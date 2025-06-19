@@ -1,10 +1,15 @@
 {
-  "dependencies": {
-    "node-fetch": "^3.3.2"
+  "name": "vr-sports-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
   },
-  "devDependencies": {
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.5",
-    "tailwindcss": "^3.4.17"
+  "dependencies": {
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "axios": "^1.10.0",
+    "dotenv": "^16.5.0"
   }
 }
