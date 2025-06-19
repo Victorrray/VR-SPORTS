@@ -1,0 +1,21 @@
+.view-tabs{
+  display:flex;
+  background:#08111e;                 /* same dark bar as your header */
+}
+.tab{
+  flex:1;
+  padding:1rem 0;
+  text-align:center;
+  font-weight:600;
+  letter-spacing:.05em;
+  border:none;
+  cursor:pointer;
+  background:#0d1a2b;
+  color:#8f9aad;
+  transition:background .2s;
+}
+.tab:not(.active):hover{background:#132238}
+.tab.active{
+  background:#453f7c;                 /* purple highlight, OddsJam-style */
+  color:#d0a6ff;
+}

@@ -1,0 +1,73 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2em 2em;
+  background: #1a1d24;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(20, 24, 38, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.logo {
+  width: 32px;
+  margin-right: 0.7em;
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 1.3em;
+  letter-spacing: 1px;
+}
+
+.viewToggle {
+  display: flex;
+  gap: 0.7em;
+}
+
+.vtab {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 1em;
+  padding: 0.45em 1.1em;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.vtab.active {
+  background: #3355ff;
+  color: #fff;
+  font-weight: 500;
+}
+
+.navLinks {
+  display: flex;
+  gap: 1em;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: #eee;
+  font-size: 1em;
+  padding: 0.38em 1.1em;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.16s;
+}
+
+.active {
+  background: #3355ff;
+  color: #fff;
+  font-weight: 500;
+}

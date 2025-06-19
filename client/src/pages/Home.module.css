@@ -1,0 +1,59 @@
+.container {
+  padding: 3em 2em;
+  min-height: 75vh;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #181c27 70%, #223cff 100%);
+}
+
+.title {
+  font-size: 2.5em;
+  font-weight: 700;
+  margin-bottom: 0.4em;
+  letter-spacing: 1.2px;
+}
+
+.subtitle {
+  font-size: 1.25em;
+  font-weight: 400;
+  margin-bottom: 2em;
+  opacity: 0.9;
+  text-align: center;
+  max-width: 600px;
+}
+
+.cards {
+  display: flex;
+  gap: 2em;
+  margin-top: 1em;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  background: rgba(28,34,48, 0.82);
+  border-radius: 20px;
+  box-shadow: 0 4px 28px rgba(30,36,60,0.18);
+  padding: 2em 1.8em 1.4em 1.8em;
+  min-width: 220px;
+  max-width: 280px;
+  text-align: center;
+  transition: transform 0.17s, box-shadow 0.17s;
+  border: 1.2px solid rgba(255,255,255,0.08);
+}
+.card:hover {
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: 0 12px 38px rgba(50,80,240,0.13);
+}
+.card h2 {
+  margin: 0 0 0.4em 0;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+.card p {
+  font-size: 1em;
+  opacity: 0.87;
+  line-height: 1.4;
+}
