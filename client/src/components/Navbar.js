@@ -2,14 +2,14 @@
 import React, { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import styles from "./Navbar.module.css";
-import logo from "../assets/logo.png"; // Update path to your logo file
+import logo from "../assets/logo.png"; // <-- update path if needed
 
 export default function Navbar({ showTabs, mode, onModeChange }) {
   const location = useLocation();
   const isMarkets = location.pathname === "/markets";
   const [mobileMenu, setMobileMenu] = useState(false);
 
-  // Links for mobile overlay menu
+  // Mobile overlay links
   const mobileLinks = isMarkets
     ? [
         {
@@ -42,7 +42,7 @@ export default function Navbar({ showTabs, mode, onModeChange }) {
 
   return (
     <nav className={styles.navbar}>
-      {/* --- Hamburger icon for mobile --- */}
+      {/* Hamburger for mobile (always visible for accessibility) */}
       <button
         className={styles.hamburger}
         onClick={() => setMobileMenu(true)}
@@ -89,7 +89,7 @@ export default function Navbar({ showTabs, mode, onModeChange }) {
         </>
       )}
 
-      {/* --- MOBILE OVERLAY MENU --- */}
+      {/* MOBILE OVERLAY MENU */}
       {mobileMenu && (
         <div className={styles.mobileMenu}>
           <button
