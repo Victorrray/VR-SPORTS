@@ -28,6 +28,29 @@
   letter-spacing: 1px;
 }
 
+.navLinksDesktop {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: #eee;
+  font-size: 1em;
+  padding: 0.38em 1.1em;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.16s;
+  text-decoration: none;
+}
+.active {
+  background: #3355ff;
+  color: #fff;
+  font-weight: 500;
+}
+
 .viewToggle {
   display: flex;
   gap: 0.7em;
@@ -43,71 +66,81 @@
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
 }
-
-.vtab.active {
+.activeTab {
   background: #3355ff;
   color: #fff;
   font-weight: 500;
 }
 
-.navLinks {
-  display: flex;
-  gap: 1em;
-}
-
-.link {
+/* --- Mobile Styles --- */
+.menuButton {
+  display: none;
   background: none;
   border: none;
-  color: #eee;
-  font-size: 1em;
-  padding: 0.38em 1.1em;
-  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.16s;
+  margin-left: 1em;
+  z-index: 110;
+}
+.hamburger {
+  display: block;
+  width: 26px;
+  height: 3px;
+  background: #fff;
+  position: relative;
+  border-radius: 3px;
+}
+.hamburger::before,
+.hamburger::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 26px;
+  height: 3px;
+  background: #fff;
+  border-radius: 3px;
+  transition: 0.19s;
+}
+.hamburger::before {
+  top: -8px;
+}
+.hamburger::after {
+  top: 8px;
 }
 
-.active {
-  background: #3355ff;
-  color: #fff;
-  font-weight: 500;
+.mobileMenu {
+  position: fixed;
+  top: 64px;
+  right: 0;
+  background: #1a1d28;
+  width: 75vw;
+  max-width: 360px;
+  box-shadow: -2px 6px 18px #2227;
+  padding: 2.1em 1.2em 1.2em 1.5em;
+  border-radius: 14px 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  z-index: 120;
+  animation: slideIn 0.21s;
+}
+@keyframes slideIn {
+  0% { transform: translateX(90%);}
+  100% { transform: translateX(0);}
+}
+.viewToggleMobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
 }
 
-/* === Mobile Responsive Navbar (Only what you need) === */
-@media (max-width: 600px) {
+@media (max-width: 830px) {
   .navbar {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0.85em 0.7em;
-    gap: 0.7em;
+    padding: 1.1em 1.1em;
   }
-  .navLeft {
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.5em;
+  .navLinksDesktop {
+    display: none;
   }
-  .logo {
-    width: 26px;
-    margin-right: 0.5em;
-  }
-  .brand {
-    font-size: 1.06em;
-  }
-  .viewToggle {
-    flex-direction: row;
-    gap: 0.5em;
-    margin-top: 0.3em;
-    margin-bottom: 0.3em;
-    justify-content: flex-start;
-  }
-  .navLinks {
-    flex-direction: row;
-    gap: 0.6em;
-    justify-content: flex-end;
-    margin-top: 0.2em;
-  }
-  .vtab, .link {
-    font-size: 0.96em;
-    padding: 0.39em 0.8em;
+  .menuButton {
+    display: block;
   }
 }
