@@ -113,3 +113,96 @@
     justify-content: center;
   }
 }
+
+.logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: 1em;
+  z-index: 102;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: #fff;
+  margin: 3px 0;
+  border-radius: 2px;
+  transition: 0.2s;
+}
+
+@media (max-width: 720px) {
+  .hamburger {
+    display: flex;
+    position: absolute;
+    left: 10px;
+    top: 16px;
+  }
+  .navLinks,
+  .viewToggle,
+  .brandBtn {
+    display: none;
+  }
+  .centerWrap {
+    display: none;
+  }
+}
+
+/* MOBILE OVERLAY MENU */
+.mobileMenu {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #222c;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 23px; right: 23px;
+  font-size: 2.2em;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.mobileLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+  align-items: center;
+}
+
+.mobileLink {
+  font-size: 1.28em;
+  color: #fff;
+  background: none;
+  border: none;
+  text-decoration: none;
+  padding: 0.6em 2.4em;
+  border-radius: 12px;
+  transition: background 0.17s;
+}
+
+.mobileLink:hover, .mobileLink.active {
+  background: #3355ff;
+  color: #fff;
+}

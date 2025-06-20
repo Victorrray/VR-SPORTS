@@ -1,43 +1,64 @@
 // src/components/Navbar.js
 import React, { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import styles from "./Navbar.module.css"; // Use your CSS module!
+import styles from "./Navbar.module.css";
+import logo from "../assets/logo.png"; // Update path to your logo file
 
 export default function Navbar({ showTabs, mode, onModeChange }) {
   const location = useLocation();
   const isMarkets = location.pathname === "/markets";
-  const [mobileOpen, setMobileOpen] = useState(false); // for hamburger, future use
+  const [mobileMenu, setMobileMenu] = useState(false);
+
+  // Links for mobile overlay menu
+  const mobileLinks = isMarkets
+    ? [
+        {
+          label: "Sports Betting",
+          onClick: () => {
+            if (onModeChange) onModeChange("game");
+            setMobileMenu(false);
+          },
+          active: mode === "game",
+        },
+        {
+          label: "Player Props",
+          onClick: () => {
+            if (onModeChange) onModeChange("props");
+            setMobileMenu(false);
+          },
+          active: mode === "props",
+        },
+      ]
+    : [
+        {
+          label: "Home",
+          to: "/",
+        },
+        {
+          label: "Markets",
+          to: "/markets",
+        },
+      ];
 
   return (
     <nav className={styles.navbar}>
-      {/* Left: Logo + Brand, always */}
-      <div className={styles.navLeft}>
-        <Link to="/" className={styles.brandBtn} style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img
-            src="/logo192.png"
-            alt="OddsSightSeer Logo"
-            className={styles.logo}
-            style={{ width: 32, height: 32, marginRight: 10, verticalAlign: "middle" }}
-          />
-          <span className={styles.brand}>OddsSightSeer</span>
-        </Link>
-      </div>
-
-      {/* Hamburger for mobile */}
+      {/* --- Hamburger icon for mobile --- */}
       <button
         className={styles.hamburger}
-        aria-label="Open menu"
-        onClick={() => setMobileOpen((v) => !v)}
-        style={{ marginLeft: "auto", display: "none" }}
+        onClick={() => setMobileMenu(true)}
+        aria-label="Open Menu"
       >
         <span />
         <span />
         <span />
       </button>
 
-      {/* Center: Only on Markets page */}
       {isMarkets ? (
         <div className={styles.centerWrap}>
+          <Link to="/" className={styles.brandBtn}>
+            <img src={logo} alt="logo" className={styles.logo} />
+            OddsSightSeer
+          </Link>
           <div className={styles.viewToggle}>
             <button
               className={`${styles.vtab} ${mode === "game" ? styles.active : ""}`}
@@ -54,10 +75,52 @@ export default function Navbar({ showTabs, mode, onModeChange }) {
           </div>
         </div>
       ) : (
-        // Right links: Home/Markets (not on Markets page)
-        <div className={styles.navLinks}>
-          <Link to="/" className={styles.link}>Home</Link>
-          <Link to="/markets" className={styles.link}>Markets</Link>
+        <>
+          <div className={styles.navLeft}>
+            <Link to="/" className={styles.brandBtn}>
+              <img src={logo} alt="logo" className={styles.logo} />
+              OddsSightSeer
+            </Link>
+          </div>
+          <div className={styles.navLinks}>
+            <Link to="/" className={styles.link}>Home</Link>
+            <Link to="/markets" className={styles.link}>Markets</Link>
+          </div>
+        </>
+      )}
+
+      {/* --- MOBILE OVERLAY MENU --- */}
+      {mobileMenu && (
+        <div className={styles.mobileMenu}>
+          <button
+            className={styles.closeBtn}
+            onClick={() => setMobileMenu(false)}
+            aria-label="Close Menu"
+          >
+            ×
+          </button>
+          <div className={styles.mobileLinks}>
+            {mobileLinks.map((link, idx) =>
+              link.to ? (
+                <Link
+                  key={idx}
+                  to={link.to}
+                  className={styles.mobileLink}
+                  onClick={() => setMobileMenu(false)}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <button
+                  key={idx}
+                  className={`${styles.mobileLink} ${link.active ? styles.active : ""}`}
+                  onClick={link.onClick}
+                >
+                  {link.label}
+                </button>
+              )
+            )}
+          </div>
         </div>
       )}
     </nav>
