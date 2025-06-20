@@ -324,3 +324,49 @@ body,
     overflow-x: auto;
   }
 }
+
+/* --- TABLE ROWS: OddsTable --- */
+.odds-row:active {
+  background: rgba(47, 92, 255, 0.31) !important;
+  transition: background 0.09s;
+}
+
+/* --- BUTTONS, LINKS, HERO BTN, TABS, MOBILE LINKS --- */
+.vtab:active,
+.link:active,
+.heroBtn:active,
+.mobileLink:active {
+  filter: brightness(0.87);
+  transform: scale(0.97);
+  transition: filter 0.08s, transform 0.09s;
+}
+
+/* --- ACTIVE STATES (Current Tab/Link) --- */
+.vtab.active,
+.mobileLink.active {
+  background: #3355ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* --- HAMBURGER & CLOSE BUTTON --- */
+.hamburger:active span,
+.closeBtn:active {
+  filter: brightness(0.7);
+  transform: scale(0.91);
+  transition: filter 0.08s, transform 0.09s;
+}
+
+/* --- Odds Table Mini-Table Click Feedback (Optional) --- */
+.mini-table-header-cell:active {
+  filter: brightness(0.86);
+  transform: scale(0.97);
+  transition: filter 0.08s, transform 0.09s;
+}
+
+/* --- GENERAL BUTTON FOCUS STYLE (for accessibility) --- */
+button:focus,
+a:focus {
+  outline: 2.5px solid #44ea97;
+  outline-offset: 1.5px;
+}
