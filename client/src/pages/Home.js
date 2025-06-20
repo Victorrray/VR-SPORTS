@@ -9,24 +9,22 @@ export default function Home() {
         <p className={styles.subtitle}>
           Your all-in-one sports betting and fantasy odds platform.
         </p>
+        <a href="/markets" className={styles.heroBtn}>Browse Odds Now</a>
       </section>
-
-      <section className={styles.cardsSection}>
-        <div className={styles.cards}>
-          <div className={styles.card}>
-            <h2>Live Odds</h2>
-            <p>Track the latest odds for every major sport, all in one place.</p>
-          </div>
-          <div className={styles.card}>
-            <h2>Markets</h2>
-            <p>Quickly switch between betting markets and fantasy props.</p>
-          </div>
-          <div className={styles.card}>
-            <h2>Compare & Win</h2>
-            <p>Find the best lines and maximize your edge with real-time data.</p>
-          </div>
+      <div className={styles.cards}>
+        <div className={styles.card}>
+          <h2>Live Odds</h2>
+          <p>Track the latest odds for every major sport, all in one place.</p>
         </div>
-      </section>
+        <div className={styles.card}>
+          <h2>Markets</h2>
+          <p>Quickly switch between betting markets and fantasy props.</p>
+        </div>
+        <div className={styles.card}>
+          <h2>Compare & Win</h2>
+          <p>Find the best lines and maximize your edge with real-time data.</p>
+        </div>
+      </div>
     </div>
   );
 }

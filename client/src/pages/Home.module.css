@@ -95,3 +95,23 @@
     font-size: 1.09em;
   }
 }
+.heroBtn {
+  display: inline-block;
+  margin-top: 2em;
+  padding: 0.95em 2em;
+  background: #3355ff;
+  color: #fff;
+  border-radius: 13px;
+  font-size: 1.09em;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.heroBtn:hover {
+  background: #2236b9;
+}
+
+.container {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
