@@ -149,50 +149,19 @@ export default function MainMarkets({ mode = "game" }) {
       <div className="market-container">
         {/* --------- Show Filters on Game Lines --------- */}
         {mode === "game" && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1.2rem",
-              marginBottom: "1.4em",
-              marginTop: "1.8em",
-              justifyContent: "center"
-            }}
-          >
+          <div className="markets-filter-bar">
             <input
+              type="search"
+              className="markets-search"
               placeholder="Search team / league"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              style={{
-                flex: 3,
-                minWidth: 260,
-                fontSize: "1.06em",
-                padding: "0.60em 1em",
-                borderRadius: "10px",
-                border: "1.5px solid #334c",
-                marginRight: 0,
-                background: "#23263a",
-                color: "#fff",
-                outline: "none",
-                boxShadow: "0 2px 9px #181b2344",
-                maxWidth: 420,
-              }}
             />
             <SportMultiSelect
               list={sportList}
               selected={picked}
               onChange={setPicked}
-              style={{
-                minWidth: 160,
-                maxWidth: 200,
-                fontSize: "1.04em",
-                borderRadius: "10px",
-                height: 40,
-                background: "#222945",
-                color: "#bbcbff",
-                border: "1.5px solid #334c",
-                boxShadow: "0 2px 7px #181b2344",
-              }}
+              className="markets-dropdown"
             />
             <label
               style={{
