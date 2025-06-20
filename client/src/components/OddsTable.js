@@ -52,22 +52,9 @@ export default function OddsTable({
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
 
-  // ---- always keep hooks at the top ----
-  useEffect(() => {
-    setPage(1);
-  }, [games, query, mode, pageSize, showAllGames]);
-
-  // ---- Loading State ----
-  if (loading) {
-    return (
-      <div className="odds-table-card">
-        <div className="spinner-wrap">
-          <div className="spinner" />
-          <p>Loading odds…</p>
-        </div>
-      </div>
-    );
-  }
+  // --- Fix: Place toggleRow before any JSX usage ---
+  const toggleRow = key =>
+    setExpandedRows(exp => ({ ...exp, [key]: !exp[key] }));
 
   function getRowsGame() {
     const rows = [];
@@ -241,10 +228,22 @@ export default function OddsTable({
     pageNumbers.push(i);
   }
 
-  const toggleRow = key =>
-    setExpandedRows(exp => ({ ...exp, [key]: !exp[key] }));
+  useEffect(() => {
+    setPage(1);
+  }, [games, query, mode, pageSize, showAllGames]);
 
-  // Only after all hooks are called: do your early return!
+  // ---- Loading State ----
+  if (loading) {
+    return (
+      <div className="odds-table-card">
+        <div className="spinner-wrap">
+          <div className="spinner" />
+          <p>Loading odds…</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!filteredRows.length) {
     return (
       <div className="odds-table-card">
@@ -309,18 +308,18 @@ export default function OddsTable({
                     onClick={() => toggleRow(row.key)}
                     style={{ cursor: "pointer" }}
                   >
-                    <td className={evClass}>{ev ? ev.toFixed(2) + "%" : ""}</td>
-                    <td>
+                    <td data-label="EV %" className={evClass}>{ev ? ev.toFixed(2) + "%" : ""}</td>
+                    <td data-label="Matchup">
                       {row.game.home_team} vs {row.game.away_team}
                       <br />
                       <small>{new Date(row.game.commence_time).toLocaleString()}</small>
                     </td>
-                    <td>{row.out.description}</td>
-                    <td>{row.out.name}</td>
-                    <td>{row.out.point}</td>
-                    <td>{formatMarket(row.mkt.key)}</td>
-                    <td>{formatOdds(row.out.price)}</td>
-                    <td>{row.bk?.title || row.out.book}</td>
+                    <td data-label="Player">{row.out.description}</td>
+                    <td data-label="O/U">{row.out.name}</td>
+                    <td data-label="Line">{row.out.point}</td>
+                    <td data-label="Market">{formatMarket(row.mkt.key)}</td>
+                    <td data-label="Odds">{formatOdds(row.out.price)}</td>
+                    <td data-label="Book">{row.bk?.title || row.out.book}</td>
                   </tr>
                 ) : (
                   <tr
@@ -328,8 +327,8 @@ export default function OddsTable({
                     onClick={() => toggleRow(row.key)}
                     style={{ cursor: "pointer" }}
                   >
-                    <td className={evClass}>{ev ? ev.toFixed(2) + "%" : ""}</td>
-                    <td>
+                    <td data-label="EV %" className={evClass}>{ev ? ev.toFixed(2) + "%" : ""}</td>
+                    <td data-label="Match">
                       {row.game.home_team} vs {row.game.away_team}
                       <br />
                       {isLive(row.game.commence_time) && (
@@ -342,12 +341,12 @@ export default function OddsTable({
                       )}
                       <small>{new Date(row.game.commence_time).toLocaleString()}</small>
                     </td>
-                    <td>{formatMarket(row.mkt.key)}</td>
-                    <td>{row.out.name}</td>
-                    <td>{formatLine(row.out.point, row.mkt.key, mode)}</td>
+                    <td data-label="Market">{formatMarket(row.mkt.key)}</td>
+                    <td data-label="Outcome">{row.out.name}</td>
+                    <td data-label="Line">{formatLine(row.out.point, row.mkt.key, mode)}</td>
                     {/* <td>{new Date(row.game.commence_time).toLocaleString()}</td> REMOVED */}
-                    <td>{row.bk.title}</td>
-                    <td>{formatOdds(row.out.price ?? row.out.odds ?? "")}</td>
+                    <td data-label="Book">{row.bk.title}</td>
+                    <td data-label="Odds">{formatOdds(row.out.price ?? row.out.odds ?? "")}</td>
                   </tr>
                 )}
 
