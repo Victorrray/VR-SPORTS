@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+ import React, { useState, useEffect } from "react";
 import "./OddsTable.css";
 
 // --- Helper: Calculate Expected Value (EV) ---
@@ -22,7 +22,6 @@ function formatLine(line, marketKey, mode = "game") {
   if (line == null || line === "") return "";
   const n = Number(line);
   if (isNaN(n)) return line;
-  // For player props, don't add +/-
   if (mode === "props") return n;
   if (marketKey === "totals" || marketKey === "TOTALS") return n;
   return n > 0 ? `+${n}` : `${n}`;
@@ -209,7 +208,6 @@ export default function OddsTable({ games, query = "", mode = "game", pageSize =
   if (!showAllGames) {
     filteredRows = filteredRows.filter(r => !isLive(r.game.commence_time));
   }
-  // If toggle is ON, show all (both live and non-live)
 
   const totalPages = Math.ceil(filteredRows.length / pageSize);
   const paginatedRows = filteredRows.slice((page - 1) * pageSize, page * pageSize);
@@ -256,7 +254,7 @@ export default function OddsTable({ games, query = "", mode = "game", pageSize =
                 <th>Market</th>
                 <th>Outcome</th>
                 <th>Line</th>
-                <th>Start</th>
+                {/* <th>Start</th> REMOVED */}
                 <th>Book</th>
                 <th>Odds</th>
                 <th></th>
@@ -311,7 +309,6 @@ export default function OddsTable({ games, query = "", mode = "game", pageSize =
                     <td>
                       {row.game.home_team} vs {row.game.away_team}
                       <br />
-                      {/* LIVE INDICATOR */}
                       {isLive(row.game.commence_time) && (
                         <span style={{
                           color: "#ff5e5e",
@@ -325,7 +322,7 @@ export default function OddsTable({ games, query = "", mode = "game", pageSize =
                     <td>{formatMarket(row.mkt.key)}</td>
                     <td>{row.out.name}</td>
                     <td>{formatLine(row.out.point, row.mkt.key, mode)}</td>
-                    <td>{new Date(row.game.commence_time).toLocaleString()}</td>
+                    {/* <td>{new Date(row.game.commence_time).toLocaleString()}</td> REMOVED */}
                     <td>{row.bk.title}</td>
                     <td>{formatOdds(row.out.price ?? row.out.odds ?? "")}</td>
                   </tr>
