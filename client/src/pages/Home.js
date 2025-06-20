@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styles from "./Home.module.css";
 
 export default function Home() {
@@ -9,7 +10,7 @@ export default function Home() {
         <p className={styles.subtitle}>
           Your all-in-one sports betting and fantasy odds platform.
         </p>
-        <a href="/markets" className={styles.heroBtn}>Browse Odds Now</a>
+        <Link to="/markets" className={styles.heroBtn}>Browse Odds Now</Link>
       </section>
       <div className={styles.cards}>
         <div className={styles.card}>

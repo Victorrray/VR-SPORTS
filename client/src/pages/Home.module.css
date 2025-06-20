@@ -1,117 +1,142 @@
 .container {
-  min-height: 80vh;
+  min-height: 90vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: #161920;
   color: #eef0f6;
-  padding: 2em 0 4em 0;
+  padding: 2em 0 3.5em 0;
 }
 
 .hero {
   width: 100%;
+  max-width: 560px;
   text-align: center;
-  margin-top: 2.4em;
-  margin-bottom: 2.6em;
+  margin: 2em auto 2em auto;
+  padding: 0 1.2em;
 }
 
 .title {
-  font-size: 2.6em;
+  font-size: 2.7em;
   font-weight: 700;
   letter-spacing: 1.5px;
-  margin-bottom: 0.4em;
+  margin-bottom: 0.38em;
+  line-height: 1.17;
 }
 
 .subtitle {
-  font-size: 1.23em;
+  font-size: 1.22em;
   color: #bbcbff;
-  margin-bottom: 1.5em;
+  margin-bottom: 1.45em;
+  line-height: 1.5;
+}
+
+.heroBtn {
+  display: inline-block;
+  margin-top: 2em;
+  padding: 0.93em 2.2em;
+  background: #3355ff;
+  color: #fff;
+  border-radius: 13px;
+  font-size: 1.12em;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+  box-shadow: 0 4px 18px #3355ff1a;
+}
+.heroBtn:hover {
+  background: #2236b9;
 }
 
 .cardsSection {
   width: 100%;
   display: flex;
   justify-content: center;
+  margin-top: 1.3em;
 }
 
 .cards {
   display: flex;
-  gap: 2.1em;
+  gap: 2.2em;
   justify-content: center;
   flex-wrap: wrap;
   width: 100%;
-  max-width: 1050px;
+  max-width: 1020px;
+  padding: 0 1.3em;
 }
 
 .card {
   background: #23263a;
-  padding: 2em 1.4em;
-  border-radius: 15px;
-  box-shadow: 0 2px 18px #3355ff22;
-  min-width: 250px;
-  max-width: 330px;
-  flex: 1 1 250px;
+  padding: 2em 1.3em;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px #3355ff22;
+  min-width: 220px;
+  max-width: 320px;
+  flex: 1 1 240px;
   text-align: center;
-  margin: 0.8em 0;
+  margin: 0.7em 0;
   transition: transform 0.14s;
 }
 .card:hover {
   transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 4px 28px #3355ff35;
+  box-shadow: 0 4px 28px #3355ff2a;
 }
 
 .card h2 {
   color: #44ea97;
   margin-bottom: 0.6em;
-  font-size: 1.23em;
+  font-size: 1.19em;
   font-weight: 600;
 }
 
 .card p {
-  font-size: 1.04em;
+  font-size: 1.05em;
   color: #b4bee2;
+  margin: 0;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 800px) {
+/* --- Mobile Responsive --- */
+@media (max-width: 850px) {
   .cards {
     flex-direction: column;
     gap: 1em;
     align-items: center;
+    padding: 0 0.2em;
   }
   .card {
-    max-width: 90vw;
+    max-width: 95vw;
     min-width: 0;
-    padding: 1.6em 1em;
+    padding: 1.5em 1em;
   }
   .hero {
-    margin-top: 1.3em;
-    margin-bottom: 1.7em;
+    margin: 1em 0 1.5em 0;
+    padding: 0 0.3em;
   }
   .title {
     font-size: 2em;
   }
   .subtitle {
-    font-size: 1.09em;
+    font-size: 1em;
+  }
+  .heroBtn {
+    width: 95%;
+    max-width: 380px;
+    padding: 0.93em 0;
+    font-size: 1.06em;
   }
 }
-.heroBtn {
-  display: inline-block;
-  margin-top: 2em;
-  padding: 0.95em 2em;
-  background: #3355ff;
-  color: #fff;
-  border-radius: 13px;
-  font-size: 1.09em;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.15s;
-}
-.heroBtn:hover {
-  background: #2236b9;
-}
 
-.container {
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
+@media (max-width: 480px) {
+  .hero {
+    padding: 0 0.05em;
+  }
+  .title {
+    font-size: 1.25em;
+  }
+  .heroBtn {
+    font-size: 0.95em;
+    padding: 0.85em 0;
+    width: 99%;
+    min-width: 0;
+  }
 }
