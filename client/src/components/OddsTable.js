@@ -52,6 +52,11 @@ export default function OddsTable({
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
 
+  // ---- always keep hooks at the top ----
+  useEffect(() => {
+    setPage(1);
+  }, [games, query, mode, pageSize, showAllGames]);
+
   // ---- Loading State ----
   if (loading) {
     return (
@@ -236,13 +241,10 @@ export default function OddsTable({
     pageNumbers.push(i);
   }
 
-  useEffect(() => {
-    setPage(1);
-  }, [games, query, mode, pageSize, showAllGames]);
-
   const toggleRow = key =>
     setExpandedRows(exp => ({ ...exp, [key]: !exp[key] }));
 
+  // Only after all hooks are called: do your early return!
   if (!filteredRows.length) {
     return (
       <div className="odds-table-card">
