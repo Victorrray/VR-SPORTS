@@ -10,7 +10,7 @@ export default function Navbar({ showTabs = false, mode, onModeChange }) {
   return (
     <header className={styles.navbar}>
       <div className={styles.navLeft} onClick={() => nav("/")}>
-        <span className={styles.brand}>VR Odds</span>
+        <span className={styles.brand}>Odds Sight Seer</span>
       </div>
 
       {/* Tabs only on /markets page */}

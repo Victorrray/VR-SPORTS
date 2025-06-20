@@ -4,7 +4,7 @@ import styles from "./Home.module.css";
 export default function Home() {
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Welcome to Odds SightSeer</h1>
+      <h1 className={styles.title}>Welcome to OddsSightSeer</h1>
       <p className={styles.subtitle}>
         Your all-in-one sports betting and fantasy odds platform.
       </p>
