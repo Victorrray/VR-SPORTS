@@ -11,26 +11,32 @@
   z-index: 100;
 }
 
+/* Brand Home Button */
+.brandBtn {
+  font-weight: 700;
+  font-size: 1.3em;
+  letter-spacing: 1.5px;
+  background: none;
+  border: none;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0.2em 0.7em;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.brandBtn:hover {
+  background: #2236b9;
+  color: #fff;
+}
+
 .navLeft {
   display: flex;
   align-items: center;
-  cursor: pointer;
 }
 
-.logo {
-  width: 32px;
-  margin-right: 0.7em;
-}
-
-.brand {
-  font-weight: 600;
-  font-size: 1.3em;
-  letter-spacing: 1px;
-}
-
-.navLinksDesktop {
+.navLinks {
   display: flex;
-  align-items: center;
   gap: 1em;
 }
 
@@ -42,9 +48,14 @@
   padding: 0.38em 1.1em;
   border-radius: 10px;
   cursor: pointer;
-  transition: background 0.16s;
   text-decoration: none;
+  transition: background 0.16s;
 }
+.link:hover {
+  background: #3355ff;
+  color: #fff;
+}
+
 .active {
   background: #3355ff;
   color: #fff;
@@ -54,6 +65,7 @@
 .viewToggle {
   display: flex;
   gap: 0.7em;
+  margin-left: 2em;
 }
 
 .vtab {
@@ -66,81 +78,38 @@
   cursor: pointer;
   transition: background 0.18s, color 0.18s;
 }
-.activeTab {
+.vtab.active {
   background: #3355ff;
   color: #fff;
   font-weight: 500;
 }
 
-/* --- Mobile Styles --- */
-.menuButton {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-left: 1em;
-  z-index: 110;
-}
-.hamburger {
-  display: block;
-  width: 26px;
-  height: 3px;
-  background: #fff;
-  position: relative;
-  border-radius: 3px;
-}
-.hamburger::before,
-.hamburger::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  width: 26px;
-  height: 3px;
-  background: #fff;
-  border-radius: 3px;
-  transition: 0.19s;
-}
-.hamburger::before {
-  top: -8px;
-}
-.hamburger::after {
-  top: 8px;
-}
-
-.mobileMenu {
-  position: fixed;
-  top: 64px;
-  right: 0;
-  background: #1a1d28;
-  width: 75vw;
-  max-width: 360px;
-  box-shadow: -2px 6px 18px #2227;
-  padding: 2.1em 1.2em 1.2em 1.5em;
-  border-radius: 14px 0 0 14px;
+/* Center everything for markets page */
+.centerWrap {
   display: flex;
   flex-direction: column;
-  gap: 1.2em;
-  z-index: 120;
-  animation: slideIn 0.21s;
-}
-@keyframes slideIn {
-  0% { transform: translateX(90%);}
-  100% { transform: translateX(0);}
-}
-.viewToggleMobile {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6em;
+  align-items: center;
+  width: 100%;
+  gap: 0.8em;
 }
 
-@media (max-width: 830px) {
+/* Responsive for mobile */
+@media (max-width: 720px) {
   .navbar {
-    padding: 1.1em 1.1em;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.7em 0.5em;
   }
-  .navLinksDesktop {
-    display: none;
+  .centerWrap {
+    gap: 0.35em;
   }
-  .menuButton {
-    display: block;
+  .brandBtn {
+    font-size: 1.04em;
+    padding: 0.15em 0.5em;
+  }
+  .viewToggle {
+    gap: 0.3em;
+    margin-left: 0;
+    justify-content: center;
   }
 }
