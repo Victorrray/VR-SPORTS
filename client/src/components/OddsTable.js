@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "./OddsTable.css";
 
 // --- Helper: Calculate Expected Value (EV) ---
@@ -41,9 +41,28 @@ function isLive(commence_time) {
   return now >= start && now < start + 3 * 3600 * 1000;
 }
 
-export default function OddsTable({ games, query = "", mode = "game", pageSize = 15, showAllGames = false }) {
+export default function OddsTable({
+  games,
+  query = "",
+  mode = "game",
+  pageSize = 15,
+  showAllGames = false,
+  loading = false,
+}) {
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
+
+  // ---- Loading State ----
+  if (loading) {
+    return (
+      <div className="odds-table-card">
+        <div className="spinner-wrap">
+          <div className="spinner" />
+          <p>Loading odds…</p>
+        </div>
+      </div>
+    );
+  }
 
   function getRowsGame() {
     const rows = [];
@@ -226,8 +245,10 @@ export default function OddsTable({ games, query = "", mode = "game", pageSize =
 
   if (!filteredRows.length) {
     return (
-      <div style={{ textAlign: "center", marginTop: "2rem" }}>
-        No bets found.
+      <div className="odds-table-card">
+        <div className="spinner-wrap" style={{ padding: "2em 0" }}>
+          <p>No bets found.</p>
+        </div>
       </div>
     );
   }

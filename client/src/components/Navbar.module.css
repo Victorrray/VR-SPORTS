@@ -24,17 +24,27 @@
   padding: 0.2em 0.7em;
   border-radius: 8px;
   transition: background 0.12s;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
 }
 .brandBtn:hover {
   background: #2236b9;
   color: #fff;
 }
 
+.logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* Nav Links (desktop) */
 .navLeft {
   display: flex;
   align-items: center;
 }
-
 .navLinks {
   display: flex;
   gap: 1em;
@@ -55,19 +65,18 @@
   background: #3355ff;
   color: #fff;
 }
-
 .active {
   background: #3355ff;
   color: #fff;
   font-weight: 500;
 }
 
+/* Tabs for markets page */
 .viewToggle {
   display: flex;
   gap: 0.7em;
   margin-left: 2em;
 }
-
 .vtab {
   background: none;
   border: none;
@@ -93,33 +102,7 @@
   gap: 0.8em;
 }
 
-/* Responsive for mobile */
-@media (max-width: 720px) {
-  .navbar {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0.7em 0.5em;
-  }
-  .centerWrap {
-    gap: 0.35em;
-  }
-  .brandBtn {
-    font-size: 1.04em;
-    padding: 0.15em 0.5em;
-  }
-  .viewToggle {
-    gap: 0.3em;
-    margin-left: 0;
-    justify-content: center;
-  }
-}
-
-.logo {
-  width: 32px;
-  height: 32px;
-  margin-right: 10px;
-  vertical-align: middle;
-}
+/* Hamburger Icon (mobile only) */
 .hamburger {
   display: none;
   flex-direction: column;
@@ -132,7 +115,6 @@
   margin-right: 1em;
   z-index: 102;
 }
-
 .hamburger span {
   display: block;
   width: 24px;
@@ -143,24 +125,32 @@
   transition: 0.2s;
 }
 
+/* --- MOBILE STYLES --- */
 @media (max-width: 720px) {
+  .navbar {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.7em 1em;
+    position: sticky;
+    top: 0;
+  }
   .hamburger {
     display: flex;
-    position: absolute;
-    left: 10px;
-    top: 16px;
+    position: relative;
+    left: 0;
+    top: 0;
   }
   .navLinks,
   .viewToggle,
-  .brandBtn {
-    display: none;
-  }
   .centerWrap {
-    display: none;
+    display: none !important;
+  }
+  .brandBtn {
+    display: none !important;
   }
 }
 
-/* MOBILE OVERLAY MENU */
+/* --- MOBILE OVERLAY MENU --- */
 .mobileMenu {
   position: fixed;
   top: 0; left: 0;
@@ -173,7 +163,6 @@
   align-items: center;
   justify-content: center;
 }
-
 .closeBtn {
   position: absolute;
   top: 23px; right: 23px;
@@ -183,14 +172,12 @@
   color: #fff;
   cursor: pointer;
 }
-
 .mobileLinks {
   display: flex;
   flex-direction: column;
   gap: 2em;
   align-items: center;
 }
-
 .mobileLink {
   font-size: 1.28em;
   color: #fff;
@@ -201,7 +188,6 @@
   border-radius: 12px;
   transition: background 0.17s;
 }
-
 .mobileLink:hover, .mobileLink.active {
   background: #3355ff;
   color: #fff;
