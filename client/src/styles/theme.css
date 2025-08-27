@@ -1,0 +1,32 @@
+:root {
+  --bg-body: #181c27;
+  --bg-elev: #23263a;
+  --bg-elev-2: #1a1d25;
+  --text: #eef0f6;
+  --text-muted: #bbcbff;
+  --accent: #3355ff;
+  --accent-2: #2236b9;
+  --success: #44ea97;
+  --danger: #ff5e5e;
+  --card-shadow: 0 2px 18px #3355ff22;
+}
+
+.theme-modern {
+  --bg-body: #0f1220;
+  --bg-elev: #171a2b;
+  --bg-elev-2: #13172b;
+  --text: #f1f4ff;
+  --text-muted: #a9b4e6;
+  --accent: #3d7eff;
+  --accent-2: #2a5fd4;
+  --success: #2ee6a6;
+  --danger: #ff6b6b;
+  --card-shadow: 0 6px 22px rgba(61, 126, 255, 0.15);
+}
+
+/* Basic application background + text defaults */
+body {
+  background: var(--bg-body);
+  color: var(--text);
+}
+

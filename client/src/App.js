@@ -1,7 +1,9 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation, Link } from "react-router-dom";
 import SportsbookMarkets from "./pages/SportsbookMarkets";
-import DFSMarkets from "./pages/DFSMarkets";
+import Home from "./pages/Home";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 // Tab Navigation Bar
 function TabNav() {
@@ -57,17 +59,24 @@ function TabNav() {
 function AppRoutes() {
   return (
     <>
-      <TabNav />
+      <Navbar />
       <Routes>
-        <Route path="/" element={<Navigate to="/sportsbooks" replace />} />
+        <Route path="/" element={<Home />} />
         <Route path="/sportsbooks" element={<SportsbookMarkets />} />
-        <Route path="/dfs" element={<DFSMarkets />} />
-        <Route path="*" element={<Navigate to="/sportsbooks" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Footer />
     </>
   );
 }
 
 export default function App() {
+  // Initialize theme on first load
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem('uiTheme') || 'modern';
+      document.body.classList.toggle('theme-modern', saved === 'modern');
+    } catch {}
+  }, []);
   return <AppRoutes />;
 }

@@ -1,7 +1,10 @@
 /* src/index.css */
+@import url('./styles/theme.css');
+
 body {
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-  background: #181c27;
+  background: var(--bg-body);
+  color: var(--text);
   margin: 0;
   padding: 0;
 }

@@ -10,17 +10,13 @@ export default function Home() {
         <p className={styles.subtitle}>
           Your all-in-one sports betting and fantasy odds platform.
         </p>
-        <Link to="/markets" className={styles.heroBtn}>Browse Odds Now</Link>
+        <Link to="/sportsbooks" className={styles.heroBtn}>Browse Sportsbooks Odds</Link>
       </section>
       <div className={styles.cards}>
-        <div className={styles.card}>
-          <h2>Live Odds</h2>
-          <p>Track the latest odds for every major sport, all in one place.</p>
-        </div>
-        <div className={styles.card}>
-          <h2>Markets</h2>
-          <p>Quickly switch between betting markets and fantasy props.</p>
-        </div>
+        <Link to="/sportsbooks" className={styles.card} style={{ textDecoration: "none" }}>
+          <h2>Sportsbooks</h2>
+          <p>Track moneylines, spreads, and totals across major books.</p>
+        </Link>
         <div className={styles.card}>
           <h2>Compare & Win</h2>
           <p>Find the best lines and maximize your edge with real-time data.</p>

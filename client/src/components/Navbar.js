@@ -4,45 +4,22 @@ import { useLocation, Link } from "react-router-dom";
 import styles from "./Navbar.module.css";
 import logo from "../assets/logo.png"; // <-- update path if needed
 
-export default function Navbar({ showTabs, mode, onModeChange }) {
+export default function Navbar() {
   const location = useLocation();
-  const isMarkets = location.pathname === "/markets";
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [modern, setModern] = useState(() => {
+    try { return (localStorage.getItem('uiTheme') || 'modern') === 'modern'; } catch { return true; }
+  });
 
-  // Mobile overlay links
-  const mobileLinks = isMarkets
-    ? [
-        {
-          label: "Sports Betting",
-          onClick: () => {
-            if (onModeChange) onModeChange("game");
-            setMobileMenu(false);
-          },
-          active: mode === "game",
-        },
-        {
-          label: "Player Props",
-          onClick: () => {
-            if (onModeChange) onModeChange("props");
-            setMobileMenu(false);
-          },
-          active: mode === "props",
-        },
-      ]
-    : [
-        {
-          label: "Home",
-          to: "/",
-        },
-        {
-          label: "Markets",
-          to: "/markets",
-        },
-      ];
+  const isActive = (path) => location.pathname === path;
+
+  const mobileLinks = [
+    { label: "Home", to: "/" },
+    { label: "Sportsbooks", to: "/sportsbooks" },
+  ];
 
   return (
     <nav className={styles.navbar}>
-      {/* Hamburger for mobile (always visible for accessibility) */}
       <button
         className={styles.hamburger}
         onClick={() => setMobileMenu(true)}
@@ -53,43 +30,29 @@ export default function Navbar({ showTabs, mode, onModeChange }) {
         <span />
       </button>
 
-      {isMarkets ? (
-        <div className={styles.centerWrap}>
-          <Link to="/" className={styles.brandBtn}>
-            <img src={logo} alt="logo" className={styles.logo} />
-            OddsSightSeer
-          </Link>
-          <div className={styles.viewToggle}>
-            <button
-              className={`${styles.vtab} ${mode === "game" ? styles.active : ""}`}
-              onClick={() => onModeChange && onModeChange("game")}
-            >
-              Sports Betting
-            </button>
-            <button
-              className={`${styles.vtab} ${mode === "props" ? styles.active : ""}`}
-              onClick={() => onModeChange && onModeChange("props")}
-            >
-              Player Props
-            </button>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className={styles.navLeft}>
-            <Link to="/" className={styles.brandBtn}>
-              <img src={logo} alt="logo" className={styles.logo} />
-              OddsSightSeer
-            </Link>
-          </div>
-          <div className={styles.navLinks}>
-            <Link to="/" className={styles.link}>Home</Link>
-            <Link to="/markets" className={styles.link}>Markets</Link>
-          </div>
-        </>
-      )}
+      <div className={styles.navLeft}>
+        <Link to="/" className={styles.brandBtn}>
+          <img src={logo} alt="logo" className={styles.logo} />
+          OddsSightSeer
+        </Link>
+      </div>
+      <div className={styles.navLinks}>
+        <Link to="/" className={`${styles.link} ${isActive("/") ? styles.active : ""}`}>Home</Link>
+        <Link to="/sportsbooks" className={`${styles.link} ${isActive("/sportsbooks") ? styles.active : ""}`}>Sportsbooks</Link>
+        <button
+          className={styles.link}
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            const next = !modern;
+            setModern(next);
+            try { localStorage.setItem('uiTheme', next ? 'modern' : 'classic'); } catch {}
+            document.body.classList.toggle('theme-modern', next);
+          }}
+        >
+          {modern ? 'Modern UI' : 'Classic UI'}
+        </button>
+      </div>
 
-      {/* MOBILE OVERLAY MENU */}
       {mobileMenu && (
         <div className={styles.mobileMenu}>
           <button
@@ -100,26 +63,28 @@ export default function Navbar({ showTabs, mode, onModeChange }) {
             ×
           </button>
           <div className={styles.mobileLinks}>
-            {mobileLinks.map((link, idx) =>
-              link.to ? (
-                <Link
-                  key={idx}
-                  to={link.to}
-                  className={styles.mobileLink}
-                  onClick={() => setMobileMenu(false)}
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <button
-                  key={idx}
-                  className={`${styles.mobileLink} ${link.active ? styles.active : ""}`}
-                  onClick={link.onClick}
-                >
-                  {link.label}
-                </button>
-              )
-            )}
+            {mobileLinks.map((link, idx) => (
+              <Link
+                key={idx}
+                to={link.to}
+                className={`${styles.mobileLink} ${isActive(link.to) ? styles.active : ""}`}
+                onClick={() => setMobileMenu(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <button
+              className={`${styles.mobileLink}`}
+              onClick={() => {
+                const next = !modern;
+                setModern(next);
+                try { localStorage.setItem('uiTheme', next ? 'modern' : 'classic'); } catch {}
+                document.body.classList.toggle('theme-modern', next);
+                setMobileMenu(false);
+              }}
+            >
+              {modern ? 'Modern UI' : 'Classic UI'}
+            </button>
           </div>
         </div>
       )}

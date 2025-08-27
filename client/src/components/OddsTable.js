@@ -1,6 +1,8 @@
+// src/components/OddsTable.js
 import React, { useState, useEffect } from "react";
 import "./OddsTable.css";
 
+// --- Helper: Calculate Expected Value (EV) ---
 function calculateEV(odds, fairLine) {
   if (!odds || !fairLine) return null;
   const toDec = o => (o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1);
@@ -8,6 +10,77 @@ function calculateEV(odds, fairLine) {
   const fairDec = toDec(fairLine);
   const ev = ((userDec / fairDec) - 1) * 100;
   return ev;
+}
+
+// Convert American odds to implied probability (ignoring vig)
+function americanToProb(odds) {
+  const o = Number(odds);
+  if (!o) return null;
+  return o > 0 ? 100 / (o + 100) : (-o) / ((-o) + 100);
+}
+
+// Convert decimal odds to American odds
+function decimalToAmerican(dec) {
+  if (!dec || dec <= 1) return 0;
+  return dec >= 2 ? Math.round((dec - 1) * 100) : Math.round(-100 / (dec - 1));
+}
+
+function median(nums) {
+  const a = nums.slice().sort((x, y) => x - y);
+  const n = a.length;
+  if (!n) return null;
+  const mid = Math.floor(n / 2);
+  return n % 2 ? a[mid] : (a[mid - 1] + a[mid]) / 2;
+}
+
+// Compute a de-vig consensus probability for the selected side by pairing both sides
+// across books for the same market/point. Falls back to null if no valid pairs.
+function consensusDevigProb(row) {
+  try {
+    const marketKey = row?.mkt?.key;
+    const pointStr = String(row?.out?.point ?? "");
+    const sideName = row?.out?.name; // For h2h: team name; for totals/spreads: "Over"/"Under"
+    const game = row?.game;
+    if (!game || !marketKey) return null;
+
+    const isH2H = marketKey === "h2h";
+    const isTotals = marketKey === "totals";
+    const isSpreads = marketKey === "spreads";
+
+    const pairs = [];
+    (game.bookmakers || []).forEach(bk => {
+      const mkt = (bk.markets || []).find(m => m.key === marketKey);
+      if (!mkt || !mkt.outcomes) return;
+      if (isH2H) {
+        const home = mkt.outcomes.find(o => o && o.name === game.home_team);
+        const away = mkt.outcomes.find(o => o && o.name === game.away_team);
+        if (!home || !away) return;
+        const pHome = americanToProb(home.price ?? home.odds);
+        const pAway = americanToProb(away.price ?? away.odds);
+        if (!(pHome > 0 && pHome < 1 && pAway > 0 && pAway < 1)) return;
+        const denom = pHome + pAway;
+        if (denom <= 0) return;
+        const pSel = sideName === game.home_team ? (pHome / denom) : (pAway / denom);
+        if (pSel > 0 && pSel < 1) pairs.push(pSel);
+      } else if (isTotals || isSpreads) {
+        const over = mkt.outcomes.find(o => o && o.name === "Over" && String(o.point ?? "") === pointStr);
+        const under = mkt.outcomes.find(o => o && o.name === "Under" && String(o.point ?? "") === pointStr);
+        if (!over || !under) return;
+        const pOver = americanToProb(over.price ?? over.odds);
+        const pUnder = americanToProb(under.price ?? under.odds);
+        if (!(pOver > 0 && pOver < 1 && pUnder > 0 && pUnder < 1)) return;
+        const denom = pOver + pUnder;
+        if (denom <= 0) return;
+        const pSel = sideName === "Under" ? (pUnder / denom) : (pOver / denom);
+        if (pSel > 0 && pSel < 1) pairs.push(pSel);
+      }
+    });
+
+    if (!pairs.length) return null;
+    return median(pairs);
+  } catch (_) {
+    return null;
+  }
 }
 
 function formatOdds(odds) {
@@ -44,59 +117,13 @@ export default function OddsTable({
   mode = "game",
   pageSize = 15,
   loading = false,
+  bookFilter = [], // array of bookmaker keys to target rows/EV; mini-table still shows all
 }) {
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
 
   const toggleRow = key =>
     setExpandedRows(exp => ({ ...exp, [key]: !exp[key] }));
-
-  // --- Fix: Show ALL outcomes for h2h/spreads/totals ---
-  function getRowsGame() {
-    const rows = [];
-    games?.forEach((game) => {
-      ["h2h", "spreads", "totals"].forEach((mktKey) => {
-        // For each outcome (moneyline, spread, total) for each bookmaker
-        const outcomeMap = {};
-        game.bookmakers?.forEach(bk => {
-          const mkt = bk.markets?.find(m => m.key === mktKey);
-          mkt?.outcomes?.forEach(out => {
-            // Use key by name/point for grouping
-            const key = `${out.name}:${out.point ?? ""}`;
-            if (!outcomeMap[key]) outcomeMap[key] = [];
-            outcomeMap[key].push({
-              ...out,
-              book: bk.title,
-              bookmaker: bk,
-              market: mkt,
-            });
-          });
-        });
-
-        Object.entries(outcomeMap).forEach(([outKey, allMarketOutcomes], idx) => {
-          if (allMarketOutcomes.length) {
-            // Pick best outcome by price (odds)
-            const bestOutcome = allMarketOutcomes
-              .sort((a, b) => Number(b.price ?? b.odds ?? 0) - Number(a.price ?? a.odds ?? 0))[0];
-            const allBooksForRow = allMarketOutcomes.map((o, i) => ({
-              ...o,
-              _rowId: `${game.id}:${mktKey}:${o.name}:${o.point}:${i}`,
-            }));
-            const rowKey = `${game.id}:${mktKey}:${outKey}`;
-            rows.push({
-              key: rowKey,
-              game,
-              mkt: bestOutcome.market,
-              bk: bestOutcome.bookmaker,
-              out: bestOutcome,
-              allBooks: allBooksForRow,
-            });
-          }
-        });
-      });
-    });
-    return rows;
-  }
 
   function getRowsProps() {
     const rows = [];
@@ -105,56 +132,123 @@ export default function OddsTable({
       game.bookmakers?.forEach((bk, bIdx) => {
         bk.markets?.forEach((mkt, mIdx) => {
           mkt.outcomes?.forEach((out, oIdx) => {
-            // FIX: Show BOTH "Over" and "Under" (or all props)
-            const playerKey = `${out.description ?? ""}:${mkt.key}:${out.point}:${out.name}`;
-            if (seen.has(playerKey)) return;
-            seen.add(playerKey);
+            if (out.name === "Over") {
+              const playerKey = `${out.description ?? ""}:${mkt.key}:${out.point}`;
+              if (seen.has(playerKey)) return;
+              seen.add(playerKey);
+              let best = { ...out, price: Number.MIN_SAFE_INTEGER, book: "", bookmaker: bk, market: mkt };
+              games.forEach(g =>
+                g.bookmakers?.forEach(b =>
+                  b.markets?.filter(m => m.key === mkt.key).forEach(m =>
+                    m.outcomes?.filter(o =>
+                      o.name === "Over" &&
+                      (o.description ?? "") === (out.description ?? "") &&
+                      String(o.point ?? "") === String(out.point ?? "")
+                    ).forEach(o => {
+                      if (Number(o.price ?? o.odds ?? 0) > Number(best.price ?? best.odds ?? 0)) {
+                        best = { ...o, book: b.title, bookmaker: b, market: mkt };
+                      }
+                    })
+                  )
+                )
+              );
+              const allBooksForRow = games.flatMap((g, gi) =>
+                g.bookmakers?.flatMap((b, bi) =>
+                  b.markets?.filter(m => m.key === mkt.key).flatMap((m, mi) =>
+                    m.outcomes?.filter(o =>
+                      o.name === "Over" &&
+                      (o.description ?? "") === (out.description ?? "") &&
+                      String(o.point ?? "") === String(out.point ?? "")
+                    ).map((o, oi) => ({
+                      ...o,
+                      book: b.title,
+                      _rowId: `${g.id}:${m.key}:${o.description || o.name}:${o.point}:${gi}:${bi}:${mi}:${oi}`,
+                    }))
+                  )
+                )
+              );
+              const baseKey = [game.id, mkt.key, out.description, out.point].join(":");
+              const key = `${baseKey}:${gIdx}:${bIdx}:${mIdx}:${oIdx}`;
+              rows.push({
+                key,
+                game,
+                bk: best.bookmaker,
+                mkt,
+                out: best,
+                allBooks: allBooksForRow,
+              });
+            }
+          });
+        });
+      });
+    });
+    return rows;
+  }
 
-            // Find best price for this prop+side
-            let best = { ...out, price: Number.MIN_SAFE_INTEGER, book: "", bookmaker: bk, market: mkt };
-            games.forEach(g =>
-              g.bookmakers?.forEach(b =>
-                b.markets?.filter(m => m.key === mkt.key).forEach(m =>
-                  m.outcomes?.filter(o =>
-                    (o.description ?? "") === (out.description ?? "") &&
-                    String(o.point ?? "") === String(out.point ?? "") &&
-                    o.name === out.name
-                  ).forEach(o => {
-                    if (Number(o.price ?? o.odds ?? 0) > Number(best.price ?? best.odds ?? 0)) {
-                      best = { ...o, book: b.title, bookmaker: b, market: mkt };
-                    }
-                  })
-                )
+  // (For completeness: keep getRowsGame if you need sportsbook mode as well)
+  function getRowsGame() {
+    const rows = [];
+    games?.forEach((game) => {
+      ["h2h", "spreads", "totals"].forEach((mktKey) => {
+        const allMarketOutcomes = [];
+        game.bookmakers?.forEach(bk => {
+          const mkt = bk.markets?.find(m => m.key === mktKey);
+          if (mkt && mkt.outcomes) {
+            mkt.outcomes.forEach(out => {
+              allMarketOutcomes.push({
+                ...out,
+                book: bk.title,
+                bookmaker: bk,
+                market: mkt,
+              });
+            });
+          }
+        });
+
+        if (allMarketOutcomes.length) {
+          // Narrow candidates to selected books if provided
+          const candidates = allMarketOutcomes.filter(o =>
+            !bookFilter.length || bookFilter.includes((o.bookmaker?.key || "").toLowerCase())
+          );
+
+          if (!candidates.length) return; // no rows for this market if selected books don't offer it
+
+          let bestOutcome;
+          if (mktKey === "h2h") {
+            bestOutcome = candidates
+              .filter(o => o.name === game.home_team)
+              .sort((a, b) => Number(b.price ?? b.odds ?? 0) - Number(a.price ?? a.odds ?? 0))[0]
+              || candidates[0];
+          } else if (mktKey === "spreads" || mktKey === "totals") {
+            bestOutcome = candidates
+              .filter(o => o.name === "Over")
+              .sort((a, b) => Number(b.price ?? b.odds ?? 0) - Number(a.price ?? a.odds ?? 0))[0]
+              || candidates[0];
+          }
+
+          if (bestOutcome) {
+            const allBooksForRow = allMarketOutcomes
+              .filter(o =>
+                (o.name === bestOutcome.name || !o.name) &&
+                (String(o.point ?? "") === String(bestOutcome.point ?? ""))
               )
-            );
-            // All books for mini-table
-            const allBooksForRow = games.flatMap((g, gi) =>
-              g.bookmakers?.flatMap((b, bi) =>
-                b.markets?.filter(m => m.key === mkt.key).flatMap((m, mi) =>
-                  m.outcomes?.filter(o =>
-                    (o.description ?? "") === (out.description ?? "") &&
-                    String(o.point ?? "") === String(out.point ?? "") &&
-                    o.name === out.name
-                  ).map((o, oi) => ({
-                    ...o,
-                    book: b.title,
-                    _rowId: `${g.id}:${m.key}:${o.description || o.name}:${o.point}:${gi}:${bi}:${mi}:${oi}`,
-                  }))
-                )
-              )
-            );
-            const baseKey = [game.id, mkt.key, out.description, out.point, out.name].join(":");
-            const key = `${baseKey}:${gIdx}:${bIdx}:${mIdx}:${oIdx}`;
+              .map((o, i) => ({
+                ...o,
+                book: o.book,
+                _rowId: `${game.id}:${mktKey}:${o.name}:${o.point}:${i}`,
+              }));
+
+            const key = `${game.id}:${mktKey}:${bestOutcome.name}:${bestOutcome.point}`;
             rows.push({
               key,
               game,
-              bk: best.bookmaker,
-              mkt,
-              out: best,
+              mkt: bestOutcome.market,
+              bk: bestOutcome.bookmaker,
+              out: bestOutcome,
               allBooks: allBooksForRow,
             });
-          });
-        });
+          }
+        }
       });
     });
     return rows;
@@ -164,16 +258,29 @@ export default function OddsTable({
 
   // --- Sort by EV highest to lowest ---
   const getEV = row => {
-    const prices = row.allBooks.map(b => Number(b.price ?? b.odds ?? 0));
-    const bestOdds =
-      prices.some(x => x > 0)
-        ? Math.max(...prices.filter(x => x > 0))
-        : Math.min(...prices.filter(x => x < 0));
-    const fairLine =
-      prices.some(x => x > 0)
-        ? Math.min(...prices.filter(x => x > 0))
-        : Math.max(...prices.filter(x => x < 0));
-    return calculateEV(bestOdds, fairLine) ?? -999;
+    const userOdds = Number(row?.out?.price ?? row?.out?.odds ?? 0);
+    if (!userOdds) return -999;
+
+    // First try de-vig using both sides from the same book across the market
+    const pDevig = consensusDevigProb(row);
+    if (pDevig && pDevig > 0 && pDevig < 1) {
+      const fairDec = 1 / pDevig;
+      const fairAmerican = decimalToAmerican(fairDec);
+      return calculateEV(userOdds, fairAmerican) ?? -999;
+    }
+
+    // Fallback: median implied probability across all books (non-de-vig)
+    const probs = row.allBooks
+      .map(b => americanToProb(b.price ?? b.odds))
+      .filter(p => typeof p === "number" && p > 0 && p < 1);
+    const consensusProb = median(probs);
+    if (consensusProb && consensusProb > 0 && consensusProb < 1) {
+      const fairDec = 1 / consensusProb;
+      const fairAmerican = decimalToAmerican(fairDec);
+      return calculateEV(userOdds, fairAmerican) ?? -999;
+    }
+
+    return -999;
   };
   allRows = allRows.sort((a, b) => getEV(b) - getEV(a));
 
@@ -187,8 +294,9 @@ export default function OddsTable({
 
   useEffect(() => {
     setPage(1);
-  }, [games, mode, pageSize]);
+  }, [games, mode, pageSize, bookFilter]);
 
+  // ---- Loading State ----
   if (loading) {
     return (
       <div className="odds-table-card">
@@ -241,18 +349,8 @@ export default function OddsTable({
         </thead>
         <tbody>
           {paginatedRows.map((row, i) => {
-            const prices = row.allBooks.map(b => Number(b.price ?? b.odds ?? 0));
-            const bestOdds =
-              prices.some(x => x > 0)
-                ? Math.max(...prices.filter(x => x > 0))
-                : Math.min(...prices.filter(x => x < 0));
-            const fairLine =
-              prices.some(x => x > 0)
-                ? Math.min(...prices.filter(x => x > 0))
-                : Math.max(...prices.filter(x => x < 0));
-            const ev = calculateEV(bestOdds, fairLine);
-
-            const evClass = ev > 0 ? "ev-col positive" : "ev-col negative";
+            const ev = getEV(row);
+            const evClass = ev && ev > 0 ? "ev-col positive" : "ev-col negative";
 
             return (
               <React.Fragment key={row.key}>
@@ -262,7 +360,7 @@ export default function OddsTable({
                     onClick={() => toggleRow(row.key)}
                     style={{ cursor: "pointer" }}
                   >
-                    <td data-label="EV %" className={evClass}>{ev ? ev.toFixed(2) + "%" : ""}</td>
+                    <td data-label="EV %" className={evClass}>{typeof ev === "number" ? ev.toFixed(2) + "%" : ""}</td>
                     <td data-label="Matchup">
                       {row.game.home_team} vs {row.game.away_team}
                       <br />
@@ -281,7 +379,7 @@ export default function OddsTable({
                     onClick={() => toggleRow(row.key)}
                     style={{ cursor: "pointer" }}
                   >
-                    <td data-label="EV %" className={evClass}>{ev ? ev.toFixed(2) + "%" : ""}</td>
+                    <td data-label="EV %" className={evClass}>{typeof ev === "number" ? ev.toFixed(2) + "%" : ""}</td>
                     <td data-label="Match">
                       {row.game.home_team} vs {row.game.away_team}
                       <br />
@@ -302,41 +400,31 @@ export default function OddsTable({
                     <td data-label="Odds">{formatOdds(row.out.price ?? row.out.odds ?? "")}</td>
                   </tr>
                 )}
+
+                {/* --- Mini-table: vertically stacked columns, centered --- */}
                 {expandedRows[row.key] && row.allBooks.length > 0 && (
                   <tr>
                     <td colSpan={mode === "props" ? 8 : 9}>
                       <div className="mini-table-oddsjam">
                         <div className="mini-table-row">
-                          {(() => {
-                            // Deduplicate
-                            const uniqueBooks = [];
-                            const seen = new Set();
-                            row.allBooks.forEach(o => {
-                              const id = `${o.book}-${o.point ?? ""}-${o.name ?? ""}`;
-                              if (!seen.has(id)) {
-                                uniqueBooks.push(o);
-                                seen.add(id);
-                              }
-                            });
-                            return uniqueBooks.map((o, oi) => {
-                              const oddsArr = uniqueBooks.map(ob => Number(ob.price ?? ob.odds ?? 0));
-                              const bestOdds =
-                                oddsArr.some(x => x > 0)
-                                  ? Math.max(...oddsArr.filter(x => x > 0))
-                                  : Math.min(...oddsArr.filter(x => x < 0));
-                              const isBest = Number(o.price ?? o.odds ?? 0) === bestOdds;
-                              return (
-                                <div key={o._rowId || oi} className="mini-table-header-cell">
-                                  <div>{o.book}</div>
-                                  <div className="mini-table-line">{o.point ?? ""}</div>
-                                  <hr style={{ width: "80%", margin: "0.4em auto 0.2em auto", border: 0, borderTop: "1.5px solid #3355ff22" }} />
-                                  <div className={`mini-table-odds-cell${isBest ? " best-odds" : ""}`}>
-                                    {formatOdds(o.price ?? o.odds ?? "")}
-                                  </div>
+                          {row.allBooks.map((o, oi) => {
+                            const oddsArr = row.allBooks.map(ob => Number(ob.price ?? ob.odds ?? 0));
+                            const bestOdds =
+                              oddsArr.some(x => x > 0)
+                                ? Math.max(...oddsArr.filter(x => x > 0))
+                                : Math.min(...oddsArr.filter(x => x < 0));
+                            const isBest = Number(o.price ?? o.odds ?? 0) === bestOdds;
+                            return (
+                              <div key={o._rowId || oi} className="mini-table-header-cell">
+                                <div>{o.book}</div>
+                                <div className="mini-table-line">{o.point ?? ""}</div>
+                                <hr style={{ width: "80%", margin: "0.4em auto 0.2em auto", border: 0, borderTop: "1.5px solid #3355ff22" }} />
+                                <div className={`mini-table-odds-cell${isBest ? " best-odds" : ""}`}>
+                                  {formatOdds(o.price ?? o.odds ?? "")}
                                 </div>
-                              );
-                            });
-                          })()}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </td>
@@ -347,6 +435,8 @@ export default function OddsTable({
           })}
         </tbody>
       </table>
+
+      {/* --- PAGINATION BAR --- */}
       {totalPages > 1 && (
         <div
           style={{

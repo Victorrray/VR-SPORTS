@@ -1,35 +1,68 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import OddsTable from "../components/OddsTable";
 import SportMultiSelect from "../components/SportMultiSelect";
 import useDebounce from "../hooks/useDebounce";
 
-// Which markets to show for main sportsbooks
+// Which markets to show for main sportsbooks (game lines)
 const GAME_LINES = ["h2h", "spreads", "totals"];
-// List of major US sportsbook keys (from odds API docs, **NOT** DFS)
-const NON_DFS_BOOKMAKERS = [
-  "fanduel", "draftkings", "betmgm", "caesars", "pointsbetus",
-  "betrivers", "barstool", "betus", "wynnbet", "foxbet", "bet365", "superbook",
-  // Add more as needed. Exclude prizepicks, underdog, etc.
-];
-
-const runLimited = (max, arr, fn) => {
-  const out = [];
-  let i = 0;
-  const next = () =>
-    i < arr.length
-      ? fn(arr[i++]).then(r => {
-          out.push(r);
-          return next();
-        })
-      : Promise.resolve();
-  return Promise.all(Array(max).fill(0).map(next)).then(() => out);
+// DFS apps to exclude when showing sportsbooks
+const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
+// Map API sport keys to common short names
+const FRIENDLY_TITLES = {
+  basketball_nba: "NBA",
+  basketball_ncaab: "NCAAB",
+  basketball_wnba: "WNBA",
+  baseball_mlb: "MLB",
+  americanfootball_nfl: "NFL",
+  americanfootball_ncaaf: "NCAAF",
+  icehockey_nhl: "NHL",
+  soccer_epl: "EPL",
+  soccer_uefa_champs_league: "UCL",
 };
+// Keep the sport picker short by default
+const FEATURED_SPORTS = new Set([
+  "basketball_nba",
+  "baseball_mlb",
+  "americanfootball_nfl",
+  "americanfootball_ncaaf",
+  "icehockey_nhl",
+]);
+
+// Friendly bookmaker titles for dropdown
+const BOOK_TITLES = {
+  draftkings: "DraftKings",
+  fanduel: "FanDuel",
+  betmgm: "BetMGM",
+  caesars: "Caesars",
+  bet365: "Bet365",
+  pointsbetus: "PointsBet (US)",
+  fanatics: "Fanatics Sportsbook",
+  fanatics_sportsbook: "Fanatics Sportsbook",
+  espnbet: "ESPN BET",
+  betrivers: "BetRivers",
+  sugarhouse: "SugarHouse",
+  unibet_us: "Unibet (US)",
+  betparx: "betPARX",
+  betway: "Betway",
+  si_sportsbook: "SI Sportsbook",
+  betfred: "Betfred",
+  superbook: "SuperBook",
+  circasports: "Circa Sports",
+  hardrockbet: "Hard Rock Bet",
+  wynnbet: "WynnBET",
+  barstool: "Barstool",
+  foxbet: "FOX Bet",
+};
+
+// Player-props helpers removed while focusing on sportsbooks only
 
 export default function SportsbookMarkets() {
   const [sportList, setSportList] = useState([]);
   const [picked, setPicked] = useState(["basketball_nba"]);
   const [query, setQuery] = useState("");
   const [games, setGames] = useState([]);
+  const [bookList, setBookList] = useState([]);
+  const [selectedBooks, setSelectedBooks] = useState([]);
   const [quota, setQuota] = useState({ remain: "–", used: "–" });
   const [loading, setLoad] = useState(false);
   const [error, setErr] = useState(null);
@@ -38,58 +71,93 @@ export default function SportsbookMarkets() {
   const debounced = useDebounce(query, 300);
   const BASE_URL = process.env.REACT_APP_API_URL || "";
 
-  // Fetch sport list
+  // Fetch sport list (defensive against non-array errors), map to friendly titles
   useEffect(() => {
-    fetch(`${BASE_URL}/api/sports`)
-      .then(r => r.json())
-      .then(list => {
-        const allSports = [
-          { key: "ALL", title: "All Sports" },
-          ...list.filter(s => s.active),
-        ];
+    (async () => {
+      try {
+        const r = await fetch(`${BASE_URL}/api/sports`);
+        if (!r.ok) {
+          setSportList([{ key: "ALL", title: "All Sports" }]);
+          return;
+        }
+        const data = await r.json();
+        const arr = Array.isArray(data) ? data : [];
+        const activeOnly = arr.filter(s => s && s.active);
+        const curated = activeOnly.filter(s => FEATURED_SPORTS.has(s.key));
+        const listToUse = curated.length ? curated : activeOnly;
+        const mapped = listToUse
+          .map(s => ({
+            ...s,
+            title: FRIENDLY_TITLES[s.key] || s.title || s.key,
+          }));
+        const allSports = [{ key: "ALL", title: "All Sports" }, ...mapped];
         setSportList(allSports);
-      });
+      } catch (_) {
+        setSportList([{ key: "ALL", title: "All Sports" }]);
+      }
+    })();
     // eslint-disable-next-line
   }, []);
 
-  // Fetch odds data for major sportsbooks
+  // Fetch odds data for major sportsbooks (game lines only)
   useEffect(() => {
     (async () => {
       try {
         setLoad(true);
+        setErr(null);
         const keys = picked.includes("ALL")
           ? sportList.filter(s => s.key !== "ALL").map(s => s.key)
           : picked;
 
-        const calls = keys.map(k =>
-          fetch(`${BASE_URL}/api/odds-data?sport=${k}&markets=${GAME_LINES.join(",")}`)
-            .then(async r => {
-              if (r.ok && quota.remain === "–") {
-                setQuota({
-                  remain: r.headers.get("x-requests-remaining") ?? "—",
-                  used: r.headers.get("x-requests-used") ?? "—",
-                });
-              }
-              return r.json();
-            })
-            .catch(() => [])
-        );
-        const gamesRaw = (await Promise.all(calls)).flat();
+        if (!keys.length) {
+          setGames([]);
+          setLoad(false);
+          return;
+        }
 
-        // Filter bookmakers for NON_DFS_BOOKMAKERS only
-        const filteredGames = gamesRaw.map(g => ({
-          ...g,
-          bookmakers: (g.bookmakers || []).filter(bk =>
-            NON_DFS_BOOKMAKERS.includes((bk.key || "").toLowerCase())
-          ),
-        }))
-        // Only include games with at least one valid sportsbook
-        .filter(g => Array.isArray(g.bookmakers) && g.bookmakers.length > 0);
+        {
+          const calls = keys.map(k =>
+            fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,uk,eu,au&markets=${GAME_LINES.join(",")}`)
+              .then(async r => {
+                if (r.ok && quota.remain === "–") {
+                  setQuota({
+                    remain: r.headers.get("x-requests-remaining") ?? "—",
+                    used: r.headers.get("x-requests-used") ?? "—",
+                  });
+                }
+                return r.json();
+              })
+              .catch(() => [])
+          );
+          const gamesRaw = (await Promise.all(calls)).flat();
 
-        setGames(filteredGames);
-        setErr(null);
+          // Remove DFS apps (keep all other bookmakers across regions)
+          const filteredGames = gamesRaw.map(g => ({
+            ...g,
+            bookmakers: (g.bookmakers || []).filter(bk => !DFS_KEYS.includes((bk.key || "").toLowerCase())),
+          }))
+          // Only include games with at least one valid sportsbook
+          .filter(g => Array.isArray(g.bookmakers) && g.bookmakers.length > 0);
+
+          setGames(filteredGames);
+
+          // Build bookmaker list from returned games (unique by key)
+          const seen = new Map();
+          filteredGames.forEach(g => (g.bookmakers || []).forEach(bk => {
+            const key = (bk.key || "").toLowerCase();
+            if (!key) return;
+            if (!seen.has(key)) seen.set(key, { key, title: bk.title || BOOK_TITLES[key] || key });
+          }));
+          const booksArr = Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
+          setBookList(booksArr);
+          // Default: select all books once on first load
+          if (booksArr.length && selectedBooks.length === 0) {
+            setSelectedBooks(booksArr.map(b => b.key));
+          }
+        }
       } catch (e) {
         setErr(e.message);
+        setGames([]);
       } finally {
         setLoad(false);
       }
@@ -100,11 +168,11 @@ export default function SportsbookMarkets() {
   // Filtering before passing to OddsTable
   let filteredGames = games;
   if (debounced.trim()) {
-    filteredGames = filteredGames.filter(
-      g =>
-        (g.home_team && g.home_team.toLowerCase().includes(debounced.toLowerCase())) ||
-        (g.away_team && g.away_team.toLowerCase().includes(debounced.toLowerCase())) ||
-        (g.sport_title && g.sport_title.toLowerCase().includes(debounced.toLowerCase()))
+    const q = debounced.toLowerCase();
+    filteredGames = filteredGames.filter(g =>
+      (g.home_team && g.home_team.toLowerCase().includes(q)) ||
+      (g.away_team && g.away_team.toLowerCase().includes(q)) ||
+      (g.sport_title && g.sport_title.toLowerCase().includes(q))
     );
   }
   if (picked && picked.length && !picked.includes("ALL")) {
@@ -123,7 +191,7 @@ export default function SportsbookMarkets() {
       <div className="market-container">
         <div className="filters-mobile">
           <input
-            placeholder="Search team / league"
+            placeholder={"Search team / league"}
             value={query}
             onChange={e => setQuery(e.target.value)}
           />
@@ -131,7 +199,17 @@ export default function SportsbookMarkets() {
             list={sportList}
             selected={picked}
             onChange={setPicked}
+            placeholderText="Choose sports…"
+            allLabel="All Sports"
           />
+          <SportMultiSelect
+            list={bookList}
+            selected={selectedBooks}
+            onChange={setSelectedBooks}
+            placeholderText="Choose books…"
+            allLabel="All Books"
+          />
+          {/* Player Props UI hidden */}
           <label className="filter-checkbox">
             <input
               type="checkbox"
@@ -140,16 +218,15 @@ export default function SportsbookMarkets() {
             />
             Show Live Games
           </label>
+          <span className="filters-count">Games: {filteredGames.length}</span>
         </div>
         <OddsTable
           games={filteredGames}
           pageSize={15}
-          mode="game"
+          mode={"game"}
+          bookFilter={selectedBooks}
           loading={loading}
         />
-        <small style={{ opacity: 0.7 }}>
-          quota – remain {quota.remain} • used {quota.used}
-        </small>
       </div>
     </main>
   );

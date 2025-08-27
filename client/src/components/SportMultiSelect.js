@@ -1,10 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./SportMultiSelect.css";
 
-/* helper — returns an array of keys for the whole list */
-const allKeys = list => list.map(s => s.key);
+/* helper — returns an array of keys for the whole list (exclude synthetic ALL) */
+const allKeys = list => list.filter(s => s.key !== "ALL").map(s => s.key);
 
-export default function SportMultiSelect({ list, selected, onChange, disabled }) {
+export default function SportMultiSelect({
+  list,
+  selected,
+  onChange,
+  disabled,
+  placeholderText = "Choose sports…",
+  allLabel = "All Sports",
+}) {
   const [open, setOpen] = useState(false);
   const boxRef = useRef(null);
 
@@ -21,16 +28,21 @@ export default function SportMultiSelect({ list, selected, onChange, disabled })
       ? onChange(selected.filter(k => k !== key))
       : onChange([...selected, key]);
 
-  /* “All Sports” handlers */
-  const allSelected = selected.length === list.length;
-  const toggleAll = () =>
-    allSelected ? onChange([]) : onChange(allKeys(list));
+  /* “All” handlers */
+  const keysOnly = allKeys(list);
+  const allSelected = keysOnly.length > 0 && keysOnly.every(k => selected.includes(k));
+  const toggleAll = () => (allSelected ? onChange([]) : onChange(keysOnly));
 
   /* label when closed */
-  const label =
-    !selected.length      ? "Choose sports…" :
-    selected.length === 1 ? selected[0]      :
-    `${selected.length} selected`;
+  const label = (() => {
+    if (!selected.length) return placeholderText;
+    if (allSelected) return allLabel;
+    if (selected.length === 1) {
+      const item = list.find(s => s.key === selected[0]);
+      return item?.title || selected[0];
+    }
+    return `${selected.length} selected`;
+  })();
 
   return (
     <div className={`ms-wrap ${disabled ? "disabled" : ""}`} ref={boxRef}>
@@ -43,7 +55,7 @@ export default function SportMultiSelect({ list, selected, onChange, disabled })
 
       {open && (
         <ul className="ms-menu">
-          {/* All-sports master switch */}
+          {/* All master switch */}
           <li style={{ borderBottom: "1px solid #444", paddingBottom: 4, marginBottom: 4 }}>
             <label>
               <input
@@ -51,7 +63,7 @@ export default function SportMultiSelect({ list, selected, onChange, disabled })
                 checked={allSelected}
                 onChange={toggleAll}
               />{" "}
-              <strong>All Sports</strong>
+              <strong>{allLabel}</strong>
             </label>
           </li>
 
