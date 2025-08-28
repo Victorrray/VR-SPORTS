@@ -58,7 +58,7 @@ const BOOK_TITLES = {
 
 export default function SportsbookMarkets() {
   const [sportList, setSportList] = useState([]);
-  const [picked, setPicked] = useState(["basketball_nba"]);
+  const [picked, setPicked] = useState(["americanfootball_nfl", "americanfootball_ncaaf"]);
   const [query, setQuery] = useState("");
   const [games, setGames] = useState([]);
   const [bookList, setBookList] = useState([]);
@@ -67,6 +67,17 @@ export default function SportsbookMarkets() {
   const [loading, setLoad] = useState(false);
   const [error, setErr] = useState(null);
   const [showAllGames, setShowAllGames] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
+  const [marketKeys, setMarketKeys] = useState(["h2h","spreads","totals"]);
+  const [onlyPositive, setOnlyPositive] = useState(false);
+  const [minEV, setMinEV] = useState("");
+
+  const resetFilters = () => {
+    setSelectedDate("");
+    setMarketKeys(["h2h", "spreads", "totals"]);
+    setOnlyPositive(false);
+    setMinEV("");
+  };
 
   const debounced = useDebounce(query, 300);
   const BASE_URL = process.env.REACT_APP_API_URL || "";
@@ -143,10 +154,11 @@ export default function SportsbookMarkets() {
 
           // Build bookmaker list from returned games (unique by key)
           const seen = new Map();
+          const cleanBookTitle = (t) => String(t || '').replace(/\.?ag\b/gi, '').trim();
           filteredGames.forEach(g => (g.bookmakers || []).forEach(bk => {
             const key = (bk.key || "").toLowerCase();
             if (!key) return;
-            if (!seen.has(key)) seen.set(key, { key, title: bk.title || BOOK_TITLES[key] || key });
+            if (!seen.has(key)) seen.set(key, { key, title: cleanBookTitle(bk.title || BOOK_TITLES[key] || key) });
           }));
           const booksArr = Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
           setBookList(booksArr);
@@ -175,6 +187,17 @@ export default function SportsbookMarkets() {
       (g.sport_title && g.sport_title.toLowerCase().includes(q))
     );
   }
+  // Date filter (local date)
+  if (selectedDate) {
+    filteredGames = filteredGames.filter(g => {
+      const d = new Date(g.commence_time);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const local = `${y}-${m}-${day}`;
+      return local === selectedDate;
+    });
+  }
   if (picked && picked.length && !picked.includes("ALL")) {
     filteredGames = filteredGames.filter(g => picked.includes(g.sport_key));
   }
@@ -190,41 +213,109 @@ export default function SportsbookMarkets() {
     <main className="page-wrap">
       <div className="market-container">
         <div className="filters-mobile">
-          <input
-            placeholder={"Search team / league"}
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-          />
-          <SportMultiSelect
-            list={sportList}
-            selected={picked}
-            onChange={setPicked}
-            placeholderText="Choose sports…"
-            allLabel="All Sports"
-          />
-          <SportMultiSelect
-            list={bookList}
-            selected={selectedBooks}
-            onChange={setSelectedBooks}
-            placeholderText="Choose books…"
-            allLabel="All Books"
-          />
-          {/* Player Props UI hidden */}
-          <label className="filter-checkbox">
+          {/* Row 1: Primary search centered */}
+          <div className="filters-row">
             <input
-              type="checkbox"
-              checked={showAllGames}
-              onChange={() => setShowAllGames(val => !val)}
+              placeholder={"Search team / league"}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
             />
-            Show Live Games
-          </label>
-          <span className="filters-count">Games: {filteredGames.length}</span>
+          </div>
+
+          {/* Row 2: Markets + EV controls (core decision filters) */}
+          <div className="filters-row">
+            <div className="filter-group">
+              <span className="filter-label">Markets</span>
+              <div className="chip-wrap">
+                {[{k:'h2h', label:'Moneyline'}, {k:'spreads', label:'Spread'}, {k:'totals', label:'Totals'}].map(m => (
+                  <button
+                    key={m.k}
+                    type="button"
+                    onClick={() => setMarketKeys(prev => prev.includes(m.k) ? prev.filter(x => x !== m.k) : [...prev, m.k])}
+                    className={`chip ${marketKeys.includes(m.k) ? 'active' : ''}`}
+                  >{m.label}</button>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group ev-group">
+              <span className="filter-label">EV</span>
+              <label className="filter-checkbox" style={{ marginRight: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={onlyPositive}
+                  onChange={() => setOnlyPositive(v => !v)}
+                />
+                Only +EV
+              </label>
+              <input
+                type="number"
+                value={minEV}
+                onChange={e => setMinEV(e.target.value)}
+                placeholder="Min %"
+                style={{ width: 90 }}
+                aria-label="Minimum EV percent"
+              />
+            </div>
+          </div>
+
+          {/* Row 3: Date + Sports + Books + Live */}
+          <div className="filters-row">
+            <div className="filter-group">
+              <span className="filter-label">Date</span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                aria-label="Filter by date"
+                title="Filter by date"
+              />
+            </div>
+            <div className="filter-group">
+              <span className="filter-label">Sports</span>
+              <SportMultiSelect
+                list={sportList}
+                selected={picked}
+                onChange={setPicked}
+                placeholderText="Choose sports…"
+                allLabel="All Sports"
+              />
+            </div>
+            <div className="filter-group">
+              <span className="filter-label">Books</span>
+              <SportMultiSelect
+                list={bookList}
+                selected={selectedBooks}
+                onChange={setSelectedBooks}
+                placeholderText="Choose books…"
+                allLabel="All Books"
+              />
+            </div>
+            <label className="filter-checkbox">
+              <input
+                type="checkbox"
+                checked={showAllGames}
+                onChange={() => setShowAllGames(val => !val)}
+              />
+              Show Live Games
+            </label>
+          </div>
+
+          {/* Row 4: Reset + Count */}
+          <div className="filters-row">
+            <div className="filters-actions">
+              <button type="button" className="btn btn-ghost" onClick={resetFilters}>Reset</button>
+            </div>
+            <span className="filters-count">Games: {filteredGames.length}</span>
+          </div>
         </div>
         <OddsTable
           games={filteredGames}
           pageSize={15}
           mode={"game"}
           bookFilter={selectedBooks}
+          marketFilter={marketKeys}
+          evOnlyPositive={onlyPositive}
+          evMin={minEV === '' ? null : Number(minEV)}
           loading={loading}
         />
       </div>

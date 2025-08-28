@@ -14,6 +14,7 @@ export default function Navbar() {
     { label: "Sportsbooks", to: "/sportsbooks" },
   ];
 
+
   return (
     <nav className={styles.navbar}>
       <button
@@ -35,6 +36,8 @@ export default function Navbar() {
         <Link to="/" className={`${styles.link} ${isActive("/") ? styles.active : ""}`}>Home</Link>
         <Link to="/sportsbooks" className={`${styles.link} ${isActive("/sportsbooks") ? styles.active : ""}`}>Sportsbooks</Link>
       </div>
+
+      {/* Theme switcher removed per request; using fixed Emerald theme */}
 
       {mobileMenu && (
         <div className={styles.mobileMenu}>

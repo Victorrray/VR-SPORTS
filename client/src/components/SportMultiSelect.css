@@ -51,7 +51,7 @@
 }
 
 .ms-menu input[type="checkbox"] {
-  accent-color: #3355ff;
+  accent-color: var(--accent);
   width: 1.1em;
   height: 1.1em;
   margin-right: 8px;

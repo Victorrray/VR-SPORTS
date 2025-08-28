@@ -1,8 +1,14 @@
 .footer {
-  background: var(--bg-elev);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 8%, var(--bg-elev)),
+      color-mix(in srgb, var(--accent) 18%, var(--bg-elev-2))
+    );
   color: var(--text-muted);
   padding: 28px 16px;
-  border-top: 1px solid #233;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 -8px 24px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .inner {
@@ -44,7 +50,7 @@
   font-weight: 500;
 }
 .link:hover {
-  color: var(--text);
+  color: var(--accent);
 }
 
 .meta {

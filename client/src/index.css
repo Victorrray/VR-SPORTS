@@ -9,3 +9,32 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* Base links and buttons */
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: #fff; }
+button { font-family: inherit; }
+
+/* Accessible focus styles */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: 10px;
+}
+
+/* Utility buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.7em 1.2em;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.12s, box-shadow 0.15s, background 0.18s;
+}
+.btn-primary { background: var(--accent-gradient); color: #fff; box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 25%, transparent); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 35%, transparent); }
+.btn-ghost { background: transparent; color: var(--text); }
+.btn-ghost:hover { background: rgba(255,255,255,0.06); }

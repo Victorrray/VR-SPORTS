@@ -1,5 +1,5 @@
 // src/components/OddsTable.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import "./OddsTable.css";
 
 // --- Helper: Calculate Expected Value (EV) ---
@@ -106,6 +106,12 @@ function formatMarket(key) {
   return key.replace("player_", "").toUpperCase();
 }
 
+// Clean bookmaker titles for display (e.g., remove ".ag")
+function cleanBookTitle(title) {
+  if (!title) return "";
+  return String(title).replace(/\.?ag\b/gi, "").trim();
+}
+
 function isLive(commence_time) {
   const start = new Date(commence_time).getTime();
   const now = Date.now();
@@ -118,9 +124,17 @@ export default function OddsTable({
   pageSize = 15,
   loading = false,
   bookFilter = [], // array of bookmaker keys to target rows/EV; mini-table still shows all
+  initialSort = { key: "ev", dir: "desc" }, // allow consumers to default-sort (e.g., by time)
+  marketFilter = [], // array of market keys to include (e.g., ['h2h','spreads','totals'])
+  evOnlyPositive = false, // if true, only show rows with EV > 0
+  evMin = null, // if number, minimum EV percent threshold
 }) {
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState(initialSort || { key: "ev", dir: "desc" });
+  const prevPriceRef = useRef({});
+  const [priceDelta, setPriceDelta] = useState({});
+  
 
   const toggleRow = key =>
     setExpandedRows(exp => ({ ...exp, [key]: !exp[key] }));
@@ -189,7 +203,8 @@ export default function OddsTable({
   function getRowsGame() {
     const rows = [];
     games?.forEach((game) => {
-      ["h2h", "spreads", "totals"].forEach((mktKey) => {
+      const keys = ["h2h", "spreads", "totals"].filter(k => !marketFilter.length || marketFilter.includes(k));
+      keys.forEach((mktKey) => {
         const allMarketOutcomes = [];
         game.bookmakers?.forEach(bk => {
           const mkt = bk.markets?.find(m => m.key === mktKey);
@@ -254,7 +269,7 @@ export default function OddsTable({
     return rows;
   }
 
-  let allRows = mode === "props" ? getRowsProps() : getRowsGame();
+  const allRows = useMemo(() => (mode === "props" ? getRowsProps() : getRowsGame()), [games, mode, bookFilter, marketFilter]);
 
   // --- Sort by EV highest to lowest ---
   const getEV = row => {
@@ -282,10 +297,44 @@ export default function OddsTable({
 
     return -999;
   };
-  allRows = allRows.sort((a, b) => getEV(b) - getEV(a));
+  const evMap = useMemo(() => {
+    const m = new Map();
+    allRows.forEach(r => {
+      m.set(r.key, getEV(r));
+    });
+    return m;
+  }, [allRows]);
 
-  const totalPages = Math.ceil(allRows.length / pageSize);
-  const paginatedRows = allRows.slice((page - 1) * pageSize, page * pageSize);
+  const sorters = {
+    ev: (a, b) => ((evMap.get(b.key) ?? -999) - (evMap.get(a.key) ?? -999)),
+    match: (a, b) => String(`${a.game.home_team} ${a.game.away_team}`).localeCompare(`${b.game.home_team} ${b.game.away_team}`),
+    market: (a, b) => String(a.mkt?.key).localeCompare(String(b.mkt?.key)),
+    outcome: (a, b) => String(a.out?.name ?? "").localeCompare(String(b.out?.name ?? "")),
+    line: (a, b) => Number(a.out?.point ?? 0) - Number(b.out?.point ?? 0),
+    book: (a, b) => cleanBookTitle(a.bk?.title ?? "").localeCompare(cleanBookTitle(b.bk?.title ?? "")),
+    odds: (a, b) => Number(a.out?.price ?? a.out?.odds ?? 0) - Number(b.out?.price ?? b.out?.odds ?? 0),
+    time: (a, b) => new Date(a.game?.commence_time || 0) - new Date(b.game?.commence_time || 0),
+  };
+
+  const sorter = sorters[sort.key] || sorters.ev;
+
+  const filteredSortedRows = useMemo(() => {
+    let rows = allRows;
+    if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
+      rows = rows.filter(r => {
+        const ev = evMap.get(r.key);
+        if (ev == null || Number.isNaN(ev)) return false;
+        if (evOnlyPositive && ev <= 0) return false;
+        if (typeof evMin === 'number' && !Number.isNaN(evMin) && ev < evMin) return false;
+        return true;
+      });
+    }
+    const sorted = rows.slice().sort((a, b) => (sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b)));
+    return sorted;
+  }, [allRows, evOnlyPositive, evMin, sort.dir, sorter, evMap]);
+
+  const totalPages = Math.ceil(filteredSortedRows.length / pageSize);
+  const paginatedRows = useMemo(() => filteredSortedRows.slice((page - 1) * pageSize, page * pageSize), [filteredSortedRows, page, pageSize]);
 
   const pageNumbers = [];
   for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
@@ -294,16 +343,56 @@ export default function OddsTable({
 
   useEffect(() => {
     setPage(1);
-  }, [games, mode, pageSize, bookFilter]);
+  }, [games, mode, pageSize, bookFilter, marketFilter, evOnlyPositive, evMin]);
 
-  // ---- Loading State ----
+  
+
+  // Flash odds cell on changes
+  useEffect(() => {
+    const prev = prevPriceRef.current || {};
+    const nextMap = {};
+    const deltas = {};
+    allRows.forEach(row => {
+      const curr = Number(row?.out?.price ?? row?.out?.odds ?? 0);
+      const prevVal = Number(prev[row.key] ?? 0);
+      nextMap[row.key] = curr;
+      if (prevVal && curr && curr !== prevVal) {
+        deltas[row.key] = curr > prevVal ? 'up' : 'down';
+      }
+    });
+    prevPriceRef.current = nextMap;
+    if (Object.keys(deltas).length) {
+      setPriceDelta(deltas);
+      const t = setTimeout(() => setPriceDelta({}), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [allRows]);
+
+  // ---- Loading State (skeleton) ----
   if (loading) {
+    const cols = mode === 'props' ? ["EV %","Matchup","Player","O/U","Line","Market","Odds","Book"] : ["EV %","Match","Market","Outcome","Line","Book","Odds",""];
     return (
       <div className="odds-table-card">
-        <div className="spinner-wrap">
-          <div className="spinner" />
-          <p>Loading odds…</p>
-        </div>
+        <table className="odds-grid" aria-busy="true" aria-label="Loading odds">
+          <thead>
+            <tr>
+              {cols.map((c, i) => (
+                <th key={i}>{c}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 6 }).map((_, r) => (
+              <tr key={r} className="odds-row">
+                {cols.map((_, ci) => (
+                  <td key={ci}>
+                    <div className="skeleton" style={{ height: '14px', width: ci === 0 ? '52px' : '100%', margin: '6px 0' }} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }
@@ -320,28 +409,99 @@ export default function OddsTable({
 
   return (
     <div className="odds-table-card">
+      
       <table className="odds-grid">
         <thead>
           <tr>
-            <th className="ev-col">EV % <span role="img" aria-label="value">💡</span></th>
+            <th
+              className="ev-col sort-th"
+              role="columnheader button"
+              aria-sort={sort.key === 'ev' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+              onClick={() => setSort(s => ({ key: 'ev', dir: s.key === 'ev' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+            >
+              <span className="sort-label">EV % <span className="sort-indicator">{sort.key === 'ev' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+            </th>
             {mode === "props" ? (
               <>
-                <th>MATCHUP</th>
-                <th>PLAYER</th>
+                <th>Matchup</th>
+                <th>Player</th>
                 <th>O/U</th>
-                <th>LINE</th>
-                <th>MARKET</th>
-                <th>ODDS</th>
-                <th>BOOK</th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'line' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'line', dir: s.key === 'line' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Line <span className="sort-indicator">{sort.key === 'line' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th>Market</th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'odds' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'odds', dir: s.key === 'odds' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Odds <span className="sort-indicator">{sort.key === 'odds' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'book' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'book', dir: s.key === 'book' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Book <span className="sort-indicator">{sort.key === 'book' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
               </>
             ) : (
               <>
-                <th>Match</th>
-                <th>Market</th>
-                <th>Outcome</th>
-                <th>Line</th>
-                <th>Book</th>
-                <th>Odds</th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'match' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'match', dir: s.key === 'match' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Match <span className="sort-indicator">{sort.key === 'match' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'market' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'market', dir: s.key === 'market' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Market <span className="sort-indicator">{sort.key === 'market' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'outcome' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'outcome', dir: s.key === 'outcome' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Outcome <span className="sort-indicator">{sort.key === 'outcome' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'line' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'line', dir: s.key === 'line' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Line <span className="sort-indicator">{sort.key === 'line' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'book' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'book', dir: s.key === 'book' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Book <span className="sort-indicator">{sort.key === 'book' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th
+                  className="sort-th"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'odds' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'odds', dir: s.key === 'odds' && s.dir === 'desc' ? 'asc' : 'desc' }))}
+                >
+                  <span className="sort-label">Odds <span className="sort-indicator">{sort.key === 'odds' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
                 <th></th>
               </>
             )}
@@ -349,8 +509,9 @@ export default function OddsTable({
         </thead>
         <tbody>
           {paginatedRows.map((row, i) => {
-            const ev = getEV(row);
+            const ev = evMap.get(row.key);
             const evClass = ev && ev > 0 ? "ev-col positive" : "ev-col negative";
+            const oddsChange = priceDelta[row.key];
 
             return (
               <React.Fragment key={row.key}>
@@ -358,6 +519,9 @@ export default function OddsTable({
                   <tr
                     className={`odds-row${expandedRows[row.key] ? " expanded" : ""}`}
                     onClick={() => toggleRow(row.key)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRow(row.key); } }}
+                    tabIndex={0}
+                    aria-expanded={!!expandedRows[row.key]}
                     style={{ cursor: "pointer" }}
                   >
                     <td data-label="EV %" className={evClass}>{typeof ev === "number" ? ev.toFixed(2) + "%" : ""}</td>
@@ -370,8 +534,10 @@ export default function OddsTable({
                     <td data-label="O/U">{row.out.name}</td>
                     <td data-label="Line">{row.out.point}</td>
                     <td data-label="Market">{formatMarket(row.mkt.key)}</td>
-                    <td data-label="Odds">{formatOdds(row.out.price)}</td>
-                    <td data-label="Book">{row.bk?.title || row.out.book}</td>
+                    <td data-label="Odds" className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
+                      {formatOdds(row.out.price)} {oddsChange === 'up' ? '▲' : oddsChange === 'down' ? '▼' : ''}
+                    </td>
+                    <td data-label="Book">{cleanBookTitle(row.bk?.title || row.out.book)}</td>
                   </tr>
                 ) : (
                   <tr
@@ -396,8 +562,10 @@ export default function OddsTable({
                     <td data-label="Market">{formatMarket(row.mkt.key)}</td>
                     <td data-label="Outcome">{row.out.name}</td>
                     <td data-label="Line">{formatLine(row.out.point, row.mkt.key, mode)}</td>
-                    <td data-label="Book">{row.bk.title}</td>
-                    <td data-label="Odds">{formatOdds(row.out.price ?? row.out.odds ?? "")}</td>
+                    <td data-label="Book">{cleanBookTitle(row.bk.title)}</td>
+                    <td data-label="Odds" className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
+                      {formatOdds(row.out.price ?? row.out.odds ?? "")} {oddsChange === 'up' ? '▲' : oddsChange === 'down' ? '▼' : ''}
+                    </td>
                   </tr>
                 )}
 
@@ -408,17 +576,28 @@ export default function OddsTable({
                       <div className="mini-table-oddsjam">
                         <div className="mini-table-row">
                           {row.allBooks.map((o, oi) => {
-                            const oddsArr = row.allBooks.map(ob => Number(ob.price ?? ob.odds ?? 0));
-                            const bestOdds =
-                              oddsArr.some(x => x > 0)
-                                ? Math.max(...oddsArr.filter(x => x > 0))
-                                : Math.min(...oddsArr.filter(x => x < 0));
-                            const isBest = Number(o.price ?? o.odds ?? 0) === bestOdds;
+                            const toDec = (n) => {
+                              const v = Number(n || 0);
+                              if (!v) return 0;
+                              return v > 0 ? (v / 100) + 1 : (100 / Math.abs(v)) + 1;
+                            };
+                            const scores = row.allBooks.map(ob => toDec(ob.price ?? ob.odds));
+                            const bestScore = Math.max(...scores);
+                            const currScore = toDec(o.price ?? o.odds);
+                            const isBest = Math.abs(currScore - bestScore) < 1e-9;
                             return (
                               <div key={o._rowId || oi} className="mini-table-header-cell">
-                                <div>{o.book}</div>
+                                <div>{cleanBookTitle(o.book)}</div>
                                 <div className="mini-table-line">{o.point ?? ""}</div>
-                                <hr style={{ width: "80%", margin: "0.4em auto 0.2em auto", border: 0, borderTop: "1.5px solid #3355ff22" }} />
+                                <hr
+                                  style={{
+                                    width: "80%",
+                                    margin: "0.4em auto 0.2em auto",
+                                    border: 0,
+                                    borderTop: "1.5px solid",
+                                    borderTopColor: "color-mix(in srgb, var(--accent) 20%, transparent)",
+                                  }}
+                                />
                                 <div className={`mini-table-odds-cell${isBest ? " best-odds" : ""}`}>
                                   {formatOdds(o.price ?? o.odds ?? "")}
                                 </div>
@@ -454,7 +633,7 @@ export default function OddsTable({
               padding: "0.45em 1.2em",
               borderRadius: "8px",
               border: "none",
-              background: page === 1 ? "#aaa" : "#3355ff",
+              background: page === 1 ? "#aaa" : "var(--accent)",
               color: "#fff",
               fontWeight: 600,
               cursor: page === 1 ? "default" : "pointer",
@@ -474,7 +653,7 @@ export default function OddsTable({
                 padding: "0.45em 1.1em",
                 borderRadius: "8px",
                 border: "none",
-                background: num === page ? "#3355ff" : "#222c",
+                background: num === page ? "var(--accent)" : "#222c",
                 color: "#fff",
                 fontWeight: 600,
                 cursor: num === page ? "default" : "pointer",
@@ -495,7 +674,7 @@ export default function OddsTable({
               padding: "0.45em 1.2em",
               borderRadius: "8px",
               border: "none",
-              background: page === totalPages ? "#aaa" : "#3355ff",
+              background: page === totalPages ? "#aaa" : "var(--accent)",
               color: "#fff",
               fontWeight: 600,
               cursor: page === totalPages ? "default" : "pointer",

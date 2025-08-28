@@ -55,12 +55,13 @@ const CONCURRENCY = 8;
 
 export default function DFSMarkets() {
   const [sportList, setSportList] = useState([]);
-  const [picked, setPicked] = useState(["basketball_nba"]);
+  const [picked, setPicked] = useState(["americanfootball_nfl", "americanfootball_ncaaf"]);
   const [games, setGames] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoad] = useState(false);
   const [error, setErr] = useState(null);
   const [quota] = useState({ remain: "–", used: "–" });
+  const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
 
   const BASE_URL = process.env.REACT_APP_API_URL || "";
   const debounced = useDebounce(query, 300);
@@ -207,8 +208,20 @@ export default function DFSMarkets() {
   // ---- client-side search ----
   const filtered = useMemo(() => {
     const q = debounced.trim().toLowerCase();
-    if (!q) return games;
-    return games.filter(g =>
+    let base = games;
+    // Date filter (by local date)
+    if (selectedDate) {
+      base = base.filter(g => {
+        const d = new Date(g.commence_time);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const local = `${y}-${m}-${day}`;
+        return local === selectedDate;
+      });
+    }
+    if (!q) return base;
+    return base.filter(g =>
       (g.home_team && g.home_team.toLowerCase().includes(q)) ||
       (g.away_team && g.away_team.toLowerCase().includes(q)) ||
       (g.sport_title && g.sport_title.toLowerCase().includes(q)) ||
@@ -222,7 +235,7 @@ export default function DFSMarkets() {
         )
       )
     );
-  }, [games, debounced]);
+  }, [games, debounced, selectedDate]);
 
   // ---- UI ----
   return (
@@ -233,6 +246,13 @@ export default function DFSMarkets() {
             placeholder="Search team / league / player"
             value={query}
             onChange={e => setQuery(e.target.value)}
+          />
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={e => setSelectedDate(e.target.value)}
+            aria-label="Filter by date"
+            title="Filter by date"
           />
           <SportMultiSelect
             list={sportList}
@@ -260,7 +280,13 @@ export default function DFSMarkets() {
             </div>
           </div>
         ) : (
-          <OddsTable games={filtered} pageSize={15} mode="props" loading={false} />
+          <OddsTable
+            games={filtered}
+            pageSize={15}
+            mode="props"
+            loading={false}
+            initialSort={{ key: 'time', dir: 'asc' }}
+          />
         )}
 
         <small style={{ opacity: 0.7 }}>
