@@ -71,11 +71,10 @@ function AppRoutes() {
 }
 
 export default function App() {
-  // Initialize theme on first load
+  // Ensure Modern UI is always enabled
   React.useEffect(() => {
     try {
-      const saved = localStorage.getItem('uiTheme') || 'modern';
-      document.body.classList.toggle('theme-modern', saved === 'modern');
+      document.body.classList.add('theme-modern');
     } catch {}
   }, []);
   return <AppRoutes />;

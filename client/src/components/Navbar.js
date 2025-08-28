@@ -6,9 +6,6 @@ import styles from "./Navbar.module.css";
 export default function Navbar() {
   const location = useLocation();
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [modern, setModern] = useState(() => {
-    try { return (localStorage.getItem('uiTheme') || 'modern') === 'modern'; } catch { return true; }
-  });
 
   const isActive = (path) => location.pathname === path;
 
@@ -37,18 +34,6 @@ export default function Navbar() {
       <div className={styles.navLinks}>
         <Link to="/" className={`${styles.link} ${isActive("/") ? styles.active : ""}`}>Home</Link>
         <Link to="/sportsbooks" className={`${styles.link} ${isActive("/sportsbooks") ? styles.active : ""}`}>Sportsbooks</Link>
-        <button
-          className={styles.link}
-          style={{ cursor: 'pointer' }}
-          onClick={() => {
-            const next = !modern;
-            setModern(next);
-            try { localStorage.setItem('uiTheme', next ? 'modern' : 'classic'); } catch {}
-            document.body.classList.toggle('theme-modern', next);
-          }}
-        >
-          {modern ? 'Modern UI' : 'Classic UI'}
-        </button>
       </div>
 
       {mobileMenu && (
@@ -71,18 +56,6 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <button
-              className={`${styles.mobileLink}`}
-              onClick={() => {
-                const next = !modern;
-                setModern(next);
-                try { localStorage.setItem('uiTheme', next ? 'modern' : 'classic'); } catch {}
-                document.body.classList.toggle('theme-modern', next);
-                setMobileMenu(false);
-              }}
-            >
-              {modern ? 'Modern UI' : 'Classic UI'}
-            </button>
           </div>
         </div>
       )}
