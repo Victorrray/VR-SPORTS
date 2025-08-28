@@ -24,10 +24,12 @@
   text-decoration: none;
 }
 
-.logo {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+.logo { display: none; }
+
+.brandTitle {
+  font-family: 'Poppins', 'Inter', 'Segoe UI', Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .links {

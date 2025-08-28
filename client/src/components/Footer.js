@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styles from "./Footer.module.css";
-import logo from "../assets/logo.png";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -9,8 +8,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
-          <img src={logo} alt="OddsSightSeer" className={styles.logo} />
-          OddsSightSeer
+          <span className={styles.brandTitle}>OddsSightSeer</span>
         </Link>
 
         <nav className={styles.links} aria-label="Footer">
@@ -27,4 +25,3 @@ export default function Footer() {
     </footer>
   );
 }
-

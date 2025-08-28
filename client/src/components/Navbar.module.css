@@ -18,7 +18,7 @@
   letter-spacing: 1.5px;
   background: none;
   border: none;
-  color: #fff;
+  color: var(--text);
   text-decoration: none;
   cursor: pointer;
   padding: 0.2em 0.7em;
@@ -33,11 +33,12 @@
   color: #fff;
 }
 
-.logo {
-  width: 32px;
-  height: 32px;
-  margin-right: 10px;
-  vertical-align: middle;
+.logo { display: none; }
+
+.brandTitle {
+  font-family: 'Poppins', 'Inter', 'Segoe UI', Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 /* Nav Links (desktop) */
