@@ -258,7 +258,7 @@ export default function SportsbookMarkets() {
             </div>
           </div>
 
-          {/* Row 3: Date + Sports + Books + Live */}
+          {/* Row 3: Date + Sports + Books */}
           <div className="filters-row">
             <div className="filter-group">
               <span className="filter-label">Date</span>
@@ -290,14 +290,6 @@ export default function SportsbookMarkets() {
                 allLabel="All Books"
               />
             </div>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={showAllGames}
-                onChange={() => setShowAllGames(val => !val)}
-              />
-              Show Live Games
-            </label>
           </div>
 
           {/* Row 4: Reset + Count */}

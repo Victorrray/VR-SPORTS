@@ -112,6 +112,22 @@ function cleanBookTitle(title) {
   return String(title).replace(/\.?ag\b/gi, "").trim();
 }
 
+// Compact kickoff formatter for mobile; shows "Mon 7:30 PM" or just time if today
+function formatKickoffShort(commence) {
+  try {
+    const d = new Date(commence);
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    const opts = { hour: 'numeric', minute: '2-digit' };
+    const time = d.toLocaleTimeString([], opts).replace(':00 ', ' ');
+    if (isToday) return time;
+    const day = d.toLocaleDateString([], { weekday: 'short' });
+    return `${day} ${time}`;
+  } catch {
+    return String(commence);
+  }
+}
+
 function isLive(commence_time) {
   const start = new Date(commence_time).getTime();
   const now = Date.now();
@@ -408,9 +424,9 @@ export default function OddsTable({
   }
 
   return (
-    <div className="odds-table-card">
+    <div className="odds-table-card revamp">
       
-      <table className="odds-grid">
+      <table className="odds-grid" data-mode={mode}>
         <thead>
           <tr>
             <th
@@ -461,6 +477,12 @@ export default function OddsTable({
                   onClick={() => setSort(s => ({ key: 'match', dir: s.key === 'match' && s.dir === 'desc' ? 'asc' : 'desc' }))}
                 >
                   <span className="sort-label">Match <span className="sort-indicator">{sort.key === 'match' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
+                </th>
+                <th
+                  className="sort-th"
+                  role="columnheader"
+                >
+                  <span className="sort-label">Start</span>
                 </th>
                 <th
                   className="sort-th"
@@ -528,7 +550,7 @@ export default function OddsTable({
                     <td data-label="Matchup">
                       {row.game.home_team} vs {row.game.away_team}
                       <br />
-                      <small>{new Date(row.game.commence_time).toLocaleString()}</small>
+                      <small>{formatKickoffShort(row.game.commence_time)}</small>
                     </td>
                     <td data-label="Player">{row.out.description}</td>
                     <td data-label="O/U">{row.out.name}</td>
@@ -548,16 +570,12 @@ export default function OddsTable({
                     <td data-label="EV %" className={evClass}>{typeof ev === "number" ? ev.toFixed(2) + "%" : ""}</td>
                     <td data-label="Match">
                       {row.game.home_team} vs {row.game.away_team}
-                      <br />
+                    </td>
+                    <td data-label="Start">
                       {isLive(row.game.commence_time) && (
-                        <span style={{
-                          color: "#ff5e5e",
-                          fontWeight: "bold",
-                          fontSize: "1em",
-                          marginRight: "0.6em"
-                        }}>🔴 LIVE</span>
+                        <span style={{ color: "#ff5e5e", fontWeight: "bold", fontSize: "1em", marginRight: "0.4em" }}>🔴 LIVE</span>
                       )}
-                      <small>{new Date(row.game.commence_time).toLocaleString()}</small>
+                      <small>{formatKickoffShort(row.game.commence_time)}</small>
                     </td>
                     <td data-label="Market">{formatMarket(row.mkt.key)}</td>
                     <td data-label="Outcome">{row.out.name}</td>
@@ -566,13 +584,15 @@ export default function OddsTable({
                     <td data-label="Odds" className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
                       {formatOdds(row.out.price ?? row.out.odds ?? "")} {oddsChange === 'up' ? '▲' : oddsChange === 'down' ? '▼' : ''}
                     </td>
+                    {/* pad to match header's trailing blank column */}
+                    <td aria-hidden="true"></td>
                   </tr>
                 )}
 
                 {/* --- Mini-table: vertically stacked columns, centered --- */}
                 {expandedRows[row.key] && row.allBooks.length > 0 && (
                   <tr>
-                    <td colSpan={mode === "props" ? 8 : 9}>
+                    <td colSpan={mode === 'props' ? 8 : 9}>
                       <div className="mini-table-oddsjam">
                         <div className="mini-table-row">
                           {row.allBooks.map((o, oi) => {
@@ -587,7 +607,7 @@ export default function OddsTable({
                             const isBest = Math.abs(currScore - bestScore) < 1e-9;
                             return (
                               <div key={o._rowId || oi} className="mini-table-header-cell">
-                                <div>{cleanBookTitle(o.book)}</div>
+                                <div className="mini-book-name" title={cleanBookTitle(o.book)}>{cleanBookTitle(o.book)}</div>
                                 <div className="mini-table-line">{o.point ?? ""}</div>
                                 <hr
                                   style={{
@@ -617,15 +637,7 @@ export default function OddsTable({
 
       {/* --- PAGINATION BAR --- */}
       {totalPages > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "0.4em",
-            margin: "2em 0",
-          }}
-        >
+        <div className="pagination-bar" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.4em", margin: "2em 0" }}>
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
