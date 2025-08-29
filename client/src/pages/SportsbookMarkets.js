@@ -5,11 +5,127 @@ import useDebounce from "../hooks/useDebounce";
 
 // Which markets to show for main sportsbooks (game lines)
 const GAME_LINES = ["h2h", "spreads", "totals"];
-const MARKET_OPTIONS = [
-  { key: "h2h", title: "Moneyline" },
-  { key: "spreads", title: "Spread" },
-  { key: "totals", title: "Totals" },
-];
+// Friendly titles for markets
+const MARKET_TITLES = {
+  h2h: "Moneyline",
+  spreads: "Spread",
+  totals: "Totals",
+  spreads_alternate: "Alt Spread",
+  totals_alternate: "Alt Totals",
+  alternate_spreads: "Alt Spread",
+  alternate_totals: "Alt Totals",
+  // Period/segment
+  first_half_spreads: "1H Spread",
+  first_half_totals: "1H Totals",
+  first_half_moneyline: "1H Moneyline",
+  team_totals: "Team Totals",
+  team_totals_home: "Home Team Total",
+  team_totals_away: "Away Team Total",
+  first_quarter_spreads: "1Q Spread",
+  first_quarter_totals: "1Q Totals",
+  first_quarter_moneyline: "1Q Moneyline",
+  first_five_moneyline: "F5 Moneyline",
+  first_five_spreads: "F5 Runline",
+  first_five_totals: "F5 Totals",
+  // Soccer specific
+  draw_no_bet: "Draw No Bet",
+  double_chance: "Double Chance",
+  btts: "Both Teams To Score",
+  corners: "Corners",
+  cards: "Cards",
+  // Tennis specific (availability varies by provider)
+  set_winner: "Set Winner",
+  game_handicap: "Game Handicap",
+  set_totals: "Set Totals",
+  total_sets: "Total Sets",
+};
+// Suggested markets per sport (unioned for multi-select)
+const SPORT_MARKETS = {
+  americanfootball_nfl: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_half_moneyline","first_half_spreads","first_half_totals",
+    "team_totals","team_totals_home","team_totals_away",
+  ],
+  americanfootball_ncaaf: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_half_moneyline","first_half_spreads","first_half_totals",
+    "team_totals","team_totals_home","team_totals_away",
+  ],
+  basketball_nba: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_half_moneyline","first_half_spreads","first_half_totals",
+    "first_quarter_moneyline","first_quarter_spreads","first_quarter_totals",
+    "team_totals","team_totals_home","team_totals_away",
+  ],
+  basketball_ncaab: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_half_moneyline","first_half_spreads","first_half_totals",
+    "team_totals",
+  ],
+  baseball_mlb: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "team_totals",
+  ],
+  // Other baseball leagues
+  baseball_kbo: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "team_totals",
+  ],
+  baseball_npb: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "team_totals",
+  ],
+  baseball_cpbl: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "team_totals",
+  ],
+  icehockey_nhl: [
+    "h2h","spreads","totals",
+    "spreads_alternate","totals_alternate",
+    "team_totals",
+  ],
+  soccer_epl: [
+    "h2h","draw_no_bet","double_chance","totals","totals_alternate","btts","corners","cards",
+  ],
+  soccer_uefa_champs_league: [
+    "h2h","draw_no_bet","double_chance","totals","totals_alternate","btts","corners","cards",
+  ],
+  // Tennis (keys may vary by feed; these are common)
+  tennis_atp: [
+    "h2h","totals","set_winner","game_handicap","set_totals","total_sets",
+  ],
+  tennis_wta: [
+    "h2h","totals","set_winner","game_handicap","set_totals","total_sets",
+  ],
+  tennis_challenger: [
+    "h2h","totals","set_winner","game_handicap","set_totals",
+  ],
+  tennis_itf_men: [
+    "h2h","totals","set_winner","game_handicap",
+  ],
+  tennis_itf_women: [
+    "h2h","totals","set_winner","game_handicap",
+  ],
+  // Combat sports (availability varies by provider)
+  mma_mixed_martial_arts: [
+    "h2h",
+  ],
+  boxing_boxing: [
+    "h2h",
+  ],
+};
 // DFS apps to exclude when showing sportsbooks
 const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
 // Map API sport keys to common short names
@@ -18,19 +134,40 @@ const FRIENDLY_TITLES = {
   basketball_ncaab: "NCAAB",
   basketball_wnba: "WNBA",
   baseball_mlb: "MLB",
+  baseball_kbo: "KBO",
+  baseball_npb: "NPB",
+  baseball_cpbl: "CPBL",
   americanfootball_nfl: "NFL",
   americanfootball_ncaaf: "NCAAF",
   icehockey_nhl: "NHL",
   soccer_epl: "EPL",
   soccer_uefa_champs_league: "UCL",
+  tennis_atp: "ATP",
+  tennis_wta: "WTA",
+  tennis_challenger: "Challenger",
+  tennis_itf_men: "ITF (Men)",
+  tennis_itf_women: "ITF (Women)",
+  mma_mixed_martial_arts: "MMA",
+  boxing_boxing: "BOXING",
 };
 // Keep the sport picker short by default
 const FEATURED_SPORTS = new Set([
   "basketball_nba",
   "baseball_mlb",
+  "baseball_kbo",
+  "baseball_npb",
+  "baseball_cpbl",
   "americanfootball_nfl",
   "americanfootball_ncaaf",
   "icehockey_nhl",
+  // Include soccer + tennis so they appear in the curated list
+  "soccer_epl",
+  "soccer_uefa_champs_league",
+  "tennis_atp",
+  "tennis_wta",
+  // Combat sports
+  "mma_mixed_martial_arts",
+  "boxing_boxing",
 ]);
 
 // Friendly bookmaker titles for dropdown
@@ -128,6 +265,22 @@ const BOOK_TITLES = {
   unibet: "Unibet",
 };
 
+// Limit sportsbook universe: keep US books, Pinnacle, and US exchanges
+const ALLOWED_BOOKS = new Set([
+  // Major US books
+  'draftkings','fanduel','betmgm','caesars','bet365','pointsbetus','fanatics','fanatics_sportsbook','espnbet',
+  'betrivers','sugarhouse','unibet_us','betparx','betway','si_sportsbook','betfred','superbook','circasports',
+  'hardrockbet','wynnbet','barstool','foxbet','ballybet','windcreek',
+  // US-friendly/offshore commonly compared
+  'bovada','betonlineag','betus','mybookieag','lowvig','betanysports',
+  // Exchanges and peer-to-peer (US)
+  'betopenly','novig','prophetx','rebet',
+  // Explicitly include Pinnacle for reference pricing
+  'pinnacle',
+  // If present in feed, allow explicit US exchange key
+  'betfair_ex_us'
+].map(k => k.toLowerCase()));
+
 // Player-props helpers removed while focusing on sportsbooks only
 
 export default function SportsbookMarkets() {
@@ -143,14 +296,51 @@ export default function SportsbookMarkets() {
   const [showAllGames, setShowAllGames] = useState(false);
   const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
   const [marketKeys, setMarketKeys] = useState(["h2h","spreads","totals"]);
-  const [onlyPositive, setOnlyPositive] = useState(false);
+
+  // Compute market options based on selected sports (union)
+  const marketOptions = useMemo(() => {
+    let keys = new Set();
+    const selectedSports = picked.includes("ALL")
+      ? sportList.filter(s => s.key !== "ALL").map(s => s.key)
+      : picked;
+    if (!selectedSports || selectedSports.length === 0) {
+      GAME_LINES.forEach(k => keys.add(k));
+    } else {
+      selectedSports.forEach(sk => {
+        (SPORT_MARKETS[sk] || GAME_LINES).forEach(k => keys.add(k));
+      });
+    }
+    return Array.from(keys).map(k => ({ key: k, title: MARKET_TITLES[k] || k }));
+  }, [picked, sportList]);
+
+  // Keep selected markets within available options for the sport(s)
+  useEffect(() => {
+    const avail = new Set(marketOptions.map(o => o.key));
+    const sel = marketKeys.filter(k => avail.has(k));
+    if (sel.length !== marketKeys.length) {
+      // If current selection becomes invalid/empty, default to all available markets
+      setMarketKeys(sel.length ? sel : Array.from(avail));
+    }
+    // eslint-disable-next-line
+  }, [marketOptions]);
+
+  // When sports selection changes, auto-select all markets available for those sports
+  useEffect(() => {
+    const allForSports = marketOptions.map(o => o.key);
+    setMarketKeys(allForSports);
+    // eslint-disable-next-line
+  }, [picked]);
   const [minEV, setMinEV] = useState("");
   const [refreshTick, setRefreshTick] = useState(0);
+  const availableMarkets = useMemo(() => {
+    const set = new Set();
+    games.slice(0, 10).forEach(g => (g.bookmakers || []).forEach(bk => (bk.markets || []).forEach(m => set.add(m.key))));
+    return Array.from(set).sort();
+  }, [games]);
 
   const resetFilters = () => {
     setSelectedDate("");
     setMarketKeys(["h2h", "spreads", "totals"]);
-    setOnlyPositive(false);
     setMinEV("");
   };
 
@@ -171,11 +361,28 @@ export default function SportsbookMarkets() {
         const activeOnly = arr.filter(s => s && s.active);
         const curated = activeOnly.filter(s => FEATURED_SPORTS.has(s.key));
         const listToUse = curated.length ? curated : activeOnly;
-        const mapped = listToUse
+        let mapped = listToUse
           .map(s => ({
             ...s,
             title: FRIENDLY_TITLES[s.key] || s.title || s.key,
           }));
+        // Ensure certain soccer/tennis keys are visible even if not returned as active
+        const ENSURE = [
+          'soccer_epl','soccer_uefa_champs_league',
+          'tennis_atp','tennis_wta',
+          // Baseball international leagues (show even if not active)
+          'baseball_kbo','baseball_npb','baseball_cpbl',
+          // Combat sports
+          'mma_mixed_martial_arts','boxing_boxing'
+        ];
+        const present = new Set(mapped.map(s => s.key));
+        ENSURE.forEach(k => {
+          if (!present.has(k)) {
+            mapped.push({ key: k, title: FRIENDLY_TITLES[k] || k, active: false });
+          }
+        });
+        // Sort by title for a tidy picker
+        mapped = mapped.sort((a,b) => String(a.title).localeCompare(String(b.title)));
         const allSports = [{ key: "ALL", title: "All Sports" }, ...mapped];
         setSportList(allSports);
       } catch (_) {
@@ -202,11 +409,20 @@ export default function SportsbookMarkets() {
         }
 
         {
+          const normalizeMarkets = (arr) => {
+            const CANON = { alternate_spreads: 'spreads_alternate', alternate_totals: 'totals_alternate' };
+            const out = new Set();
+            (arr || []).forEach(k => {
+              const kk = (CANON[k] || k);
+              out.add(kk);
+            });
+            return Array.from(out);
+          };
           const calls = keys.map(k => {
             const selectedMarkets = (marketKeys && marketKeys.length) ? marketKeys : GAME_LINES;
-            const marketsParam = selectedMarkets.join(",");
-            // Include us2 and us_ex (US exchanges) regions to broaden bookmaker coverage
-            return fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,us2,us_ex,uk,eu,au&markets=${marketsParam}&includeBetLimits=true`)
+            const marketsParam = normalizeMarkets(selectedMarkets).join(",");
+            // Restrict to US and US exchanges; include us2 for broader US coverage
+            return fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,us2,us_ex&markets=${marketsParam}&includeBetLimits=true`)
               .then(async r => {
                 if (r.ok && quota.remain === "–") {
                   setQuota({
@@ -223,7 +439,9 @@ export default function SportsbookMarkets() {
           // Remove DFS apps (keep all other bookmakers across regions)
           const filteredGames = gamesRaw.map(g => ({
             ...g,
-            bookmakers: (g.bookmakers || []).filter(bk => !DFS_KEYS.includes((bk.key || "").toLowerCase())),
+            bookmakers: (g.bookmakers || [])
+              .filter(bk => !DFS_KEYS.includes((bk.key || "").toLowerCase()))
+              .filter(bk => ALLOWED_BOOKS.has((bk.key || '').toLowerCase())),
           }))
           // Only include games with at least one valid sportsbook
           .filter(g => Array.isArray(g.bookmakers) && g.bookmakers.length > 0);
@@ -310,49 +528,39 @@ export default function SportsbookMarkets() {
     <main className="page-wrap">
       <div className="market-container">
         <div className="filters-mobile filters-two-line">
-          {/* Row 1: Search + EV */}
+          {/* Row 1: Search + Date */}
           <div className="filters-row two-line-row">
-            <div className="filter-group search-ev">
+            <div className="filter-group search-ev" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <input
                 placeholder={"Search team / league"}
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 style={{ minWidth: 210 }}
               />
-              <div className="ev-inline ev-group">
-                <label className="filter-checkbox" style={{ marginRight: 8 }}>
-                  <input
-                    type="checkbox"
-                    checked={onlyPositive}
-                    onChange={() => setOnlyPositive(v => !v)}
-                  />
-                  Only +EV
-                </label>
+              <div className="filter-group">
+                <span className="filter-label">Date</span>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  aria-label="Filter by date"
+                  title="Filter by date"
+                />
               </div>
             </div>
           </div>
 
-          {/* Row 2: Date + Markets + Sports + Books */}
+          {/* Row 2: Markets + Sports + Books */}
           <div className="filters-row two-line-row">
-            <div className="filter-group">
-              <span className="filter-label">Date</span>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                aria-label="Filter by date"
-                title="Filter by date"
-              />
-            </div>
             <div className="filter-group" style={{ minWidth: 200 }}>
               <span className="filter-label">Markets</span>
-              <SportMultiSelect
-                list={MARKET_OPTIONS}
-                selected={marketKeys}
-                onChange={setMarketKeys}
-                placeholderText="Choose markets…"
-                allLabel="All Markets"
-              />
+            <SportMultiSelect
+              list={marketOptions}
+              selected={marketKeys}
+              onChange={setMarketKeys}
+              placeholderText="Choose markets…"
+              allLabel="All Markets"
+            />
             </div>
             <div className="filter-group" style={{ minWidth: 220 }}>
               <span className="filter-label">Sports</span>
@@ -393,9 +601,9 @@ export default function SportsbookMarkets() {
           mode={"game"}
           bookFilter={selectedBooks}
           marketFilter={marketKeys}
-          evOnlyPositive={onlyPositive}
           evMin={minEV === '' ? null : Number(minEV)}
           loading={loading}
+          allCaps={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('caps') === '1'}
         />
       </div>
     </main>

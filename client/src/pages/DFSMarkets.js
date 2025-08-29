@@ -137,7 +137,13 @@ export default function DFSMarkets() {
         }
         const list = await r.json();
         const arr = Array.isArray(list) ? list : [];
-        const all = [{ key: "ALL", title: "All Sports" }, ...arr.filter(s => s && s.active)];
+        const normalized = arr
+          .filter(s => s && s.active)
+          .map(s => ({
+            ...s,
+            title: (s.key === 'boxing_boxing') ? 'BOXING' : (s.title || s.key),
+          }));
+        const all = [{ key: "ALL", title: "All Sports" }, ...normalized];
         setSportList(all);
       } catch (e) {
         setSportList([{ key: "ALL", title: "All Sports" }]);
@@ -286,6 +292,7 @@ export default function DFSMarkets() {
             mode="props"
             loading={false}
             initialSort={{ key: 'time', dir: 'asc' }}
+            allCaps={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('caps') === '1'}
           />
         )}
 

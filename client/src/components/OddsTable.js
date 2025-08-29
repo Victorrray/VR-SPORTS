@@ -99,11 +99,47 @@ function formatLine(line, marketKey, mode = "game") {
   return n > 0 ? `+${n}` : `${n}`;
 }
 
-function formatMarket(key) {
-  if (key === "h2h") return "MONEYLINE";
-  if (key === "spreads") return "SPREAD";
-  if (key === "totals") return "TOTALS";
+function formatMarket(key = "") {
+  const k = String(key || "").toLowerCase();
+  if (k === "h2h") return "MONEYLINE";
+  if (k === "spreads") return "SPREAD";
+  if (k === "totals") return "TOTALS";
+  if (k.includes("alternate") && k.includes("spread")) return "ALT SPREAD";
+  if (k.includes("alternate") && k.includes("total")) return "ALT TOTALS";
+  if (k === "draw_no_bet") return "DRAW NO BET";
+  if (k === "double_chance") return "DOUBLE CHANCE";
+  if (k === "btts") return "BOTH TEAMS TO SCORE";
+  if (k === "corners") return "CORNERS";
+  if (k === "cards") return "CARDS";
+  if (k === "first_half_moneyline") return "1H MONEYLINE";
+  if (k === "first_half_spreads") return "1H SPREAD";
+  if (k === "first_half_totals") return "1H TOTALS";
+  if (k === "first_quarter_moneyline") return "1Q MONEYLINE";
+  if (k === "first_quarter_spreads") return "1Q SPREAD";
+  if (k === "first_quarter_totals") return "1Q TOTALS";
+  if (k === "first_five_moneyline") return "F5 MONEYLINE";
+  if (k === "first_five_spreads") return "F5 RUNLINE";
+  if (k === "first_five_totals") return "F5 TOTALS";
+  if (k === "team_totals") return "TEAM TOTALS";
+  if (k === "team_totals_home") return "HOME TEAM TOTAL";
+  if (k === "team_totals_away") return "AWAY TEAM TOTAL";
+  if (k === "set_winner") return "SET WINNER";
+  if (k === "game_handicap") return "GAME HANDICAP";
+  if (k === "set_totals") return "SET TOTALS";
+  if (k === "total_sets") return "TOTAL SETS";
   return key.replace("player_", "").toUpperCase();
+}
+
+// Compact market type for the main table Type column
+function marketTypeLabel(key = "") {
+  const k = String(key || "").toLowerCase();
+  if (k === 'h2h' || k.endsWith('moneyline')) return 'ML';
+  if (k.includes('spread')) return 'Spread';
+  if (k.includes('total')) return 'Totals';
+  if (k === 'draw_no_bet') return 'DNB';
+  if (k === 'double_chance') return 'Double Chance';
+  if (k === 'btts') return 'BTTS';
+  return formatMarket(key);
 }
 
 // Clean bookmaker titles for display (e.g., remove ".ag")
@@ -145,7 +181,8 @@ function formatKickoffShort(commence) {
     const d = new Date(commence);
     const now = new Date();
     const isToday = d.toDateString() === now.toDateString();
-    const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(':00 ', ' ');
+  // Always show minutes, even when :00 (e.g., 4:00 PM)
+  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     if (isToday) return time;
     const diffMs = d.getTime() - now.getTime();
     const withinWeek = diffMs >= 0 && diffMs <= 7 * 24 * 60 * 60 * 1000;
@@ -188,6 +225,7 @@ export default function OddsTable({
   marketFilter = [], // array of market keys to include (e.g., ['h2h','spreads','totals'])
   evOnlyPositive = false, // if true, only show rows with EV > 0
   evMin = null, // if number, minimum EV percent threshold
+  allCaps = false, // if true, render all table text uppercase for preview
 }) {
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
@@ -212,7 +250,10 @@ export default function OddsTable({
               seen.add(playerKey);
               let best = { ...out, price: Number.MIN_SAFE_INTEGER, book: "", bookmaker: bk, market: mkt };
               games.forEach(g =>
-                g.bookmakers?.forEach(b =>
+                g.bookmakers?.forEach(b => {
+                  const bKey = (b.key || "").toLowerCase();
+                  // Respect selected books, if provided
+                  if (bookFilter.length && !bookFilter.includes(bKey)) return;
                   b.markets?.filter(m => m.key === mkt.key).forEach(m =>
                     m.outcomes?.filter(o =>
                       o.name === "Over" &&
@@ -220,11 +261,12 @@ export default function OddsTable({
                       String(o.point ?? "") === String(out.point ?? "")
                     ).forEach(o => {
                       if (Number(o.price ?? o.odds ?? 0) > Number(best.price ?? best.odds ?? 0)) {
-                        best = { ...o, book: b.title, bookmaker: b, market: mkt };
+                        // Ensure market/bookmaker reference matches the winning offer
+                        best = { ...o, book: b.title, bookmaker: b, market: m };
                       }
                     })
-                  )
-                )
+                  );
+                })
               );
               const allBooksForRow = games.flatMap((g, gi) =>
                 g.bookmakers?.flatMap((b, bi) =>
@@ -236,6 +278,8 @@ export default function OddsTable({
                     ).map((o, oi) => ({
                       ...o,
                       book: b.title,
+                      bookmaker: b,
+                      market: m,
                       _rowId: `${g.id}:${m.key}:${o.description || o.name}:${o.point}:${gi}:${bi}:${mi}:${oi}`,
                     }))
                   )
@@ -263,7 +307,9 @@ export default function OddsTable({
   function getRowsGame() {
     const rows = [];
     games?.forEach((game) => {
-      const keys = ["h2h", "spreads", "totals"].filter(k => !marketFilter.length || marketFilter.includes(k));
+      const baseKeys = ["h2h", "spreads", "totals"];
+      const keys = (marketFilter && marketFilter.length) ? marketFilter : baseKeys;
+
       keys.forEach((mktKey) => {
         const allMarketOutcomes = [];
         game.bookmakers?.forEach(bk => {
@@ -280,49 +326,53 @@ export default function OddsTable({
           }
         });
 
-        if (allMarketOutcomes.length) {
-          // Narrow candidates to selected books if provided
-          const candidates = allMarketOutcomes.filter(o =>
-            !bookFilter.length || bookFilter.includes((o.bookmaker?.key || "").toLowerCase())
-          );
+        if (!allMarketOutcomes.length) return;
 
-          if (!candidates.length) return; // no rows for this market if selected books don't offer it
+        // Narrow candidates to selected books if provided
+        const candidates = allMarketOutcomes.filter(o =>
+          !bookFilter.length || bookFilter.includes((o.bookmaker?.key || "").toLowerCase())
+        );
+        if (!candidates.length) return;
 
-          let bestOutcome;
-          if (mktKey === "h2h") {
-            bestOutcome = candidates
-              .filter(o => o.name === game.home_team)
-              .sort((a, b) => Number(b.price ?? b.odds ?? 0) - Number(a.price ?? a.odds ?? 0))[0]
-              || candidates[0];
-          } else if (mktKey === "spreads" || mktKey === "totals") {
-            bestOutcome = candidates
-              .filter(o => o.name === "Over")
-              .sort((a, b) => Number(b.price ?? b.odds ?? 0) - Number(a.price ?? a.odds ?? 0))[0]
-              || candidates[0];
-          }
-
-          if (bestOutcome) {
+        if (mktKey === 'h2h') {
+          // Create a row for each side (home/away), later we will keep the higher EV per game
+          const sides = [game.home_team, game.away_team].filter(Boolean);
+          sides.forEach(side => {
+            const sideOffers = candidates.filter(o => (o.name === side));
+            if (!sideOffers.length) return;
+            const bestOffer = sideOffers.slice().sort((a, b) => Number(b.price ?? b.odds ?? 0) - Number(a.price ?? a.odds ?? 0))[0];
             const allBooksForRow = allMarketOutcomes
-              .filter(o =>
-                (o.name === bestOutcome.name || !o.name) &&
-                (String(o.point ?? "") === String(bestOutcome.point ?? ""))
-              )
-              .map((o, i) => ({
-                ...o,
-                book: o.book,
-                _rowId: `${game.id}:${mktKey}:${o.name}:${o.point}:${i}`,
-              }));
-
-            const key = `${game.id}:${mktKey}:${bestOutcome.name}:${bestOutcome.point}`;
-            rows.push({
-              key,
-              game,
-              mkt: bestOutcome.market,
-              bk: bestOutcome.bookmaker,
-              out: bestOutcome,
-              allBooks: allBooksForRow,
+              .filter(o => (o.name === side || !o.name))
+              .map((o, i) => ({ ...o, book: o.book, _rowId: `${game.id}:${mktKey}:${o.name || ''}:${o.point || ''}:${i}` }));
+            const key = `${game.id}:${mktKey}:${side}:${bestOffer.point || ''}`;
+            rows.push({ key, game, mkt: bestOffer.market, bk: bestOffer.bookmaker, out: bestOffer, allBooks: allBooksForRow });
+          });
+        } else {
+          // For spreads/totals (and alternates): for each point, create one row per selection (e.g., Over/Under or each team)
+          const byPoint = new Map();
+          candidates.forEach(o => {
+            const p = String(o.point ?? '');
+            if (!byPoint.has(p)) byPoint.set(p, []);
+            byPoint.get(p).push(o);
+          });
+          byPoint.forEach((list, p) => {
+            // Group by selection name at this point
+            const byName = new Map();
+            list.forEach(o => {
+              const nm = o.name || '';
+              if (!byName.has(nm)) byName.set(nm, []);
+              byName.get(nm).push(o);
             });
-          }
+            byName.forEach((offers, nm) => {
+              if (!offers.length) return;
+              const bestOffer = offers.slice().sort((a, b) => Number(b.price ?? b.odds ?? 0) - Number(a.price ?? a.odds ?? 0))[0];
+              const allBooksForRow = allMarketOutcomes
+                .filter(o => String(o.point ?? '') === p && (o.name === nm || !o.name))
+                .map((o, i) => ({ ...o, book: o.book, _rowId: `${game.id}:${mktKey}:${o.name || ''}:${p}:${i}` }));
+              const key = `${game.id}:${mktKey}:${nm}:${p}`;
+              rows.push({ key, game, mkt: bestOffer.market, bk: bestOffer.bookmaker, out: bestOffer, allBooks: allBooksForRow });
+            });
+          });
         }
       });
     });
@@ -389,6 +439,31 @@ export default function OddsTable({
         return true;
       });
     }
+    // Keep only the line with the higher EV per (game, market, point) group
+    const bestByGroup = new Map();
+    const groupKey = (r) => {
+      const mk = String(r?.mkt?.key || '').toLowerCase();
+      const rawPt = r?.out?.point;
+      // For spreads, group by absolute point so +7.5 and -7.5 are considered one bucket
+      let ptKey;
+      if (mk.includes('spread')) {
+        const n = Number(rawPt);
+        ptKey = Number.isFinite(n) ? Math.abs(n).toString() : String(rawPt ?? '');
+      } else {
+        ptKey = String(rawPt ?? '');
+      }
+      // Group h2h by game+market; others by game+market+normalizedPoint
+      return mk === 'h2h' ? `${r.game.id}:${mk}` : `${r.game.id}:${mk}:${ptKey}`;
+    };
+    rows.forEach(r => {
+      const gk = groupKey(r);
+      const ev = evMap.get(r.key) ?? -999;
+      const current = bestByGroup.get(gk);
+      if (!current || ev > current.ev) {
+        bestByGroup.set(gk, { row: r, ev });
+      }
+    });
+    rows = Array.from(bestByGroup.values()).map(v => v.row);
     const sorted = rows.slice().sort((a, b) => (sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b)));
     return sorted;
   }, [allRows, evOnlyPositive, evMin, sort.dir, sorter, evMap]);
@@ -432,7 +507,7 @@ export default function OddsTable({
   if (loading) {
     const cols = mode === 'props'
       ? ["EV %","Matchup","Player","O/U","Line","Market","Odds","Book"]
-      : ["EV %","Sport","Match","Start","Selection","Line","Book","Odds",""];
+      : ["EV %","Sport","Match","Start","Type","Team","Line","Book","Odds",""];
     return (
       <div className="odds-table-card">
         <table className="odds-grid" aria-busy="true" aria-label="Loading odds">
@@ -470,7 +545,7 @@ export default function OddsTable({
   }
 
   return (
-    <div className="odds-table-card revamp">
+    <div className={`odds-table-card revamp${allCaps ? ' all-caps' : ''}`}>
       
       <table className="odds-grid" data-mode={mode}>
         <thead>
@@ -532,11 +607,14 @@ export default function OddsTable({
                 </th>
                 <th
                   className="sort-th"
-                  role="columnheader"
+                  role="columnheader button"
+                  aria-sort={sort.key === 'time' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                  onClick={() => setSort(s => ({ key: 'time', dir: s.key === 'time' && s.dir === 'desc' ? 'asc' : 'desc' }))}
                 >
-                  <span className="sort-label">Start</span>
+                  <span className="sort-label">Start <span className="sort-indicator">{sort.key === 'time' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
                 </th>
-                <th><span className="sort-label">Selection</span></th>
+                <th><span className="sort-label">Type</span></th>
+                <th><span className="sort-label">Team</span></th>
                 <th
                   className="sort-th"
                   role="columnheader button"
@@ -615,12 +693,13 @@ export default function OddsTable({
                       )}
                       <small>{formatKickoffShort(row.game.commence_time)}</small>
                     </td>
-                    <td data-label="Selection">
-                      {row.mkt.key === 'h2h' ? `${shortTeam(row.out.name, row.game.sport_key)} ML` :
-                       row.mkt.key === 'spreads' ? shortTeam(row.out.name, row.game.sport_key) :
+                    <td data-label="Type">{marketTypeLabel(row.mkt.key)}</td>
+                    <td data-label="Team">
+                      {(row.mkt.key || '') === 'h2h' ? shortTeam(row.out.name, row.game.sport_key) :
+                       (row.mkt.key || '').includes('spread') ? shortTeam(row.out.name, row.game.sport_key) :
                        (row.out.name || '')}
                     </td>
-                    <td data-label="Line">{row.mkt.key === 'h2h' ? '' : formatLine(row.out.point, row.mkt.key, mode)}</td>
+                    <td data-label="Line">{(row.mkt.key || '') === 'h2h' ? '' : formatLine(row.out.point, row.mkt.key, mode)}</td>
                     <td data-label="Book">{cleanBookTitle(row.bk.title)}</td>
                     <td data-label="Odds" className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
                       {formatOdds(row.out.price ?? row.out.odds ?? "")} {oddsChange === 'up' ? '▲' : oddsChange === 'down' ? '▼' : ''}
@@ -633,38 +712,61 @@ export default function OddsTable({
                 {/* --- Mini-table: vertically stacked columns, centered --- */}
                 {expandedRows[row.key] && row.allBooks.length > 0 && (
                   <tr>
-                    <td colSpan={mode === 'props' ? 8 : 9}>
+                    <td colSpan={mode === 'props' ? 8 : 10}>
                       <div className="mini-table-oddsjam">
                         <div className="mini-table-row">
-                          {row.allBooks.map((o, oi) => {
+                          {(() => {
                             const toDec = (n) => {
                               const v = Number(n || 0);
                               if (!v) return 0;
                               return v > 0 ? (v / 100) + 1 : (100 / Math.abs(v)) + 1;
                             };
-                            const scores = row.allBooks.map(ob => toDec(ob.price ?? ob.odds));
-                            const bestScore = Math.max(...scores);
-                            const currScore = toDec(o.price ?? o.odds);
-                            const isBest = Math.abs(currScore - bestScore) < 1e-9;
-                            return (
-                              <div key={o._rowId || oi} className="mini-table-header-cell">
-                                <div className="mini-book-name" title={cleanBookTitle(o.book)}>{cleanBookTitle(o.book)}</div>
-                                <div className="mini-table-line">{o.point ?? ""}</div>
-                                <hr
-                                  style={{
-                                    width: "80%",
-                                    margin: "0.4em auto 0.2em auto",
-                                    border: 0,
-                                    borderTop: "1.5px solid",
-                                    borderTopColor: "color-mix(in srgb, var(--accent) 20%, transparent)",
-                                  }}
-                                />
-                                <div className={`mini-table-odds-cell${isBest ? " best-odds" : ""}`}>
-                                  {formatOdds(o.price ?? o.odds ?? "")}
+                            const MAX_COMPARE = 9; // best + up to 8 others
+                            const allowed = (bookFilter && bookFilter.length)
+                              ? new Set(bookFilter.map(k => String(k).toLowerCase()))
+                              : null;
+                            // Filter to selected books if any
+                            const eligible = row.allBooks.filter(ob => {
+                              const key = String(ob?.bookmaker?.key || "").toLowerCase();
+                              return !allowed || allowed.has(key);
+                            });
+                            const pool = eligible.length ? eligible : row.allBooks;
+                            // Unique by bookmaker key (defensive)
+                            const seen = new Set();
+                            const unique = [];
+                            pool.forEach(ob => {
+                              const k = String(ob?.bookmaker?.key || ob.book || "").toLowerCase();
+                              if (!seen.has(k)) { seen.add(k); unique.push(ob); }
+                            });
+                            // Sort by best price (decimal odds desc)
+                            const sorted = unique.slice().sort((a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds));
+                            const limited = sorted.slice(0, MAX_COMPARE);
+                            const bestScore = limited.length
+                              ? Math.max(...limited.map(ob => toDec(ob.price ?? ob.odds)))
+                              : -Infinity;
+                            return limited.map((o, oi) => {
+                              const currScore = toDec(o.price ?? o.odds);
+                              const isBest = Math.abs(currScore - bestScore) < 1e-9;
+                              return (
+                                <div key={o._rowId || oi} className="mini-table-header-cell">
+                                  <div className="mini-book-name" title={cleanBookTitle(o.book)}>{cleanBookTitle(o.book)}</div>
+                                  <div className="mini-table-line">{o.point ?? ""}</div>
+                                  <hr
+                                    style={{
+                                      width: "80%",
+                                      margin: "0.4em auto 0.2em auto",
+                                      border: 0,
+                                      borderTop: "1.5px solid",
+                                      borderTopColor: "color-mix(in srgb, var(--accent) 20%, transparent)",
+                                    }}
+                                  />
+                                  <div className={`mini-table-odds-cell${isBest ? " best-odds" : ""}`}>
+                                    {formatOdds(o.price ?? o.odds ?? "")}
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            });
+                          })()}
                         </div>
                       </div>
                     </td>

@@ -45,6 +45,9 @@ body,
 .odds-table-card.revamp .ev-col.positive { color: var(--success); }
 .odds-table-card.revamp .ev-col.negative { color: var(--danger); }
 
+/* Preview mode: render all table text in caps */
+.odds-table-card.revamp.all-caps .odds-grid { text-transform: uppercase; }
+
 /* Subtle rounding on first/last td heightened in revamp */
 .odds-table-card.revamp .odds-grid tbody tr td:first-child { border-top-left-radius: 14px; border-bottom-left-radius: 14px; }
 .odds-table-card.revamp .odds-grid tbody tr td:last-child { border-top-right-radius: 14px; border-bottom-right-radius: 14px; }
