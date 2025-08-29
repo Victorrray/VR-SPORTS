@@ -31,7 +31,7 @@
   transition: background 0.12s;
   display: flex;
   align-items: center;
-  gap: 0.4em;
+  gap: 0.55em;
 }
 .brandBtn:hover {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
@@ -44,6 +44,14 @@
   font-family: 'Poppins', 'Inter', 'Segoe UI', Arial, sans-serif;
   font-weight: 800;
   letter-spacing: 0.5px;
+}
+
+.brandLogo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: inline-block;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
 }
 
 /* Nav Links (desktop) */
@@ -152,9 +160,10 @@
   .centerWrap {
     display: none !important;
   }
-  .brandBtn {
-    display: none !important;
-  }
+  /* Show logo on mobile (hide brand text to save space) */
+  .brandBtn { display: inline-flex !important; padding-left: 0; }
+  .brandTitle { display: none; }
+  .brandLogo { width: 28px; height: 28px; }
 }
 
 /* --- MOBILE OVERLAY MENU --- */

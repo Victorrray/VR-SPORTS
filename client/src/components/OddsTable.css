@@ -72,7 +72,7 @@ body,
 .odds-grid tbody tr td:last-child { padding-right: 0.9em; }
 
 /* Recreate vertical row gaps without using border-spacing */
-.odds-grid tbody tr + tr td { border-top: 0.35em solid transparent; }
+.odds-grid tbody tr + tr td { border-top: 0.7em solid transparent; }
 .odds-grid tbody tr td { background-clip: padding-box; }
 
 .odds-grid th {
@@ -328,8 +328,7 @@ body,
 
 /* Ultra-compact on small phones: hide less critical columns */
 @media (max-width: 560px) {
-  /* Keep Market visible on mobile in both modes */
-  /* Game mode: with Start column inserted, hide Book (7) and trailing empty (9) */
+  /* Keep important columns; hide Book (7) and trailing empty (9) in game mode */
   .odds-grid[data-mode="game"] th:nth-child(7), .odds-grid[data-mode="game"] td:nth-child(7) { display: none; }
   .odds-grid[data-mode="game"] th:nth-child(9), .odds-grid[data-mode="game"] td:nth-child(9) { display: none; }
   /* Props mode: hide Book (8) only; keep Market (6) */
@@ -663,6 +662,13 @@ a:focus {
   margin-left: 0;
   color: #bbcbff;
   font-weight: 600;
+}
+
+.filters-available {
+  margin-left: 8px;
+  color: #9db8ff;
+  font-weight: 500;
+  opacity: 0.9;
 }
 
 /* Mobile responsiveness */

@@ -55,9 +55,11 @@ app.get("/api/odds-data", async (req, res) => {
     const regions = req.query.regions || "us"; // allow override
     const markets = req.query.markets || "h2h,spreads,totals";
     const oddsFormat = req.query.oddsFormat || "american";
+    const includeBetLimits = req.query.includeBetLimits; // passthrough for exchanges like BetOpenly
 
     const url = `https://api.the-odds-api.com/v4/sports/${sport}/odds` +
-      `?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
+      `?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}` +
+      (includeBetLimits ? `&includeBetLimits=${encodeURIComponent(includeBetLimits)}` : "");
 
     const r = await axios.get(url);
     res.json(r.data);

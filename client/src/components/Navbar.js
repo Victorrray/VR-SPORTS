@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import styles from "./Navbar.module.css";
+import brandLogo from "../assets/logo.png"; // replace this file with your supplied logo if desired
 
 export default function Navbar() {
   const location = useLocation();
@@ -29,6 +30,7 @@ export default function Navbar() {
 
       <div className={styles.navLeft}>
         <Link to="/" className={styles.brandBtn}>
+          <img src={brandLogo} alt="OddsSightSeer" className={styles.brandLogo} />
           <span className={styles.brandTitle}>OddsSightSeer</span>
         </Link>
       </div>

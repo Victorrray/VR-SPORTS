@@ -52,6 +52,75 @@ const BOOK_TITLES = {
   wynnbet: "WynnBET",
   barstool: "Barstool",
   foxbet: "FOX Bet",
+  fliff: "Fliff",
+  fliff_sportsbook: "Fliff",
+  ballybet: "Bally Bet",
+  betanysports: "BetAnySports",
+  rebet: "ReBet",
+  windcreek: "Wind Creek (Betfred PA)",
+  betopenly: "BetOpenly",
+  novig: "Novig",
+  prophetx: "ProphetX",
+  pinnacle: "Pinnacle",
+  // --- Additional US (us) ---
+  betonlineag: "BetOnline.ag",
+  betus: "BetUS",
+  bovada: "Bovada",
+  williamhill_us: "Caesars",
+  lowvig: "LowVig.ag",
+  mybookieag: "MyBookie.ag",
+  // --- UK (uk) ---
+  sport888: "888sport",
+  betfair_ex_uk: "Betfair Exchange (UK)",
+  betfair_sb_uk: "Betfair Sportsbook (UK)",
+  betvictor: "BetVictor",
+  boylesports: "BoyleSports",
+  casumo: "Casumo",
+  coral: "Coral",
+  grosvenor: "Grosvenor",
+  ladbrokes_uk: "Ladbrokes",
+  leovegas: "LeoVegas",
+  livescorebet: "LiveScore Bet",
+  matchbook: "Matchbook",
+  paddypower: "Paddy Power",
+  skybet: "Sky Bet",
+  smarkets: "Smarkets",
+  unibet_uk: "Unibet (UK)",
+  virginbet: "Virgin Bet",
+  williamhill: "William Hill",
+  // --- EU (eu) ---
+  onexbet: "1xBet",
+  betclic_fr: "Betclic (FR)",
+  betfair_ex_eu: "Betfair Exchange (EU)",
+  betsson: "Betsson",
+  coolbet: "Coolbet",
+  everygame: "Everygame",
+  gtbets: "GTBets",
+  marathonbet: "Marathon Bet",
+  nordicbet: "NordicBet",
+  parionssport_fr: "Parions Sport (FR)",
+  suprabets: "Suprabets",
+  tipico_de: "Tipico (DE)",
+  unibet_fr: "Unibet (FR)",
+  unibet_it: "Unibet (IT)",
+  unibet_nl: "Unibet (NL)",
+  winamax_de: "Winamax (DE)",
+  winamax_fr: "Winamax (FR)",
+  // --- AU (au) ---
+  betfair_ex_au: "Betfair Exchange (AU)",
+  betr_au: "Betr (AU)",
+  betright: "Bet Right",
+  bet365_au: "Bet365 AU",
+  boombet: "BoomBet",
+  dabble_au: "Dabble AU",
+  ladbrokes_au: "Ladbrokes AU",
+  neds: "Neds",
+  playup: "PlayUp",
+  pointsbetau: "PointsBet AU",
+  sportsbet: "SportsBet",
+  tab: "TAB",
+  tabtouch: "TABtouch",
+  unibet: "Unibet",
 };
 
 // Player-props helpers removed while focusing on sportsbooks only
@@ -128,7 +197,8 @@ export default function SportsbookMarkets() {
 
         {
           const calls = keys.map(k =>
-            fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,uk,eu,au&markets=${GAME_LINES.join(",")}`)
+            // Include us2 and us_ex (US exchanges) regions to broaden bookmaker coverage
+            fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,us2,us_ex,uk,eu,au&markets=${GAME_LINES.join(",")}&includeBetLimits=true`)
               .then(async r => {
                 if (r.ok && quota.remain === "–") {
                   setQuota({
@@ -160,11 +230,27 @@ export default function SportsbookMarkets() {
             if (!key) return;
             if (!seen.has(key)) seen.set(key, { key, title: cleanBookTitle(bk.title || BOOK_TITLES[key] || key) });
           }));
+          // Build list using only books actually present in the feed
           const booksArr = Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
+          if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+            try {
+              const keys = Array.from(seen.keys());
+              // eslint-disable-next-line no-console
+              console.debug('[Sportsbooks] bookmakers in feed:', keys);
+            } catch {}
+          }
           setBookList(booksArr);
-          // Default: select all books once on first load
-          if (booksArr.length && selectedBooks.length === 0) {
-            setSelectedBooks(booksArr.map(b => b.key));
+          // Sync current selection to available set (delist books with no responses)
+          const availableKeys = new Set(booksArr.map(b => b.key));
+          if (booksArr.length) {
+            if (selectedBooks.length === 0) {
+              setSelectedBooks(booksArr.map(b => b.key));
+            } else {
+              const intersect = selectedBooks.filter(k => availableKeys.has(k));
+              if (intersect.length !== selectedBooks.length) {
+                setSelectedBooks(intersect.length ? intersect : booksArr.map(b => b.key));
+              }
+            }
           }
         }
       } catch (e) {

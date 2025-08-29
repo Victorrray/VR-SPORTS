@@ -112,17 +112,61 @@ function cleanBookTitle(title) {
   return String(title).replace(/\.?ag\b/gi, "").trim();
 }
 
+// Team nickname helper with small mapping and heuristics
+const TEAM_NICKNAMES = {
+  americanfootball_ncaaf: {
+    'St. Francis (PA) Red Flash': 'Red Flash',
+  },
+};
+
+function shortTeam(name = "", sportKey = "") {
+  const n = String(name).trim();
+  if (!n) return "";
+  const mapped = TEAM_NICKNAMES[sportKey]?.[n];
+  if (mapped) return mapped;
+  const paren = n.lastIndexOf(')');
+  if (paren !== -1 && paren + 1 < n.length) {
+    const after = n.slice(paren + 1).trim();
+    if (after) return after;
+  }
+  const parts = n.split(/\s+/);
+  if (parts.length >= 2) {
+    const last = parts[parts.length - 1];
+    const prev = parts[parts.length - 2];
+    const ADJ = new Set(['Red','Blue','Green','Black','White','Golden','Fighting','Crimson','Scarlet','Orange','Mean','Yellow','Purple','Silver','Gold','Cardinal','Tar',"Ragin'"]);
+    if (ADJ.has(prev)) return `${prev} ${last}`;
+  }
+  return parts[parts.length - 1];
+}
+
 // Compact kickoff formatter for mobile; shows "Mon 7:30 PM" or just time if today
 function formatKickoffShort(commence) {
   try {
     const d = new Date(commence);
     const now = new Date();
     const isToday = d.toDateString() === now.toDateString();
-    const opts = { hour: 'numeric', minute: '2-digit' };
-    const time = d.toLocaleTimeString([], opts).replace(':00 ', ' ');
+    const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(':00 ', ' ');
     if (isToday) return time;
-    const day = d.toLocaleDateString([], { weekday: 'short' });
-    return `${day} ${time}`;
+    const diffMs = d.getTime() - now.getTime();
+    const withinWeek = diffMs >= 0 && diffMs <= 7 * 24 * 60 * 60 * 1000;
+    if (withinWeek) {
+      const day = d.toLocaleDateString([], { weekday: 'short' });
+      return `${day} ${time}`;
+    }
+    // Farther than a week: show explicit date like "Aug 28th 7:30 PM"
+    const month = d.toLocaleString([], { month: 'short' });
+    const dayNum = d.getDate();
+    const suffix = ((n) => {
+      const v = n % 100;
+      if (v >= 11 && v <= 13) return 'th';
+      switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    })(dayNum);
+    return `${month} ${dayNum}${suffix} ${time}`;
   } catch {
     return String(commence);
   }
@@ -386,7 +430,9 @@ export default function OddsTable({
 
   // ---- Loading State (skeleton) ----
   if (loading) {
-    const cols = mode === 'props' ? ["EV %","Matchup","Player","O/U","Line","Market","Odds","Book"] : ["EV %","Match","Market","Outcome","Line","Book","Odds",""];
+    const cols = mode === 'props'
+      ? ["EV %","Matchup","Player","O/U","Line","Market","Odds","Book"]
+      : ["EV %","Sport","Match","Start","Selection","Line","Book","Odds",""];
     return (
       <div className="odds-table-card">
         <table className="odds-grid" aria-busy="true" aria-label="Loading odds">
@@ -472,6 +518,12 @@ export default function OddsTable({
               <>
                 <th
                   className="sort-th"
+                  role="columnheader"
+                >
+                  <span className="sort-label">Sport</span>
+                </th>
+                <th
+                  className="sort-th"
                   role="columnheader button"
                   aria-sort={sort.key === 'match' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
                   onClick={() => setSort(s => ({ key: 'match', dir: s.key === 'match' && s.dir === 'desc' ? 'asc' : 'desc' }))}
@@ -484,22 +536,7 @@ export default function OddsTable({
                 >
                   <span className="sort-label">Start</span>
                 </th>
-                <th
-                  className="sort-th"
-                  role="columnheader button"
-                  aria-sort={sort.key === 'market' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
-                  onClick={() => setSort(s => ({ key: 'market', dir: s.key === 'market' && s.dir === 'desc' ? 'asc' : 'desc' }))}
-                >
-                  <span className="sort-label">Market <span className="sort-indicator">{sort.key === 'market' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
-                </th>
-                <th
-                  className="sort-th"
-                  role="columnheader button"
-                  aria-sort={sort.key === 'outcome' ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
-                  onClick={() => setSort(s => ({ key: 'outcome', dir: s.key === 'outcome' && s.dir === 'desc' ? 'asc' : 'desc' }))}
-                >
-                  <span className="sort-label">Outcome <span className="sort-indicator">{sort.key === 'outcome' ? (sort.dir === 'desc' ? '▼' : '▲') : ''}</span></span>
-                </th>
+                <th><span className="sort-label">Selection</span></th>
                 <th
                   className="sort-th"
                   role="columnheader button"
@@ -568,6 +605,7 @@ export default function OddsTable({
                     style={{ cursor: "pointer" }}
                   >
                     <td data-label="EV %" className={evClass}>{typeof ev === "number" ? ev.toFixed(2) + "%" : ""}</td>
+                    <td data-label="Sport">{row.game.sport_title || ''}</td>
                     <td data-label="Match">
                       {row.game.home_team} vs {row.game.away_team}
                     </td>
@@ -577,9 +615,12 @@ export default function OddsTable({
                       )}
                       <small>{formatKickoffShort(row.game.commence_time)}</small>
                     </td>
-                    <td data-label="Market">{formatMarket(row.mkt.key)}</td>
-                    <td data-label="Outcome">{row.out.name}</td>
-                    <td data-label="Line">{formatLine(row.out.point, row.mkt.key, mode)}</td>
+                    <td data-label="Selection">
+                      {row.mkt.key === 'h2h' ? `${shortTeam(row.out.name, row.game.sport_key)} ML` :
+                       row.mkt.key === 'spreads' ? shortTeam(row.out.name, row.game.sport_key) :
+                       (row.out.name || '')}
+                    </td>
+                    <td data-label="Line">{row.mkt.key === 'h2h' ? '' : formatLine(row.out.point, row.mkt.key, mode)}</td>
                     <td data-label="Book">{cleanBookTitle(row.bk.title)}</td>
                     <td data-label="Odds" className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
                       {formatOdds(row.out.price ?? row.out.odds ?? "")} {oddsChange === 'up' ? '▲' : oddsChange === 'down' ? '▼' : ''}
