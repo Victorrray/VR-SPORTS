@@ -526,17 +526,17 @@ a:focus {
     width: 100%;
   }
   .odds-grid tr {
-    margin-bottom: 0.9em;
-    box-shadow: 0 1px 10px #181b2355;
+    margin-bottom: 0.6em;
+    box-shadow: 0 1px 8px #181b2350;
     border-radius: 12px;
     overflow: hidden;
     background: #202538;
-    padding: 0.8em 0.75em; /* larger, even vertical padding for the card-like row */
+    padding: 0.45em 0.5em;
     position: relative;
   }
   .odds-grid td {
     border: none;
-    padding: 0.65em 0.6em;           /* larger, even vertical padding inside mobile rows */
+    padding: 0.4em 0.4em;            /* tighter cell padding */
     text-align: left; /* revert to left-aligned values */
     background: none;
     font-size: 0.98em;
@@ -607,6 +607,18 @@ a:focus {
   margin-right: auto;
 }
 
+/* One-line layout for filters on larger screens, wrapping on small */
+.filters-one-line { flex-wrap: wrap; row-gap: 10px; column-gap: 10px; }
+.filters-one-line .filter-group { display: inline-flex; align-items: center; gap: 8px; }
+.filters-one-line .search-ev { flex: 1 1 320px; justify-content: flex-start; }
+.filters-one-line .search-ev input { min-width: 220px; }
+.filters-one-line .ev-inline { display: inline-flex; align-items: center; gap: 8px; }
+
+@media (min-width: 900px) {
+  .filters-one-line { flex-wrap: nowrap; }
+  .filters-one-line .filter-group { white-space: nowrap; }
+}
+
 /* Grouped filter layout */
 .filters-row {
   display: flex;
@@ -654,7 +666,7 @@ a:focus {
 .filter-checkbox input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  margin-right: 8px;
+  margin-right: 6px; /* tighten gap before label */
   accent-color: var(--accent);
 }
 
@@ -662,6 +674,7 @@ a:focus {
   margin-left: 0;
   color: #bbcbff;
   font-weight: 600;
+  font-size: 0.95em;          /* slightly smaller */
 }
 
 .filters-available {
@@ -676,13 +689,13 @@ a:focus {
   .filters-mobile {
     flex-direction: column;
     align-items: stretch;
-    gap: 14px;
-    padding: 14px 0 8px 0;
-    margin-bottom: 12px;
-    margin-top: 10px;
-    border-radius: 14px;
+    gap: 8px;                     /* tighter */
+    padding: 6px 8px;             /* smaller padding */
+    margin-bottom: 8px;
+    margin-top: 8px;
+    border-radius: 12px;
     background: #1a1d25;
-    box-shadow: 0 2px 16px #0003;
+    box-shadow: 0 2px 12px #0003;
     position: static; /* non-sticky */
     top: auto;
     z-index: 30;
@@ -712,8 +725,10 @@ a:focus {
   .mini-table-odds-cell { min-width: 56px; }
   .mini-book-name { max-width: 96px; word-break: break-word; }
   /* Stack rows and groups vertically for clean mobile layout */
-  .filters-row { flex-direction: column; align-items: stretch; gap: 10px; }
-  .filter-group { flex-direction: column; align-items: stretch; gap: 6px; width: 100%; }
+  .filters-row { flex-direction: column; align-items: stretch; gap: 6px; }
+  .filter-group { flex-direction: column; align-items: stretch; gap: 4px; width: 100%; }
+  /* keep search + EV inline on mobile to avoid big vertical gaps */
+  .filters-two-line .search-ev { flex-direction: row !important; align-items: center; gap: 4px; }
   /* Keep EV mini controls side-by-side on mobile */
   .filter-group.ev-group { flex-direction: row; align-items: center; gap: 8px; width: auto; justify-content: center; }
   .filters-actions { width: 100%; }
@@ -738,7 +753,51 @@ a:focus {
   .filters-row { gap: 8px; }
 }
 
+/* iPhone 15 Pro Max (≈430px width) optimizations */
+@media (max-width: 430px) {
+  .odds-table-card { padding: 0.35em 0.08em; }
+  .filters-mobile { padding: 10px 10px; gap: 10px; }
+  .filters-two-line { gap: 8px; }
+  .filters-two-line .two-line-row { gap: 8px; }
+  .filters-two-line .search-ev { flex: 1 1 100%; justify-content: center; gap: 8px; }
+  .filters-two-line .search-ev input { flex: 1 1 auto; min-width: 0; }
+  .filters-two-line .actions-right { width: 100%; justify-content: center; gap: 10px; }
+  .filters-two-line .filter-group { gap: 6px; }
+  .filters-mobile input, .filters-mobile select { min-height: 44px; font-size: 16px; }
+
+  .odds-grid { font-size: 0.93em; }
+  .odds-grid td { font-size: 0.95em; }
+  .odds-grid td[data-label]:before { min-width: 88px; width: 5.8em; font-size: 0.92em; }
+
+  .mini-table-header-cell { min-width: 50px; }
+  .mini-table-odds-cell { min-width: 50px; }
+  .mini-book-name { max-width: 82px; }
+
+  .pagination-bar { bottom: max(8px, env(safe-area-inset-bottom)); }
+}
+
 /* Ultra-small devices: chips full width */
 @media (max-width: 380px) {
   .chip { flex: 1 1 100%; }
+}
+.filters-two-line { display: flex; flex-direction: column; gap: 6px; }
+.filters-two-line .two-line-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: center; width: 100%; }
+/* First row: center everything as well */
+.filters-two-line .two-line-row:first-child { justify-content: center; }
+.filters-two-line .search-ev { flex: 1 1 420px; display: inline-flex; gap: 6px; align-items: center; min-width: 320px; justify-content: center; }
+.filters-two-line .search-ev input { padding: 10px 12px; min-height: 38px; }
+.filters-two-line .ev-inline { gap: 6px; }
+.filters-two-line .ev-inline .filter-checkbox { margin-right: 0 !important; gap: 4px; }
+.filters-two-line .actions-right { display: inline-flex; gap: 10px; align-items: center; margin-left: 0; white-space: nowrap; }
+.filters-two-line .actions-row { justify-content: space-between; }
+.filters-two-line .actions-row .actions-left { display: inline-flex; gap: 10px; align-items: center; }
+.filters-two-line .actions-row .results-right { margin-left: auto; }
+.filters-two-line .actions-right .btn { min-height: 38px; }
+.filters-two-line .actions-right .filters-count { margin-left: 6px; }
+.filters-two-line .filter-group .filter-label { margin-right: 6px; }
+.filter-checkbox { display: inline-flex; align-items: center; gap: 6px; padding-left: 0; }
+
+@media (max-width: 720px) {
+  .filters-two-line .actions-row { justify-content: center; }
+  .filters-two-line .actions-row .results-right { margin-left: 0; }
 }

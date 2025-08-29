@@ -5,6 +5,11 @@ import useDebounce from "../hooks/useDebounce";
 
 // Which markets to show for main sportsbooks (game lines)
 const GAME_LINES = ["h2h", "spreads", "totals"];
+const MARKET_OPTIONS = [
+  { key: "h2h", title: "Moneyline" },
+  { key: "spreads", title: "Spread" },
+  { key: "totals", title: "Totals" },
+];
 // DFS apps to exclude when showing sportsbooks
 const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
 // Map API sport keys to common short names
@@ -140,6 +145,7 @@ export default function SportsbookMarkets() {
   const [marketKeys, setMarketKeys] = useState(["h2h","spreads","totals"]);
   const [onlyPositive, setOnlyPositive] = useState(false);
   const [minEV, setMinEV] = useState("");
+  const [refreshTick, setRefreshTick] = useState(0);
 
   const resetFilters = () => {
     setSelectedDate("");
@@ -196,9 +202,11 @@ export default function SportsbookMarkets() {
         }
 
         {
-          const calls = keys.map(k =>
+          const calls = keys.map(k => {
+            const selectedMarkets = (marketKeys && marketKeys.length) ? marketKeys : GAME_LINES;
+            const marketsParam = selectedMarkets.join(",");
             // Include us2 and us_ex (US exchanges) regions to broaden bookmaker coverage
-            fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,us2,us_ex,uk,eu,au&markets=${GAME_LINES.join(",")}&includeBetLimits=true`)
+            return fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,us2,us_ex,uk,eu,au&markets=${marketsParam}&includeBetLimits=true`)
               .then(async r => {
                 if (r.ok && quota.remain === "–") {
                   setQuota({
@@ -208,8 +216,8 @@ export default function SportsbookMarkets() {
                 }
                 return r.json();
               })
-              .catch(() => [])
-          );
+              .catch(() => []);
+          });
           const gamesRaw = (await Promise.all(calls)).flat();
 
           // Remove DFS apps (keep all other bookmakers across regions)
@@ -240,15 +248,18 @@ export default function SportsbookMarkets() {
             } catch {}
           }
           setBookList(booksArr);
-          // Sync current selection to available set (delist books with no responses)
+          // Preferred default selection if available
           const availableKeys = new Set(booksArr.map(b => b.key));
+          const PREFERRED = ['bovada', 'fliff', 'fanduel', 'draftkings'];
+          const preferredAvail = PREFERRED.filter(k => availableKeys.has(k));
+          // Sync current selection to available set (delist books with no responses)
           if (booksArr.length) {
             if (selectedBooks.length === 0) {
-              setSelectedBooks(booksArr.map(b => b.key));
+              setSelectedBooks(preferredAvail.length ? preferredAvail : booksArr.map(b => b.key));
             } else {
               const intersect = selectedBooks.filter(k => availableKeys.has(k));
               if (intersect.length !== selectedBooks.length) {
-                setSelectedBooks(intersect.length ? intersect : booksArr.map(b => b.key));
+                setSelectedBooks(intersect.length ? intersect : (preferredAvail.length ? preferredAvail : booksArr.map(b => b.key)));
               }
             }
           }
@@ -261,7 +272,7 @@ export default function SportsbookMarkets() {
       }
     })();
     // eslint-disable-next-line
-  }, [picked, sportList]);
+  }, [picked, sportList, marketKeys, refreshTick]);
 
   // Filtering before passing to OddsTable
   let filteredGames = games;
@@ -298,54 +309,31 @@ export default function SportsbookMarkets() {
   return (
     <main className="page-wrap">
       <div className="market-container">
-        <div className="filters-mobile">
-          {/* Row 1: Primary search centered */}
-          <div className="filters-row">
-            <input
-              placeholder={"Search team / league"}
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-            />
-          </div>
-
-          {/* Row 2: Markets + EV controls (core decision filters) */}
-          <div className="filters-row">
-            <div className="filter-group">
-              <span className="filter-label">Markets</span>
-              <div className="chip-wrap">
-                {[{k:'h2h', label:'Moneyline'}, {k:'spreads', label:'Spread'}, {k:'totals', label:'Totals'}].map(m => (
-                  <button
-                    key={m.k}
-                    type="button"
-                    onClick={() => setMarketKeys(prev => prev.includes(m.k) ? prev.filter(x => x !== m.k) : [...prev, m.k])}
-                    className={`chip ${marketKeys.includes(m.k) ? 'active' : ''}`}
-                  >{m.label}</button>
-                ))}
+        <div className="filters-mobile filters-two-line">
+          {/* Row 1: Search + EV */}
+          <div className="filters-row two-line-row">
+            <div className="filter-group search-ev">
+              <input
+                placeholder={"Search team / league"}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                style={{ minWidth: 210 }}
+              />
+              <div className="ev-inline ev-group">
+                <label className="filter-checkbox" style={{ marginRight: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={onlyPositive}
+                    onChange={() => setOnlyPositive(v => !v)}
+                  />
+                  Only +EV
+                </label>
               </div>
             </div>
-            <div className="filter-group ev-group">
-              <span className="filter-label">EV</span>
-              <label className="filter-checkbox" style={{ marginRight: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={onlyPositive}
-                  onChange={() => setOnlyPositive(v => !v)}
-                />
-                Only +EV
-              </label>
-              <input
-                type="number"
-                value={minEV}
-                onChange={e => setMinEV(e.target.value)}
-                placeholder="Min %"
-                style={{ width: 90 }}
-                aria-label="Minimum EV percent"
-              />
-            </div>
           </div>
 
-          {/* Row 3: Date + Sports + Books */}
-          <div className="filters-row">
+          {/* Row 2: Date + Markets + Sports + Books */}
+          <div className="filters-row two-line-row">
             <div className="filter-group">
               <span className="filter-label">Date</span>
               <input
@@ -356,7 +344,17 @@ export default function SportsbookMarkets() {
                 title="Filter by date"
               />
             </div>
-            <div className="filter-group">
+            <div className="filter-group" style={{ minWidth: 200 }}>
+              <span className="filter-label">Markets</span>
+              <SportMultiSelect
+                list={MARKET_OPTIONS}
+                selected={marketKeys}
+                onChange={setMarketKeys}
+                placeholderText="Choose markets…"
+                allLabel="All Markets"
+              />
+            </div>
+            <div className="filter-group" style={{ minWidth: 220 }}>
               <span className="filter-label">Sports</span>
               <SportMultiSelect
                 list={sportList}
@@ -366,7 +364,7 @@ export default function SportsbookMarkets() {
                 allLabel="All Sports"
               />
             </div>
-            <div className="filter-group">
+            <div className="filter-group" style={{ minWidth: 220 }}>
               <span className="filter-label">Books</span>
               <SportMultiSelect
                 list={bookList}
@@ -378,12 +376,15 @@ export default function SportsbookMarkets() {
             </div>
           </div>
 
-          {/* Row 4: Reset + Count */}
-          <div className="filters-row">
-            <div className="filters-actions">
+          {/* Row 3: Actions under dropdowns */}
+          <div className="filters-row two-line-row actions-row">
+            <div className="filter-group actions-left">
+              <button type="button" className="btn btn-primary" onClick={() => setRefreshTick(Date.now())}>Refresh</button>
               <button type="button" className="btn btn-ghost" onClick={resetFilters}>Reset</button>
             </div>
-            <span className="filters-count">Games: {filteredGames.length}</span>
+            <div className="filter-group results-right">
+              <span className="filters-count">Results: {filteredGames.length}</span>
+            </div>
           </div>
         </div>
         <OddsTable

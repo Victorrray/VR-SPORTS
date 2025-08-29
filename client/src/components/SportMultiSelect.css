@@ -22,25 +22,36 @@
 /* Dropdown menu */
 .ms-menu {
   position: absolute;
-  z-index: 99;
-  left: 0;
-  right: 0;
+  z-index: 999;
+  left: 50%;
+  transform: translateX(-50%);
+  right: auto;
   top: 110%;
   background: #181c27;
   border-radius: 10px;
-  padding: 8px 0;
+  padding: 8px 10px;
   margin: 0;
   box-shadow: 0 4px 24px #0008;
   border: 1.5px solid #334c;
   list-style: none;
   min-width: 160px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 4px 12px;
+  max-height: 60vh;           /* reasonable default */
+  overflow: auto;
 }
 
 .ms-menu li {
-  padding: 7px 18px 7px 14px;
+  padding: 7px 12px;
   font-size: 1em;
   color: #dde4ff;
   cursor: pointer;
+}
+
+/* Make the first row (All) span full width */
+.ms-menu li:first-child {
+  grid-column: 1 / -1;
 }
 
 .ms-menu label {
@@ -79,20 +90,40 @@
   }
   .ms-menu {
     min-width: 0;
-    width: 100vw;
-    left: -24px;
-    right: -24px;
+    width: calc(100vw - 48px);
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
     border-radius: 0 0 14px 14px;
     font-size: 1.13em;
     box-shadow: 0 7px 28px #000b;
+    grid-template-columns: 1fr; /* single column on small screens */
   }
   .ms-menu li {
-    padding: 16px 20px 16px 20px;
+    padding: 14px 16px;
     font-size: 1.08em;
   }
   .ms-menu input[type="checkbox"] {
     width: 1.33em;
     height: 1.33em;
     margin-right: 13px;
+  }
+}
+
+/* Wide screens: expand menu so most options are visible without scrolling */
+@media (min-width: 1024px) {
+  .ms-menu {
+    right: auto;               /* allow custom width */
+    width: 720px;              /* spacious dropdown */
+    grid-template-columns: repeat(3, minmax(200px, 1fr));
+    max-height: none;          /* remove scroll cap */
+    overflow: visible;         /* no internal scroll */
+  }
+}
+
+@media (min-width: 1440px) {
+  .ms-menu {
+    width: 900px;
+    grid-template-columns: repeat(4, minmax(200px, 1fr));
   }
 }
