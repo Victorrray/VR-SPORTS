@@ -1,13 +1,22 @@
+// src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
-import OddsTable from "../components/OddsTable";
-import SportMultiSelect from "../components/SportMultiSelect";
-import useDebounce from "../hooks/useDebounce";
-import useMarkets from "../hooks/useMarkets";
 import MobileBottomBar from "../components/MobileBottomBar";
 import MobileFiltersSheet from "../components/MobileFiltersSheet";
 
+// ⬇️ Adjust these paths if needed
+import SportMultiSelect from "../components/SportMultiSelect";
+import OddsTable from "../components/OddsTable";
+import useDebounce from "../hooks/useDebounce";
+import useMarkets from "../hooks/useMarkets";
+
+
+/* =========================
+   Constants & helpers
+   ========================= */
+
 // Which markets to show for main sportsbooks (game lines)
 const GAME_LINES = ["h2h", "spreads", "totals"];
+
 // Friendly titles for markets
 const MARKET_TITLES = {
   h2h: "Moneyline",
@@ -42,6 +51,7 @@ const MARKET_TITLES = {
   set_totals: "Set Totals",
   total_sets: "Total Sets",
 };
+
 // Suggested markets per sport (unioned for multi-select)
 const SPORT_MARKETS = {
   americanfootball_nfl: [
@@ -75,7 +85,6 @@ const SPORT_MARKETS = {
     "first_five_moneyline","first_five_spreads","first_five_totals",
     "team_totals",
   ],
-  // Other baseball leagues
   baseball_kbo: [
     "h2h","spreads","totals",
     "spreads_alternate","totals_alternate",
@@ -105,32 +114,18 @@ const SPORT_MARKETS = {
   soccer_uefa_champs_league: [
     "h2h","draw_no_bet","double_chance","totals","totals_alternate","btts","corners","cards",
   ],
-  // Tennis (keys may vary by feed; these are common)
-  tennis_atp: [
-    "h2h","totals","set_winner","game_handicap","set_totals","total_sets",
-  ],
-  tennis_wta: [
-    "h2h","totals","set_winner","game_handicap","set_totals","total_sets",
-  ],
-  tennis_challenger: [
-    "h2h","totals","set_winner","game_handicap","set_totals",
-  ],
-  tennis_itf_men: [
-    "h2h","totals","set_winner","game_handicap",
-  ],
-  tennis_itf_women: [
-    "h2h","totals","set_winner","game_handicap",
-  ],
-  // Combat sports (availability varies by provider)
-  mma_mixed_martial_arts: [
-    "h2h",
-  ],
-  boxing_boxing: [
-    "h2h",
-  ],
+  tennis_atp: ["h2h","totals","set_winner","game_handicap","set_totals","total_sets"],
+  tennis_wta: ["h2h","totals","set_winner","game_handicap","set_totals","total_sets"],
+  tennis_challenger: ["h2h","totals","set_winner","game_handicap","set_totals"],
+  tennis_itf_men: ["h2h","totals","set_winner","game_handicap"],
+  tennis_itf_women: ["h2h","totals","set_winner","game_handicap"],
+  mma_mixed_martial_arts: ["h2h"],
+  boxing_boxing: ["h2h"],
 };
+
 // DFS apps to exclude when showing sportsbooks
 const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
+
 // Map API sport keys to common short names
 const FRIENDLY_TITLES = {
   basketball_nba: "NBA",
@@ -153,6 +148,7 @@ const FRIENDLY_TITLES = {
   mma_mixed_martial_arts: "MMA",
   boxing_boxing: "BOXING",
 };
+
 // Keep the sport picker short by default
 const FEATURED_SPORTS = new Set([
   "basketball_nba",
@@ -163,17 +159,15 @@ const FEATURED_SPORTS = new Set([
   "americanfootball_nfl",
   "americanfootball_ncaaf",
   "icehockey_nhl",
-  // Include soccer + tennis so they appear in the curated list
   "soccer_epl",
   "soccer_uefa_champs_league",
   "tennis_atp",
   "tennis_wta",
-  // Combat sports
   "mma_mixed_martial_arts",
   "boxing_boxing",
 ]);
 
-// Friendly bookmaker titles for dropdown
+// Friendly bookmaker titles (if you render them elsewhere)
 const BOOK_TITLES = {
   draftkings: "DraftKings",
   fanduel: "FanDuel",
@@ -207,14 +201,12 @@ const BOOK_TITLES = {
   novig: "Novig",
   prophetx: "ProphetX",
   pinnacle: "Pinnacle",
-  // --- Additional US (us) ---
   betonlineag: "BetOnline.ag",
   betus: "BetUS",
   bovada: "Bovada",
   williamhill_us: "Caesars",
   lowvig: "LowVig.ag",
   mybookieag: "MyBookie.ag",
-  // --- UK (uk) ---
   sport888: "888sport",
   betfair_ex_uk: "Betfair Exchange (UK)",
   betfair_sb_uk: "Betfair Sportsbook (UK)",
@@ -233,7 +225,6 @@ const BOOK_TITLES = {
   unibet_uk: "Unibet (UK)",
   virginbet: "Virgin Bet",
   williamhill: "William Hill",
-  // --- EU (eu) ---
   onexbet: "1xBet",
   betclic_fr: "Betclic (FR)",
   betfair_ex_eu: "Betfair Exchange (EU)",
@@ -251,7 +242,6 @@ const BOOK_TITLES = {
   unibet_nl: "Unibet (NL)",
   winamax_de: "Winamax (DE)",
   winamax_fr: "Winamax (FR)",
-  // --- AU (au) ---
   betfair_ex_au: "Betfair Exchange (AU)",
   betr_au: "Betr (AU)",
   betright: "Bet Right",
@@ -269,22 +259,26 @@ const BOOK_TITLES = {
 };
 
 // Limit sportsbook universe: keep US books, Pinnacle, and US exchanges
-const ALLOWED_BOOKS = new Set([
-  // Major US books
-  'draftkings','fanduel','betmgm','caesars','bet365','pointsbetus','fanatics','fanatics_sportsbook','espnbet',
-  'betrivers','sugarhouse','unibet_us','betparx','betway','si_sportsbook','betfred','superbook','circasports',
-  'hardrockbet','wynnbet','barstool','foxbet','ballybet','windcreek',
-  // US-friendly/offshore commonly compared
-  'bovada','betonlineag','betus','mybookieag','lowvig','betanysports','fliff','fliff_sportsbook',
-  // Exchanges and peer-to-peer (US)
-  'betopenly','novig','prophetx','rebet',
-  // Explicitly include Pinnacle for reference pricing
-  'pinnacle',
-  // If present in feed, allow explicit US exchange key
-  'betfair_ex_us'
-].map(k => k.toLowerCase()));
+const ALLOWED_BOOKS = new Set(
+  [
+    // Major US books
+    "draftkings","fanduel","betmgm","caesars","bet365","pointsbetus","fanatics","fanatics_sportsbook","espnbet",
+    "betrivers","sugarhouse","unibet_us","betparx","betway","si_sportsbook","betfred","superbook","circasports",
+    "hardrockbet","wynnbet","barstool","foxbet","ballybet","windcreek",
+    // US-friendly/offshore commonly compared
+    "bovada","betonlineag","betus","mybookieag","lowvig","betanysports","fliff","fliff_sportsbook",
+    // Exchanges and peer-to-peer (US)
+    "betopenly","novig","prophetx","rebet",
+    // Explicitly include Pinnacle for reference pricing
+    "pinnacle",
+    // If present in feed, allow explicit US exchange key
+    "betfair_ex_us",
+  ].map((k) => k.toLowerCase())
+);
 
-// Player-props helpers removed while focusing on sportsbooks only
+/* =========================
+   Component
+   ========================= */
 
 export default function SportsbookMarkets() {
   const [sportList, setSportList] = useState([]);
@@ -299,23 +293,30 @@ export default function SportsbookMarkets() {
   const [error, setErr] = useState(null);
   const [showAllGames, setShowAllGames] = useState(false);
   const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
-  const [marketKeys, setMarketKeys] = useState(["h2h","spreads","totals"]);
+  const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [minEV, setMinEV] = useState("");
+  const [refreshTick, setRefreshTick] = useState(0);
+
   const [oddsFormat, setOddsFormat] = useState(() => {
-    if (typeof window === 'undefined') return 'american';
-    return localStorage.getItem('oddsFormat') || 'american';
+    if (typeof window === "undefined") return "american";
+    return localStorage.getItem("oddsFormat") || "american";
   });
+
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try { localStorage.setItem('oddsFormat', oddsFormat); } catch {}
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("oddsFormat", oddsFormat);
+      } catch {}
     }
   }, [oddsFormat]);
+
   // Hydrate books list from localStorage cache on first mount (to avoid empty dropdown)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     try {
-      const raw = localStorage.getItem('booksCache');
+      const raw = localStorage.getItem("booksCache");
       if (raw) {
         const arr = JSON.parse(raw);
         if (Array.isArray(arr) && arr.length) setBookList(arr);
@@ -323,31 +324,39 @@ export default function SportsbookMarkets() {
     } catch {}
     // eslint-disable-next-line
   }, []);
+
   // Preferred default books for reset
-  const PREFERRED_BOOK_KEYS = ['draftkings', 'fanduel', 'fanatics', 'fanatics_sportsbook', 'bovada', 'fliff', 'fliff_sportsbook'];
+  const PREFERRED_BOOK_KEYS = [
+    "draftkings",
+    "fanduel",
+    "fanatics",
+    "fanatics_sportsbook",
+    "bovada",
+    "fliff",
+    "fliff_sportsbook",
+  ];
 
   // Compute market options based on selected sports (union)
   const marketOptions = useMemo(() => {
     let keys = new Set();
     const selectedSports = picked.includes("ALL")
-      ? sportList.filter(s => s.key !== "ALL").map(s => s.key)
+      ? sportList.filter((s) => s.key !== "ALL").map((s) => s.key)
       : picked;
     if (!selectedSports || selectedSports.length === 0) {
-      GAME_LINES.forEach(k => keys.add(k));
+      GAME_LINES.forEach((k) => keys.add(k));
     } else {
-      selectedSports.forEach(sk => {
-        (SPORT_MARKETS[sk] || GAME_LINES).forEach(k => keys.add(k));
+      selectedSports.forEach((sk) => {
+        (SPORT_MARKETS[sk] || GAME_LINES).forEach((k) => keys.add(k));
       });
     }
-    return Array.from(keys).map(k => ({ key: k, title: MARKET_TITLES[k] || k }));
+    return Array.from(keys).map((k) => ({ key: k, title: MARKET_TITLES[k] || k }));
   }, [picked, sportList]);
 
   // Keep selected markets within available options for the sport(s)
   useEffect(() => {
-    const avail = new Set(marketOptions.map(o => o.key));
-    const sel = marketKeys.filter(k => avail.has(k));
+    const avail = new Set(marketOptions.map((o) => o.key));
+    const sel = marketKeys.filter((k) => avail.has(k));
     if (sel.length !== marketKeys.length) {
-      // If current selection becomes invalid/empty, default to all available markets
       setMarketKeys(sel.length ? sel : Array.from(avail));
     }
     // eslint-disable-next-line
@@ -355,46 +364,21 @@ export default function SportsbookMarkets() {
 
   // When sports selection changes, auto-select all markets available for those sports
   useEffect(() => {
-    const allForSports = marketOptions.map(o => o.key);
+    const allForSports = marketOptions.map((o) => o.key);
     setMarketKeys(allForSports);
     // eslint-disable-next-line
-  }, [picked]);
-  const [minEV, setMinEV] = useState("");
-  const [refreshTick, setRefreshTick] = useState(0);
+  }, [picked]); // eslint okay; handled intentionally
+
   const availableMarkets = useMemo(() => {
     const set = new Set();
-    games.slice(0, 10).forEach(g => (g.bookmakers || []).forEach(bk => (bk.markets || []).forEach(m => set.add(m.key))));
+    games
+      .slice(0, 10)
+      .forEach((g) => (g.bookmakers || []).forEach((bk) => (bk.markets || []).forEach((m) => set.add(m.key))));
     return Array.from(set).sort();
   }, [games]);
 
-  const resetFilters = () => {
-    // Clear text/date inputs
-    setQuery("");
-    setSelectedDate("");
-    setMinEV("");
-
-    // Reset sports to default selection
-    const DEFAULT_SPORTS = ["americanfootball_nfl", "americanfootball_ncaaf"];
-    setPicked(DEFAULT_SPORTS);
-
-    // Markets will auto-sync to all available for selected sports via effect
-    // No need to set here to avoid transient mismatches
-
-    // Reset books to default preferred set if available, else all available
-    // Reset to preferred books; if list is not yet loaded, effect below will correct after fetch
-    const availableKeys = new Set(bookList.map(b => b.key));
-    const preferredAvail = PREFERRED_BOOK_KEYS.filter(k => availableKeys.has(k));
-    setSelectedBooks(preferredAvail.length ? preferredAvail : PREFERRED_BOOK_KEYS);
-
-    // Remount table to reset internal state (Type filter, pagination, expansion)
-    setTableNonce(n => n + 1);
-    // Trigger a refresh so data repopulates with defaults
-    setRefreshTick(Date.now());
-  };
-
   const debounced = useDebounce(query, 300);
-  const BASE_URL = process.env.REACT_APP_API_URL || "";
-  const refreshDeps = useState(0); // not used directly; just for parity
+  const BASE_URL = process.env.REACT_APP_API_URL || ""; // keep CRA-style env; change to import.meta.env for Vite
 
   // Fetch sport list (defensive against non-array errors), map to friendly titles
   useEffect(() => {
@@ -407,31 +391,34 @@ export default function SportsbookMarkets() {
         }
         const data = await r.json();
         const arr = Array.isArray(data) ? data : [];
-        const activeOnly = arr.filter(s => s && s.active);
-        const curated = activeOnly.filter(s => FEATURED_SPORTS.has(s.key));
+        const activeOnly = arr.filter((s) => s && s.active);
+        const curated = activeOnly.filter((s) => FEATURED_SPORTS.has(s.key));
         const listToUse = curated.length ? curated : activeOnly;
-        let mapped = listToUse
-          .map(s => ({
-            ...s,
-            title: FRIENDLY_TITLES[s.key] || s.title || s.key,
-          }));
+        let mapped = listToUse.map((s) => ({
+          ...s,
+          title: FRIENDLY_TITLES[s.key] || s.title || s.key,
+        }));
+
         // Ensure certain soccer/tennis keys are visible even if not returned as active
         const ENSURE = [
-          'soccer_epl','soccer_uefa_champs_league',
-          'tennis_atp','tennis_wta',
-          // Baseball international leagues (show even if not active)
-          'baseball_kbo','baseball_npb','baseball_cpbl',
-          // Combat sports
-          'mma_mixed_martial_arts','boxing_boxing'
+          "soccer_epl",
+          "soccer_uefa_champs_league",
+          "tennis_atp",
+          "tennis_wta",
+          "baseball_kbo",
+          "baseball_npb",
+          "baseball_cpbl",
+          "mma_mixed_martial_arts",
+          "boxing_boxing",
         ];
-        const present = new Set(mapped.map(s => s.key));
-        ENSURE.forEach(k => {
+        const present = new Set(mapped.map((s) => s.key));
+        ENSURE.forEach((k) => {
           if (!present.has(k)) {
             mapped.push({ key: k, title: FRIENDLY_TITLES[k] || k, active: false });
           }
         });
-        // Sort by title for a tidy picker
-        mapped = mapped.sort((a,b) => String(a.title).localeCompare(String(b.title)));
+
+        mapped = mapped.sort((a, b) => String(a.title).localeCompare(String(b.title)));
         const allSports = [{ key: "ALL", title: "All Sports" }, ...mapped];
         setSportList(allSports);
       } catch (_) {
@@ -443,7 +430,7 @@ export default function SportsbookMarkets() {
 
   // Use shared hook for sportsbook odds data
   const selectedSports = picked.includes("ALL")
-    ? sportList.filter(s => s.key !== "ALL").map(s => s.key)
+    ? sportList.filter((s) => s.key !== "ALL").map((s) => s.key)
     : picked;
   const allowedBooksArr = useMemo(() => Array.from(ALLOWED_BOOKS), []);
   const { games: hookGames, books: hookBooks, loading: hookLoading, error: hookError, quota: hookQuota } = useMarkets({
@@ -462,37 +449,35 @@ export default function SportsbookMarkets() {
     setLoad(!!hookLoading);
     setErr(hookError || null);
     setQuota(hookQuota || { remain: "–", used: "–" });
-    // Avoid clearing the Books menu during refresh; update only when we have data
     if (Array.isArray(hookBooks) && hookBooks.length > 0) {
       setBookList(hookBooks);
-      // Persist to cache for the next load
-      if (typeof window !== 'undefined') {
-        try { localStorage.setItem('booksCache', JSON.stringify(hookBooks)); } catch {}
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("booksCache", JSON.stringify(hookBooks));
+        } catch {}
       }
     }
   }, [hookGames, hookLoading, hookError, hookQuota, hookBooks]);
 
-  // Derive an effective book filter that only includes available books.
-  // If none of the currently selected books are available, fall back to no filter (show all).
-  const availableBookKeys = useMemo(() => new Set((bookList || []).map(b => b.key)), [bookList]);
+  // Derive effective book filter; if none of selected are available, show all
+  const availableBookKeys = useMemo(() => new Set((bookList || []).map((b) => b.key)), [bookList]);
   const effectiveSelectedBooks = useMemo(() => {
-    const filtered = (selectedBooks || []).filter(k => availableBookKeys.has(k));
+    const filtered = (selectedBooks || []).filter((k) => availableBookKeys.has(k));
     return filtered.length ? filtered : [];
   }, [selectedBooks, availableBookKeys]);
 
   // Ensure selected books stay within available list; if none, prefer defaults
   useEffect(() => {
     const booksArr = bookList || [];
-    const availableKeys = new Set(booksArr.map(b => b.key));
+    const availableKeys = new Set(booksArr.map((b) => b.key));
     if (!booksArr.length) return;
-    // Intersect current selection with available keys
-    const intersect = (selectedBooks || []).filter(k => availableKeys.has(k));
+
+    const intersect = (selectedBooks || []).filter((k) => availableKeys.has(k));
     if (intersect.length) {
       if (intersect.length !== selectedBooks.length) setSelectedBooks(intersect);
     } else {
-      // Select preferred defaults if none from current selection are available
-      const prefer = PREFERRED_BOOK_KEYS.filter(k => availableKeys.has(k));
-      setSelectedBooks(prefer.length ? prefer : booksArr.map(b => b.key));
+      const prefer = PREFERRED_BOOK_KEYS.filter((k) => availableKeys.has(k));
+      setSelectedBooks(prefer.length ? prefer : booksArr.map((b) => b.key));
     }
     // eslint-disable-next-line
   }, [bookList]);
@@ -501,28 +486,29 @@ export default function SportsbookMarkets() {
   let filteredGames = games;
   if (debounced.trim()) {
     const q = debounced.toLowerCase();
-    filteredGames = filteredGames.filter(g =>
-      (g.home_team && g.home_team.toLowerCase().includes(q)) ||
-      (g.away_team && g.away_team.toLowerCase().includes(q)) ||
-      (g.sport_title && g.sport_title.toLowerCase().includes(q))
+    filteredGames = filteredGames.filter(
+      (g) =>
+        (g.home_team && g.home_team.toLowerCase().includes(q)) ||
+        (g.away_team && g.away_team.toLowerCase().includes(q)) ||
+        (g.sport_title && g.sport_title.toLowerCase().includes(q))
     );
   }
   // Date filter (local date)
   if (selectedDate) {
-    filteredGames = filteredGames.filter(g => {
+    filteredGames = filteredGames.filter((g) => {
       const d = new Date(g.commence_time);
       const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
       const local = `${y}-${m}-${day}`;
       return local === selectedDate;
     });
   }
   if (picked && picked.length && !picked.includes("ALL")) {
-    filteredGames = filteredGames.filter(g => picked.includes(g.sport_key));
+    filteredGames = filteredGames.filter((g) => picked.includes(g.sport_key));
   }
   if (!showAllGames) {
-    filteredGames = filteredGames.filter(g => {
+    filteredGames = filteredGames.filter((g) => {
       const start = new Date(g.commence_time).getTime();
       const now = Date.now();
       return !(now >= start && now < start + 3 * 3600 * 1000);
@@ -534,24 +520,36 @@ export default function SportsbookMarkets() {
       <div className="market-container two-col">
         <aside className="filters-sidebar">
           <div className="filter-stack">
-            {/* Settings panel (remains near top for readability) */}
             {settingsOpen && (
               <div
                 role="dialog"
                 aria-label="Settings"
                 style={{
-                  marginBottom: '10px', padding: '10px', border: '1px solid #334c',
-                  background: '#11192c', borderRadius: 10
+                  marginBottom: "10px",
+                  padding: "10px",
+                  border: "1px solid #334c",
+                  background: "#11192c",
+                  borderRadius: 10,
                 }}
               >
                 <div style={{ fontWeight: 800, marginBottom: 6 }}>Odds Format</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {[
-                    { k: 'american', label: 'American' },
-                    { k: 'decimal', label: 'Decimal' },
-                    { k: 'fractional', label: 'Fractional' },
-                  ].map(opt => (
-                    <label key={opt.k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 8, border: '1px solid #334c' }}>
+                    { k: "american", label: "American" },
+                    { k: "decimal", label: "Decimal" },
+                    { k: "fractional", label: "Fractional" },
+                  ].map((opt) => (
+                    <label
+                      key={opt.k}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                        padding: "6px 8px",
+                        borderRadius: 8,
+                        border: "1px solid #334c",
+                      }}
+                    >
                       <input
                         type="radio"
                         name="odds-format"
@@ -565,14 +563,16 @@ export default function SportsbookMarkets() {
                 </div>
               </div>
             )}
+
             <div className="filter-group">
               <span className="filter-label">Search</span>
               <input
                 placeholder={"Search team / league"}
                 value={query}
-                onChange={e => setQuery(e.target.value)}
+                onChange={(e) => setQuery(e.target.value)}
               />
             </div>
+
             <div className="filter-group">
               <span className="filter-label">Date</span>
               <input
@@ -583,6 +583,7 @@ export default function SportsbookMarkets() {
                 title="Filter by date"
               />
             </div>
+
             <div className="filter-group">
               <span className="filter-label">Sports</span>
               <SportMultiSelect
@@ -593,6 +594,7 @@ export default function SportsbookMarkets() {
                 allLabel="All Sports"
               />
             </div>
+
             <div className="filter-group">
               <span className="filter-label">Books</span>
               <SportMultiSelect
@@ -604,31 +606,40 @@ export default function SportsbookMarkets() {
                 grid={true}
                 columns={2}
                 leftAlign={true}
+                usePortal={true}
+                portalAlign={"up"}
               />
             </div>
+
             <div className="filter-actions">
-              <button type="button" className="btn btn-primary btn-lg" onClick={() => setRefreshTick(Date.now())}>Refresh</button>
-              <button type="button" className="btn btn-danger btn-lg" onClick={resetFilters}>Reset</button>
+              <button type="button" className="btn btn-primary btn-lg" onClick={() => setRefreshTick(Date.now())}>
+                Refresh
+              </button>
+              <button type="button" className="btn btn-danger btn-lg" onClick={resetFilters}>
+                Reset
+              </button>
             </div>
+
             <div className="filters-meta">
               <span className="filters-count">Results: {filteredGames.length}</span>
             </div>
           </div>
+
           {/* Bottom-left gear button */}
           <button
             type="button"
             aria-label="Settings"
             title="Settings"
-            onClick={() => setSettingsOpen(v => !v)}
+            onClick={() => setSettingsOpen((v) => !v)}
             style={{
-              position: 'absolute',
+              position: "absolute",
               left: 12,
               bottom: 12,
-              background: 'transparent',
-              border: 'none',
-              color: '#e7ecff',
-              cursor: 'pointer',
-              fontSize: '20px',
+              background: "transparent",
+              border: "none",
+              color: "#e7ecff",
+              cursor: "pointer",
+              fontSize: "20px",
               lineHeight: 1,
               padding: 6,
               borderRadius: 8,
@@ -637,6 +648,7 @@ export default function SportsbookMarkets() {
             ⚙️
           </button>
         </aside>
+
         <section className="table-area">
           <OddsTable
             key={tableNonce}
@@ -645,23 +657,26 @@ export default function SportsbookMarkets() {
             mode={"game"}
             bookFilter={effectiveSelectedBooks}
             marketFilter={marketKeys}
-            evMin={minEV === '' ? null : Number(minEV)}
+            evMin={minEV === "" ? null : Number(minEV)}
             loading={loading}
             error={error}
             oddsFormat={oddsFormat}
-            allCaps={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('caps') === '1'}
+            allCaps={
+              typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
+            }
           />
         </section>
+
         {/* Mobile footer nav + filter pill */}
         <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" />
         <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
-          <div className="filter-stack" style={{ maxWidth: 680, margin: '0 auto' }}>
+          <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
             <div className="filter-group">
               <span className="filter-label">Search</span>
               <input
                 placeholder={"Search team / league"}
                 value={query}
-                onChange={e => setQuery(e.target.value)}
+                onChange={(e) => setQuery(e.target.value)}
               />
             </div>
             <div className="filter-group">
@@ -698,12 +713,47 @@ export default function SportsbookMarkets() {
               />
             </div>
             <div className="filter-actions">
-              <button type="button" className="btn btn-primary btn-lg" onClick={() => { setRefreshTick(Date.now()); setMobileFiltersOpen(false); }}>Apply</button>
-              <button type="button" className="btn btn-danger btn-lg" onClick={() => { resetFilters(); setMobileFiltersOpen(false); }}>Reset</button>
+              <button
+                type="button"
+                className="btn btn-primary btn-lg"
+                onClick={() => {
+                  setRefreshTick(Date.now());
+                  setMobileFiltersOpen(false);
+                }}
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger btn-lg"
+                onClick={() => {
+                  resetFilters();
+                  setMobileFiltersOpen(false);
+                }}
+              >
+                Reset
+              </button>
             </div>
           </div>
         </MobileFiltersSheet>
       </div>
     </main>
   );
+
+  // Helpers scoped inside component
+  function resetFilters() {
+    setQuery("");
+    setSelectedDate("");
+    setMinEV("");
+
+    const DEFAULT_SPORTS = ["americanfootball_nfl", "americanfootball_ncaaf"];
+    setPicked(DEFAULT_SPORTS);
+
+    const availableKeys = new Set(bookList.map((b) => b.key));
+    const preferredAvail = ["draftkings","fanduel","fanatics","fanatics_sportsbook","bovada","fliff","fliff_sportsbook"]
+      .filter((k) => availableKeys.has(k));
+    setSelectedBooks(preferredAvail.length ? preferredAvail : []);
+    setTableNonce((n) => n + 1);
+    setRefreshTick(Date.now());
+  }
 }

@@ -914,7 +914,9 @@ export default function OddsTable({
                     aria-expanded={!!expandedRows[row.key]}
                     style={{ cursor: "pointer" }}
                   >
-                    <td data-label="EV %" className={evClass}>{typeof ev === "number" ? ev.toFixed(2) + "%" : ""}</td>
+                    <td data-label="EV %" className={evClass}>
+                      {typeof ev === "number" ? (<span className="ev-chip">{ev.toFixed(2)}%</span>) : ""}
+                    </td>
                     <td data-label="Matchup">
                       {row.game.home_team} vs {row.game.away_team}
                       <br />
@@ -927,6 +929,9 @@ export default function OddsTable({
                     <td data-label="Odds" className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
                       <span className="odds-main odds-best">{formatByPreference(row.out.price)}</span>
                       {" "}{oddsChange === 'up' ? '▲' : oddsChange === 'down' ? '▼' : ''}
+                      <div className="mobile-subtext">
+                        {cleanBookTitle(row.bk?.title || row.out.book)}{row.out.point != null && row.out.point !== '' ? ` • ${row.out.point}` : ''}
+                      </div>
                     </td>
                     <td data-label="Book">{cleanBookTitle(row.bk?.title || row.out.book)}</td>
                   </tr>
@@ -936,7 +941,9 @@ export default function OddsTable({
                     onClick={() => toggleRow(row.key)}
                     style={{ cursor: "pointer" }}
                   >
-                    <td data-label="EV %" className={evClass}>{typeof ev === "number" ? ev.toFixed(2) + "%" : ""}</td>
+                    <td data-label="EV %" className={evClass}>
+                      {typeof ev === "number" ? (<span className="ev-chip">{ev.toFixed(2)}%</span>) : ""}
+                    </td>
                     <td data-label="Match">
                       <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <span style={{ opacity: 0.8, fontSize: '0.92em' }}>{formatKickoffNice(row.game.commence_time)}</span>
@@ -968,10 +975,48 @@ export default function OddsTable({
                     <td data-label="Odds" className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
                       <span className="odds-main odds-best">{formatByPreference(row.out.price ?? row.out.odds ?? '')}</span>
                       {" "}{oddsChange === 'up' ? '▲' : oddsChange === 'down' ? '▼' : ''}
+                      <div className="mobile-subtext">
+                        {cleanBookTitle(row.bk?.title)}{(row.mkt.key || '') !== 'h2h' && (row.out.point != null && row.out.point !== '') ? ` • ${formatLine(row.out.point, row.mkt.key, mode)}` : ''}
+                        {fair != null ? ` • Fair ${formatByPreference(fair)}` : ''}
+                      </div>
                     </td>
                     <td data-label="De‑Vig">{fair != null ? formatByPreference(fair) : ''}</td>
                     {/* pad to match header's trailing blank column */}
                     <td aria-hidden="true"></td>
+                  </tr>
+                )}
+
+                {/* --- Mobile card layout (game mode) --- */}
+                {mode !== 'props' && (
+                  <tr className="mobile-card-row" aria-hidden={false}>
+                    <td colSpan={8}>
+                      <div className="mobile-odds-card">
+                        <div className={`ev-badge ${ev && ev > 0 ? 'pos' : 'neg'}`}>{typeof ev === 'number' ? `${ev.toFixed(2)}%` : ''}</div>
+                        <div className="mob-section mob-match">
+                          <div className="mob-time">{formatKickoffNice(row.game.commence_time)}</div>
+                          <div className="mob-title">{row.game.home_team} vs {row.game.away_team}</div>
+                          <div className="mob-sub">{(() => { const { sport, league } = getSportLeague(row.game.sport_key, row.game.sport_title); return `${sport} | ${league}`; })()}</div>
+                        </div>
+                        <div className="mob-section">
+                          <div className="mob-label">Team</div>
+                          <div className="mob-value">
+                            {(row.mkt.key || '') === 'h2h' ? shortTeam(row.out.name, row.game.sport_key) :
+                             (row.mkt.key || '').includes('spread') ? shortTeam(row.out.name, row.game.sport_key) :
+                             (row.out.name || '')}
+                          </div>
+                          <div className="mob-type">{(() => { const mk = String(row.mkt?.key || '').toLowerCase(); return (mk === 'h2h' || mk.endsWith('moneyline')) ? 'MONEYLINE' : mk.includes('spread') ? 'SPREAD' : mk.includes('total') ? 'TOTALS' : formatMarket(row.mkt?.key || ''); })()}</div>
+                        </div>
+                        <div className="mob-section">
+                          <div className="mob-label">Line</div>
+                          <div className="mob-value">{(row.mkt.key || '') === 'h2h' ? '—' : formatLine(row.out.point, row.mkt.key, mode)}</div>
+                        </div>
+                        <div className="mob-section">
+                          <div className="mob-label">Odds</div>
+                          <div className={`mob-odds ${oddsChange ? (oddsChange === 'up' ? 'up' : 'down') : ''}`}>{formatByPreference(row.out.price ?? row.out.odds ?? '')}</div>
+                          <div className="mob-sub">{cleanBookTitle(row.bk.title)}{fair != null ? ` • Fair ${formatByPreference(fair)}` : ''}</div>
+                        </div>
+                      </div>
+                    </td>
                   </tr>
                 )}
 
