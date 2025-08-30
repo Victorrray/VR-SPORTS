@@ -6,7 +6,7 @@ import styles from "./Navbar.module.css";
 
 export default function Navbar() {
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [mobileMenu, setMobileMenu] = useState(false);
 
   const isActive = (path) => location.pathname === path;
@@ -14,12 +14,7 @@ export default function Navbar() {
   const mobileLinks = [
     { label: "Home", to: "/" },
     { label: "Sportsbooks", to: "/sportsbooks" },
-    ...(user
-      ? [
-          { label: "Account", to: "/account" },
-          // Sign out will be a button in the drawer footer
-        ]
-      : [{ label: "Login", to: "/login" }]),
+    ...(user ? [{ label: "Account", to: "/account" }] : [{ label: "Login", to: "/login" }]),
   ];
 
   return (
@@ -41,22 +36,15 @@ export default function Navbar() {
       </div>
 
       <div className={styles.navLinks}>
-        <Link
-          to="/"
-          className={`${styles.link} ${isActive("/") ? styles.active : ""}`}
-        >
-          Home
-        </Link>
+        <Link to="/" className={`${styles.link} ${isActive("/") ? styles.active : ""}`}>Home</Link>
         <Link
           to="/sportsbooks"
-          className={`${styles.link} ${
-            isActive("/sportsbooks") ? styles.active : ""
-          }`}
+          className={`${styles.link} ${isActive("/sportsbooks") ? styles.active : ""}`}
         >
           Sportsbooks
         </Link>
 
-        {/* RIGHT SIDE AUTH AREA */}
+        {/* RIGHT SIDE AUTH AREA — no Sign out here */}
         {!user ? (
           <Link
             to="/login"
@@ -66,21 +54,13 @@ export default function Navbar() {
             Login
           </Link>
         ) : (
-          <div className={styles.authArea} style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
-            <Link
-              to="/account"
-              className={`${styles.link} ${isActive("/account") ? styles.active : ""}`}
-            >
-              Account
-            </Link>
-            <button
-              onClick={signOut}
-              className={styles.link}
-              style={{ background: "transparent", border: 0, cursor: "pointer" }}
-            >
-              Sign out
-            </button>
-          </div>
+          <Link
+            to="/account"
+            className={`${styles.link} ${isActive("/account") ? styles.active : ""}`}
+            style={{ marginLeft: "auto" }}
+          >
+            Account
+          </Link>
         )}
       </div>
 
@@ -100,30 +80,13 @@ export default function Navbar() {
               <Link
                 key={idx}
                 to={link.to}
-                className={`${styles.mobileLink} ${
-                  isActive(link.to) ? styles.active : ""
-                }`}
+                className={`${styles.mobileLink} ${isActive(link.to) ? styles.active : ""}`}
                 onClick={() => setMobileMenu(false)}
               >
                 {link.label}
               </Link>
             ))}
           </div>
-
-          {user && (
-            <div style={{ padding: 12 }}>
-              <button
-                onClick={() => {
-                  setMobileMenu(false);
-                  signOut();
-                }}
-                className={styles.mobileLink}
-                style={{ width: "100%", textAlign: "left" }}
-              >
-                Sign out
-              </button>
-            </div>
-          )}
         </div>
       )}
     </nav>
