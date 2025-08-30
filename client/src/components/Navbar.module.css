@@ -145,25 +145,22 @@
   .navbar {
     flex-direction: row;
     align-items: center;
+    justify-content: center;          /* center content on mobile */
     padding: 0.7em 1em;
     position: sticky;
     top: 0;
   }
-  .hamburger {
-    display: flex;
-    position: relative;
-    left: 0;
-    top: 0;
-  }
+  .hamburger { display: none; }       /* hide menu icon on mobile */
   .navLinks,
   .viewToggle,
   .centerWrap {
     display: none !important;
   }
-  /* Show logo on mobile (hide brand text to save space) */
+  /* Center brand name only */
+  .navLeft { width: 100%; display: flex; justify-content: center; }
   .brandBtn { display: inline-flex !important; padding-left: 0; }
-  .brandTitle { display: none; }
-  .brandLogo { width: 28px; height: 28px; }
+  .brandTitle { display: inline; font-size: 1.05rem; }
+  .brandLogo { display: none; }
 }
 
 /* --- MOBILE OVERLAY MENU --- */

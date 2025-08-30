@@ -59,6 +59,7 @@
 }
 
 @media (max-width: 720px) {
+  .footer { display: none; }
   .inner {
     flex-direction: column;
     align-items: flex-start;

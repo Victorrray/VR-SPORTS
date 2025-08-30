@@ -16,7 +16,7 @@
   cursor: pointer;
   font-size: 1.07em;
   box-shadow: 0 2px 7px #181b2344;
-  text-align: left;
+  text-align: center; /* center label text within the bar */
 }
 
 /* Dropdown menu */

@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import OddsTable from "../components/OddsTable";
 import SportMultiSelect from "../components/SportMultiSelect";
 import useDebounce from "../hooks/useDebounce";
+import useMarkets from "../hooks/useMarkets";
+import MobileBottomBar from "../components/MobileBottomBar";
+import MobileFiltersSheet from "../components/MobileFiltersSheet";
 
 // Which markets to show for main sportsbooks (game lines)
 const GAME_LINES = ["h2h", "spreads", "totals"];
@@ -272,7 +275,7 @@ const ALLOWED_BOOKS = new Set([
   'betrivers','sugarhouse','unibet_us','betparx','betway','si_sportsbook','betfred','superbook','circasports',
   'hardrockbet','wynnbet','barstool','foxbet','ballybet','windcreek',
   // US-friendly/offshore commonly compared
-  'bovada','betonlineag','betus','mybookieag','lowvig','betanysports',
+  'bovada','betonlineag','betus','mybookieag','lowvig','betanysports','fliff','fliff_sportsbook',
   // Exchanges and peer-to-peer (US)
   'betopenly','novig','prophetx','rebet',
   // Explicitly include Pinnacle for reference pricing
@@ -290,12 +293,38 @@ export default function SportsbookMarkets() {
   const [games, setGames] = useState([]);
   const [bookList, setBookList] = useState([]);
   const [selectedBooks, setSelectedBooks] = useState([]);
+  const [tableNonce, setTableNonce] = useState(0);
   const [quota, setQuota] = useState({ remain: "–", used: "–" });
   const [loading, setLoad] = useState(false);
   const [error, setErr] = useState(null);
   const [showAllGames, setShowAllGames] = useState(false);
   const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
   const [marketKeys, setMarketKeys] = useState(["h2h","spreads","totals"]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [oddsFormat, setOddsFormat] = useState(() => {
+    if (typeof window === 'undefined') return 'american';
+    return localStorage.getItem('oddsFormat') || 'american';
+  });
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try { localStorage.setItem('oddsFormat', oddsFormat); } catch {}
+    }
+  }, [oddsFormat]);
+  // Hydrate books list from localStorage cache on first mount (to avoid empty dropdown)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem('booksCache');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length) setBookList(arr);
+      }
+    } catch {}
+    // eslint-disable-next-line
+  }, []);
+  // Preferred default books for reset
+  const PREFERRED_BOOK_KEYS = ['draftkings', 'fanduel', 'fanatics', 'fanatics_sportsbook', 'bovada', 'fliff', 'fliff_sportsbook'];
 
   // Compute market options based on selected sports (union)
   const marketOptions = useMemo(() => {
@@ -339,13 +368,33 @@ export default function SportsbookMarkets() {
   }, [games]);
 
   const resetFilters = () => {
+    // Clear text/date inputs
+    setQuery("");
     setSelectedDate("");
-    setMarketKeys(["h2h", "spreads", "totals"]);
     setMinEV("");
+
+    // Reset sports to default selection
+    const DEFAULT_SPORTS = ["americanfootball_nfl", "americanfootball_ncaaf"];
+    setPicked(DEFAULT_SPORTS);
+
+    // Markets will auto-sync to all available for selected sports via effect
+    // No need to set here to avoid transient mismatches
+
+    // Reset books to default preferred set if available, else all available
+    // Reset to preferred books; if list is not yet loaded, effect below will correct after fetch
+    const availableKeys = new Set(bookList.map(b => b.key));
+    const preferredAvail = PREFERRED_BOOK_KEYS.filter(k => availableKeys.has(k));
+    setSelectedBooks(preferredAvail.length ? preferredAvail : PREFERRED_BOOK_KEYS);
+
+    // Remount table to reset internal state (Type filter, pagination, expansion)
+    setTableNonce(n => n + 1);
+    // Trigger a refresh so data repopulates with defaults
+    setRefreshTick(Date.now());
   };
 
   const debounced = useDebounce(query, 300);
   const BASE_URL = process.env.REACT_APP_API_URL || "";
+  const refreshDeps = useState(0); // not used directly; just for parity
 
   // Fetch sport list (defensive against non-array errors), map to friendly titles
   useEffect(() => {
@@ -392,105 +441,61 @@ export default function SportsbookMarkets() {
     // eslint-disable-next-line
   }, []);
 
-  // Fetch odds data for major sportsbooks (game lines only)
+  // Use shared hook for sportsbook odds data
+  const selectedSports = picked.includes("ALL")
+    ? sportList.filter(s => s.key !== "ALL").map(s => s.key)
+    : picked;
+  const allowedBooksArr = useMemo(() => Array.from(ALLOWED_BOOKS), []);
+  const { games: hookGames, books: hookBooks, loading: hookLoading, error: hookError, quota: hookQuota } = useMarkets({
+    sports: selectedSports,
+    markets: marketKeys.length ? marketKeys : GAME_LINES,
+    baseUrl: BASE_URL,
+    regions: "us,us2,us_ex",
+    excludeBooks: DFS_KEYS,
+    allowedBooks: allowedBooksArr,
+    refreshKey: refreshTick,
+  });
+
+  // Sync back to local state expected by existing UI
   useEffect(() => {
-    (async () => {
-      try {
-        setLoad(true);
-        setErr(null);
-        const keys = picked.includes("ALL")
-          ? sportList.filter(s => s.key !== "ALL").map(s => s.key)
-          : picked;
-
-        if (!keys.length) {
-          setGames([]);
-          setLoad(false);
-          return;
-        }
-
-        {
-          const normalizeMarkets = (arr) => {
-            const CANON = { alternate_spreads: 'spreads_alternate', alternate_totals: 'totals_alternate' };
-            const out = new Set();
-            (arr || []).forEach(k => {
-              const kk = (CANON[k] || k);
-              out.add(kk);
-            });
-            return Array.from(out);
-          };
-          const calls = keys.map(k => {
-            const selectedMarkets = (marketKeys && marketKeys.length) ? marketKeys : GAME_LINES;
-            const marketsParam = normalizeMarkets(selectedMarkets).join(",");
-            // Restrict to US and US exchanges; include us2 for broader US coverage
-            return fetch(`${BASE_URL}/api/odds-data?sport=${k}&regions=us,us2,us_ex&markets=${marketsParam}&includeBetLimits=true`)
-              .then(async r => {
-                if (r.ok && quota.remain === "–") {
-                  setQuota({
-                    remain: r.headers.get("x-requests-remaining") ?? "—",
-                    used: r.headers.get("x-requests-used") ?? "—",
-                  });
-                }
-                return r.json();
-              })
-              .catch(() => []);
-          });
-          const gamesRaw = (await Promise.all(calls)).flat();
-
-          // Remove DFS apps (keep all other bookmakers across regions)
-          const filteredGames = gamesRaw.map(g => ({
-            ...g,
-            bookmakers: (g.bookmakers || [])
-              .filter(bk => !DFS_KEYS.includes((bk.key || "").toLowerCase()))
-              .filter(bk => ALLOWED_BOOKS.has((bk.key || '').toLowerCase())),
-          }))
-          // Only include games with at least one valid sportsbook
-          .filter(g => Array.isArray(g.bookmakers) && g.bookmakers.length > 0);
-
-          setGames(filteredGames);
-
-          // Build bookmaker list from returned games (unique by key)
-          const seen = new Map();
-          const cleanBookTitle = (t) => String(t || '').replace(/\.?ag\b/gi, '').trim();
-          filteredGames.forEach(g => (g.bookmakers || []).forEach(bk => {
-            const key = (bk.key || "").toLowerCase();
-            if (!key) return;
-            if (!seen.has(key)) seen.set(key, { key, title: cleanBookTitle(bk.title || BOOK_TITLES[key] || key) });
-          }));
-          // Build list using only books actually present in the feed
-          const booksArr = Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
-          if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-            try {
-              const keys = Array.from(seen.keys());
-              // eslint-disable-next-line no-console
-              console.debug('[Sportsbooks] bookmakers in feed:', keys);
-            } catch {}
-          }
-          setBookList(booksArr);
-          // Preferred default selection if available
-          const availableKeys = new Set(booksArr.map(b => b.key));
-          const PREFERRED = ['bovada', 'fliff', 'fanduel', 'draftkings'];
-          const preferredAvail = PREFERRED.filter(k => availableKeys.has(k));
-          // Sync current selection to available set (delist books with no responses)
-          if (booksArr.length) {
-            if (selectedBooks.length === 0) {
-              setSelectedBooks(preferredAvail.length ? preferredAvail : booksArr.map(b => b.key));
-            } else {
-              const intersect = selectedBooks.filter(k => availableKeys.has(k));
-              if (intersect.length !== selectedBooks.length) {
-                setSelectedBooks(intersect.length ? intersect : (preferredAvail.length ? preferredAvail : booksArr.map(b => b.key)));
-              }
-            }
-          }
-        }
-      } catch (e) {
-        setErr(e.message);
-        setGames([]);
-      } finally {
-        setLoad(false);
+    setGames(hookGames || []);
+    setLoad(!!hookLoading);
+    setErr(hookError || null);
+    setQuota(hookQuota || { remain: "–", used: "–" });
+    // Avoid clearing the Books menu during refresh; update only when we have data
+    if (Array.isArray(hookBooks) && hookBooks.length > 0) {
+      setBookList(hookBooks);
+      // Persist to cache for the next load
+      if (typeof window !== 'undefined') {
+        try { localStorage.setItem('booksCache', JSON.stringify(hookBooks)); } catch {}
       }
-    })();
+    }
+  }, [hookGames, hookLoading, hookError, hookQuota, hookBooks]);
+
+  // Derive an effective book filter that only includes available books.
+  // If none of the currently selected books are available, fall back to no filter (show all).
+  const availableBookKeys = useMemo(() => new Set((bookList || []).map(b => b.key)), [bookList]);
+  const effectiveSelectedBooks = useMemo(() => {
+    const filtered = (selectedBooks || []).filter(k => availableBookKeys.has(k));
+    return filtered.length ? filtered : [];
+  }, [selectedBooks, availableBookKeys]);
+
+  // Ensure selected books stay within available list; if none, prefer defaults
+  useEffect(() => {
+    const booksArr = bookList || [];
+    const availableKeys = new Set(booksArr.map(b => b.key));
+    if (!booksArr.length) return;
+    // Intersect current selection with available keys
+    const intersect = (selectedBooks || []).filter(k => availableKeys.has(k));
+    if (intersect.length) {
+      if (intersect.length !== selectedBooks.length) setSelectedBooks(intersect);
+    } else {
+      // Select preferred defaults if none from current selection are available
+      const prefer = PREFERRED_BOOK_KEYS.filter(k => availableKeys.has(k));
+      setSelectedBooks(prefer.length ? prefer : booksArr.map(b => b.key));
+    }
     // eslint-disable-next-line
-  }, [picked, sportList, marketKeys, refreshTick]);
+  }, [bookList]);
 
   // Filtering before passing to OddsTable
   let filteredGames = games;
@@ -526,43 +531,59 @@ export default function SportsbookMarkets() {
 
   return (
     <main className="page-wrap">
-      <div className="market-container">
-        <div className="filters-mobile filters-two-line">
-          {/* Row 1: Search + Date */}
-          <div className="filters-row two-line-row">
-            <div className="filter-group search-ev" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <div className="market-container two-col">
+        <aside className="filters-sidebar">
+          <div className="filter-stack">
+            {/* Settings panel (remains near top for readability) */}
+            {settingsOpen && (
+              <div
+                role="dialog"
+                aria-label="Settings"
+                style={{
+                  marginBottom: '10px', padding: '10px', border: '1px solid #334c',
+                  background: '#11192c', borderRadius: 10
+                }}
+              >
+                <div style={{ fontWeight: 800, marginBottom: 6 }}>Odds Format</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {[
+                    { k: 'american', label: 'American' },
+                    { k: 'decimal', label: 'Decimal' },
+                    { k: 'fractional', label: 'Fractional' },
+                  ].map(opt => (
+                    <label key={opt.k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 8, border: '1px solid #334c' }}>
+                      <input
+                        type="radio"
+                        name="odds-format"
+                        value={opt.k}
+                        checked={oddsFormat === opt.k}
+                        onChange={() => setOddsFormat(opt.k)}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="filter-group">
+              <span className="filter-label">Search</span>
               <input
                 placeholder={"Search team / league"}
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                style={{ minWidth: 210 }}
               />
-              <div className="filter-group">
-                <span className="filter-label">Date</span>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  aria-label="Filter by date"
-                  title="Filter by date"
-                />
-              </div>
             </div>
-          </div>
-
-          {/* Row 2: Markets + Sports + Books */}
-          <div className="filters-row two-line-row">
-            <div className="filter-group" style={{ minWidth: 200 }}>
-              <span className="filter-label">Markets</span>
-            <SportMultiSelect
-              list={marketOptions}
-              selected={marketKeys}
-              onChange={setMarketKeys}
-              placeholderText="Choose markets…"
-              allLabel="All Markets"
-            />
+            <div className="filter-group">
+              <span className="filter-label">Date</span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                aria-label="Filter by date"
+                title="Filter by date"
+              />
             </div>
-            <div className="filter-group" style={{ minWidth: 220 }}>
+            <div className="filter-group">
               <span className="filter-label">Sports</span>
               <SportMultiSelect
                 list={sportList}
@@ -572,7 +593,7 @@ export default function SportsbookMarkets() {
                 allLabel="All Sports"
               />
             </div>
-            <div className="filter-group" style={{ minWidth: 220 }}>
+            <div className="filter-group">
               <span className="filter-label">Books</span>
               <SportMultiSelect
                 list={bookList}
@@ -580,31 +601,108 @@ export default function SportsbookMarkets() {
                 onChange={setSelectedBooks}
                 placeholderText="Choose books…"
                 allLabel="All Books"
+                grid={true}
+                columns={2}
+                leftAlign={true}
               />
             </div>
-          </div>
-
-          {/* Row 3: Actions under dropdowns */}
-          <div className="filters-row two-line-row actions-row">
-            <div className="filter-group actions-left">
-              <button type="button" className="btn btn-primary" onClick={() => setRefreshTick(Date.now())}>Refresh</button>
-              <button type="button" className="btn btn-ghost" onClick={resetFilters}>Reset</button>
+            <div className="filter-actions">
+              <button type="button" className="btn btn-primary btn-lg" onClick={() => setRefreshTick(Date.now())}>Refresh</button>
+              <button type="button" className="btn btn-danger btn-lg" onClick={resetFilters}>Reset</button>
             </div>
-            <div className="filter-group results-right">
+            <div className="filters-meta">
               <span className="filters-count">Results: {filteredGames.length}</span>
             </div>
           </div>
-        </div>
-        <OddsTable
-          games={filteredGames}
-          pageSize={15}
-          mode={"game"}
-          bookFilter={selectedBooks}
-          marketFilter={marketKeys}
-          evMin={minEV === '' ? null : Number(minEV)}
-          loading={loading}
-          allCaps={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('caps') === '1'}
-        />
+          {/* Bottom-left gear button */}
+          <button
+            type="button"
+            aria-label="Settings"
+            title="Settings"
+            onClick={() => setSettingsOpen(v => !v)}
+            style={{
+              position: 'absolute',
+              left: 12,
+              bottom: 12,
+              background: 'transparent',
+              border: 'none',
+              color: '#e7ecff',
+              cursor: 'pointer',
+              fontSize: '20px',
+              lineHeight: 1,
+              padding: 6,
+              borderRadius: 8,
+            }}
+          >
+            ⚙️
+          </button>
+        </aside>
+        <section className="table-area">
+          <OddsTable
+            key={tableNonce}
+            games={filteredGames}
+            pageSize={15}
+            mode={"game"}
+            bookFilter={effectiveSelectedBooks}
+            marketFilter={marketKeys}
+            evMin={minEV === '' ? null : Number(minEV)}
+            loading={loading}
+            error={error}
+            oddsFormat={oddsFormat}
+            allCaps={typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('caps') === '1'}
+          />
+        </section>
+        {/* Mobile footer nav + filter pill */}
+        <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" />
+        <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
+          <div className="filter-stack" style={{ maxWidth: 680, margin: '0 auto' }}>
+            <div className="filter-group">
+              <span className="filter-label">Search</span>
+              <input
+                placeholder={"Search team / league"}
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+              />
+            </div>
+            <div className="filter-group">
+              <span className="filter-label">Date</span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                aria-label="Filter by date"
+                title="Filter by date"
+              />
+            </div>
+            <div className="filter-group">
+              <span className="filter-label">Sports</span>
+              <SportMultiSelect
+                list={sportList}
+                selected={picked}
+                onChange={setPicked}
+                placeholderText="Choose sports…"
+                allLabel="All Sports"
+              />
+            </div>
+            <div className="filter-group">
+              <span className="filter-label">Books</span>
+              <SportMultiSelect
+                list={bookList}
+                selected={selectedBooks}
+                onChange={setSelectedBooks}
+                placeholderText="Choose books…"
+                allLabel="All Books"
+                grid={true}
+                columns={2}
+                leftAlign={true}
+              />
+            </div>
+            <div className="filter-actions">
+              <button type="button" className="btn btn-primary btn-lg" onClick={() => { setRefreshTick(Date.now()); setMobileFiltersOpen(false); }}>Apply</button>
+              <button type="button" className="btn btn-danger btn-lg" onClick={() => { resetFilters(); setMobileFiltersOpen(false); }}>Reset</button>
+            </div>
+          </div>
+        </MobileFiltersSheet>
       </div>
     </main>
   );

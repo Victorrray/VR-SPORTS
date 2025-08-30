@@ -11,6 +11,9 @@ export default function SportMultiSelect({
   disabled,
   placeholderText = "Choose sports…",
   allLabel = "All Sports",
+  grid = false,
+  columns = 2,
+  leftAlign = false,
 }) {
   const [open, setOpen] = useState(false);
   const boxRef = useRef(null);
@@ -54,7 +57,16 @@ export default function SportMultiSelect({
       </button>
 
       {open && (
-        <ul className="ms-menu">
+        <ul
+          className="ms-menu"
+          style={grid ? {
+            display: 'grid',
+            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            columnGap: '10px',
+            rowGap: '6px',
+            textAlign: leftAlign ? 'left' : 'center',
+          } : (leftAlign ? { textAlign: 'left' } : undefined)}
+        >
           {/* All master switch */}
           <li style={{ borderBottom: "1px solid #444", paddingBottom: 4, marginBottom: 4 }}>
             <label>
@@ -69,7 +81,7 @@ export default function SportMultiSelect({
 
           {/* individual leagues */}
           {list.map(s => (
-            <li key={s.key}>
+            <li key={s.key} style={leftAlign ? { textAlign: 'left' } : undefined}>
               <label>
                 <input
                   type="checkbox"

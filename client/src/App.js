@@ -68,13 +68,17 @@ function AppRoutes() {
         </div>
       </div>
     }>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/sportsbooks" element={<SportsbookMarkets />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <Footer />
+      <div className="app-shell">
+        <Navbar />
+        <div className="app-body">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/sportsbooks" element={<SportsbookMarkets />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+        <Footer />
+      </div>
     </React.Suspense>
   );
 }

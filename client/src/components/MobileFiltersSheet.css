@@ -1,0 +1,55 @@
+.mfs-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,12,22,0.55);
+  z-index: 2000;
+  display: none;
+}
+.mfs-sheet {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: #0f1626;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  border: 1px solid #334c;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.45);
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  transition: transform 160ms ease;
+  overflow-y: auto; /* allow sheet to scroll; menus can overflow */
+}
+.mfs-grabber {
+  width: 48px; height: 4px;
+  border-radius: 999px;
+  background: #667;
+  opacity: 0.6;
+  margin: 10px auto 6px auto;
+}
+.mfs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+.mfs-title { font-weight: 900; letter-spacing: 0.02em; }
+.mfs-close {
+  background: transparent; border: none; color: #e7ecff; cursor: pointer;
+  font-size: 26px; line-height: 1; padding: 4px 8px; border-radius: 8px;
+}
+.mfs-content { padding: 10px 12px; overflow: visible; }
+
+/* Improve spacing of filters within the sheet */
+.mfs-content .filter-stack { gap: 14px; }
+.mfs-content .filter-group { margin-bottom: 8px; }
+
+/* Make dropdowns open upward inside the sheet */
+.mfs-content .ms-menu {
+  top: auto !important;
+  bottom: 110% !important;
+}
+
+@media (max-width: 720px) {
+  .mfs-backdrop { display: block; }
+}
