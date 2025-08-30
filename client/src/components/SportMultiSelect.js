@@ -1,9 +1,9 @@
+// src/components/SportMultiSelect.js
 import React, { useState, useRef, useEffect } from "react";
 import ReactDOM from "react-dom";
 import "./SportMultiSelect.css";
 
-/* helper — returns an array of keys for the whole list (exclude synthetic ALL) */
-const allKeys = list => list.filter(s => s.key !== "ALL").map(s => s.key);
+const allKeys = (list) => list.filter(s => s.key !== "ALL").map(s => s.key);
 
 export default function SportMultiSelect({
   list,
@@ -16,73 +16,105 @@ export default function SportMultiSelect({
   columns = 2,
   leftAlign = false,
   usePortal = false,
-  portalAlign = 'down', // 'down' or 'up'
+  // 'down' | 'up' | 'auto'  (auto = pick best based on space; default is auto on mobile)
+  portalAlign = "down",
 }) {
   const [open, setOpen] = useState(false);
   const boxRef = useRef(null);
   const menuRef = useRef(null);
   const [portalStyle, setPortalStyle] = useState({});
+  const [actualAlign, setActualAlign] = useState(portalAlign);
 
-  /* close dropdown on outside click */
+  // Use a portal automatically on small screens
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 800;
+  const shouldPortal = usePortal || isMobile;
+
+  // Close on outside click
   useEffect(() => {
-    const h = e => {
+    const h = (e) => {
       const box = boxRef.current;
       const menu = menuRef.current;
       if (!box) return setOpen(false);
-      if (box.contains(e.target)) return; // click inside toggle
-      if (menu && menu.contains && menu.contains(e.target)) return; // click inside portal menu
+      if (box.contains(e.target)) return;
+      if (menu && menu.contains && menu.contains(e.target)) return;
       setOpen(false);
     };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  /* position portal menu on open/resize/scroll */
+  // Position + size portal menu; auto-flip on mobile
   useEffect(() => {
-    if (!open || !usePortal) return;
+    if (!open || !shouldPortal) return;
+
     const compute = () => {
       const el = boxRef.current;
       if (!el) return;
+
       const r = el.getBoundingClientRect();
-      const base = {
-        position: 'fixed',
-        zIndex: 9999,
-        minWidth: Math.max(r.width, 200),
-        left: Math.max(8, Math.min(r.left, window.innerWidth - 8 - Math.max(r.width, 200))),
-      };
-      if (portalAlign === 'up') {
-        base.bottom = Math.max(8, window.innerHeight - r.top + 8);
-      } else {
-        base.top = Math.min(window.innerHeight - 8, r.bottom + 8);
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const pad = 12;
+      const minW = Math.max(r.width, 220);
+
+      // available space
+      const spaceAbove = r.top - pad;
+      const spaceBelow = vh - r.bottom - pad - 80; // 80px guess for bottom actions
+
+      // Decide direction
+      let align = portalAlign;
+      if (isMobile && (portalAlign === "down" || portalAlign === "auto")) {
+        // prefer "up" on mobile if below space is tight
+        align = spaceBelow < 240 && spaceAbove > spaceBelow ? "up" : "down";
       }
+      if (portalAlign === "auto") {
+        align = spaceAbove > spaceBelow ? "up" : "down";
+      }
+      setActualAlign(align);
+
+      const base = {
+        position: "fixed",
+        zIndex: 2000,
+        minWidth: minW,
+        left: Math.max(pad, Math.min(r.left, vw - pad - minW)),
+        borderRadius: 12,
+        overflow: "auto",
+      };
+
+      if (align === "up") {
+        base.bottom = Math.max(8, vh - r.top + 8);
+        base.maxHeight = Math.max(160, spaceAbove);
+      } else {
+        base.top = Math.min(vh - pad, r.bottom + 8);
+        base.maxHeight = Math.max(160, spaceBelow);
+      }
+
       setPortalStyle(base);
     };
-    compute();
-    window.addEventListener('resize', compute);
-    window.addEventListener('scroll', compute, true);
-    return () => {
-      window.removeEventListener('resize', compute);
-      window.removeEventListener('scroll', compute, true);
-    };
-  }, [open, usePortal, portalAlign]);
 
-  /* toggle one league */
-  const toggle = key =>
+    compute();
+    window.addEventListener("resize", compute);
+    window.addEventListener("scroll", compute, true);
+    return () => {
+      window.removeEventListener("resize", compute);
+      window.removeEventListener("scroll", compute, true);
+    };
+  }, [open, shouldPortal, portalAlign, isMobile]);
+
+  const toggleOne = (key) =>
     selected.includes(key)
-      ? onChange(selected.filter(k => k !== key))
+      ? onChange(selected.filter((k) => k !== key))
       : onChange([...selected, key]);
 
-  /* “All” handlers */
   const keysOnly = allKeys(list);
-  const allSelected = keysOnly.length > 0 && keysOnly.every(k => selected.includes(k));
+  const allSelected = keysOnly.length > 0 && keysOnly.every((k) => selected.includes(k));
   const toggleAll = () => (allSelected ? onChange([]) : onChange(keysOnly));
 
-  /* label when closed */
   const label = (() => {
     if (!selected.length) return placeholderText;
     if (allSelected) return allLabel;
     if (selected.length === 1) {
-      const item = list.find(s => s.key === selected[0]);
+      const item = list.find((s) => s.key === selected[0]);
       return item?.title || selected[0];
     }
     return `${selected.length} selected`;
@@ -92,61 +124,31 @@ export default function SportMultiSelect({
     <div className={`ms-wrap ${disabled ? "disabled" : ""}`} ref={boxRef}>
       <button
         className="ms-toggle"
-        onClick={() => !disabled && setOpen(o => !o)}
+        onClick={() => !disabled && setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
       >
         {label} ▾
       </button>
 
-      {open && !usePortal && (
+      {/* Non-portal desktop dropdown */}
+      {open && !shouldPortal && (
         <ul
           className="ms-menu"
-          style={grid ? {
-            display: 'grid',
-            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-            columnGap: '10px',
-            rowGap: '6px',
-            textAlign: leftAlign ? 'left' : 'center',
-          } : (leftAlign ? { textAlign: 'left' } : undefined)}
-        >
-          {/* All master switch */}
-          <li style={{ borderBottom: "1px solid #444", paddingBottom: 4, marginBottom: 4 }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={allSelected}
-                onChange={toggleAll}
-              />{" "}
-              <strong>{allLabel}</strong>
-            </label>
-          </li>
-
-          {/* individual leagues */}
-          {list.map(s => (
-            <li key={s.key} style={leftAlign ? { textAlign: 'left' } : undefined}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selected.includes(s.key)}
-                  onChange={() => toggle(s.key)}
-                />{" "}
-                {s.title}
-              </label>
-            </li>
-          ))}
-        </ul>
-      )}
-      {open && usePortal && typeof document !== 'undefined' && ReactDOM.createPortal(
-        <ul
-          ref={menuRef}
-          className="ms-menu"
-          style={{
-            position: 'fixed',
-            ...portalStyle,
-            width: 'calc(100vw - 48px)',
-            maxWidth: 720,
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
+          role="listbox"
+          style={
+            grid
+              ? {
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                  columnGap: "10px",
+                  rowGap: "6px",
+                  textAlign: leftAlign ? "left" : "center",
+                }
+              : leftAlign
+              ? { textAlign: "left" }
+              : undefined
+          }
         >
           <li style={{ borderBottom: "1px solid #444", paddingBottom: 4, marginBottom: 4 }}>
             <label>
@@ -154,17 +156,46 @@ export default function SportMultiSelect({
               <strong>{allLabel}</strong>
             </label>
           </li>
-          {list.map(s => (
-            <li key={s.key} style={{ textAlign: leftAlign ? 'left' : 'center' }}>
+          {list.map((s) => (
+            <li key={s.key} style={leftAlign ? { textAlign: "left" } : undefined}>
               <label>
-                <input type="checkbox" checked={selected.includes(s.key)} onChange={() => toggle(s.key)} />{" "}
+                <input type="checkbox" checked={selected.includes(s.key)} onChange={() => toggleOne(s.key)} />{" "}
                 {s.title}
               </label>
             </li>
           ))}
-        </ul>,
-        document.body
+        </ul>
       )}
+
+      {/* Portal dropdown (mobile / forced) */}
+      {open &&
+        shouldPortal &&
+        typeof document !== "undefined" &&
+        ReactDOM.createPortal(
+          <ul
+            ref={menuRef}
+            className="ms-menu ms-menu-portal"
+            role="listbox"
+            data-align={actualAlign}
+            style={portalStyle}
+          >
+            <li style={{ borderBottom: "1px solid #444", paddingBottom: 4, marginBottom: 4 }}>
+              <label>
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} />{" "}
+                <strong>{allLabel}</strong>
+              </label>
+            </li>
+            {list.map((s) => (
+              <li key={s.key} style={{ textAlign: leftAlign ? "left" : "center" }}>
+                <label>
+                  <input type="checkbox" checked={selected.includes(s.key)} onChange={() => toggleOne(s.key)} />{" "}
+                  {s.title}
+                </label>
+              </li>
+            ))}
+          </ul>,
+          document.body
+        )}
     </div>
   );
 }

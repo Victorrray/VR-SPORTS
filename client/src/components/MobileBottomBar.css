@@ -63,3 +63,23 @@
 .mobile-tab.align-left { text-align: left; }
 .mobile-tab.align-center { text-align: center; }
 .mobile-tab.align-right { text-align: right; }
+
+/* Allow 4 tabs to breathe on narrow phones */
+.mobile-nav { max-width: 700px; }
+
+/* New alignment slot for Profile tab */
+.mobile-tab.align-profile { text-align: right; }
+
+/* Slightly tighter labels on very small screens */
+@media (max-width: 380px) {
+  .tab-label { font-size: 12px; }
+  .tab-icon { font-size: 20px; }
+}
+
+/* Keep it above drawers/sheets if any */
+.mobile-bottom-bar { z-index: 60; }
+
+/* Give page content room so bar doesn't cover it */
+@media (max-width: 720px) {
+  .app-body { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+}

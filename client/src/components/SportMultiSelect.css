@@ -127,3 +127,32 @@
     grid-template-columns: repeat(4, minmax(200px, 1fr));
   }
 }
+
+/* ============== Portal override (renders on document.body) ============== */
+.ms-menu.ms-menu-portal {
+  position: fixed;         /* not absolute: escape parent clipping */
+  z-index: 2000;           /* above sheets/bottom bar */
+  left: auto;              /* JS computes left/right/top/bottom */
+  right: auto;
+  top: auto;
+  bottom: auto;
+  transform: none;         /* don't center with translateX - we compute position */
+  width: auto;             /* JS sets minWidth; allow width to fit */
+  max-height: 70vh;        /* scroll if too tall (JS also caps by space) */
+  overflow: auto;
+  border-radius: 12px;
+}
+
+/* On very small phones, allow near-full width */
+@media (max-width: 600px) {
+  .ms-menu.ms-menu-portal {
+    max-width: calc(100vw - 24px);
+  }
+}
+
+/* Make sure non-portal rules don't re-center portal */
+.ms-menu:not(.ms-menu-portal) {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}

@@ -1,0 +1,141 @@
+.account-page {
+  max-width: 760px;
+  margin: 1.75rem auto;
+  padding: 0 1rem 120px;
+}
+
+.account-page.not-signed {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+}
+.not-signed-inner {
+  text-align: center;
+  opacity: 0.9;
+}
+
+.account-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+.account-header p {
+  margin: 6px 0 0;
+  opacity: 0.8;
+}
+
+/* Card */
+.card {
+  padding: 18px;
+  border: 1px solid #2a3255;
+  border-radius: 16px;
+  background: #121a2b;
+  margin-bottom: 16px;
+}
+.card h2 {
+  margin: 0 0 14px;
+  font-size: 1.15rem;
+}
+
+/* Profile */
+.profile {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 22px;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 50%, #0b1020),
+    var(--accent)
+  );
+  border: 1px solid #2a3255;
+}
+.email-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.user-id {
+  margin-top: 8px;
+  opacity: 0.9;
+  font-size: 14px;
+}
+.copy-btn {
+  margin-left: 8px;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid #2a3255;
+  background: #1b2137;
+  color: #e7e9ee;
+  cursor: pointer;
+}
+
+/* Providers */
+.providers {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.provider {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #1b2137;
+  border: 1px solid #2a3255;
+  color: #bbcbff;
+  text-transform: capitalize;
+}
+
+/* Badges */
+.badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.badge.verified {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #a7f3d0;
+}
+.badge.not-verified {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fde68a;
+}
+
+/* Actions */
+.actions {
+  display: grid;
+  gap: 10px;
+}
+.actions button {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #2a3255;
+  background: #23263a;
+  color: #e7e9ee;
+  font-weight: 800;
+  cursor: pointer;
+}
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.actions button.danger {
+  border: 1px solid #7f1d1d;
+  background: #3f1f22;
+  color: #fecaca;
+}
