@@ -139,3 +139,81 @@
   background: #3f1f22;
   color: #fecaca;
 }
+
+/* ---------- Username editor ---------- */
+.username-row {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.username-left .label {
+  opacity: 0.8;
+  margin-right: 6px;
+}
+.username-left .muted {
+  opacity: 0.65;
+}
+
+.username-editor {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #101628;
+  border: 1px solid #2a3255;
+}
+
+.username-editor .field input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #334c;
+  background: #1b2340;
+  color: #e7ecff;
+  outline: none;
+}
+.username-editor .field input:focus {
+  border-color: var(--accent, #4e7bff);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #4e7bff) 25%, transparent);
+}
+.username-editor .hint {
+  font-size: 12.5px;
+  opacity: 0.8;
+  margin-top: 6px;
+}
+
+/* Buttons used inside the username section */
+.username-row .btn,
+.username-editor .btn {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid #2a3255;
+  background: #243055;
+  color: #e7ecff;
+  font-weight: 800;
+  cursor: pointer;
+}
+.username-editor .btn.primary {
+  background: var(--accent, #4e7bff);
+  border-color: transparent;
+  color: #fff;
+}
+.username-editor .btn.ghost {
+  background: transparent;
+}
+
+/* Small screens */
+@media (max-width: 560px) {
+  .username-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .username-row .btn {
+    justify-self: start;
+  }
+}

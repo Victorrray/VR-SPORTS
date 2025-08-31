@@ -1,10 +1,28 @@
+:root {
+  --mobile-gutter: max(16px, env(safe-area-inset-left));
+  --mobile-extra-inset: 8px;
+}
+
 .mobile-bottom-bar {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  z-index: 40;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom)) 12px;
-  background: linear-gradient(180deg, transparent, rgba(10, 12, 22, 0.85) 30%, rgba(10, 12, 22, 0.95));
+  z-index: 60;
   display: none;
+  box-sizing: border-box;
+  padding-top: 10px;
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent, rgba(10, 12, 22, 0.85) 30%, rgba(10, 12, 22, 0.95));
+}
+
+.mobile-bottom-bar .filter-pill,
+.mobile-nav {
+  margin-left: calc(var(--mobile-gutter) + var(--mobile-extra-inset));
+  margin-right: calc(var(--mobile-gutter) + var(--mobile-extra-inset));
+  inline-size: auto;
+  max-inline-size: none;
+  box-sizing: border-box;
 }
 
 .mobile-bottom-bar .filter-pill {
@@ -12,9 +30,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 0 auto 10px auto;
-  width: 92%;
-  max-width: 560px;
+  margin-bottom: 10px;
   border-radius: 18px;
   border: 1px solid #334c;
   background: #2a3046;
@@ -25,16 +41,13 @@
 
 .mobile-nav {
   display: flex;
-  justify-content: space-between; /* distribute across the bar */
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
   background: rgba(15, 18, 30, 0.8);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 18px;
-  padding: 14px 16px;        /* bigger touch target */
-  width: 92%;
-  max-width: 620px;          /* allow a bit wider on large phones */
-  margin: 0 auto;            /* center the bar itself */
+  padding: 14px 16px;
 }
 
 .mobile-tab {
@@ -42,44 +55,31 @@
   color: #aeb6d6;
   display: flex;
   flex-direction: column;
-  align-items: center;         /* keep icon centered over label */
-  gap: 8px;                  /* space between icon and label */
-  padding: 10px 10px;        /* bigger hit area */
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px;
   border-radius: 12px;
-  flex: 1 1 0;               /* equal segments */
+  flex: 1 1 0;
 }
 .mobile-tab.active { color: #ffd96b; font-weight: 900; }
 .tab-icon { font-size: 22px; line-height: 1; }
 .tab-label { font-size: 13.5px; font-weight: 700; }
 
-.mobile-bottom-spacer { height: 110px; display: none; }
+.mobile-tab.align-left   { text-align: left; }
+.mobile-tab.align-center { text-align: center; }
+.mobile-tab.align-right  { text-align: right; }
+.mobile-tab.align-profile{ text-align: right; }
 
 @media (max-width: 720px) {
   .mobile-bottom-bar { display: block; }
-  .mobile-bottom-spacer { display: block; }
+  .mobile-bottom-spacer {
+    display: block;
+    height: calc(110px + env(safe-area-inset-bottom));
+  }
+  .app-body { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
 }
 
-/* Alignment overrides per tab (text alignment only; icons remain centered above text) */
-.mobile-tab.align-left { text-align: left; }
-.mobile-tab.align-center { text-align: center; }
-.mobile-tab.align-right { text-align: right; }
-
-/* Allow 4 tabs to breathe on narrow phones */
-.mobile-nav { max-width: 700px; }
-
-/* New alignment slot for Profile tab */
-.mobile-tab.align-profile { text-align: right; }
-
-/* Slightly tighter labels on very small screens */
 @media (max-width: 380px) {
   .tab-label { font-size: 12px; }
   .tab-icon { font-size: 20px; }
-}
-
-/* Keep it above drawers/sheets if any */
-.mobile-bottom-bar { z-index: 60; }
-
-/* Give page content room so bar doesn't cover it */
-@media (max-width: 720px) {
-  .app-body { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
 }
