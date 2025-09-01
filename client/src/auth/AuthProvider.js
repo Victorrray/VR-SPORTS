@@ -102,15 +102,27 @@ export function AuthProvider({ children }) {
     if (!user) return { error: 'No user logged in' };
     
     try {
-      // Save to localStorage for persistence
-      localStorage.setItem(`username_${user.id}`, username);
-      
-      // Update user metadata
-      const { error } = await supabase.auth.updateUser({
+      // Save to database first
+      const { error: dbError } = await supabase
+        .from("profiles")
+        .upsert({ id: user.id, username });
+
+      if (dbError) {
+        if (dbError.code === "23505") {
+          return { error: 'Username already taken' };
+        }
+        throw dbError;
+      }
+
+      // Update auth metadata
+      const { error: authError } = await supabase.auth.updateUser({
         data: { username }
       });
       
-      if (error) throw error;
+      if (authError) throw authError;
+      
+      // Save to localStorage for persistence
+      localStorage.setItem(`username_${user.id}`, username);
       
       // Update local user state
       setUser(prev => ({

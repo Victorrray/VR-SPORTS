@@ -72,29 +72,39 @@ export default function Account() {
     if (status !== "ok") return;
 
     setStatus("saving");
-    const { error } = await supabase
-      .from("profiles")
-      .update({ username: v })
-      .eq("id", user.id);
+    
+    try {
+      // Save to database first
+      const { error: dbError } = await supabase
+        .from("profiles")
+        .upsert({ id: user.id, username: v });
 
-    if (!error) {
+      if (dbError) {
+        // Taken (unique violation)
+        if (dbError.code === "23505") {
+          setStatus("taken");
+          return;
+        }
+        throw dbError;
+      }
+
+      // Update auth metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { username: v }
+      });
+
+      if (authError) throw authError;
+
+      // Save to localStorage for persistence
+      localStorage.setItem(`username_${user.id}`, v);
+
       setUsername(v);
       setEditingUN(false);
       setStatus("saved");
-      return;
+    } catch (error) {
+      console.error("Error saving username:", error);
+      setStatus("error");
     }
-    // Taken (unique violation)
-    if (error.code === "23505") {
-      setStatus("taken");
-      return;
-    }
-    // Locked by trigger (set-once)
-    if (error.code === "P0001" && /USERNAME_LOCKED/i.test(error.message || "")) {
-      setStatus("locked");
-      setEditingUN(false);
-      return;
-    }
-    setStatus("error");
   }
 
   const email =

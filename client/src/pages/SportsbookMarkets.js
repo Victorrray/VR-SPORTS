@@ -502,7 +502,10 @@ export default function SportsbookMarkets() {
       (g) =>
         (g.home_team && g.home_team.toLowerCase().includes(q)) ||
         (g.away_team && g.away_team.toLowerCase().includes(q)) ||
-        (g.sport_title && g.sport_title.toLowerCase().includes(q))
+        (g.sport_title && g.sport_title.toLowerCase().includes(q)) ||
+        // Also search by league/sport
+        (getSportLeague(g.sport_key).league.toLowerCase().includes(q)) ||
+        (getSportLeague(g.sport_key).sport.toLowerCase().includes(q))
     );
   }
 
