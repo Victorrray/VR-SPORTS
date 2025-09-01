@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Search, User } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
+import MobileSearchModal from "./MobileSearchModal";
 import styles from "./Navbar.module.css";
 
 export default function Navbar() {
@@ -12,6 +13,7 @@ export default function Navbar() {
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [q, setQ] = useState("");
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
@@ -36,6 +38,13 @@ export default function Navbar() {
     navigate(`/sportsbooks?${params.toString()}`);
   }
 
+  function handleMobileSearch(searchTerm) {
+    const params = new URLSearchParams(location.search);
+    if (searchTerm) params.set("q", searchTerm);
+    else params.delete("q");
+    navigate(`/sportsbooks?${params.toString()}`);
+  }
+
   return (
     <nav className={styles.navbar}>
       <button
@@ -53,7 +62,7 @@ export default function Navbar() {
         <button 
           className={styles.mobileSearchBtn} 
           aria-label="Search"
-          onClick={() => document.querySelector('.nav-search input')?.focus()}
+          onClick={() => setShowMobileSearch(true)}
         >
           <Search size={20} />
         </button>
@@ -142,6 +151,14 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Mobile Search Modal */}
+      <MobileSearchModal 
+        isOpen={showMobileSearch}
+        onClose={() => setShowMobileSearch(false)}
+        onSearch={handleMobileSearch}
+        currentQuery={q}
+      />
     </nav>
   );
 }

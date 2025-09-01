@@ -1,0 +1,279 @@
+/* Scores Loading Skeleton */
+.scores-loading-container {
+  padding: 16px;
+}
+
+.scores-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .scores-skeleton-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.score-skeleton-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  animation: skeletonCardPulse 2s ease-in-out infinite;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.skeleton-status {
+  width: 60px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 10px;
+  opacity: 0.2;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-time {
+  width: 80px;
+  height: 14px;
+  background: var(--text-muted);
+  border-radius: 3px;
+  opacity: 0.2;
+  animation: skeletonPulse 1.5s ease-in-out infinite 0.2s;
+}
+
+.skeleton-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.skeleton-team-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-team-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skeleton-logo {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  border-radius: 6px;
+  opacity: 0.2;
+  animation: skeletonPulse 1.5s ease-in-out infinite 0.1s;
+}
+
+.skeleton-team-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.skeleton-team-name {
+  width: 120px;
+  height: 16px;
+  background: var(--text-primary);
+  border-radius: 4px;
+  opacity: 0.3;
+  animation: skeletonPulse 1.5s ease-in-out infinite 0.3s;
+}
+
+.skeleton-team-rank {
+  width: 30px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 6px;
+  opacity: 0.2;
+  animation: skeletonPulse 1.5s ease-in-out infinite 0.4s;
+}
+
+.skeleton-score {
+  width: 30px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 4px;
+  opacity: 0.25;
+  animation: skeletonPulse 1.5s ease-in-out infinite 0.5s;
+}
+
+.skeleton-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-odds-line {
+  width: 150px;
+  height: 12px;
+  background: var(--text-secondary);
+  border-radius: 3px;
+  opacity: 0.2;
+  animation: skeletonPulse 1.5s ease-in-out infinite 0.6s;
+}
+
+.skeleton-reactions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.skeleton-reaction {
+  width: 40px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 12px;
+  opacity: 0.15;
+  animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-reaction:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.skeleton-add-reaction {
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: skeletonPulse 1.5s ease-in-out infinite 0.2s;
+}
+
+/* Pulse Animations */
+@keyframes skeletonPulse {
+  0% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes skeletonCardPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile Loading Screen */
+.mobile-scores-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.mobile-loading-spinner {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.mobile-spinner-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+}
+
+.mobile-spinner-ring:nth-child(1) {
+  border-top-color: var(--accent);
+  animation-delay: 0s;
+}
+
+.mobile-spinner-ring:nth-child(2) {
+  border-right-color: var(--accent-hover);
+  animation-delay: -0.4s;
+  width: 75%;
+  height: 75%;
+  top: 12.5%;
+  left: 12.5%;
+}
+
+.mobile-spinner-ring:nth-child(3) {
+  border-bottom-color: var(--accent-light);
+  animation-delay: -0.8s;
+  width: 50%;
+  height: 50%;
+  top: 25%;
+  left: 25%;
+}
+
+.mobile-loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.mobile-loading-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .score-skeleton-card,
+  .skeleton-status,
+  .skeleton-time,
+  .skeleton-logo,
+  .skeleton-team-name,
+  .skeleton-team-rank,
+  .skeleton-score,
+  .skeleton-odds-line,
+  .skeleton-reaction,
+  .skeleton-add-reaction,
+  .mobile-spinner-ring {
+    animation: none;
+  }
+  
+  .skeleton-status,
+  .skeleton-time,
+  .skeleton-logo,
+  .skeleton-team-name,
+  .skeleton-team-rank,
+  .skeleton-score,
+  .skeleton-odds-line,
+  .skeleton-reaction,
+  .skeleton-add-reaction {
+    opacity: 0.2;
+  }
+  
+  .mobile-spinner-ring {
+    border: 3px solid var(--accent);
+  }
+}

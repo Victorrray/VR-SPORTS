@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MessageCircle, Users, Trophy, Calendar, RefreshCw, Clock, Info } from 'lucide-react';
 import GameReactions from '../components/GameReactions';
 import GameDetailsModal from '../components/GameDetailsModal';
+import ScoresLoadingSkeleton from '../components/ScoresLoadingSkeleton';
 import MobileBottomBar from '../components/MobileBottomBar';
 import './Scores.css';
 
@@ -205,7 +206,17 @@ export default function Scores() {
         </div>
       </div>
 
-      {loading && <div className="loading-state">Loading scores...</div>}
+      {loading && (
+        <div className="mobile-scores-loading">
+          <div className="mobile-loading-spinner">
+            <div className="mobile-spinner-ring"></div>
+            <div className="mobile-spinner-ring"></div>
+            <div className="mobile-spinner-ring"></div>
+          </div>
+          <div className="mobile-loading-text">Loading Live Scores</div>
+          <div className="mobile-loading-subtitle">Fetching latest game data...</div>
+        </div>
+      )}
       {err && <div className="error-state">{err}</div>}
 
       <div className="scores-grid">
@@ -224,31 +235,51 @@ export default function Scores() {
               }}
             >
               <div className="game-content">
-                <div className="teams">
-                  <div className="team away">
-                    <TeamLogo src={g.away_logo} name={g.away_team} />
-                    <div className="team-details">
-                      <div className="team-name">{g.away_team}</div>
-                      {isCompleted && g.scores && (
-                        <div className="team-score">{g.scores.find(s => s.name === g.away_team)?.score || 0}</div>
-                      )}
-                    </div>
-                  </div>
-                  
+                <div className="game-header">
                   <div className="game-status">
                     {isLive && <div className="status-badge live">LIVE</div>}
                     {isCompleted && <div className="status-badge final">FINAL</div>}
                     {isUpcoming && <div className="status-badge upcoming">UPCOMING</div>}
                   </div>
                   
-                  <div className="team home">
-                    <div className="team-details">
-                      <div className="team-name">{g.home_team}</div>
-                      {isCompleted && g.scores && (
-                        <div className="team-score">{g.scores.find(s => s.name === g.home_team)?.score || 0}</div>
-                      )}
+                  <div className="game-time-compact">
+                    {isLive ? (
+                      <span className="live-text">Live Now</span>
+                    ) : (
+                      <span>{kickoffLabel(g.commence_time)}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="teams-compact">
+                  <div className="team-row away">
+                    <div className="team-left">
+                      <TeamLogo src={g.away_logo} name={g.away_team} />
+                      <div className="team-info">
+                        <span className="team-name">{g.away_team}</span>
+                        {sport === 'americanfootball_cfb' && g.away_rank && (
+                          <span className="team-rank">#{g.away_rank}</span>
+                        )}
+                      </div>
                     </div>
-                    <TeamLogo src={g.home_logo} name={g.home_team} />
+                    {isCompleted && g.scores && (
+                      <div className="team-score">{g.scores.find(s => s.name === g.away_team)?.score || 0}</div>
+                    )}
+                  </div>
+                  
+                  <div className="team-row home">
+                    <div className="team-left">
+                      <TeamLogo src={g.home_logo} name={g.home_team} />
+                      <div className="team-info">
+                        <span className="team-name">{g.home_team}</span>
+                        {sport === 'americanfootball_cfb' && g.home_rank && (
+                          <span className="team-rank">#{g.home_rank}</span>
+                        )}
+                      </div>
+                    </div>
+                    {isCompleted && g.scores && (
+                      <div className="team-score">{g.scores.find(s => s.name === g.home_team)?.score || 0}</div>
+                    )}
                   </div>
                 </div>
 
