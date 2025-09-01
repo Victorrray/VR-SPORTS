@@ -65,17 +65,107 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+}
+
+.sport-selector {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.sport-dropdown-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: var(--backdrop-blur-light);
+  -webkit-backdrop-filter: var(--backdrop-blur-light);
+}
+
+.sport-dropdown-btn:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--glass-bg));
+}
+
+.sport-dropdown-btn.open {
+  border-color: var(--accent);
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.sport-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  overflow: hidden;
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+}
+
+.sport-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.sport-option:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+}
+
+.sport-option.selected {
+  background: var(--accent-gradient);
+  color: white;
+  font-weight: 600;
+}
+
+.sport-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 6px;
+  color: var(--accent);
+}
+
+.sport-option.selected .sport-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .sport-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--bg-elev-2);
-  border-radius: 12px;
-  padding: 4px;
-  border: 1px solid var(--glass-border);
-  flex-wrap: wrap;
-  max-width: 100%;
+  display: none; /* Hide on mobile, show dropdown instead */
 }
 
 .sport-tab {
@@ -510,16 +600,35 @@
   margin-top: 4px;
 }
 
+/* Desktop - Show tabs instead of dropdown */
+@media (min-width: 769px) {
+  .sport-selector {
+    display: none;
+  }
+  
+  .sport-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-elev-2);
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+  }
+}
+
 /* Mobile Responsive */
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .scores-page {
-    padding: 0 1rem 140px;
+    padding: 0 16px 140px;
+    margin: 1rem auto;
   }
   
   .scores-header {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
+    margin-bottom: 20px;
   }
   
   .header-left {
@@ -532,7 +641,17 @@
   }
   
   .header-controls {
-    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .sport-selector {
+    order: 1;
+  }
+  
+  .refresh-btn {
+    order: 2;
+    align-self: center;
   }
   
   .game-card {
@@ -554,51 +673,91 @@
   }
 }
 
-@media (max-width: 480px) {
+/* iPhone 15 Pro Max (430px) Optimizations */
+@media (max-width: 430px) {
+  .scores-page {
+    padding: 0 20px 140px;
+    margin: 0.5rem auto;
+  }
+  
   .scores-header {
-    gap: 12px;
+    gap: 16px;
+    margin-bottom: 24px;
   }
   
   .page-title {
-    gap: 8px;
+    gap: 10px;
   }
   
   .page-title h1 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
   
   .title-icon {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
   }
   
   .week-badge {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-  
-  .sport-tab {
-    padding: 6px 12px;
+    padding: 8px 12px;
     font-size: 13px;
   }
   
+  .sport-dropdown-btn {
+    padding: 14px 18px;
+    font-size: 15px;
+    border-radius: 14px;
+  }
+  
+  .sport-option {
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+  
   .refresh-btn {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+  
+  .scores-grid {
+    gap: 12px;
   }
   
   .game-card {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    padding: 16px;
+    border-radius: 12px;
   }
   
-  .game-status {
-    align-items: flex-start;
-    text-align: left;
+  .game-header {
+    margin-bottom: 14px;
   }
   
-  .status-section {
-    justify-content: flex-start;
+  .teams-compact {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  
+  .team-left {
+    gap: 10px;
+  }
+  
+  .team-logo {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .team-name {
+    font-size: 15px;
+  }
+  
+  .team-score {
+    font-size: 18px;
+  }
+  
+  .status-badge {
+    padding: 8px 12px;
+    font-size: 12px;
   }
 }
 

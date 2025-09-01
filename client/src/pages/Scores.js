@@ -1,6 +1,6 @@
 // src/pages/Scores.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MessageCircle, Users, Trophy, Calendar, RefreshCw, Clock, Info } from 'lucide-react';
+import { MessageCircle, Users, Trophy, Calendar, RefreshCw, Clock, Info, ChevronDown, Football, Basketball, Zap, Gamepad2, Target, Home } from 'lucide-react';
 import GameReactions from '../components/GameReactions';
 import GameDetailsModal from '../components/GameDetailsModal';
 import ScoresLoadingSkeleton from '../components/ScoresLoadingSkeleton';
@@ -70,15 +70,15 @@ function statusBadgeText(status, clock) {
 
 const REFRESH_MS = 15_000; // auto refresh every 15s
 
-// Get all available sports (show all for debugging)
+// Get all available sports with icons
 function getCurrentSeasonSports() {
   return [
-    { key: "americanfootball_nfl", label: "NFL" },
-    { key: "americanfootball_ncaaf", label: "NCAA" },
-    { key: "basketball_nba", label: "NBA" },
-    { key: "basketball_ncaab", label: "NCAAB" },
-    { key: "icehockey_nhl", label: "NHL" },
-    { key: "baseball_mlb", label: "MLB" }
+    { key: "americanfootball_nfl", label: "NFL", icon: "🏈" },
+    { key: "americanfootball_ncaaf", label: "NCAA", icon: "🏈" },
+    { key: "basketball_nba", label: "NBA", icon: "🏀" },
+    { key: "basketball_ncaab", label: "NCAAB", icon: "🏀" },
+    { key: "icehockey_nhl", label: "NHL", icon: "🏒" },
+    { key: "baseball_mlb", label: "MLB", icon: "⚾" }
   ];
 }
 
@@ -93,6 +93,7 @@ export default function Scores() {
   const [spinning, setSpinning] = useState(false); // refresh button spin
   const [selectedGame, setSelectedGame] = useState(null);
   const [showGameModal, setShowGameModal] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const btnRef = useRef(null);
 
@@ -112,6 +113,18 @@ export default function Scores() {
       if (!silent) setLoading(false);
     }
   }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownOpen && !event.target.closest('.sport-selector')) {
+        setDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [dropdownOpen]);
 
   // First load + auto refresh
   useEffect(() => {
@@ -179,6 +192,41 @@ export default function Scores() {
         </div>
 
         <div className="header-controls">
+          {/* Mobile Dropdown Selector */}
+          <div className="sport-selector">
+            <button 
+              className={`sport-dropdown-btn ${dropdownOpen ? 'open' : ''}`}
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="sport-icon">
+                  {availableSports.find(s => s.key === sport)?.icon || '🏈'}
+                </span>
+                <span>{availableSports.find(s => s.key === sport)?.label || 'Select Sport'}</span>
+              </div>
+              <ChevronDown size={16} style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+            </button>
+            
+            {dropdownOpen && (
+              <div className="sport-dropdown-menu">
+                {availableSports.map((sportOption) => (
+                  <button
+                    key={sportOption.key}
+                    onClick={() => {
+                      setSport(sportOption.key);
+                      setDropdownOpen(false);
+                    }}
+                    className={`sport-option ${sport === sportOption.key ? 'selected' : ''}`}
+                  >
+                    <span className="sport-icon">{sportOption.icon}</span>
+                    <span>{sportOption.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Tabs */}
           <div className="sport-tabs">
             {availableSports.map((sportOption) => (
               <button
