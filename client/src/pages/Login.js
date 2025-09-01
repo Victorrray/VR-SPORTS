@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
+import { Mail, Lock, ArrowRight, Chrome } from "lucide-react";
+import "./Login.css";
 
 export default function Login() {
   const { signInEmail, signUpEmail, signInWithProvider } = useAuth();
@@ -21,122 +23,91 @@ export default function Login() {
   };
 
   return (
-    <main style={{ minHeight: "70vh", display: "grid", placeItems: "center" }}>
-      <div
-        style={{
-          background: "#1b2137",
-          border: "1px solid #2a3255",
-          borderRadius: 14,
-          padding: 24,
-          width: 360,
-          color: "#e7e9ee",
-        }}
-      >
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+    <main className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <h1 className="login-title">Welcome to VR-Odds</h1>
+          <p className="login-subtitle">Find profitable betting opportunities with AI</p>
+        </div>
+
+        <div className="tab-switcher">
           <button
             onClick={() => setTab("login")}
-            style={{ fontWeight: tab === "login" ? 800 : 600 }}
+            className={`tab-btn ${tab === "login" ? "active" : ""}`}
           >
             Log in
           </button>
           <button
             onClick={() => setTab("signup")}
-            style={{ fontWeight: tab === "signup" ? 800 : 600 }}
+            className={`tab-btn ${tab === "signup" ? "active" : ""}`}
           >
             Sign up
           </button>
         </div>
 
-        {err && <div style={{ color: "#f87171", marginBottom: 8 }}>{err}</div>}
+        {err && <div className="error-message">{err}</div>}
 
-        <label style={{ display: "grid", gap: 6, marginBottom: 10 }}>
-          Email
+        <div className="input-group">
+          <label className="input-label">
+            <Mail size={16} />
+            Email
+          </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@email.com"
-            style={{
-              padding: "10px 12px",
-              borderRadius: 10,
-              border: "1px solid #2a3255",
-              background: "#101625",
-              color: "#e7e9ee",
-            }}
+            className="login-input"
           />
-        </label>
+        </div>
 
-        <label style={{ display: "grid", gap: 6, marginBottom: 12 }}>
-          Password
+        <div className="input-group">
+          <label className="input-label">
+            <Lock size={16} />
+            Password
+          </label>
           <input
             type="password"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             placeholder="••••••••"
-            style={{
-              padding: "10px 12px",
-              borderRadius: 10,
-              border: "1px solid #2a3255",
-              background: "#101625",
-              color: "#e7e9ee",
-            }}
+            className="login-input"
           />
-        </label>
+        </div>
 
         {tab === "login" ? (
           <button
             onClick={() => go(signInEmail)}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: 12,
-              fontWeight: 800,
-              background: "linear-gradient(90deg,#10b981,#34d399)",
-              color: "#fff",
-              border: 0,
-            }}
+            className="primary-btn"
           >
-            Log in
+            <span>Log in</span>
+            <ArrowRight size={18} />
           </button>
         ) : (
           <button
             onClick={() => go(signUpEmail)}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: 12,
-              fontWeight: 800,
-              background: "linear-gradient(90deg,#10b981,#34d399)",
-              color: "#fff",
-              border: 0,
-            }}
+            className="primary-btn"
           >
-            Create account
+            <span>Create account</span>
+            <ArrowRight size={18} />
           </button>
         )}
 
-        <div style={{ margin: "10px 0", opacity: 0.7, textAlign: "center" }}>
-          or
+        <div className="divider">
+          <span>or</span>
         </div>
 
         <button
           onClick={() => signInWithProvider("google")}
-          style={{
-            width: "100%",
-            padding: "10px",
-            borderRadius: 12,
-            background: "#23263a",
-            color: "#e7e9ee",
-            border: "1px solid #2a3255",
-            fontWeight: 800,
-          }}
+          className="google-btn"
         >
-          Continue with Google
+          <Chrome size={18} />
+          <span>Continue with Google</span>
         </button>
 
-        <p style={{ opacity: 0.7, marginTop: 10, fontSize: 12 }}>
-          By continuing you agree to our <Link to="/terms">Terms</Link> and{" "}
-          <Link to="/privacy">Privacy</Link>.
+        <p className="terms-text">
+          By continuing you agree to our <Link to="/terms" className="terms-link">Terms</Link> and{" "}
+          <Link to="/privacy" className="terms-link">Privacy</Link>.
         </p>
       </div>
     </main>

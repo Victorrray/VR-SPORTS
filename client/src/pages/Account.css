@@ -27,7 +27,7 @@
 
 .header-icon {
   color: var(--accent);
-  filter: drop-shadow(0 0 8px rgba(61, 126, 255, 0.3));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 30%, transparent));
 }
 
 .header-title h1 {
@@ -124,7 +124,7 @@
   color: white;
   background: var(--accent-gradient);
   border: 3px solid var(--glass-border);
-  box-shadow: 0 8px 24px rgba(61, 126, 255, 0.2);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 20%, transparent);
   position: relative;
 }
 
@@ -317,7 +317,7 @@
   padding: 6px 12px;
   border-radius: 12px;
   border: 1px solid var(--accent);
-  background: rgba(61, 126, 255, 0.1);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent);
   font-size: 12px;
   font-weight: 600;
@@ -367,7 +367,7 @@
 
 .reset-btn:hover {
   border-color: var(--accent);
-  background: rgba(61, 126, 255, 0.05);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
 }
 
 .signout-btn:hover {
@@ -423,7 +423,7 @@
 
 .username-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(61, 126, 255, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
   background: var(--bg-elev-2);
 }
 
@@ -476,7 +476,7 @@
 
 .save-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(61, 126, 255, 0.3);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .save-btn:disabled {

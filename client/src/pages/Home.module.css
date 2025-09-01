@@ -3,8 +3,8 @@
   --bg-body: #0f1117;
   --text: #e7e9ee;
   --text-muted: #a6adbb;
-  --accent: #3d7eff;
-  --accent-gradient: linear-gradient(90deg, #3d7eff, #2a5fd4);
+  --accent: var(--accent, #8b5cf6);
+  --accent-gradient: linear-gradient(90deg, var(--accent, #8b5cf6), var(--accent-hover, #7c3aed));
   --success: #22c55e;
 
   /* Mobile gutters to match bottom bar */
@@ -20,7 +20,7 @@
   align-items: center;
   background:
     radial-gradient(1200px 600px at 50% -200px,
-      color-mix(in srgb, var(--accent) 18%, transparent), transparent),
+      color-mix(in srgb, var(--accent) 12%, transparent), transparent),
     var(--bg-body);
   color: var(--text);
   padding: 2em 0 4em 0;
@@ -47,14 +47,14 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(61, 126, 255, 0.1);
-  border: 1px solid rgba(61, 126, 255, 0.3);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   border-radius: 20px;
   padding: 8px 16px;
   margin: 0 auto 1.5em auto;
   font-size: 0.9em;
   font-weight: 600;
-  color: #3d7eff;
+  color: var(--accent);
   width: fit-content;
   animation: pulse 2s infinite;
 }

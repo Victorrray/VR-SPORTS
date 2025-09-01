@@ -41,7 +41,7 @@
 
 .title-icon {
   color: var(--accent);
-  filter: drop-shadow(0 0 8px rgba(61, 126, 255, 0.3));
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 30%, transparent));
 }
 
 .week-badge {
@@ -100,7 +100,7 @@
 .sport-tab.active {
   background: var(--accent-gradient);
   color: white;
-  box-shadow: 0 2px 8px rgba(61, 126, 255, 0.3);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .refresh-btn {

@@ -603,8 +603,20 @@ export default function OddsTable({
                             })()}
                           </div>
                         </div>
-                        <div className={`mob-ev ${ev && ev > 0 ? 'pos' : 'neg'}`}>
-                          {typeof ev === 'number' ? `${ev.toFixed(2)}%` : ''}
+                        <div className="mob-ev-section">
+                          <div className={`mob-ev ${ev && ev > 0 ? 'pos' : 'neg'}`}>
+                            {typeof ev === 'number' ? `${ev.toFixed(2)}%` : ''}
+                          </div>
+                          <button 
+                            className="mob-add-pick-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToPicks(row, { bookmaker: row.bk, book: row.bk?.title });
+                            }}
+                            title="Add to My Picks"
+                          >
+                            +
+                          </button>
                         </div>
                       </div>
 
@@ -659,16 +671,6 @@ export default function OddsTable({
                               })()}
                             </span>
                           </div>
-                          <button 
-                            className="mob-add-pick-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToPicks(row, { bookmaker: row.bk, book: row.bk?.title });
-                            }}
-                            title="Add to My Picks"
-                          >
-                            +
-                          </button>
                         </div>
                       </div>
 

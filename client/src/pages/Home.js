@@ -127,8 +127,8 @@ export default function Home({
     [featuredSports]
   );
 
-  const goToSport = (sport) => navigate(`/sportsbooks?sport=${encodeURIComponent(sport)}`);
-  const goToTool = (slug) => navigate(`/sportsbooks`);
+  const goToSport = (sport) => navigate(user ? `/sportsbooks?sport=${encodeURIComponent(sport)}` : '/signup');
+  const goToTool = (slug) => navigate(user ? `/sportsbooks` : '/signup');
 
   return (
     <main
