@@ -167,7 +167,33 @@
 @media (max-width: 768px) {
   .scores-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px;
+  }
+  
+  .game-card {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .game-header {
+    margin-bottom: 8px;
+  }
+  
+  .teams-compact {
+    margin-bottom: 8px;
+    gap: 6px;
+  }
+  
+  .team-row {
+    padding: 4px 0;
+  }
+  
+  .team-name {
+    font-size: 13px;
+  }
+  
+  .team-score {
+    font-size: 16px;
   }
 }
 
@@ -178,6 +204,51 @@
   border-radius: 12px;
   padding: 16px;
   transition: all 0.3s ease;
+}
+
+/* Compact Mobile Layout */
+@media (max-width: 480px) {
+  .game-card {
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .teams-compact {
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  
+  .team-left {
+    gap: 6px;
+  }
+  
+  .team-logo {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .team-name {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .team-rank {
+    font-size: 10px;
+    padding: 1px 3px;
+  }
+  
+  .team-score {
+    font-size: 14px;
+  }
+  
+  .game-time-compact {
+    font-size: 11px;
+  }
+  
+  .status-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
 }
 
 .game-card.clickable {

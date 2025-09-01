@@ -96,8 +96,8 @@ export default function Scores() {
 
   const btnRef = useRef(null);
 
-  async function load() {
-    setLoading(true);
+  async function load(silent = false) {
+    if (!silent) setLoading(true);
     setErr("");
     console.log("Loading scores for sport:", sport); // Debug log
     try {
@@ -105,21 +105,21 @@ export default function Scores() {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       console.log("Received data for sport", sport, ":", data); // Debug log
-      setGames(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error("Error loading scores:", e); // Debug log
-      setErr(e.message || "Failed to load scores");
+      setGames(data || []);
+    } catch (error) {
+      console.error("Error loading scores:", error);
+      if (!silent) setErr(`Failed to load scores: ${error.message}`);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
   // First load + auto refresh
   useEffect(() => {
     load();
-    const t = setInterval(load, REFRESH_MS);
+    const t = setInterval(() => load(true), REFRESH_MS); // Silent auto-refresh
     return () => clearInterval(t);
-  }, [sport]); // Remove eslint-disable to ensure sport dependency is properly tracked
+  }, [sport]);
 
   // Manual refresh + spin animation
   const handleRefresh = async () => {
