@@ -312,6 +312,32 @@
   line-height: 1.4;
 }
 
+/* Live Chat Feature */
+.live-chat-toggle {
+  margin-top: 8px;
+}
+
+.chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.chat-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-1px);
+}
+
 .odds-line {
   margin-bottom: 2px;
 }

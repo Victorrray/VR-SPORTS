@@ -343,20 +343,39 @@ body,
   .mob-ev.pos { background: color-mix(in srgb, var(--success) 24%, var(--bg-elev)); border-color: color-mix(in srgb, var(--success) 42%, transparent); }
   .mob-ev.neg { background: color-mix(in srgb, var(--danger) 24%, var(--bg-elev));  border-color: color-mix(in srgb, var(--danger) 42%, transparent); }
   
+  .desktop-add-pick-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 60px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+}
+  
   .mob-add-pick-btn {
     background: linear-gradient(135deg, var(--accent), var(--accent-hover));
     color: white;
     border: none;
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 12px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    width: 60px;
+    height: 28px;
     display: flex;
     align-items: center;
-    gap: 4px;
-    white-space: nowrap;
+    justify-content: center;
   }
   
   .mob-add-pick-btn:hover {
@@ -530,6 +549,24 @@ body,
     display: none;
   }
   
+  /* Responsive skeleton visibility */
+  .desktop-skeleton {
+    display: block;
+  }
+
+  .mobile-skeleton {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .desktop-skeleton {
+      display: none;
+    }
+    .mobile-skeleton {
+      display: block;
+    }
+  }
+
   /* Show more indicator */
   .mini-swipe::after {
     content: 'Showing top 6 books';

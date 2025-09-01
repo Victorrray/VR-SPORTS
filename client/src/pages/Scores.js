@@ -1,8 +1,10 @@
 // src/pages/Scores.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { RefreshCw, Trophy, Calendar, Clock } from "lucide-react";
-import MobileBottomBar from "../components/MobileBottomBar";
-import "./Scores.css";
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { MessageCircle, Users, Trophy, Calendar, RefreshCw, Clock, Info } from 'lucide-react';
+import GameReactions from '../components/GameReactions';
+import GameDetailsModal from '../components/GameDetailsModal';
+import MobileBottomBar from '../components/MobileBottomBar';
+import './Scores.css';
 
 function TeamLogo({ src, name }) {
   const [ok, setOk] = React.useState(true);
@@ -88,6 +90,8 @@ export default function Scores() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
   const [spinning, setSpinning] = useState(false); // refresh button spin
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [showGameModal, setShowGameModal] = useState(false);
 
   const btnRef = useRef(null);
 
@@ -205,48 +209,59 @@ export default function Scores() {
       {err && <div className="error-state">{err}</div>}
 
       <div className="scores-grid">
-        {sorted.map((g) => {
-          const badge = statusBadgeText(g.status, g.clock);
-          const isLive = g.status === "in_progress";
-          const isFinal = g.status === "final";
+        {games.map((g) => {
+          const isLive = g.completed === false && new Date(g.commence_time) <= new Date();
+          const isCompleted = g.completed === true;
+          const isUpcoming = !isLive && !isCompleted;
 
           return (
-            <div
-              key={g.id}
-              className={`game-card ${isLive ? "live" : ""} ${isFinal ? "final" : ""}`}
+            <div 
+              key={g.id} 
+              className="game-card clickable"
+              onClick={() => {
+                setSelectedGame(g);
+                setShowGameModal(true);
+              }}
             >
-              <div className="teams-section">
-                {/* Away */}
-                <div className="team-row">
-                  <TeamLogo src={g.away_logo} name={g.away_team} />
-                  <div className="team-info">
-                    <div className="team-name">{g.away_team}{g.away_rank ? ` (#${g.away_rank})` : ""}</div>
-                    {g.away_record && <div className="team-record">{g.away_record}</div>}
-                  </div>
-                  <div className="team-score">{g.scores?.away ?? (isFinal ? 0 : "-")}</div>
-                </div>
-
-                {/* Home */}
-                <div className="team-row">
-                  <TeamLogo src={g.home_logo} name={g.home_team} />
-                  <div className="team-info">
-                    <div className="team-name">{g.home_team}{g.home_rank ? ` (#${g.home_rank})` : ""}</div>
-                    {g.home_record && <div className="team-record">{g.home_record}</div>}
-                  </div>
-                  <div className="team-score">{g.scores?.home ?? (isFinal ? 0 : "-")}</div>
-                </div>
-              </div>
-
-              <div className="game-status">
-                <div className="status-section">
-                  {badge ? (
-                    <div className={`status-badge ${isLive ? "live" : "final"}`}>
-                      {isLive && <div className="live-dot" />}
-                      <span>{badge}</span>
+              <div className="game-content">
+                <div className="teams">
+                  <div className="team away">
+                    <TeamLogo src={g.away_logo} name={g.away_team} />
+                    <div className="team-details">
+                      <div className="team-name">{g.away_team}</div>
+                      {isCompleted && g.scores && (
+                        <div className="team-score">{g.scores.find(s => s.name === g.away_team)?.score || 0}</div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="kickoff-time">
-                      <Clock size={12} />
+                  </div>
+                  
+                  <div className="game-status">
+                    {isLive && <div className="status-badge live">LIVE</div>}
+                    {isCompleted && <div className="status-badge final">FINAL</div>}
+                    {isUpcoming && <div className="status-badge upcoming">UPCOMING</div>}
+                  </div>
+                  
+                  <div className="team home">
+                    <div className="team-details">
+                      <div className="team-name">{g.home_team}</div>
+                      {isCompleted && g.scores && (
+                        <div className="team-score">{g.scores.find(s => s.name === g.home_team)?.score || 0}</div>
+                      )}
+                    </div>
+                    <TeamLogo src={g.home_logo} name={g.home_team} />
+                  </div>
+                </div>
+
+                <div className="game-info">
+                  {isLive && (
+                    <div className="live-indicator">
+                      <div className="live-dot"></div>
+                      <span>Live Now</span>
+                    </div>
+                  )}
+                  {!isLive && (
+                    <div className="game-time">
+                      <Clock size={14} />
                       <span>{kickoffLabel(g.commence_time)}</span>
                     </div>
                   )}
@@ -259,6 +274,26 @@ export default function Scores() {
                     {g.odds.provider && <div className="odds-provider">({g.odds.provider})</div>}
                   </div>
                 )}
+                
+                {/* Game Reactions */}
+                <GameReactions 
+                  gameId={g.id} 
+                  gameKey={`${g.away_team}-${g.home_team}-${g.commence_time}`}
+                />
+
+                {/* Live Chat Feature for Live Games */}
+                {isLive && (
+                  <div className="live-chat-toggle">
+                    <button 
+                      className="chat-btn"
+                      onClick={() => {/* TODO: Implement chat modal */}}
+                      title="Join live chat"
+                    >
+                      <MessageCircle size={14} />
+                      <span>Chat</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -266,6 +301,16 @@ export default function Scores() {
       </div>
 
       <MobileBottomBar active="scores" showFilter={false} />
+      
+      {/* Game Details Modal */}
+      <GameDetailsModal 
+        game={selectedGame}
+        isOpen={showGameModal}
+        onClose={() => {
+          setShowGameModal(false);
+          setSelectedGame(null);
+        }}
+      />
     </main>
   );
 }

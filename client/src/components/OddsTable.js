@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
 import "./OddsTable.css";
 
 /* ---------- Helpers (unchanged core math) ---------- */
@@ -191,39 +192,63 @@ export default function OddsTable({
 }) {
   
   // My Picks functionality
-  const addToPicks = (row, book, isHome) => {
+  const addToPicks = (row, book, isHome, buttonElement) => {
+    const existingPicks = JSON.parse(localStorage.getItem('oss_my_picks_v1') || '[]');
+    
+    // Check if this exact pick already exists
+    const gameKey = `${row.game.away_team}-${row.game.home_team}-${row.mkt?.key}-${row.out.name}`;
+    const isDuplicate = existingPicks.some(p => 
+      p.game === `${row.game.away_team} @ ${row.game.home_team}` &&
+      p.market === formatMarket(row.mkt?.key || '') &&
+      p.selection.includes(row.out.name)
+    );
+    
+    if (isDuplicate) {
+      // Show already added feedback
+      if (buttonElement) {
+        const originalText = buttonElement.textContent;
+        const originalBg = buttonElement.style.background;
+        buttonElement.textContent = 'Already Added';
+        buttonElement.style.background = 'var(--warning)';
+        buttonElement.style.fontSize = '10px';
+        setTimeout(() => {
+          buttonElement.textContent = originalText;
+          buttonElement.style.background = originalBg;
+          buttonElement.style.fontSize = '';
+        }, 2000);
+      }
+      return;
+    }
+    
     const pick = {
       id: `${row.key}-${book?.bookmaker?.key || book?.book}-${Date.now()}`,
-      gameId: row.game.id,
-      homeTeam: row.game.home_team,
-      awayTeam: row.game.away_team,
-      market: formatMarket(row.mkt?.key || ''),
-      selection: row.out.name,
-      odds: row.out.price || row.out.odds,
-      bookmaker: cleanBookTitle(book?.book || book?.bookmaker?.title),
-      line: row.out.point,
-      commenceTime: row.game.commence_time,
-      sport: getSportLeague(row.game.sport_key).sport,
+      game: `${row.game.away_team} @ ${row.game.home_team}`,
       league: getSportLeague(row.game.sport_key).league,
+      market: formatMarket(row.mkt?.key || ''),
+      selection: `${row.out.name} ${row.out.point ? row.out.point : ''} ${row.out.price || row.out.odds}`,
+      odds: row.out.price || row.out.odds,
+      note: `${cleanBookTitle(book?.book || book?.bookmaker?.title)} - ${getSportLeague(row.game.sport_key).sport}`,
       dateAdded: new Date().toISOString(),
-      status: 'pending',
-      stake: 0,
-      notes: ''
+      status: 'pending'
     };
     
-    const existingPicks = JSON.parse(localStorage.getItem('myPicks') || '[]');
     const updatedPicks = [...existingPicks, pick];
-    localStorage.setItem('myPicks', JSON.stringify(updatedPicks));
+    localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
     
-    // Show success feedback
-    const button = document.querySelector(`[data-pick-id="${pick.id}"]`);
-    if (button) {
-      button.textContent = '✓';
-      button.style.background = 'var(--success)';
+    // Show success feedback with enhanced confirmation
+    if (buttonElement) {
+      const originalText = buttonElement.textContent;
+      const originalBg = buttonElement.style.background;
+      buttonElement.textContent = '✓ Added';
+      buttonElement.style.background = 'var(--success)';
+      buttonElement.style.color = 'white';
+      buttonElement.style.fontSize = '10px';
       setTimeout(() => {
-        button.textContent = '+';
-        button.style.background = '';
-      }, 1500);
+        buttonElement.textContent = originalText;
+        buttonElement.style.background = originalBg;
+        buttonElement.style.color = '';
+        buttonElement.style.fontSize = '';
+      }, 2000);
     }
   };
   const [expandedRows, setExpandedRows] = useState({});
@@ -444,17 +469,16 @@ export default function OddsTable({
   }, [allRows]);
 
   /* ---------- Render ---------- */
-  if (loading) {
-    const cols = ["EV %","Match","Team","Type","Line","Book","Odds","De-Vig",""];
-    return (
-      <div className="odds-table-card">
-        <table className="odds-grid" aria-busy="true" aria-label="Loading odds">
-          <thead><tr>{cols.map((c,i)=><th key={i}>{c}</th>)}</tr></thead>
-          <tbody>{Array.from({length:6}).map((_,r)=>(<tr key={r} className="odds-row">{cols.map((__,ci)=>(<td key={ci}><div className="skeleton" style={{height:'14px',width:ci===0?'52px':'100%',margin:'6px 0'}}/></td>))}</tr>))}</tbody>
-        </table>
+  if (loading) return (
+    <>
+      <div className="desktop-skeleton">
+        <OddsTableSkeleton rows={8} />
       </div>
-    );
-  }
+      <div className="mobile-skeleton">
+        <OddsTableSkeletonMobile rows={6} />
+      </div>
+    </>
+  );
   if (!allRows.length) return (
     <div className="odds-table-card">
       <div className="spinner-wrap" style={{ padding:"2em 0" }}><p>No bets found.</p></div>
@@ -518,7 +542,7 @@ export default function OddsTable({
                         className="desktop-add-pick-btn"
                         onClick={(e) => {
                           e.stopPropagation();
-                          addToPicks(row, { bookmaker: row.bk, book: row.bk?.title });
+                          addToPicks(row, { bookmaker: row.bk, book: row.bk?.title }, false, e.target);
                         }}
                         title="Add to My Picks"
                       >
@@ -611,7 +635,7 @@ export default function OddsTable({
                             className="mob-add-pick-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                              addToPicks(row, { bookmaker: row.bk, book: row.bk?.title });
+                              addToPicks(row, { bookmaker: row.bk, book: row.bk?.title }, false, e.target);
                             }}
                             title="Add to My Picks"
                           >
@@ -760,7 +784,7 @@ export default function OddsTable({
                                     className="add-pick-btn"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      addToPicks(row, ob, true);
+                                      addToPicks(row, ob, true, e.target);
                                     }}
                                     title="Add to My Picks"
                                   >

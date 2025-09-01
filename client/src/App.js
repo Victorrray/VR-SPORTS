@@ -7,6 +7,7 @@ import PrivateRoute from "./auth/PrivateRoute";
 import UsernameSetup from "./components/UsernameSetup";
 import LoadingBar from "./components/LoadingBar";
 import { useAuth } from "./auth/AuthProvider";
+import "./App.css";
 
 // Lazy pages with fallback to named exports
 const SportsbookMarkets = React.lazy(() =>
@@ -43,12 +44,14 @@ function AppRoutes() {
   return (
     <React.Suspense
       fallback={
-        <div style={{ padding: "2em 0" }}>
-          <div className="odds-table-card">
-            <div className="spinner-wrap">
-              <div className="spinner" />
-              <p>Loading…</p>
+        <div className="loading-fallback">
+          <div className="loading-container">
+            <div className="loading-spinner">
+              <div className="spinner-ring"></div>
+              <div className="spinner-ring"></div>
+              <div className="spinner-ring"></div>
             </div>
+            <p className="loading-text">Loading OddsSightSeer...</p>
           </div>
         </div>
       }
