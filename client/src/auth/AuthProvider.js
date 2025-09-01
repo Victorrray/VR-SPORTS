@@ -18,15 +18,34 @@ export function AuthProvider({ children }) {
       
       let currentUser = session?.user ?? null;
       
-      // Check if user has a username set, if not prompt for one
+      // Check if user has a username set
       if (currentUser && !currentUser.user_metadata?.username) {
-        const savedUsername = localStorage.getItem(`username_${currentUser.id}`);
-        if (savedUsername) {
-          // Update user metadata with saved username
-          await supabase.auth.updateUser({
-            data: { username: savedUsername }
-          });
-          currentUser = { ...currentUser, user_metadata: { ...currentUser.user_metadata, username: savedUsername } };
+        // Try to get username from database first
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("id", currentUser.id)
+            .single();
+          
+          if (profile?.username) {
+            // Update user metadata with database username
+            await supabase.auth.updateUser({
+              data: { username: profile.username }
+            });
+            currentUser = { ...currentUser, user_metadata: { ...currentUser.user_metadata, username: profile.username } };
+          } else {
+            // Fallback to localStorage
+            const savedUsername = localStorage.getItem(`username_${currentUser.id}`);
+            if (savedUsername) {
+              await supabase.auth.updateUser({
+                data: { username: savedUsername }
+              });
+              currentUser = { ...currentUser, user_metadata: { ...currentUser.user_metadata, username: savedUsername } };
+            }
+          }
+        } catch (error) {
+          console.error("Error loading username:", error);
         }
       }
       
@@ -39,15 +58,34 @@ export function AuthProvider({ children }) {
       
       let currentUser = session?.user ?? null;
       
-      // Check if user has a username set, if not prompt for one
+      // Check if user has a username set
       if (currentUser && !currentUser.user_metadata?.username) {
-        const savedUsername = localStorage.getItem(`username_${currentUser.id}`);
-        if (savedUsername) {
-          // Update user metadata with saved username
-          await supabase.auth.updateUser({
-            data: { username: savedUsername }
-          });
-          currentUser = { ...currentUser, user_metadata: { ...currentUser.user_metadata, username: savedUsername } };
+        // Try to get username from database first
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("id", currentUser.id)
+            .single();
+          
+          if (profile?.username) {
+            // Update user metadata with database username
+            await supabase.auth.updateUser({
+              data: { username: profile.username }
+            });
+            currentUser = { ...currentUser, user_metadata: { ...currentUser.user_metadata, username: profile.username } };
+          } else {
+            // Fallback to localStorage
+            const savedUsername = localStorage.getItem(`username_${currentUser.id}`);
+            if (savedUsername) {
+              await supabase.auth.updateUser({
+                data: { username: savedUsername }
+              });
+              currentUser = { ...currentUser, user_metadata: { ...currentUser.user_metadata, username: savedUsername } };
+            }
+          }
+        } catch (error) {
+          console.error("Error loading username:", error);
         }
       }
       

@@ -100,7 +100,8 @@ export default function Scores() {
     if (!silent) setLoading(true);
     setErr("");
     try {
-      const r = await fetch(`${process.env.REACT_APP_API_URL || ""}/api/scores?sport=${sport}`);
+      const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5050');
+      const r = await fetch(`${apiUrl}/api/scores?sport=${sport}`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       setGames(data || []);
