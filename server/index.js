@@ -13,6 +13,7 @@ if (!API_KEY) {
 }
 
 app.use(cors());
+app.use(express.json());
 
 
 /* ------------------------------------ Helpers ------------------------------------ */
@@ -348,6 +349,104 @@ app.get("/api/scores", async (req, res) => {
     const status = err?.response?.status || 500;
     console.error("scores (espn) error:", status, err?.response?.data || err.message);
     res.status(status).json({ error: "scores_espn_failed", detail: err?.response?.data || err.message });
+  }
+});
+
+/* ------------------------------------ Game Reactions ------------------------------------ */
+
+// In-memory storage for reactions (in production, use a database)
+const gameReactions = new Map();
+
+// Get reactions for a specific game
+app.get('/api/reactions/:gameKey', (req, res) => {
+  try {
+    const { gameKey } = req.params;
+    const reactions = gameReactions.get(gameKey) || {};
+    res.json({ reactions });
+  } catch (err) {
+    console.error('Get reactions error:', err);
+    res.status(500).json({ error: 'Failed to get reactions' });
+  }
+});
+
+// Add or update a reaction
+app.post('/api/reactions/:gameKey', (req, res) => {
+  try {
+    const { gameKey } = req.params;
+    const { userId, username, emoji, action } = req.body;
+
+    if (!userId || !emoji) {
+      return res.status(400).json({ error: 'Missing userId or emoji' });
+    }
+
+    let reactions = gameReactions.get(gameKey) || {};
+
+    if (action === 'remove') {
+      // Remove user's reaction
+      Object.keys(reactions).forEach(reactionEmoji => {
+        reactions[reactionEmoji] = reactions[reactionEmoji]?.filter(
+          user => user.userId !== userId
+        ) || [];
+        if (reactions[reactionEmoji].length === 0) {
+          delete reactions[reactionEmoji];
+        }
+      });
+    } else {
+      // Remove user's previous reaction first
+      Object.keys(reactions).forEach(reactionEmoji => {
+        reactions[reactionEmoji] = reactions[reactionEmoji]?.filter(
+          user => user.userId !== userId
+        ) || [];
+        if (reactions[reactionEmoji].length === 0) {
+          delete reactions[reactionEmoji];
+        }
+      });
+
+      // Add new reaction
+      if (!reactions[emoji]) {
+        reactions[emoji] = [];
+      }
+      
+      const existingUser = reactions[emoji].find(user => user.userId === userId);
+      if (!existingUser) {
+        reactions[emoji].push({
+          userId,
+          username: username || 'Anonymous',
+          timestamp: Date.now()
+        });
+      }
+    }
+
+    gameReactions.set(gameKey, reactions);
+    res.json({ reactions });
+  } catch (err) {
+    console.error('Add reaction error:', err);
+    res.status(500).json({ error: 'Failed to add reaction' });
+  }
+});
+
+// Get all reactions summary (for analytics)
+app.get('/api/reactions-summary', (req, res) => {
+  try {
+    const summary = {};
+    gameReactions.forEach((reactions, gameKey) => {
+      const totalReactions = Object.values(reactions).reduce(
+        (sum, users) => sum + users.length, 0
+      );
+      if (totalReactions > 0) {
+        summary[gameKey] = {
+          totalReactions,
+          reactions: Object.keys(reactions).reduce((acc, emoji) => {
+            acc[emoji] = reactions[emoji].length;
+            return acc;
+          }, {})
+        };
+      }
+    });
+    res.json({ summary });
+  } catch (err) {
+    console.error('Get reactions summary error:', err);
+    res.status(500).json({ error: 'Failed to get reactions summary' });
   }
 });
 
