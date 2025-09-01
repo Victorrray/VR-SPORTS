@@ -48,10 +48,12 @@ export default function Navbar() {
         <span />
       </button>
 
-      {/* Mobile search icon - left side */}
-      <button className={styles.mobileSearchBtn} aria-label="Search">
-        <Search size={20} />
-      </button>
+      {/* Mobile search icon - left side (only on sportsbooks page) */}
+      {location.pathname.startsWith("/sportsbooks") && (
+        <button className={styles.mobileSearchBtn} aria-label="Search">
+          <Search size={20} />
+        </button>
+      )}
 
       <div className={styles.navLeft}>
         <Link to="/" className={styles.brandBtn}>
@@ -87,11 +89,13 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Mobile notification bell - top right */}
-      <button className={styles.mobileNotificationBtn} aria-label="Notifications">
-        <Bell size={20} />
-        <div className={styles.notificationDot} />
-      </button>
+      {/* Mobile notification bell - top right (only on sportsbooks page) */}
+      {location.pathname.startsWith("/sportsbooks") && (
+        <button className={styles.mobileNotificationBtn} aria-label="Notifications">
+          <Bell size={20} />
+          <div className={styles.notificationDot} />
+        </button>
+      )}
 
       {/* Inline search bar only on Sportsbooks page (desktop only) */}
       {location.pathname.startsWith("/sportsbooks") && (

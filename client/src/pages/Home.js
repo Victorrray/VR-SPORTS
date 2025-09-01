@@ -128,7 +128,7 @@ export default function Home({
   );
 
   const goToSport = (sport) => navigate(`/sportsbooks?sport=${encodeURIComponent(sport)}`);
-  const goToTool = (slug) => navigate(`/tools/${slug}`);
+  const goToTool = (slug) => navigate(`/sportsbooks`);
 
   return (
     <main
@@ -330,8 +330,8 @@ export default function Home({
                 <div className={styles.edgeBadge}>{r.edge}</div>
               </div>
               <div className={styles.td} role="cell">
-                <Link className={styles.betButton} to={user ? `/matchup/${r.id}` : '/signup'}>
-                  {user ? 'Bet Now' : 'Sign Up'}
+                <Link className={styles.betButton} to={user ? `/sportsbooks` : '/signup'}>
+                  {user ? 'View Odds' : 'Sign Up'}
                 </Link>
               </div>
             </div>
@@ -350,78 +350,24 @@ export default function Home({
         </div>
       </section>
 
-      {/* ===== Success Stories & Education ===== */}
-      <h2 className={styles.sectionTitle} id="learn-heading">
-        Success stories & strategies
-        <span className={styles.sectionSubtitle}>Learn from profitable bettors</span>
-      </h2>
-      <section className={styles.learn} aria-labelledby="learn-heading" role="list">
-        <a className={styles.learnCard} role="listitem" href="/blog/line-shopping-guide">
-          <div className={styles.learnIcon}>📈</div>
-          <h3>From $500 to $12K in 6 months</h3>
-          <p>How Sarah used +EV betting to turn her bankroll into consistent profits.</p>
-          <div className={styles.learnMeta}>
-            <span className={styles.readTime}>5 min read</span>
-            <span className={styles.toolCta}>Read Story</span>
-          </div>
-        </a>
-        <a className={styles.learnCard} role="listitem" href="/blog/expected-value-explained">
-          <div className={styles.learnIcon}>🎯</div>
-          <h3>The Math Behind +EV Betting</h3>
-          <p>Understanding expected value and why it's the key to long-term profits.</p>
-          <div className={styles.learnMeta}>
-            <span className={styles.readTime}>8 min read</span>
-            <span className={styles.toolCta}>Learn Strategy</span>
-          </div>
-        </a>
-        <a className={styles.learnCard} role="listitem" href="/blog/bet-tracking-and-clv">
-          <div className={styles.learnIcon}>⚡</div>
-          <h3>Finding 20+ Edges Per Week</h3>
-          <p>Advanced techniques for maximizing your edge-finding efficiency.</p>
-          <div className={styles.learnMeta}>
-            <span className={styles.readTime}>12 min read</span>
-            <span className={styles.toolCta}>Master Techniques</span>
-          </div>
-        </a>
-      </section>
-
-      {/* ===== Final CTA with Urgency ===== */}
+      {/* ===== Final CTA ===== */}
       <section className={styles.ctaBanner} aria-label="Get started">
         <div className={styles.bannerContent}>
           <div className={styles.bannerHeader}>
-            <h3>Join 50,000+ profitable bettors</h3>
+            <h3>Ready to find profitable bets?</h3>
             <div className={styles.urgencyText}>
               <Clock size={16} />
-              <span>Limited time: 30-day free trial</span>
+              <span>Start finding +EV opportunities now</span>
             </div>
           </div>
-          <p>Start finding +EV opportunities in the next 5 minutes. No credit card required.</p>
-          
-          <div className={styles.benefitsList}>
-            <div className={styles.benefit}>
-              <CheckCircle size={16} />
-              <span>Real-time +EV alerts</span>
-            </div>
-            <div className={styles.benefit}>
-              <CheckCircle size={16} />
-              <span>25+ sportsbook coverage</span>
-            </div>
-            <div className={styles.benefit}>
-              <CheckCircle size={16} />
-              <span>Advanced arbitrage finder</span>
-            </div>
-          </div>
+          <p>Join thousands of smart bettors using data to win consistently.</p>
         </div>
         
         <div className={styles.bannerCta}>
-          <Link to={user ? "/sportsbooks" : "/signup"} className={`${styles.heroBtn} ${styles.ctaPrimary} ${styles.pulseBtn}`}>
-            {user ? "Find Edges Now" : "Start Free Trial"}
+          <Link to={user ? "/sportsbooks" : "/signup"} className={`${styles.heroBtn} ${styles.ctaPrimary}`}>
+            {user ? "View Live Odds" : "Get Started Free"}
             <ArrowRight size={18} className={styles.ctaIcon} />
           </Link>
-          <div className={styles.riskFree}>
-            <Shield size={16} />
-            <span>30-day money-back guarantee</span>
-          </div>
         </div>
       </section>
 
