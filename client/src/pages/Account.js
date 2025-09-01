@@ -1,5 +1,6 @@
 // src/pages/Account.js
 import React, { useMemo, useState, useEffect } from "react";
+import { User, Shield, Copy, Check, AlertCircle, Settings, Mail, Key, LogOut } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
 import { supabase } from "../lib/supabase";
 import MobileBottomBar from "../components/MobileBottomBar";
@@ -149,69 +150,97 @@ export default function Account() {
   return (
     <main className="account-page">
       <header className="account-header">
-        <h1>Profile</h1>
-        <p>Manage your account and security settings.</p>
+        <div className="header-title">
+          <User className="header-icon" size={32} />
+          <div>
+            <h1>Profile</h1>
+            <p>Manage your account and security settings</p>
+          </div>
+        </div>
       </header>
 
       {/* Profile card */}
-      <section className="card">
-        <h2>Account</h2>
-        <div className="profile">
-          <div className="avatar">{initialsFromEmail(email)}</div>
-
-          <div className="profile-info">
-            <div className="email-row">
-              <strong>{email}</strong>
+      <section className="profile-card">
+        <div className="card-header">
+          <User size={20} />
+          <h2>Account Information</h2>
+        </div>
+        
+        <div className="profile-content">
+          <div className="avatar-section">
+            <div className="avatar">{initialsFromEmail(email)}</div>
+            <div className="avatar-status">
               {emailVerified ? (
-                <span className="badge verified">Verified</span>
+                <div className="status-badge verified">
+                  <Check size={12} />
+                  <span>Verified</span>
+                </div>
               ) : (
-                <span className="badge not-verified">Not verified</span>
+                <div className="status-badge unverified">
+                  <AlertCircle size={12} />
+                  <span>Unverified</span>
+                </div>
               )}
             </div>
+          </div>
 
-            <div className="user-id">
-              User ID: <code>{maskId(user.id)}</code>
-              <button onClick={() => copy(user.id)} className="copy-btn">
-                Copy
-              </button>
+          <div className="profile-details">
+            <div className="detail-row">
+              <div className="detail-label">
+                <Mail size={16} />
+                <span>Email Address</span>
+              </div>
+              <div className="detail-value">{email}</div>
             </div>
 
+
             {providers.length > 0 && (
-              <div className="providers">
-                {providers.map((p) => (
-                  <span key={p} className="provider">{p}</span>
-                ))}
+              <div className="detail-row">
+                <div className="detail-label">
+                  <Settings size={16} />
+                  <span>Auth Providers</span>
+                </div>
+                <div className="providers">
+                  {providers.map((p) => (
+                    <span key={p} className="provider-badge">{p}</span>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Username / Set-once editor */}
-            <div className="username-row" style={{ marginTop: 14 }}>
-              <div className="username-left">
-                <span className="label">Username:</span>{" "}
+            <div className="detail-row">
+              <div className="detail-label">
+                <User size={16} />
+                <span>Username</span>
+              </div>
+              <div className="username-section">
                 {loadingProfile ? (
-                  <span className="muted">Loading…</span>
+                  <span className="loading-text">Loading…</span>
                 ) : username ? (
-                  <strong>@{username}</strong>
+                  <div className="username-display">
+                    <strong>@{username}</strong>
+                    <span className="permanent-note">Permanent</span>
+                  </div>
                 ) : (
-                  <span className="muted">Not set</span>
+                  <div className="username-empty">
+                    <span className="not-set">Not set</span>
+                    {!editingUN && (
+                      <button
+                        type="button"
+                        className="set-username-btn"
+                        onClick={() => { setEditingUN(true); setValue(""); setStatus("idle"); }}
+                      >
+                        Set Username
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
-
-              {/* Only allow setting if not yet set */}
-              {!loadingProfile && !username && !editingUN && (
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => { setEditingUN(true); setValue(""); setStatus("idle"); }}
-                >
-                  Set username
-                </button>
-              )}
             </div>
 
             {editingUN && !username && (
               <div className="username-editor">
-                <div className="field">
+                <div className="editor-field">
                   <input
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
@@ -219,30 +248,38 @@ export default function Account() {
                     autoCapitalize="off"
                     autoCorrect="off"
                     spellCheck="false"
+                    className="username-input"
                   />
-                  <div className="hint">
-                    {status === "checking" && "Checking…"}
-                    {status === "ok" && "Available ✔"}
-                    {status === "taken" && "Already taken"}
+                  <div className={`status-hint ${status}`}>
+                    {status === "checking" && "Checking availability..."}
+                    {status === "ok" && (
+                      <><Check size={14} /> Available</>  
+                    )}
+                    {status === "taken" && (
+                      <><AlertCircle size={14} /> Already taken</>
+                    )}
                     {status === "invalid" && "Use 3–20 letters, numbers, _ (no leading/trailing _)"}
-                    {status === "saving" && "Saving…"}
-                    {status === "saved" && "Saved ✔"}
+                    {status === "saving" && "Saving..."}
+                    {status === "saved" && (
+                      <><Check size={14} /> Saved successfully</>
+                    )}
                     {status === "error" && "Error saving. Try again."}
-                    {status === "locked" && "Your username is locked and cannot be changed."}
+                    {status === "locked" && "Username is locked and cannot be changed."}
                   </div>
                 </div>
-                <div className="row" style={{ display: "flex", gap: 8 }}>
+                <div className="editor-actions">
                   <button
                     type="button"
-                    className="btn primary"
+                    className="save-btn"
                     disabled={status !== "ok"}
                     onClick={saveUsername}
                   >
+                    <Check size={16} />
                     Save
                   </button>
                   <button
                     type="button"
-                    className="btn ghost"
+                    className="cancel-btn"
                     onClick={() => { setEditingUN(false); setValue(""); setStatus("idle"); }}
                   >
                     Cancel
@@ -251,25 +288,39 @@ export default function Account() {
               </div>
             )}
 
-            {/* If already set, optionally show a lock note */}
-            {!loadingProfile && username && (
-              <div className="hint" style={{ marginTop: 8, opacity: 0.75, fontSize: 13 }}>
-                Your username is permanent and cannot be changed.
-              </div>
-            )}
           </div>
         </div>
       </section>
 
       {/* Security card */}
-      <section className="card">
-        <h2>Security</h2>
-        <div className="actions">
-          <button onClick={handleResetPassword} disabled={busy}>
-            {busy ? "Sending…" : "Send password reset link"}
+      <section className="security-card">
+        <div className="card-header">
+          <Shield size={20} />
+          <h2>Security & Access</h2>
+        </div>
+        
+        <div className="security-actions">
+          <button 
+            onClick={handleResetPassword} 
+            disabled={busy}
+            className="security-btn reset-btn"
+          >
+            <Key size={18} />
+            <div className="btn-content">
+              <span>{busy ? "Sending..." : "Reset Password"}</span>
+              <small>Send reset link to your email</small>
+            </div>
           </button>
-          <button className="danger" onClick={signOut}>
-            Sign out
+          
+          <button 
+            className="security-btn signout-btn" 
+            onClick={signOut}
+          >
+            <LogOut size={18} />
+            <div className="btn-content">
+              <span>Sign Out</span>
+              <small>End your current session</small>
+            </div>
           </button>
         </div>
       </section>

@@ -1,0 +1,451 @@
+/* Scores Page - Modern VR-Odds Design */
+.scores-page {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem 120px;
+  min-height: 100vh;
+}
+
+/* Header Section */
+.scores-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-title h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.title-icon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(61, 126, 255, 0.3));
+}
+
+.week-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--backdrop-blur-light);
+  -webkit-backdrop-filter: var(--backdrop-blur-light);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Controls */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sport-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-elev-2);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--glass-border);
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.sport-tab {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.sport-tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sport-tab.active {
+  background: var(--accent-gradient);
+  color: white;
+  box-shadow: 0 2px 8px rgba(61, 126, 255, 0.3);
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: var(--backdrop-blur-light);
+  -webkit-backdrop-filter: var(--backdrop-blur-light);
+}
+
+.refresh-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.refresh-btn.spinning .refresh-icon {
+  animation: spin 0.75s linear;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading and Error States */
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 16px;
+  background: var(--glass-bg);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--backdrop-blur-light);
+  -webkit-backdrop-filter: var(--backdrop-blur-light);
+}
+
+.error-state {
+  text-align: center;
+  padding: 20px;
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Scores Grid */
+.scores-grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* Game Cards */
+.game-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--backdrop-blur-light);
+  -webkit-backdrop-filter: var(--backdrop-blur-light);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.game-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.game-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.game-card.live {
+  border-color: var(--success);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.game-card.live::before {
+  background: linear-gradient(90deg, transparent, var(--success), transparent);
+}
+
+/* Teams Section */
+.teams-section {
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 12px;
+}
+
+.team-row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.team-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.team-name {
+  font-weight: 800;
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.team-record {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.team-score {
+  font-weight: 900;
+  font-size: 20px;
+  color: var(--text);
+  text-align: right;
+  min-width: 30px;
+}
+
+/* Game Status Section */
+.game-status {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  text-align: right;
+  gap: 12px;
+}
+
+.status-section {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.live {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--success);
+}
+
+.status-badge.final {
+  background: rgba(100, 116, 139, 0.15);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  color: var(--text-secondary);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: livePulse 2s infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.3); }
+}
+
+.kickoff-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Odds Summary */
+.odds-summary {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.odds-line {
+  margin-bottom: 2px;
+}
+
+.odds-line span {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.odds-provider {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 720px) {
+  .scores-page {
+    padding: 0 1rem 140px;
+  }
+  
+  .scores-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .header-left {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .page-title h1 {
+    font-size: 1.75rem;
+  }
+  
+  .header-controls {
+    justify-content: center;
+  }
+  
+  .game-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .team-row {
+    grid-template-columns: 28px 1fr auto;
+    gap: 10px;
+  }
+  
+  .team-name {
+    font-size: 14px;
+  }
+  
+  .team-score {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .scores-header {
+    gap: 12px;
+  }
+  
+  .page-title {
+    gap: 8px;
+  }
+  
+  .page-title h1 {
+    font-size: 1.5rem;
+  }
+  
+  .title-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .week-badge {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .sport-tab {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .refresh-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .game-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .game-status {
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .status-section {
+    justify-content: flex-start;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .refresh-btn.spinning .refresh-icon,
+  .live-dot {
+    animation: none;
+  }
+  
+  .game-card {
+    transition: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .game-card {
+    border: 2px solid #fff;
+    background: #000;
+  }
+  
+  .status-badge.live {
+    background: #00ff00;
+    color: #000;
+  }
+  
+  .status-badge.final {
+    background: #fff;
+    color: #000;
+  }
+}

@@ -189,6 +189,43 @@ export default function OddsTable({
   evMin = null,
   allCaps = false,
 }) {
+  
+  // My Picks functionality
+  const addToPicks = (row, book, isHome) => {
+    const pick = {
+      id: `${row.key}-${book?.bookmaker?.key || book?.book}-${Date.now()}`,
+      gameId: row.game.id,
+      homeTeam: row.game.home_team,
+      awayTeam: row.game.away_team,
+      market: formatMarket(row.mkt?.key || ''),
+      selection: row.out.name,
+      odds: row.out.price || row.out.odds,
+      bookmaker: cleanBookTitle(book?.book || book?.bookmaker?.title),
+      line: row.out.point,
+      commenceTime: row.game.commence_time,
+      sport: getSportLeague(row.game.sport_key).sport,
+      league: getSportLeague(row.game.sport_key).league,
+      dateAdded: new Date().toISOString(),
+      status: 'pending',
+      stake: 0,
+      notes: ''
+    };
+    
+    const existingPicks = JSON.parse(localStorage.getItem('myPicks') || '[]');
+    const updatedPicks = [...existingPicks, pick];
+    localStorage.setItem('myPicks', JSON.stringify(updatedPicks));
+    
+    // Show success feedback
+    const button = document.querySelector(`[data-pick-id="${pick.id}"]`);
+    if (button) {
+      button.textContent = '✓';
+      button.style.background = 'var(--success)';
+      setTimeout(() => {
+        button.textContent = '+';
+        button.style.background = '';
+      }, 1500);
+    }
+  };
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState(initialSort || { key: "ev", dir: "desc" });
@@ -475,7 +512,19 @@ export default function OddsTable({
                 {/* Desktop / tablet row (unchanged) */}
                 <tr className={`odds-row${expandedRows[row.key] ? " expanded" : ""}`} onClick={()=>toggleRow(row.key)} style={{ cursor:"pointer" }}>
                   <td className={`ev-col ${ev && ev > 0 ? 'positive' : 'negative'}`}>
-                    {typeof ev === "number" ? (<span className="ev-chip">{ev.toFixed(2)}%</span>) : ""}
+                    <div className="ev-col-content">
+                      {typeof ev === "number" ? (<span className="ev-chip">{ev.toFixed(2)}%</span>) : ""}
+                      <button 
+                        className="desktop-add-pick-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToPicks(row, { bookmaker: row.bk, book: row.bk?.title });
+                        }}
+                        title="Add to My Picks"
+                      >
+                        +
+                      </button>
+                    </div>
                   </td>
                   <td>
                     <div style={{ textAlign:'left', display:'flex', flexDirection:'column', gap:2 }}>
@@ -559,47 +608,86 @@ export default function OddsTable({
                         </div>
                       </div>
 
-                      {/* middle row: Market left, Line right (NO Spread/Total summary bar) */}
-                      <div className="mob-mid">
-                        <div className="mob-market">{formatMarket(row.mkt?.key || '')}</div>
+                      {/* Team name - now appears first */}
+                      <div className="mob-team">
+                        {String(row.mkt?.key || '').includes('total')
+                          ? '' // No team name for totals
+                          : (() => {
+                              const teamName = (row.mkt.key || '') === 'h2h' 
+                                ? shortTeam(row.out.name, row.game.sport_key)
+                                : shortTeam(row.out.name, row.game.sport_key);
+                              
+                              // Check if both teams have the same short name
+                              const homeShort = shortTeam(row.game.home_team, row.game.sport_key);
+                              const awayShort = shortTeam(row.game.away_team, row.game.sport_key);
+                              
+                              if (homeShort === awayShort && teamName === homeShort) {
+                                // Add home/away indicator when teams have same name
+                                const isHome = row.out.name === row.game.home_team;
+                                return `${teamName} ${isHome ? '(H)' : '(A)'}`;
+                              }
+                              
+                              return teamName;
+                            })()}
+                      </div>
+
+                      {/* Market type and line - now appears below team */}
+                      <div className="mob-market-row">
+                        <div className="mob-market">
+                          {formatMarket(row.mkt?.key || '')}
+                          {String(row.mkt?.key || '').includes('total') 
+                            ? ` ${row.out.name || ''}` 
+                            : ''}
+                        </div>
                         <div className="mob-line">{(row.mkt.key || '') === 'h2h' ? '—' : formatLine(row.out.point, row.mkt.key, 'game')}</div>
                       </div>
 
-                      {/* selection label */}
-                      <div className="mob-sel">
-                        {(row.mkt.key || '') === 'h2h'
-                          ? shortTeam(row.out.name, row.game.sport_key)
-                          : (row.out.name || '')}
+                      {/* Bottom row: Sportsbook name left, odds and pick button right */}
+                      <div className="mob-bottom-row">
+                        <div className="mob-book">{cleanBookTitle(row.bk?.title)}</div>
+                        <div className="mob-right-section">
+                          <div className={`mob-odds-container ${priceDelta[row.key] ? (priceDelta[row.key] === 'up' ? 'up' : 'down') : ''}`}>
+                            <span className="mob-odds">
+                              {(() => {
+                                const n = Number(row.out.price ?? row.out.odds ?? 0);
+                                if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
+                                if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
+                                const num = n > 0 ? Math.round(Math.abs(n)) : 100;
+                                const den = n > 0 ? 100 : Math.round(Math.abs(n));
+                                const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
+                                return `${num/g}/${den/g}`;
+                              })()}
+                            </span>
+                          </div>
+                          <button 
+                            className="mob-add-pick-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToPicks(row, { bookmaker: row.bk, book: row.bk?.title });
+                            }}
+                            title="Add to My Picks"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
 
-                      {/* odds: right aligned; NO book • fair subline on mobile */}
-                      <div className={`mob-odds-row ${priceDelta[row.key] ? (priceDelta[row.key] === 'up' ? 'up' : 'down') : ''}`}>
-                        <span className="mob-odds">
-                          {(() => {
-                            const n = Number(row.out.price ?? row.out.odds ?? 0);
-                            if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
-                            if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
-                            const num = n > 0 ? Math.round(Math.abs(n)) : 100;
-                            const den = n > 0 ? 100 : Math.round(Math.abs(n));
-                            const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
-                            return `${num/g}/${den/g}`;
-                          })()}
-                        </span>
-                      </div>
-
-                      {/* ---- MOBILE SWIPE MINI-TABLE (replaces desktop mini table on small screens) ---- */}
+                      {/* ---- MOBILE VERTICAL MINI-TABLE (expands downward only) ---- */}
                       {expandedRows[row.key] && (
-                        <div className="mini-swipe" role="region" aria-label="Compare books (swipe)">
-                          {/* sticky legend card */}
-                          <div className="mini-swipe-col legend">
-                            <div className="legend-type">{marketTypeLabel(row?.mkt?.key || '')}</div>
-                            <div className="legend-teams">
-                              <div>{String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}</div>
-                              <div>{String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}</div>
+                        <div className="mini-swipe" role="region" aria-label="Compare books">
+                          {/* Header row */}
+                          <div className="mini-swipe-header">
+                            <div className="mini-header-book">Book</div>
+                            <div className="mini-header-odds">
+                              {String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}
                             </div>
+                            <div className="mini-header-odds">
+                              {String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}
+                            </div>
+                            <div className="mini-header-pick">Pick</div>
                           </div>
 
-                          {/* book columns */}
+                          {/* Book rows */}
                           {(() => {
                             const toDec = (n) => {
                               const v = Number(n || 0);
@@ -618,7 +706,7 @@ export default function OddsTable({
                               const key = String(ob?.bookmaker?.key || ob.book || '').toLowerCase();
                               if (!seen.has(key)) { seen.add(key); uniq.push(ob); }
                             });
-                            const cols = uniq.slice().sort((a,b)=>toDec(b.price??b.odds)-toDec(a.price??a.odds)).slice(0, 12);
+                            const cols = uniq.slice().sort((a,b)=>toDec(b.price??b.odds)-toDec(a.price??a.odds)).slice(0, 6);
 
                             const grab = (ob, top) => {
                               const outs = Array.isArray(ob?.market?.outcomes) ? ob.market.outcomes : [];
@@ -634,7 +722,6 @@ export default function OddsTable({
                               }
                               if (isSpreads) {
                                 const name = top ? row.game.home_team : row.game.away_team;
-                                // match by absolute point when available
                                 const ptAbs = Math.abs(Number(row.out.point ?? 0));
                                 const f = outs.find(x => x && x.name === name && Math.abs(Number(x.point ?? 0)) === ptAbs) ||
                                           outs.find(x => x && x.name === name);
@@ -643,32 +730,40 @@ export default function OddsTable({
                               return '';
                             };
 
+                            const formatOdds = (n) => {
+                              if (!n && n !== 0) return '';
+                              if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
+                              if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
+                              const num = n > 0 ? Math.round(Math.abs(n)) : 100;
+                              const den = n > 0 ? 100 : Math.round(Math.abs(n));
+                              const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
+                              return `${num/g}/${den/g}`;
+                            };
+
                             return cols.map((ob, i) => (
-                              <div className="mini-swipe-col" key={ob._rowId || i}>
-                                <div className="mini-swipe-book">{cleanBookTitle(ob.book)}</div>
-                                <div className="mini-swipe-odds top">
-                                  {(() => {
-                                    const n = Number(grab(ob, true));
-                                    if (!n && n !== 0) return '';
-                                    if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
-                                    if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
-                                    const num = n > 0 ? Math.round(Math.abs(n)) : 100;
-                                    const den = n > 0 ? 100 : Math.round(Math.abs(n));
-                                    const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
-                                    return `${num/g}/${den/g}`;
-                                  })()}
+                              <div className="mini-swipe-row" key={ob._rowId || i}>
+                                <div className="mini-book-col">{cleanBookTitle(ob.book)}</div>
+                                <div className="mini-odds-col">
+                                  <div className="mini-swipe-odds">
+                                    {formatOdds(Number(grab(ob, true)))}
+                                  </div>
                                 </div>
-                                <div className="mini-swipe-odds bot">
-                                  {(() => {
-                                    const n = Number(grab(ob, false));
-                                    if (!n && n !== 0) return '';
-                                    if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
-                                    if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
-                                    const num = n > 0 ? Math.round(Math.abs(n)) : 100;
-                                    const den = n > 0 ? 100 : Math.round(Math.abs(n));
-                                    const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
-                                    return `${num/g}/${den/g}`;
-                                  })()}
+                                <div className="mini-odds-col">
+                                  <div className="mini-swipe-odds">
+                                    {formatOdds(Number(grab(ob, false)))}
+                                  </div>
+                                </div>
+                                <div className="mini-pick-col">
+                                  <button 
+                                    className="add-pick-btn"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addToPicks(row, ob, true);
+                                    }}
+                                    title="Add to My Picks"
+                                  >
+                                    +
+                                  </button>
                                 </div>
                               </div>
                             ));

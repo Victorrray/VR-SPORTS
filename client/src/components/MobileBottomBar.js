@@ -1,13 +1,48 @@
 // src/components/MobileBottomBar.js
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Home, TrendingUp, BarChart3, User, Filter } from "lucide-react";
 import "./MobileBottomBar.css";
 
 export default function MobileBottomBar({ onFilterClick, active = "sportsbooks", showFilter = true }) {
+  const [hasNotifications, setHasNotifications] = useState(true);
+  const [activeCount, setActiveCount] = useState(0);
+
+  // Simulate live activity counter
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveCount(prev => Math.max(0, prev + Math.floor(Math.random() * 3) - 1));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   const tabs = [
-    { key: "sportsbooks", label: "Sportsbooks", icon: "🏦", href: "/sportsbooks" },
-    { key: "picks",       label: "My Picks",     icon: "💖", href: "/picks" },
-    { key: "scores",      label: "Scores",       icon: "🧮", href: "/scores" },
-    { key: "account",     label: "Profile",      icon: "👤", href: "/account" },
+    { 
+      key: "sportsbooks", 
+      label: "Odds", 
+      icon: Home, 
+      href: "/sportsbooks",
+      badge: activeCount > 0 ? `${activeCount}` : null
+    },
+    { 
+      key: "picks", 
+      label: "Picks", 
+      icon: TrendingUp, 
+      href: "/picks",
+      badge: hasNotifications ? "!" : null
+    },
+    { 
+      key: "scores", 
+      label: "Scores", 
+      icon: BarChart3, 
+      href: "/scores",
+      isLive: true
+    },
+    { 
+      key: "account", 
+      label: "Profile", 
+      icon: User, 
+      href: "/account" 
+    },
   ];
 
   return (
@@ -20,31 +55,43 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
             onClick={onFilterClick}
             aria-label="Open filters"
           >
-            <span className="filter-icon">⚙️</span>
+            <Filter size={16} className="filter-icon" />
             <span className="filter-text">Filters</span>
+            <div className="filter-pulse" />
           </button>
         )}
 
         <nav className="mobile-nav">
           {tabs.map((t) => {
-            const alignClass =
-              t.key === "sportsbooks" ? "align-left"
-              : t.key === "picks"     ? "align-center"
-              : t.key === "scores"    ? "align-right"
-              : "align-profile";
+            const IconComponent = t.icon;
+            const isActive = active === t.key;
 
             return (
               <a
                 key={t.key}
-                className={`mobile-tab ${alignClass}${active === t.key ? " active" : ""}`}
+                className={`mobile-tab${isActive ? " active" : ""}`}
                 href={t.href}
                 onClick={(e) => {
-                  // allow real links; prevent "#" if you ever add one
                   if (t.href === "#") e.preventDefault();
+                  if (t.key === "picks" && hasNotifications) {
+                    setHasNotifications(false);
+                  }
                 }}
               >
-                <span className="tab-icon" aria-hidden>{t.icon}</span>
+                <div className="tab-icon-container">
+                  <IconComponent 
+                    size={20} 
+                    className={`tab-icon${t.isLive ? " live-icon" : ""}`} 
+                  />
+                  {t.badge && (
+                    <span className={`tab-badge${t.badge === "!" ? " notification-badge" : " count-badge"}`}>
+                      {t.badge}
+                    </span>
+                  )}
+                  {t.isLive && <div className="live-indicator" />}
+                </div>
                 <span className="tab-label">{t.label}</span>
+                {isActive && <div className="active-indicator" />}
               </a>
             );
           })}

@@ -1,9 +1,12 @@
 // file: src/App.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import PrivateRoute from "./auth/PrivateRoute";
+import UsernameSetup from "./components/UsernameSetup";
+import LoadingBar from "./components/LoadingBar";
+import { useAuth } from "./auth/AuthProvider";
 
 // Lazy pages with fallback to named exports
 const SportsbookMarkets = React.lazy(() =>
@@ -26,6 +29,17 @@ const Scores = React.lazy(() =>
 );
 
 function AppRoutes() {
+  const { user } = useAuth();
+  const [showUsernameSetup, setShowUsernameSetup] = useState(false);
+
+  useEffect(() => {
+    if (user && !user.user_metadata?.username) {
+      setShowUsernameSetup(true);
+    } else {
+      setShowUsernameSetup(false);
+    }
+  }, [user]);
+
   return (
     <React.Suspense
       fallback={
@@ -40,6 +54,7 @@ function AppRoutes() {
       }
     >
       <div className="app-shell">
+        <LoadingBar />
         <Navbar />
         <div className="app-body">
           <Routes>
@@ -82,6 +97,11 @@ function AppRoutes() {
           </Routes>
         </div>
         <Footer />
+        
+        {/* Username Setup Modal */}
+        {showUsernameSetup && (
+          <UsernameSetup onComplete={() => setShowUsernameSetup(false)} />
+        )}
       </div>
     </React.Suspense>
   );

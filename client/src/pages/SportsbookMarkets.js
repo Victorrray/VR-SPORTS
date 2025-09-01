@@ -5,10 +5,10 @@ import MobileFiltersSheet from "../components/MobileFiltersSheet";
 
 // ⬇️ Adjust these paths if needed
 import SportMultiSelect from "../components/SportMultiSelect";
+import DatePicker from "../components/DatePicker";
 import OddsTable from "../components/OddsTable";
 import useDebounce from "../hooks/useDebounce";
 import useMarkets from "../hooks/useMarkets";
-
 
 /* =========================
    Constants & helpers
@@ -55,70 +55,70 @@ const MARKET_TITLES = {
 // Suggested markets per sport (unioned for multi-select)
 const SPORT_MARKETS = {
   americanfootball_nfl: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_half_moneyline","first_half_spreads","first_half_totals",
-    "team_totals","team_totals_home","team_totals_away",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_half_moneyline", "first_half_spreads", "first_half_totals",
+    "team_totals", "team_totals_home", "team_totals_away",
   ],
   americanfootball_ncaaf: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_half_moneyline","first_half_spreads","first_half_totals",
-    "team_totals","team_totals_home","team_totals_away",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_half_moneyline", "first_half_spreads", "first_half_totals",
+    "team_totals", "team_totals_home", "team_totals_away",
   ],
   basketball_nba: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_half_moneyline","first_half_spreads","first_half_totals",
-    "first_quarter_moneyline","first_quarter_spreads","first_quarter_totals",
-    "team_totals","team_totals_home","team_totals_away",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_half_moneyline", "first_half_spreads", "first_half_totals",
+    "first_quarter_moneyline", "first_quarter_spreads", "first_quarter_totals",
+    "team_totals", "team_totals_home", "team_totals_away",
   ],
   basketball_ncaab: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_half_moneyline","first_half_spreads","first_half_totals",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_half_moneyline", "first_half_spreads", "first_half_totals",
     "team_totals",
   ],
   baseball_mlb: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_five_moneyline", "first_five_spreads", "first_five_totals",
     "team_totals",
   ],
   baseball_kbo: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_five_moneyline", "first_five_spreads", "first_five_totals",
     "team_totals",
   ],
   baseball_npb: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_five_moneyline", "first_five_spreads", "first_five_totals",
     "team_totals",
   ],
   baseball_cpbl: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
-    "first_five_moneyline","first_five_spreads","first_five_totals",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
+    "first_five_moneyline", "first_five_spreads", "first_five_totals",
     "team_totals",
   ],
   icehockey_nhl: [
-    "h2h","spreads","totals",
-    "spreads_alternate","totals_alternate",
+    "h2h", "spreads", "totals",
+    "spreads_alternate", "totals_alternate",
     "team_totals",
   ],
   soccer_epl: [
-    "h2h","draw_no_bet","double_chance","totals","totals_alternate","btts","corners","cards",
+    "h2h", "draw_no_bet", "double_chance", "totals", "totals_alternate", "btts", "corners", "cards",
   ],
   soccer_uefa_champs_league: [
-    "h2h","draw_no_bet","double_chance","totals","totals_alternate","btts","corners","cards",
+    "h2h", "draw_no_bet", "double_chance", "totals", "totals_alternate", "btts", "corners", "cards",
   ],
-  tennis_atp: ["h2h","totals","set_winner","game_handicap","set_totals","total_sets"],
-  tennis_wta: ["h2h","totals","set_winner","game_handicap","set_totals","total_sets"],
-  tennis_challenger: ["h2h","totals","set_winner","game_handicap","set_totals"],
-  tennis_itf_men: ["h2h","totals","set_winner","game_handicap"],
-  tennis_itf_women: ["h2h","totals","set_winner","game_handicap"],
+  tennis_atp: ["h2h", "totals", "set_winner", "game_handicap", "set_totals", "total_sets"],
+  tennis_wta: ["h2h", "totals", "set_winner", "game_handicap", "set_totals", "total_sets"],
+  tennis_challenger: ["h2h", "totals", "set_winner", "game_handicap", "set_totals"],
+  tennis_itf_men: ["h2h", "totals", "set_winner", "game_handicap"],
+  tennis_itf_women: ["h2h", "totals", "set_winner", "game_handicap"],
   mma_mixed_martial_arts: ["h2h"],
   boxing_boxing: ["h2h"],
 };
@@ -304,6 +304,18 @@ export default function SportsbookMarkets() {
     return localStorage.getItem("oddsFormat") || "american";
   });
 
+  // ✅ Debounce defined ONCE
+  const debouncedQuery = useDebounce(query, 300);
+
+  // Sync with URL search params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlQuery = params.get('q') || '';
+    if (urlQuery !== query) {
+      setQuery(urlQuery);
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -377,7 +389,6 @@ export default function SportsbookMarkets() {
     return Array.from(set).sort();
   }, [games]);
 
-  const debounced = useDebounce(query, 300);
   const BASE_URL = process.env.REACT_APP_API_URL || ""; // keep CRA-style env; change to import.meta.env for Vite
 
   // Fetch sport list (defensive against non-array errors), map to friendly titles
@@ -482,10 +493,11 @@ export default function SportsbookMarkets() {
     // eslint-disable-next-line
   }, [bookList]);
 
-  // Filtering before passing to OddsTable
+  // ===== Filtering before passing to OddsTable =====
   let filteredGames = games;
-  if (debounced.trim()) {
-    const q = debounced.toLowerCase();
+
+  if (debouncedQuery.trim()) {
+    const q = debouncedQuery.toLowerCase();
     filteredGames = filteredGames.filter(
       (g) =>
         (g.home_team && g.home_team.toLowerCase().includes(q)) ||
@@ -493,6 +505,7 @@ export default function SportsbookMarkets() {
         (g.sport_title && g.sport_title.toLowerCase().includes(q))
     );
   }
+
   // Date filter (local date)
   if (selectedDate) {
     filteredGames = filteredGames.filter((g) => {
@@ -504,9 +517,11 @@ export default function SportsbookMarkets() {
       return local === selectedDate;
     });
   }
+
   if (picked && picked.length && !picked.includes("ALL")) {
     filteredGames = filteredGames.filter((g) => picked.includes(g.sport_key));
   }
+
   if (!showAllGames) {
     filteredGames = filteredGames.filter((g) => {
       const start = new Date(g.commence_time).getTime();
@@ -575,12 +590,10 @@ export default function SportsbookMarkets() {
 
             <div className="filter-group">
               <span className="filter-label">Date</span>
-              <input
-                type="date"
+              <DatePicker
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                aria-label="Filter by date"
-                title="Filter by date"
+                onChange={setSelectedDate}
+                placeholder="All Dates"
               />
             </div>
 
@@ -672,21 +685,11 @@ export default function SportsbookMarkets() {
         <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
           <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
             <div className="filter-group">
-              <span className="filter-label">Search</span>
-              <input
-                placeholder={"Search team / league"}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-            <div className="filter-group">
               <span className="filter-label">Date</span>
-              <input
-                type="date"
+              <DatePicker
                 value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                aria-label="Filter by date"
-                title="Filter by date"
+                onChange={setSelectedDate}
+                placeholder="All Dates"
               />
             </div>
             <div className="filter-group">
@@ -715,23 +718,23 @@ export default function SportsbookMarkets() {
             <div className="filter-actions">
               <button
                 type="button"
-                className="btn btn-primary btn-lg"
+                className="filter-btn apply-btn"
                 onClick={() => {
                   setRefreshTick(Date.now());
                   setMobileFiltersOpen(false);
                 }}
               >
-                Apply
+                Apply Filters
               </button>
               <button
                 type="button"
-                className="btn btn-danger btn-lg"
+                className="filter-btn reset-btn"
                 onClick={() => {
                   resetFilters();
                   setMobileFiltersOpen(false);
                 }}
               >
-                Reset
+                Reset All
               </button>
             </div>
           </div>

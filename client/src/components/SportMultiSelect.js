@@ -157,11 +157,18 @@ export default function SportMultiSelect({
             </label>
           </li>
           {list.map((s) => (
-            <li key={s.key} style={leftAlign ? { textAlign: "left" } : undefined}>
-              <label>
-                <input type="checkbox" checked={selected.includes(s.key)} onChange={() => toggleOne(s.key)} />{" "}
-                {s.title}
-              </label>
+            <li
+              key={s.key}
+              className={`ms-item ${selected.includes(s.key) ? "ms-selected" : ""}`}
+              onClick={() => toggleOne(s.key)}
+            >
+              <input
+                type="checkbox"
+                checked={selected.includes(s.key)}
+                onChange={() => {}}
+                tabIndex={-1}
+              />
+              <span>{s.title}</span>
             </li>
           ))}
         </ul>
@@ -172,28 +179,38 @@ export default function SportMultiSelect({
         shouldPortal &&
         typeof document !== "undefined" &&
         ReactDOM.createPortal(
-          <ul
-            ref={menuRef}
-            className="ms-menu ms-menu-portal"
-            role="listbox"
-            data-align={actualAlign}
-            style={portalStyle}
-          >
-            <li style={{ borderBottom: "1px solid #444", paddingBottom: 4, marginBottom: 4 }}>
-              <label>
-                <input type="checkbox" checked={allSelected} onChange={toggleAll} />{" "}
-                <strong>{allLabel}</strong>
-              </label>
-            </li>
-            {list.map((s) => (
-              <li key={s.key} style={{ textAlign: leftAlign ? "left" : "center" }}>
-                <label>
-                  <input type="checkbox" checked={selected.includes(s.key)} onChange={() => toggleOne(s.key)} />{" "}
-                  {s.title}
-                </label>
-              </li>
-            ))}
-          </ul>,
+          <div className="ms-mobile-overlay" onClick={() => setOpen(false)}>
+            <div className="ms-mobile-sheet" onClick={(e) => e.stopPropagation()}>
+              <div className="ms-mobile-header">
+                <h3>{allLabel}</h3>
+                <button className="ms-mobile-close" onClick={() => setOpen(false)}>×</button>
+              </div>
+              <div className="ms-mobile-content">
+                <div className="ms-mobile-option ms-mobile-all" onClick={toggleAll}>
+                  <span className={`ms-mobile-checkbox ${allSelected ? 'ms-checked' : ''}`}>
+                    {allSelected ? "✓" : "○"}
+                  </span>
+                  <span className="ms-mobile-label">
+                    <strong>{allLabel}</strong>
+                  </span>
+                </div>
+                <div className="ms-mobile-divider"></div>
+                {list.map((s) => (
+                  <div key={s.key} className="ms-mobile-option" onClick={() => toggleOne(s.key)}>
+                    <span className={`ms-mobile-checkbox ${selected.includes(s.key) ? 'ms-checked' : ''}`}>
+                      {selected.includes(s.key) ? "✓" : "○"}
+                    </span>
+                    <span className="ms-mobile-label">{s.title}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="ms-mobile-footer">
+                <button className="ms-mobile-done" onClick={() => setOpen(false)}>
+                  Done ({selected.length} selected)
+                </button>
+              </div>
+            </div>
+          </div>,
           document.body
         )}
     </div>

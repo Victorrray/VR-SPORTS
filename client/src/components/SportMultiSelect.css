@@ -1,79 +1,371 @@
 .ms-wrap {
   position: relative;
   display: inline-block;
-  min-width: 120px;
-  font-size: 1em;
+  width: 100%;
 }
 
-/* Toggle button */
+.ms-wrap.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .ms-toggle {
   width: 100%;
-  padding: 0.65em 1em;
-  background: #222945;
-  color: #bbcbff;
-  border: 1.5px solid #334c;
-  border-radius: 10px;
+  padding: 14px 16px;
+  border: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--bg-elev) 80%, transparent),
+    color-mix(in srgb, var(--bg-elev-2) 90%, transparent)
+  );
+  color: var(--text);
+  text-align: left;
   cursor: pointer;
-  font-size: 1.07em;
-  box-shadow: 0 2px 7px #181b2344;
-  text-align: center; /* center label text within the bar */
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Dropdown menu */
+.ms-toggle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: -1;
+}
+
+.ms-toggle:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.ms-toggle:hover::before {
+  opacity: 0.05;
+}
+
+.ms-toggle:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
 .ms-menu {
   position: absolute;
-  z-index: 999;
-  left: 50%;
-  transform: translateX(-50%);
-  right: auto;
-  top: 110%;
-  background: #181c27;
-  border-radius: 10px;
-  padding: 8px 10px;
-  margin: 0;
-  box-shadow: 0 4px 24px #0008;
-  border: 1.5px solid #334c;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-elev) 95%, transparent),
+    color-mix(in srgb, var(--bg-elev-2) 98%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 12px;
+  margin-top: 8px;
+  padding: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--accent) 15%, #000);
+  backdrop-filter: blur(12px);
   list-style: none;
-  min-width: 160px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(150px, 1fr));
-  gap: 4px 12px;
-  max-height: 60vh;           /* reasonable default */
-  overflow: auto;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ms-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ms-menu::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--bg-elev) 30%, transparent);
+  border-radius: 3px;
+}
+
+.ms-menu::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.ms-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
 }
 
 .ms-menu li {
-  padding: 7px 12px;
-  font-size: 1em;
-  color: #dde4ff;
-  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
 }
 
-/* Make the first row (All) span full width */
-.ms-menu li:first-child {
-  grid-column: 1 / -1;
+.ms-menu li:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .ms-menu label {
   display: flex;
   align-items: center;
-  font-weight: 500;
   cursor: pointer;
+  color: var(--text);
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.ms-menu label:hover {
+  color: var(--accent);
 }
 
 .ms-menu input[type="checkbox"] {
+  margin-right: 12px;
   accent-color: var(--accent);
-  width: 1.1em;
-  height: 1.1em;
-  margin-right: 8px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 
-/* Disabled state */
-.ms-wrap.disabled .ms-toggle {
-  background: #23263a;
-  color: #888;
-  cursor: not-allowed;
+/* Portal styles for mobile */
+.ms-menu-portal {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-elev) 95%, transparent),
+    color-mix(in srgb, var(--bg-elev-2) 98%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--accent) 20%, #000);
+  backdrop-filter: blur(16px);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ms-menu-portal[data-align="up"] {
+  border-radius: 12px 12px 8px 8px;
+  animation: slideUpReverse 0.3s ease-out;
+}
+
+@keyframes slideUpReverse {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ms-menu-portal[data-align="down"] {
+  border-radius: 8px 8px 12px 12px;
+}
+
+/* Mobile overlay and sheet styles */
+.ms-mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ms-mobile-sheet {
+  width: 100%;
+  max-height: 80vh;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-elev) 95%, transparent),
+    color-mix(in srgb, var(--bg-elev-2) 98%, transparent)
+  );
+  border-radius: 20px 20px 0 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow: 0 -10px 40px color-mix(in srgb, var(--accent) 15%, #000);
+  backdrop-filter: blur(12px);
+  animation: slideUpSheet 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ms-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.ms-mobile-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ms-mobile-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.ms-mobile-close:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+}
+
+.ms-mobile-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.ms-mobile-option {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.ms-mobile-option:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.ms-mobile-option.ms-mobile-all {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.ms-mobile-checkbox {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 16px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ms-mobile-checkbox::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--accent) 20%, transparent),
+    color-mix(in srgb, var(--accent) 10%, transparent)
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ms-mobile-option:hover .ms-mobile-checkbox::before {
+  opacity: 1;
+}
+
+.ms-mobile-checkbox.ms-checked {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 40%, transparent);
+  transform: scale(1.05);
+}
+
+.ms-mobile-label {
+  flex: 1;
+  font-size: 16px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.ms-mobile-divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  margin: 8px 24px;
+}
+
+.ms-mobile-footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.ms-mobile-done {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ms-mobile-done:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 /* ------- MOBILE: full width, larger tap targets ------- */
@@ -102,6 +394,24 @@
   .ms-menu li {
     padding: 14px 16px;
     font-size: 1.08em;
+    position: relative;
+  }
+  .ms-menu li.ms-selected {
+    background: linear-gradient(135deg, 
+      color-mix(in srgb, var(--accent) 15%, transparent),
+      color-mix(in srgb, var(--accent) 8%, transparent)
+    );
+    border-left: 3px solid var(--accent);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .ms-menu li.ms-selected::after {
+    content: "✓";
+    position: absolute;
+    right: 16px;
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 14px;
   }
   .ms-menu input[type="checkbox"] {
     width: 1.33em;

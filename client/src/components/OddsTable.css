@@ -10,6 +10,99 @@ body,
   color: var(--text);
 }
 
+/* My Picks button styles */
+.mob-right-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mob-add-pick-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mob-add-pick-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.add-pick-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-pick-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.mini-pick-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.mini-header-pick {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.85em;
+  text-align: center;
+}
+
+.ev-col-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.desktop-add-pick-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+.desktop-add-pick-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+  opacity: 1;
+}
+
 .odds-table-card {
   background: linear-gradient(180deg, rgba(19,23,43,0.85), rgba(19,23,54,0.95));
   border-radius: 22px;
@@ -151,7 +244,7 @@ body,
 .mini-table-legend { background: #1f2742; }
 .mini-legend-stack { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: .2em; }
 .mini-legend-stack .legend-team { font-size: .95em; font-weight: 800; color: #d7e4ff; padding: .43em .12em; min-height: 2.2em; display: flex; align-items: center; justify-content: center; }
-.mini-book-name { max-width: 130px; font-weight: 700; font-size: .96em; line-height: 1.15; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mini-book-name { max-width: 130px; font-weight: 700; font-size: .96em; line-height: 1.15; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .mini-col-type { font-size: .78em; font-weight: 900; color: #cfe0ff; opacity: .9; text-transform: uppercase; }
 .mini-table-odds-cell {
   font-size: 1.18em; font-weight: 600; color: #f9fafb;
@@ -193,21 +286,44 @@ body,
     padding: 8px 0 !important;
     background: transparent !important;
     border: 0 !important;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
   .odds-grid tbody tr.mobile-card-row:last-child td { padding-bottom: 0 !important; }
 
-  /* --- Mobile card-as-button --- */
-  .mobile-odds-card.as-button {
-    width: 100%;
-    background: #151c2e;
-    border: 1px solid #334c;
-    border-radius: 16px;
-    padding: 12px;
-    box-shadow: 0 8px 26px rgba(0,0,0,.25);
-    cursor: pointer;
-    user-select: none;
+  /* Mobile card styling - enhanced and larger */
+  .mobile-odds-card {
+    background: linear-gradient(135deg, #1a2347 0%, #0f1626 100%);
+    border: 1px solid #2a3356;
+    border-radius: 20px;
+    padding: 20px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
   }
-  .mobile-odds-card.as-button:active { transform: scale(.995); }
+  
+  .mobile-odds-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(61, 126, 255, 0.3), transparent);
+  }
+  
+  .mobile-odds-card:hover { 
+    border-color: #3a4366; 
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+  }
+  .mobile-odds-card.as-button { cursor: pointer; }
+  .mobile-odds-card.as-button:active { transform: translateY(0px); }
   .mobile-odds-card.as-button.expanded { padding: 12px; }
 
   /* Top cluster */
@@ -221,66 +337,184 @@ body,
   .mob-ev.neg { background: color-mix(in srgb, var(--danger) 24%, #0f1626);  border-color: color-mix(in srgb, var(--danger) 42%, #0f1626); }
   .mobile-odds-card.as-button .mob-top { padding-bottom: 10px; border-bottom: 1px solid #2a3356; margin-bottom: 8px; }
 
-  /* Middle row: market left, line right */
-  .mob-mid { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #2a3356; margin-bottom: 6px; }
-  .mob-market { font-weight: 900; letter-spacing: .02em; font-size: 0.95em; }
-  .mob-line { font-weight: 800; opacity: .95; font-size: 0.95em; }
+  /* Team name - now appears first with enhanced styling */
+  .mob-team { 
+    font-weight: 800; 
+    text-align: left; 
+    margin-bottom: 8px; 
+    font-size: 1.15em; 
+    color: #ffffff;
+    min-height: 1.4em;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+  }
 
-  /* Selection + odds */
-  .mob-sel { font-weight: 800; text-align: left; margin: 2px 0 4px; font-size: 0.98em; }
-  .mob-odds-row { text-align: right; margin-top: 0; }
-  .mob-odds { display: inline-block; font-weight: 900; font-size: 1.02em; padding: 5px 9px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 14%, transparent); }
-  .mob-odds-row.up   .mob-odds { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--success) 50%, transparent); }
-  .mob-odds-row.down .mob-odds { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--danger) 50%, transparent); }
+  /* Market type and line - enhanced styling */
+  .mob-market-row { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 12px; 
+    padding: 8px 0; 
+    margin-bottom: 12px; 
+    border-bottom: 1px solid rgba(42, 51, 86, 0.5);
+  }
+  .mob-market { 
+    font-weight: 700; 
+    letter-spacing: .02em; 
+    font-size: 1.0em; 
+    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.95);
+  }
+  .mob-line { 
+    font-weight: 800; 
+    opacity: .95; 
+    font-size: 1.0em; 
+    color: rgba(61, 126, 255, 0.9);
+  }
+
+  /* Bottom row: Sportsbook left, odds right - enhanced */
+  .mob-bottom-row { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 12px; 
+    margin-top: 12px;
+    padding-top: 4px;
+  }
+  .mob-book { 
+    font-weight: 600; 
+    font-size: 0.95em; 
+    opacity: 0.85;
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .mob-odds-container { 
+    text-align: right; 
+  }
+  .mob-odds { 
+    display: inline-block; 
+    font-weight: 900; 
+    font-size: 1.1em; 
+    padding: 8px 12px; 
+    border-radius: 12px; 
+    background: linear-gradient(135deg, rgba(61, 126, 255, 0.15), rgba(61, 126, 255, 0.08));
+    border: 1px solid rgba(61, 126, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(61, 126, 255, 0.1);
+    transition: all 0.2s ease;
+  }
+  .mob-odds-container.up   .mob-odds { 
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+  }
+  .mob-odds-container.down .mob-odds { 
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 2px 12px rgba(239, 68, 68, 0.2);
+  }
 
   /* Remove subline like “Book • Fair …” on mobile */
   .mobile-subtext { display: none !important; }
 
-  /* ---- Swipe mini-table (compact) ---- */
+  /* ---- Vertical mini-table (no horizontal scroll) ---- */
   .mini-swipe {
     display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
+    flex-direction: column;
+    gap: 6px;
     padding-top: 8px;
     margin-top: 6px;
-    border-top: 1px solid #2a3356;  /* separator line */
+    border-top: 1px solid #2a3356;
+    width: 100%;
+    box-sizing: border-box;
   }
-  .mini-swipe::-webkit-scrollbar { height: 7px; }
-  .mini-swipe::-webkit-scrollbar-thumb { background: #222e; border-radius: 12px; }
-
-  /* Narrow columns for compactness */
-  .mini-swipe-col {
-    flex: 0 0 88px;
-    min-width: 88px;
+  
+  /* Mini table row */
+  .mini-swipe-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
     background: #1b2340;
     border: 1px solid #2e3a63;
-    border-radius: 10px;
-    padding: 6px 6px 8px;
-    scroll-snap-align: start;
+    border-radius: 8px;
+    padding: 8px 6px;
   }
-  .mini-swipe-col.legend {
-    position: sticky; left: 0; z-index: 1;
+
+  /* Book name column */
+  .mini-book-col {
+    flex: 1;
+    min-width: 0;
+    font-weight: 700;
+    font-size: 0.85em;
+    color: #cfe0ff;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Odds columns */
+  .mini-odds-col {
+    flex: 0 0 auto;
+    min-width: 50px;
+    text-align: center;
+  }
+  
+  /* Header row */
+  .mini-swipe-header {
+    display: flex;
+    gap: 4px;
+    align-items: center;
     background: #1a2240;
-    flex-basis: 96px; min-width: 96px;
+    border: 1px solid rgba(61, 126, 255, 0.3);
+    border-radius: 8px;
+    padding: 6px;
+    margin-bottom: 4px;
+    font-size: 0.8em;
+    font-weight: 800;
+    color: #cfe0ff;
   }
-  .mini-swipe-col .mini-swipe-book { font-weight: 800; text-align: center; margin-bottom: 4px; font-size: 0.95em; }
-  .legend-type { font-size: .74em; font-weight: 900; color: #cfe0ff; text-align: center; }
-  .legend-teams { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; text-align: center; font-weight: 800; font-size: 0.96em; }
+  
+  .mini-header-book {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .mini-header-odds {
+    flex: 0 0 auto;
+    min-width: 50px;
+    text-align: center;
+    font-size: 0.75em;
+  }
 
   .mini-swipe-odds {
-    font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
-    min-height: 32px;
-    border-radius: 7px;
+    font-weight: 700;
+    font-size: 0.85em;
+    padding: 4px 6px;
+    border-radius: 6px;
     background: color-mix(in srgb, var(--accent) 12%, transparent);
-    font-size: 0.98em;
+    color: #ffffff;
+    white-space: nowrap;
   }
-  .mini-swipe-odds.top { margin-top: 3px; }
-  .mini-swipe-odds.bot { margin-top: 5px; }
 
   /* Hide desktop mini-table on mobile */
   .desktop-mini-wrap { display: none; }
+  
+  /* Limit number of books shown to prevent overflow */
+  .mini-swipe-row:nth-child(n+8) {
+    display: none;
+  }
+  
+  /* Show more indicator */
+  .mini-swipe::after {
+    content: 'Showing top 6 books';
+    display: block;
+    text-align: center;
+    font-size: 0.75em;
+    color: rgba(61, 126, 255, 0.7);
+    margin-top: 6px;
+    padding: 4px;
+  }
 }
 

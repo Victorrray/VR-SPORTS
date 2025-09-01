@@ -163,14 +163,40 @@ app.get("/api/scores", async (req, res) => {
     const LEAGUE = {
       americanfootball_nfl: "nfl",
       americanfootball_ncaaf: "college-football",
+      basketball_nba: "nba",
+      basketball_ncaab: "mens-college-basketball",
+      basketball_wnba: "wnba",
+      icehockey_nhl: "nhl",
+      soccer_epl: "eng.1",
+      soccer_uefa_champs_league: "uefa.champions",
+      baseball_mlb: "mlb"
     };
     const leagueSlug = LEAGUE[sport] || "nfl";
+    
+    // Different ESPN API endpoints for different sports
+    let baseUrl;
+    if (sport.includes("football")) {
+      baseUrl = `https://site.api.espn.com/apis/site/v2/sports/football/${leagueSlug}/scoreboard`;
+    } else if (sport.includes("basketball")) {
+      baseUrl = `https://site.api.espn.com/apis/site/v2/sports/basketball/${leagueSlug}/scoreboard`;
+    } else if (sport.includes("hockey")) {
+      baseUrl = `https://site.api.espn.com/apis/site/v2/sports/hockey/${leagueSlug}/scoreboard`;
+    } else if (sport.includes("soccer")) {
+      baseUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueSlug}/scoreboard`;
+    } else if (sport.includes("baseball")) {
+      baseUrl = `https://site.api.espn.com/apis/site/v2/sports/baseball/${leagueSlug}/scoreboard`;
+    } else {
+      // Default fallback
+      baseUrl = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`;
+    }
 
-    const url = `https://site.api.espn.com/apis/site/v2/sports/football/${leagueSlug}/scoreboard`;
     const axiosOpts = { timeout: 15_000 };
-    if (dateParam) axiosOpts.params = { dates: dateParam };
+    // Only add date param for historical data, not for live scores
+    if (dateParam && dateParam !== new Date().toISOString().slice(0, 10).replace(/-/g, "")) {
+      axiosOpts.params = { dates: dateParam };
+    }
 
-    const r = await axios.get(url, axiosOpts);
+    const r = await axios.get(baseUrl, axiosOpts);
     const events = Array.isArray(r.data?.events) ? r.data.events : [];
     const week = r.data?.week?.number ?? r.data?.week ?? null;
     const season = (r.data?.season && (r.data.season.year || r.data.season)) || null;
@@ -290,6 +316,7 @@ app.get("/api/scores", async (req, res) => {
 
       return {
         id: e.id || comp.id || `${awayName}-${homeName}-${e.date}`,
+        sport_key: sport,
         home_team: homeName,
         away_team: awayName,
         home_logo,

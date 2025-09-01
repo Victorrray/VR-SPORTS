@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { TrendingUp, Plus, Trash2, Trophy, Target, Calendar, DollarSign, AlertCircle, CheckCircle2 } from "lucide-react";
 import MobileBottomBar from "../components/MobileBottomBar";
+import "./MyPicks.css";
 
 const LS_KEY = "oss_my_picks_v1";
 
@@ -23,54 +25,139 @@ export default function MyPicks() {
   }
 
   return (
-    <main style={{ maxWidth: 860, margin: "1.5rem auto", padding: "0 1rem 120px" }}>
-      <h1 style={{ marginBottom: 8, fontSize: "1.8rem", fontWeight: 800 }}>My Picks</h1>
-      <p style={{ opacity: 0.85, marginBottom: 16 }}>
-        Save selections you want to track. (Local to this device for now.)
-      </p>
+    <main className="picks-page">
+      <header className="picks-header">
+        <div className="header-title">
+          <TrendingUp className="header-icon" size={32} />
+          <div>
+            <h1>My Picks</h1>
+            <p>Track your betting selections and performance</p>
+          </div>
+        </div>
+        
+        <div className="picks-stats">
+          <div className="stat-card">
+            <div className="stat-icon">
+              <Target size={20} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-value">{picks.length}</div>
+              <div className="stat-label">Active Picks</div>
+            </div>
+          </div>
+          
+          <div className="stat-card">
+            <div className="stat-icon">
+              <Trophy size={20} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-value">--</div>
+              <div className="stat-label">Win Rate</div>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {picks.length === 0 && (
-        <div style={{ padding: 18, border: "1px solid #2a3255", borderRadius: 14, background: "#121a2b" }}>
-          <p style={{ margin: 0, opacity: 0.9 }}>
-            You don’t have any picks yet.
-            <button
-              onClick={() => {
-                const demo = {
-                  id: String(Date.now()),
-                  league: "NFL",
-                  game: "DAL @ PHI",
-                  market: "Moneyline",
-                  selection: "PHI -120",
-                  note: "Demo pick",
-                };
-                save([demo]);
-              }}
-              style={{ marginLeft: 8, padding: "6px 10px", borderRadius: 10, border: "1px solid #2a3255", background: "#1b2137", color: "#e7e9ee", fontWeight: 700 }}
-            >
-              add a demo pick
-            </button>
-          </p>
+        <div className="empty-state">
+          <div className="empty-icon">
+            <TrendingUp size={48} />
+          </div>
+          <h3>No picks yet</h3>
+          <p>Start tracking your betting selections to monitor your performance.</p>
+          <button
+            onClick={() => {
+              const demo = {
+                id: String(Date.now()),
+                league: "NFL",
+                game: "Dallas Cowboys @ Philadelphia Eagles",
+                market: "Moneyline",
+                selection: "PHI -120",
+                note: "Eagles at home with strong offensive line",
+                odds: "-120",
+                stake: "$50",
+                potential: "$91.67",
+                status: "pending",
+                dateAdded: new Date().toISOString()
+              };
+              save([demo]);
+            }}
+            className="demo-btn"
+          >
+            <Plus size={16} />
+            Add Demo Pick
+          </button>
         </div>
       )}
 
-      <div style={{ display: "grid", gap: 12 }}>
+      <div className="picks-grid">
         {picks.map(p => (
-          <div key={p.id} style={{ padding: 14, border: "1px solid #2a3255", borderRadius: 14, background: "#121a2b" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", gap:10, flexWrap:"wrap" }}>
-              <div>
-                <div style={{ fontWeight:800 }}>{p.game}</div>
-                <div style={{ opacity: 0.85, fontSize: 13 }}>{p.league} • {p.market}</div>
-                <div style={{ marginTop: 6 }}>{p.selection}</div>
-                {p.note && <div style={{ opacity: 0.8, fontSize: 13, marginTop: 4 }}>{p.note}</div>}
+          <div key={p.id} className={`pick-card ${p.status || 'pending'}`}>
+            <div className="pick-header">
+              <div className="pick-league">
+                <Trophy size={14} />
+                <span>{p.league}</span>
               </div>
-              <div>
-                <button
-                  onClick={() => removePick(p.id)}
-                  style={{ padding:"8px 10px", borderRadius:10, border:"1px solid #7f1d1d", background:"#3f1f22", color:"#fecaca", fontWeight:800 }}
-                >
-                  Remove
-                </button>
+              <div className="pick-status">
+                {(p.status === 'won' || p.status === 'win') && <CheckCircle2 size={16} className="status-won" />}
+                {(p.status === 'lost' || p.status === 'loss') && <AlertCircle size={16} className="status-lost" />}
+                {(!p.status || p.status === 'pending') && <Calendar size={16} className="status-pending" />}
               </div>
+            </div>
+            
+            <div className="pick-game">
+              <h3>{p.game}</h3>
+              <div className="pick-market">{p.market}</div>
+            </div>
+            
+            <div className="pick-selection">
+              <div className="selection-main">{p.selection}</div>
+              {p.odds && (
+                <div className="selection-odds">
+                  <span>Odds: {p.odds}</span>
+                </div>
+              )}
+            </div>
+            
+            {(p.stake || p.potential) && (
+              <div className="pick-financials">
+                {p.stake && (
+                  <div className="financial-item">
+                    <DollarSign size={14} />
+                    <span>Stake: {p.stake}</span>
+                  </div>
+                )}
+                {p.potential && (
+                  <div className="financial-item">
+                    <Target size={14} />
+                    <span>Potential: {p.potential}</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {p.note && (
+              <div className="pick-note">
+                <p>{p.note}</p>
+              </div>
+            )}
+            
+            {p.dateAdded && (
+              <div className="pick-date">
+                <Calendar size={12} />
+                <span>{new Date(p.dateAdded).toLocaleDateString()}</span>
+              </div>
+            )}
+            
+            <div className="pick-actions">
+              <button
+                onClick={() => removePick(p.id)}
+                className="remove-btn"
+                aria-label="Remove pick"
+              >
+                <Trash2 size={16} />
+                Remove
+              </button>
             </div>
           </div>
         ))}

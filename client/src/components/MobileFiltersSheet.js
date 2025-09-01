@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { X, Filter } from "lucide-react";
 import "./MobileFiltersSheet.css";
 
 export default function MobileFiltersSheet({ open, onClose, title = "Filters", children }) {
@@ -40,8 +41,13 @@ export default function MobileFiltersSheet({ open, onClose, title = "Filters", c
       >
         <div className="mfs-grabber" aria-hidden="true" />
         <div className="mfs-header">
-          <span className="mfs-title">{title}</span>
-          <button className="mfs-close" onClick={onClose} aria-label="Close filters">×</button>
+          <div className="mfs-title-section">
+            <Filter size={20} className="mfs-title-icon" />
+            <span className="mfs-title">{title}</span>
+          </div>
+          <button className="mfs-close" onClick={onClose} aria-label="Close filters">
+            <X size={20} />
+          </button>
         </div>
         <div className="mfs-content">
           {children}
