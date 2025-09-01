@@ -43,6 +43,7 @@ export default function Navbar() {
     if (searchTerm) params.set("q", searchTerm);
     else params.delete("q");
     navigate(`/sportsbooks?${params.toString()}`);
+    setShowMobileSearch(false);
   }
 
   return (
@@ -62,7 +63,11 @@ export default function Navbar() {
         <button 
           className={styles.mobileSearchBtn} 
           aria-label="Search"
-          onClick={() => setShowMobileSearch(true)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowMobileSearch(true);
+          }}
         >
           <Search size={20} />
         </button>

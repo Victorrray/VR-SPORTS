@@ -13,20 +13,24 @@
 
 .mobile-bottom-bar {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 50%; 
+  bottom: 0;
+  transform: translateX(-50%);
   z-index: 60;
   display: none;
   box-sizing: border-box;
-  padding-top: 16px;
-  padding-left: max(16px, env(safe-area-inset-left));
-  padding-right: max(16px, env(safe-area-inset-right));
+  padding-top: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  width: calc(100vw - 32px);
+  max-width: 393px;
 }
 
 .mobile-bottom-bar .filter-pill,
 .mobile-nav {
-  margin-left: calc(var(--mobile-gutter) + var(--mobile-extra-inset));
-  margin-right: calc(var(--mobile-gutter) + var(--mobile-extra-inset));
+  margin-left: 0;
+  margin-right: 0;
   inline-size: auto;
   max-inline-size: none;
   box-sizing: border-box;
@@ -37,7 +41,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   border-radius: 20px;
   border: 1px solid var(--mobile-primary);
   background: linear-gradient(135deg, var(--mobile-primary) 0%, var(--mobile-primary-light) 100%);
@@ -97,6 +101,8 @@
   box-shadow: var(--mobile-shadow);
   position: relative;
   overflow: hidden;
+  margin: 0 auto;
+  max-width: 360px;
 }
 
 .mobile-nav::before {
@@ -251,12 +257,23 @@
 
 
 @media (max-width: 720px) {
-  .mobile-bottom-bar { display: block; }
+  .mobile-bottom-bar { 
+    display: block; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - 32px);
+    max-width: 393px;
+  }
   .mobile-bottom-spacer {
     display: block;
     height: calc(130px + env(safe-area-inset-bottom));
   }
-  .app-body { padding-bottom: calc(130px + env(safe-area-inset-bottom)); }
+  .app-body { 
+    padding-bottom: calc(130px + env(safe-area-inset-bottom)); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 @media (max-width: 480px) {

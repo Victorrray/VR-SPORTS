@@ -1,9 +1,11 @@
 // file: src/pages/Home.jsx
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import styles from "./Home.module.css";
+import { ArrowRight, TrendingUp, Shield, Users, Clock, Star, ChevronRight, Target, Zap, BarChart3, Calendar } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
-import { TrendingUp, Users, Clock, Shield, Star, CheckCircle, ArrowRight } from "lucide-react";
+import MobileBottomBar from "../components/MobileBottomBar";
+import Footer from "../components/Footer";
+import styles from "./Home.module.css";
 
 // If you have these from config, pass them as props instead
 const DEFAULT_SPORTS = ["NFL", "NCAAF", "NBA", "MLB", "NHL", "Soccer", "Tennis"];
@@ -34,7 +36,7 @@ const TOOLS = [
     slug: "low-hold", 
     title: "Low Hold", 
     blurb: "Promos/markets with minimal implied vig.",
-    icon: CheckCircle,
+    icon: Star,
     benefit: "Maximum value markets"
   },
   { 
@@ -371,12 +373,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* Spacer so fixed mobile bottom bar never overlaps content */}
-      <div
-        className={styles.bottomSpacer}
-        aria-hidden="true"
-        style={{ height: "calc(90px + env(safe-area-inset-bottom))" }}
-      />
+      {/* No mobile bottom bar on home page */}
     </main>
   );
 }

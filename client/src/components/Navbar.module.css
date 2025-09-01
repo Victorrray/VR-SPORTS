@@ -362,6 +362,7 @@
   .mobileSearchBtn {
     order: 2;
     margin-left: 12px;
+    z-index: 10;
   }
   
   .navLeft {
@@ -369,6 +370,10 @@
     flex: 1;
     justify-content: center;
     margin: 0 12px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
   }
   
   .mobileProfileBtn {

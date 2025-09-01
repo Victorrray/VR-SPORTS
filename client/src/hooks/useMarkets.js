@@ -1,5 +1,7 @@
 // src/hooks/useMarkets.js
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { cacheUtils, cacheKeys } from "../utils/cache";
+import { secureFetch, apiRateLimiter } from "../utils/security";
 
 // Small utility to normalize arrays from API responses
 function normalizeArray(resp) {
@@ -44,32 +46,26 @@ export default function useMarkets({
   const excludeBooksKey = useMemo(() => JSON.stringify(Array.from(excludeBooks || [])), [excludeBooks]);
 
   const fetchAll = useCallback(async () => {
+    if (!sports.length) return;
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
-      setGames([]);
+      const cacheKey = cacheKeys.odds(sports, marketsParam, allowedBooksKey);
+      
+      const data = await cacheUtils.withCache(cacheKey, async () => {
+        // Check rate limit before making request
+        if (!apiRateLimiter.isAllowed('odds-api')) {
+          throw new Error('Rate limit exceeded. Please wait before making more requests.');
+        }
 
-      const keys = Array.isArray(sports) ? sports : [];
-      if (!keys.length) {
-        setGames([]);
-        return;
-      }
+        const url = `${baseUrl}/api/odds?sports=${sports.join(",")}&regions=${regions.join(",")}&markets=${marketsParam.join(",")}`;
+        const resp = await secureFetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+        return await resp.json();
+      }, 180000); // 3 minute cache for odds data
 
-      const cacheBust = encodeURIComponent(String(refreshKey || Date.now()));
-      const calls = keys.map(k =>
-        fetch(`${baseUrl}/api/odds-data?sport=${k}&regions=${regions}&markets=${marketsParam}&includeBetLimits=true&_=${cacheBust}`)
-          .then(async r => {
-            if (r.ok && quota.remain === "–") {
-              setQuota({
-                remain: r.headers.get("x-requests-remaining") ?? "—",
-                used: r.headers.get("x-requests-used") ?? "—",
-              });
-            }
-            return r.ok ? r.json() : [];
-          })
-          .catch(() => [])
-      );
-      const gamesRaw = (await Promise.all(calls)).flat();
+      const gamesRaw = normalizeArray(data);
 
       // Filter bookmakers by exclude/allow lists (normalized from keys)
       const exArr = (() => { try { return JSON.parse(excludeBooksKey) || []; } catch { return []; } })();
@@ -99,8 +95,26 @@ export default function useMarkets({
       const booksArr = Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
       setBooks(booksArr);
     } catch (e) {
-      setError(e.message || String(e));
+      console.error("Markets API Error:", e);
+      
+      // Enhanced error handling with specific error types
+      let errorMessage = "Failed to load odds data";
+      
+      if (e.name === 'TypeError' && e.message.includes('fetch')) {
+        errorMessage = "Network error - please check your connection";
+      } else if (e.message?.includes('429')) {
+        errorMessage = "Rate limit exceeded - please wait a moment";
+      } else if (e.message?.includes('401') || e.message?.includes('403')) {
+        errorMessage = "Authentication error - please refresh the page";
+      } else if (e.message?.includes('500')) {
+        errorMessage = "Server error - our team has been notified";
+      } else if (e.message) {
+        errorMessage = e.message;
+      }
+      
+      setError(errorMessage);
       setGames([]);
+      setBooks([]);
     } finally {
       setLoading(false);
     }

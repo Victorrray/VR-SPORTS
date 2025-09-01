@@ -1,6 +1,6 @@
 :root {
   /* Fallbacks */
-  --bg-body: #0f1117;
+  --bg-body: #1344d5;
   --text: #e7e9ee;
   --text-muted: #a6adbb;
   --accent: var(--accent, #8b5cf6);
@@ -14,14 +14,15 @@
 
 /* ===== Container / Hero ===== */
 .container {
-  min-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background:
-    radial-gradient(1200px 600px at 50% -200px,
-      color-mix(in srgb, var(--accent) 12%, transparent), transparent),
-    var(--bg-body);
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2em 1em 0;
+  min-height: 100vh;
+  position: relative;
+  background: 
+    radial-gradient(ellipse at top, color-mix(in srgb, var(--accent) 4%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, color-mix(in srgb, var(--accent) 3%, transparent) 0%, transparent 50%),
+    var(--bg);
   color: var(--text);
   padding: 2em 0 4em 0;
 
@@ -262,30 +263,62 @@
 /* ===== Stats ===== */
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  max-width: 1100px;
-  margin: 1.2em auto 0 auto;
-  padding: 0 10px;
-  width: 100%;
-  box-sizing: border-box;
+  margin: 2em auto 3em auto;
+  max-width: 900px;
 }
+
 .statCard {
-  background: #101625;
-  border: 1px solid #263054;
-  border-radius: 14px;
-  padding: 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 20px 16px;
   text-align: center;
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
 }
-.statVal { font-size: 1.6em; font-weight: 900; color: var(--success); }
-.statLabel { color: var(--text-muted); margin-top: 4px; }
-.statTrend { 
-  font-size: 0.8em; 
-  color: var(--accent); 
-  margin-top: 2px; 
+
+.statVal {
+  font-size: 2em;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 0.3em;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.85em;
+  color: var(--text-muted);
   font-weight: 600;
+  margin-bottom: 0.4em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.statSubtext {
+  font-size: 0.7em;
+  color: var(--text-muted);
+  opacity: 0.8;
+  line-height: 1.3;
+  margin-top: 0.2em;
+}
+
+.statTrend {
+  font-size: 0.9em;
+  color: var(--success);
+  font-weight: 500;
+  opacity: 0.85;
+  margin-top: 4px;
 }
 
 /* Testimonial Section */
@@ -295,25 +328,6 @@
   margin: 2em auto;
   padding: 0 10px;
   box-sizing: border-box;
-}
-
-.hero {
-  text-align: center;
-  padding: 5rem 0 4rem;
-  background: linear-gradient(135deg, #0f1626 0%, #1a2347 50%, #0f1626 100%);
-  border-bottom: 1px solid rgba(42, 51, 86, 0.4);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(61, 126, 255, 0.4), transparent);
 }
 
 .testimonial {
@@ -403,14 +417,12 @@
 /* ===== Tools grid ===== */
 .tools {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  max-width: 1100px;
-  margin: 1.2em auto 0 auto;
-  padding: 0 10px;
-  width: 100%;
-  box-sizing: border-box;
+  margin: 2em auto;
+  max-width: 900px;
 }
+
 .toolCard {
   background: linear-gradient(135deg, rgba(26, 35, 71, 0.9) 0%, rgba(15, 22, 38, 0.95) 100%);
   border: 1px solid rgba(42, 51, 86, 0.4);
@@ -425,6 +437,7 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   position: relative;
   overflow: hidden;
+  min-height: 200px;
 }
 
 .toolCard::before {
@@ -452,15 +465,15 @@
 }
 
 .toolIcon {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   background: color-mix(in srgb, var(--accent) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--accent);
+  flex-shrink: 0;
 }
 
 .toolBadge {
@@ -471,9 +484,23 @@
 
 .toolBenefit {
   font-size: 0.9em;
-  font-weight: 600;
   color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.toolTitle {
+  font-size: 1.15em;
+  font-weight: 700;
+  color: var(--text);
   margin: 0;
+  line-height: 1.2;
 }
 
 .toolBlurb { 
@@ -488,6 +515,8 @@
   align-items: center;
   justify-content: space-between;
   margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .toolCta { 
@@ -499,6 +528,7 @@
 .toolArrow {
   color: var(--accent);
   transition: transform 0.2s ease;
+  opacity: 0.8;
 }
 
 .toolCard:hover .toolArrow {
@@ -753,7 +783,7 @@
 .bannerHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 8px;
 }
 
@@ -806,6 +836,21 @@
   height: calc(90px + env(safe-area-inset-bottom));
 }
 
+/* Mobile content adjustments */
+@media (max-width: 720px) {
+  .container {
+    padding-bottom: 0;
+  }
+  
+  .finalCta {
+    margin-bottom: 1rem;
+  }
+  
+  .bottomSpacer {
+    height: calc(60px + env(safe-area-inset-bottom));
+  }
+}
+
 /* ===== A11y: reduced motion ===== */
 @media (prefers-reduced-motion: reduce) {
   .chip, .heroBtn, .toolCard, .learnCard { transition: none; }
@@ -821,8 +866,9 @@
   
   .container {
     max-width: var(--iphone-max-width);
-    padding: 1em var(--iphone-max-padding) 2em;
+    padding: 1em var(--iphone-max-padding) 0;
     margin: 0 auto;
+    min-height: calc(100vh - 90px);
   }
   
   .hero {
@@ -842,13 +888,21 @@
   }
   
   .valuePills {
-    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     margin: 1.5em 0;
+    max-width: 100%;
   }
   
   .valuePill {
-    padding: 10px 16px;
-    font-size: 0.95em;
+    padding: 14px 20px;
+    font-size: 1em;
+    justify-content: center;
+    text-align: center;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
   }
   
   .heroBtn {
@@ -876,49 +930,87 @@
   }
   
   .title {
-    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    font-size: 2.2rem;
     line-height: 1.2;
   }
   
   .subtitle {
     font-size: 1.05em;
-    padding: 0 10px;
+    line-height: 1.4;
   }
   
   .valuePills {
-    gap: 8px;
-    margin-bottom: 1.2em;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 1.5em;
+    max-width: 500px;
   }
   
   .valuePill {
-    font-size: 0.85em;
-    padding: 6px 12px;
+    font-size: 0.9em;
+    padding: 10px 14px;
+    justify-content: center;
   }
   
   .stats {
-    grid-template-columns: 1fr;
-    gap: 14px;
-    max-width: 400px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 1.5em auto 0 auto;
+    max-width: 100%;
   }
   
   .statCard {
-    padding: 14px;
+    padding: 16px 8px;
+    min-height: 120px;
   }
   
   .statVal {
     font-size: 1.4em;
   }
   
-  .tools, .learn {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+  .testimonialSection {
+    margin: 1.5em auto;
   }
   
-  .toolCard, .learnCard {
-    padding: 16px;
+  .testimonial {
+    padding: 20px;
+  }
+  
+  .testimonialQuote {
+    font-size: 1em;
+  }
+  
+  .testimonialAuthor {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .tools, .tools {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 1.5em auto;
+  }
+  
+  .toolCard {
+    padding: 12px;
+    min-height: 160px;
+  }
+  
+  .toolIcon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .toolBadge {
+    font-size: 0.95em;
   }
   
   /* Simplified table for tablet */
+  .tableWrap {
+    border-radius: 12px;
+  }
+  
   .tr { grid-template-columns: 80px 1fr 100px 80px; }
   .td:nth-child(4) { display: none; } /* Hide edge column on tablet */
 }
@@ -934,54 +1026,33 @@
   }
   
   .title {
-    font-size: clamp(1.6rem, 8vw, 2.2rem);
-    margin-bottom: 0.3em;
+    font-size: 1.8rem;
+    line-height: 1.15;
   }
   
   .subtitle {
     font-size: 1em;
-    margin-bottom: 1em;
-  }
-  
-  .urgencyBanner {
-    font-size: 0.8em;
-    padding: 6px 12px;
-    margin-bottom: 1em;
+    line-height: 1.35;
   }
   
   .valuePills {
+    display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 1em;
+    gap: 10px;
+    margin-bottom: 1.2em;
+    max-width: 400px;
   }
   
   .valuePill {
-    width: fit-content;
+    font-size: 0.85em;
+    padding: 12px 16px;
+    justify-content: center;
+    text-align: center;
   }
   
   .heroBtn {
     padding: 1em 2em;
     font-size: 1em;
-    width: 100%;
-    max-width: 280px;
-  }
-  
-  .ctaRow {
-    gap: 8px;
-  }
-  
-  .riskFree {
-    font-size: 0.85em;
-  }
-  
-  .socialProof {
-    margin-top: 1em;
-  }
-  
-  .trustBadges {
-    flex-direction: column;
-    gap: 8px;
   }
   
   .sectionTitle {
@@ -991,18 +1062,15 @@
   }
   
   .stats {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
     margin: 1em auto 0 auto;
-    max-width: 350px;
+    max-width: 100%;
   }
   
   .statCard {
-    padding: 16px;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 14px 10px;
+    min-height: 110px;
   }
   
   .statVal {

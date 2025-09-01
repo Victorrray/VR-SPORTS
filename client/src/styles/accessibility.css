@@ -1,0 +1,233 @@
+/* Accessibility styles for better user experience */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--purple-600);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Keyboard navigation styles */
+.keyboard-navigation *:focus {
+  outline: 2px solid var(--purple-400) !important;
+  outline-offset: 2px !important;
+}
+
+.keyboard-navigation button:focus,
+.keyboard-navigation input:focus,
+.keyboard-navigation select:focus,
+.keyboard-navigation textarea:focus,
+.keyboard-navigation [tabindex]:focus {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* High contrast mode */
+.high-contrast {
+  --text-primary: #ffffff;
+  --text-secondary: #e5e5e5;
+  --bg-primary: #000000;
+  --bg-secondary: #1a1a1a;
+  --purple-600: #bb86fc;
+  --purple-500: #cf6679;
+  --border-color: #ffffff;
+}
+
+.high-contrast .glass-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 2px solid #ffffff !important;
+}
+
+.high-contrast .odds-card {
+  background: #1a1a1a !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* Reduced motion preferences */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Large text sizes */
+.large-text {
+  font-size: 1.2em;
+}
+
+.extra-large-text {
+  font-size: 1.5em;
+}
+
+.large-text .odds-value,
+.extra-large-text .odds-value {
+  font-size: 1.1em;
+}
+
+.large-text .team-name,
+.extra-large-text .team-name {
+  font-size: 1.1em;
+}
+
+/* Focus management for modals */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.modal-content:focus {
+  outline: none;
+}
+
+/* Improved button accessibility */
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button[aria-pressed="true"] {
+  background-color: var(--purple-600);
+  color: white;
+}
+
+/* Better link accessibility */
+a:focus {
+  text-decoration: underline;
+}
+
+/* Form accessibility */
+.form-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-input:focus {
+  border-color: var(--purple-400);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.form-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.form-error[role="alert"] {
+  font-weight: 500;
+}
+
+/* Table accessibility */
+.odds-table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
+  z-index: 10;
+}
+
+.odds-table caption {
+  caption-side: top;
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Loading states */
+.loading-spinner[aria-live="polite"] {
+  position: relative;
+}
+
+.loading-spinner::after {
+  content: "Loading...";
+  position: absolute;
+  left: -9999px;
+}
+
+/* Error states */
+.error-message[role="alert"] {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* Success states */
+.success-message[role="status"] {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid #22c55e;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* Mobile accessibility improvements */
+@media (max-width: 768px) {
+  .keyboard-navigation button,
+  .keyboard-navigation input,
+  .keyboard-navigation select {
+    min-height: 44px; /* Minimum touch target size */
+    min-width: 44px;
+  }
+  
+  .large-text {
+    font-size: 1.3em;
+  }
+  
+  .extra-large-text {
+    font-size: 1.6em;
+  }
+}
+
+/* Print accessibility */
+@media print {
+  .skip-link,
+  .keyboard-navigation-only {
+    display: none;
+  }
+  
+  .odds-table {
+    border-collapse: collapse;
+  }
+  
+  .odds-table th,
+  .odds-table td {
+    border: 1px solid #000;
+    padding: 0.5rem;
+  }
+}

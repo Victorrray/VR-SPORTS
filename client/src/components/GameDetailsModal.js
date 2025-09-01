@@ -35,27 +35,27 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
           { name: "Mike Johnson", position: "Umpire" }
         ],
         teamStats: {
-          [game.away_team]: {
+          [game.away_team || "Away Team"]: {
             record: "12-8",
             streak: "W3",
-            lastGame: "W 105-98 vs Lakers",
+            lastGame: `W 105-98 vs ${game.home_team || "Opponent"}`,
             injuries: ["Player A (Questionable)", "Player B (Out)"]
           },
-          [game.home_team]: {
+          [game.home_team || "Home Team"]: {
             record: "15-5", 
             streak: "W5",
-            lastGame: "W 112-89 vs Warriors",
+            lastGame: `W 112-89 vs ${game.away_team || "Opponent"}`,
             injuries: ["Player C (Probable)"]
           }
         },
         headToHead: {
-          allTime: "Lakers lead 45-32",
+          allTime: `${game.home_team || "Home"} lead 45-32`,
           thisSeason: "Split 1-1",
-          lastMeeting: "Lakers 108-102 (Dec 15)"
+          lastMeeting: `${game.home_team || "Home"} 108-102 (Dec 15)`
         },
         keyPlayers: [
-          { name: "LeBron James", team: game.away_team, stats: "27.5 PPG, 8.1 RPG, 6.8 APG" },
-          { name: "Jayson Tatum", team: game.home_team, stats: "30.2 PPG, 8.9 RPG, 4.5 APG" }
+          { name: "Star Player", team: game.away_team || "Away Team", stats: "27.5 PPG, 8.1 RPG, 6.8 APG" },
+          { name: "Key Player", team: game.home_team || "Home Team", stats: "30.2 PPG, 8.9 RPG, 4.5 APG" }
         ],
         predictions: {
           spread: game.odds?.spread || "-3.5",

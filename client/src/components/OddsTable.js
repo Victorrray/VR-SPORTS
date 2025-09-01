@@ -49,6 +49,18 @@ function marketTypeLabel(key="") {
 function cleanBookTitle(t){ return t ? String(t).replace(/\.?ag\b/gi,"").trim() : ""; }
 
 const TEAM_NICKNAMES = { americanfootball_ncaaf: { 'St. Francis (PA) Red Flash': 'Red Flash' } };
+
+// Team location abbreviations for duplicate names
+const TEAM_LOCATIONS = {
+  'Aggies': { 'Texas A&M': 'TAM', 'Utah State': 'USU', 'New Mexico State': 'NMSU' },
+  'Badgers': { 'Wisconsin': 'WIS' },
+  'Blue Raiders': { 'Middle Tennessee': 'MTSU' },
+  'Panthers': { 'Pittsburgh': 'PITT', 'Central Michigan': 'CMU' },
+  'Eagles': { 'Boston College': 'BC', 'Eastern Michigan': 'EMU' },
+  'Tigers': { 'LSU': 'LSU', 'Auburn': 'AUB', 'Missouri': 'MIZ', 'Memphis': 'MEM' },
+  'Bulldogs': { 'Georgia': 'UGA', 'Mississippi State': 'MSU', 'Fresno State': 'FRES' }
+};
+
 function shortTeam(name="", sportKey="") {
   const n = String(name).trim(); if (!n) return "";
   const mapped = TEAM_NICKNAMES[sportKey]?.[n]; if (mapped) return mapped;
@@ -61,7 +73,21 @@ function shortTeam(name="", sportKey="") {
     const ADJ = new Set(['Red','Blue','Green','Black','White','Golden','Fighting','Crimson','Scarlet','Orange','Mean','Yellow','Purple','Silver','Gold','Cardinal','Tar',"Ragin'"]);
     if (ADJ.has(prev)) return `${prev} ${last}`;
   }
-  return parts[parts.length-1];
+  
+  const nickname = parts[parts.length-1];
+  
+  // Check if this nickname needs location disambiguation
+  if (TEAM_LOCATIONS[nickname]) {
+    // Find the school/location in the full name
+    const fullName = parts.slice(0, -1).join(' ');
+    for (const [school, abbrev] of Object.entries(TEAM_LOCATIONS[nickname])) {
+      if (fullName.includes(school)) {
+        return `${nickname} (${abbrev})`;
+      }
+    }
+  }
+  
+  return nickname;
 }
 function formatKickoffNice(commence){
   try{

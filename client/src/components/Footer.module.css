@@ -59,13 +59,45 @@
 }
 
 @media (max-width: 720px) {
-  .footer { display: none; }
+  .footer {
+    display: block;
+    padding: 20px 16px;
+    margin-top: 2rem;
+  }
+  
   .inner {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
   }
+  
+  .brand {
+    justify-content: center;
+  }
+  
+  .brandTitle {
+    font-size: 1.1rem;
+  }
+  
   .links {
-    gap: 12px;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .link {
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .link:hover {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+  
+  .meta {
+    font-size: 0.85rem;
+    text-align: center;
   }
 }

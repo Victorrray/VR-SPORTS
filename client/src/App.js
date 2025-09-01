@@ -1,36 +1,30 @@
 // file: src/App.jsx
-import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import PrivateRoute from "./auth/PrivateRoute";
-import UsernameSetup from "./components/UsernameSetup";
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthProvider';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { AccessibilityProvider } from './components/AccessibilityProvider';
+import Navbar from './components/Navbar';
+import MobileBottomBar from './components/MobileBottomBar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import SportsbookMarkets from './pages/SportsbookMarkets';
+import Login from './pages/Login';
+import Account from './pages/Account';
+import UsernameSetup from './components/UsernameSetup';
 import LoadingBar from "./components/LoadingBar";
+import PrivateRoute from "./auth/PrivateRoute";
+import MyPicks from './pages/MyPicks';
+import Scores from './pages/Scores';
 import { useAuth } from "./auth/AuthProvider";
+import { initBrowserCompat } from "./utils/browserCompat";
 import "./App.css";
-
-// Lazy pages with fallback to named exports
-const SportsbookMarkets = React.lazy(() =>
-  import("./pages/SportsbookMarkets").then(m => ({ default: m.default || m.SportsbookMarkets }))
-);
-const Home = React.lazy(() =>
-  import("./pages/Home").then(m => ({ default: m.default || m.Home }))
-);
-const Login = React.lazy(() =>
-  import("./pages/Login").then(m => ({ default: m.default || m.Login }))
-);
-const Account = React.lazy(() =>
-  import("./pages/Account").then(m => ({ default: m.default || m.Account }))
-);
-const MyPicks = React.lazy(() =>
-  import("./pages/MyPicks").then(m => ({ default: m.default || m.MyPicks }))
-);
-const Scores = React.lazy(() =>
-  import("./pages/Scores").then(m => ({ default: m.default || m.Scores }))
-);
+import "./styles/accessibility.css";
+import "./styles/browserCompat.css";
 
 function AppRoutes() {
   const { user } = useAuth();
+  const location = useLocation();
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
 
   useEffect(() => {
@@ -46,65 +40,34 @@ function AppRoutes() {
       fallback={
         <div className="loading-fallback">
           <div className="loading-container">
-            <div className="loading-spinner">
-              <div className="spinner-ring"></div>
-              <div className="spinner-ring"></div>
-              <div className="spinner-ring"></div>
-            </div>
-            <p className="loading-text">Loading OddsSightSeer...</p>
+            <div className="loading-spinner"></div>
           </div>
         </div>
       }
     >
-      <div className="app-shell">
-        <LoadingBar />
+      <div className="app">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <Navbar />
-        <div className="app-body">
+        <LoadingBar />
+        <main id="main-content" className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
-
-            {/* Require sign-in to view odds */}
-            <Route
-              path="/sportsbooks"
-              element={
-                <PrivateRoute>
-                  <SportsbookMarkets />
-                </PrivateRoute>
-              }
-            />
-
-            {/* Scores: public */}
-            <Route path="/scores" element={<Scores />} />
-
-            {/* Picks: require sign-in */}
-            <Route
-              path="/picks"
-              element={
-                <PrivateRoute>
-                  <MyPicks />
-                </PrivateRoute>
-              }
-            />
-
+            <Route path="/sportsbooks" element={<SportsbookMarkets />} />
             <Route path="/login" element={<Login />} />
-            <Route
-              path="/account"
-              element={
-                <PrivateRoute>
-                  <Account />
-                </PrivateRoute>
-              }
-            />
-
+            <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
+            <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
+            <Route path="/scores" element={<Scores />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </div>
-        <Footer />
+        </main>
+        {/* Only show footer on home page in mobile view */}
+        {(location.pathname === "/" || window.innerWidth > 720) && <Footer />}
         
         {/* Username Setup Modal */}
         {showUsernameSetup && (
           <UsernameSetup onComplete={() => setShowUsernameSetup(false)} />
         )}
+        <MobileBottomBar />
       </div>
     </React.Suspense>
   );
@@ -118,7 +81,19 @@ export default function App() {
         .filter(c => c.startsWith("theme-"))
         .forEach(c => el.classList.remove(c));
       el.classList.add("theme-purple");
+      
+      // Initialize browser compatibility fixes
+      initBrowserCompat();
     } catch {}
   }, []);
-  return <AppRoutes />;
+  
+  return (
+    <AuthProvider>
+      <AccessibilityProvider>
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
+      </AccessibilityProvider>
+    </AuthProvider>
+  );
 }

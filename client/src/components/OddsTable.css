@@ -271,13 +271,16 @@ body,
 
   /* iPhone 15 Pro optimized container */
   .odds-table-card {
-    margin: 16px auto !important;
+    margin: 16px auto 100px auto !important;
     width: calc(100vw - 32px) !important;
     max-width: 393px !important;
     padding: 16px !important;
     border-radius: 20px;
     box-sizing: border-box;
     min-height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   /* Hide desktop rows & show card rows */
@@ -286,10 +289,23 @@ body,
   .odds-grid tbody tr.mobile-card-row { display: table-row; }
 
   .odds-grid tbody tr + tr td { border-top: 0 !important; }
+  .mobile-card-row td {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+  
+  /* Center align mobile card content */
+  .mobile-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
   .odds-grid tbody tr.mobile-card-row td {
-    padding: 8px 0 !important;
     background: transparent !important;
-    border: 0 !important;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -303,13 +319,14 @@ body,
     border: 1px solid #2a3356;
     border-radius: 16px;
     padding: 16px;
-    margin-bottom: 12px;
+    margin: 0 auto 12px auto;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     position: relative;
     overflow: hidden;
     width: 100%;
+    max-width: 360px;
     box-sizing: border-box;
   }
   
@@ -517,8 +534,8 @@ body,
     display: flex;
     gap: 4px;
     align-items: center;
-    background: var(--bg-elev-2);
-    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1));
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
     border-radius: 8px;
     padding: 8px 6px;
   }
@@ -548,14 +565,14 @@ body,
     display: flex;
     gap: 4px;
     align-items: center;
-    background: #1a2240;
-    border: 1px solid rgba(61, 126, 255, 0.3);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(124, 58, 237, 0.2));
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
     border-radius: 8px;
     padding: 6px;
     margin-bottom: 4px;
     font-size: 0.8em;
     font-weight: 800;
-    color: #cfe0ff;
+    color: #ffffff;
   }
   
   .mini-header-book {

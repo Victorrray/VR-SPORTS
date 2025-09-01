@@ -13,20 +13,28 @@ export function AuthProvider({ children }) {
     let mounted = true;
 
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!mounted) return;
-      
-      let currentUser = session?.user ?? null;
-      
-      // Check if user has a username set
-      if (currentUser && !currentUser.user_metadata?.username) {
-        // Try to get username from database first
-        try {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("username")
-            .eq("id", currentUser.id)
-            .single();
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!mounted) return;
+        
+        if (error) {
+          console.error("Session retrieval error:", error);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        
+        let currentUser = session?.user ?? null;
+        
+        // Check if user has a username set
+        if (currentUser && !currentUser.user_metadata?.username) {
+          // Try to get username from database first
+          try {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("username")
+              .eq("id", currentUser.id)
+              .single();
           
           if (profile?.username) {
             // Update user metadata with database username
@@ -44,13 +52,18 @@ export function AuthProvider({ children }) {
               currentUser = { ...currentUser, user_metadata: { ...currentUser.user_metadata, username: savedUsername } };
             }
           }
-        } catch (error) {
-          console.error("Error loading username:", error);
+          } catch (error) {
+            console.error("Error loading username:", error);
+          }
         }
+        
+        setUser(currentUser);
+        setLoading(false);
+      } catch (outerError) {
+        console.error("Auth initialization error:", outerError);
+        setUser(null);
+        setLoading(false);
       }
-      
-      setUser(currentUser);
-      setLoading(false);
     })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -102,36 +115,45 @@ export function AuthProvider({ children }) {
     if (!user) return { error: 'No user logged in' };
     
     try {
-      // Save to database first
+      // Save to database first with proper error handling
       const { error: dbError } = await supabase
         .from("profiles")
-        .upsert({ id: user.id, username });
+        .upsert({ 
+          id: user.id, 
+          username: username.trim(),
+          updated_at: new Date().toISOString()
+        });
 
       if (dbError) {
+        console.error("Database error:", dbError);
         if (dbError.code === "23505") {
           return { error: 'Username already taken' };
         }
-        throw dbError;
+        return { error: `Database error: ${dbError.message}` };
       }
 
       // Update auth metadata
       const { error: authError } = await supabase.auth.updateUser({
-        data: { username }
+        data: { username: username.trim() }
       });
       
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Auth error:", authError);
+        return { error: `Auth error: ${authError.message}` };
+      }
       
       // Save to localStorage for persistence
-      localStorage.setItem(`username_${user.id}`, username);
+      localStorage.setItem(`username_${user.id}`, username.trim());
       
-      // Update local user state
+      // Update local user state immediately
       setUser(prev => ({
         ...prev,
-        user_metadata: { ...prev.user_metadata, username }
+        user_metadata: { ...prev.user_metadata, username: username.trim() }
       }));
       
       return { success: true };
     } catch (error) {
+      console.error("Unexpected error:", error);
       return { error: error.message };
     }
   };

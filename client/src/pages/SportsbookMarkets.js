@@ -1,5 +1,6 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import MobileBottomBar from "../components/MobileBottomBar";
 import MobileFiltersSheet from "../components/MobileFiltersSheet";
 
@@ -303,6 +304,7 @@ const ALLOWED_BOOKS = new Set(
    ========================= */
 
 export default function SportsbookMarkets() {
+  const location = useLocation();
   const [sportList, setSportList] = useState([]);
   const [picked, setPicked] = useState(["americanfootball_nfl", "americanfootball_ncaaf"]);
   const [query, setQuery] = useState("");
@@ -331,12 +333,12 @@ export default function SportsbookMarkets() {
 
   // Sync with URL search params
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const urlQuery = params.get('q') || '';
     if (urlQuery !== query) {
       setQuery(urlQuery);
     }
-  }, []);
+  }, [location.search, query]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

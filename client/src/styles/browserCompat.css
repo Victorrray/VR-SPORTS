@@ -1,0 +1,269 @@
+/* Browser compatibility styles */
+
+/* Safari-specific fixes */
+.safari-browser {
+  /* Fix for Safari's 100vh mobile viewport issue */
+  --vh: 1vh;
+}
+
+.safari-browser .full-height {
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+.safari-browser .glass-card {
+  /* Improve backdrop-filter performance on Safari */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+.safari-browser input[type="date"] {
+  /* Fix Safari date input appearance */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: var(--text-primary);
+}
+
+.safari-browser input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.7;
+}
+
+/* Firefox-specific fixes */
+.firefox-browser {
+  /* Custom scrollbar for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+}
+
+.firefox-browser input[type="number"] {
+  /* Fix Firefox number input spinner */
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.firefox-browser input[type="number"]::-webkit-outer-spin-button,
+.firefox-browser input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.firefox-browser .glass-card {
+  /* Firefox backdrop-filter fallback */
+  background: rgba(26, 16, 37, 0.8);
+}
+
+/* Edge-specific fixes */
+.edge-browser .odds-table {
+  /* Fix Edge table rendering */
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* CSS Grid fallback for older browsers */
+@supports not (display: grid) {
+  .odds-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .odds-grid > * {
+    flex: 1 1 300px;
+  }
+}
+
+/* Flexbox fallback for very old browsers */
+@supports not (display: flex) {
+  .navbar-content {
+    display: table;
+    width: 100%;
+  }
+  
+  .navbar-left,
+  .navbar-center,
+  .navbar-right {
+    display: table-cell;
+    vertical-align: middle;
+  }
+}
+
+/* Custom properties fallback */
+:root {
+  /* Fallback colors for browsers without CSS custom properties */
+  --purple-50-fallback: #faf5ff;
+  --purple-100-fallback: #f3e8ff;
+  --purple-200-fallback: #e9d5ff;
+  --purple-300-fallback: #d8b4fe;
+  --purple-400-fallback: #c084fc;
+  --purple-500-fallback: #a855f7;
+  --purple-600-fallback: #9333ea;
+  --purple-700-fallback: #7c3aed;
+  --purple-800-fallback: #6b21a8;
+  --purple-900-fallback: #581c87;
+}
+
+/* Intersection Observer fallback */
+.no-intersection-observer .lazy-load {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ResizeObserver fallback */
+.no-resize-observer .responsive-component {
+  /* Use media queries instead */
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Smooth scroll fallback */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Position sticky fallback */
+@supports not (position: sticky) {
+  .sticky-header {
+    position: fixed;
+    top: 0;
+    z-index: 100;
+  }
+}
+
+/* Object-fit fallback for older browsers */
+@supports not (object-fit: cover) {
+  .team-logo {
+    /* Use background-image instead */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+  .team-logo img {
+    opacity: 0;
+  }
+}
+
+/* CSS masks fallback */
+@supports not (mask: url()) {
+  .masked-element {
+    /* Use clip-path or other techniques */
+    clip-path: circle(50%);
+  }
+}
+
+/* Backdrop-filter fallback */
+@supports not (backdrop-filter: blur()) {
+  .glass-card {
+    background: rgba(26, 16, 37, 0.9);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+  
+  .modal-overlay {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Gap property fallback for flexbox */
+@supports not (gap: 1rem) {
+  .flex-gap > * + * {
+    margin-left: 1rem;
+  }
+  
+  .flex-gap-vertical > * + * {
+    margin-top: 1rem;
+  }
+}
+
+/* Aspect-ratio fallback */
+@supports not (aspect-ratio: 1) {
+  .aspect-square {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+  }
+  
+  .aspect-square > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Container queries fallback */
+@supports not (container-type: inline-size) {
+  .container-query {
+    /* Use regular media queries instead */
+    width: 100%;
+  }
+  
+  @media (max-width: 768px) {
+    .container-query {
+      padding: 1rem;
+    }
+  }
+}
+
+/* Focus-visible fallback */
+@supports not selector(:focus-visible) {
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  [tabindex]:focus {
+    outline: 2px solid var(--purple-400);
+    outline-offset: 2px;
+  }
+}
+
+/* Logical properties fallback */
+@supports not (margin-inline-start: 1rem) {
+  .margin-inline-start {
+    margin-left: 1rem;
+  }
+  
+  .margin-inline-end {
+    margin-right: 1rem;
+  }
+  
+  .padding-block-start {
+    padding-top: 1rem;
+  }
+  
+  .padding-block-end {
+    padding-bottom: 1rem;
+  }
+}
+
+/* Print styles for better compatibility */
+@media print {
+  .glass-card {
+    background: white !important;
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
+  
+  .odds-table {
+    border-collapse: collapse;
+  }
+  
+  .odds-table th,
+  .odds-table td {
+    border: 1px solid #000;
+    padding: 0.5rem;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
