@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: vr-odds-api
+    env: node
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ODDS_API_KEY
+        sync: false
