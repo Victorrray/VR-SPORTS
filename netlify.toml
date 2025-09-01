@@ -1,0 +1,24 @@
+[build]
+  base = "server"
+  publish = "."
+  command = "npm install"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[functions]]
+  directory = "."
+  node_bundler = "esbuild"
+
+[functions]
+  external_node_modules = ["express"]
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/index/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
