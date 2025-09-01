@@ -5,7 +5,7 @@ const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ODDS_API_KEY || null;
 
 if (!API_KEY) {
@@ -13,6 +13,7 @@ if (!API_KEY) {
 }
 
 app.use(cors());
+
 
 /* ------------------------------------ Helpers ------------------------------------ */
 
