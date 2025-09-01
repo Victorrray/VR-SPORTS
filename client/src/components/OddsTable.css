@@ -1,5 +1,5 @@
 /* =========================
-   OddsTable.css (drop-in)
+   OddsTable.css (Purple Theme)
    ========================= */
 
 /* ---- Base & Card ---- */
@@ -332,9 +332,37 @@ body,
   .mob-match-title { font-weight: 900; line-height: 1.15; margin-bottom: 4px; text-align: left; font-size: 0.98em; }
   .mob-match-title .team-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .mob-meta { text-align: left; opacity: .85; font-size: 0.86em; }
-  .mob-ev { align-self: flex-start; font-weight: 900; font-size: 0.86em; padding: 5px 9px; border-radius: 999px; border: 1px solid #4a5a9a; background: color-mix(in srgb, var(--accent) 22%, #0f1626); color: #eaf3ff; white-space: nowrap; }
-  .mob-ev.pos { background: color-mix(in srgb, var(--success) 24%, #0f1626); border-color: color-mix(in srgb, var(--success) 42%, #0f1626); }
-  .mob-ev.neg { background: color-mix(in srgb, var(--danger) 24%, #0f1626);  border-color: color-mix(in srgb, var(--danger) 42%, #0f1626); }
+  .mob-ev-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  
+  .mob-ev { font-weight: 900; font-size: 0.86em; padding: 5px 9px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: color-mix(in srgb, var(--accent) 22%, var(--bg-elev)); color: var(--text); white-space: nowrap; }
+  .mob-ev.pos { background: color-mix(in srgb, var(--success) 24%, var(--bg-elev)); border-color: color-mix(in srgb, var(--success) 42%, transparent); }
+  .mob-ev.neg { background: color-mix(in srgb, var(--danger) 24%, var(--bg-elev));  border-color: color-mix(in srgb, var(--danger) 42%, transparent); }
+  
+  .mob-add-pick-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  
+  .mob-add-pick-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
   .mobile-odds-card.as-button .mob-top { padding-bottom: 10px; border-bottom: 1px solid #2a3356; margin-bottom: 8px; }
 
   /* Team name - now appears first with enhanced styling */
@@ -398,16 +426,12 @@ body,
     font-size: 1.1em; 
     padding: 8px 12px; 
     border-radius: 12px; 
-    background: linear-gradient(135deg, rgba(61, 126, 255, 0.15), rgba(61, 126, 255, 0.08));
-    border: 1px solid rgba(61, 126, 255, 0.2);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(61, 126, 255, 0.1);
-    transition: all 0.2s ease;
-  }
-  .mob-odds-container.up   .mob-odds { 
     background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
     border-color: rgba(34, 197, 94, 0.4);
     box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(61, 126, 255, 0.1);
+    transition: all 0.2s ease;
   }
   .mob-odds-container.down .mob-odds { 
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
@@ -425,7 +449,7 @@ body,
     gap: 6px;
     padding-top: 8px;
     margin-top: 6px;
-    border-top: 1px solid #2a3356;
+    border-top: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
     width: 100%;
     box-sizing: border-box;
   }
@@ -435,8 +459,8 @@ body,
     display: flex;
     gap: 4px;
     align-items: center;
-    background: #1b2340;
-    border: 1px solid #2e3a63;
+    background: var(--bg-elev-2);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
     border-radius: 8px;
     padding: 8px 6px;
   }

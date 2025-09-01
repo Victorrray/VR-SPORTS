@@ -1,24 +1,25 @@
 :root {
-  /* Core palette - Modern VR-Odds Design */
-  --bg-body: #0a0c16;
-  --bg-elev: #0f1220;
-  --bg-elev-2: #171a2b;
-  --bg-elev-3: #1a1f36;
-  --text: #f2f5ff;
-  --text-muted: #8b93b8;
-  --text-secondary: #a9b4e6;
+  /* Core palette - Purple Brand Design */
+  --bg-body: #0a0612;
+  --bg-elev: #0f0b1a;
+  --bg-elev-2: #1a1025;
+  --bg-elev-3: #221430;
+  --text: #f5f3ff;
+  --text-muted: #a78bfa;
+  --text-secondary: #c4b5fd;
   --accent: #8b5cf6;
   --accent-2: #7c3aed;
   --accent-light: #a78bfa;
+  --accent-hover: #7c3aed;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --info: #06b6d4;
+  --info: #8b5cf6;
 
   /* Glass morphism effects */
-  --glass-bg: rgba(15, 18, 30, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --glass-bg: rgba(15, 11, 26, 0.85);
+  --glass-border: rgba(167, 139, 250, 0.15);
+  --glass-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
   
   /* Enhanced shadows and effects */
   --card-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
@@ -34,22 +35,23 @@
 }
 
 .theme-modern {
-  --bg-body: #08091a;
-  --bg-elev: #0f1220;
-  --bg-elev-2: #151a2e;
-  --bg-elev-3: #1a1f36;
-  --text: #f8faff;
-  --text-muted: #8b93b8;
-  --text-secondary: #a9b4e6;
+  --bg-body: #0a0612;
+  --bg-elev: #0f0b1a;
+  --bg-elev-2: #1a1025;
+  --bg-elev-3: #221430;
+  --text: #f5f3ff;
+  --text-muted: #a78bfa;
+  --text-secondary: #c4b5fd;
   --accent: #8b5cf6;
   --accent-2: #7c3aed;
   --accent-light: #a78bfa;
+  --accent-hover: #7c3aed;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --info: #06b6d4;
-  --glass-bg: rgba(15, 18, 30, 0.9);
-  --glass-border: rgba(255, 255, 255, 0.12);
+  --info: #8b5cf6;
+  --glass-bg: rgba(15, 11, 26, 0.9);
+  --glass-border: rgba(167, 139, 250, 0.15);
   --card-shadow: 0 8px 32px rgba(139, 92, 246, 0.18);
   --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
 }

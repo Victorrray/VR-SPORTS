@@ -1,8 +1,8 @@
 :root {
-  /* Enhanced navbar variables matching premium odds table design */
-  --nav-bg: linear-gradient(135deg, rgba(26, 35, 71, 0.9) 0%, rgba(15, 22, 38, 0.95) 100%);
-  --nav-border: rgba(61, 126, 255, 0.3);
-  --nav-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  /* Enhanced navbar variables matching purple brand design */
+  --nav-bg: linear-gradient(135deg, rgba(34, 20, 48, 0.9) 0%, rgba(15, 11, 26, 0.95) 100%);
+  --nav-border: rgba(139, 92, 246, 0.3);
+  --nav-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
   --nav-backdrop: blur(20px);
 }
 
@@ -25,9 +25,9 @@
   overflow: hidden;
 }
 
-/* Mobile search and notification buttons */
+/* Mobile search and profile buttons */
 .mobileSearchBtn,
-.mobileNotificationBtn {
+.mobileProfileBtn {
   display: none;
   align-items: center;
   justify-content: center;
@@ -45,14 +45,10 @@
 }
 
 .mobileSearchBtn:hover,
-.mobileNotificationBtn:hover {
+.mobileProfileBtn:hover {
   color: var(--accent);
   border-color: var(--accent);
   transform: scale(1.05);
-}
-
-.mobileNotificationBtn {
-  position: relative;
 }
 
 .notificationDot {
@@ -346,7 +342,7 @@
   }
   
   .mobileSearchBtn,
-  .mobileNotificationBtn {
+  .mobileProfileBtn {
     display: flex;
   }
   
@@ -375,7 +371,7 @@
     margin: 0 12px;
   }
   
-  .mobileNotificationBtn {
+  .mobileProfileBtn {
     order: 4;
   }
   
