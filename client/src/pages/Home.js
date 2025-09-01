@@ -127,8 +127,8 @@ export default function Home({
     [featuredSports]
   );
 
-  const goToSport = (sport) => navigate('/signup');
-  const goToTool = (slug) => navigate('/signup');
+  const goToSport = (sport) => navigate('/sportsbooks');
+  const goToTool = (slug) => navigate('/sportsbooks');
 
   return (
     <main
@@ -174,7 +174,7 @@ export default function Home({
         </div>
 
         <div className={styles.ctaRow}>
-          <Link to="/signup" className={`${styles.heroBtn} ${styles.ctaPrimary}`}>
+          <Link to="/sportsbooks" className={`${styles.heroBtn} ${styles.ctaPrimary}`}>
             Start Free Trial
             <ArrowRight size={18} className={styles.ctaIcon} />
           </Link>
