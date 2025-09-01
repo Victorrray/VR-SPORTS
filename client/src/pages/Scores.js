@@ -99,12 +99,10 @@ export default function Scores() {
   async function load(silent = false) {
     if (!silent) setLoading(true);
     setErr("");
-    console.log("Loading scores for sport:", sport); // Debug log
     try {
       const r = await fetch(`${process.env.REACT_APP_API_URL || ""}/api/scores?sport=${sport}`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
-      console.log("Received data for sport", sport, ":", data); // Debug log
       setGames(data || []);
     } catch (error) {
       console.error("Error loading scores:", error);
@@ -133,12 +131,10 @@ export default function Scores() {
 
   // Sort: LIVE first, then scheduled by start, then finals last (by start desc)
   const sorted = useMemo(() => {
-    console.log("Sorting games for sport:", sport, "Total games:", games.length);
     const live = [];
     const sched = [];
     const finals = [];
     games.forEach((g) => {
-      console.log("Game:", g.away_team, "vs", g.home_team, "Status:", g.status, "Sport:", g.sport_key);
       if (g.status === "in_progress") live.push(g);
       else if (g.status === "final") finals.push(g);
       else sched.push(g);
@@ -148,7 +144,6 @@ export default function Scores() {
     finals.sort((a, b) => new Date(b.commence_time) - new Date(a.commence_time));
     
     const result = [...live, ...sched, ...finals];
-    console.log("Final sorted games:", result.length);
     return result;
   }, [games, sport]);
 

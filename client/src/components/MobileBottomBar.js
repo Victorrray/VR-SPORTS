@@ -1,5 +1,6 @@
 // src/components/MobileBottomBar.js
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Home, TrendingUp, BarChart3, User, Filter } from "lucide-react";
 import "./MobileBottomBar.css";
 
@@ -67,10 +68,10 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
             const isActive = active === t.key;
 
             return (
-              <a
+              <Link
                 key={t.key}
+                to={t.href}
                 className={`mobile-tab${isActive ? " active" : ""}`}
-                href={t.href}
                 onClick={(e) => {
                   if (t.href === "#") e.preventDefault();
                   if (t.key === "picks" && hasNotifications) {
@@ -92,7 +93,7 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
                 </div>
                 <span className="tab-label">{t.label}</span>
                 {isActive && <div className="active-indicator" />}
-              </a>
+              </Link>
             );
           })}
         </nav>

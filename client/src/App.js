@@ -117,7 +117,7 @@ export default function App() {
       Array.from(el.classList)
         .filter(c => c.startsWith("theme-"))
         .forEach(c => el.classList.remove(c));
-      el.classList.add("theme-emerald");
+      el.classList.add("theme-purple");
     } catch {}
   }, []);
   return <AppRoutes />;
