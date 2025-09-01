@@ -10,6 +10,28 @@ import OddsTable from "../components/OddsTable";
 import useDebounce from "../hooks/useDebounce";
 import useMarkets from "../hooks/useMarkets";
 
+// Import getSportLeague function
+function getSportLeague(sportKey='', sportTitle=''){
+  const key = String(sportKey).toLowerCase();
+  const map = {
+    americanfootball_nfl:{sport:'Football',league:'NFL'},
+    americanfootball_ncaaf:{sport:'Football',league:'NCAAF'},
+    basketball_nba:{sport:'Basketball',league:'NBA'},
+    basketball_ncaab:{sport:'Basketball',league:'NCAAB'},
+    baseball_mlb:{sport:'Baseball',league:'MLB'},
+    icehockey_nhl:{sport:'Hockey',league:'NHL'},
+    soccer_epl:{sport:'Soccer',league:'EPL'},
+    soccer_uefa_champs_league:{sport:'Soccer',league:'UCL'},
+    tennis_atp:{sport:'Tennis',league:'ATP'},
+    tennis_wta:{sport:'Tennis',league:'WTA'},
+  };
+  if (map[key]) return map[key];
+  const part = key.split('_')[0];
+  const sportGuess = {americanfootball:'Football',basketball:'Basketball',baseball:'Baseball',icehockey:'Hockey',soccer:'Soccer',tennis:'Tennis'}[part] || (sportTitle || 'Sport');
+  const league = (sportTitle || key.split('_')[1] || '').toUpperCase() || 'LEAGUE';
+  return { sport: sportGuess, league };
+}
+
 /* =========================
    Constants & helpers
    ========================= */
