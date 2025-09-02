@@ -335,7 +335,7 @@ export default function Account() {
         </div>
       </section>
 
-      <MobileBottomBar active="account" showFilter={false} />
+      <MobileBottomBar active="profile" showFilter={false} />
     </main>
   );
 }

@@ -58,6 +58,13 @@
   font-size: 0.95em;
 }
 
+/* Hide footer on mobile for non-landing pages */
+@media (max-width: 720px) {
+  .footer.hide-mobile-footer {
+    display: none !important;
+  }
+}
+
 @media (max-width: 720px) {
   .footer {
     display: block;

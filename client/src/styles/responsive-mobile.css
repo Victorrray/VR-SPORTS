@@ -1,0 +1,267 @@
+/* Responsive Mobile Scaling for Different iPhone Sizes */
+
+/* Base mobile styles */
+:root {
+  /* Dynamic viewport units for better mobile support */
+  --mobile-vh: 1vh;
+  --mobile-vw: 1vw;
+  
+  /* Responsive font scaling */
+  --base-font-size: clamp(14px, 3.5vw, 16px);
+  --small-font-size: clamp(12px, 3vw, 14px);
+  --large-font-size: clamp(16px, 4vw, 18px);
+  
+  /* Responsive spacing */
+  --mobile-padding: clamp(12px, 4vw, 20px);
+  --mobile-margin: clamp(8px, 2.5vw, 16px);
+  --mobile-gap: clamp(8px, 2vw, 12px);
+  
+  /* Touch target sizes */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+}
+
+/* iPhone X and newer (with notch) - 375x812 and similar */
+@media screen and (max-width: 414px) and (min-height: 700px) {
+  :root {
+    --mobile-vh: calc(1vh - 0.1px); /* Account for viewport bugs */
+    --base-font-size: clamp(14px, 3.8vw, 16px);
+    --mobile-padding: clamp(16px, 4.2vw, 24px);
+  }
+  
+  .main-content {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+  
+  .navbar {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* iPhone 15 Pro Max and larger phones - 430x932 */
+@media screen and (min-width: 415px) and (max-width: 480px) {
+  :root {
+    --base-font-size: clamp(15px, 3.2vw, 17px);
+    --mobile-padding: clamp(18px, 3.8vw, 24px);
+    --mobile-gap: clamp(10px, 2.2vw, 14px);
+  }
+  
+  .odds-table {
+    font-size: var(--base-font-size);
+  }
+  
+  .game-card {
+    padding: var(--mobile-padding);
+    margin-bottom: var(--mobile-gap);
+  }
+}
+
+/* Smaller phones like iPhone SE - 375x667 */
+@media screen and (max-width: 375px) and (max-height: 700px) {
+  :root {
+    --base-font-size: clamp(13px, 4vw, 15px);
+    --small-font-size: clamp(11px, 3.2vw, 13px);
+    --mobile-padding: clamp(10px, 3.5vw, 16px);
+    --mobile-gap: clamp(6px, 1.8vw, 10px);
+  }
+  
+  .odds-value {
+    font-size: var(--small-font-size);
+    padding: 6px 8px;
+  }
+  
+  .team-name {
+    font-size: var(--small-font-size);
+  }
+  
+  .filter-btn, .sport-tab {
+    padding: 8px 12px;
+    font-size: var(--small-font-size);
+  }
+}
+
+/* Ultra-wide phones and foldables */
+@media screen and (min-width: 481px) and (max-width: 600px) {
+  :root {
+    --base-font-size: clamp(16px, 2.8vw, 18px);
+    --mobile-padding: clamp(20px, 3.5vw, 28px);
+  }
+  
+  .odds-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--mobile-gap);
+  }
+}
+
+/* Landscape orientation adjustments */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  :root {
+    --mobile-padding: clamp(8px, 2vw, 12px);
+    --mobile-gap: clamp(4px, 1vw, 8px);
+  }
+  
+  .navbar {
+    padding: 8px var(--mobile-padding);
+  }
+  
+  .main-content {
+    padding-top: 60px;
+  }
+  
+  .mfs-sheet {
+    max-height: 90vh;
+  }
+}
+
+/* Responsive touch targets */
+@media (max-width: 768px) {
+  button, 
+  .clickable,
+  input[type="button"],
+  input[type="submit"],
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+  
+  /* Comfortable touch targets for primary actions */
+  .primary-btn,
+  .cta-button,
+  .filter-btn,
+  .odds-value {
+    min-height: var(--touch-target-comfortable);
+  }
+}
+
+/* Text scaling for accessibility */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition: font-size 0.2s ease;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .odds-table {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Container queries for component-level responsiveness */
+@container (max-width: 400px) {
+  .game-card {
+    padding: var(--mobile-padding);
+  }
+  
+  .odds-row {
+    flex-direction: column;
+    gap: var(--mobile-gap);
+  }
+}
+
+/* Dynamic font sizing based on screen width */
+.responsive-text {
+  font-size: clamp(0.875rem, 2.5vw, 1.125rem);
+}
+
+.responsive-heading {
+  font-size: clamp(1.25rem, 4vw, 2rem);
+}
+
+.responsive-subheading {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+}
+
+/* Responsive grid layouts */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--mobile-gap);
+}
+
+.responsive-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mobile-gap);
+}
+
+.responsive-flex > * {
+  flex: 1 1 clamp(200px, 45%, 300px);
+}
+
+/* Safe area adjustments for different devices */
+.safe-area-top {
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+
+.safe-area-bottom {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.safe-area-left {
+  padding-left: max(12px, env(safe-area-inset-left));
+}
+
+.safe-area-right {
+  padding-right: max(12px, env(safe-area-inset-right));
+}
+
+/* Responsive modal and sheet adjustments */
+@media (max-width: 480px) {
+  .mfs-sheet {
+    border-radius: 16px 16px 0 0;
+    max-height: 85vh;
+  }
+  
+  .mfs-content {
+    padding: var(--mobile-padding);
+  }
+  
+  .filter-stack {
+    gap: var(--mobile-gap);
+  }
+}
+
+/* Responsive table adjustments */
+@media (max-width: 640px) {
+  .odds-table {
+    font-size: var(--small-font-size);
+  }
+  
+  .odds-table th,
+  .odds-table td {
+    padding: 8px 4px;
+  }
+  
+  .team-logo {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Responsive navigation */
+@media (max-width: 768px) {
+  .navbar-content {
+    padding: 0 var(--mobile-padding);
+  }
+  
+  .mobile-bottom-bar {
+    padding: 12px var(--mobile-padding);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Print styles for mobile */
+@media print {
+  :root {
+    --base-font-size: 12pt;
+    --mobile-padding: 0.5cm;
+  }
+  
+  .mfs-sheet,
+  .mobile-bottom-bar,
+  .navbar {
+    display: none !important;
+  }
+}

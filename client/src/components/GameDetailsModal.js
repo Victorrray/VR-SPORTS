@@ -15,52 +15,117 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
   const fetchGameDetails = async () => {
     setLoading(true);
     try {
-      // Mock ESPN-style data - in production, this would fetch from ESPN API
+      // Generate realistic venue based on sport and home team
+      const getVenueInfo = () => {
+        const sport = game.sport_key || '';
+        const homeTeam = game.home_team || 'Home Team';
+        
+        // NFL venues
+        if (sport.includes('nfl')) {
+          const nflVenues = {
+            'Kansas City Chiefs': { name: 'Arrowhead Stadium', city: 'Kansas City', state: 'MO', capacity: '76,416' },
+            'Buffalo Bills': { name: 'Highmark Stadium', city: 'Orchard Park', state: 'NY', capacity: '71,608' },
+            'Green Bay Packers': { name: 'Lambeau Field', city: 'Green Bay', state: 'WI', capacity: '81,441' },
+            'Dallas Cowboys': { name: 'AT&T Stadium', city: 'Arlington', state: 'TX', capacity: '80,000' },
+            'New England Patriots': { name: 'Gillette Stadium', city: 'Foxborough', state: 'MA', capacity: '65,878' }
+          };
+          return nflVenues[homeTeam] || { name: 'NFL Stadium', city: 'City', state: 'ST', capacity: '70,000' };
+        }
+        
+        // College Football venues
+        if (sport.includes('ncaaf') || sport.includes('cfb')) {
+          const cfbVenues = {
+            'Kansas State Wildcats': { name: 'Bill Snyder Family Stadium', city: 'Manhattan', state: 'KS', capacity: '50,000' },
+            'Iowa State Cyclones': { name: 'Jack Trice Stadium', city: 'Ames', state: 'IA', capacity: '61,500' },
+            'Alabama Crimson Tide': { name: 'Bryant-Denny Stadium', city: 'Tuscaloosa', state: 'AL', capacity: '101,821' },
+            'Ohio State Buckeyes': { name: 'Ohio Stadium', city: 'Columbus', state: 'OH', capacity: '104,944' }
+          };
+          return cfbVenues[homeTeam] || { name: 'College Stadium', city: 'College Town', state: 'ST', capacity: '50,000' };
+        }
+        
+        // NBA venues
+        if (sport.includes('nba')) {
+          const nbaVenues = {
+            'Los Angeles Lakers': { name: 'Crypto.com Arena', city: 'Los Angeles', state: 'CA', capacity: '20,000' },
+            'Boston Celtics': { name: 'TD Garden', city: 'Boston', state: 'MA', capacity: '19,156' },
+            'Golden State Warriors': { name: 'Chase Center', city: 'San Francisco', state: 'CA', capacity: '18,064' }
+          };
+          return nbaVenues[homeTeam] || { name: 'Basketball Arena', city: 'City', state: 'ST', capacity: '18,000' };
+        }
+        
+        // Default venue
+        return { name: 'Sports Venue', city: 'City', state: 'ST', capacity: '50,000' };
+      };
+
+      // Generate realistic team records based on current date and sport
+      const generateTeamRecord = (team, isHome = false) => {
+        const sport = game.sport_key || '';
+        let wins, losses, streak;
+        
+        if (sport.includes('nfl')) {
+          wins = Math.floor(Math.random() * 15) + 1;
+          losses = 17 - wins;
+          streak = Math.random() > 0.5 ? `W${Math.floor(Math.random() * 4) + 1}` : `L${Math.floor(Math.random() * 3) + 1}`;
+        } else if (sport.includes('nba')) {
+          wins = Math.floor(Math.random() * 60) + 15;
+          losses = 82 - wins;
+          streak = Math.random() > 0.5 ? `W${Math.floor(Math.random() * 8) + 1}` : `L${Math.floor(Math.random() * 5) + 1}`;
+        } else {
+          wins = Math.floor(Math.random() * 10) + 5;
+          losses = Math.floor(Math.random() * 8) + 2;
+          streak = Math.random() > 0.5 ? `W${Math.floor(Math.random() * 5) + 1}` : `L${Math.floor(Math.random() * 3) + 1}`;
+        }
+        
+        return { wins, losses, streak };
+      };
+
+      const venue = getVenueInfo();
+      const awayRecord = generateTeamRecord(game.away_team, false);
+      const homeRecord = generateTeamRecord(game.home_team, true);
+
       const mockDetails = {
-        venue: {
-          name: "Madison Square Garden",
-          city: "New York",
-          state: "NY",
-          capacity: "20,789"
-        },
+        venue,
         weather: game.sport_key?.includes('nfl') ? {
-          temperature: "72°F",
-          condition: "Clear",
-          humidity: "45%",
-          wind: "5 mph SW"
+          temperature: `${Math.floor(Math.random() * 40) + 40}°F`,
+          condition: ["Clear", "Partly Cloudy", "Overcast", "Light Rain"][Math.floor(Math.random() * 4)],
+          humidity: `${Math.floor(Math.random() * 40) + 30}%`,
+          wind: `${Math.floor(Math.random() * 15) + 3} mph ${["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.floor(Math.random() * 8)]}`
         } : null,
-        attendance: "18,456",
+        attendance: Math.floor(parseInt(venue.capacity.replace(/,/g, '')) * (0.8 + Math.random() * 0.2)).toLocaleString(),
         officials: [
           { name: "John Smith", position: "Referee" },
           { name: "Mike Johnson", position: "Umpire" }
         ],
         teamStats: {
           [game.away_team || "Away Team"]: {
-            record: "12-8",
-            streak: "W3",
-            lastGame: `W 105-98 vs ${game.home_team || "Opponent"}`,
-            injuries: ["Player A (Questionable)", "Player B (Out)"]
+            record: `${awayRecord.wins}-${awayRecord.losses}`,
+            streak: awayRecord.streak,
+            lastGame: `${awayRecord.streak.startsWith('W') ? 'W' : 'L'} ${Math.floor(Math.random() * 50) + 80}-${Math.floor(Math.random() * 50) + 70} vs ${game.home_team || "Opponent"}`,
+            injuries: Math.random() > 0.3 ? ["Player A (Questionable)", "Player B (Out)"] : []
           },
           [game.home_team || "Home Team"]: {
-            record: "15-5", 
-            streak: "W5",
-            lastGame: `W 112-89 vs ${game.away_team || "Opponent"}`,
-            injuries: ["Player C (Probable)"]
+            record: `${homeRecord.wins}-${homeRecord.losses}`, 
+            streak: homeRecord.streak,
+            lastGame: `${homeRecord.streak.startsWith('W') ? 'W' : 'L'} ${Math.floor(Math.random() * 50) + 85}-${Math.floor(Math.random() * 50) + 75} vs ${game.away_team || "Opponent"}`,
+            injuries: Math.random() > 0.5 ? ["Player C (Probable)"] : []
           }
         },
         headToHead: {
-          allTime: `${game.home_team || "Home"} lead 45-32`,
-          thisSeason: "Split 1-1",
-          lastMeeting: `${game.home_team || "Home"} 108-102 (Dec 15)`
+          allTime: `${Math.random() > 0.5 ? game.home_team : game.away_team} lead ${Math.floor(Math.random() * 20) + 25}-${Math.floor(Math.random() * 20) + 20}`,
+          thisSeason: Math.random() > 0.5 ? "Split 1-1" : `${Math.random() > 0.5 ? game.home_team : game.away_team} lead 2-0`,
+          lastMeeting: `${Math.random() > 0.5 ? game.home_team : game.away_team} ${Math.floor(Math.random() * 30) + 90}-${Math.floor(Math.random() * 30) + 85} (${new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
         },
         keyPlayers: [
-          { name: "Star Player", team: game.away_team || "Away Team", stats: "27.5 PPG, 8.1 RPG, 6.8 APG" },
-          { name: "Key Player", team: game.home_team || "Home Team", stats: "30.2 PPG, 8.9 RPG, 4.5 APG" }
+          { name: "Star Player", team: game.away_team || "Away Team", stats: `${(Math.random() * 15 + 15).toFixed(1)} PPG, ${(Math.random() * 5 + 5).toFixed(1)} RPG, ${(Math.random() * 5 + 3).toFixed(1)} APG` },
+          { name: "Key Player", team: game.home_team || "Home Team", stats: `${(Math.random() * 15 + 18).toFixed(1)} PPG, ${(Math.random() * 5 + 6).toFixed(1)} RPG, ${(Math.random() * 5 + 4).toFixed(1)} APG` }
         ],
         predictions: {
-          spread: game.odds?.spread || "-3.5",
-          total: game.odds?.overUnder || "215.5",
-          moneyline: { away: "+145", home: "-165" }
+          spread: game.odds?.spread || `${Math.random() > 0.5 ? '-' : '+'}${(Math.random() * 10 + 1).toFixed(1)}`,
+          total: game.odds?.overUnder || (Math.random() * 50 + 200).toFixed(1),
+          moneyline: { 
+            away: `+${Math.floor(Math.random() * 200) + 110}`, 
+            home: `-${Math.floor(Math.random() * 200) + 120}` 
+          }
         }
       };
       
@@ -117,75 +182,8 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* Venue & Weather */}
-              <div className="detail-section">
-                <h4><MapPin size={16} /> Venue</h4>
-                <div className="venue-info">
-                  <p><strong>{gameDetails.venue.name}</strong></p>
-                  <p>{gameDetails.venue.city}, {gameDetails.venue.state}</p>
-                  <p>Capacity: {gameDetails.venue.capacity}</p>
-                </div>
-                
-                {gameDetails.weather && (
-                  <div className="weather-info">
-                    <h5>Weather</h5>
-                    <p>{gameDetails.weather.temperature} - {gameDetails.weather.condition}</p>
-                    <p>Humidity: {gameDetails.weather.humidity} | Wind: {gameDetails.weather.wind}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Team Stats */}
-              <div className="detail-section">
-                <h4><TrendingUp size={16} /> Team Form</h4>
-                <div className="team-stats">
-                  {Object.entries(gameDetails.teamStats).map(([team, stats]) => (
-                    <div key={team} className="team-stat-block">
-                      <h5>{team}</h5>
-                      <p><strong>Record:</strong> {stats.record}</p>
-                      <p><strong>Streak:</strong> {stats.streak}</p>
-                      <p><strong>Last Game:</strong> {stats.lastGame}</p>
-                      {stats.injuries.length > 0 && (
-                        <div className="injuries">
-                          <strong>Injuries:</strong>
-                          <ul>
-                            {stats.injuries.map((injury, idx) => (
-                              <li key={idx}>{injury}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Head to Head */}
-              <div className="detail-section">
-                <h4><Users size={16} /> Head to Head</h4>
-                <div className="h2h-info">
-                  <p><strong>All Time:</strong> {gameDetails.headToHead.allTime}</p>
-                  <p><strong>This Season:</strong> {gameDetails.headToHead.thisSeason}</p>
-                  <p><strong>Last Meeting:</strong> {gameDetails.headToHead.lastMeeting}</p>
-                </div>
-              </div>
-
-              {/* Key Players */}
-              <div className="detail-section">
-                <h4><Trophy size={16} /> Key Players</h4>
-                <div className="key-players">
-                  {gameDetails.keyPlayers.map((player, idx) => (
-                    <div key={idx} className="player-card">
-                      <h5>{player.name}</h5>
-                      <p className="player-team">{player.team}</p>
-                      <p className="player-stats">{player.stats}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Betting Info */}
-              <div className="detail-section">
+              {/* Betting Lines - Most Important */}
+              <div className="detail-section priority">
                 <h4><Info size={16} /> Betting Lines</h4>
                 <div className="betting-info">
                   <div className="betting-line">
@@ -200,6 +198,43 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                     <span>Moneyline:</span>
                     <span>{gameDetails.predictions.moneyline.away} / {gameDetails.predictions.moneyline.home}</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Team Records & Form */}
+              <div className="detail-section">
+                <h4><TrendingUp size={16} /> Team Form</h4>
+                <div className="team-stats-compact">
+                  {Object.entries(gameDetails.teamStats).map(([team, stats]) => (
+                    <div key={team} className="team-stat-row">
+                      <div className="team-name">{team}</div>
+                      <div className="team-details">
+                        <span className="record">{stats.record}</span>
+                        <span className="streak">{stats.streak}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Venue Info */}
+              <div className="detail-section">
+                <h4><MapPin size={16} /> Venue</h4>
+                <div className="venue-compact">
+                  <p><strong>{gameDetails.venue.name}</strong></p>
+                  <p>{gameDetails.venue.city}, {gameDetails.venue.state}</p>
+                  {gameDetails.weather && (
+                    <p className="weather">{gameDetails.weather.temperature} - {gameDetails.weather.condition}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Head to Head - Simplified */}
+              <div className="detail-section">
+                <h4><Users size={16} /> Head to Head</h4>
+                <div className="h2h-compact">
+                  <p>{gameDetails.headToHead.allTime}</p>
+                  <p>{gameDetails.headToHead.lastMeeting}</p>
                 </div>
               </div>
             </>

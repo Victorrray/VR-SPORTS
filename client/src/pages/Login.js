@@ -26,7 +26,7 @@ export default function Login() {
     <main className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1 className="login-title">Welcome to VR-Odds</h1>
+          <h1 className="login-title">Welcome to Odds Sight Seer</h1>
           <p className="login-subtitle">Find profitable betting opportunities with AI</p>
         </div>
 

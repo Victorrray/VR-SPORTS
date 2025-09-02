@@ -39,8 +39,20 @@ export default function SportMultiSelect({
       if (menu && menu.contains && menu.contains(e.target)) return;
       setOpen(false);
     };
+    
+    // Prevent closing when clicking inside filter sheet
+    const preventClose = (e) => {
+      if (e.target.closest('.mfs-content')) {
+        e.stopPropagation();
+      }
+    };
+    
     document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
+    document.addEventListener("mousedown", preventClose, true);
+    return () => {
+      document.removeEventListener("mousedown", h);
+      document.removeEventListener("mousedown", preventClose, true);
+    };
   }, []);
 
   // Position + size portal menu; auto-flip on mobile
@@ -101,14 +113,27 @@ export default function SportMultiSelect({
     };
   }, [open, shouldPortal, portalAlign, isMobile]);
 
-  const toggleOne = (key) =>
-    selected.includes(key)
-      ? onChange(selected.filter((k) => k !== key))
-      : onChange([...selected, key]);
+  const toggleOne = (key) => {
+    try {
+      const newSelection = selected.includes(key)
+        ? selected.filter((k) => k !== key)
+        : [...selected, key];
+      onChange(newSelection);
+    } catch (error) {
+      console.error('Error updating selection:', error);
+    }
+  };
 
   const keysOnly = allKeys(list);
   const allSelected = keysOnly.length > 0 && keysOnly.every((k) => selected.includes(k));
-  const toggleAll = () => (allSelected ? onChange([]) : onChange(keysOnly));
+  const toggleAll = () => {
+    try {
+      const newSelection = allSelected ? [] : keysOnly;
+      onChange(newSelection);
+    } catch (error) {
+      console.error('Error updating all selection:', error);
+    }
+  };
 
   const label = (() => {
     if (!selected.length) return placeholderText;

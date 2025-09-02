@@ -747,8 +747,17 @@ export default function SportsbookMarkets() {
                 type="button"
                 className="filter-btn apply-btn"
                 onClick={() => {
+                  // Close any open dropdowns first
+                  const openDropdowns = document.querySelectorAll('.ms-menu');
+                  openDropdowns.forEach(dropdown => {
+                    const toggle = dropdown.parentElement?.querySelector('.ms-toggle');
+                    if (toggle) {
+                      toggle.setAttribute('aria-expanded', 'false');
+                    }
+                  });
+                  
                   setRefreshTick(Date.now());
-                  setMobileFiltersOpen(false);
+                  setTimeout(() => setMobileFiltersOpen(false), 50);
                 }}
               >
                 Apply Filters
@@ -757,8 +766,17 @@ export default function SportsbookMarkets() {
                 type="button"
                 className="filter-btn reset-btn"
                 onClick={() => {
+                  // Close any open dropdowns first
+                  const openDropdowns = document.querySelectorAll('.ms-menu');
+                  openDropdowns.forEach(dropdown => {
+                    const toggle = dropdown.parentElement?.querySelector('.ms-toggle');
+                    if (toggle) {
+                      toggle.setAttribute('aria-expanded', 'false');
+                    }
+                  });
+                  
                   resetFilters();
-                  setMobileFiltersOpen(false);
+                  setTimeout(() => setMobileFiltersOpen(false), 50);
                 }}
               >
                 Reset All

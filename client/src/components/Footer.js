@@ -2,10 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styles from "./Footer.module.css";
 
-export default function Footer() {
+export default function Footer({ className }) {
   const year = new Date().getFullYear();
   return (
-    <footer className={styles.footer}>
+    <footer className={`${styles.footer} ${className || ''}`}>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
           <span className={styles.brandTitle}>OddsSightSeer</span>

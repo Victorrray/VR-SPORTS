@@ -24,8 +24,24 @@ export default function MobileFiltersSheet({ open, onClose, title = "Filters", c
     if (delta > 0) setDy(delta);
   };
   const onTouchEnd = () => {
-    if (dy > threshold) onClose?.();
+    if (dy > threshold) handleClose();
     setDy(0);
+  };
+
+  const handleClose = () => {
+    // Ensure any open dropdowns are closed before closing the sheet
+    const openDropdowns = document.querySelectorAll('.ms-menu');
+    openDropdowns.forEach(dropdown => {
+      const toggle = dropdown.parentElement?.querySelector('.ms-toggle');
+      if (toggle) {
+        toggle.click();
+      }
+    });
+    
+    // Small delay to allow dropdowns to close
+    setTimeout(() => {
+      onClose();
+    }, 100);
   };
 
   if (!open) return null;

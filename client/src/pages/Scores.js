@@ -192,40 +192,6 @@ export default function Scores() {
         </div>
 
         <div className="header-controls">
-          {/* Mobile Dropdown Selector */}
-          <div className="sport-selector">
-            <button 
-              className={`sport-dropdown-btn ${dropdownOpen ? 'open' : ''}`}
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className="sport-icon">
-                  {availableSports.find(s => s.key === sport)?.icon || '🏈'}
-                </span>
-                <span>{availableSports.find(s => s.key === sport)?.label || 'Select Sport'}</span>
-              </div>
-              <ChevronDown size={16} style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
-            </button>
-            
-            {dropdownOpen && (
-              <div className="sport-dropdown-menu">
-                {availableSports.map((sportOption) => (
-                  <button
-                    key={sportOption.key}
-                    onClick={() => {
-                      setSport(sportOption.key);
-                      setDropdownOpen(false);
-                    }}
-                    className={`sport-option ${sport === sportOption.key ? 'selected' : ''}`}
-                  >
-                    <span className="sport-icon">{sportOption.icon}</span>
-                    <span>{sportOption.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Desktop Tabs */}
           <div className="sport-tabs">
             {availableSports.map((sportOption) => (
@@ -239,14 +205,50 @@ export default function Scores() {
             ))}
           </div>
 
-          <button
-            ref={btnRef}
-            onClick={handleRefresh}
-            aria-label="Refresh scores"
-            className={`refresh-btn ${spinning ? "spinning" : ""}`}
-          >
-            <RefreshCw size={18} className="refresh-icon" />
-          </button>
+          <div className="mobile-controls">
+            {/* Mobile Dropdown Selector */}
+            <div className="sport-selector">
+              <button 
+                className={`sport-dropdown-btn ${dropdownOpen ? 'open' : ''}`}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="sport-icon">
+                    {availableSports.find(s => s.key === sport)?.icon || '🏈'}
+                  </span>
+                  <span>{availableSports.find(s => s.key === sport)?.label || 'Select Sport'}</span>
+                </div>
+                <ChevronDown size={16} style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+              </button>
+              
+              {dropdownOpen && (
+                <div className="sport-dropdown-menu">
+                  {availableSports.map((sportOption) => (
+                    <button
+                      key={sportOption.key}
+                      onClick={() => {
+                        setSport(sportOption.key);
+                        setDropdownOpen(false);
+                      }}
+                      className={`sport-option ${sport === sportOption.key ? 'selected' : ''}`}
+                    >
+                      <span className="sport-icon">{sportOption.icon}</span>
+                      <span>{sportOption.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              ref={btnRef}
+              onClick={handleRefresh}
+              aria-label="Refresh scores"
+              className={`refresh-btn ${spinning ? "spinning" : ""}`}
+            >
+              <RefreshCw size={18} className="refresh-icon" />
+            </button>
+          </div>
         </div>
       </div>
 

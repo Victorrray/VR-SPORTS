@@ -196,7 +196,10 @@ export default function GameReactions({ gameId, gameKey }) {
           <button
             key={emoji}
             className={`reaction-bubble ${users.includes(user?.id) ? 'user-reacted' : ''}`}
-            onClick={() => users.includes(user?.id) ? removeReaction() : addReaction(emoji)}
+            onClick={(e) => {
+              e.stopPropagation();
+              users.includes(user?.id) ? removeReaction() : addReaction(emoji);
+            }}
             title={`${users.length} ${REACTION_EMOJIS.find(r => r.emoji === emoji)?.label || 'reactions'}`}
           >
             <span className="reaction-emoji">{emoji}</span>
@@ -208,7 +211,10 @@ export default function GameReactions({ gameId, gameKey }) {
         {user && (
           <button
             className={`add-reaction-btn ${loading ? 'loading' : ''}`}
-            onClick={() => setShowPicker(!showPicker)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPicker(!showPicker);
+            }}
             disabled={loading}
             title="Add reaction"
           >
@@ -224,7 +230,10 @@ export default function GameReactions({ gameId, gameKey }) {
             <button
               key={emoji}
               className="reaction-option"
-              onClick={() => addReaction(emoji)}
+              onClick={(e) => {
+                e.stopPropagation();
+                addReaction(emoji);
+              }}
               title={label}
             >
               {emoji}

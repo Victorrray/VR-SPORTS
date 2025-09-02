@@ -64,13 +64,19 @@
 .header-controls {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   width: 100%;
 }
 
+.mobile-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .sport-selector {
   position: relative;
-  flex: 1;
   min-width: 200px;
 }
 

@@ -19,8 +19,9 @@ import Scores from './pages/Scores';
 import { useAuth } from "./auth/AuthProvider";
 import { initBrowserCompat } from "./utils/browserCompat";
 import "./App.css";
-import "./styles/accessibility.css";
-import "./styles/browserCompat.css";
+import './styles/accessibility.css';
+import './styles/browserCompat.css';
+import './styles/responsive-mobile.css';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -60,14 +61,16 @@ function AppRoutes() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
-        {/* Only show footer on home page in mobile view */}
-        {(location.pathname === "/" || window.innerWidth > 720) && <Footer />}
+        {/* Only show footer on landing and login pages */}
+        {(location.pathname === "/" || location.pathname === "/login") && <Footer />}
         
         {/* Username Setup Modal */}
         {showUsernameSetup && (
           <UsernameSetup onComplete={() => setShowUsernameSetup(false)} />
         )}
-        <MobileBottomBar />
+        
+        {/* Show bottom bar only for authenticated users */}
+        {user && <MobileBottomBar />}
       </div>
     </React.Suspense>
   );

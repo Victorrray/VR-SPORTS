@@ -1,7 +1,7 @@
 // src/components/MobileBottomBar.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Home, TrendingUp, BarChart3, User, Filter } from "lucide-react";
+import { Home, TrendingUp, BarChart3, User, Filter, Activity } from "lucide-react";
 import "./MobileBottomBar.css";
 
 export default function MobileBottomBar({ onFilterClick, active = "sportsbooks", showFilter = true }) {
@@ -18,28 +18,35 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
 
   const tabs = [
     { 
+      key: "home", 
+      label: "Home", 
+      icon: Home, 
+      href: "/",
+      badge: null
+    },
+    { 
       key: "sportsbooks", 
       label: "Odds", 
-      icon: Home, 
+      icon: TrendingUp, 
       href: "/sportsbooks",
       badge: activeCount > 0 ? `${activeCount}` : null
     },
     { 
       key: "picks", 
       label: "Picks", 
-      icon: TrendingUp, 
+      icon: BarChart3, 
       href: "/picks",
       badge: hasNotifications ? "!" : null
     },
     { 
       key: "scores", 
       label: "Scores", 
-      icon: BarChart3, 
+      icon: Activity, 
       href: "/scores",
       isLive: true
     },
     { 
-      key: "account", 
+      key: "profile", 
       label: "Profile", 
       icon: User, 
       href: "/account" 
