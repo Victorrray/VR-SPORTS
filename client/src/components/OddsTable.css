@@ -10,6 +10,12 @@ body,
   color: var(--text);
 }
 
+/* Mobile-first responsive design */
+:root {
+  --mobile-gutter: max(16px, env(safe-area-inset-left));
+  --touch-target: 44px;
+}
+
 /* My Picks button styles */
 .mob-right-section {
   display: flex;
@@ -21,9 +27,9 @@ body,
   background: var(--accent);
   color: white;
   border: none;
-  border-radius: 6px;
-  width: 28px;
-  height: 28px;
+  border-radius: 8px;
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -31,6 +37,7 @@ body,
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
 }
 
 .mob-add-pick-btn:hover {
@@ -38,16 +45,21 @@ body,
   transform: scale(1.05);
 }
 
+.mob-add-pick-btn:active {
+  transform: scale(0.95);
+}
+
 .add-pick-btn {
   background: var(--accent);
   color: white;
   border: none;
-  border-radius: 4px;
-  width: 24px;
-  height: 24px;
+  border-radius: 6px;
+  min-width: 32px;
+  min-height: 32px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
+  touch-action: manipulation;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -57,6 +69,58 @@ body,
 .add-pick-btn:hover {
   background: var(--accent-hover);
   transform: scale(1.05);
+}
+
+.add-pick-btn:active {
+  transform: scale(0.95);
+}
+
+/* Mobile responsive enhancements */
+@media (max-width: 768px) {
+  .odds-table-card {
+    margin: 0 var(--mobile-gutter);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .odds-table {
+    font-size: 14px;
+  }
+  
+  .odds-row {
+    min-height: 60px;
+    padding: 12px 8px;
+  }
+  
+  .odds-cell {
+    padding: 8px 4px;
+    min-height: var(--touch-target);
+  }
+  
+  .odds-button {
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    touch-action: manipulation;
+  }
+  
+  .team-name {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  
+  .game-time {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  
+  /* Improved scrolling */
+  .odds-table-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
 }
 
 .mini-pick-col {

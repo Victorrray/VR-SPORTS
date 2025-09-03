@@ -94,7 +94,39 @@ app.get("/api/events", async (req, res) => {
   }
 });
 
-// odds snapshot (Odds API)
+// odds endpoint (unified for multiple sports)
+app.get("/api/odds", async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    
+    const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american" } = req.query;
+    if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
+    
+    const sportsArray = sports.split(',');
+    const allGames = [];
+    
+    // Fetch odds for each sport
+    for (const sport of sportsArray) {
+      try {
+        const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport.trim())}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
+        const r = await axios.get(url);
+        const games = Array.isArray(r.data) ? r.data : [];
+        allGames.push(...games);
+      } catch (sportErr) {
+        console.warn(`Failed to fetch odds for sport ${sport}:`, sportErr.message);
+        // Continue with other sports instead of failing completely
+      }
+    }
+    
+    res.json(allGames);
+  } catch (err) {
+    console.error("odds error:", err?.response?.status, err?.response?.data || err.message);
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: String(err) });
+  }
+});
+
+// odds snapshot (Odds API) - legacy endpoint
 app.get("/api/odds-data", async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
@@ -119,25 +151,78 @@ app.get("/api/odds-data", async (req, res) => {
   }
 });
 
-// player props (Odds API)
+// player props (Odds API) - enhanced with market discovery
 app.get("/api/player-props", async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     const { sport, eventId, regions = "us", markets = "", oddsFormat = "american" } = req.query;
     if (!sport || !eventId) return res.status(400).json({ error: "Missing sport or eventId" });
 
-    const url =
-      `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(
-        eventId
-      )}/odds` +
-      `?apiKey=${API_KEY}&regions=${regions}&oddsFormat=${oddsFormat}` +
-      (markets ? `&markets=${markets}` : "");
+    // If no specific markets requested, get available markets first
+    let marketsToFetch = markets;
+    if (!markets) {
+      try {
+        const marketsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}`;
+        const marketsResp = await axios.get(marketsUrl);
+        
+        // Extract player prop markets (typically contain "player" in the key)
+        const playerPropMarkets = [];
+        if (marketsResp.data && marketsResp.data.bookmakers) {
+          marketsResp.data.bookmakers.forEach(book => {
+            if (book.markets) {
+              book.markets.forEach(market => {
+                if (market.includes('player') || market.includes('prop')) {
+                  playerPropMarkets.push(market);
+                }
+              });
+            }
+          });
+        }
+        
+        if (playerPropMarkets.length > 0) {
+          marketsToFetch = [...new Set(playerPropMarkets)].join(',');
+        }
+      } catch (marketsErr) {
+        console.warn("Failed to fetch available markets, using default player prop markets");
+        // Common player prop markets for different sports
+        const defaultPlayerProps = {
+          'americanfootball_nfl': 'player_pass_tds,player_pass_yds,player_rush_yds,player_receptions,player_reception_yds',
+          'basketball_nba': 'player_points,player_rebounds,player_assists,player_threes,player_blocks,player_steals',
+          'baseball_mlb': 'player_home_runs,player_hits,player_total_bases,player_rbis,player_runs_scored',
+          'icehockey_nhl': 'player_points,player_goals,player_assists,player_shots_on_goal'
+        };
+        marketsToFetch = defaultPlayerProps[sport] || '';
+      }
+    }
+
+    if (!marketsToFetch) {
+      return res.json({ message: "No player prop markets available for this event", bookmakers: [] });
+    }
+
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/odds?apiKey=${API_KEY}&regions=${regions}&oddsFormat=${oddsFormat}&markets=${marketsToFetch}`;
 
     const r = await axios.get(url);
     res.json(r.data);
   } catch (err) {
     const status = err?.response?.status || 500;
     console.error("player-props error:", status, err?.response?.data || err.message);
+    res.status(status).json({ error: String(err) });
+  }
+});
+
+// available markets for an event (useful for discovering player props)
+app.get("/api/event-markets", async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    const { sport, eventId, regions = "us" } = req.query;
+    if (!sport || !eventId) return res.status(400).json({ error: "Missing sport or eventId" });
+
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}`;
+    const r = await axios.get(url);
+    res.json(r.data);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    console.error("event-markets error:", status, err?.response?.data || err.message);
     res.status(status).json({ error: String(err) });
   }
 });

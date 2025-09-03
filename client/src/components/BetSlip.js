@@ -1,0 +1,599 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, Plus, Minus, Calculator, TrendingUp, AlertCircle, CheckCircle2, Zap, Target, DollarSign, Trophy, Share2, Download, Trash2, Copy, Eye, EyeOff } from 'lucide-react';
+import './BetSlip.css';
+
+const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClearAll, onPlaceBets }) => {
+  const [betAmounts, setBetAmounts] = useState({});
+  const [parlayAmount, setParlayAmount] = useState('');
+  const [betType, setBetType] = useState('single'); // 'single', 'parlay', 'round-robin'
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [quickBetAmount, setQuickBetAmount] = useState(25);
+  const [bankroll, setBankroll] = useState(1000);
+  const [riskTolerance, setRiskTolerance] = useState('moderate'); // 'conservative', 'moderate', 'aggressive'
+  const [autoCalculate, setAutoCalculate] = useState(true);
+
+  // Load saved settings
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('betslip_settings');
+      if (saved) {
+        const settings = JSON.parse(saved);
+        setBankroll(settings.bankroll || 1000);
+        setRiskTolerance(settings.riskTolerance || 'moderate');
+        setQuickBetAmount(settings.quickBetAmount || 25);
+        setAutoCalculate(settings.autoCalculate !== false);
+      }
+    } catch (e) {
+      console.warn('Failed to load bet slip settings:', e);
+    }
+  }, []);
+
+  // Save settings when they change
+  useEffect(() => {
+    try {
+      const settings = { bankroll, riskTolerance, quickBetAmount, autoCalculate };
+      localStorage.setItem('betslip_settings', JSON.stringify(settings));
+    } catch (e) {
+      console.warn('Failed to save bet slip settings:', e);
+    }
+  }, [bankroll, riskTolerance, quickBetAmount, autoCalculate]);
+
+  // Initialize bet amounts when bets change
+  useEffect(() => {
+    const newAmounts = { ...betAmounts };
+    bets.forEach(bet => {
+      if (!newAmounts[bet.id]) {
+        newAmounts[bet.id] = autoCalculate ? getRecommendedBet(bet) : '';
+      }
+    });
+    setBetAmounts(newAmounts);
+  }, [bets, autoCalculate]);
+
+  // Calculate recommended bet size based on Kelly Criterion and risk tolerance
+  const getRecommendedBet = (bet) => {
+    if (!bet.edge || bet.edge <= 0) return quickBetAmount;
+    
+    const edge = bet.edge / 100;
+    const odds = bet.americanOdds;
+    const prob = odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+    
+    // Kelly Criterion: f = (bp - q) / b
+    // where b = decimal odds - 1, p = probability, q = 1 - p
+    const b = odds > 0 ? odds / 100 : 100 / Math.abs(odds);
+    const kellyFraction = (b * prob - (1 - prob)) / b;
+    
+    // Adjust for risk tolerance
+    const riskMultiplier = {
+      conservative: 0.25,
+      moderate: 0.5,
+      aggressive: 0.75
+    }[riskTolerance];
+    
+    const recommendedFraction = Math.max(0, kellyFraction * riskMultiplier);
+    const recommendedAmount = Math.min(bankroll * recommendedFraction, bankroll * 0.05); // Cap at 5% of bankroll
+    
+    return Math.max(quickBetAmount, Math.round(recommendedAmount));
+  };
+
+  // Calculate parlay odds
+  const parlayCalculations = useMemo(() => {
+    if (bets.length < 2) return null;
+    
+    let combinedOdds = 1;
+    let totalEdge = 0;
+    let validBets = 0;
+    
+    bets.forEach(bet => {
+      const odds = bet.americanOdds;
+      const decimalOdds = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+      combinedOdds *= decimalOdds;
+      
+      if (bet.edge) {
+        totalEdge += bet.edge;
+        validBets++;
+      }
+    });
+    
+    const americanOdds = combinedOdds >= 2 
+      ? Math.round((combinedOdds - 1) * 100)
+      : Math.round(-100 / (combinedOdds - 1));
+    
+    const avgEdge = validBets > 0 ? totalEdge / validBets : 0;
+    const amount = parseFloat(parlayAmount) || 0;
+    const payout = amount * combinedOdds;
+    const profit = payout - amount;
+    
+    return {
+      odds: americanOdds,
+      combinedDecimal: combinedOdds,
+      avgEdge,
+      amount,
+      payout,
+      profit,
+      legs: bets.length
+    };
+  }, [bets, parlayAmount]);
+
+  // Calculate single bet totals
+  const singleBetTotals = useMemo(() => {
+    let totalStake = 0;
+    let totalPayout = 0;
+    let totalProfit = 0;
+    let totalEdge = 0;
+    let validEdges = 0;
+
+    bets.forEach(bet => {
+      const amount = parseFloat(betAmounts[bet.id]) || 0;
+      const odds = bet.americanOdds;
+      const decimalOdds = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+      
+      totalStake += amount;
+      const payout = amount * decimalOdds;
+      totalPayout += payout;
+      totalProfit += (payout - amount);
+      
+      if (bet.edge) {
+        totalEdge += bet.edge;
+        validEdges++;
+      }
+    });
+
+    return {
+      stake: totalStake,
+      payout: totalPayout,
+      profit: totalProfit,
+      avgEdge: validEdges > 0 ? totalEdge / validEdges : 0,
+      count: bets.length
+    };
+  }, [bets, betAmounts]);
+
+  const updateBetAmount = (betId, amount) => {
+    setBetAmounts(prev => ({
+      ...prev,
+      [betId]: amount
+    }));
+  };
+
+  const applyQuickBet = (betId) => {
+    updateBetAmount(betId, quickBetAmount);
+  };
+
+  const clearBetAmount = (betId) => {
+    updateBetAmount(betId, '');
+  };
+
+  const formatOdds = (odds) => {
+    return odds > 0 ? `+${odds}` : `${odds}`;
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const getEdgeColor = (edge) => {
+    if (!edge) return 'var(--text-muted)';
+    if (edge >= 5) return 'var(--success)';
+    if (edge >= 2) return 'var(--warning)';
+    return 'var(--danger)';
+  };
+
+  const handlePlaceBets = () => {
+    const betsToPlace = [];
+    
+    if (betType === 'single') {
+      bets.forEach(bet => {
+        const amount = parseFloat(betAmounts[bet.id]);
+        if (amount > 0) {
+          betsToPlace.push({
+            ...bet,
+            amount,
+            type: 'single'
+          });
+        }
+      });
+    } else if (betType === 'parlay' && parlayCalculations && parseFloat(parlayAmount) > 0) {
+      betsToPlace.push({
+        id: `parlay_${Date.now()}`,
+        type: 'parlay',
+        legs: bets,
+        amount: parseFloat(parlayAmount),
+        odds: parlayCalculations.odds,
+        payout: parlayCalculations.payout,
+        profit: parlayCalculations.profit
+      });
+    }
+    
+    if (betsToPlace.length > 0) {
+      onPlaceBets?.(betsToPlace);
+      // Clear the slip after placing bets
+      onClearAll?.();
+      setBetAmounts({});
+      setParlayAmount('');
+    }
+  };
+
+  const exportBets = () => {
+    const data = {
+      timestamp: new Date().toISOString(),
+      betType,
+      bets: bets.map(bet => ({
+        ...bet,
+        amount: betAmounts[bet.id] || 0
+      })),
+      parlayAmount: betType === 'parlay' ? parlayAmount : null,
+      totals: betType === 'single' ? singleBetTotals : parlayCalculations
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `betslip_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const shareBets = async () => {
+    const shareText = betType === 'single' 
+      ? `My bets: ${bets.length} selections, ${formatCurrency(singleBetTotals.stake)} total stake, ${formatCurrency(singleBetTotals.profit)} potential profit`
+      : `My parlay: ${bets.length} legs, ${formatCurrency(parlayCalculations?.amount || 0)} stake, ${formatOdds(parlayCalculations?.odds || 0)} odds`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'My Bet Slip',
+          text: shareText
+        });
+      } catch (e) {
+        // Fallback to clipboard
+        navigator.clipboard?.writeText(shareText);
+      }
+    } else {
+      navigator.clipboard?.writeText(shareText);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="betslip-overlay">
+      <div className="betslip-container">
+        <div className="betslip-header">
+          <div className="betslip-title">
+            <Trophy size={20} />
+            <span>Bet Slip</span>
+            <div className="bet-count">{bets.length}</div>
+          </div>
+          <div className="betslip-controls">
+            <button onClick={exportBets} className="control-btn" title="Export">
+              <Download size={16} />
+            </button>
+            <button onClick={shareBets} className="control-btn" title="Share">
+              <Share2 size={16} />
+            </button>
+            <button onClick={onClose} className="control-btn close-btn">
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {bets.length === 0 ? (
+          <div className="betslip-empty">
+            <div className="empty-icon">
+              <Target size={48} />
+            </div>
+            <h3>No Bets Selected</h3>
+            <p>Click on odds to add bets to your slip</p>
+          </div>
+        ) : (
+          <>
+            {/* Bet Type Selector */}
+            <div className="bet-type-selector">
+              <button 
+                className={`type-btn ${betType === 'single' ? 'active' : ''}`}
+                onClick={() => setBetType('single')}
+              >
+                Single Bets
+              </button>
+              <button 
+                className={`type-btn ${betType === 'parlay' ? 'active' : ''}`}
+                onClick={() => setBetType('parlay')}
+                disabled={bets.length < 2}
+              >
+                Parlay ({bets.length})
+              </button>
+            </div>
+
+            {/* Quick Settings */}
+            <div className="quick-settings">
+              <div className="quick-bet-controls">
+                <span className="setting-label">Quick Bet:</span>
+                <div className="amount-buttons">
+                  {[10, 25, 50, 100].map(amount => (
+                    <button
+                      key={amount}
+                      className={`amount-btn ${quickBetAmount === amount ? 'active' : ''}`}
+                      onClick={() => setQuickBetAmount(amount)}
+                    >
+                      ${amount}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button 
+                className="advanced-toggle"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                {showAdvanced ? <EyeOff size={14} /> : <Eye size={14} />}
+                Advanced
+              </button>
+            </div>
+
+            {/* Advanced Settings */}
+            {showAdvanced && (
+              <div className="advanced-settings">
+                <div className="setting-row">
+                  <label>Bankroll:</label>
+                  <input
+                    type="number"
+                    value={bankroll}
+                    onChange={(e) => setBankroll(Number(e.target.value))}
+                    className="setting-input"
+                  />
+                </div>
+                <div className="setting-row">
+                  <label>Risk Tolerance:</label>
+                  <select
+                    value={riskTolerance}
+                    onChange={(e) => setRiskTolerance(e.target.value)}
+                    className="setting-select"
+                  >
+                    <option value="conservative">Conservative</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="aggressive">Aggressive</option>
+                  </select>
+                </div>
+                <div className="setting-row">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={autoCalculate}
+                      onChange={(e) => setAutoCalculate(e.target.checked)}
+                    />
+                    Auto-calculate bet sizes
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Bet List */}
+            <div className="betslip-content">
+              {betType === 'single' ? (
+                <div className="single-bets">
+                  {bets.map(bet => (
+                    <div key={bet.id} className="bet-item">
+                      <div className="bet-header">
+                        <div className="bet-info">
+                          <div className="bet-matchup">{bet.matchup}</div>
+                          <div className="bet-selection">
+                            <span className="selection-text">{bet.selection}</span>
+                            <span className="selection-odds">{formatOdds(bet.americanOdds)}</span>
+                          </div>
+                          <div className="bet-details">
+                            <span className="bet-market">{bet.market}</span>
+                            {bet.edge && (
+                              <span 
+                                className="bet-edge"
+                                style={{ color: getEdgeColor(bet.edge) }}
+                              >
+                                {bet.edge > 0 ? '+' : ''}{bet.edge.toFixed(1)}% EV
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => onRemoveBet?.(bet.id)}
+                          className="remove-bet-btn"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                      
+                      <div className="bet-amount-section">
+                        <div className="amount-input-group">
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={betAmounts[bet.id] || ''}
+                            onChange={(e) => updateBetAmount(bet.id, e.target.value)}
+                            className="amount-input"
+                          />
+                          <div className="amount-controls">
+                            <button
+                              onClick={() => applyQuickBet(bet.id)}
+                              className="quick-apply-btn"
+                              title={`Apply $${quickBetAmount}`}
+                            >
+                              <Zap size={12} />
+                            </button>
+                            <button
+                              onClick={() => clearBetAmount(bet.id)}
+                              className="clear-amount-btn"
+                              title="Clear"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {betAmounts[bet.id] && parseFloat(betAmounts[bet.id]) > 0 && (
+                          <div className="bet-payout">
+                            <span>Payout: {formatCurrency(
+                              parseFloat(betAmounts[bet.id]) * 
+                              (bet.americanOdds > 0 ? (bet.americanOdds / 100) + 1 : (100 / Math.abs(bet.americanOdds)) + 1)
+                            )}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="parlay-section">
+                  <div className="parlay-legs">
+                    <h4>Parlay Legs ({bets.length})</h4>
+                    {bets.map((bet, index) => (
+                      <div key={bet.id} className="parlay-leg">
+                        <div className="leg-number">{index + 1}</div>
+                        <div className="leg-info">
+                          <div className="leg-matchup">{bet.matchup}</div>
+                          <div className="leg-selection">
+                            {bet.selection} {formatOdds(bet.americanOdds)}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => onRemoveBet?.(bet.id)}
+                          className="remove-leg-btn"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="parlay-bet-section">
+                    <div className="parlay-odds">
+                      <span className="odds-label">Parlay Odds:</span>
+                      <span className="odds-value">
+                        {parlayCalculations ? formatOdds(parlayCalculations.odds) : '--'}
+                      </span>
+                    </div>
+                    
+                    <div className="parlay-amount-input">
+                      <input
+                        type="number"
+                        placeholder="Enter bet amount"
+                        value={parlayAmount}
+                        onChange={(e) => setParlayAmount(e.target.value)}
+                        className="parlay-input"
+                      />
+                      <div className="quick-parlay-amounts">
+                        {[25, 50, 100, 200].map(amount => (
+                          <button
+                            key={amount}
+                            onClick={() => setParlayAmount(amount.toString())}
+                            className="quick-amount-btn"
+                          >
+                            ${amount}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {parlayCalculations && parlayCalculations.amount > 0 && (
+                      <div className="parlay-payout">
+                        <div className="payout-row">
+                          <span>Potential Payout:</span>
+                          <span className="payout-amount">
+                            {formatCurrency(parlayCalculations.payout)}
+                          </span>
+                        </div>
+                        <div className="payout-row profit">
+                          <span>Potential Profit:</span>
+                          <span className="profit-amount">
+                            {formatCurrency(parlayCalculations.profit)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Summary */}
+            <div className="betslip-summary">
+              {betType === 'single' ? (
+                <div className="single-summary">
+                  <div className="summary-row">
+                    <span>Total Stake:</span>
+                    <span className="summary-value">{formatCurrency(singleBetTotals.stake)}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Potential Payout:</span>
+                    <span className="summary-value">{formatCurrency(singleBetTotals.payout)}</span>
+                  </div>
+                  <div className="summary-row profit">
+                    <span>Potential Profit:</span>
+                    <span className="summary-value profit">
+                      {formatCurrency(singleBetTotals.profit)}
+                    </span>
+                  </div>
+                  {singleBetTotals.avgEdge !== 0 && (
+                    <div className="summary-row">
+                      <span>Avg Edge:</span>
+                      <span 
+                        className="summary-value"
+                        style={{ color: getEdgeColor(singleBetTotals.avgEdge) }}
+                      >
+                        {singleBetTotals.avgEdge > 0 ? '+' : ''}{singleBetTotals.avgEdge.toFixed(1)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                parlayCalculations && (
+                  <div className="parlay-summary">
+                    <div className="summary-row">
+                      <span>Parlay Stake:</span>
+                      <span className="summary-value">{formatCurrency(parlayCalculations.amount)}</span>
+                    </div>
+                    <div className="summary-row">
+                      <span>Potential Payout:</span>
+                      <span className="summary-value">{formatCurrency(parlayCalculations.payout)}</span>
+                    </div>
+                    <div className="summary-row profit">
+                      <span>Potential Profit:</span>
+                      <span className="summary-value profit">
+                        {formatCurrency(parlayCalculations.profit)}
+                      </span>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="betslip-actions">
+              <button
+                onClick={onClearAll}
+                className="clear-all-btn"
+              >
+                <Trash2 size={16} />
+                Clear All
+              </button>
+              <button
+                onClick={handlePlaceBets}
+                className="place-bets-btn"
+                disabled={
+                  betType === 'single' 
+                    ? singleBetTotals.stake === 0
+                    : !parlayCalculations || parlayCalculations.amount === 0
+                }
+              >
+                <CheckCircle2 size={16} />
+                Place {betType === 'single' ? `${singleBetTotals.count} Bets` : 'Parlay'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default BetSlip;

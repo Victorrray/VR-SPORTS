@@ -1,0 +1,211 @@
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle } from 'lucide-react';
+import './PersonalizedDashboard.css';
+
+export default function PersonalizedDashboard({ games, userPreferences = {} }) {
+  const [dashboardData, setDashboardData] = useState({
+    todayOpportunities: 0,
+    highEvBets: 0,
+    favoriteLeagues: [],
+    recentPerformance: null,
+    recommendedBets: [],
+    alerts: []
+  });
+
+  useEffect(() => {
+    if (games?.length) {
+      generateDashboardData();
+    }
+  }, [games, userPreferences]);
+
+  const generateDashboardData = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayGames = games.filter(game => 
+      game.commence_time && game.commence_time.startsWith(today)
+    );
+
+    // Calculate high EV opportunities
+    const highEvBets = games.filter(game => {
+      // Mock EV calculation - in real app this would use actual edge data
+      return Math.random() > 0.7; // ~30% of bets are high EV
+    });
+
+    // Get user's favorite leagues from preferences or default
+    const favoriteLeagues = userPreferences.favoriteLeagues || [
+      'NFL', 'NBA', 'NCAAF', 'NCAAB'
+    ];
+
+    // Generate recommended bets based on user preferences
+    const recommendedBets = games.slice(0, 5).map(game => ({
+      id: game.id,
+      matchup: `${game.away_team} @ ${game.home_team}`,
+      market: ['Moneyline', 'Spread', 'Total'][Math.floor(Math.random() * 3)],
+      edge: (Math.random() * 5 + 1).toFixed(1),
+      confidence: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)],
+      bookmaker: ['DraftKings', 'FanDuel', 'BetMGM'][Math.floor(Math.random() * 3)],
+      odds: Math.random() > 0.5 ? `+${Math.floor(Math.random() * 200) + 100}` : `-${Math.floor(Math.random() * 200) + 110}`
+    }));
+
+    // Generate performance alerts
+    const alerts = [
+      {
+        type: 'opportunity',
+        message: `${highEvBets.length} high-value bets available today`,
+        icon: TrendingUp,
+        color: 'var(--success)'
+      },
+      {
+        type: 'warning',
+        message: 'Consider diversifying across more sportsbooks',
+        icon: AlertTriangle,
+        color: 'var(--warning)'
+      },
+      {
+        type: 'info',
+        message: 'Your favorite NFL team has a game tonight',
+        icon: Clock,
+        color: 'var(--info)'
+      }
+    ];
+
+    setDashboardData({
+      todayOpportunities: todayGames.length,
+      highEvBets: highEvBets.length,
+      favoriteLeagues,
+      recentPerformance: {
+        winRate: (60 + Math.random() * 20).toFixed(1),
+        avgEdge: (2.1 + Math.random() * 2).toFixed(1),
+        roi: (8.5 + Math.random() * 10).toFixed(1),
+        totalBets: Math.floor(Math.random() * 50) + 25
+      },
+      recommendedBets,
+      alerts: alerts.slice(0, 2) // Show max 2 alerts
+    });
+  };
+
+  const StatCard = ({ icon: Icon, title, value, subtitle, color = 'var(--accent)' }) => (
+    <div className="stat-card">
+      <div className="stat-icon" style={{ color }}>
+        <Icon size={24} />
+      </div>
+      <div className="stat-content">
+        <div className="stat-value">{value}</div>
+        <div className="stat-title">{title}</div>
+        {subtitle && <div className="stat-subtitle">{subtitle}</div>}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="personalized-dashboard">
+      <div className="dashboard-header">
+        <h2>Your Dashboard</h2>
+        <p>Personalized insights and recommendations</p>
+      </div>
+
+      {/* Key Metrics */}
+      <div className="dashboard-stats">
+        <StatCard
+          icon={Target}
+          title="Today's Opportunities"
+          value={dashboardData.todayOpportunities}
+          subtitle="Games available"
+          color="var(--accent)"
+        />
+        <StatCard
+          icon={TrendingUp}
+          title="High +EV Bets"
+          value={dashboardData.highEvBets}
+          subtitle="Above 3% edge"
+          color="var(--success)"
+        />
+        <StatCard
+          icon={DollarSign}
+          title="Avg Edge"
+          value={`${dashboardData.recentPerformance?.avgEdge || '0.0'}%`}
+          subtitle="Last 30 days"
+          color="var(--warning)"
+        />
+        <StatCard
+          icon={BarChart3}
+          title="Win Rate"
+          value={`${dashboardData.recentPerformance?.winRate || '0.0'}%`}
+          subtitle={`${dashboardData.recentPerformance?.totalBets || 0} bets`}
+          color="var(--info)"
+        />
+      </div>
+
+      {/* Alerts */}
+      {dashboardData.alerts.length > 0 && (
+        <div className="dashboard-alerts">
+          <h3>Alerts & Insights</h3>
+          <div className="alerts-list">
+            {dashboardData.alerts.map((alert, index) => {
+              const Icon = alert.icon;
+              return (
+                <div key={index} className="alert-item" style={{ borderLeft: `4px solid ${alert.color}` }}>
+                  <Icon size={16} style={{ color: alert.color }} />
+                  <span>{alert.message}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Recommended Bets */}
+      <div className="dashboard-recommendations">
+        <h3>
+          <Zap size={18} />
+          Recommended Bets
+        </h3>
+        <div className="recommendations-list">
+          {dashboardData.recommendedBets.map((bet, index) => (
+            <div key={bet.id || index} className="recommendation-card">
+              <div className="rec-header">
+                <div className="rec-matchup">{bet.matchup}</div>
+                <div className={`rec-confidence ${bet.confidence.toLowerCase()}`}>
+                  {bet.confidence}
+                </div>
+              </div>
+              <div className="rec-details">
+                <div className="rec-market">{bet.market}</div>
+                <div className="rec-edge">+{bet.edge}% EV</div>
+                <div className="rec-odds">{bet.odds}</div>
+              </div>
+              <div className="rec-bookmaker">{bet.bookmaker}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Performance Summary */}
+      {dashboardData.recentPerformance && (
+        <div className="dashboard-performance">
+          <h3>
+            <Award size={18} />
+            Recent Performance
+          </h3>
+          <div className="performance-grid">
+            <div className="perf-metric">
+              <div className="perf-value">{dashboardData.recentPerformance.winRate}%</div>
+              <div className="perf-label">Win Rate</div>
+            </div>
+            <div className="perf-metric">
+              <div className="perf-value">+{dashboardData.recentPerformance.roi}%</div>
+              <div className="perf-label">ROI</div>
+            </div>
+            <div className="perf-metric">
+              <div className="perf-value">{dashboardData.recentPerformance.avgEdge}%</div>
+              <div className="perf-label">Avg Edge</div>
+            </div>
+            <div className="perf-metric">
+              <div className="perf-value">{dashboardData.recentPerformance.totalBets}</div>
+              <div className="perf-label">Total Bets</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -215,9 +215,53 @@ export default function OddsTable({
   evOnlyPositive = false,
   evMin = null,
   allCaps = false,
+  onAddBet = null,
+  betSlipCount = 0,
+  onOpenBetSlip = null,
 }) {
   
-  // My Picks functionality
+  // Bet Slip functionality
+  const addToBetSlip = (row, book, buttonElement) => {
+    if (!onAddBet) return;
+    
+    const odds = row.out.price || row.out.odds;
+    const americanOdds = typeof odds === 'string' ? parseInt(odds) : odds;
+    
+    // Calculate edge if available
+    const fairProb = consensusDevigProb(row);
+    const edge = fairProb ? calculateEV(americanOdds, decimalToAmerican(1 / fairProb)) : null;
+    
+    const bet = {
+      id: `${row.key}-${book?.bookmaker?.key || book?.book}-${Date.now()}`,
+      matchup: `${row.game.away_team} @ ${row.game.home_team}`,
+      selection: `${row.out.name}${row.out.point ? ` ${row.out.point}` : ''}`,
+      market: formatMarket(row.mkt?.key || ''),
+      americanOdds,
+      bookmaker: book?.bookmaker?.title || book?.title || 'Unknown',
+      sport: getSportLeague(row.game.sport_key).sport,
+      league: getSportLeague(row.game.sport_key).league,
+      edge: edge,
+      gameTime: row.game.commence_time,
+    };
+    
+    onAddBet(bet);
+    
+    // Show feedback
+    if (buttonElement) {
+      const originalText = buttonElement.textContent;
+      const originalBg = buttonElement.style.background;
+      buttonElement.textContent = 'Added!';
+      buttonElement.style.background = 'var(--success)';
+      buttonElement.style.fontSize = '10px';
+      setTimeout(() => {
+        buttonElement.textContent = originalText;
+        buttonElement.style.background = originalBg;
+        buttonElement.style.fontSize = '';
+      }, 1500);
+    }
+  };
+
+  // Legacy My Picks functionality (keeping for backward compatibility)
   const addToPicks = (row, book, isHome, buttonElement) => {
     const existingPicks = JSON.parse(localStorage.getItem('oss_my_picks_v1') || '[]');
     
@@ -342,9 +386,12 @@ export default function OddsTable({
         });
         if (!allMarketOutcomes.length) return;
 
-        const candidates = allMarketOutcomes.filter(o =>
-          !bookFilter.length || bookFilter.includes((o.bookmaker?.key || "").toLowerCase())
-        );
+        const candidates = allMarketOutcomes.filter(o => {
+          // If no bookFilter specified, include all bookmakers
+          if (!bookFilter || !bookFilter.length) return true;
+          // Otherwise, check if bookmaker key is in the filter list
+          return bookFilter.includes((o.bookmaker?.key || "").toLowerCase());
+        });
         if (!candidates.length) return;
 
         if (mktKey === 'h2h') {
@@ -548,7 +595,49 @@ export default function OddsTable({
               <span className="sort-label">Odds <span className="sort-indicator">{sort.key==='odds'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
             </th>
             <th>De-Vig</th>
-            <th></th>
+            <th>
+              {onAddBet && (
+                <button
+                  className="bet-slip-header-btn"
+                  onClick={onOpenBetSlip}
+                  title="Open Bet Slip"
+                  style={{
+                    background: betSlipCount > 0 ? 'var(--accent)' : '#334155',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '6px 10px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  🎫 Slip
+                  {betSlipCount > 0 && (
+                    <span
+                      style={{
+                        background: '#ef4444',
+                        color: '#fff',
+                        borderRadius: '50%',
+                        width: '18px',
+                        height: '18px',
+                        fontSize: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: '700'
+                      }}
+                    >
+                      {betSlipCount}
+                    </span>
+                  )}
+                </button>
+              )}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -810,9 +899,13 @@ export default function OddsTable({
                                     className="add-pick-btn"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      addToPicks(row, ob, true, e.target);
+                                      if (onAddBet) {
+                                        addToBetSlip(row, ob, e.target);
+                                      } else {
+                                        addToPicks(row, ob, true, e.target);
+                                      }
                                     }}
-                                    title="Add to My Picks"
+                                    title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
                                   >
                                     +
                                   </button>

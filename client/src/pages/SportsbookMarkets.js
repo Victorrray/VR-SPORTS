@@ -3,6 +3,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import MobileBottomBar from "../components/MobileBottomBar";
 import MobileFiltersSheet from "../components/MobileFiltersSheet";
+import { useBetSlip } from "../contexts/BetSlipContext";
+import BetSlip from "../components/BetSlip";
+import PersonalizedDashboard from "../components/PersonalizedDashboard";
+import EdgeCalculator from "../components/EdgeCalculator";
+import AlertSystem from "../components/AlertSystem";
 
 // ⬇️ Adjust these paths if needed
 import SportMultiSelect from "../components/SportMultiSelect";
@@ -305,6 +310,7 @@ const ALLOWED_BOOKS = new Set(
 
 export default function SportsbookMarkets() {
   const location = useLocation();
+  const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
   const [sportList, setSportList] = useState([]);
   const [picked, setPicked] = useState(["americanfootball_nfl", "americanfootball_ncaaf"]);
   const [query, setQuery] = useState("");
@@ -322,11 +328,113 @@ export default function SportsbookMarkets() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [minEV, setMinEV] = useState("");
   const [refreshTick, setRefreshTick] = useState(0);
+  const [activePreset, setActivePreset] = useState(null);
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
+
+  // Smart filter presets
+  const filterPresets = [
+    {
+      id: 'high-ev',
+      name: 'High +EV',
+      icon: '🔥',
+      description: 'Bets with 3%+ edge',
+      filters: {
+        minEV: '3',
+        sports: ['americanfootball_nfl', 'basketball_nba'],
+        markets: ['h2h', 'spreads'],
+        books: ['draftkings', 'fanduel', 'fanatics']
+      }
+    },
+    {
+      id: 'nfl-sunday',
+      name: 'NFL Sunday',
+      icon: '🏈',
+      description: 'NFL games this week',
+      filters: {
+        sports: ['americanfootball_nfl'],
+        markets: ['h2h', 'spreads', 'totals'],
+        date: 'thisweek',
+        books: ['draftkings', 'fanduel', 'fanatics', 'bovada']
+      }
+    },
+    {
+      id: 'live-games',
+      name: 'Live Games',
+      icon: '🔴',
+      description: 'Games happening now',
+      filters: {
+        date: 'today',
+        markets: ['h2h', 'spreads'],
+        minEV: '1'
+      }
+    },
+    {
+      id: 'college-basketball',
+      name: 'March Madness',
+      icon: '🏀',
+      description: 'College basketball action',
+      filters: {
+        sports: ['basketball_ncaab'],
+        markets: ['h2h', 'spreads', 'totals'],
+        minEV: '2'
+      }
+    },
+    {
+      id: 'safe-bets',
+      name: 'Safe Picks',
+      icon: '🛡️',
+      description: 'Lower risk, positive EV',
+      filters: {
+        minEV: '1.5',
+        markets: ['h2h'],
+        books: ['draftkings', 'fanduel', 'fanatics', 'betmgm']
+      }
+    }
+  ];
 
   const [oddsFormat, setOddsFormat] = useState(() => {
     if (typeof window === "undefined") return "american";
     return localStorage.getItem("oddsFormat") || "american";
   });
+
+  // Apply filter preset
+  const applyPreset = (preset) => {
+    const { filters } = preset;
+    
+    // Apply minEV filter
+    if (filters.minEV) setMinEV(filters.minEV);
+    
+    // Apply sports filter
+    if (filters.sports) setPicked(filters.sports);
+    
+    // Apply markets filter
+    if (filters.markets) setMarketKeys(filters.markets);
+    
+    // Apply books filter
+    if (filters.books) {
+      const availableKeys = new Set(bookList.map((b) => b.key));
+      const validBooks = filters.books.filter(book => availableKeys.has(book));
+      setSelectedBooks(validBooks);
+    }
+    
+    // Apply date filter
+    if (filters.date) {
+      const today = new Date();
+      if (filters.date === 'today') {
+        setSelectedDate(today.toISOString().split('T')[0]);
+      } else if (filters.date === 'thisweek') {
+        // Get next Sunday
+        const nextSunday = new Date(today);
+        nextSunday.setDate(today.getDate() + (7 - today.getDay()));
+        setSelectedDate(nextSunday.toISOString().split('T')[0]);
+      }
+    }
+    
+    setActivePreset(preset.id);
+    setTableNonce(n => n + 1);
+    setRefreshTick(Date.now());
+  };
 
   // ✅ Debounce defined ONCE
   const debouncedQuery = useDebounce(query, 300);
@@ -413,7 +521,7 @@ export default function SportsbookMarkets() {
     return Array.from(set).sort();
   }, [games]);
 
-  const BASE_URL = process.env.REACT_APP_API_URL || ""; // keep CRA-style env; change to import.meta.env for Vite
+  const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:10000"; // keep CRA-style env; change to import.meta.env for Vite
 
   // Fetch sport list (defensive against non-array errors), map to friendly titles
   useEffect(() => {
@@ -498,6 +606,7 @@ export default function SportsbookMarkets() {
   const availableBookKeys = useMemo(() => new Set((bookList || []).map((b) => b.key)), [bookList]);
   const effectiveSelectedBooks = useMemo(() => {
     const filtered = (selectedBooks || []).filter((k) => availableBookKeys.has(k));
+    // If no books are selected or available, return empty array to show all books
     return filtered.length ? filtered : [];
   }, [selectedBooks, availableBookKeys]);
 
@@ -511,8 +620,8 @@ export default function SportsbookMarkets() {
     if (intersect.length) {
       if (intersect.length !== selectedBooks.length) setSelectedBooks(intersect);
     } else {
-      const prefer = PREFERRED_BOOK_KEYS.filter((k) => availableKeys.has(k));
-      setSelectedBooks(prefer.length ? prefer : booksArr.map((b) => b.key));
+      // Don't auto-select books - let user choose
+      setSelectedBooks([]);
     }
     // eslint-disable-next-line
   }, [bookList]);
@@ -609,30 +718,66 @@ export default function SportsbookMarkets() {
             <div className="filter-group">
               <span className="filter-label">Search</span>
               <input
-                placeholder={"Search team / league"}
+                placeholder="Search team / league"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
 
-            <div className="filter-group">
-              <span className="filter-label">Date</span>
-              <DatePicker
-                value={selectedDate}
-                onChange={setSelectedDate}
-                placeholder="All Dates"
-              />
-            </div>
-
-            <div className="filter-group">
-              <span className="filter-label">Sports</span>
-              <SportMultiSelect
-                list={sportList}
-                selected={picked}
-                onChange={setPicked}
-                placeholderText="Choose sports…"
-                allLabel="All Sports"
-              />
+            {/* Smart Filter Presets */}
+            <div className="filter-presets" style={{ marginBottom: '16px' }}>
+              <div className="presets-scroll" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {filterPresets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    className={`preset-btn ${activePreset === preset.id ? 'active' : ''}`}
+                    onClick={() => applyPreset(preset)}
+                    title={preset.description}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: activePreset === preset.id ? '2px solid var(--accent)' : '1px solid #334155',
+                      background: activePreset === preset.id ? 'var(--accent)' : '#1e293b',
+                      color: '#fff',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <span className="preset-icon">{preset.icon}</span>
+                    <span className="preset-name">{preset.name}</span>
+                  </button>
+                ))}
+                <button
+                  className={`preset-btn clear ${activePreset === null ? 'active' : ''}`}
+                  onClick={() => {
+                    resetFilters();
+                    setActivePreset(null);
+                  }}
+                  title="Clear all filters"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: activePreset === null ? '2px solid #ef4444' : '1px solid #334155',
+                    background: activePreset === null ? '#ef4444' : '#1e293b',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span className="preset-icon">🔄</span>
+                  <span className="preset-name">Clear</span>
+                </button>
+              </div>
             </div>
 
             <div className="filter-group">
@@ -690,25 +835,78 @@ export default function SportsbookMarkets() {
         </aside>
 
         <section className="table-area">
-          <OddsTable
-            key={tableNonce}
-            games={filteredGames}
-            pageSize={15}
-            mode={"game"}
-            bookFilter={effectiveSelectedBooks}
-            marketFilter={marketKeys}
-            evMin={minEV === "" ? null : Number(minEV)}
-            loading={loading}
-            error={error}
-            oddsFormat={oddsFormat}
-            allCaps={
-              typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
-            }
-          />
+          {/* Header with Tools */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>
+              {showDashboard ? 'Your Dashboard' : 'Betting Opportunities'}
+            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <AlertSystem games={filteredGames} />
+              <button
+                onClick={() => setShowEdgeCalculator(true)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--card-bg)',
+                  color: 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                title="Open Edge Calculator"
+              >
+                🧮 Calculator
+              </button>
+              <button
+                onClick={() => setShowDashboard(!showDashboard)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                  background: showDashboard ? 'var(--accent)' : 'var(--card-bg)',
+                  color: showDashboard ? '#fff' : 'var(--text-primary)',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {showDashboard ? '📊 View Odds' : '🏠 Dashboard'}
+              </button>
+            </div>
+          </div>
+
+          {showDashboard ? (
+            <PersonalizedDashboard games={filteredGames} />
+          ) : (
+            <OddsTable
+              key={tableNonce}
+              games={filteredGames}
+              pageSize={15}
+              mode={"game"}
+              bookFilter={effectiveSelectedBooks}
+              marketFilter={marketKeys}
+              evMin={minEV === "" ? null : Number(minEV)}
+              loading={loading}
+              error={error}
+              oddsFormat={oddsFormat}
+              allCaps={
+                typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
+              }
+              onAddBet={addBet}
+              betSlipCount={bets.length}
+              onOpenBetSlip={openBetSlip}
+            />
+          )}
         </section>
 
         {/* Mobile footer nav + filter pill */}
-        <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" />
+        <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
         <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
           <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
             <div className="filter-group">
@@ -756,8 +954,10 @@ export default function SportsbookMarkets() {
                     }
                   });
                   
+                  // Force re-fetch with current filter settings
+                  setTableNonce(n => n + 1);
                   setRefreshTick(Date.now());
-                  setTimeout(() => setMobileFiltersOpen(false), 50);
+                  setTimeout(() => setMobileFiltersOpen(false), 100);
                 }}
               >
                 Apply Filters
@@ -776,7 +976,7 @@ export default function SportsbookMarkets() {
                   });
                   
                   resetFilters();
-                  setTimeout(() => setMobileFiltersOpen(false), 50);
+                  setTimeout(() => setMobileFiltersOpen(false), 100);
                 }}
               >
                 Reset All
@@ -784,6 +984,22 @@ export default function SportsbookMarkets() {
             </div>
           </div>
         </MobileFiltersSheet>
+        
+        {/* BetSlip Component */}
+        <BetSlip
+          isOpen={isOpen}
+          onClose={closeBetSlip}
+          bets={bets}
+          onUpdateBet={updateBet}
+          onRemoveBet={removeBet}
+          onClearAll={clearAllBets}
+          onPlaceBets={placeBets}
+        />
+
+        {/* Edge Calculator Modal */}
+        {showEdgeCalculator && (
+          <EdgeCalculator onClose={() => setShowEdgeCalculator(false)} />
+        )}
       </div>
     </main>
   );
@@ -797,10 +1013,8 @@ export default function SportsbookMarkets() {
     const DEFAULT_SPORTS = ["americanfootball_nfl", "americanfootball_ncaaf"];
     setPicked(DEFAULT_SPORTS);
 
-    const availableKeys = new Set(bookList.map((b) => b.key));
-    const preferredAvail = ["draftkings","fanduel","fanatics","fanatics_sportsbook","bovada","fliff","fliff_sportsbook"]
-      .filter((k) => availableKeys.has(k));
-    setSelectedBooks(preferredAvail.length ? preferredAvail : []);
+    // Reset to no books selected (show all)
+    setSelectedBooks([]);
     setTableNonce((n) => n + 1);
     setRefreshTick(Date.now());
   }

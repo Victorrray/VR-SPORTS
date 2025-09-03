@@ -1895,6 +1895,156 @@
   .td:nth-child(4) { display: none; } /* Hide edge column on tablet */
 }
 
+@media (max-width: 768px) {
+  .landingContainer {
+    padding: 1em var(--mobile-gutter-left) 6em var(--mobile-gutter-right); /* Account for bottom bar and safe areas */
+    gap: 2.5em;
+  }
+
+  .heroSection {
+    text-align: center;
+    padding: 1em 0;
+  }
+
+  .heroTitle {
+    font-size: clamp(2em, 5vw, 2.5em);
+    line-height: 1.1;
+    margin-bottom: 0.5em;
+  }
+
+  .heroSubtitle {
+    font-size: clamp(1em, 3vw, 1.2em);
+    margin-bottom: 1.5em;
+  }
+
+  .valuePills {
+    flex-direction: column;
+    gap: 0.75em;
+  }
+
+  .valuePill {
+    padding: 0.875em 1.25em;
+    font-size: 0.9em;
+    min-height: 44px; /* Touch target */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quickActions {
+    grid-template-columns: 1fr;
+    gap: 1em;
+  }
+
+  .actionCard {
+    padding: 1.5em;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .actionCard h3 {
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+  }
+
+  .actionCard p {
+    font-size: 0.9em;
+    margin-bottom: 1em;
+    flex-grow: 1;
+  }
+
+  .actionBtn {
+    min-height: 44px;
+    font-size: 0.9em;
+    border-radius: 12px;
+  }
+
+  .performanceDashboard {
+    padding: 1.5em;
+    border-radius: 16px;
+  }
+
+  .performanceGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+
+  .performanceCard {
+    padding: 1.25em;
+    border-radius: 12px;
+  }
+
+  .performanceValue {
+    font-size: clamp(1.6em, 4vw, 2em);
+  }
+
+  .performanceLabel {
+    font-size: 0.8em;
+  }
+
+  .testimonials {
+    padding: 1.5em;
+  }
+
+  .testimonialCard {
+    padding: 1.5em;
+    border-radius: 16px;
+    min-height: 140px;
+  }
+
+  .testimonialText {
+    font-size: 0.95em;
+    margin-bottom: 1em;
+    line-height: 1.5;
+  }
+
+  .testimonialAuthor {
+    font-size: 0.85em;
+  }
+
+  .finalCta {
+    padding: 2.5em 1.5em;
+    border-radius: 20px;
+    margin-bottom: 2em;
+  }
+
+  .finalCtaTitle {
+    font-size: clamp(1.6em, 4vw, 2em);
+    margin-bottom: 0.75em;
+  }
+
+  .benefitsList {
+    margin: 1.5em 0;
+  }
+
+  .benefitsList li {
+    font-size: 0.95em;
+    margin-bottom: 0.75em;
+    padding: 0.5em 0;
+  }
+
+  .ctaButton {
+    min-height: 52px;
+    font-size: 1em;
+    border-radius: 16px;
+    font-weight: 600;
+  }
+
+  /* Enhanced touch targets */
+  button, .btn, .actionBtn, .ctaButton {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Improved scrolling */
+  .landingContainer {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
 @media (max-width: 640px) and (min-width: 431px) {
   .container {
     padding: 0.5em 0 1.5em 0;

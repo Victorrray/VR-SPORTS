@@ -59,8 +59,8 @@ export default function useMarkets({
           throw new Error('Rate limit exceeded. Please wait before making more requests.');
         }
 
-        const url = `${baseUrl}/api/odds?sports=${sports.join(",")}&regions=${regions.join(",")}&markets=${marketsParam.join(",")}`;
-        const resp = await secureFetch(url);
+        const url = `${baseUrl}/api/odds?sports=${sports.join(",")}&regions=${regions}&markets=${marketsParam}`;
+        const resp = await fetch(url);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
         return await resp.json();
       }, 180000); // 3 minute cache for odds data
@@ -95,20 +95,20 @@ export default function useMarkets({
       const booksArr = Array.from(seen.values()).sort((a, b) => a.title.localeCompare(b.title));
       setBooks(booksArr);
     } catch (e) {
-      console.error("Markets API Error:", e);
+      console.error("Markets API Error:", e?.message || e);
       
       // Enhanced error handling with specific error types
       let errorMessage = "Failed to load odds data";
       
-      if (e.name === 'TypeError' && e.message.includes('fetch')) {
+      if (e?.name === 'TypeError' && e?.message?.includes('fetch')) {
         errorMessage = "Network error - please check your connection";
-      } else if (e.message?.includes('429')) {
+      } else if (e?.message?.includes('429')) {
         errorMessage = "Rate limit exceeded - please wait a moment";
-      } else if (e.message?.includes('401') || e.message?.includes('403')) {
+      } else if (e?.message?.includes('401') || e?.message?.includes('403')) {
         errorMessage = "Authentication error - please refresh the page";
-      } else if (e.message?.includes('500')) {
+      } else if (e?.message?.includes('500')) {
         errorMessage = "Server error - our team has been notified";
-      } else if (e.message) {
+      } else if (e?.message) {
         errorMessage = e.message;
       }
       

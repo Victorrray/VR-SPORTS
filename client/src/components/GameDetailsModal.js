@@ -83,7 +83,8 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
       const awayRecord = generateTeamRecord(game.away_team, false);
       const homeRecord = generateTeamRecord(game.home_team, true);
 
-      const mockDetails = {
+      // Use actual game data when available, fallback to mock data
+      const gameDetails = {
         venue,
         weather: game.sport_key?.includes('nfl') ? {
           temperature: `${Math.floor(Math.random() * 40) + 40}°F`,
@@ -100,13 +101,13 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
           [game.away_team || "Away Team"]: {
             record: `${awayRecord.wins}-${awayRecord.losses}`,
             streak: awayRecord.streak,
-            lastGame: `${awayRecord.streak.startsWith('W') ? 'W' : 'L'} ${Math.floor(Math.random() * 50) + 80}-${Math.floor(Math.random() * 50) + 70} vs ${game.home_team || "Opponent"}`,
+            score: game.scores?.find(s => s.name === game.away_team)?.score || null,
             injuries: Math.random() > 0.3 ? ["Player A (Questionable)", "Player B (Out)"] : []
           },
           [game.home_team || "Home Team"]: {
             record: `${homeRecord.wins}-${homeRecord.losses}`, 
             streak: homeRecord.streak,
-            lastGame: `${homeRecord.streak.startsWith('W') ? 'W' : 'L'} ${Math.floor(Math.random() * 50) + 85}-${Math.floor(Math.random() * 50) + 75} vs ${game.away_team || "Opponent"}`,
+            score: game.scores?.find(s => s.name === game.home_team)?.score || null,
             injuries: Math.random() > 0.5 ? ["Player C (Probable)"] : []
           }
         },
@@ -120,16 +121,20 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
           { name: "Key Player", team: game.home_team || "Home Team", stats: `${(Math.random() * 15 + 18).toFixed(1)} PPG, ${(Math.random() * 5 + 6).toFixed(1)} RPG, ${(Math.random() * 5 + 4).toFixed(1)} APG` }
         ],
         predictions: {
-          spread: game.odds?.spread || `${Math.random() > 0.5 ? '-' : '+'}${(Math.random() * 10 + 1).toFixed(1)}`,
-          total: game.odds?.overUnder || (Math.random() * 50 + 200).toFixed(1),
+          spread: game.bookmakers?.[0]?.markets?.find(m => m.key === 'spreads')?.outcomes?.[0]?.point || `${Math.random() > 0.5 ? '-' : '+'}${(Math.random() * 10 + 1).toFixed(1)}`,
+          total: game.bookmakers?.[0]?.markets?.find(m => m.key === 'totals')?.outcomes?.[0]?.point || (Math.random() * 50 + 200).toFixed(1),
           moneyline: { 
-            away: `+${Math.floor(Math.random() * 200) + 110}`, 
-            home: `-${Math.floor(Math.random() * 200) + 120}` 
+            away: game.bookmakers?.[0]?.markets?.find(m => m.key === 'h2h')?.outcomes?.find(o => o.name === game.away_team)?.price || `+${Math.floor(Math.random() * 200) + 110}`, 
+            home: game.bookmakers?.[0]?.markets?.find(m => m.key === 'h2h')?.outcomes?.find(o => o.name === game.home_team)?.price || `-${Math.floor(Math.random() * 200) + 120}` 
           }
-        }
+        },
+        // Add actual game status and period information
+        gameStatus: game.completed ? 'Final' : (game.scores ? 'Live' : 'Scheduled'),
+        period: game.last_update ? new Date(game.last_update).toLocaleTimeString() : null,
+        actualScores: game.scores || null
       };
       
-      setGameDetails(mockDetails);
+      setGameDetails(gameDetails);
     } catch (error) {
       console.error('Error fetching game details:', error);
     } finally {
@@ -168,17 +173,35 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                   <div className="team-info">
                     <h3>{game.away_team}</h3>
                     <span className="team-record">{gameDetails.teamStats[game.away_team]?.record}</span>
+                    {gameDetails.actualScores && (
+                      <span className="team-score">{gameDetails.teamStats[game.away_team]?.score}</span>
+                    )}
                   </div>
-                  <div className="vs-divider">@</div>
+                  <div className="vs-divider">
+                    {gameDetails.actualScores ? (
+                      <span className="game-status">{gameDetails.gameStatus}</span>
+                    ) : (
+                      "@"
+                    )}
+                  </div>
                   <div className="team-info">
                     <h3>{game.home_team}</h3>
                     <span className="team-record">{gameDetails.teamStats[game.home_team]?.record}</span>
+                    {gameDetails.actualScores && (
+                      <span className="team-score">{gameDetails.teamStats[game.home_team]?.score}</span>
+                    )}
                   </div>
                 </div>
                 
                 <div className="game-time">
                   <Clock size={16} />
-                  <span>{new Date(game.commence_time).toLocaleString()}</span>
+                  <span>
+                    {gameDetails.actualScores ? (
+                      `${gameDetails.gameStatus}${gameDetails.period ? ` - ${gameDetails.period}` : ''}`
+                    ) : (
+                      new Date(game.commence_time).toLocaleString()
+                    )}
+                  </span>
                 </div>
               </div>
 

@@ -42,12 +42,16 @@
   justify-content: center;
   gap: 8px;
   margin-bottom: 4px;
-  border-radius: 20px;
+  border-radius: 24px;
   border: 1px solid var(--mobile-primary);
   background: linear-gradient(135deg, var(--mobile-primary) 0%, var(--mobile-primary-light) 100%);
   color: white;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 12px 20px;
+  touch-action: manipulation;
+  transition: all 0.2s ease;
   padding: 10px 16px;
   cursor: pointer;
   transition: all 0.3s ease;

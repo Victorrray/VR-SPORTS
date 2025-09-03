@@ -4,6 +4,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AccessibilityProvider } from './components/AccessibilityProvider';
+import { BetSlipProvider } from './contexts/BetSlipContext';
 import Navbar from './components/Navbar';
 import MobileBottomBar from './components/MobileBottomBar';
 import Footer from './components/Footer';
@@ -69,8 +70,7 @@ function AppRoutes() {
           <UsernameSetup onComplete={() => setShowUsernameSetup(false)} />
         )}
         
-        {/* Show bottom bar only for authenticated users */}
-        {user && <MobileBottomBar />}
+        {/* Mobile bottom bar is handled by individual pages */}
       </div>
     </React.Suspense>
   );
@@ -92,11 +92,13 @@ export default function App() {
   
   return (
     <AuthProvider>
-      <AccessibilityProvider>
-        <ErrorBoundary>
-          <AppRoutes />
-        </ErrorBoundary>
-      </AccessibilityProvider>
+      <BetSlipProvider>
+        <AccessibilityProvider>
+          <ErrorBoundary>
+            <AppRoutes />
+          </ErrorBoundary>
+        </AccessibilityProvider>
+      </BetSlipProvider>
     </AuthProvider>
   );
 }
