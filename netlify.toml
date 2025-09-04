@@ -8,7 +8,7 @@
   REACT_APP_API_URL = ""
 
 [[functions]]
-  directory = "server/netlify-functions"
+  directory = "server"
   node_bundler = "esbuild"
 
 [functions]
@@ -16,7 +16,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/index/:splat"
+  to = "/.netlify/functions/index.netlify/:splat"
   status = 200
 
 [[redirects]]
