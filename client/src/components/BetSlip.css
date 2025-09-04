@@ -835,3 +835,79 @@
     background: #000;
   }
 }
+
+/* Validation Styles */
+.bankroll-percentage {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.validation-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #ef4444;
+}
+
+.validation-warning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 4px;
+  font-size: 11px;
+  color: #f59e0b;
+}
+
+.validation-errors {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.probability-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ev-value {
+  font-weight: 600;
+}
+
+.payout-row.probability {
+  border-top: 1px solid var(--glass-border);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.payout-row.ev {
+  font-weight: 600;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .betslip-container {
+    border: 2px solid #fff;
+    background: #000;
+  }
+  
+  .bet-item {
+    border: 1px solid #fff;
+  }
+  
+  .place-bets-btn {
+    background: #00ff00;
+    color: #000;
+  }
+}

@@ -14,7 +14,7 @@ import SportMultiSelect from "../components/SportMultiSelect";
 import DatePicker from "../components/DatePicker";
 import OddsTable from "../components/OddsTable";
 import useDebounce from "../hooks/useDebounce";
-import useMarkets from "../hooks/useMarkets";
+import { useMarkets } from '../hooks/useMarkets';
 
 // Import getSportLeague function
 function getSportLeague(sportKey='', sportTitle=''){
@@ -151,8 +151,6 @@ const SPORT_MARKETS = {
   boxing_boxing: ["h2h"],
 };
 
-// DFS apps to exclude when showing sportsbooks
-const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
 
 // Map API sport keys to common short names
 const FRIENDLY_TITLES = {
@@ -195,96 +193,6 @@ const FEATURED_SPORTS = new Set([
   "boxing_boxing",
 ]);
 
-// Friendly bookmaker titles (if you render them elsewhere)
-const BOOK_TITLES = {
-  draftkings: "DraftKings",
-  fanduel: "FanDuel",
-  betmgm: "BetMGM",
-  caesars: "Caesars",
-  bet365: "Bet365",
-  pointsbetus: "PointsBet (US)",
-  fanatics: "Fanatics Sportsbook",
-  fanatics_sportsbook: "Fanatics Sportsbook",
-  espnbet: "ESPN BET",
-  betrivers: "BetRivers",
-  sugarhouse: "SugarHouse",
-  unibet_us: "Unibet (US)",
-  betparx: "betPARX",
-  betway: "Betway",
-  si_sportsbook: "SI Sportsbook",
-  betfred: "Betfred",
-  superbook: "SuperBook",
-  circasports: "Circa Sports",
-  hardrockbet: "Hard Rock Bet",
-  wynnbet: "WynnBET",
-  barstool: "Barstool",
-  foxbet: "FOX Bet",
-  fliff: "Fliff",
-  fliff_sportsbook: "Fliff",
-  ballybet: "Bally Bet",
-  betanysports: "BetAnySports",
-  rebet: "ReBet",
-  windcreek: "Wind Creek (Betfred PA)",
-  betopenly: "BetOpenly",
-  novig: "Novig",
-  prophetx: "ProphetX",
-  pinnacle: "Pinnacle",
-  betonlineag: "BetOnline.ag",
-  betus: "BetUS",
-  bovada: "Bovada",
-  williamhill_us: "Caesars",
-  lowvig: "LowVig.ag",
-  mybookieag: "MyBookie.ag",
-  sport888: "888sport",
-  betfair_ex_uk: "Betfair Exchange (UK)",
-  betfair_sb_uk: "Betfair Sportsbook (UK)",
-  betvictor: "BetVictor",
-  boylesports: "BoyleSports",
-  casumo: "Casumo",
-  coral: "Coral",
-  grosvenor: "Grosvenor",
-  ladbrokes_uk: "Ladbrokes",
-  leovegas: "LeoVegas",
-  livescorebet: "LiveScore Bet",
-  matchbook: "Matchbook",
-  paddypower: "Paddy Power",
-  skybet: "Sky Bet",
-  smarkets: "Smarkets",
-  unibet_uk: "Unibet (UK)",
-  virginbet: "Virgin Bet",
-  williamhill: "William Hill",
-  onexbet: "1xBet",
-  betclic_fr: "Betclic (FR)",
-  betfair_ex_eu: "Betfair Exchange (EU)",
-  betsson: "Betsson",
-  coolbet: "Coolbet",
-  everygame: "Everygame",
-  gtbets: "GTBets",
-  marathonbet: "Marathon Bet",
-  nordicbet: "NordicBet",
-  parionssport_fr: "Parions Sport (FR)",
-  suprabets: "Suprabets",
-  tipico_de: "Tipico (DE)",
-  unibet_fr: "Unibet (FR)",
-  unibet_it: "Unibet (IT)",
-  unibet_nl: "Unibet (NL)",
-  winamax_de: "Winamax (DE)",
-  winamax_fr: "Winamax (FR)",
-  betfair_ex_au: "Betfair Exchange (AU)",
-  betr_au: "Betr (AU)",
-  betright: "Bet Right",
-  bet365_au: "Bet365 AU",
-  boombet: "BoomBet",
-  dabble_au: "Dabble AU",
-  ladbrokes_au: "Ladbrokes AU",
-  neds: "Neds",
-  playup: "PlayUp",
-  pointsbetau: "PointsBet AU",
-  sportsbet: "SportsBet",
-  tab: "TAB",
-  tabtouch: "TABtouch",
-  unibet: "Unibet",
-};
 
 // Limit sportsbook universe: keep US books, Pinnacle, and US exchanges
 const ALLOWED_BOOKS = new Set(
@@ -297,6 +205,8 @@ const ALLOWED_BOOKS = new Set(
     "bovada","betonlineag","betus","mybookieag","lowvig","betanysports","fliff","fliff_sportsbook",
     // Exchanges and peer-to-peer (US)
     "betopenly","novig","prophetx","rebet",
+    // DFS books for player props
+    "prizepicks","underdog","draftkings_pick6",
     // Explicitly include Pinnacle for reference pricing
     "pinnacle",
     // If present in feed, allow explicit US exchange key
@@ -318,123 +228,50 @@ export default function SportsbookMarkets() {
   const [bookList, setBookList] = useState([]);
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [tableNonce, setTableNonce] = useState(0);
-  const [quota, setQuota] = useState({ remain: "–", used: "–" });
   const [loading, setLoad] = useState(false);
   const [error, setErr] = useState(null);
-  const [showAllGames, setShowAllGames] = useState(false);
   const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
   const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [minEV, setMinEV] = useState("");
-  const [refreshTick, setRefreshTick] = useState(0);
   const [activePreset, setActivePreset] = useState(null);
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
-
-  // Smart filter presets
+  const [showPlayerProps, setShowPlayerProps] = useState(false);
+  // Filter presets
   const filterPresets = [
     {
-      id: 'high-ev',
-      name: 'High +EV',
-      icon: '🔥',
-      description: 'Bets with 3%+ edge',
-      filters: {
-        minEV: '3',
-        sports: ['americanfootball_nfl', 'basketball_nba'],
-        markets: ['h2h', 'spreads'],
-        books: ['draftkings', 'fanduel', 'fanatics']
-      }
+      id: 'nfl',
+      name: 'NFL',
+      description: 'NFL games only',
+      sports: ['americanfootball_nfl'],
+      markets: ['h2h', 'spreads', 'totals']
     },
     {
-      id: 'nfl-sunday',
-      name: 'NFL Sunday',
-      icon: '🏈',
-      description: 'NFL games this week',
-      filters: {
-        sports: ['americanfootball_nfl'],
-        markets: ['h2h', 'spreads', 'totals'],
-        date: 'thisweek',
-        books: ['draftkings', 'fanduel', 'fanatics', 'bovada']
-      }
+      id: 'nba',
+      name: 'NBA', 
+      description: 'NBA games only',
+      sports: ['basketball_nba'],
+      markets: ['h2h', 'spreads', 'totals']
     },
     {
-      id: 'live-games',
-      name: 'Live Games',
-      icon: '🔴',
-      description: 'Games happening now',
-      filters: {
-        date: 'today',
-        markets: ['h2h', 'spreads'],
-        minEV: '1'
-      }
-    },
-    {
-      id: 'college-basketball',
-      name: 'March Madness',
-      icon: '🏀',
-      description: 'College basketball action',
-      filters: {
-        sports: ['basketball_ncaab'],
-        markets: ['h2h', 'spreads', 'totals'],
-        minEV: '2'
-      }
-    },
-    {
-      id: 'safe-bets',
-      name: 'Safe Picks',
-      icon: '🛡️',
-      description: 'Lower risk, positive EV',
-      filters: {
-        minEV: '1.5',
-        markets: ['h2h'],
-        books: ['draftkings', 'fanduel', 'fanatics', 'betmgm']
-      }
+      id: 'mlb',
+      name: 'MLB',
+      description: 'MLB games only', 
+      sports: ['baseball_mlb'],
+      markets: ['h2h', 'spreads', 'totals', 'first_five_moneyline', 'first_five_spreads', 'first_five_totals']
     }
   ];
+  
+  const applyPreset = (preset) => {
+    setPicked(preset.sports);
+    setMarketKeys(preset.markets);
+    setActivePreset(preset.id);
+  };
 
   const [oddsFormat, setOddsFormat] = useState(() => {
     if (typeof window === "undefined") return "american";
     return localStorage.getItem("oddsFormat") || "american";
   });
-
-  // Apply filter preset
-  const applyPreset = (preset) => {
-    const { filters } = preset;
-    
-    // Apply minEV filter
-    if (filters.minEV) setMinEV(filters.minEV);
-    
-    // Apply sports filter
-    if (filters.sports) setPicked(filters.sports);
-    
-    // Apply markets filter
-    if (filters.markets) setMarketKeys(filters.markets);
-    
-    // Apply books filter
-    if (filters.books) {
-      const availableKeys = new Set(bookList.map((b) => b.key));
-      const validBooks = filters.books.filter(book => availableKeys.has(book));
-      setSelectedBooks(validBooks);
-    }
-    
-    // Apply date filter
-    if (filters.date) {
-      const today = new Date();
-      if (filters.date === 'today') {
-        setSelectedDate(today.toISOString().split('T')[0]);
-      } else if (filters.date === 'thisweek') {
-        // Get next Sunday
-        const nextSunday = new Date(today);
-        nextSunday.setDate(today.getDate() + (7 - today.getDay()));
-        setSelectedDate(nextSunday.toISOString().split('T')[0]);
-      }
-    }
-    
-    setActivePreset(preset.id);
-    setTableNonce(n => n + 1);
-    setRefreshTick(Date.now());
-  };
 
   // ✅ Debounce defined ONCE
   const debouncedQuery = useDebounce(query, 300);
@@ -469,16 +306,6 @@ export default function SportsbookMarkets() {
     // eslint-disable-next-line
   }, []);
 
-  // Preferred default books for reset
-  const PREFERRED_BOOK_KEYS = [
-    "draftkings",
-    "fanduel",
-    "fanatics",
-    "fanatics_sportsbook",
-    "bovada",
-    "fliff",
-    "fliff_sportsbook",
-  ];
 
   // Compute market options based on selected sports (union)
   const marketOptions = useMemo(() => {
@@ -496,30 +323,10 @@ export default function SportsbookMarkets() {
     return Array.from(keys).map((k) => ({ key: k, title: MARKET_TITLES[k] || k }));
   }, [picked, sportList]);
 
-  // Keep selected markets within available options for the sport(s)
-  useEffect(() => {
-    const avail = new Set(marketOptions.map((o) => o.key));
-    const sel = marketKeys.filter((k) => avail.has(k));
-    if (sel.length !== marketKeys.length) {
-      setMarketKeys(sel.length ? sel : Array.from(avail));
-    }
-    // eslint-disable-next-line
-  }, [marketOptions]);
+  // Removed problematic market syncing to prevent infinite loops
 
-  // When sports selection changes, auto-select all markets available for those sports
-  useEffect(() => {
-    const allForSports = marketOptions.map((o) => o.key);
-    setMarketKeys(allForSports);
-    // eslint-disable-next-line
-  }, [picked]); // eslint okay; handled intentionally
+  // Removed auto-market selection to prevent infinite loops
 
-  const availableMarkets = useMemo(() => {
-    const set = new Set();
-    games
-      .slice(0, 10)
-      .forEach((g) => (g.bookmakers || []).forEach((bk) => (bk.markets || []).forEach((m) => set.add(m.key))));
-    return Array.from(set).sort();
-  }, [games]);
 
   const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:10000"; // keep CRA-style env; change to import.meta.env for Vite
 
@@ -575,32 +382,44 @@ export default function SportsbookMarkets() {
   const selectedSports = picked.includes("ALL")
     ? sportList.filter((s) => s.key !== "ALL").map((s) => s.key)
     : picked;
-  const allowedBooksArr = useMemo(() => Array.from(ALLOWED_BOOKS), []);
-  const { games: hookGames, books: hookBooks, loading: hookLoading, error: hookError, quota: hookQuota } = useMarkets({
-    sports: selectedSports,
-    markets: marketKeys.length ? marketKeys : GAME_LINES,
-    baseUrl: BASE_URL,
-    regions: "us,us2,us_ex",
-    excludeBooks: DFS_KEYS,
-    allowedBooks: allowedBooksArr,
-    refreshKey: refreshTick,
-  });
+  // Add player props markets when in props mode
+  const marketsToFetch = useMemo(() => {
+    const baseMarkets = marketKeys.length ? [...marketKeys] : [...GAME_LINES];
+    if (showPlayerProps) {
+      baseMarkets.push("player_pass_tds", "player_pass_yds", "player_rush_yds", "player_receptions");
+    }
+    return baseMarkets;
+  }, [marketKeys, showPlayerProps]);
+
+  const { games: hookGames, books: hookBooks, loading: hookLoading, error: hookError } = useMarkets(
+    selectedSports, // sports array
+    ["us", "us2", "us_ex"], // regions array
+    marketsToFetch // markets array including player props
+  );
 
   // Sync back to local state expected by existing UI
   useEffect(() => {
     setGames(hookGames || []);
     setLoad(!!hookLoading);
     setErr(hookError || null);
-    setQuota(hookQuota || { remain: "–", used: "–" });
+    // setQuota(hookQuota || { remain: "–", used: "–" });
     if (Array.isArray(hookBooks) && hookBooks.length > 0) {
-      setBookList(hookBooks);
+      // Add DFS books to the book list for filtering
+      const dfsBooks = [
+        { key: 'prizepicks', title: 'PrizePicks' },
+        { key: 'underdog', title: 'Underdog Fantasy' },
+        { key: 'draftkings_pick6', title: 'DraftKings Pick6' }
+      ];
+      
+      const combinedBooks = [...hookBooks, ...dfsBooks];
+      setBookList(combinedBooks);
       if (typeof window !== "undefined") {
         try {
-          localStorage.setItem("booksCache", JSON.stringify(hookBooks));
+          localStorage.setItem("booksCache", JSON.stringify(combinedBooks));
         } catch {}
       }
     }
-  }, [hookGames, hookLoading, hookError, hookQuota, hookBooks]);
+  }, [hookGames, hookLoading, hookError, hookBooks]);
 
   // Derive effective book filter; if none of selected are available, show all
   const availableBookKeys = useMemo(() => new Set((bookList || []).map((b) => b.key)), [bookList]);
@@ -610,21 +429,7 @@ export default function SportsbookMarkets() {
     return filtered.length ? filtered : [];
   }, [selectedBooks, availableBookKeys]);
 
-  // Ensure selected books stay within available list; if none, prefer defaults
-  useEffect(() => {
-    const booksArr = bookList || [];
-    const availableKeys = new Set(booksArr.map((b) => b.key));
-    if (!booksArr.length) return;
-
-    const intersect = (selectedBooks || []).filter((k) => availableKeys.has(k));
-    if (intersect.length) {
-      if (intersect.length !== selectedBooks.length) setSelectedBooks(intersect);
-    } else {
-      // Don't auto-select books - let user choose
-      setSelectedBooks([]);
-    }
-    // eslint-disable-next-line
-  }, [bookList]);
+  // Removed problematic book syncing to prevent re-render loops
 
   // ===== Filtering before passing to OddsTable =====
   let filteredGames = games;
@@ -658,7 +463,8 @@ export default function SportsbookMarkets() {
     filteredGames = filteredGames.filter((g) => picked.includes(g.sport_key));
   }
 
-  if (!showAllGames) {
+  // Show all games by default
+  if (false) {
     filteredGames = filteredGames.filter((g) => {
       const start = new Date(g.commence_time).getTime();
       const now = Date.now();
@@ -706,7 +512,7 @@ export default function SportsbookMarkets() {
                         name="odds-format"
                         value={opt.k}
                         checked={oddsFormat === opt.k}
-                        onChange={() => setOddsFormat(opt.k)}
+                        onChange={(e) => setOddsFormat(e.target.value)}
                       />
                       {opt.label}
                     </label>
@@ -739,44 +545,15 @@ export default function SportsbookMarkets() {
                       gap: '6px',
                       padding: '8px 12px',
                       borderRadius: '8px',
-                      border: activePreset === preset.id ? '2px solid var(--accent)' : '1px solid #334155',
-                      background: activePreset === preset.id ? 'var(--accent)' : '#1e293b',
-                      color: '#fff',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease'
+                      border: '1px solid var(--border-color)',
+                      background: activePreset === preset.id ? 'var(--accent)' : 'transparent',
+                      color: activePreset === preset.id ? 'white' : 'var(--text-primary)',
+                      cursor: 'pointer'
                     }}
                   >
-                    <span className="preset-icon">{preset.icon}</span>
-                    <span className="preset-name">{preset.name}</span>
+                    {preset.name}
                   </button>
                 ))}
-                <button
-                  className={`preset-btn clear ${activePreset === null ? 'active' : ''}`}
-                  onClick={() => {
-                    resetFilters();
-                    setActivePreset(null);
-                  }}
-                  title="Clear all filters"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: activePreset === null ? '2px solid #ef4444' : '1px solid #334155',
-                    background: activePreset === null ? '#ef4444' : '#1e293b',
-                    color: '#fff',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <span className="preset-icon">🔄</span>
-                  <span className="preset-name">Clear</span>
-                </button>
               </div>
             </div>
 
@@ -797,7 +574,7 @@ export default function SportsbookMarkets() {
             </div>
 
             <div className="filter-actions">
-              <button type="button" className="btn btn-primary btn-lg" onClick={() => setRefreshTick(Date.now())}>
+              <button type="button" className="btn btn-primary btn-lg" onClick={() => setTableNonce(n => n + 1)}>
                 Refresh
               </button>
               <button type="button" className="btn btn-danger btn-lg" onClick={resetFilters}>
@@ -811,98 +588,83 @@ export default function SportsbookMarkets() {
           </div>
 
           {/* Bottom-left gear button */}
-          <button
-            type="button"
-            aria-label="Settings"
-            title="Settings"
-            onClick={() => setSettingsOpen((v) => !v)}
-            style={{
-              position: "absolute",
-              left: 12,
-              bottom: 12,
-              background: "transparent",
-              border: "none",
-              color: "#e7ecff",
-              cursor: "pointer",
-              fontSize: "20px",
-              lineHeight: 1,
-              padding: 6,
-              borderRadius: 8,
-            }}
-          >
-            ⚙️
-          </button>
         </aside>
 
         <section className="table-area">
-          {/* Header with Tools */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ margin: 0, color: 'var(--text-primary)' }}>
-              {showDashboard ? 'Your Dashboard' : 'Betting Opportunities'}
-            </h2>
+          {/* Header with Bet Type Toggle */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '16px', paddingTop: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <AlertSystem games={filteredGames} />
-              <button
-                onClick={() => setShowEdgeCalculator(true)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--card-bg)',
-                  color: 'var(--text-primary)',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-                title="Open Edge Calculator"
-              >
-                🧮 Calculator
-              </button>
-              <button
-                onClick={() => setShowDashboard(!showDashboard)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-color)',
-                  background: showDashboard ? 'var(--accent)' : 'var(--card-bg)',
-                  color: showDashboard ? '#fff' : 'var(--text-primary)',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {showDashboard ? '📊 View Odds' : '🏠 Dashboard'}
-              </button>
+{/* <AlertSystem games={filteredGames} /> */}
+              <div style={{
+                display: 'flex',
+                background: 'var(--card-bg)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                overflow: 'hidden'
+              }}>
+                <button
+                  onClick={() => {
+                    if (showPlayerProps) {
+                      setShowPlayerProps(false);
+                    }
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    border: 'none',
+                    background: !showPlayerProps ? 'var(--accent)' : 'transparent',
+                    color: !showPlayerProps ? '#fff' : 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Game Odds
+                </button>
+                <button
+                  onClick={() => {
+                    if (!showPlayerProps) {
+                      // Add delay to prevent rapid switching
+                      setTimeout(() => {
+                        setShowPlayerProps(true);
+                      }, 300);
+                    }
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    border: 'none',
+                    background: showPlayerProps ? 'var(--accent)' : 'transparent',
+                    color: showPlayerProps ? '#fff' : 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Player Props
+                </button>
+              </div>
             </div>
           </div>
 
-          {showDashboard ? (
-            <PersonalizedDashboard games={filteredGames} />
-          ) : (
-            <OddsTable
-              key={tableNonce}
-              games={filteredGames}
-              pageSize={15}
-              mode={"game"}
-              bookFilter={effectiveSelectedBooks}
-              marketFilter={marketKeys}
-              evMin={minEV === "" ? null : Number(minEV)}
-              loading={loading}
-              error={error}
-              oddsFormat={oddsFormat}
-              allCaps={
-                typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
-              }
-              onAddBet={addBet}
-              betSlipCount={bets.length}
-              onOpenBetSlip={openBetSlip}
-            />
-          )}
+          <OddsTable
+            key={tableNonce}
+            games={filteredGames}
+            pageSize={15}
+            mode={showPlayerProps ? "props" : "game"}
+            bookFilter={effectiveSelectedBooks}
+            marketFilter={marketKeys}
+            evMin={minEV === "" ? null : Number(minEV)}
+            loading={loading}
+            error={error}
+            oddsFormat={oddsFormat}
+            allCaps={
+              typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
+            }
+            onAddBet={addBet}
+            betSlipCount={bets.length}
+            onOpenBetSlip={openBetSlip}
+          />
         </section>
 
         {/* Mobile footer nav + filter pill */}
@@ -925,6 +687,11 @@ export default function SportsbookMarkets() {
                 onChange={setPicked}
                 placeholderText="Choose sports…"
                 allLabel="All Sports"
+                grid={true}
+                columns={2}
+                leftAlign={true}
+                usePortal={true}
+                portalAlign={"up"}
               />
             </div>
             <div className="filter-group">
@@ -956,7 +723,6 @@ export default function SportsbookMarkets() {
                   
                   // Force re-fetch with current filter settings
                   setTableNonce(n => n + 1);
-                  setRefreshTick(Date.now());
                   setTimeout(() => setMobileFiltersOpen(false), 100);
                 }}
               >
@@ -996,10 +762,6 @@ export default function SportsbookMarkets() {
           onPlaceBets={placeBets}
         />
 
-        {/* Edge Calculator Modal */}
-        {showEdgeCalculator && (
-          <EdgeCalculator onClose={() => setShowEdgeCalculator(false)} />
-        )}
       </div>
     </main>
   );
@@ -1016,6 +778,5 @@ export default function SportsbookMarkets() {
     // Reset to no books selected (show all)
     setSelectedBooks([]);
     setTableNonce((n) => n + 1);
-    setRefreshTick(Date.now());
   }
 }

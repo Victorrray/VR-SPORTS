@@ -68,7 +68,8 @@ function statusBadgeText(status, clock) {
   return ""; // scheduled: we'll show "Today • time" separately
 }
 
-const REFRESH_MS = 15_000; // auto refresh every 15s
+const REFRESH_MS = 60_000; // auto refresh every 60s for scheduled games
+const LIVE_REFRESH_MS = 30_000; // refresh every 30s for live games
 
 // Get all available sports with icons
 function getCurrentSeasonSports() {
@@ -94,20 +95,34 @@ export default function Scores() {
   const [selectedGame, setSelectedGame] = useState(null);
   const [showGameModal, setShowGameModal] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [liveGamesCount, setLiveGamesCount] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('connected');
 
   const btnRef = useRef(null);
 
   async function load(silent = false) {
     if (!silent) setLoading(true);
     setErr("");
+    setConnectionStatus('connecting');
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5050');
+      const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
       const r = await fetch(`${apiUrl}/api/scores?sport=${sport}`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       setGames(data || []);
+      
+      // Count live games for dynamic refresh
+      const liveCount = (data || []).filter(g => 
+        g.status === 'in_progress' || 
+        (g.completed === false && new Date(g.commence_time) <= new Date())
+      ).length;
+      setLiveGamesCount(liveCount);
+      setLastUpdate(new Date());
+      setConnectionStatus('connected');
     } catch (error) {
       console.error("Error loading scores:", error);
+      setConnectionStatus('error');
       if (!silent) setErr(`Failed to load scores: ${error.message}`);
     } finally {
       if (!silent) setLoading(false);
@@ -126,12 +141,15 @@ export default function Scores() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, [dropdownOpen]);
 
-  // First load + auto refresh
+  // First load + dynamic auto refresh based on live games
   useEffect(() => {
     load();
-    const t = setInterval(() => load(true), REFRESH_MS); // Silent auto-refresh
+    
+    // Use faster refresh if there are live games
+    const refreshInterval = liveGamesCount > 0 ? LIVE_REFRESH_MS : REFRESH_MS;
+    const t = setInterval(() => load(true), refreshInterval);
     return () => clearInterval(t);
-  }, [sport]);
+  }, [sport, liveGamesCount]);
 
   // Manual refresh + spin animation
   const handleRefresh = async () => {
@@ -179,16 +197,34 @@ export default function Scores() {
           <div className="page-title">
             <Trophy className="title-icon" size={28} />
             <h1>Live Scores</h1>
+            {liveGamesCount > 0 && (
+              <div className="live-indicator-header">
+                <div className="live-dot-pulse"></div>
+                <span className="live-count">{liveGamesCount} Live</span>
+              </div>
+            )}
           </div>
-          {/* Week pill (NFL mostly) */}
-          {weekInfo?.week && weekInfo?.season && (
-            <div className="week-badge">
-              <Calendar size={14} />
-              <span>
-                {weekInfo.league === "nfl" ? `NFL • Week ${weekInfo.week} • ${weekInfo.season}` : `Week ${weekInfo.week} • ${weekInfo.season}`}
-              </span>
+          <div className="header-info">
+            {/* Week pill (NFL mostly) */}
+            {weekInfo?.week && weekInfo?.season && (
+              <div className="week-badge">
+                <Calendar size={14} />
+                <span>
+                  {weekInfo.league === "nfl" ? `NFL • Week ${weekInfo.week} • ${weekInfo.season}` : `Week ${weekInfo.week} • ${weekInfo.season}`}
+                </span>
+              </div>
+            )}
+            
+            {/* Connection status and last update */}
+            <div className="connection-status">
+              <div className={`status-dot ${connectionStatus}`}></div>
+              {lastUpdate && (
+                <span className="last-update">
+                  Updated {lastUpdate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                </span>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         <div className="header-controls">
@@ -308,8 +344,10 @@ export default function Scores() {
                         )}
                       </div>
                     </div>
-                    {isCompleted && g.scores && (
-                      <div className="team-score">{g.scores.find(s => s.name === g.away_team)?.score || 0}</div>
+                    {(isCompleted || isLive) && g.scores && (
+                      <div className="team-score">
+                        {g.scores.find(s => s.name === g.away_team)?.score || 0}
+                      </div>
                     )}
                   </div>
                   
@@ -323,8 +361,10 @@ export default function Scores() {
                         )}
                       </div>
                     </div>
-                    {isCompleted && g.scores && (
-                      <div className="team-score">{g.scores.find(s => s.name === g.home_team)?.score || 0}</div>
+                    {(isCompleted || isLive) && g.scores && (
+                      <div className="team-score">
+                        {g.scores.find(s => s.name === g.home_team)?.score || 0}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -334,6 +374,8 @@ export default function Scores() {
                     <div className="live-indicator">
                       <div className="live-dot"></div>
                       <span>Live Now</span>
+                      {g.clock && <span className="game-clock">{g.clock}</span>}
+                      {g.period && <span className="game-period">{g.period}</span>}
                     </div>
                   )}
                   {!isLive && (

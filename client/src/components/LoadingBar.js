@@ -12,24 +12,26 @@ export default function LoadingBar() {
     setIsLoading(true);
     setProgress(0);
 
-    // Simulate progressive loading
+    // Simulate progressive loading with shorter delays
     const intervals = [
-      { delay: 0, progress: 10 },
-      { delay: 100, progress: 30 },
-      { delay: 200, progress: 60 },
-      { delay: 400, progress: 85 },
-      { delay: 600, progress: 100 }
+      { delay: 0, progress: 20 },
+      { delay: 50, progress: 50 },
+      { delay: 100, progress: 80 },
+      { delay: 150, progress: 100 }
     ];
 
     const timeouts = intervals.map(({ delay, progress: targetProgress }) =>
       setTimeout(() => setProgress(targetProgress), delay)
     );
 
-    // Complete loading after a short delay
+    // Complete loading quickly
     const completeTimeout = setTimeout(() => {
       setProgress(100);
-      setTimeout(() => setIsLoading(false), 200);
-    }, 800);
+      setTimeout(() => {
+        setIsLoading(false);
+        setProgress(0); // Reset progress to prevent interference
+      }, 100);
+    }, 300);
 
     return () => {
       timeouts.forEach(clearTimeout);

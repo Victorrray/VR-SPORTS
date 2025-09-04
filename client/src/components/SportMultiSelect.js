@@ -37,23 +37,27 @@ export default function SportMultiSelect({
       if (!box) return setOpen(false);
       if (box.contains(e.target)) return;
       if (menu && menu.contains && menu.contains(e.target)) return;
+      // Don't close if clicking inside mobile filter sheet
+      if (e.target.closest('.mfs-content') || e.target.closest('.mobile-filters-sheet')) return;
       setOpen(false);
     };
     
     // Prevent closing when clicking inside filter sheet
     const preventClose = (e) => {
-      if (e.target.closest('.mfs-content')) {
+      if (e.target.closest('.mfs-content') || e.target.closest('.mobile-filters-sheet')) {
         e.stopPropagation();
       }
     };
     
-    document.addEventListener("mousedown", h);
-    document.addEventListener("mousedown", preventClose, true);
-    return () => {
-      document.removeEventListener("mousedown", h);
-      document.removeEventListener("mousedown", preventClose, true);
-    };
-  }, []);
+    if (open) {
+      document.addEventListener("mousedown", h);
+      document.addEventListener("mousedown", preventClose, true);
+      return () => {
+        document.removeEventListener("mousedown", h);
+        document.removeEventListener("mousedown", preventClose, true);
+      };
+    }
+  }, [open]);
 
   // Position + size portal menu; auto-flip on mobile
   useEffect(() => {
@@ -119,6 +123,8 @@ export default function SportMultiSelect({
         ? selected.filter((k) => k !== key)
         : [...selected, key];
       onChange(newSelection);
+      // Don't close dropdown on selection for better UX
+      // setOpen(false);
     } catch (error) {
       console.error('Error updating selection:', error);
     }

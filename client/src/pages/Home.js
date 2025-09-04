@@ -1,27 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { 
-  TrendingUp, 
   Target, 
-  Zap, 
   Shield, 
-  ArrowRight, 
-  ChevronRight,
   Calculator,
-  Bell,
   Users,
-  Trophy,
-  Flame,
   Activity,
-  DollarSign,
   BarChart3,
-  Clock,
   Star,
-  TrendingDown,
-  Eye,
-  MessageCircle,
-  Heart,
-  Share2,
   Award
 } from 'lucide-react';
 
@@ -33,11 +19,11 @@ import MobileBottomBar from '../components/MobileBottomBar';
 import Footer from '../components/Footer';
 
 // Hooks
-import useMarkets from '../hooks/useMarkets';
+import { useMarkets } from '../hooks/useMarkets';
 import { useAuth } from '../auth/AuthProvider';
 
 // Styles
-import styles from './Home.module.css';
+// import styles from './Home.module.css';
 
 const QUICK_ACTIONS = [
   {
@@ -58,101 +44,34 @@ const QUICK_ACTIONS = [
     title: "Analytics",
     description: "Advanced betting analytics", 
     icon: BarChart3,
-    link: "/sportsbooks",
+    link: "/picks",
     color: "var(--info)"
   }
 ];
 
-// +EV Opportunities preview
-const EV_OPPORTUNITIES = [
-  { 
-    id: "ev1", 
-    league: "NFL", 
-    game: "Chiefs vs Bills", 
-    market: "Spread", 
-    line: "Chiefs -3.5", 
-    book: "DraftKings", 
-    odds: "+102", 
-    edge: "+4.2%",
-    profit: "$42 per $100"
-  },
-  { 
-    id: "ev2", 
-    league: "NBA", 
-    game: "Lakers vs Warriors", 
-    market: "Total", 
-    line: "Over 225.5", 
-    book: "FanDuel", 
-    odds: "+105", 
-    edge: "+3.1%",
-    profit: "$31 per $100"
-  },
-  { 
-    id: "ev3", 
-    league: "MLB", 
-    game: "Dodgers vs Giants", 
-    market: "Moneyline", 
-    line: "Dodgers ML", 
-    book: "Caesars", 
-    odds: "-108", 
-    edge: "+2.8%",
-    profit: "$28 per $100"
-  }
-];
 
-// Success stories with specific results
-const SUCCESS_STORIES = [
-  {
-    name: "Mike Chen",
-    role: "Professional Bettor",
-    result: "$2,400 profit in 30 days",
-    quote: "The edge detection found opportunities I never would have spotted manually.",
-    avatar: "MC",
-    verified: true
-  },
-  {
-    name: "Sarah Rodriguez",
-    role: "Sports Analyst", 
-    result: "40% CLV improvement",
-    quote: "Finally, a tool that actually finds real value instead of just tracking odds.",
-    avatar: "SR",
-    verified: true
-  },
-  {
-    name: "David Park",
-    role: "Weekend Bettor",
-    result: "From -$500 to +$1,200",
-    quote: "Went from consistently losing to making steady profits every month.",
-    avatar: "DP",
-    verified: true
-  }
-];
 
-// Trust signals
-const TRUST_SIGNALS = [
-  { icon: Star, text: "4.9/5 rating", subtext: "2,847 reviews" },
-  { icon: Shield, text: "Bank-level security", subtext: "256-bit encryption" },
-  { icon: Users, text: "50K+ users", subtext: "Growing daily" },
-  { icon: Award, text: "30-day guarantee", subtext: "Risk-free trial" }
-];
 
 // Landing Page Component for non-authenticated users
 export default function Home() {
   const { user } = useAuth();
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
   
-  // Fetch live odds data for dashboard
-  const { games, loading, error } = useMarkets({
-    sports: ["americanfootball_nfl", "basketball_nba", "baseball_mlb"],
-    baseUrl: process.env.REACT_APP_API_URL || "http://localhost:10000",
-    refreshKey: 0
-  });
+  // Fetch live odds data for dashboard with reduced polling
+  const { games } = useMarkets(
+    ["americanfootball_nfl", "basketball_nba", "baseball_mlb"], // sports
+    ["us"], // regions
+    ["h2h", "spreads", "totals"], // markets
+    { pollingInterval: 10 * 60 * 1000, enabled: false } // 10 minutes, disabled auto-polling
+  );
 
   return (
     <main style={{ 
       minHeight: '100vh', 
       background: 'var(--bg-primary)',
-      paddingTop: '80px'
+      paddingTop: '80px',
+      position: 'relative',
+      zIndex: 1
     }}>
       {/* Header Section */}
       <div style={{ 
@@ -172,11 +91,11 @@ export default function Home() {
             fontWeight: '700',
             margin: 0
           }}>
-            {user ? `Welcome back, ${user.email?.split('@')[0]}!` : 'VR-Odds Dashboard'}
+{user ? `${user.email?.split('@')[0]}'s Dashboard` : 'VR-Odds Dashboard'}
           </h1>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <AlertSystem games={games} />
+{/* <AlertSystem games={games} /> */}
             <button
               onClick={() => setShowEdgeCalculator(true)}
               style={{
@@ -225,12 +144,12 @@ export default function Home() {
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 8px 25px rgba(139, 92, 246, 0.15)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(139, 92, 246, 0.15)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 <div style={{
@@ -276,7 +195,6 @@ export default function Home() {
       )}
 
       <MobileBottomBar active="home" showFilter={false} />
-      <Footer />
     </main>
   );
 }

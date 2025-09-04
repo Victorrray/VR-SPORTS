@@ -14,9 +14,10 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
 
   useEffect(() => {
     if (games?.length) {
+      // Only generate data once when games first load, not on every update
       generateDashboardData();
     }
-  }, [games, userPreferences]);
+  }, [games?.length, userPreferences]); // Only depend on games length, not the games array itself
 
   const generateDashboardData = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -24,10 +25,11 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       game.commence_time && game.commence_time.startsWith(today)
     );
 
-    // Calculate high EV opportunities
-    const highEvBets = games.filter(game => {
-      // Mock EV calculation - in real app this would use actual edge data
-      return Math.random() > 0.7; // ~30% of bets are high EV
+    // Calculate high EV opportunities - use static data to prevent jitter
+    const highEvBets = games.filter((game, index) => {
+      // Use game ID for consistent pseudo-random results
+      const seed = game.id ? game.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0) : index;
+      return Math.abs(seed) % 10 > 7; // ~30% of bets are high EV, but consistent
     });
 
     // Get user's favorite leagues from preferences or default
@@ -35,16 +37,23 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       'NFL', 'NBA', 'NCAAF', 'NCAAB'
     ];
 
-    // Generate recommended bets based on user preferences
-    const recommendedBets = games.slice(0, 5).map(game => ({
-      id: game.id,
-      matchup: `${game.away_team} @ ${game.home_team}`,
-      market: ['Moneyline', 'Spread', 'Total'][Math.floor(Math.random() * 3)],
-      edge: (Math.random() * 5 + 1).toFixed(1),
-      confidence: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)],
-      bookmaker: ['DraftKings', 'FanDuel', 'BetMGM'][Math.floor(Math.random() * 3)],
-      odds: Math.random() > 0.5 ? `+${Math.floor(Math.random() * 200) + 100}` : `-${Math.floor(Math.random() * 200) + 110}`
-    }));
+    // Generate recommended bets based on user preferences - use deterministic data
+    const recommendedBets = games.slice(0, 5).map((game, index) => {
+      const seed = game.id ? game.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0) : index;
+      const markets = ['Moneyline', 'Spread', 'Total'];
+      const confidences = ['High', 'Medium', 'Low'];
+      const bookmakers = ['DraftKings', 'FanDuel', 'BetMGM'];
+      
+      return {
+        id: game.id,
+        matchup: `${game.away_team} @ ${game.home_team}`,
+        market: markets[Math.abs(seed) % 3],
+        edge: (Math.abs(seed) % 50 / 10 + 1).toFixed(1),
+        confidence: confidences[Math.abs(seed * 2) % 3],
+        bookmaker: bookmakers[Math.abs(seed * 3) % 3],
+        odds: Math.abs(seed) % 2 === 0 ? `+${Math.abs(seed) % 200 + 100}` : `-${Math.abs(seed) % 200 + 110}`
+      };
+    });
 
     // Generate performance alerts
     const alerts = [
@@ -73,10 +82,10 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       highEvBets: highEvBets.length,
       favoriteLeagues,
       recentPerformance: {
-        winRate: (60 + Math.random() * 20).toFixed(1),
-        avgEdge: (2.1 + Math.random() * 2).toFixed(1),
-        roi: (8.5 + Math.random() * 10).toFixed(1),
-        totalBets: Math.floor(Math.random() * 50) + 25
+        winRate: (60 + (Math.abs(games[0]?.id?.charCodeAt(0) || 0) % 200) / 10).toFixed(1),
+        avgEdge: (2.1 + (Math.abs(games[0]?.id?.charCodeAt(1) || 0) % 20) / 10).toFixed(1),
+        roi: (8.5 + (Math.abs(games[0]?.id?.charCodeAt(2) || 0) % 100) / 10).toFixed(1),
+        totalBets: Math.floor((Math.abs(games[0]?.id?.charCodeAt(3) || 0) % 50)) + 25
       },
       recommendedBets,
       alerts: alerts.slice(0, 2) // Show max 2 alerts

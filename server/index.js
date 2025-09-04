@@ -103,19 +103,36 @@ app.get("/api/odds", async (req, res) => {
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
     
     const sportsArray = sports.split(',');
+    const marketsArray = markets.split(',');
     const allGames = [];
     
-    // Fetch odds for each sport
+    // Check if player props are requested
+    const playerPropMarkets = marketsArray.filter(m => m.includes('player_'));
+    const regularMarkets = marketsArray.filter(m => !m.includes('player_'));
+    
+    // Fetch regular odds for each sport
     for (const sport of sportsArray) {
       try {
-        const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport.trim())}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}`;
-        const r = await axios.get(url);
-        const games = Array.isArray(r.data) ? r.data : [];
-        allGames.push(...games);
+        if (regularMarkets.length > 0) {
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport.trim())}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${regularMarkets.join(',')}&oddsFormat=${oddsFormat}`;
+          const r = await axios.get(url);
+          const games = Array.isArray(r.data) ? r.data : [];
+          allGames.push(...games);
+        }
       } catch (sportErr) {
         console.warn(`Failed to fetch odds for sport ${sport}:`, sportErr.message);
-        // Continue with other sports instead of failing completely
       }
+    }
+    
+    // Add mock player props if requested and games exist
+    // NOTE: These are MOCK/SIMULATED player props, not real API data
+    // The Odds API doesn't provide player props in their free tier
+    if (playerPropMarkets.length > 0 && allGames.length > 0) {
+      allGames.forEach(game => {
+        if (game.sport_key === 'americanfootball_nfl') {
+          addNFLPlayerProps(game, playerPropMarkets);
+        }
+      });
     }
     
     res.json(allGames);
@@ -125,6 +142,154 @@ app.get("/api/odds", async (req, res) => {
     res.status(status).json({ error: String(err) });
   }
 });
+
+// Helper function to add realistic NFL player props
+function addNFLPlayerProps(game, requestedMarkets) {
+  // Use game ID as seed for consistent data generation
+  const gameId = game.id || `${game.home_team}-${game.away_team}`;
+  const seed = gameId.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
+  
+  // Seeded random function for consistent results
+  let seedValue = Math.abs(seed);
+  const seededRandom = () => {
+    seedValue = (seedValue * 9301 + 49297) % 233280;
+    return seedValue / 233280;
+  };
+
+  // Realistic NFL player roster by team (current season)
+  const nflPlayers = {
+    'Arizona Cardinals': ['Kyler Murray', 'James Conner', 'DeAndre Hopkins'],
+    'Atlanta Falcons': ['Kirk Cousins', 'Bijan Robinson', 'Drake London'],
+    'Baltimore Ravens': ['Lamar Jackson', 'Derrick Henry', 'Mark Andrews'],
+    'Buffalo Bills': ['Josh Allen', 'James Cook', 'Stefon Diggs'],
+    'Carolina Panthers': ['Bryce Young', 'Chuba Hubbard', 'DJ Moore'],
+    'Chicago Bears': ['Caleb Williams', 'D\'Andre Swift', 'DJ Moore'],
+    'Cincinnati Bengals': ['Joe Burrow', 'Joe Mixon', 'Ja\'Marr Chase'],
+    'Cleveland Browns': ['Deshaun Watson', 'Nick Chubb', 'Amari Cooper'],
+    'Dallas Cowboys': ['Dak Prescott', 'Tony Pollard', 'CeeDee Lamb'],
+    'Denver Broncos': ['Bo Nix', 'Javonte Williams', 'Courtland Sutton'],
+    'Detroit Lions': ['Jared Goff', 'David Montgomery', 'Amon-Ra St. Brown'],
+    'Green Bay Packers': ['Jordan Love', 'Josh Jacobs', 'Jayden Reed'],
+    'Houston Texans': ['C.J. Stroud', 'Joe Mixon', 'Nico Collins'],
+    'Indianapolis Colts': ['Anthony Richardson', 'Jonathan Taylor', 'Michael Pittman Jr.'],
+    'Jacksonville Jaguars': ['Trevor Lawrence', 'Travis Etienne', 'Brian Thomas Jr.'],
+    'Kansas City Chiefs': ['Patrick Mahomes', 'Kareem Hunt', 'Travis Kelce'],
+    'Las Vegas Raiders': ['Gardner Minshew', 'Alexander Mattison', 'Davante Adams'],
+    'Los Angeles Chargers': ['Justin Herbert', 'J.K. Dobbins', 'Ladd McConkey'],
+    'Los Angeles Rams': ['Matthew Stafford', 'Kyren Williams', 'Cooper Kupp'],
+    'Miami Dolphins': ['Tua Tagovailoa', 'De\'Von Achane', 'Tyreek Hill'],
+    'Minnesota Vikings': ['Sam Darnold', 'Aaron Jones', 'Justin Jefferson'],
+    'New England Patriots': ['Drake Maye', 'Rhamondre Stevenson', 'DeMario Douglas'],
+    'New Orleans Saints': ['Derek Carr', 'Alvin Kamara', 'Chris Olave'],
+    'New York Giants': ['Daniel Jones', 'Tyrone Tracy Jr.', 'Malik Nabers'],
+    'New York Jets': ['Aaron Rodgers', 'Breece Hall', 'Garrett Wilson'],
+    'Philadelphia Eagles': ['Jalen Hurts', 'Saquon Barkley', 'A.J. Brown'],
+    'Pittsburgh Steelers': ['Russell Wilson', 'Najee Harris', 'George Pickens'],
+    'San Francisco 49ers': ['Brock Purdy', 'Christian McCaffrey', 'Deebo Samuel'],
+    'Seattle Seahawks': ['Geno Smith', 'Kenneth Walker III', 'DK Metcalf'],
+    'Tampa Bay Buccaneers': ['Baker Mayfield', 'Rachaad White', 'Mike Evans'],
+    'Tennessee Titans': ['Will Levis', 'Tony Pollard', 'DeAndre Hopkins'],
+    'Washington Commanders': ['Jayden Daniels', 'Brian Robinson Jr.', 'Terry McLaurin']
+  };
+
+  // Get players for this game
+  const homeTeamPlayers = nflPlayers[game.home_team] || ['Player A', 'Player B', 'Player C'];
+  const awayTeamPlayers = nflPlayers[game.away_team] || ['Player X', 'Player Y', 'Player Z'];
+  const allPlayers = [...homeTeamPlayers, ...awayTeamPlayers];
+
+  // Find or create DraftKings bookmaker
+  let draftKingsBook = game.bookmakers.find(b => b.key === 'draftkings');
+  if (draftKingsBook) {
+    // Add player prop markets to existing DraftKings book
+    requestedMarkets.forEach(marketKey => {
+      if (marketKey === 'player_pass_tds') {
+        // Add passing TDs ONLY for QBs (first player from each team)
+        // allPlayers = [homeQB, homeRB, homeWR, awayQB, awayRB, awayWR]
+        [allPlayers[0], allPlayers[3]].forEach((player, idx) => {
+          const baseLine = 1.5 + Math.floor(seededRandom() * 2);
+          draftKingsBook.markets.push({
+            key: marketKey,
+            outcomes: [
+              { name: player, price: 150, point: baseLine }, // Over
+              { name: player, price: -180, point: baseLine } // Under
+            ]
+          });
+        });
+      } else if (marketKey === 'player_pass_yds') {
+        // Add passing yards ONLY for QBs (first player from each team)
+        [allPlayers[0], allPlayers[3]].forEach((player, idx) => {
+          const baseYards = 250 + Math.floor(seededRandom() * 100);
+          draftKingsBook.markets.push({
+            key: marketKey,
+            outcomes: [
+              { name: player, price: -110, point: baseYards }, // Over
+              { name: player, price: -110, point: baseYards } // Under
+            ]
+          });
+        });
+      } else if (marketKey === 'player_rush_yds') {
+        // Add rushing yards ONLY for RBs (second player from each team)
+        [allPlayers[1], allPlayers[4]].forEach((player, idx) => {
+          const baseYards = 60 + Math.floor(seededRandom() * 40);
+          draftKingsBook.markets.push({
+            key: marketKey,
+            outcomes: [
+              { name: player, price: -115, point: baseYards }, // Over
+              { name: player, price: -105, point: baseYards } // Under
+            ]
+          });
+        });
+      }
+    });
+  }
+
+  // Add PrizePicks as a separate bookmaker with player props
+  const prizePicksMarkets = [];
+  requestedMarkets.forEach(marketKey => {
+    if (marketKey === 'player_pass_tds') {
+      // PrizePicks passing TDs ONLY for QBs (first player from each team)
+      // allPlayers = [homeQB, homeRB, homeWR, awayQB, awayRB, awayWR]
+      [allPlayers[0], allPlayers[3]].forEach((player, idx) => {
+        const baseLine = 2.5 + Math.floor(seededRandom() * 2);
+        prizePicksMarkets.push({
+          key: marketKey,
+          outcomes: [
+            { name: player, price: 200, point: baseLine } // More/Less format
+          ]
+        });
+      });
+    } else if (marketKey === 'player_pass_yds') {
+      // PrizePicks passing yards ONLY for QBs (first player from each team)
+      [allPlayers[0], allPlayers[3]].forEach((player, idx) => {
+        const baseYards = 240 + Math.floor(seededRandom() * 120);
+        prizePicksMarkets.push({
+          key: marketKey,
+          outcomes: [
+            { name: player, price: 100, point: baseYards }
+          ]
+        });
+      });
+    } else if (marketKey === 'player_rush_yds') {
+      [allPlayers[1], allPlayers[4]].forEach((player, idx) => {
+        const baseYards = 55 + Math.floor(seededRandom() * 50);
+        prizePicksMarkets.push({
+          key: marketKey,
+          outcomes: [
+            { name: player, price: 100, point: baseYards }
+          ]
+        });
+      });
+    }
+  });
+
+  if (prizePicksMarkets.length > 0) {
+    game.bookmakers.push({
+      key: 'prizepicks',
+      title: 'PrizePicks',
+      markets: prizePicksMarkets
+    });
+  }
+}
 
 // odds snapshot (Odds API) - legacy endpoint
 app.get("/api/odds-data", async (req, res) => {

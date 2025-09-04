@@ -1,0 +1,497 @@
+/* Live Betting Styles */
+.live-betting-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.live-betting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.live-betting-header h2 {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.connection-status.connected {
+  background: rgba(34, 197, 94, 0.1);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.connection-status.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.connection-status.connecting {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auto-refresh-btn {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auto-refresh-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.auto-refresh-btn.active {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+.last-update {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+/* Alert Settings */
+.alert-settings {
+  background: rgba(26, 16, 37, 0.95);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.alert-settings label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.alert-settings input {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: white;
+  width: 60px;
+  text-align: center;
+}
+
+.alert-settings input:focus {
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* Live Games Grid */
+.live-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
+}
+
+.live-game-card {
+  background: rgba(26, 16, 37, 0.95);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.live-game-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e);
+  animation: liveGradient 3s ease-in-out infinite;
+}
+
+@keyframes liveGradient {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.live-game-card:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+}
+
+/* Game Header */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.game-info {
+  flex: 1;
+}
+
+.teams {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.team.away {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.team.home {
+  color: white;
+}
+
+.score {
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.vs {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.game-status {
+  display: flex;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+}
+
+.period {
+  font-weight: 600;
+}
+
+.clock {
+  font-family: 'Courier New', monospace;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* Markets */
+.markets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.market-section {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.market-title {
+  color: #a78bfa;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.outcomes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.outcome-btn {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  position: relative;
+}
+
+.outcome-btn:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.outcome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.outcome-name {
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.movement-indicator {
+  display: flex;
+  align-items: center;
+  padding: 0.125rem 0.25rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.movement-indicator.up {
+  background: rgba(34, 197, 94, 0.1);
+  color: #86efac;
+}
+
+.movement-indicator.down {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+}
+
+.outcome-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.point-spread {
+  color: #a78bfa;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.point-change {
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.point-change.up {
+  color: #86efac;
+}
+
+.point-change.down {
+  color: #fca5a5;
+}
+
+.odds-price {
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.price-change {
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.price-change.up {
+  color: #86efac;
+}
+
+.price-change.down {
+  color: #fca5a5;
+}
+
+/* Empty State */
+.no-live-games {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.no-live-games svg {
+  color: rgba(139, 92, 246, 0.3);
+  margin-bottom: 1rem;
+}
+
+.no-live-games h3 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.no-live-games p {
+  font-size: 1rem;
+  margin: 0.25rem 0;
+}
+
+/* Error Message */
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .live-betting-container {
+    padding: 1rem;
+  }
+
+  .live-betting-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .live-betting-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .header-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .live-games-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .live-game-card {
+    padding: 1rem;
+  }
+
+  .teams {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .team {
+    justify-content: center;
+  }
+
+  .game-status {
+    justify-content: center;
+  }
+
+  .outcomes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .alert-settings label {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .live-betting-container {
+    padding: 0.5rem;
+  }
+
+  .live-game-card {
+    padding: 0.75rem;
+  }
+
+  .game-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .live-indicator {
+    align-self: flex-start;
+  }
+
+  .outcome-btn {
+    padding: 0.75rem;
+  }
+
+  .market-section {
+    padding: 0.75rem;
+  }
+}

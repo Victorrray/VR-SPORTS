@@ -317,11 +317,23 @@ body,
   display: flex; align-items: center; justify-content: center; min-height: 2.2em;
 }
 
-/* Odds change flash */
-.flash-up { animation: flashUp 900ms ease; }
-.flash-down { animation: flashDown 900ms ease; }
-@keyframes flashUp   { 0% { background: rgba(36,222,161,.35); } 100% { background: transparent; } }
-@keyframes flashDown { 0% { background: rgba(255,107,107,.35); } 100% { background: transparent; } }
+/* Odds change flash - minimal animation to prevent jittering */
+.flash-up { 
+  animation: flashUp 400ms ease-out;
+  animation-fill-mode: forwards;
+}
+.flash-down { 
+  animation: flashDown 400ms ease-out;
+  animation-fill-mode: forwards;
+}
+@keyframes flashUp   { 
+  0% { background: rgba(34,197,94,.15); } 
+  100% { background: transparent; } 
+}
+@keyframes flashDown { 
+  0% { background: rgba(239,68,68,.15); } 
+  100% { background: transparent; } 
+}
 @media (prefers-reduced-motion: reduce) {
   .flash-up, .flash-down { animation: none !important; }
 }
@@ -517,6 +529,54 @@ body,
     line-height: 1.3;
     letter-spacing: 0.01em;
   }
+  
+  /* Player props mobile styling */
+  .mob-player-prop {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .mob-player-name {
+    font-weight: 800;
+    font-size: 1.2em;
+    color: var(--text-primary);
+  }
+  
+  .mob-prop-type {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .mob-prop-bet {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .mob-prop-side {
+    font-weight: 700;
+    font-size: 1.1em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .mob-prop-side.over {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+  
+  .mob-prop-side.under {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
 
   /* Market type and line - iPhone 15 Pro layout */
   .mob-market-row { 
@@ -602,6 +662,33 @@ body,
     border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
     border-radius: 8px;
     padding: 8px 6px;
+  }
+  
+  /* Player props mini table styling */
+  .mini-prop-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .mini-prop-book {
+    font-weight: 700;
+    font-size: 0.85em;
+    color: #cfe0ff;
+  }
+  
+  .mini-prop-side {
+    font-weight: 600;
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .mini-props-odds {
+    flex: 0 0 auto;
+    min-width: 70px;
+    text-align: center;
   }
 
   /* Book name column */

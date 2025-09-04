@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Plus, Minus, Calculator, TrendingUp, AlertCircle, CheckCircle2, Zap, Target, DollarSign, Trophy, Share2, Download, Trash2, Copy, Eye, EyeOff } from 'lucide-react';
+import { X, Plus, Minus, Calculator, TrendingUp, AlertCircle, CheckCircle2, Zap, Target, DollarSign, Trophy, Share2, Download, Trash2, Copy, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import './BetSlip.css';
 
 const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClearAll, onPlaceBets }) => {
@@ -11,6 +11,8 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
   const [bankroll, setBankroll] = useState(1000);
   const [riskTolerance, setRiskTolerance] = useState('moderate'); // 'conservative', 'moderate', 'aggressive'
   const [autoCalculate, setAutoCalculate] = useState(true);
+  const [validationErrors, setValidationErrors] = useState({});
+  const [showValidation, setShowValidation] = useState(true);
 
   // Load saved settings
   useEffect(() => {
@@ -74,6 +76,81 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     
     return Math.max(quickBetAmount, Math.round(recommendedAmount));
   };
+  
+  // Validate bet amounts and settings
+  const validateBets = () => {
+    const errors = {};
+    let totalRisk = 0;
+    
+    if (betType === 'single') {
+      bets.forEach(bet => {
+        const amount = parseFloat(betAmounts[bet.id]) || 0;
+        const betId = bet.id;
+        
+        if (amount > 0) {
+          // Check minimum bet
+          if (amount < 1) {
+            errors[betId] = 'Minimum bet is $1';
+          }
+          // Check maximum bet (20% of bankroll)
+          else if (amount > bankroll * 0.2) {
+            errors[betId] = `Exceeds 20% of bankroll ($${(bankroll * 0.2).toFixed(0)})`;
+          }
+          // Check if bet is too large for edge
+          else if (bet.edge && bet.edge < 2 && amount > bankroll * 0.02) {
+            errors[betId] = 'Large bet on low edge - consider reducing';
+          }
+          
+          totalRisk += amount;
+        }
+      });
+      
+      // Check total exposure
+      if (totalRisk > bankroll * 0.5) {
+        errors.total = 'Total exposure exceeds 50% of bankroll';
+      }
+    } else if (betType === 'parlay') {
+      const amount = parseFloat(parlayAmount) || 0;
+      
+      if (amount > 0) {
+        if (amount < 1) {
+          errors.parlay = 'Minimum parlay bet is $1';
+        } else if (amount > bankroll * 0.1) {
+          errors.parlay = `Parlay bet exceeds 10% of bankroll ($${(bankroll * 0.1).toFixed(0)})`;
+        }
+      }
+      
+      // Check parlay leg count
+      if (bets.length > 10) {
+        errors.parlay = 'Maximum 10 legs allowed in parlay';
+      }
+      
+      // Check for correlated bets (same game)
+      const games = new Set();
+      let hasCorrelatedBets = false;
+      bets.forEach(bet => {
+        const gameKey = bet.matchup;
+        if (games.has(gameKey)) {
+          hasCorrelatedBets = true;
+        }
+        games.add(gameKey);
+      });
+      
+      if (hasCorrelatedBets) {
+        errors.correlation = 'Warning: Correlated bets detected (same game)';
+      }
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
+  // Run validation when amounts change
+  useEffect(() => {
+    if (showValidation) {
+      validateBets();
+    }
+  }, [betAmounts, parlayAmount, betType, bets, bankroll]);
 
   // Calculate parlay odds
   const parlayCalculations = useMemo(() => {
@@ -103,6 +180,18 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     const payout = amount * combinedOdds;
     const profit = payout - amount;
     
+    // Calculate parlay probability and expected value
+    let combinedProb = 1;
+    bets.forEach(bet => {
+      const odds = bet.americanOdds;
+      const impliedProb = odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+      combinedProb *= impliedProb;
+    });
+    
+    const breakEvenProb = 1 / combinedOdds;
+    const expectedValue = (combinedProb * profit) - ((1 - combinedProb) * amount);
+    const evPercentage = amount > 0 ? (expectedValue / amount) * 100 : 0;
+    
     return {
       odds: americanOdds,
       combinedDecimal: combinedOdds,
@@ -110,7 +199,11 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
       amount,
       payout,
       profit,
-      legs: bets.length
+      legs: bets.length,
+      probability: combinedProb * 100,
+      breakEvenProb: breakEvenProb * 100,
+      expectedValue,
+      evPercentage
     };
   }, [bets, parlayAmount]);
 
@@ -182,6 +275,12 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
   };
 
   const handlePlaceBets = () => {
+    // Validate before placing
+    if (!validateBets()) {
+      setShowValidation(true);
+      return;
+    }
+    
     const betsToPlace = [];
     
     if (betType === 'single') {
@@ -191,7 +290,9 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
           betsToPlace.push({
             ...bet,
             amount,
-            type: 'single'
+            type: 'single',
+            timestamp: new Date().toISOString(),
+            bankrollPercentage: ((amount / bankroll) * 100).toFixed(2)
           });
         }
       });
@@ -203,7 +304,12 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
         amount: parseFloat(parlayAmount),
         odds: parlayCalculations.odds,
         payout: parlayCalculations.payout,
-        profit: parlayCalculations.profit
+        profit: parlayCalculations.profit,
+        expectedValue: parlayCalculations.expectedValue,
+        evPercentage: parlayCalculations.evPercentage,
+        probability: parlayCalculations.probability,
+        timestamp: new Date().toISOString(),
+        bankrollPercentage: ((parseFloat(parlayAmount) / bankroll) * 100).toFixed(2)
       });
     }
     
@@ -213,6 +319,7 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
       onClearAll?.();
       setBetAmounts({});
       setParlayAmount('');
+      setValidationErrors({});
     }
   };
 
@@ -436,6 +543,17 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                               parseFloat(betAmounts[bet.id]) * 
                               (bet.americanOdds > 0 ? (bet.americanOdds / 100) + 1 : (100 / Math.abs(bet.americanOdds)) + 1)
                             )}</span>
+                            <span className="bankroll-percentage">
+                              ({((parseFloat(betAmounts[bet.id]) / bankroll) * 100).toFixed(1)}% of bankroll)
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Validation Error */}
+                        {validationErrors[bet.id] && (
+                          <div className="validation-error">
+                            <AlertCircle size={12} />
+                            <span>{validationErrors[bet.id]}</span>
                           </div>
                         )}
                       </div>
@@ -508,6 +626,39 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                             {formatCurrency(parlayCalculations.profit)}
                           </span>
                         </div>
+                        <div className="payout-row probability">
+                          <span>Win Probability:</span>
+                          <span className="probability-value">
+                            {parlayCalculations.probability.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="payout-row ev">
+                          <span>Expected Value:</span>
+                          <span 
+                            className="ev-value"
+                            style={{ color: parlayCalculations.evPercentage > 0 ? 'var(--success)' : 'var(--danger)' }}
+                          >
+                            {parlayCalculations.evPercentage > 0 ? '+' : ''}{parlayCalculations.evPercentage.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Parlay Validation Errors */}
+                    {(validationErrors.parlay || validationErrors.correlation) && (
+                      <div className="validation-errors">
+                        {validationErrors.parlay && (
+                          <div className="validation-error">
+                            <AlertCircle size={12} />
+                            <span>{validationErrors.parlay}</span>
+                          </div>
+                        )}
+                        {validationErrors.correlation && (
+                          <div className="validation-warning">
+                            <AlertTriangle size={12} />
+                            <span>{validationErrors.correlation}</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

@@ -17,6 +17,8 @@ import LoadingBar from "./components/LoadingBar";
 import PrivateRoute from "./auth/PrivateRoute";
 import MyPicks from './pages/MyPicks';
 import Scores from './pages/Scores';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import { useAuth } from "./auth/AuthProvider";
 import { initBrowserCompat } from "./utils/browserCompat";
 import "./App.css";
@@ -59,6 +61,8 @@ function AppRoutes() {
             <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
             <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
             <Route path="/scores" element={<Scores />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

@@ -29,7 +29,9 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
 
   const generateDateOptions = () => {
     const options = [];
+    // Use current local time to ensure correct date
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day to avoid timezone issues
     
     // Add "All Dates" option
     options.push({ value: "", label: "All Dates" });
