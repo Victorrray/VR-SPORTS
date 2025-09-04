@@ -140,12 +140,25 @@ app.get("/api/odds", async (req, res) => {
     if (regularMarkets.length > 0 || playerPropMarkets.length > 0) {
       // If only player props requested, fetch h2h to get base games
       const marketsToFetch = regularMarkets.length > 0 ? regularMarkets : ['h2h'];
-      const url = `https://api.the-odds-api.com/v4/sports/${sports}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}`;
-      console.log("Fetching base games from:", url);
       
-      const response = await axios.get(url);
-      allGames = response.data || [];
-      console.log(`Got ${allGames.length} games with base markets`);
+      // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
+      for (const sport of sportsArray) {
+        try {
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}`;
+          console.log(`Fetching base games for ${sport} from:`, url);
+          
+          const response = await axios.get(url);
+          const sportGames = response.data || [];
+          console.log(`Got ${sportGames.length} games for ${sport}`);
+          
+          allGames.push(...sportGames);
+        } catch (sportErr) {
+          console.warn(`Failed to fetch games for sport ${sport}:`, sportErr.response?.status, sportErr.response?.data || sportErr.message);
+          // Continue with other sports even if one fails
+        }
+      }
+      
+      console.log(`Got ${allGames.length} total games with base markets`);
       
       // If we only fetched h2h for player props, remove those markets to avoid confusion
       if (regularMarkets.length === 0 && playerPropMarkets.length > 0) {
