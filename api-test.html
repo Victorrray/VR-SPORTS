@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR-Odds API Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #0a0612;
+            color: white;
+        }
+        .test-button { 
+            background: #8b5cf6; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        .test-button:hover { background: #7c3aed; }
+        .result { 
+            background: rgba(139, 92, 246, 0.1); 
+            border: 1px solid #8b5cf6; 
+            border-radius: 8px; 
+            padding: 15px; 
+            margin: 10px 0; 
+            white-space: pre-wrap; 
+        }
+        .success { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .error { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .game { 
+            background: rgba(255,255,255,0.05); 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 6px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        .team { display: flex; align-items: center; gap: 10px; }
+        .logo { width: 30px; height: 30px; }
+    </style>
+</head>
+<body>
+    <h1>🏈 VR-Odds API Connectivity Test</h1>
+    <p>Test your backend API to verify ESPN scores are working:</p>
+    
+    <button class="test-button" onclick="testScoresAPI()">Test Scores API</button>
+    <button class="test-button" onclick="testOddsAPI()">Test Odds API</button>
+    <button class="test-button" onclick="testHealthAPI()">Test Health API</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'https://vr-sports.onrender.com';
+        
+        async function testScoresAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="result">🔄 Testing Scores API...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/scores?sport=americanfootball_nfl`);
+                const data = await response.json();
+                
+                if (response.ok && data.length > 0) {
+                    let html = `<div class="result success">✅ Scores API Working! Found ${data.length} NFL games:</div>`;
+                    
+                    data.slice(0, 5).forEach(game => {
+                        const homeScore = game.scores?.home || 0;
+                        const awayScore = game.scores?.away || 0;
+                        const status = game.status || 'scheduled';
+                        
+                        html += `<div class="game">
+                            <div class="team">
+                                <img class="logo" src="${game.home_team_logo}" alt="${game.home_team}" onerror="this.style.display='none'">
+                                <span>${game.home_team} ${homeScore}</span>
+                            </div>
+                            <div>vs</div>
+                            <div class="team">
+                                <span>${awayScore} ${game.away_team}</span>
+                                <img class="logo" src="${game.away_team_logo}" alt="${game.away_team}" onerror="this.style.display='none'">
+                            </div>
+                            <div>${status}</div>
+                        </div>`;
+                    });
+                    
+                    if (data.length > 5) {
+                        html += `<div class="result">... and ${data.length - 5} more games</div>`;
+                    }
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="result error">❌ No games found. Response: ${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result error">❌ API Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testOddsAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="result">🔄 Testing Odds API...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/odds?sport=americanfootball_nfl&regions=us&markets=h2h`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultsDiv.innerHTML = `<div class="result success">✅ Odds API Working! Found ${data.length} games with odds</div>`;
+                } else {
+                    resultsDiv.innerHTML = `<div class="result error">❌ Odds API Error: ${JSON.stringify(data, null, 2)}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result error">❌ API Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testHealthAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="result">🔄 Testing Health API...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultsDiv.innerHTML = `<div class="result success">✅ Backend Health: ${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    resultsDiv.innerHTML = `<div class="result error">❌ Health Check Failed</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="result error">❌ API Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
