@@ -1,0 +1,244 @@
+/* Accessibility Menu Styles */
+.accessibility-menu {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.accessibility-toggle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.accessibility-toggle:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.accessibility-toggle:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.accessibility-panel {
+  position: absolute;
+  bottom: 60px;
+  right: 0;
+  width: 320px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(16px);
+  padding: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.accessibility-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.accessibility-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.close-button:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.accessibility-options {
+  padding: 16px 20px;
+}
+
+.option-group {
+  margin-bottom: 24px;
+}
+
+.option-group:last-child {
+  margin-bottom: 0;
+}
+
+.option-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.option-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.option-item input[type="checkbox"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.option-item span {
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.option-item small {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-left: 24px;
+}
+
+.font-size-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.font-size-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.font-size-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.font-size-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.font-preview {
+  color: var(--text-primary);
+}
+
+.font-preview.font-normal {
+  font-size: 14px;
+}
+
+.font-preview.font-large {
+  font-size: 16px;
+}
+
+.font-preview.font-extra-large {
+  font-size: 18px;
+}
+
+.keyboard-info {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+}
+
+.keyboard-info p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .accessibility-menu {
+    bottom: 80px; /* Above mobile bottom bar */
+    right: 16px;
+  }
+  
+  .accessibility-panel {
+    width: calc(100vw - 32px);
+    right: -16px;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .accessibility-toggle {
+    border: 2px solid white;
+  }
+  
+  .accessibility-panel {
+    border-width: 2px;
+  }
+  
+  .option-item input {
+    border: 2px solid var(--text-primary);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .accessibility-toggle {
+    transition: none;
+  }
+  
+  .accessibility-toggle:hover {
+    transform: none;
+  }
+  
+  .font-size-option {
+    transition: none;
+  }
+}
+
+/* Focus Styles for Keyboard Navigation */
+.keyboard-navigation .option-item:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.keyboard-navigation .font-size-option:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}

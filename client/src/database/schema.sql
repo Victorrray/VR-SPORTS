@@ -1,5 +1,5 @@
 -- ============================================
--- VR-Odds Database Schema
+-- OddsSightSeer Database Schema
 -- User data persistence and betting features
 -- ============================================
 

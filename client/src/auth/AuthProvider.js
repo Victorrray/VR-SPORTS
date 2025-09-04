@@ -166,7 +166,12 @@ export function AuthProvider({ children }) {
     signUpEmail: (email, password) =>
       supabase.auth.signUp({ email, password }),
     signInWithProvider: (provider = "google") =>
-      supabase.auth.signInWithOAuth({ provider }),
+      supabase.auth.signInWithOAuth({ 
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      }),
     signOut: () => supabase.auth.signOut(),
   };
 

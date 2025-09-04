@@ -81,8 +81,50 @@ export const AccessibilityProvider = ({ children }) => {
       document.body.appendChild(announcement);
       
       setTimeout(() => {
-        document.body.removeChild(announcement);
+        if (document.body.contains(announcement)) {
+          document.body.removeChild(announcement);
+        }
       }, 1000);
+    },
+    skipToContent: () => {
+      const mainContent = document.querySelector('main, [role="main"], #main-content');
+      if (mainContent) {
+        mainContent.focus();
+        mainContent.scrollIntoView({ behavior: 'smooth' });
+      }
+    },
+    trapFocus: (element) => {
+      const focusableElements = element.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      const handleTabKey = (e) => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+              lastElement.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              firstElement.focus();
+              e.preventDefault();
+            }
+          }
+        }
+        if (e.key === 'Escape') {
+          element.dispatchEvent(new CustomEvent('closeFocusTrap'));
+        }
+      };
+
+      element.addEventListener('keydown', handleTabKey);
+      firstElement?.focus();
+
+      return () => {
+        element.removeEventListener('keydown', handleTabKey);
+      };
     }
   };
 

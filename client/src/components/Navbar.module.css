@@ -1,8 +1,8 @@
 :root {
-  /* Enhanced navbar variables matching purple brand design */
-  --nav-bg: linear-gradient(135deg, rgba(34, 20, 48, 0.9) 0%, rgba(15, 11, 26, 0.95) 100%);
-  --nav-border: rgba(139, 92, 246, 0.3);
-  --nav-shadow: 0 6px 20px rgba(139, 92, 246, 0.15);
+  /* Clean navbar variables matching OddsSightSeer branding */
+  --nav-bg: rgba(15, 18, 30, 0.95);
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   --nav-backdrop: blur(20px);
 }
 
@@ -75,7 +75,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 40%, transparent), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
 }
 
 /* Brand Home Button */

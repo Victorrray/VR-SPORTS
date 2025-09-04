@@ -362,51 +362,198 @@ export default function OddsTable({
   const allRows = useMemo(() => {
     if (mode === "props") {
       const propsRows = [];
+      const propGroups = new Map(); // Group props by player+market+point
       
-      // Use real API data from games.bookmakers.markets.outcomes
+      // First pass: collect all props and group them
+      console.log('Processing games for props mode. Total games:', games?.length);
+      
+      // Log what markets we're looking for
+      console.log('Looking for player prop markets containing: player_, batter_, pitcher_');
+      console.log('Looking for DFS sites:', ['prizepicks', 'underdog', 'sleeper']);
+      
+      // Debug: Log raw games data to see what's actually being received
+      games?.forEach((game, idx) => {
+        console.log(`Game ${idx + 1} (${game.id}):`, {
+          sport: game.sport_key,
+          teams: `${game.away_team} @ ${game.home_team}`,
+          bookmakers: game.bookmakers?.length || 0,
+          bookmakerKeys: game.bookmakers?.map(b => b.key) || [],
+          totalMarkets: game.bookmakers?.reduce((sum, b) => sum + (b.markets?.length || 0), 0) || 0,
+          marketKeys: game.bookmakers?.flatMap(b => b.markets?.map(m => m.key) || []) || []
+        });
+      });
+      
+      
       games?.forEach(game => {
-        if (!game.bookmakers) return;
+        if (!game.bookmakers) {
+          console.log('Game has no bookmakers:', game.id);
+          return;
+        }
         
+        console.log(`Game ${game.id} (${game.home_team} vs ${game.away_team}) has ${game.bookmakers.length} bookmakers`);
         game.bookmakers.forEach(bookmaker => {
-          if (!bookmaker.markets) return;
+          if (!bookmaker.markets) {
+            console.log(`Bookmaker ${bookmaker.key} has no markets`);
+            return;
+          }
           
+          console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
           bookmaker.markets.forEach(market => {
-            // Only process player prop markets
-            if (!market.key.includes('player_')) return;
+            // Process ALL markets for DFS sites, and player prop markets for traditional books
+            const isDFSSite = ['prizepicks', 'underdog', 'sleeper'].includes(bookmaker.key?.toLowerCase());
+            const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
             
+            if (!isDFSSite && !isPlayerPropMarket) {
+              console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop`);
+              return;
+            }
+            
+            console.log(`Processing market ${market.key} for bookmaker ${bookmaker.key} with ${market.outcomes?.length || 0} outcomes`);
+            
+            if (!market.outcomes || !Array.isArray(market.outcomes)) {
+              console.log(`Market ${market.key} has no outcomes`);
+              return;
+            }
+            
+            // Handle TheOddsAPI player props format (Over/Under with description)
+            if (isPlayerPropMarket && market.outcomes.some(o => o.name === 'Over' || o.name === 'Under')) {
+              console.log(`Processing TheOddsAPI format for ${market.key}`);
+              
+              // Group Over/Under pairs by player (description field)
+              const playerGroups = {};
+              market.outcomes.forEach(outcome => {
+                const playerName = outcome.description || outcome.name;
+                if (!playerGroups[playerName]) {
+                  playerGroups[playerName] = [];
+                }
+                playerGroups[playerName].push(outcome);
+              });
+              
+              Object.entries(playerGroups).forEach(([playerName, outcomes]) => {
+                if (outcomes.length >= 2) { // Need both Over and Under
+                  const overOutcome = outcomes.find(o => o.name === 'Over');
+                  const underOutcome = outcomes.find(o => o.name === 'Under');
+                  
+                  if (overOutcome && underOutcome && overOutcome.point !== undefined) {
+                    const propKey = `${game.id}-${market.key}-${playerName}-${overOutcome.point}`;
+                    console.log(`Creating prop for ${playerName}: ${market.key} ${overOutcome.point}`);
+                    
+                    if (!propGroups.has(propKey)) {
+                      propGroups.set(propKey, {
+                        game,
+                        mkt: { 
+                          key: market.key, 
+                          name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+                        },
+                        out: {
+                          name: playerName,
+                          price: overOutcome.price,
+                          odds: overOutcome.price,
+                          point: overOutcome.point
+                        },
+                        bk: bookmaker,
+                        sport: game.sport_key,
+                        isPlayerProp: true,
+                        allBooks: []
+                      });
+                    }
+                    
+                    const propGroup = propGroups.get(propKey);
+                    propGroup.allBooks.push({
+                      price: overOutcome.price,
+                      odds: overOutcome.price,
+                      book: bookmaker.title,
+                      bookmaker: bookmaker,
+                      market: market
+                    });
+                  }
+                }
+              });
+              
+              return; // Skip the old processing for this market
+            }
+            
+            // Original processing for other formats
             market.outcomes?.forEach(outcome => {
-              propsRows.push({
-                key: `${game.id}-${bookmaker.key}-${market.key}-${outcome.name}`,
-                game,
-                mkt: { 
-                  key: market.key, 
-                  name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
-                },
-                out: { 
-                  name: outcome.name, 
-                  price: outcome.price, 
-                  odds: outcome.price, 
-                  point: outcome.point || null 
-                },
-                bk: bookmaker,
-                sport: game.sport_key,
-                isPlayerProp: true,
-                allBooks: [{ 
-                  price: outcome.price, 
-                  odds: outcome.price,
-                  book: bookmaker.title,
-                  bookmaker: bookmaker 
-                }]
+              const propKey = `${game.id}-${market.key}-${outcome.name}-${outcome.point || 'no-point'}`;
+              
+              // Log detailed prop creation for debugging
+              if (isDFSSite) {
+                console.log(`Creating prop key: ${propKey} for ${bookmaker.key}`);
+                console.log(`Outcome details:`, {
+                  name: outcome.name,
+                  point: outcome.point,
+                  price: outcome.price,
+                  marketKey: market.key
+                });
+              }
+              
+              if (!propGroups.has(propKey)) {
+                propGroups.set(propKey, {
+                  game,
+                  mkt: { 
+                    key: market.key, 
+                    name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+                  },
+                  out: { 
+                    name: outcome.name, 
+                    price: outcome.price, 
+                    odds: outcome.price, 
+                    point: outcome.point || null 
+                  },
+                  bk: bookmaker,
+                  sport: game.sport_key,
+                  isPlayerProp: true,
+                  allBooks: []
+                });
+              }
+              
+              // Add this bookmaker's odds to the group
+              propGroups.get(propKey).allBooks.push({
+                price: outcome.price, 
+                odds: outcome.price,
+                book: bookmaker.title,
+                bookmaker: bookmaker,
+                market: market
               });
             });
           });
         });
       });
       
+      // Second pass: include all props and apply sportsbook filter
+      console.log(`Total prop groups collected: ${propGroups.size}`);
+      propGroups.forEach((propData, propKey) => {
+        console.log(`Processing prop group: ${propKey} with ${propData.allBooks.length} books`);
+        
+        // Apply sportsbook filter if active
+        if (bookFilter && bookFilter.length > 0) {
+          const hasMatchingBook = propData.allBooks.some(book => {
+            const keyMatch = bookFilter.includes(book.bookmaker?.key);
+            const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
+            console.log('Filtering prop:', propData.out.name, 'Book:', book.bookmaker?.key, book.book, 'Match:', keyMatch || nameMatch);
+            return keyMatch || nameMatch;
+          });
+          if (!hasMatchingBook) {
+            console.log(`Skipping prop ${propKey} - no matching sportsbook`);
+            return; // Skip this prop if no matching sportsbook
+          }
+        }
+        
+        // Add this prop to the results
+        propsRows.push(propData);
+      });
+      
+      console.log(`Total prop groups created: ${propGroups.size}`);
+      console.log(`Total props rows after filtering: ${propsRows.length}`);
+      if (propsRows.length > 0) {
+        console.log('Sample prop row:', propsRows[0]);
+      }
+      
       return propsRows;
     }
 
-    // Regular odds table logic for non-props mode
+    // Regular game mode processing
     const gameRows = [];
     games?.forEach((game) => {
       const baseKeys = ["h2h", "spreads", "totals"];
@@ -450,7 +597,8 @@ export default function OddsTable({
               price: o.price, 
               odds: o.price,
               book: o.book,
-              bookmaker: o.bookmaker 
+              bookmaker: o.bookmaker,
+              market: o.market // Include market data for mini-table access
             })),
             sport: game.sport_key
           };
@@ -462,37 +610,34 @@ export default function OddsTable({
     return gameRows;
   }, [games, mode, marketFilter, bookFilter]);
 
-  // Filter rows based on selected books and other criteria
-  const filteredRows = useMemo(() => {
-    return allRows.filter(row => {
-      // Apply book filtering if any books are selected
-      if (bookFilter && bookFilter.length > 0) {
-        return bookFilter.includes(row.bk?.key);
-      }
-      return true;
-    });
-  }, [allRows, bookFilter]);
-
   // Price change detection for flash animations
   const prevPriceRef = useRef({});
   const [priceDelta, setPriceDelta] = useState({});
 
   useEffect(() => {
+    // Skip price change animations for player props mode to prevent glitter effect
+    if (mode === "props") return;
+    
     const prev = prevPriceRef.current || {};
     const nextMap = {}, deltas = {};
-    filteredRows.forEach(row => {
+    let hasChanges = false;
+    
+    allRows.forEach(row => {
       const curr = Number(row?.out?.price ?? row?.out?.odds ?? 0);
       const prevVal = Number(prev[row.key] ?? 0);
       nextMap[row.key] = curr;
-      if (prevVal && curr && curr !== prevVal) deltas[row.key] = curr > prevVal ? 'up' : 'down';
+      if (prevVal && curr && curr !== prevVal) {
+        deltas[row.key] = curr > prevVal ? 'up' : 'down';
+        hasChanges = true;
+      }
     });
     prevPriceRef.current = nextMap;
-    if (Object.keys(deltas).length) {
+    if (hasChanges) {
       setPriceDelta(deltas);
       const t = setTimeout(() => setPriceDelta({}), 900);
       return () => clearTimeout(t);
     }
-  }, [filteredRows]);
+  }, [allRows, mode]);
 
   /* ---------- EV / fair maps ---------- */
   const getEV = row => {
@@ -630,7 +775,12 @@ export default function OddsTable({
   );
   if (!allRows.length) return (
     <div className="odds-table-card">
-      <div className="spinner-wrap" style={{ padding:"2em 0" }}><p>No bets found.</p></div>
+      <div className="spinner-wrap" style={{ padding:"2em 0" }}>
+        <p>No player props available from sportsbooks at this time.</p>
+        <p style={{ fontSize: '0.9em', opacity: 0.7, marginTop: '0.5em' }}>
+          Player props may not be available for all games or may be limited by the odds provider.
+        </p>
+      </div>
     </div>
   );
 
@@ -915,12 +1065,18 @@ export default function OddsTable({
                           {/* Header row */}
                           <div className="mini-swipe-header">
                             <div className="mini-header-book">Book</div>
-                            <div className="mini-header-odds">
-                              {String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}
-                            </div>
-                            <div className="mini-header-odds">
-                              {String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}
-                            </div>
+                            {mode === "props" ? (
+                              <div className="mini-header-odds mini-props-header">Odds</div>
+                            ) : (
+                              <>
+                                <div className="mini-header-odds">
+                                  {String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}
+                                </div>
+                                <div className="mini-header-odds">
+                                  {String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}
+                                </div>
+                              </>
+                            )}
                             <div className="mini-header-pick">Pick</div>
                           </div>
 
@@ -937,13 +1093,21 @@ export default function OddsTable({
                             const isSpreads = mkRow.includes('spread');
                             const oPointStr = String(row.out.point ?? '');
 
-                            const seen = new Set();
-                            const uniq = [];
-                            row.allBooks.forEach(ob => {
-                              const key = String(ob?.bookmaker?.key || ob.book || '').toLowerCase();
-                              if (!seen.has(key)) { seen.add(key); uniq.push(ob); }
-                            });
-                            const cols = uniq.slice().sort((a,b)=>toDec(b.price??b.odds)-toDec(a.price??a.odds)).slice(0, 6);
+                            // For player props, use the allBooks data that's already grouped
+                            let cols = [];
+                            if (mode === "props") {
+                              // Use the pre-grouped allBooks data
+                              cols = (row.allBooks || []).slice().sort((a,b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds)).slice(0, 6);
+                            } else {
+                              // Original logic for regular games
+                              const seen = new Set();
+                              const uniq = [];
+                              row.allBooks.forEach(ob => {
+                                const key = String(ob?.bookmaker?.key || ob.book || '').toLowerCase();
+                                if (!seen.has(key)) { seen.add(key); uniq.push(ob); }
+                              });
+                              cols = uniq.slice().sort((a,b)=>toDec(b.price??b.odds)-toDec(a.price??a.odds)).slice(0, 6);
+                            }
 
                             const grab = (ob, top) => {
                               // For player props mode, return the odds directly
@@ -951,23 +1115,45 @@ export default function OddsTable({
                                 return ob.price ?? ob.odds ?? '';
                               }
                               
-                              const outs = Array.isArray(ob?.market?.outcomes) ? ob.market.outcomes : [];
+                              // Debug: Log the structure to understand what we're working with
+                              console.log('Mini-table grab debug:', { ob, top, isML, isTotals, isSpreads });
+                              
+                              // Try multiple data structure patterns
+                              let outs = [];
+                              if (Array.isArray(ob?.market?.outcomes)) {
+                                outs = ob.market.outcomes;
+                              } else if (Array.isArray(ob?.outcomes)) {
+                                outs = ob.outcomes;
+                              } else if (ob?.bookmaker && Array.isArray(ob.bookmaker.markets)) {
+                                // Find the matching market in the bookmaker data
+                                const market = ob.bookmaker.markets.find(m => m.key === row.mkt?.key);
+                                if (market && Array.isArray(market.outcomes)) {
+                                  outs = market.outcomes;
+                                }
+                              }
+                              
                               if (isML) {
                                 const name = top ? row.game.home_team : row.game.away_team;
                                 const f = outs.find(x => x && x.name === name);
-                                return f ? (f.price ?? f.odds) : '';
+                                const result = f ? (f.price ?? f.odds) : '';
+                                console.log('ML result:', { name, found: f, result });
+                                return result;
                               }
                               if (isTotals) {
                                 const name = top ? 'Over' : 'Under';
                                 const f = outs.find(x => x && x.name === name && String(x.point ?? '') === oPointStr);
-                                return f ? (f.price ?? f.odds) : '';
+                                const result = f ? (f.price ?? f.odds) : '';
+                                console.log('Totals result:', { name, point: oPointStr, found: f, result });
+                                return result;
                               }
                               if (isSpreads) {
                                 const name = top ? row.game.home_team : row.game.away_team;
                                 const ptAbs = Math.abs(Number(row.out.point ?? 0));
                                 const f = outs.find(x => x && x.name === name && Math.abs(Number(x.point ?? 0)) === ptAbs) ||
                                           outs.find(x => x && x.name === name);
-                                return f ? (f.price ?? f.odds) : '';
+                                const result = f ? (f.price ?? f.odds) : '';
+                                console.log('Spreads result:', { name, ptAbs, found: f, result });
+                                return result;
                               }
                               return '';
                             };
@@ -983,59 +1169,66 @@ export default function OddsTable({
                             };
 
                             return cols.map((ob, i) => (
-                              <div className="mini-swipe-row" key={ob._rowId || i}>
-                                <div className="mini-book-col">
-                                  {mode === "props" ? (
-                                    <div className="mini-prop-info">
-                                      <div className="mini-prop-book">{cleanBookTitle(ob.book)}</div>
-                                      <div className="mini-prop-side">
-                                        {row.out.name.includes('Over') ? 'Over' : 'Under'} {row.out.point}
+                                <div className="mini-swipe-row" key={ob._rowId || i}>
+                                  <div className="mini-book-col">
+                                    {mode === "props" ? (
+                                      <div className="mini-prop-info">
+                                        <div className="mini-prop-book">{cleanBookTitle(ob.book)}</div>
+                                        <div className="mini-prop-side">
+                                          {row.out.name.includes('Over') ? 'Over' : 'Under'} {row.out.point}
+                                        </div>
                                       </div>
-                                    </div>
-                                  ) : (
-                                    cleanBookTitle(ob.book)
-                                  )}
-                                </div>
-                                {mode === "props" ? (
-                                  // For props, show single odds column
-                                  <div className="mini-odds-col mini-props-odds">
-                                    <div className="mini-swipe-odds">
-                                      {formatOdds(Number(grab(ob, true)))}
-                                    </div>
+                                    ) : (
+                                      cleanBookTitle(ob.book)
+                                    )}
                                   </div>
-                                ) : (
-                                  // For regular games, show two odds columns
-                                  <>
-                                    <div className="mini-odds-col">
-                                      <div className="mini-swipe-odds">
-                                        {formatOdds(Number(grab(ob, true)))}
+                                  {mode === "props" ? (
+                                    // For props, show single odds column spanning both columns
+                                    <>
+                                      <div className="mini-odds-col">
+                                        <div className="mini-swipe-odds">
+                                          {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
+                                        </div>
                                       </div>
-                                    </div>
-                                    <div className="mini-odds-col">
-                                      <div className="mini-swipe-odds">
-                                        {formatOdds(Number(grab(ob, false)))}
+                                      <div className="mini-odds-col">
+                                        <div className="mini-swipe-odds" style={{ opacity: 0.3 }}>
+                                          —
+                                        </div>
                                       </div>
-                                    </div>
-                                  </>
-                                )}
-                                <div className="mini-pick-col">
-                                  <button 
-                                    className="add-pick-btn"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (onAddBet) {
-                                        addToBetSlip(row, ob, e.target);
-                                      } else {
-                                        addToPicks(row, ob, true, e.target);
-                                      }
-                                    }}
-                                    title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
-                                  >
-                                    +
-                                  </button>
+                                    </>
+                                  ) : (
+                                    // For regular games, show two odds columns
+                                    <>
+                                      <div className="mini-odds-col">
+                                        <div className="mini-swipe-odds">
+                                          {formatOdds(Number(grab(ob, true)))}
+                                        </div>
+                                      </div>
+                                      <div className="mini-odds-col">
+                                        <div className="mini-swipe-odds">
+                                          {formatOdds(Number(grab(ob, false)))}
+                                        </div>
+                                      </div>
+                                    </>
+                                  )}
+                                  <div className="mini-pick-col">
+                                    <button 
+                                      className="add-pick-btn"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onAddBet) {
+                                          addToBetSlip(row, ob, e.target);
+                                        } else {
+                                          addToPicks(row, ob, true, e.target);
+                                        }
+                                      }}
+                                      title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
+                                    >
+                                      +
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            ));
+                              ));
                           })()}
                         </div>
                       )}
@@ -1054,8 +1247,14 @@ export default function OddsTable({
                             <div className="mini-col-type">{marketTypeLabel(row?.mkt?.key || '')}</div>
                             <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
                             <div className="mini-legend-stack">
-                              <div className="legend-team top">{String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}</div>
-                              <div className="legend-team bot">{String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}</div>
+                              {mode === "props" ? (
+                                <div className="legend-team top">Odds</div>
+                              ) : (
+                                <>
+                                  <div className="legend-team top">{String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}</div>
+                                  <div className="legend-team bot">{String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}</div>
+                                </>
+                              )}
                             </div>
                           </div>
 
@@ -1071,13 +1270,20 @@ export default function OddsTable({
                             const isTotals = mkRow.includes('total');
                             const oPointStr = String(row.out.point ?? '');
 
-                            const seenAll = new Set();
-                            const uniqueAll = [];
-                            row.allBooks.forEach(ob => {
-                              const k = String(ob?.bookmaker?.key || ob.book || "").toLowerCase();
-                              if (!seenAll.has(k)) { seenAll.add(k); uniqueAll.push(ob); }
-                            });
-                            const sortedAll = uniqueAll.slice().sort((a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds)).slice(0, 8);
+                            let sortedAll = [];
+                            if (mode === "props") {
+                              // Use the pre-grouped allBooks data for player props
+                              sortedAll = (row.allBooks || []).slice().sort((a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds)).slice(0, 8);
+                            } else {
+                              // Original logic for regular games
+                              const seenAll = new Set();
+                              const uniqueAll = [];
+                              row.allBooks.forEach(ob => {
+                                const k = String(ob?.bookmaker?.key || ob.book || "").toLowerCase();
+                                if (!seenAll.has(k)) { seenAll.add(k); uniqueAll.push(ob); }
+                              });
+                              sortedAll = uniqueAll.slice().sort((a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds)).slice(0, 8);
+                            }
 
                             const fmt = (out) => {
                               const n = Number(out);
@@ -1091,25 +1297,39 @@ export default function OddsTable({
                             };
 
                             return sortedAll.map((p, i) => {
-                              const outs = Array.isArray(p?.market?.outcomes) ? p.market.outcomes : [];
-                              const top = isML
-                                ? outs.find(x => x && x.name === row.game.home_team)
-                                : isTotals
-                                  ? outs.find(x => x && x.name === 'Over' && String(x.point ?? '') === oPointStr)
-                                  : outs.find(x => x && x.name === row.game.home_team);
-                              const bot = isML
-                                ? outs.find(x => x && x.name === row.game.away_team)
-                                : isTotals
-                                  ? outs.find(x => x && x.name === 'Under' && String(x.point ?? '') === oPointStr)
-                                  : outs.find(x => x && x.name === row.game.away_team);
-                              return (
-                                <div key={p._rowId || i} className="mini-table-header-cell">
-                                  <div className="mini-book-name" title={cleanBookTitle(p.book)}>{cleanBookTitle(p.book)}</div>
-                                  <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
-                                  <div className="mini-table-odds-cell">{fmt(top?.price ?? top?.odds)}</div>
-                                  <div className="mini-table-odds-cell" style={{ marginTop:6 }}>{fmt(bot?.price ?? bot?.odds)}</div>
-                                </div>
-                              );
+                              if (mode === "props") {
+                                // For player props, show single odds value
+                                return (
+                                  <div key={p._rowId || i} className="mini-table-header-cell">
+                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>{cleanBookTitle(p.book)}</div>
+                                    <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
+                                    <div className="mini-table-odds-cell">{fmt(p.price ?? p.odds)}</div>
+                                    <div className="mini-table-odds-cell" style={{ marginTop:6, opacity: 0.3 }}>—</div>
+                                  </div>
+                                );
+                              } else {
+                                // Fix: Check multiple possible data structures for outcomes
+                                const outs = Array.isArray(p?.market?.outcomes) ? p.market.outcomes : 
+                                            Array.isArray(p?.outcomes) ? p.outcomes : [];
+                                const top = isML
+                                  ? outs.find(x => x && x.name === row.game.home_team)
+                                  : isTotals
+                                    ? outs.find(x => x && x.name === 'Over' && String(x.point ?? '') === oPointStr)
+                                    : outs.find(x => x && x.name === row.game.home_team);
+                                const bot = isML
+                                  ? outs.find(x => x && x.name === row.game.away_team)
+                                  : isTotals
+                                    ? outs.find(x => x && x.name === 'Under' && String(x.point ?? '') === oPointStr)
+                                    : outs.find(x => x && x.name === row.game.away_team);
+                                return (
+                                  <div key={p._rowId || i} className="mini-table-header-cell">
+                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>{cleanBookTitle(p.book)}</div>
+                                    <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
+                                    <div className="mini-table-odds-cell">{fmt(top?.price ?? top?.odds)}</div>
+                                    <div className="mini-table-odds-cell" style={{ marginTop:6 }}>{fmt(bot?.price ?? bot?.odds)}</div>
+                                  </div>
+                                );
+                              }
                             });
                           })()}
                         </div>

@@ -29,23 +29,24 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
 
   const generateDateOptions = () => {
     const options = [];
-    // Use current local time to ensure correct date
+    // Get current date in user's local timezone
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset to start of day to avoid timezone issues
+    // Create a new date object using local date components to avoid timezone issues
+    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     
     // Add "All Dates" option
     options.push({ value: "", label: "All Dates" });
     
     // Add today
     options.push({ 
-      value: today.toISOString().split('T')[0], 
+      value: localToday.toISOString().split('T')[0], 
       label: "Today" 
     });
     
     // Add next 7 days
     for (let i = 1; i <= 7; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
+      const date = new Date(localToday);
+      date.setDate(localToday.getDate() + i);
       const value = date.toISOString().split('T')[0];
       const label = date.toLocaleDateString('en-US', { 
         weekday: 'short',

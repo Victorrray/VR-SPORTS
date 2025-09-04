@@ -34,27 +34,25 @@ export default function SportMultiSelect({
     const h = (e) => {
       const box = boxRef.current;
       const menu = menuRef.current;
-      if (!box) return setOpen(false);
+      if (!box) return;
+      
+      // Don't close if clicking inside the toggle button or menu
       if (box.contains(e.target)) return;
       if (menu && menu.contains && menu.contains(e.target)) return;
-      // Don't close if clicking inside mobile filter sheet
-      if (e.target.closest('.mfs-content') || e.target.closest('.mobile-filters-sheet')) return;
+      
+      // Don't close if clicking inside mobile filter sheet or any dropdown content
+      if (e.target.closest('.mfs-content') || 
+          e.target.closest('.mobile-filters-sheet') ||
+          e.target.closest('.ms-menu') ||
+          e.target.closest('.ms-mobile-sheet')) return;
+      
       setOpen(false);
-    };
-    
-    // Prevent closing when clicking inside filter sheet
-    const preventClose = (e) => {
-      if (e.target.closest('.mfs-content') || e.target.closest('.mobile-filters-sheet')) {
-        e.stopPropagation();
-      }
     };
     
     if (open) {
       document.addEventListener("mousedown", h);
-      document.addEventListener("mousedown", preventClose, true);
       return () => {
         document.removeEventListener("mousedown", h);
-        document.removeEventListener("mousedown", preventClose, true);
       };
     }
   }, [open]);
@@ -123,8 +121,7 @@ export default function SportMultiSelect({
         ? selected.filter((k) => k !== key)
         : [...selected, key];
       onChange(newSelection);
-      // Don't close dropdown on selection for better UX
-      // setOpen(false);
+      // Keep dropdown open for multiple selections
     } catch (error) {
       console.error('Error updating selection:', error);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle } from 'lucide-react';
 import './PersonalizedDashboard.css';
 
@@ -13,13 +13,17 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   });
 
   useEffect(() => {
-    if (games?.length) {
+    if (games?.length && games.length > 0) {
       // Only generate data once when games first load, not on every update
-      generateDashboardData();
+      const timeoutId = setTimeout(() => {
+        generateDashboardData();
+      }, 100); // Small delay to prevent rapid re-renders
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [games?.length, userPreferences]); // Only depend on games length, not the games array itself
+  }, [games?.length]); // Remove userPreferences dependency to prevent unnecessary updates
 
-  const generateDashboardData = () => {
+  const generateDashboardData = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
     const todayGames = games.filter(game => 
       game.commence_time && game.commence_time.startsWith(today)
@@ -90,7 +94,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       recommendedBets,
       alerts: alerts.slice(0, 2) // Show max 2 alerts
     });
-  };
+  }, [games]);
 
   const StatCard = ({ icon: Icon, title, value, subtitle, color = 'var(--accent)' }) => (
     <div className="stat-card">

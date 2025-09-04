@@ -5,6 +5,11 @@ import { AuthProvider } from './auth/AuthProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AccessibilityProvider } from './components/AccessibilityProvider';
 import { BetSlipProvider } from './contexts/BetSlipContext';
+import { ToastProvider } from './components/Toast';
+import { HelmetProvider } from 'react-helmet-async';
+import SkipToContent from './components/SkipToContent';
+import AccessibilityMenu from './components/AccessibilityMenu';
+import { registerServiceWorker } from './utils/bundleOptimization';
 import Navbar from './components/Navbar';
 import MobileBottomBar from './components/MobileBottomBar';
 import Footer from './components/Footer';
@@ -39,6 +44,18 @@ function AppRoutes() {
     }
   }, [user]);
 
+  // Redirect non-authenticated users from protected pages to landing page
+  const shouldRedirectToLanding = !user && (
+    location.pathname === '/sportsbooks' ||
+    location.pathname === '/scores' ||
+    location.pathname === '/picks' ||
+    location.pathname === '/account'
+  );
+
+  if (shouldRedirectToLanding) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <React.Suspense
       fallback={
@@ -51,37 +68,40 @@ function AppRoutes() {
     >
       <div className="app">
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        <Navbar />
-        <LoadingBar />
-        <main id="main-content" className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/sportsbooks" element={<SportsbookMarkets />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
-            <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
-            <Route path="/scores" element={<Scores />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-        {/* Only show footer on landing and login pages */}
-        {(location.pathname === "/" || location.pathname === "/login") && <Footer />}
-        
-        {/* Username Setup Modal */}
-        {showUsernameSetup && (
-          <UsernameSetup onComplete={() => setShowUsernameSetup(false)} />
-        )}
-        
-        {/* Mobile bottom bar is handled by individual pages */}
+        <div className="app-layout">
+          <SkipToContent />
+          <LoadingBar />
+          <Navbar />
+          <main className="main-content" id="main-content" tabIndex="-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/sportsbooks" element={user ? <SportsbookMarkets /> : <Navigate to="/" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
+              <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
+              <Route path="/scores" element={user ? <Scores /> : <Navigate to="/" replace />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+          {/* Only show footer on landing and login pages */}
+          {(location.pathname === "/" || location.pathname === "/login") && <Footer />}
+          
+          {/* Username Setup Modal */}
+          {showUsernameSetup && (
+            <UsernameSetup onComplete={() => setShowUsernameSetup(false)} />
+          )}
+          
+          {/* Mobile bottom bar is handled by individual pages */}
+        </div>
       </div>
     </React.Suspense>
   );
 }
 
-export default function App() {
-  React.useEffect(() => {
+function App() {
+  useEffect(() => {
     try {
       const el = document.body;
       Array.from(el.classList)
@@ -91,18 +111,27 @@ export default function App() {
       
       // Initialize browser compatibility fixes
       initBrowserCompat();
+      
+      // Register service worker for caching
+      registerServiceWorker();
     } catch {}
   }, []);
   
   return (
-    <AuthProvider>
-      <BetSlipProvider>
-        <AccessibilityProvider>
-          <ErrorBoundary>
-            <AppRoutes />
-          </ErrorBoundary>
-        </AccessibilityProvider>
-      </BetSlipProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <BetSlipProvider>
+          <AccessibilityProvider>
+            <ToastProvider>
+              <ErrorBoundary>
+                <AppRoutes />
+              </ErrorBoundary>
+            </ToastProvider>
+          </AccessibilityProvider>
+        </BetSlipProvider>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
+
+export default App;

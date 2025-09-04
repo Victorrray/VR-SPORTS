@@ -6,7 +6,8 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-const API_KEY = process.env.ODDS_API_KEY || null;
+const API_KEY = process.env.ODDS_API_KEY;
+const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
 
 if (!API_KEY) {
   console.warn("⚠️  Missing ODDS_API_KEY in .env (odds endpoints will still work for ESPN scores).");
@@ -104,37 +105,101 @@ app.get("/api/odds", async (req, res) => {
     
     const sportsArray = sports.split(',');
     const marketsArray = markets.split(',');
-    const allGames = [];
+    let allGames = [];
     
     // Check if player props are requested
-    const playerPropMarkets = marketsArray.filter(m => m.includes('player_'));
-    const regularMarkets = marketsArray.filter(m => !m.includes('player_'));
+    const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
+    const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
     
-    // Fetch regular odds for each sport
-    for (const sport of sportsArray) {
-      try {
-        if (regularMarkets.length > 0) {
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport.trim())}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${regularMarkets.join(',')}&oddsFormat=${oddsFormat}`;
-          const r = await axios.get(url);
-          const games = Array.isArray(r.data) ? r.data : [];
-          allGames.push(...games);
-        }
-      } catch (sportErr) {
-        console.warn(`Failed to fetch odds for sport ${sport}:`, sportErr.message);
+    console.log('Player prop markets requested:', playerPropMarkets);
+    console.log('Regular markets requested:', regularMarkets);
+    
+    // Step 1: Fetch regular odds (h2h, spreads, totals) if requested, OR fetch base games for player props
+    if (regularMarkets.length > 0 || playerPropMarkets.length > 0) {
+      // If only player props requested, fetch h2h to get base games
+      const marketsToFetch = regularMarkets.length > 0 ? regularMarkets : ['h2h'];
+      const url = `https://api.the-odds-api.com/v4/sports/${sports}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}`;
+      console.log("Fetching base games from:", url);
+      
+      const response = await axios.get(url);
+      allGames = response.data || [];
+      console.log(`Got ${allGames.length} games with base markets`);
+      
+      // If we only fetched h2h for player props, remove those markets to avoid confusion
+      if (regularMarkets.length === 0 && playerPropMarkets.length > 0) {
+        allGames.forEach(game => {
+          game.bookmakers.forEach(bookmaker => {
+            bookmaker.markets = bookmaker.markets.filter(market => !['h2h'].includes(market.key));
+          });
+        });
       }
     }
     
-    // Add mock player props if requested and games exist
-    // NOTE: These are MOCK/SIMULATED player props, not real API data
-    // The Odds API doesn't provide player props in their free tier
+    // Step 2: Fetch player props for each game individually (if requested)
     if (playerPropMarkets.length > 0 && allGames.length > 0) {
-      allGames.forEach(game => {
-        if (game.sport_key === 'americanfootball_nfl') {
-          addNFLPlayerProps(game, playerPropMarkets);
+      console.log(`Fetching player props for ${allGames.length} games...`);
+      
+      for (const game of allGames) {
+        try {
+          // Use TheOddsAPI's /events/{eventId}/odds endpoint for player props
+          const eventUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}`;
+          console.log(`Fetching props for game ${game.id}:`, eventUrl);
+          
+          const propResponse = await axios.get(eventUrl);
+          const propData = propResponse.data;
+          
+          if (propData && propData.bookmakers && propData.bookmakers.length > 0) {
+            console.log(`Got ${propData.bookmakers.length} bookmakers with props for game ${game.id}`);
+            
+            // Merge prop bookmakers with existing game bookmakers
+            propData.bookmakers.forEach(propBookmaker => {
+              // Find existing bookmaker in game or add new one
+              let existingBookmaker = game.bookmakers.find(b => b.key === propBookmaker.key);
+              
+              if (existingBookmaker) {
+                // Add prop markets to existing bookmaker
+                existingBookmaker.markets = existingBookmaker.markets || [];
+                existingBookmaker.markets.push(...(propBookmaker.markets || []));
+              } else {
+                // Add new bookmaker with prop markets
+                game.bookmakers.push(propBookmaker);
+              }
+            });
+          } else {
+            console.log(`No prop data returned for game ${game.id} from TheOddsAPI - trying SportsGameOdds fallback`);
+            
+            // Try SportsGameOdds API as fallback
+            if (SPORTSGAMEODDS_API_KEY) {
+              try {
+                await fetchSportsGameOddsPlayerProps(game);
+              } catch (sgoErr) {
+                console.warn(`SportsGameOdds fallback also failed for game ${game.id}:`, sgoErr.message);
+              }
+            } else {
+              console.log(`No SportsGameOdds API key configured - skipping fallback`);
+            }
+          }
+          
+        } catch (propErr) {
+          console.warn(`Failed to fetch props for game ${game.id} from TheOddsAPI:`, propErr.message);
+          console.warn(`Error details:`, propErr.response?.status, propErr.response?.data);
+          
+          // Try SportsGameOdds API as fallback
+          if (SPORTSGAMEODDS_API_KEY) {
+            console.log(`Trying SportsGameOdds fallback for game ${game.id}`);
+            try {
+              await fetchSportsGameOddsPlayerProps(game);
+            } catch (sgoErr) {
+              console.warn(`SportsGameOdds fallback also failed for game ${game.id}:`, sgoErr.message);
+            }
+          } else {
+            console.log(`No SportsGameOdds API key configured - skipping fallback`);
+          }
         }
-      });
+      }
     }
     
+    console.log(`Returning ${allGames.length} games total`);
     res.json(allGames);
   } catch (err) {
     console.error("odds error:", err?.response?.status, err?.response?.data || err.message);
@@ -142,6 +207,198 @@ app.get("/api/odds", async (req, res) => {
     res.status(status).json({ error: String(err) });
   }
 });
+
+// Helper function to fetch player props from SportsGameOdds API
+async function fetchSportsGameOddsPlayerProps(game) {
+  if (!SPORTSGAMEODDS_API_KEY) {
+    throw new Error('SportsGameOdds API key not configured');
+  }
+
+  try {
+    // Map sport keys from TheOddsAPI to SportsGameOdds league IDs
+    const leagueMapping = {
+      'americanfootball_nfl': 'NFL',
+      'basketball_nba': 'NBA', 
+      'baseball_mlb': 'MLB',
+      'icehockey_nhl': 'NHL'
+    };
+
+    const sgoLeagueID = leagueMapping[game.sport_key];
+    if (!sgoLeagueID) {
+      console.log(`Sport ${game.sport_key} not supported by SportsGameOdds fallback`);
+      return;
+    }
+
+    // SportsGameOdds API endpoint for events with leagueID
+    const eventsUrl = `https://api.sportsgameodds.com/v2/events`;
+    
+    // Get events for the specific league
+    const eventsResponse = await axios.get(eventsUrl, {
+      headers: {
+        'x-api-key': SPORTSGAMEODDS_API_KEY
+      },
+      params: {
+        leagueID: sgoLeagueID,
+        format: 'json'
+      }
+    });
+
+    const eventsData = eventsResponse.data;
+    if (!eventsData || !eventsData.success || !eventsData.data || eventsData.data.length === 0) {
+      console.log(`No events found for league ${sgoLeagueID} in SportsGameOdds`);
+      return;
+    }
+
+    // Find matching event by team names
+    const matchingEvent = eventsData.data.find(event => {
+      const homeTeam = event.homeTeam?.toLowerCase() || '';
+      const awayTeam = event.awayTeam?.toLowerCase() || '';
+      const gameHome = game.home_team?.toLowerCase() || '';
+      const gameAway = game.away_team?.toLowerCase() || '';
+      
+      return (homeTeam.includes(gameHome) || gameHome.includes(homeTeam)) &&
+             (awayTeam.includes(gameAway) || gameAway.includes(awayTeam));
+    });
+
+    if (!matchingEvent) {
+      console.log(`No matching event found for ${game.home_team} vs ${game.away_team} in SportsGameOdds`);
+      console.log(`Available events:`, eventsData.data.map(e => `${e.homeTeam} vs ${e.awayTeam}`));
+      return;
+    }
+
+    console.log(`Found matching event: ${matchingEvent.homeTeam} vs ${matchingEvent.awayTeam} (ID: ${matchingEvent.eventID})`);
+
+    // Now get odds for the specific event
+    const oddsUrl = `https://api.sportsgameodds.com/v2/odds`;
+    const response = await axios.get(oddsUrl, {
+      headers: {
+        'x-api-key': SPORTSGAMEODDS_API_KEY
+      },
+      params: {
+        eventID: matchingEvent.eventID,
+        format: 'json'
+      }
+    });
+
+    const sgoData = response.data;
+    console.log(`SportsGameOdds returned data for ${game.id}:`, sgoData ? 'Success' : 'No data');
+
+    if (sgoData && sgoData.data && sgoData.data.length > 0) {
+      // Transform SportsGameOdds data to TheOddsAPI format
+      const transformedBookmakers = transformSportsGameOddsData(sgoData, game);
+      
+      if (transformedBookmakers.length > 0) {
+        console.log(`Successfully transformed ${transformedBookmakers.length} bookmakers from SportsGameOdds for game ${game.id}`);
+        
+        // Merge with existing game bookmakers
+        transformedBookmakers.forEach(sgoBookmaker => {
+          let existingBookmaker = game.bookmakers.find(b => b.key === sgoBookmaker.key);
+          
+          if (existingBookmaker) {
+            existingBookmaker.markets = existingBookmaker.markets || [];
+            existingBookmaker.markets.push(...(sgoBookmaker.markets || []));
+          } else {
+            game.bookmakers.push(sgoBookmaker);
+          }
+        });
+      }
+    }
+
+  } catch (error) {
+    console.error(`SportsGameOdds API error for game ${game.id}:`, error.message);
+    throw error;
+  }
+}
+
+// Helper function to transform SportsGameOdds data to TheOddsAPI format
+function transformSportsGameOddsData(sgoData, game) {
+  const bookmakers = [];
+  
+  try {
+    console.log('Transforming SportsGameOdds data:', JSON.stringify(sgoData, null, 2));
+    
+    // Group odds by bookmaker
+    const bookmakerGroups = {};
+    
+    // SportsGameOdds v2 API structure
+    const oddsArray = sgoData.data || sgoData.odds || [];
+    
+    oddsArray.forEach(odd => {
+      console.log('Processing odd:', JSON.stringify(odd, null, 2));
+      
+      // Check if this is a player prop
+      const isPlayerProp = odd.market_type === 'player_props' || 
+                          odd.bet_type === 'player_prop' ||
+                          odd.category === 'player' ||
+                          (odd.market && odd.market.includes('player'));
+      
+      if (!isPlayerProp || !odd.bookmaker) return;
+      
+      const bookmakerKey = odd.bookmaker.toLowerCase().replace(/\s+/g, '_');
+      if (!bookmakerGroups[bookmakerKey]) {
+        bookmakerGroups[bookmakerKey] = {
+          key: bookmakerKey,
+          title: odd.bookmaker,
+          markets: []
+        };
+      }
+      
+      // Transform player prop to TheOddsAPI format
+      const market = {
+        key: `player_${odd.prop_type || odd.market || 'unknown'}`,
+        outcomes: []
+      };
+      
+      // Handle different SportsGameOdds data formats
+      if (odd.over_price && odd.under_price && odd.line !== undefined) {
+        market.outcomes.push({
+          name: 'Over',
+          price: parseFloat(odd.over_price),
+          point: parseFloat(odd.line),
+          description: odd.player_name || odd.player || 'Unknown Player'
+        });
+        
+        market.outcomes.push({
+          name: 'Under', 
+          price: parseFloat(odd.under_price),
+          point: parseFloat(odd.line),
+          description: odd.player_name || odd.player || 'Unknown Player'
+        });
+      } else if (odd.odds && Array.isArray(odd.odds)) {
+        // Handle array format
+        odd.odds.forEach(outcome => {
+          if (outcome.name && outcome.price) {
+            market.outcomes.push({
+              name: outcome.name,
+              price: parseFloat(outcome.price),
+              point: outcome.point ? parseFloat(outcome.point) : undefined,
+              description: odd.player_name || odd.player || 'Unknown Player'
+            });
+          }
+        });
+      }
+      
+      if (market.outcomes.length > 0) {
+        bookmakerGroups[bookmakerKey].markets.push(market);
+        console.log(`Added market for ${bookmakerKey}:`, market);
+      }
+    });
+    
+    // Convert to array
+    Object.values(bookmakerGroups).forEach(bookmaker => {
+      if (bookmaker.markets.length > 0) {
+        bookmakers.push(bookmaker);
+      }
+    });
+    
+    console.log(`Transformed ${bookmakers.length} bookmakers from SportsGameOdds`);
+    
+  } catch (transformError) {
+    console.error('Error transforming SportsGameOdds data:', transformError);
+  }
+  
+  return bookmakers;
+}
 
 // Helper function to add realistic NFL player props
 function addNFLPlayerProps(game, requestedMarkets) {
@@ -210,8 +467,8 @@ function addNFLPlayerProps(game, requestedMarkets) {
           draftKingsBook.markets.push({
             key: marketKey,
             outcomes: [
-              { name: player, price: 150, point: baseLine }, // Over
-              { name: player, price: -180, point: baseLine } // Under
+              { name: 'Over', description: player, price: 150, point: baseLine },
+              { name: 'Under', description: player, price: -180, point: baseLine }
             ]
           });
         });
@@ -222,8 +479,8 @@ function addNFLPlayerProps(game, requestedMarkets) {
           draftKingsBook.markets.push({
             key: marketKey,
             outcomes: [
-              { name: player, price: -110, point: baseYards }, // Over
-              { name: player, price: -110, point: baseYards } // Under
+              { name: 'Over', description: player, price: -110, point: baseYards },
+              { name: 'Under', description: player, price: -110, point: baseYards }
             ]
           });
         });
@@ -234,8 +491,8 @@ function addNFLPlayerProps(game, requestedMarkets) {
           draftKingsBook.markets.push({
             key: marketKey,
             outcomes: [
-              { name: player, price: -115, point: baseYards }, // Over
-              { name: player, price: -105, point: baseYards } // Under
+              { name: 'Over', description: player, price: -115, point: baseYards },
+              { name: 'Under', description: player, price: -105, point: baseYards }
             ]
           });
         });
@@ -254,7 +511,8 @@ function addNFLPlayerProps(game, requestedMarkets) {
         prizePicksMarkets.push({
           key: marketKey,
           outcomes: [
-            { name: player, price: 200, point: baseLine } // More/Less format
+            { name: 'Over', description: player, price: 200, point: baseLine },
+            { name: 'Under', description: player, price: -250, point: baseLine }
           ]
         });
       });
@@ -265,7 +523,8 @@ function addNFLPlayerProps(game, requestedMarkets) {
         prizePicksMarkets.push({
           key: marketKey,
           outcomes: [
-            { name: player, price: 100, point: baseYards }
+            { name: 'Over', description: player, price: 100, point: baseYards },
+            { name: 'Under', description: player, price: -120, point: baseYards }
           ]
         });
       });
@@ -275,7 +534,8 @@ function addNFLPlayerProps(game, requestedMarkets) {
         prizePicksMarkets.push({
           key: marketKey,
           outcomes: [
-            { name: player, price: 100, point: baseYards }
+            { name: 'Over', description: player, price: 100, point: baseYards },
+            { name: 'Under', description: player, price: -120, point: baseYards }
           ]
         });
       });

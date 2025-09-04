@@ -1,5 +1,7 @@
 // src/hooks/useMarkets.js
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { debounce, APICache } from '../utils/performance';
+import { useMemoizedCallback } from './useMemoizedCallback';
 import { secureFetch, apiRateLimiter } from '../utils/security';
 import { useCachedFetch, useRealtimeCachedFetch } from './useCachedFetch';
 
@@ -19,52 +21,71 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
   const [cacheStats, setCacheStats] = useState(null);
   const [quota, setQuota] = useState({ remain: "–", used: "–" });
 
-  const marketsParam = useMemo(() => {
-    const CANON = { alternate_spreads: 'spreads_alternate', alternate_totals: 'totals_alternate' };
-    const set = new Set();
-    (markets || []).forEach(k => set.add(CANON[k] || k));
-    return Array.from(set).join(",");
-  }, [markets]);
-
-  const {
-    data: cachedGames,
-    loading: cacheLoading,
-    error: cacheError,
-    refresh: refreshCache,
-    isPolling,
-    startPolling,
-    stopPolling
-  } = useRealtimeCachedFetch('/api/odds', {
-    enabled: sports.length > 0 && regions.length > 0 && markets.length > 0,
-    params: {
-      sports: sports.join(','),
-      regions: regions.join(','),
-      markets: markets.join(',')
-    },
-    pollingInterval: 600000, // 10 minutes - reduced API calls to save costs
-    enablePolling: false, // Disabled auto-polling to stop refresh glitch
-    pauseOnHidden: true,
-    transform: (data) => data || [],
-    onSuccess: (data) => {
-      setLastUpdate(new Date());
-      // Update cache stats
-      import('../utils/cacheManager').then(({ oddsCacheManager }) => {
-        setCacheStats(oddsCacheManager.getStats());
-      });
-    },
-    onError: (err) => {
-      console.error('Markets fetch error:', err);
+  const fetchMarkets = useMemoizedCallback(async () => {
+    if (!sports.length || !regions.length || !markets.length) {
+      console.log('🔍 useMarkets: Skipping fetch - missing required params:', { sports, regions, markets });
+      return;
     }
-  });
 
-  // Sync cached data with local state and extract books
-  useEffect(() => {
-    if (cachedGames) {
-      setGames(cachedGames);
+    // Check cache first
+    const cacheKey = `markets-${sports.join(',')}-${regions.join(',')}-${markets.join(',')}`;
+    const cachedData = APICache.get(cacheKey);
+    if (cachedData) {
+      console.log('🔍 useMarkets: Using cached data');
+      setGames(cachedData);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log('🔍 useMarkets: Starting fetch with params:', { sports, regions, markets });
       
+      // Process markets parameter properly
+      const marketsParam = Array.isArray(markets) ? markets.join(',') : markets;
+      console.log('🔍 useMarkets: Processed marketsParam:', marketsParam);
+      
+      const params = new URLSearchParams({
+        sports: sports.join(','),
+        regions: regions.join(','),
+        markets: marketsParam,
+        oddsFormat: 'american',
+        dateFormat: 'iso'
+      });
+
+      console.log('🔍 useMarkets: Final API URL:', `/api/odds?${params}`);
+      
+      const response = await secureFetch(`/api/odds?${params}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('🔍 useMarkets: Raw API response:', data);
+      
+      const normalizedGames = normalizeArray(data);
+      console.log('🔍 useMarkets: Normalized games:', normalizedGames);
+      
+      // Cache the result
+      APICache.set(cacheKey, normalizedGames);
+      
+      setGames(normalizedGames);
+      setLastUpdate(Date.now());
+    } catch (err) {
+      console.error('🔍 useMarkets: Fetch error:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [sports, regions, markets]);
+
+  useEffect(() => {
+    if (games) {
       // Extract unique books from games data
       const bookSet = new Set();
-      cachedGames.forEach(game => {
+      games.forEach(game => {
         if (game.bookmakers && Array.isArray(game.bookmakers)) {
           game.bookmakers.forEach(book => {
             if (book.key && book.title) {
@@ -77,20 +98,17 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       const uniqueBooks = Array.from(bookSet).map(bookStr => JSON.parse(bookStr));
       setBooks(uniqueBooks);
     }
-  }, [cachedGames]);
+  }, [games]);
+
+  // Debounced fetch to prevent excessive API calls
+  const debouncedFetch = useMemo(
+    () => debounce(fetchMarkets, 500),
+    [fetchMarkets]
+  );
 
   useEffect(() => {
-    setLoading(cacheLoading);
-  }, [cacheLoading]);
-
-  useEffect(() => {
-    setError(cacheError?.message || null);
-  }, [cacheError]);
-
-  // Legacy fetch function for backward compatibility
-  const fetchMarkets = useCallback(async (silent = false) => {
-    return refreshCache();
-  }, [refreshCache]);
+    debouncedFetch();
+  }, [sports, regions, markets, debouncedFetch]);
 
   return {
     games,
@@ -98,11 +116,6 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
     loading,
     error,
     lastUpdate,
-    refresh: fetchMarkets,
-    cacheStats,
-    isPolling,
-    startPolling,
-    stopPolling,
-    refreshCache
+    refresh: fetchMarkets
   };
 }

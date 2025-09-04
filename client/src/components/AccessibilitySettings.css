@@ -1,0 +1,241 @@
+/* Accessibility Settings Card Styles */
+.accessibility-settings-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 24px;
+  backdrop-filter: blur(16px);
+}
+
+.accessibility-settings-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.accessibility-settings-card .card-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.accessibility-options {
+  padding: 24px;
+}
+
+.option-group {
+  margin-bottom: 32px;
+}
+
+.option-group:last-child {
+  margin-bottom: 0;
+}
+
+.option-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.option-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.2s ease;
+}
+
+.option-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent);
+}
+
+.option-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.option-control input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.option-label {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.option-description {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-left: 30px;
+  line-height: 1.4;
+}
+
+.font-size-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.font-size-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.2s ease;
+}
+
+.font-size-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent);
+}
+
+.font-size-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.font-preview {
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.font-preview.font-normal {
+  font-size: 16px;
+}
+
+.font-preview.font-large {
+  font-size: 18px;
+}
+
+.font-preview.font-extra-large {
+  font-size: 20px;
+}
+
+.keyboard-info {
+  padding: 16px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 12px;
+  border-left: 4px solid var(--accent);
+}
+
+.keyboard-info p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .accessibility-settings-card .card-header {
+    padding: 16px 20px;
+  }
+  
+  .accessibility-options {
+    padding: 20px;
+  }
+  
+  .option-item {
+    padding: 12px;
+  }
+  
+  .font-size-option {
+    padding: 12px;
+  }
+  
+  .option-header {
+    font-size: 15px;
+  }
+  
+  .option-label {
+    font-size: 15px;
+  }
+  
+  .option-description {
+    font-size: 13px;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .accessibility-settings-card {
+    border-width: 2px;
+  }
+  
+  .option-item {
+    border-width: 2px;
+  }
+  
+  .font-size-option {
+    border-width: 2px;
+  }
+  
+  .option-control input,
+  .font-size-option input {
+    border: 2px solid var(--text-primary);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .option-item {
+    transition: none;
+  }
+  
+  .font-size-option {
+    transition: none;
+  }
+}
+
+/* Focus Styles for Keyboard Navigation */
+.keyboard-navigation .option-item:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.keyboard-navigation .font-size-option:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Dark Theme Adjustments */
+@media (prefers-color-scheme: dark) {
+  .accessibility-settings-card {
+    background: rgba(26, 16, 37, 0.95);
+    border-color: rgba(139, 92, 246, 0.2);
+  }
+  
+  .option-item {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .font-size-option {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}

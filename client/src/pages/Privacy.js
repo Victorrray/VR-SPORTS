@@ -115,7 +115,7 @@ export default function Privacy() {
           <h2>10. Contact Us</h2>
           <p>
             If you have questions about this Privacy Policy or wish to exercise your rights, 
-            please contact us at privacy@vr-odds.com.
+            please contact us at privacy@oddssightseer.com.
           </p>
         </div>
 

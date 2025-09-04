@@ -93,6 +93,7 @@ export default function Login() {
           </button>
         )}
 
+        {/* Google OAuth temporarily disabled - needs Supabase configuration
         <div className="divider">
           <span>or</span>
         </div>
@@ -104,6 +105,7 @@ export default function Login() {
           <Chrome size={18} />
           <span>Continue with Google</span>
         </button>
+        */}
 
         <p className="terms-text">
           By continuing you agree to our <Link to="/terms" className="terms-link">Terms</Link> and{" "}

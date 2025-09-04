@@ -103,10 +103,26 @@
   right: 0;
   bottom: 0;
   z-index: 1000;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 12px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-content:focus {
-  outline: none;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Focus trap for modals */
+.modal-content[data-focus-trap] {
+  isolation: isolate;
 }
 
 /* Improved button accessibility */

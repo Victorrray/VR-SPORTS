@@ -176,19 +176,15 @@ const FRIENDLY_TITLES = {
 };
 
 // Keep the sport picker short by default
+// Removed sports causing 404 errors: tennis_atp, tennis_wta, baseball_kbo, baseball_npb, baseball_cpbl
 const FEATURED_SPORTS = new Set([
   "basketball_nba",
   "baseball_mlb",
-  "baseball_kbo",
-  "baseball_npb",
-  "baseball_cpbl",
   "americanfootball_nfl",
   "americanfootball_ncaaf",
   "icehockey_nhl",
   "soccer_epl",
   "soccer_uefa_champs_league",
-  "tennis_atp",
-  "tennis_wta",
   "mma_mixed_martial_arts",
   "boxing_boxing",
 ]);
@@ -349,15 +345,11 @@ export default function SportsbookMarkets() {
           title: FRIENDLY_TITLES[s.key] || s.title || s.key,
         }));
 
-        // Ensure certain soccer/tennis keys are visible even if not returned as active
+        // Ensure certain sports are visible even if not returned as active
+        // Remove sports that are causing 404 errors
         const ENSURE = [
           "soccer_epl",
           "soccer_uefa_champs_league",
-          "tennis_atp",
-          "tennis_wta",
-          "baseball_kbo",
-          "baseball_npb",
-          "baseball_cpbl",
           "mma_mixed_martial_arts",
           "boxing_boxing",
         ];
@@ -386,8 +378,32 @@ export default function SportsbookMarkets() {
   const marketsToFetch = useMemo(() => {
     const baseMarkets = marketKeys.length ? [...marketKeys] : [...GAME_LINES];
     if (showPlayerProps) {
-      baseMarkets.push("player_pass_tds", "player_pass_yds", "player_rush_yds", "player_receptions");
+      console.log('Player props mode enabled - adding prop markets to fetch');
+      
+      // NFL player props
+      const nflProps = [
+        "player_pass_tds", "player_pass_yds", "player_rush_yds", "player_receptions",
+        "player_receiving_yds", "player_rush_attempts", "player_pass_attempts",
+        "player_pass_completions", "player_pass_interceptions"
+      ];
+      
+      // MLB player props
+      const mlbProps = [
+        "batter_home_runs", "batter_hits", "batter_total_bases", "batter_rbis",
+        "batter_runs_scored", "pitcher_strikeouts", "pitcher_hits_allowed"
+      ];
+      
+      // NBA player props
+      const nbaProps = [
+        "player_points", "player_rebounds", "player_assists", "player_threes",
+        "player_blocks", "player_steals"
+      ];
+      
+      const propsToAdd = [...nflProps, ...mlbProps, ...nbaProps];
+      console.log('Adding player prop markets:', propsToAdd);
+      baseMarkets.push(...propsToAdd);
     }
+    console.log('Final markets to fetch:', baseMarkets);
     return baseMarkets;
   }, [marketKeys, showPlayerProps]);
 

@@ -4,6 +4,7 @@ import { User, Shield, Copy, Check, AlertCircle, Settings, Mail, Key, LogOut } f
 import { useAuth } from "../auth/AuthProvider";
 import { supabase } from "../lib/supabase";
 import MobileBottomBar from "../components/MobileBottomBar";
+import AccessibilitySettings from "../components/AccessibilitySettings";
 import "./Account.css";
 
 function initialsFromEmail(email = "") {
@@ -334,6 +335,9 @@ export default function Account() {
           </button>
         </div>
       </section>
+
+      {/* Accessibility Settings */}
+      <AccessibilitySettings />
 
       <MobileBottomBar active="profile" showFilter={false} />
     </main>
