@@ -1,7 +1,7 @@
 services:
   # Backend API Server
   - type: web
-    name: vr-sports-api
+    name: vr-sports
     env: node
     rootDir: server
     buildCommand: npm install
@@ -14,7 +14,7 @@ services:
 
   # Frontend React App
   - type: static
-    name: vr-sports
+    name: my-react-frontend-021i
     env: node
     rootDir: client
     buildCommand: npm install && npm run build
@@ -22,7 +22,7 @@ services:
     plan: free
     envVars:
       - key: REACT_APP_API_URL
-        value: https://vr-sports-api.onrender.com
+        value: https://vr-sports.onrender.com
       - key: REACT_APP_SUPABASE_URL
         value: https://diujrwsonuytbsodjetg.supabase.co
       - key: REACT_APP_SUPABASE_ANON_KEY
