@@ -1,4 +1,5 @@
 services:
+  # Backend API Server
   - type: web
     name: vr-odds-api
     env: node
@@ -10,3 +11,23 @@ services:
         value: production
       - key: ODDS_API_KEY
         sync: false
+      - key: SPORTSGAMEODDS_API_KEY
+        sync: false
+
+  # Frontend React App
+  - type: web
+    name: vr-odds-frontend
+    env: node
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          type: web
+          name: vr-odds-api
+          property: host
+      - key: REACT_APP_SUPABASE_URL
+        value: https://diujrwsonuytbsodjetg.supabase.co
+      - key: REACT_APP_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpdWpyd3NvbnV5dGJzb2RqZXRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1ODEyMjIsImV4cCI6MjA3MjE1NzIyMn0.-n77Q41IgTQ_XolqA0qFBfIBa1apNcWyipuv5WOOR4k
