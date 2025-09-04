@@ -346,7 +346,7 @@ export default function Scores() {
                     </div>
                     {(isCompleted || isLive) && g.scores && (
                       <div className="team-score">
-                        {g.scores.find(s => s.name === g.away_team)?.score || 0}
+                        {g.scores.away || 0}
                       </div>
                     )}
                   </div>
@@ -363,7 +363,7 @@ export default function Scores() {
                     </div>
                     {(isCompleted || isLive) && g.scores && (
                       <div className="team-score">
-                        {g.scores.find(s => s.name === g.home_team)?.score || 0}
+                        {g.scores.home || 0}
                       </div>
                     )}
                   </div>

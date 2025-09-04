@@ -35,7 +35,7 @@ export const secureFetch = async (url, options = {}) => {
       'X-Requested-With': 'XMLHttpRequest',
       ...options.headers
     },
-    credentials: 'same-origin', // Include cookies for same-origin requests
+    credentials: 'include', // Include cookies for cross-origin requests
   };
 
   // Add referrer policy for external APIs

@@ -54,9 +54,11 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         dateFormat: 'iso'
       });
 
-      console.log('🔍 useMarkets: Final API URL:', `/api/odds?${params}`);
+      const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
+      const fullUrl = `${BASE_URL}/api/odds?${params}`;
+      console.log('🔍 useMarkets: Final API URL:', fullUrl);
       
-      const response = await secureFetch(`/api/odds?${params}`);
+      const response = await secureFetch(fullUrl);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
