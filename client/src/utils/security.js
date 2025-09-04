@@ -27,6 +27,11 @@ export const getCSRFToken = () => {
 export const secureFetch = async (url, options = {}) => {
   const csrfToken = getCSRFToken();
   
+  // Check if this is a cross-origin request
+  const isLocalhost = url.startsWith('http://localhost');
+  const isSameOrigin = url.startsWith(window.location.origin);
+  const isCrossOrigin = !isLocalhost && !isSameOrigin;
+  
   const secureOptions = {
     ...options,
     headers: {
@@ -35,7 +40,8 @@ export const secureFetch = async (url, options = {}) => {
       'X-Requested-With': 'XMLHttpRequest',
       ...options.headers
     },
-    credentials: 'include', // Include cookies for cross-origin requests
+    // Only include credentials for same-origin or localhost requests
+    credentials: isCrossOrigin ? 'omit' : 'include',
   };
 
   // Add referrer policy for external APIs

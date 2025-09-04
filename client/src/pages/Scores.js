@@ -108,7 +108,18 @@ export default function Scores() {
     try {
       const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://vr-sports.onrender.com' : 'http://localhost:10000');
       console.log('🔍 Scores API URL:', `${apiUrl}/api/scores?sport=${sport}`);
-      const r = await fetch(`${apiUrl}/api/scores?sport=${sport}`);
+      
+      // Configure fetch options for cross-origin requests
+      const fetchOptions = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Don't include credentials for cross-origin requests in production
+        credentials: apiUrl.includes('localhost') ? 'include' : 'omit'
+      };
+      
+      const r = await fetch(`${apiUrl}/api/scores?sport=${sport}`, fetchOptions);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       setGames(data || []);

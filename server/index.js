@@ -17,12 +17,14 @@ if (!API_KEY) {
 const corsOptions = {
   origin: [
     'http://localhost:3000',
+    'http://localhost:3001', // Alternative port
     'https://my-react-frontend-021i.onrender.com',
     'https://oddssightseer.com'
   ],
-  credentials: true,
+  credentials: false, // Disable credentials for cross-origin requests
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
 };
 
 app.use(cors(corsOptions));
