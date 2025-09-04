@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from '@dr.pogodin/react-helmet';
 
 export default function SEOHead({ 
   title = "OddsSightSeer - Smart Sports Betting Analytics",

@@ -6,7 +6,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { AccessibilityProvider } from './components/AccessibilityProvider';
 import { BetSlipProvider } from './contexts/BetSlipContext';
 import { ToastProvider } from './components/Toast';
-import { HelmetProvider } from 'react-helmet-async';
+import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import SkipToContent from './components/SkipToContent';
 import AccessibilityMenu from './components/AccessibilityMenu';
 import { registerServiceWorker } from './utils/bundleOptimization';
