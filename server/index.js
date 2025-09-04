@@ -13,9 +13,31 @@ if (!API_KEY) {
   console.warn("⚠️  Missing ODDS_API_KEY in .env (odds endpoints will still work for ESPN scores).");
 }
 
-app.use(cors());
+// Configure CORS for production
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'https://vr-odds-frontend.onrender.com',
+    'https://oddssightseer.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV,
+    hasOddsAPI: !!API_KEY,
+    hasSportsGameOddsAPI: !!SPORTSGAMEODDS_API_KEY
+  });
+});
 
 /* ------------------------------------ Helpers ------------------------------------ */
 
