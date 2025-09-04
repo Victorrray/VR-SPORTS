@@ -67,9 +67,7 @@ function AppRoutes() {
       }
     >
       <div className="app">
-        <a href="#main-content" className="skip-link">Skip to main content</a>
         <div className="app-layout">
-          <SkipToContent />
           <LoadingBar />
           <Navbar />
           <main className="main-content" id="main-content" tabIndex="-1">
