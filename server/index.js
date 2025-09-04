@@ -17,7 +17,7 @@ if (!API_KEY) {
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'https://vr-odds-frontend.onrender.com',
+    'https://my-react-frontend-021i.onrender.com',
     'https://oddssightseer.com'
   ],
   credentials: true,
