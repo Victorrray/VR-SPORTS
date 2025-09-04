@@ -1,17 +1,18 @@
 [build]
-  base = "server"
-  publish = "."
-  command = "npm install"
+  base = "client"
+  publish = "client/build"
+  command = "npm install && npm run build"
 
 [build.environment]
   NODE_VERSION = "18"
+  REACT_APP_API_URL = ""
 
 [[functions]]
-  directory = "."
+  directory = "server/netlify-functions"
   node_bundler = "esbuild"
 
 [functions]
-  external_node_modules = ["express"]
+  external_node_modules = ["express", "axios", "cors", "dotenv"]
 
 [[redirects]]
   from = "/api/*"

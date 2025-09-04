@@ -19,7 +19,7 @@ export default function GameReactions({ gameId, gameKey }) {
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:10000';
+  const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
 
   // Load reactions from server
   const loadReactions = async () => {

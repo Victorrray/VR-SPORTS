@@ -63,7 +63,7 @@ export default function DFSMarkets() {
   const [quota] = useState({ remain: "–", used: "–" });
   const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
 
-  const BASE_URL = process.env.REACT_APP_API_URL || "";
+  const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
   const debounced = useDebounce(query, 300);
 
   // ---- helpers ----

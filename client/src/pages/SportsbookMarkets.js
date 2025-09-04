@@ -324,7 +324,7 @@ export default function SportsbookMarkets() {
   // Removed auto-market selection to prevent infinite loops
 
 
-  const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:10000"; // keep CRA-style env; change to import.meta.env for Vite
+  const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
 
   // Fetch sport list (defensive against non-array errors), map to friendly titles
   useEffect(() => {
