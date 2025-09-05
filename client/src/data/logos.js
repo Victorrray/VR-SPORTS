@@ -5,7 +5,7 @@
 const logos = {
   // Major Operators
   betmgm:         "/logos/betmgm.png",
-  fanduel:        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/FanDuel_logo.svg/120px-FanDuel_logo.svg.png",
+  fanduel:        "https://logos-world.net/wp-content/uploads/2021/08/FanDuel-Logo.png",
   draftkings:     "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/DraftKings_logo.svg/120px-DraftKings_logo.svg.png",
   caesars:        "https://seeklogo.com/images/C/caesars-sportsbook-logo-5B472151D8-seeklogo.com.png",
   williamhill_us: "https://seeklogo.com/images/W/william-hill-logo-8B2B2B2B2B-seeklogo.com.png",

@@ -640,7 +640,16 @@ export default function SportsbookMarkets() {
 
         <section className="table-area">
           {/* Header with Bet Type Toggle */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '16px', paddingTop: '20px', textAlign: 'center' }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            marginBottom: '16px', 
+            paddingTop: '20px', 
+            textAlign: 'center',
+            paddingLeft: 'var(--mobile-gutter, 16px)',
+            paddingRight: 'var(--mobile-gutter, 16px)'
+          }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
 {/* <AlertSystem games={filteredGames} /> */}
               <div style={{
