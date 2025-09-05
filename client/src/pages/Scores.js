@@ -383,6 +383,15 @@ export default function Scores() {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Game lines right-aligned with team names */}
+                  {g.odds && (g.odds.spread || g.odds.overUnder) && (
+                    <div className="game-lines-right">
+                      {g.odds.spread && <div className="odds-line"><span>Line:</span> {g.odds.spread}</div>}
+                      {g.odds.overUnder != null && <div className="odds-line"><span>O/U:</span> {g.odds.overUnder}</div>}
+                      {g.odds.provider && <div className="odds-provider">({g.odds.provider})</div>}
+                    </div>
+                  )}
                 </div>
 
                 <div className="game-info">
@@ -395,23 +404,9 @@ export default function Scores() {
                       {g.situation && <span className="game-situation">{g.situation}</span>}
                     </div>
                   )}
-                  {!isLive && (
-                    <div className="game-time">
-                      <Clock size={14} />
-                      <span>{kickoffLabel(g.commence_time)}</span>
-                    </div>
-                  )}
                 </div>
 
-                {g.odds && (g.odds.spread || g.odds.overUnder) && (
-                  <div className="odds-summary">
-                    {g.odds.spread && <div className="odds-line"><span>Line:</span> {g.odds.spread}</div>}
-                    {g.odds.overUnder != null && <div className="odds-line"><span>O/U:</span> {g.odds.overUnder}</div>}
-                    {g.odds.provider && <div className="odds-provider">({g.odds.provider})</div>}
-                  </div>
-                )}
-                
-                {/* Game Reactions */}
+                {/* Game Reactions moved under game lines */}
                 <GameReactions 
                   gameId={g.id} 
                   gameKey={`${g.away_team}-${g.home_team}-${g.commence_time}`}
