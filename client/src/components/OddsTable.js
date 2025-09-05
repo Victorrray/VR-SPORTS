@@ -587,13 +587,19 @@ export default function OddsTable({
         }, {});
 
         Object.entries(grouped).forEach(([outcomeName, outcomes]) => {
+          // For the main row display, use filtered outcomes
+          const filteredOutcome = outcomes[0];
+          
+          // For mini-table, get ALL books for this outcome (not filtered)
+          const allBooksForOutcome = allMarketOutcomes.filter(o => o.name === outcomeName);
+          
           const gameRow = {
             key: `${game.id}-${mktKey}-${outcomeName}`,
             game,
-            mkt: outcomes[0].market,
-            out: outcomes[0],
-            bk: outcomes[0].bookmaker,
-            allBooks: outcomes.map(o => ({ 
+            mkt: filteredOutcome.market,
+            out: filteredOutcome,
+            bk: filteredOutcome.bookmaker,
+            allBooks: allBooksForOutcome.map(o => ({ 
               price: o.price, 
               odds: o.price,
               book: o.book,
