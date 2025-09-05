@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
+import logos from "../data/logos";
 import "./OddsTable.css";
 
 /* ---------- Helpers (unchanged core math) ---------- */
@@ -1046,7 +1047,22 @@ export default function OddsTable({
 
                       {/* Bottom row: Sportsbook name left, odds and pick button right */}
                       <div className="mob-bottom-row">
-                        <div className="mob-book">{cleanBookTitle(row.bk?.title)}</div>
+                        <div className="mob-book">
+                          {logos[row.bk?.key] && (
+                            <img 
+                              src={logos[row.bk?.key]} 
+                              alt={cleanBookTitle(row.bk?.title)}
+                              className="bookmaker-logo"
+                              style={{
+                                width: '20px',
+                                height: '20px',
+                                marginRight: '6px',
+                                objectFit: 'contain'
+                              }}
+                            />
+                          )}
+                          {cleanBookTitle(row.bk?.title)}
+                        </div>
                         <div className="mob-right-section">
                           <div className={`mob-odds-container ${priceDelta[row.key] ? (priceDelta[row.key] === 'up' ? 'up' : 'down') : ''}`}>
                             <span className="mob-odds">
