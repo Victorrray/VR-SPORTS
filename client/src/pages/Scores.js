@@ -342,9 +342,11 @@ export default function Scores() {
                   </div>
                   
                   <div className="game-time-compact">
-                    {isLive && (
+                    {isLive ? (
                       <span className="live-text">Live Now</span>
-                    )}
+                    ) : isUpcoming ? (
+                      <span>{kickoffLabel(g.commence_time)}</span>
+                    ) : null}
                   </div>
                 </div>
 
