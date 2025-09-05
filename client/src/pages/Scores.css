@@ -418,6 +418,13 @@
   border-radius: 4px;
 }
 
+.team-record {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
 .team-score {
   font-size: 18px;
   font-weight: 700;

@@ -359,6 +359,9 @@ export default function Scores() {
                         {sport === 'americanfootball_cfb' && g.away_rank && (
                           <span className="team-rank">#{g.away_rank}</span>
                         )}
+                        {g.away_record && (
+                          <span className="team-record">({g.away_record})</span>
+                        )}
                       </div>
                     </div>
                     {(isCompleted || isLive) && g.scores && (
@@ -376,6 +379,9 @@ export default function Scores() {
                         {sport === 'americanfootball_cfb' && g.home_rank && (
                           <span className="team-rank">#{g.home_rank}</span>
                         )}
+                        {g.home_record && (
+                          <span className="team-record">({g.home_record})</span>
+                        )}
                       </div>
                     </div>
                     {(isCompleted || isLive) && g.scores && (
@@ -390,7 +396,6 @@ export default function Scores() {
                     <div className="game-lines-right">
                       {g.odds.spread && <div className="odds-line"><span>Line:</span> {g.odds.spread}</div>}
                       {g.odds.overUnder != null && <div className="odds-line"><span>O/U:</span> {g.odds.overUnder}</div>}
-                      {g.odds.provider && <div className="odds-provider">({g.odds.provider})</div>}
                     </div>
                   )}
                 </div>
