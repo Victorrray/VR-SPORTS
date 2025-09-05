@@ -268,27 +268,6 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                 </div>
               )}
 
-              {/* Venue Info */}
-              <div className="detail-section">
-                <h4><MapPin size={16} /> Venue</h4>
-                <div className="venue-compact">
-                  <p><strong>{gameDetails.venue.name}</strong></p>
-                  <p>{gameDetails.venue.city}, {gameDetails.venue.state}</p>
-                  <p className="capacity">Capacity: {gameDetails.venue.capacity}</p>
-                </div>
-              </div>
-
-              {/* Game Information */}
-              {(gameDetails.gameWeek || gameDetails.gameSeason) && (
-                <div className="detail-section">
-                  <h4><Info size={16} /> Game Information</h4>
-                  <div className="game-info-details">
-                    {gameDetails.gameWeek && <p><strong>Week:</strong> {gameDetails.gameWeek}</p>}
-                    {gameDetails.gameSeason && <p><strong>Season:</strong> {gameDetails.gameSeason}</p>}
-                    <p><strong>League:</strong> {game.league?.toUpperCase() || 'NFL'}</p>
-                  </div>
-                </div>
-              )}
 
               {/* Live Updates Notice */}
               {gameDetails.liveUpdates && (

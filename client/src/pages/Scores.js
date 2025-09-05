@@ -319,8 +319,8 @@ export default function Scores() {
 
       <div className="scores-grid">
         {sorted.map((g) => {
-          const isLive = g.live === true || g.status === 'in_progress';
-          const isCompleted = g.completed === true || g.status === 'final';
+          const isLive = g.live === true || g.status === 'in_progress' || g.status_type?.state === 'in';
+          const isCompleted = g.completed === true || g.status === 'final' || g.status_type?.completed === true;
           const isUpcoming = !isLive && !isCompleted;
 
           return (
