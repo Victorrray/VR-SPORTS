@@ -9,7 +9,7 @@ services:
     routes:
       - type: redirect
         source: /
-        destination: https://my-react-frontend-021i.onrender.com
+        destination: https://odds-frontend-j2pn.onrender.com
         statusCode: 301
     envVars:
       - key: NODE_ENV
