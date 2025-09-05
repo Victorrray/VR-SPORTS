@@ -609,7 +609,11 @@ export default function OddsTable({
             })),
             sport: game.sport_key
           };
+          // Only add rows with valid odds (not zero or empty)
+        const hasValidOdds = Number(filteredOutcome.price || filteredOutcome.odds || 0) !== 0;
+        if (hasValidOdds) {
           gameRows.push(gameRow);
+        }
         });
       });
     });
@@ -920,7 +924,23 @@ export default function OddsTable({
                     </div>
                   </td>
                   <td>{(row.mkt.key || '') === 'h2h' ? '' : formatLine(row.out.point, row.mkt.key, 'game')}</td>
-                  <td>{cleanBookTitle(row.bk.title)}</td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {logos[row.bk?.key] && (
+                        <img 
+                          src={logos[row.bk.key]} 
+                          alt={cleanBookTitle(row.bk.title)}
+                          className="bookmaker-logo"
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            objectFit: 'contain'
+                          }}
+                        />
+                      )}
+                      {cleanBookTitle(row.bk.title)}
+                    </div>
+                  </td>
                   <td className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
                     <span className="odds-main odds-best">
                       {(() => {
@@ -1115,20 +1135,56 @@ export default function OddsTable({
                             const isSpreads = mkRow.includes('spread');
                             const oPointStr = String(row.out.point ?? '');
 
+                            // Priority bookmakers to show first
+                            const priorityBooks = ['fanduel', 'draftkings', 'caesars', 'pinnacle'];
+                            
+                            const getBookPriority = (bookKey) => {
+                              const key = String(bookKey || '').toLowerCase();
+                              const index = priorityBooks.findIndex(priority => key.includes(priority));
+                              return index === -1 ? 999 : index; // Non-priority books get high number
+                            };
+
                             // For player props, use the allBooks data that's already grouped
                             let cols = [];
                             if (mode === "props") {
-                              // Use the pre-grouped allBooks data
-                              cols = (row.allBooks || []).slice().sort((a,b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds)).slice(0, 6);
+                              // Use the pre-grouped allBooks data with priority sorting
+                              cols = (row.allBooks || []).slice()
+                                .sort((a, b) => {
+                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
+                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
+                                  
+                                  // First sort by priority (lower number = higher priority)
+                                  if (aPriority !== bPriority) {
+                                    return aPriority - bPriority;
+                                  }
+                                  
+                                  // Then by odds (higher odds = better value)
+                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
+                                })
+                                .slice(0, 6);
                             } else {
-                              // Original logic for regular games
+                              // Original logic for regular games with priority sorting
                               const seen = new Set();
                               const uniq = [];
                               row.allBooks.forEach(ob => {
                                 const key = String(ob?.bookmaker?.key || ob.book || '').toLowerCase();
                                 if (!seen.has(key)) { seen.add(key); uniq.push(ob); }
                               });
-                              cols = uniq.slice().sort((a,b)=>toDec(b.price??b.odds)-toDec(a.price??a.odds)).slice(0, 6);
+                              
+                              cols = uniq.slice()
+                                .sort((a, b) => {
+                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
+                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
+                                  
+                                  // First sort by priority (lower number = higher priority)
+                                  if (aPriority !== bPriority) {
+                                    return aPriority - bPriority;
+                                  }
+                                  
+                                  // Then by odds (higher odds = better value)
+                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
+                                })
+                                .slice(0, 6);
                             }
 
                             const grab = (ob, top) => {
@@ -1195,13 +1251,43 @@ export default function OddsTable({
                                   <div className="mini-book-col">
                                     {mode === "props" ? (
                                       <div className="mini-prop-info">
-                                        <div className="mini-prop-book">{cleanBookTitle(ob.book)}</div>
+                                        <div className="mini-prop-book">
+                                          {logos[ob.bookmaker?.key] && (
+                                            <img 
+                                              src={logos[ob.bookmaker?.key]} 
+                                              alt={cleanBookTitle(ob.book)}
+                                              className="bookmaker-logo"
+                                              style={{
+                                                width: '16px',
+                                                height: '16px',
+                                                marginRight: '4px',
+                                                objectFit: 'contain'
+                                              }}
+                                            />
+                                          )}
+                                          {cleanBookTitle(ob.book)}
+                                        </div>
                                         <div className="mini-prop-side">
                                           {row.out.name.includes('Over') ? 'Over' : 'Under'} {row.out.point}
                                         </div>
                                       </div>
                                     ) : (
-                                      cleanBookTitle(ob.book)
+                                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        {logos[ob.bookmaker?.key] && (
+                                          <img 
+                                            src={logos[ob.bookmaker?.key]} 
+                                            alt={cleanBookTitle(ob.book)}
+                                            className="bookmaker-logo"
+                                            style={{
+                                              width: '16px',
+                                              height: '16px',
+                                              marginRight: '4px',
+                                              objectFit: 'contain'
+                                            }}
+                                          />
+                                        )}
+                                        {cleanBookTitle(ob.book)}
+                                      </div>
                                     )}
                                   </div>
                                   {mode === "props" ? (
@@ -1292,19 +1378,55 @@ export default function OddsTable({
                             const isTotals = mkRow.includes('total');
                             const oPointStr = String(row.out.point ?? '');
 
+                            // Priority bookmakers to show first (same as mobile)
+                            const priorityBooks = ['fanduel', 'draftkings', 'caesars', 'pinnacle'];
+                            
+                            const getBookPriority = (bookKey) => {
+                              const key = String(bookKey || '').toLowerCase();
+                              const index = priorityBooks.findIndex(priority => key.includes(priority));
+                              return index === -1 ? 999 : index; // Non-priority books get high number
+                            };
+
                             let sortedAll = [];
                             if (mode === "props") {
-                              // Use the pre-grouped allBooks data for player props
-                              sortedAll = (row.allBooks || []).slice().sort((a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds)).slice(0, 8);
+                              // Use the pre-grouped allBooks data for player props with priority sorting
+                              sortedAll = (row.allBooks || []).slice()
+                                .sort((a, b) => {
+                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
+                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
+                                  
+                                  // First sort by priority (lower number = higher priority)
+                                  if (aPriority !== bPriority) {
+                                    return aPriority - bPriority;
+                                  }
+                                  
+                                  // Then by odds (higher odds = better value)
+                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
+                                })
+                                .slice(0, 8);
                             } else {
-                              // Original logic for regular games
+                              // Original logic for regular games with priority sorting
                               const seenAll = new Set();
                               const uniqueAll = [];
                               row.allBooks.forEach(ob => {
                                 const k = String(ob?.bookmaker?.key || ob.book || "").toLowerCase();
                                 if (!seenAll.has(k)) { seenAll.add(k); uniqueAll.push(ob); }
                               });
-                              sortedAll = uniqueAll.slice().sort((a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds)).slice(0, 8);
+                              
+                              sortedAll = uniqueAll.slice()
+                                .sort((a, b) => {
+                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
+                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
+                                  
+                                  // First sort by priority (lower number = higher priority)
+                                  if (aPriority !== bPriority) {
+                                    return aPriority - bPriority;
+                                  }
+                                  
+                                  // Then by odds (higher odds = better value)
+                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
+                                })
+                                .slice(0, 8);
                             }
 
                             const fmt = (out) => {
@@ -1323,7 +1445,24 @@ export default function OddsTable({
                                 // For player props, show single odds value
                                 return (
                                   <div key={p._rowId || i} className="mini-table-header-cell">
-                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>{cleanBookTitle(p.book)}</div>
+                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>
+                                      {logos[p.bookmaker?.key] && (
+                                        <img 
+                                          src={logos[p.bookmaker?.key]} 
+                                          alt={cleanBookTitle(p.book)}
+                                          className="bookmaker-logo"
+                                          style={{
+                                            width: '18px',
+                                            height: '18px',
+                                            marginBottom: '4px',
+                                            objectFit: 'contain',
+                                            display: 'block',
+                                            margin: '0 auto 4px auto'
+                                          }}
+                                        />
+                                      )}
+                                      {cleanBookTitle(p.book)}
+                                    </div>
                                     <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
                                     <div className="mini-table-odds-cell">{fmt(p.price ?? p.odds)}</div>
                                     <div className="mini-table-odds-cell" style={{ marginTop:6, opacity: 0.3 }}>—</div>
@@ -1345,7 +1484,24 @@ export default function OddsTable({
                                     : outs.find(x => x && x.name === row.game.away_team);
                                 return (
                                   <div key={p._rowId || i} className="mini-table-header-cell">
-                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>{cleanBookTitle(p.book)}</div>
+                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>
+                                      {logos[p.bookmaker?.key] && (
+                                        <img 
+                                          src={logos[p.bookmaker?.key]} 
+                                          alt={cleanBookTitle(p.book)}
+                                          className="bookmaker-logo"
+                                          style={{
+                                            width: '18px',
+                                            height: '18px',
+                                            marginBottom: '4px',
+                                            objectFit: 'contain',
+                                            display: 'block',
+                                            margin: '0 auto 4px auto'
+                                          }}
+                                        />
+                                      )}
+                                      {cleanBookTitle(p.book)}
+                                    </div>
                                     <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
                                     <div className="mini-table-odds-cell">{fmt(top?.price ?? top?.odds)}</div>
                                     <div className="mini-table-odds-cell" style={{ marginTop:6 }}>{fmt(bot?.price ?? bot?.odds)}</div>
