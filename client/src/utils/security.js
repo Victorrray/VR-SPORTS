@@ -30,7 +30,8 @@ export const secureFetch = async (url, options = {}) => {
   // Check if this is a cross-origin request
   const isLocalhost = url.startsWith('http://localhost');
   const isSameOrigin = url.startsWith(window.location.origin);
-  const isCrossOrigin = !isLocalhost && !isSameOrigin;
+  const isVRSportsAPI = url.includes('vr-sports.onrender.com');
+  const isCrossOrigin = !isLocalhost && !isSameOrigin && !isVRSportsAPI;
   
   const secureOptions = {
     ...options,
@@ -40,7 +41,7 @@ export const secureFetch = async (url, options = {}) => {
       'X-Requested-With': 'XMLHttpRequest',
       ...options.headers
     },
-    // Only include credentials for same-origin or localhost requests
+    // Include credentials for same-origin, localhost, and our VR-Sports API
     credentials: isCrossOrigin ? 'omit' : 'include',
   };
 
