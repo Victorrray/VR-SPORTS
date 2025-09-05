@@ -15,16 +15,28 @@ if (!API_KEY) {
 
 // Configure CORS for production
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001', // Alternative port
-    'https://odds-frontend-j2pn.onrender.com',
-    'https://oddssightseer.com'
-  ],
-  credentials: false, // Disable credentials for cross-origin requests
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://odds-frontend-j2pn.onrender.com',
+      'https://oddssightseer.com'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('🚫 CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept'],
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
