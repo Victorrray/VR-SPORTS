@@ -25,6 +25,10 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: ./build
     plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
     envVars:
       - key: REACT_APP_API_URL
         value: https://odds-backend-4e9q.onrender.com
