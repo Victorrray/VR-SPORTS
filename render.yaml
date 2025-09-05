@@ -9,7 +9,7 @@ services:
     routes:
       - type: redirect
         source: /
-        destination: https://www.oddsightseer.com/
+        destination: https://my-react-frontend-021i.onrender.com
         statusCode: 301
     envVars:
       - key: NODE_ENV
@@ -27,7 +27,7 @@ services:
     plan: free
     envVars:
       - key: REACT_APP_API_URL
-        value: https://vr-sports.onrender.com
+        value: https://odds-backend-4e9q.onrender.com
       - key: REACT_APP_SUPABASE_URL
         value: https://diujrwsonuytbsodjetg.supabase.co
       - key: REACT_APP_SUPABASE_ANON_KEY
