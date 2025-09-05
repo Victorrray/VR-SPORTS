@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import './PersonalizedDashboard.css';
-import { logos } from '../data/logos';
+import logos from '../data/logos';
 
 export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   const [dashboardData, setDashboardData] = useState({
