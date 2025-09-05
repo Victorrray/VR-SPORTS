@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, TrendingUp, DollarSign, Target, Info, AlertCircle } from 'lucide-react';
+import { Calculator, TrendingUp, DollarSign, Target, Info, AlertCircle, Plus, Trophy, BarChart3, Award } from 'lucide-react';
 import './EdgeCalculator.css';
 
-export default function EdgeCalculator({ onClose }) {
+const LS_KEY = "oss_my_picks_v1";
+
+export default function EdgeCalculator({ onClose, onNavigateToSportsbooks }) {
   const [inputs, setInputs] = useState({
     bookmakerOdds: '',
     fairOdds: '',
@@ -24,6 +26,50 @@ export default function EdgeCalculator({ onClose }) {
     loseScenario: null,
     longTermEV: null
   });
+
+  const [userPicks, setUserPicks] = useState([]);
+  const [realPerformance, setRealPerformance] = useState(null);
+
+  // Load user picks data
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const picks = JSON.parse(raw);
+        setUserPicks(picks);
+        calculateRealPerformance(picks);
+      }
+    } catch (error) {
+      console.error('Error loading picks:', error);
+    }
+  }, []);
+
+  const calculateRealPerformance = (picks) => {
+    const settled = picks.filter(p => p.status === 'won' || p.status === 'lost');
+    const won = picks.filter(p => p.status === 'won');
+    const totalStaked = picks.reduce((sum, p) => sum + (Number(p.stake) || 0), 0);
+    const totalReturns = won.reduce((sum, p) => sum + (Number(p.actualPayout) || Number(p.potential) || 0), 0);
+    const netProfit = totalReturns - totalStaked;
+    const winRate = settled.length > 0 ? (won.length / settled.length) * 100 : 0;
+    const roi = totalStaked > 0 ? (netProfit / totalStaked) * 100 : 0;
+    
+    // Calculate average edge from odds
+    const avgEdge = picks.length > 0 ? picks.reduce((sum, p) => {
+      const odds = Number(String(p.odds || '').replace(/[^-+0-9]/g, '')) || 0;
+      // Rough edge estimation based on odds (this is simplified)
+      const impliedProb = odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+      const edge = Math.max(0, (1 - impliedProb) * 100 - 5); // Rough calculation
+      return sum + edge;
+    }, 0) / picks.length : 0;
+
+    setRealPerformance({
+      winRate: Math.round(winRate * 10) / 10,
+      roi: Math.round(roi * 10) / 10,
+      avgEdge: Math.round(avgEdge * 10) / 10,
+      totalBets: picks.length,
+      netProfit: Math.round(netProfit * 100) / 100
+    });
+  };
 
   useEffect(() => {
     calculateEdge();
@@ -247,6 +293,56 @@ export default function EdgeCalculator({ onClose }) {
               </div>
             </div>
           )}
+
+          {/* Recent Performance Section */}
+          <div className="performance-section">
+            <h3>
+              <Trophy size={18} />
+              Recent Performance
+            </h3>
+            {realPerformance && userPicks.length > 0 ? (
+              <div className="real-performance-grid">
+                <div className="perf-metric">
+                  <div className="perf-value">{realPerformance.winRate}%</div>
+                  <div className="perf-label">WIN RATE</div>
+                </div>
+                <div className="perf-metric">
+                  <div className={`perf-value ${realPerformance.roi >= 0 ? 'positive' : 'negative'}`}>
+                    {realPerformance.roi >= 0 ? '+' : ''}{realPerformance.roi}%
+                  </div>
+                  <div className="perf-label">ROI</div>
+                </div>
+                <div className="perf-metric">
+                  <div className="perf-value">{realPerformance.avgEdge}%</div>
+                  <div className="perf-label">AVG EDGE</div>
+                </div>
+                <div className="perf-metric">
+                  <div className="perf-value">{realPerformance.totalBets}</div>
+                  <div className="perf-label">TOTAL BETS</div>
+                </div>
+              </div>
+            ) : (
+              <div className="no-picks-state">
+                <div className="no-picks-content">
+                  <BarChart3 size={32} className="no-picks-icon" />
+                  <h4>No Betting History</h4>
+                  <p>Start tracking your picks to see real performance data</p>
+                  <button 
+                    className="add-picks-btn"
+                    onClick={() => {
+                      onClose();
+                      if (onNavigateToSportsbooks) {
+                        onNavigateToSportsbooks();
+                      }
+                    }}
+                  >
+                    <Plus size={16} />
+                    Find +EV Bets
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Help Section */}
           <div className="help-section">

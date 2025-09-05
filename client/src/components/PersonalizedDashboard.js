@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle } from 'lucide-react';
+import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import './PersonalizedDashboard.css';
+import { logos } from '../data/logos';
 
 export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   const [dashboardData, setDashboardData] = useState({
@@ -11,6 +12,8 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     recommendedBets: [],
     alerts: []
   });
+
+  const [expandedBets, setExpandedBets] = useState({});
 
   useEffect(() => {
     if (games?.length && games.length > 0) {
@@ -46,7 +49,22 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       const seed = game.id ? game.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0) : index;
       const markets = ['Moneyline', 'Spread', 'Total'];
       const confidences = ['High', 'Medium', 'Low'];
-      const bookmakers = ['DraftKings', 'FanDuel', 'BetMGM'];
+      const bookmakers = ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'Pinnacle'];
+      const bookmakerKeys = ['draftkings', 'fanduel', 'betmgm', 'caesars', 'pinnacle'];
+      
+      // Generate mock odds for mini table
+      const mockOdds = bookmakers.map((book, i) => {
+        const bookSeed = seed + i * 17;
+        return {
+          bookmaker: {
+            key: bookmakerKeys[i],
+            title: book
+          },
+          book: book,
+          price: Math.abs(bookSeed) % 2 === 0 ? Math.abs(bookSeed) % 200 + 100 : -(Math.abs(bookSeed) % 200 + 110),
+          odds: Math.abs(bookSeed) % 2 === 0 ? Math.abs(bookSeed) % 200 + 100 : -(Math.abs(bookSeed) % 200 + 110)
+        };
+      });
       
       return {
         id: game.id,
@@ -54,8 +72,10 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
         market: markets[Math.abs(seed) % 3],
         edge: (Math.abs(seed) % 50 / 10 + 1).toFixed(1),
         confidence: confidences[Math.abs(seed * 2) % 3],
-        bookmaker: bookmakers[Math.abs(seed * 3) % 3],
-        odds: Math.abs(seed) % 2 === 0 ? `+${Math.abs(seed) % 200 + 100}` : `-${Math.abs(seed) % 200 + 110}`
+        bookmaker: bookmakers[Math.abs(seed * 3) % 5],
+        odds: Math.abs(seed) % 2 === 0 ? `+${Math.abs(seed) % 200 + 100}` : `-${Math.abs(seed) % 200 + 110}`,
+        allBooks: mockOdds,
+        game: game
       };
     });
 
@@ -108,6 +128,22 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       </div>
     </div>
   );
+
+  const toggleBetExpansion = (betId) => {
+    setExpandedBets(prev => ({
+      ...prev,
+      [betId]: !prev[betId]
+    }));
+  };
+
+  const formatOdds = (odds) => {
+    const n = Number(odds);
+    return n > 0 ? `+${n}` : `${n}`;
+  };
+
+  const cleanBookTitle = (title) => {
+    return String(title || '').replace(/[^a-zA-Z0-9\s]/g, '').trim();
+  };
 
   return (
     <div className="personalized-dashboard">
@@ -173,22 +209,77 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
           Recommended Bets
         </h3>
         <div className="recommendations-list">
-          {dashboardData.recommendedBets.map((bet, index) => (
-            <div key={bet.id || index} className="recommendation-card">
-              <div className="rec-header">
-                <div className="rec-matchup">{bet.matchup}</div>
-                <div className={`rec-confidence ${bet.confidence.toLowerCase()}`}>
-                  {bet.confidence}
+          {dashboardData.recommendedBets.map((bet, index) => {
+            const isExpanded = expandedBets[bet.id || index];
+            return (
+              <div key={bet.id || index} className={`recommendation-card ${isExpanded ? 'expanded' : ''}`}>
+                <div 
+                  className="rec-main-content"
+                  onClick={() => toggleBetExpansion(bet.id || index)}
+                >
+                  <div className="rec-header">
+                    <div className="rec-matchup">{bet.matchup}</div>
+                    <div className="rec-header-right">
+                      <div className={`rec-confidence ${bet.confidence.toLowerCase()}`}>
+                        {bet.confidence}
+                      </div>
+                      <div className="expand-indicator">
+                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rec-details">
+                    <div className="rec-market">{bet.market}</div>
+                    <div className="rec-edge">+{bet.edge}% EV</div>
+                    <div className="rec-odds">{bet.odds}</div>
+                  </div>
+                  <div className="rec-bookmaker">
+                    {logos[bet.bookmaker?.toLowerCase()] && (
+                      <img 
+                        src={logos[bet.bookmaker.toLowerCase()]} 
+                        alt={bet.bookmaker}
+                        className="rec-bookmaker-logo"
+                      />
+                    )}
+                    {bet.bookmaker}
+                  </div>
                 </div>
+                
+                {/* Mini Odds Table */}
+                {isExpanded && bet.allBooks && (
+                  <div className="rec-mini-table">
+                    <div className="mini-table-header">
+                      <h4>Compare Odds</h4>
+                      <div className="mini-table-subtitle">{bet.market} • {bet.matchup}</div>
+                    </div>
+                    <div className="mini-odds-grid">
+                      {bet.allBooks.slice(0, 6).map((book, bookIndex) => (
+                        <div key={bookIndex} className="mini-odds-card">
+                          <div className="mini-book-header">
+                            {logos[book.bookmaker?.key] && (
+                              <img 
+                                src={logos[book.bookmaker.key]} 
+                                alt={book.book}
+                                className="mini-book-logo"
+                              />
+                            )}
+                            <span className="mini-book-name">{cleanBookTitle(book.book)}</span>
+                          </div>
+                          <div className="mini-book-odds">
+                            <span className="mini-odds-value">{formatOdds(book.price || book.odds)}</span>
+                          </div>
+                          <button className="mini-bet-btn">
+                            <Plus size={12} />
+                            Bet
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="rec-details">
-                <div className="rec-market">{bet.market}</div>
-                <div className="rec-edge">+{bet.edge}% EV</div>
-                <div className="rec-odds">{bet.odds}</div>
-              </div>
-              <div className="rec-bookmaker">{bet.bookmaker}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

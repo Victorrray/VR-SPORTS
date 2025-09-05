@@ -175,7 +175,13 @@ export default function Home() {
 
         {/* Edge Calculator Modal */}
         {showEdgeCalculator && (
-          <EdgeCalculator onClose={() => setShowEdgeCalculator(false)} />
+          <EdgeCalculator 
+            onClose={() => setShowEdgeCalculator(false)} 
+            onNavigateToSportsbooks={() => {
+              setShowEdgeCalculator(false);
+              window.location.href = '/sportsbooks';
+            }}
+          />
         )}
         </section>
       </div>
@@ -308,7 +314,13 @@ export default function Home() {
 
       {/* Edge Calculator Modal */}
       {showEdgeCalculator && (
-        <EdgeCalculator onClose={() => setShowEdgeCalculator(false)} />
+        <EdgeCalculator 
+          onClose={() => setShowEdgeCalculator(false)} 
+          onNavigateToSportsbooks={() => {
+            setShowEdgeCalculator(false);
+            window.location.href = '/sportsbooks';
+          }}
+        />
       )}
 
       <MobileBottomBar active="home" showFilter={false} />
