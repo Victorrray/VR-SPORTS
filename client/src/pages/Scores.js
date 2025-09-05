@@ -398,9 +398,6 @@ export default function Scores() {
                     <div className="live-indicator">
                       <div className="live-dot"></div>
                       <span>Live Now</span>
-                      {g.clock && g.clock !== 'Live' && <span className="game-clock">{g.clock}</span>}
-                      {g.period && <span className="game-period">Q{g.period}</span>}
-                      {g.situation && <span className="game-situation">{g.situation}</span>}
                     </div>
                   )}
                 </div>

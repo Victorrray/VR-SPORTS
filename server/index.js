@@ -933,7 +933,7 @@ app.get("/api/scores", async (req, res) => {
         clock: enhancedClock,
         // Enhanced live game metadata
         completed: enhancedStatus === 'final',
-        live: enhancedStatus === 'in_progress' && (homeScore > 0 || awayScore > 0 || enhancedClock !== ''),
+        live: false, // Disable all live status until we can properly validate actual live games
         period: e.status?.period || comp.status?.period || null,
         situation: e.status?.type?.situation || null,
         week: r.data?.week?.number ?? r.data?.week ?? null,
