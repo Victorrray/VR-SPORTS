@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle, ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import './PersonalizedDashboard.css';
-import logos from '../data/logos';
 
 export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   const [dashboardData, setDashboardData] = useState({
@@ -229,49 +228,39 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
                     </div>
                   </div>
                   <div className="rec-details">
-                    <div className="rec-market">{bet.market}</div>
-                    <div className="rec-edge">+{bet.edge}% EV</div>
-                    <div className="rec-odds">{bet.odds}</div>
-                  </div>
-                  <div className="rec-bookmaker">
-                    {logos[bet.bookmaker?.toLowerCase()] && (
-                      <img 
-                        src={logos[bet.bookmaker.toLowerCase()]} 
-                        alt={bet.bookmaker}
-                        className="rec-bookmaker-logo"
-                      />
-                    )}
-                    {bet.bookmaker}
+                    <div className="rec-bet-info">
+                      <div className="bet-card-bookmaker">
+                        <span className="bookmaker-name">
+                          {bet.bookmaker}
+                        </span>
+                      </div>
+                      <div className="rec-market">{bet.market}</div>
+                      <div className="rec-odds">{bet.odds}</div>
+                      <div className="rec-edge">+{bet.edge}% EV</div>
+                    </div>
                   </div>
                 </div>
-                
+
                 {/* Mini Odds Table */}
-                {isExpanded && bet.allBooks && (
-                  <div className="rec-mini-table">
+                {isExpanded && (
+                  <div className="mini-odds-table">
                     <div className="mini-table-header">
-                      <h4>Compare Odds</h4>
-                      <div className="mini-table-subtitle">{bet.market} • {bet.matchup}</div>
+                      <span>Sportsbook Comparison</span>
                     </div>
-                    <div className="mini-odds-grid">
+                    <div className="mini-table-content">
                       {bet.allBooks.slice(0, 6).map((book, bookIndex) => (
-                        <div key={bookIndex} className="mini-odds-card">
-                          <div className="mini-book-header">
-                            {logos[book.bookmaker?.key] && (
-                              <img 
-                                src={logos[book.bookmaker.key]} 
-                                alt={book.book}
-                                className="mini-book-logo"
-                              />
-                            )}
-                            <span className="mini-book-name">{cleanBookTitle(book.book)}</span>
+                        <div key={bookIndex} className="mini-table-row">
+                          <div className="mini-table-bookmaker">
+                            <span className="bookmaker-name">
+                              {book.name}
+                            </span>
                           </div>
-                          <div className="mini-book-odds">
-                            <span className="mini-odds-value">{formatOdds(book.price || book.odds)}</span>
+                          <div className="mini-table-odds">
+                            {formatOdds(book.odds)}
                           </div>
-                          <button className="mini-bet-btn">
-                            <Plus size={12} />
-                            Bet
-                          </button>
+                          <div className="mini-table-action">
+                            <button className="mini-bet-btn">Bet</button>
+                          </div>
                         </div>
                       ))}
                     </div>
