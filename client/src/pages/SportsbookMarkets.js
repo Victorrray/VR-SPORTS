@@ -210,28 +210,47 @@ export default function SportsbookMarkets() {
   const [minEV, setMinEV] = useState("");
   const [activePreset, setActivePreset] = useState(null);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
-  // Filter presets
+  // Enhanced filter presets with sportsbook recommendations
   const filterPresets = [
     {
       id: 'nfl',
       name: 'NFL',
-      description: 'NFL games only',
+      description: 'NFL games with best books',
       sports: ['americanfootball_nfl'],
-      markets: ['h2h', 'spreads', 'totals']
+      markets: ['h2h', 'spreads', 'totals'],
+      recommendedBooks: ['draftkings', 'fanduel', 'betmgm', 'caesars', 'espnbet']
     },
     {
       id: 'nba',
       name: 'NBA', 
-      description: 'NBA games only',
+      description: 'NBA games with top sportsbooks',
       sports: ['basketball_nba'],
-      markets: ['h2h', 'spreads', 'totals']
+      markets: ['h2h', 'spreads', 'totals'],
+      recommendedBooks: ['draftkings', 'fanduel', 'betmgm', 'pointsbetau', 'hardrockbet']
     },
     {
       id: 'mlb',
       name: 'MLB',
-      description: 'MLB games only', 
+      description: 'MLB games with enhanced markets', 
       sports: ['baseball_mlb'],
-      markets: ['h2h', 'spreads', 'totals', 'first_five_moneyline', 'first_five_spreads', 'first_five_totals']
+      markets: ['h2h', 'spreads', 'totals', 'first_five_moneyline', 'first_five_spreads', 'first_five_totals'],
+      recommendedBooks: ['fanduel', 'draftkings', 'betmgm', 'unibet_us']
+    },
+    {
+      id: 'dfs',
+      name: 'DFS',
+      description: 'Daily Fantasy Sports platforms',
+      sports: ['americanfootball_nfl', 'basketball_nba', 'baseball_mlb'],
+      markets: ['h2h', 'spreads', 'totals'],
+      recommendedBooks: ['prizepicks', 'underdog', 'superdraft', 'fliff']
+    },
+    {
+      id: 'props',
+      name: 'Props',
+      description: 'Player props across all sports',
+      sports: ['americanfootball_nfl', 'basketball_nba', 'baseball_mlb'],
+      markets: ['player_pass_tds', 'player_points', 'batter_home_runs'],
+      recommendedBooks: ['draftkings', 'fanduel', 'betmgm', 'prizepicks']
     }
   ];
   
@@ -239,6 +258,23 @@ export default function SportsbookMarkets() {
     setPicked(preset.sports);
     setMarketKeys(preset.markets);
     setActivePreset(preset.id);
+    
+    // Auto-select recommended books if available
+    if (preset.recommendedBooks && bookList.length > 0) {
+      const availableRecommended = preset.recommendedBooks.filter(bookKey => 
+        bookList.some(book => book.key === bookKey)
+      );
+      if (availableRecommended.length > 0) {
+        setSelectedBooks(availableRecommended);
+      }
+    }
+    
+    // Enable player props for props preset
+    if (preset.id === 'props') {
+      setShowPlayerProps(true);
+    } else {
+      setShowPlayerProps(false);
+    }
   };
 
   const [oddsFormat, setOddsFormat] = useState(() => {
@@ -427,14 +463,24 @@ export default function SportsbookMarkets() {
     setErr(hookError || null);
     // setQuota(hookQuota || { remain: "–", used: "–" });
     if (Array.isArray(hookBooks) && hookBooks.length > 0) {
-      // Add DFS books to the book list for filtering
-      const dfsBooks = [
+      // Add all new sportsbooks to ensure they appear in filters
+      const additionalBooks = [
+        { key: 'espnbet', title: 'ESPN BET' },
+        { key: 'pointsbetau', title: 'PointsBet' },
+        { key: 'unibet_us', title: 'Unibet' },
+        { key: 'betfred_us', title: 'Betfred' },
+        { key: 'hardrockbet', title: 'Hard Rock Bet' },
+        { key: 'fliff', title: 'Fliff' },
+        { key: 'superdraft', title: 'SuperDraft' },
         { key: 'prizepicks', title: 'PrizePicks' },
         { key: 'underdog', title: 'Underdog Fantasy' },
         { key: 'draftkings_pick6', title: 'DraftKings Pick6' }
       ];
       
-      const combinedBooks = [...hookBooks, ...dfsBooks];
+      // Merge books, avoiding duplicates
+      const existingKeys = new Set(hookBooks.map(b => b.key));
+      const newBooks = additionalBooks.filter(b => !existingKeys.has(b.key));
+      const combinedBooks = [...hookBooks, ...newBooks];
       setBookList(combinedBooks);
       if (typeof window !== "undefined") {
         try {
@@ -552,12 +598,20 @@ export default function SportsbookMarkets() {
             </div>
 
             <div className="filter-group">
-              <span className="filter-label">Books</span>
+              <span className="filter-label">Sportsbooks ({bookList.length} available)</span>
               <SportMultiSelect
-                list={bookList}
+                list={bookList.sort((a, b) => {
+                  // Sort by popularity/importance
+                  const priority = {
+                    'draftkings': 1, 'fanduel': 2, 'betmgm': 3, 'caesars': 4, 'espnbet': 5,
+                    'pointsbetau': 6, 'hardrockbet': 7, 'unibet_us': 8, 'betfred_us': 9,
+                    'prizepicks': 10, 'underdog': 11, 'superdraft': 12, 'fliff': 13
+                  };
+                  return (priority[a.key] || 99) - (priority[b.key] || 99);
+                })}
                 selected={selectedBooks}
                 onChange={setSelectedBooks}
-                placeholderText="Choose books…"
+                placeholderText={selectedBooks.length === 0 ? "All Books Selected" : `${selectedBooks.length} books selected`}
                 allLabel="All Books"
                 grid={true}
                 columns={2}

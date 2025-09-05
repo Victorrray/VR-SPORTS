@@ -3,14 +3,29 @@
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 20px;
-  padding: 0;
-  margin-bottom: 24px;
   backdrop-filter: var(--backdrop-blur-light);
   -webkit-backdrop-filter: var(--backdrop-blur-light);
   box-shadow: var(--card-shadow);
+  margin-bottom: 24px;
   overflow: hidden;
   position: relative;
   transition: all 0.3s ease;
+}
+
+.accessibility-settings-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.accessibility-settings-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .accessibility-settings-card .card-header {

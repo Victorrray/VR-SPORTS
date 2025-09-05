@@ -158,7 +158,7 @@ app.get("/api/odds", async (req, res) => {
       // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
       for (const sport of sportsArray) {
         try {
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}`;
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
           console.log(`Fetching base games for ${sport} from:`, url);
           
           const response = await axios.get(url);
@@ -191,7 +191,7 @@ app.get("/api/odds", async (req, res) => {
       for (const game of allGames) {
         try {
           // Use TheOddsAPI's /events/{eventId}/odds endpoint for player props
-          const eventUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}`;
+          const eventUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
           console.log(`Fetching props for game ${game.id}:`, eventUrl);
           
           const propResponse = await axios.get(eventUrl);
@@ -636,7 +636,7 @@ app.get("/api/player-props", async (req, res) => {
     let marketsToFetch = markets;
     if (!markets) {
       try {
-        const marketsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}`;
+        const marketsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
         const marketsResp = await axios.get(marketsUrl);
         
         // Extract player prop markets (typically contain "player" in the key)
@@ -673,7 +673,7 @@ app.get("/api/player-props", async (req, res) => {
       return res.json({ message: "No player prop markets available for this event", bookmakers: [] });
     }
 
-    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/odds?apiKey=${API_KEY}&regions=${regions}&oddsFormat=${oddsFormat}&markets=${marketsToFetch}`;
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/odds?apiKey=${API_KEY}&regions=${regions}&oddsFormat=${oddsFormat}&markets=${marketsToFetch}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
 
     const r = await axios.get(url);
     res.json(r.data);
@@ -691,7 +691,7 @@ app.get("/api/event-markets", async (req, res) => {
     const { sport, eventId, regions = "us" } = req.query;
     if (!sport || !eventId) return res.status(400).json({ error: "Missing sport or eventId" });
 
-    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}`;
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
     const r = await axios.get(url);
     res.json(r.data);
   } catch (err) {
@@ -751,7 +751,13 @@ app.get("/api/scores", async (req, res) => {
       baseUrl = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`;
     }
 
-    const axiosOpts = { timeout: 15_000 };
+    const axiosOpts = { 
+      timeout: 15_000,
+      headers: {
+        'User-Agent': 'VR-Odds/1.0 (Sports Betting Platform)',
+        'Accept': 'application/json'
+      }
+    };
     // Only add date param for historical data, not for live scores
     if (dateParam && dateParam !== new Date().toISOString().slice(0, 10).replace(/-/g, "")) {
       axiosOpts.params = { dates: dateParam };
@@ -827,6 +833,36 @@ app.get("/api/scores", async (req, res) => {
       return Number.isFinite(n) ? n : null;
     };
 
+    // Enhanced status detection for more accurate live game identification
+    const getGameStatus = (event, competition) => {
+      const status = event.status || competition.status || {};
+      const type = status.type || {};
+      
+      // More granular status detection
+      if (type.completed === true || type.state === 'post') {
+        return 'final';
+      }
+      
+      if (type.state === 'in' || status.displayClock) {
+        return 'in_progress';
+      }
+      
+      if (type.state === 'pre' || new Date(event.date) > new Date()) {
+        return 'scheduled';
+      }
+      
+      // Fallback based on scores presence and time
+      const hasScores = competition.competitors?.some(c => c.score && Number(c.score) > 0);
+      const gameTime = new Date(event.date);
+      const now = new Date();
+      
+      if (hasScores && gameTime <= now) {
+        return 'in_progress';
+      }
+      
+      return gameTime > now ? 'scheduled' : 'final';
+    };
+
     const statusTuple = (e, comp) => {
       const st = e.status || comp.status || {};
       const t = st.type || {};
@@ -863,6 +899,18 @@ app.get("/api/scores", async (req, res) => {
       const awayScore = toNum(away.score);
 
       const { status, clock } = statusTuple(e, comp);
+      const enhancedStatus = getGameStatus(e, comp);
+      
+      // Enhanced clock information for live games
+      let enhancedClock = clock;
+      if (enhancedStatus === 'in_progress') {
+        const statusType = e.status?.type || comp.status?.type || {};
+        enhancedClock = statusType.displayClock || 
+                       statusType.shortDetail || 
+                       statusType.detail || 
+                       clock || 
+                       'Live';
+      }
 
       // ESPN sometimes includes odds; keep if present
       let vegasLine = null;
@@ -887,9 +935,14 @@ app.get("/api/scores", async (req, res) => {
         home_rank,
         away_rank,
         commence_time: e.date,
-        status,
+        status: enhancedStatus,
         scores: { home: homeScore ?? 0, away: awayScore ?? 0 },
-        clock,
+        clock: enhancedClock,
+        // Enhanced live game metadata
+        completed: enhancedStatus === 'final',
+        live: enhancedStatus === 'in_progress',
+        period: e.status?.period || comp.status?.period || null,
+        situation: e.status?.type?.situation || null,
         week: r.data?.week?.number ?? r.data?.week ?? null,
         season: (r.data?.season && (r.data.season.year || r.data.season)) || null,
         league: leagueSlug,
@@ -900,9 +953,35 @@ app.get("/api/scores", async (req, res) => {
       };
     });
 
-    games.sort((a, b) => new Date(a.commence_time) - new Date(b.commence_time));
+    // Enhanced sorting: Live games first, then upcoming by time, then completed by time desc
+    games.sort((a, b) => {
+      // Prioritize live games
+      if (a.live && !b.live) return -1;
+      if (!a.live && b.live) return 1;
+      
+      // Among live games, sort by commence time
+      if (a.live && b.live) {
+        return new Date(a.commence_time) - new Date(b.commence_time);
+      }
+      
+      // Among non-live games, upcoming first, then completed
+      if (!a.completed && b.completed) return -1;
+      if (a.completed && !b.completed) return 1;
+      
+      // Within same category, sort by time (upcoming: asc, completed: desc)
+      const timeA = new Date(a.commence_time);
+      const timeB = new Date(b.commence_time);
+      
+      return a.completed ? timeB - timeA : timeA - timeB;
+    });
 
-    res.set("Cache-Control", "public, max-age=30");
+    // Dynamic cache control based on live games
+    const hasLiveGames = games.some(g => g.live);
+    const cacheMaxAge = hasLiveGames ? 15 : 60; // 15s for live games, 60s for others
+    res.set("Cache-Control", `public, max-age=${cacheMaxAge}`);
+    
+    // Add live games count to response headers for client optimization
+    res.set("X-Live-Games-Count", games.filter(g => g.live).length.toString());
     res.json(games);
   } catch (err) {
     const status = err?.response?.status || 500;

@@ -124,14 +124,18 @@ export default function Scores() {
       const data = await r.json();
       setGames(data || []);
       
-      // Count live games for dynamic refresh
-      const liveCount = (data || []).filter(g => 
-        g.status === 'in_progress' || 
-        (g.completed === false && new Date(g.commence_time) <= new Date())
-      ).length;
+      // Count live games using enhanced backend data
+      const liveCount = (data || []).filter(g => g.live === true || g.status === 'in_progress').length;
       setLiveGamesCount(liveCount);
       setLastUpdate(new Date());
       setConnectionStatus('connected');
+      
+      // Log live games for debugging
+      if (liveCount > 0) {
+        console.log(`🔴 Found ${liveCount} live games:`, 
+          (data || []).filter(g => g.live === true).map(g => `${g.away_team} @ ${g.home_team}`)
+        );
+      }
     } catch (error) {
       console.error("Error loading scores:", error);
       setConnectionStatus('error');
@@ -157,8 +161,8 @@ export default function Scores() {
   useEffect(() => {
     load();
     
-    // Use faster refresh if there are live games
-    const refreshInterval = liveGamesCount > 0 ? LIVE_REFRESH_MS : REFRESH_MS;
+    // Use faster refresh if there are live games (15s for live, 60s for others)
+    const refreshInterval = liveGamesCount > 0 ? 15000 : REFRESH_MS;
     const t = setInterval(() => load(true), refreshInterval);
     return () => clearInterval(t);
   }, [sport, liveGamesCount]);
@@ -314,9 +318,9 @@ export default function Scores() {
       {err && <div className="error-state">{err}</div>}
 
       <div className="scores-grid">
-        {games.map((g) => {
-          const isLive = g.completed === false && new Date(g.commence_time) <= new Date();
-          const isCompleted = g.completed === true;
+        {sorted.map((g) => {
+          const isLive = g.live === true || g.status === 'in_progress';
+          const isCompleted = g.completed === true || g.status === 'final';
           const isUpcoming = !isLive && !isCompleted;
 
           return (
@@ -386,8 +390,9 @@ export default function Scores() {
                     <div className="live-indicator">
                       <div className="live-dot"></div>
                       <span>Live Now</span>
-                      {g.clock && <span className="game-clock">{g.clock}</span>}
-                      {g.period && <span className="game-period">{g.period}</span>}
+                      {g.clock && g.clock !== 'Live' && <span className="game-clock">{g.clock}</span>}
+                      {g.period && <span className="game-period">Q{g.period}</span>}
+                      {g.situation && <span className="game-situation">{g.situation}</span>}
                     </div>
                   )}
                   {!isLive && (

@@ -27,9 +27,36 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
             'Buffalo Bills': { name: 'Highmark Stadium', city: 'Orchard Park', state: 'NY', capacity: '71,608' },
             'Green Bay Packers': { name: 'Lambeau Field', city: 'Green Bay', state: 'WI', capacity: '81,441' },
             'Dallas Cowboys': { name: 'AT&T Stadium', city: 'Arlington', state: 'TX', capacity: '80,000' },
-            'New England Patriots': { name: 'Gillette Stadium', city: 'Foxborough', state: 'MA', capacity: '65,878' }
+            'New England Patriots': { name: 'Gillette Stadium', city: 'Foxborough', state: 'MA', capacity: '65,878' },
+            'Philadelphia Eagles': { name: 'Lincoln Financial Field', city: 'Philadelphia', state: 'PA', capacity: '69,176' },
+            'Pittsburgh Steelers': { name: 'Heinz Field', city: 'Pittsburgh', state: 'PA', capacity: '68,400' },
+            'Baltimore Ravens': { name: 'M&T Bank Stadium', city: 'Baltimore', state: 'MD', capacity: '71,008' },
+            'Cincinnati Bengals': { name: 'Paycor Stadium', city: 'Cincinnati', state: 'OH', capacity: '65,515' },
+            'Cleveland Browns': { name: 'FirstEnergy Stadium', city: 'Cleveland', state: 'OH', capacity: '67,431' },
+            'Miami Dolphins': { name: 'Hard Rock Stadium', city: 'Miami Gardens', state: 'FL', capacity: '65,326' },
+            'New York Jets': { name: 'MetLife Stadium', city: 'East Rutherford', state: 'NJ', capacity: '82,500' },
+            'New York Giants': { name: 'MetLife Stadium', city: 'East Rutherford', state: 'NJ', capacity: '82,500' },
+            'Washington Commanders': { name: 'FedExField', city: 'Landover', state: 'MD', capacity: '82,000' },
+            'Chicago Bears': { name: 'Soldier Field', city: 'Chicago', state: 'IL', capacity: '61,500' },
+            'Detroit Lions': { name: 'Ford Field', city: 'Detroit', state: 'MI', capacity: '65,000' },
+            'Minnesota Vikings': { name: 'U.S. Bank Stadium', city: 'Minneapolis', state: 'MN', capacity: '66,860' },
+            'Atlanta Falcons': { name: 'Mercedes-Benz Stadium', city: 'Atlanta', state: 'GA', capacity: '71,000' },
+            'Carolina Panthers': { name: 'Bank of America Stadium', city: 'Charlotte', state: 'NC', capacity: '75,523' },
+            'New Orleans Saints': { name: 'Caesars Superdome', city: 'New Orleans', state: 'LA', capacity: '73,208' },
+            'Tampa Bay Buccaneers': { name: 'Raymond James Stadium', city: 'Tampa', state: 'FL', capacity: '65,890' },
+            'Arizona Cardinals': { name: 'State Farm Stadium', city: 'Glendale', state: 'AZ', capacity: '63,400' },
+            'Los Angeles Rams': { name: 'SoFi Stadium', city: 'Los Angeles', state: 'CA', capacity: '70,240' },
+            'Los Angeles Chargers': { name: 'SoFi Stadium', city: 'Los Angeles', state: 'CA', capacity: '70,240' },
+            'San Francisco 49ers': { name: 'Levi\'s Stadium', city: 'Santa Clara', state: 'CA', capacity: '68,500' },
+            'Seattle Seahawks': { name: 'Lumen Field', city: 'Seattle', state: 'WA', capacity: '69,000' },
+            'Denver Broncos': { name: 'Empower Field at Mile High', city: 'Denver', state: 'CO', capacity: '76,125' },
+            'Las Vegas Raiders': { name: 'Allegiant Stadium', city: 'Las Vegas', state: 'NV', capacity: '65,000' },
+            'Houston Texans': { name: 'NRG Stadium', city: 'Houston', state: 'TX', capacity: '72,220' },
+            'Indianapolis Colts': { name: 'Lucas Oil Stadium', city: 'Indianapolis', state: 'IN', capacity: '63,000' },
+            'Jacksonville Jaguars': { name: 'TIAA Bank Field', city: 'Jacksonville', state: 'FL', capacity: '67,838' },
+            'Tennessee Titans': { name: 'Nissan Stadium', city: 'Nashville', state: 'TN', capacity: '69,143' }
           };
-          return nflVenues[homeTeam] || { name: 'NFL Stadium', city: 'City', state: 'ST', capacity: '70,000' };
+          return nflVenues[homeTeam] || { name: homeTeam + ' Stadium', city: 'Home City', state: 'ST', capacity: '70,000' };
         }
         
         // College Football venues
@@ -57,81 +84,54 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
         return { name: 'Sports Venue', city: 'City', state: 'ST', capacity: '50,000' };
       };
 
-      // Generate realistic team records based on current date and sport
-      const generateTeamRecord = (team, isHome = false) => {
-        const sport = game.sport_key || '';
-        let wins, losses, streak;
-        
-        if (sport.includes('nfl')) {
-          wins = Math.floor(Math.random() * 15) + 1;
-          losses = 17 - wins;
-          streak = Math.random() > 0.5 ? `W${Math.floor(Math.random() * 4) + 1}` : `L${Math.floor(Math.random() * 3) + 1}`;
-        } else if (sport.includes('nba')) {
-          wins = Math.floor(Math.random() * 60) + 15;
-          losses = 82 - wins;
-          streak = Math.random() > 0.5 ? `W${Math.floor(Math.random() * 8) + 1}` : `L${Math.floor(Math.random() * 5) + 1}`;
-        } else {
-          wins = Math.floor(Math.random() * 10) + 5;
-          losses = Math.floor(Math.random() * 8) + 2;
-          streak = Math.random() > 0.5 ? `W${Math.floor(Math.random() * 5) + 1}` : `L${Math.floor(Math.random() * 3) + 1}`;
-        }
-        
-        return { wins, losses, streak };
-      };
-
       const venue = getVenueInfo();
-      const awayRecord = generateTeamRecord(game.away_team, false);
-      const homeRecord = generateTeamRecord(game.home_team, true);
 
-      // Use actual game data when available, fallback to mock data
+      // Use only real ESPN API data - no mock data
       const gameDetails = {
         venue,
-        weather: game.sport_key?.includes('nfl') ? {
-          temperature: `${Math.floor(Math.random() * 40) + 40}°F`,
-          condition: ["Clear", "Partly Cloudy", "Overcast", "Light Rain"][Math.floor(Math.random() * 4)],
-          humidity: `${Math.floor(Math.random() * 40) + 30}%`,
-          wind: `${Math.floor(Math.random() * 15) + 3} mph ${["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.floor(Math.random() * 8)]}`
-        } : null,
-        attendance: Math.floor(parseInt(venue.capacity.replace(/,/g, '')) * (0.8 + Math.random() * 0.2)).toLocaleString(),
-        officials: [
-          { name: "John Smith", position: "Referee" },
-          { name: "Mike Johnson", position: "Umpire" }
-        ],
+        // Only show weather if available from API (currently not provided by ESPN)
+        weather: null,
+        // Only show attendance if available from API
+        attendance: null,
+        // Only show officials if available from API
+        officials: null,
         teamStats: {
           [game.away_team || "Away Team"]: {
-            record: `${awayRecord.wins}-${awayRecord.losses}`,
-            streak: awayRecord.streak,
-            score: game.scores?.find(s => s.name === game.away_team)?.score || null,
-            injuries: Math.random() > 0.3 ? ["Player A (Questionable)", "Player B (Out)"] : []
+            record: game.away_record || null,
+            streak: null, // Not available from ESPN API
+            score: game.scores?.away || null,
+            injuries: null // Not available from ESPN API
           },
           [game.home_team || "Home Team"]: {
-            record: `${homeRecord.wins}-${homeRecord.losses}`, 
-            streak: homeRecord.streak,
-            score: game.scores?.find(s => s.name === game.home_team)?.score || null,
-            injuries: Math.random() > 0.5 ? ["Player C (Probable)"] : []
+            record: game.home_record || null,
+            streak: null, // Not available from ESPN API
+            score: game.scores?.home || null,
+            injuries: null // Not available from ESPN API
           }
         },
-        headToHead: {
-          allTime: `${Math.random() > 0.5 ? game.home_team : game.away_team} lead ${Math.floor(Math.random() * 20) + 25}-${Math.floor(Math.random() * 20) + 20}`,
-          thisSeason: Math.random() > 0.5 ? "Split 1-1" : `${Math.random() > 0.5 ? game.home_team : game.away_team} lead 2-0`,
-          lastMeeting: `${Math.random() > 0.5 ? game.home_team : game.away_team} ${Math.floor(Math.random() * 30) + 90}-${Math.floor(Math.random() * 30) + 85} (${new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
-        },
-        keyPlayers: [
-          { name: "Star Player", team: game.away_team || "Away Team", stats: `${(Math.random() * 15 + 15).toFixed(1)} PPG, ${(Math.random() * 5 + 5).toFixed(1)} RPG, ${(Math.random() * 5 + 3).toFixed(1)} APG` },
-          { name: "Key Player", team: game.home_team || "Home Team", stats: `${(Math.random() * 15 + 18).toFixed(1)} PPG, ${(Math.random() * 5 + 6).toFixed(1)} RPG, ${(Math.random() * 5 + 4).toFixed(1)} APG` }
-        ],
+        // Remove mock head-to-head data
+        headToHead: null,
+        // Remove mock key players
+        keyPlayers: null,
+        // Use real betting data from odds API if available
         predictions: {
-          spread: game.bookmakers?.[0]?.markets?.find(m => m.key === 'spreads')?.outcomes?.[0]?.point || `${Math.random() > 0.5 ? '-' : '+'}${(Math.random() * 10 + 1).toFixed(1)}`,
-          total: game.bookmakers?.[0]?.markets?.find(m => m.key === 'totals')?.outcomes?.[0]?.point || (Math.random() * 50 + 200).toFixed(1),
-          moneyline: { 
-            away: game.bookmakers?.[0]?.markets?.find(m => m.key === 'h2h')?.outcomes?.find(o => o.name === game.away_team)?.price || `+${Math.floor(Math.random() * 200) + 110}`, 
-            home: game.bookmakers?.[0]?.markets?.find(m => m.key === 'h2h')?.outcomes?.find(o => o.name === game.home_team)?.price || `-${Math.floor(Math.random() * 200) + 120}` 
-          }
+          spread: game.odds?.spread || null,
+          total: game.odds?.overUnder || null,
+          moneyline: null // Will be populated from odds API if available
         },
-        // Add actual game status and period information
-        gameStatus: game.completed ? 'Final' : (game.scores ? 'Live' : 'Scheduled'),
-        period: game.last_update ? new Date(game.last_update).toLocaleTimeString() : null,
-        actualScores: game.scores || null
+        // Real game status and period information from ESPN
+        gameStatus: game.status === 'final' ? 'Final' : (game.status === 'in_progress' ? 'Live' : 'Scheduled'),
+        period: game.clock || null,
+        actualScores: game.scores || null,
+        // Enhanced game details from real data
+        liveUpdates: game.status === 'in_progress',
+        gameWeek: game.week,
+        gameSeason: game.season,
+        // Remove mock broadcast info
+        broadcastInfo: {
+          network: null, // Not available from ESPN API
+          announcers: null // Not available from ESPN API
+        }
       };
       
       setGameDetails(gameDetails);
@@ -171,22 +171,40 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
               <div className="game-header">
                 <div className="teams-display">
                   <div className="team-info">
-                    <h3>{game.away_team}</h3>
-                    <span className="team-record">{gameDetails.teamStats[game.away_team]?.record}</span>
+                    {game.away_logo && (
+                      <img src={game.away_logo} alt={game.away_team} className="team-logo-modal" />
+                    )}
+                    <div className="team-details">
+                      <h3>{game.away_team}</h3>
+                      <span className="team-record">{gameDetails.teamStats[game.away_team]?.record}</span>
+                      {game.away_rank && <span className="team-rank">#{game.away_rank}</span>}
+                    </div>
                     {gameDetails.actualScores && (
                       <span className="team-score">{gameDetails.teamStats[game.away_team]?.score}</span>
                     )}
                   </div>
                   <div className="vs-divider">
-                    {gameDetails.actualScores ? (
+                    {gameDetails.liveUpdates ? (
+                      <div className="live-status">
+                        <div className="live-dot-pulse"></div>
+                        <span className="game-status">{gameDetails.gameStatus}</span>
+                        {gameDetails.period && <span className="game-period">{gameDetails.period}</span>}
+                      </div>
+                    ) : gameDetails.actualScores ? (
                       <span className="game-status">{gameDetails.gameStatus}</span>
                     ) : (
                       "@"
                     )}
                   </div>
                   <div className="team-info">
-                    <h3>{game.home_team}</h3>
-                    <span className="team-record">{gameDetails.teamStats[game.home_team]?.record}</span>
+                    {game.home_logo && (
+                      <img src={game.home_logo} alt={game.home_team} className="team-logo-modal" />
+                    )}
+                    <div className="team-details">
+                      <h3>{game.home_team}</h3>
+                      <span className="team-record">{gameDetails.teamStats[game.home_team]?.record}</span>
+                      {game.home_rank && <span className="team-rank">#{game.home_rank}</span>}
+                    </div>
                     {gameDetails.actualScores && (
                       <span className="team-score">{gameDetails.teamStats[game.home_team]?.score}</span>
                     )}
@@ -205,40 +223,50 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* Betting Lines - Most Important */}
-              <div className="detail-section priority">
-                <h4><Info size={16} /> Betting Lines</h4>
-                <div className="betting-info">
-                  <div className="betting-line">
-                    <span>Spread:</span>
-                    <span>{gameDetails.predictions.spread}</span>
-                  </div>
-                  <div className="betting-line">
-                    <span>Total:</span>
-                    <span>{gameDetails.predictions.total}</span>
-                  </div>
-                  <div className="betting-line">
-                    <span>Moneyline:</span>
-                    <span>{gameDetails.predictions.moneyline.away} / {gameDetails.predictions.moneyline.home}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Team Records & Form */}
-              <div className="detail-section">
-                <h4><TrendingUp size={16} /> Team Form</h4>
-                <div className="team-stats-compact">
-                  {Object.entries(gameDetails.teamStats).map(([team, stats]) => (
-                    <div key={team} className="team-stat-row">
-                      <div className="team-name">{team}</div>
-                      <div className="team-details">
-                        <span className="record">{stats.record}</span>
-                        <span className="streak">{stats.streak}</span>
+              {/* Betting Lines - Only if real data available */}
+              {(gameDetails.predictions.spread || gameDetails.predictions.total) && (
+                <div className="detail-section priority">
+                  <h4><Info size={16} /> Betting Lines</h4>
+                  <div className="betting-info">
+                    {gameDetails.predictions.spread && (
+                      <div className="betting-line">
+                        <span>Spread:</span>
+                        <span>{gameDetails.predictions.spread}</span>
                       </div>
-                    </div>
-                  ))}
+                    )}
+                    {gameDetails.predictions.total && (
+                      <div className="betting-line">
+                        <span>Total (O/U):</span>
+                        <span>{gameDetails.predictions.total}</span>
+                      </div>
+                    )}
+                    {game.odds?.provider && (
+                      <div className="betting-source">
+                        <span>Source: {game.odds.provider}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Team Records (only if available from ESPN) */}
+              {(gameDetails.teamStats[game.away_team]?.record || gameDetails.teamStats[game.home_team]?.record) && (
+                <div className="detail-section">
+                  <h4><TrendingUp size={16} /> Team Records</h4>
+                  <div className="team-stats-compact">
+                    {Object.entries(gameDetails.teamStats).map(([team, stats]) => (
+                      stats.record && (
+                        <div key={team} className="team-stat-row">
+                          <div className="team-name">{team}</div>
+                          <div className="team-details">
+                            <span className="record">{stats.record}</span>
+                          </div>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Venue Info */}
               <div className="detail-section">
@@ -246,20 +274,31 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                 <div className="venue-compact">
                   <p><strong>{gameDetails.venue.name}</strong></p>
                   <p>{gameDetails.venue.city}, {gameDetails.venue.state}</p>
-                  {gameDetails.weather && (
-                    <p className="weather">{gameDetails.weather.temperature} - {gameDetails.weather.condition}</p>
-                  )}
+                  <p className="capacity">Capacity: {gameDetails.venue.capacity}</p>
                 </div>
               </div>
 
-              {/* Head to Head - Simplified */}
-              <div className="detail-section">
-                <h4><Users size={16} /> Head to Head</h4>
-                <div className="h2h-compact">
-                  <p>{gameDetails.headToHead.allTime}</p>
-                  <p>{gameDetails.headToHead.lastMeeting}</p>
+              {/* Game Information */}
+              {(gameDetails.gameWeek || gameDetails.gameSeason) && (
+                <div className="detail-section">
+                  <h4><Info size={16} /> Game Information</h4>
+                  <div className="game-info-details">
+                    {gameDetails.gameWeek && <p><strong>Week:</strong> {gameDetails.gameWeek}</p>}
+                    {gameDetails.gameSeason && <p><strong>Season:</strong> {gameDetails.gameSeason}</p>}
+                    <p><strong>League:</strong> {game.league?.toUpperCase() || 'NFL'}</p>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Live Updates Notice */}
+              {gameDetails.liveUpdates && (
+                <div className="detail-section live-notice">
+                  <div className="live-update-banner">
+                    <div className="live-dot-pulse"></div>
+                    <span>Live updates every 30 seconds</span>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <div className="modal-error">
