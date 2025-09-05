@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VR-Odds Favicon Generator</title>
+</head>
+<body>
+    <canvas id="favicon" width="32" height="32" style="border: 1px solid #ccc; image-rendering: pixelated; width: 128px; height: 128px;"></canvas>
+    <br><br>
+    <canvas id="apple-icon" width="180" height="180" style="border: 1px solid #ccc; image-rendering: pixelated; width: 180px; height: 180px;"></canvas>
+    <br><br>
+    <button onclick="downloadFavicon()">Download 32x32 Favicon</button>
+    <button onclick="downloadAppleIcon()">Download 180x180 Apple Icon</button>
+    
+    <script>
+        // Create 32x32 favicon
+        const canvas = document.getElementById('favicon');
+        const ctx = canvas.getContext('2d');
+        
+        // Create gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 32, 32);
+        gradient.addColorStop(0, '#8b5cf6');
+        gradient.addColorStop(1, '#7c3aed');
+        
+        // Fill background
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(16, 16, 16, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Add OS text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('OS', 16, 16);
+        
+        // Add small percentage symbol
+        ctx.fillStyle = '#a78bfa';
+        ctx.beginPath();
+        ctx.arc(25, 7, 3, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 5px Arial';
+        ctx.fillText('%', 25, 7);
+        
+        // Create 180x180 Apple touch icon
+        const appleCanvas = document.getElementById('apple-icon');
+        const appleCtx = appleCanvas.getContext('2d');
+        
+        // Scale up for Apple icon
+        const appleGradient = appleCtx.createLinearGradient(0, 0, 180, 180);
+        appleGradient.addColorStop(0, '#8b5cf6');
+        appleGradient.addColorStop(1, '#7c3aed');
+        
+        // Fill background with rounded corners
+        appleCtx.fillStyle = appleGradient;
+        appleCtx.beginPath();
+        appleCtx.roundRect(0, 0, 180, 180, 32);
+        appleCtx.fill();
+        
+        // Add OS text (larger)
+        appleCtx.fillStyle = 'white';
+        appleCtx.font = 'bold 64px Arial';
+        appleCtx.textAlign = 'center';
+        appleCtx.textBaseline = 'middle';
+        appleCtx.fillText('OS', 90, 90);
+        
+        // Add percentage symbol
+        appleCtx.fillStyle = '#a78bfa';
+        appleCtx.beginPath();
+        appleCtx.arc(140, 40, 16, 0, 2 * Math.PI);
+        appleCtx.fill();
+        
+        appleCtx.fillStyle = 'white';
+        appleCtx.font = 'bold 20px Arial';
+        appleCtx.fillText('%', 140, 40);
+        
+        function downloadFavicon() {
+            const link = document.createElement('a');
+            link.download = 'favicon.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        function downloadAppleIcon() {
+            const link = document.createElement('a');
+            link.download = 'apple-touch-icon.png';
+            link.href = appleCanvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
