@@ -76,209 +76,331 @@
   margin-top: 2px;
 }
 
-/* Alerts */
-.dashboard-alerts {
+
+/* Top Value Bets */
+.top-value-bets {
   margin-bottom: 32px;
 }
 
-.dashboard-alerts h3 {
-  color: var(--text-primary);
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 16px 0;
+.section-header {
+  margin-bottom: 24px;
 }
 
-.alerts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.alert-item {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 16px;
+.section-title {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.section-title h3 {
   color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
 }
 
-/* Recommendations */
-.dashboard-recommendations {
-  margin-bottom: 32px;
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin: 0;
 }
 
-.dashboard-recommendations h3 {
-  color: var(--text-primary);
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.recommendations-list {
+.value-bets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
-.recommendation-card {
-  background: linear-gradient(135deg, var(--card-bg) 0%, color-mix(in srgb, var(--card-bg) 95%, var(--accent) 5%) 100%);
-  border: 1px solid color-mix(in srgb, var(--border-color) 70%, var(--accent) 30%);
+.value-bet-card {
+  background: linear-gradient(135deg, var(--card-bg) 0%, color-mix(in srgb, var(--card-bg) 96%, var(--accent) 4%) 100%);
+  border: 1px solid color-mix(in srgb, var(--border-color) 80%, var(--accent) 20%);
   border-radius: 16px;
-  padding: 0;
+  padding: 24px;
   transition: all 0.3s ease;
-  cursor: pointer;
-  overflow: hidden;
   position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.recommendation-card::before {
+.value-bet-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, var(--success)));
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--success));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.recommendation-card:hover {
+.value-bet-card:hover {
   border-color: var(--accent);
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 15%, rgba(0, 0, 0, 0.1));
 }
 
-.recommendation-card:hover::before {
+.value-bet-card:hover::before {
   opacity: 1;
 }
 
-.recommendation-card.expanded {
-  border-color: var(--accent);
-  box-shadow: 0 8px 30px color-mix(in srgb, var(--accent) 20%, rgba(0, 0, 0, 0.1));
-}
-
-.recommendation-card.expanded::before {
-  opacity: 1;
-}
-
-.rec-main-content {
-  padding: 20px;
-  cursor: pointer;
-}
-
-.rec-header {
+.bet-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.rec-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.matchup-info {
+  flex: 1;
 }
 
-.expand-indicator {
-  color: var(--text-secondary);
-  transition: all 0.2s ease;
-  padding: 4px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.expand-indicator:hover {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 20%, transparent);
-}
-
-.rec-matchup {
+.teams {
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
-  font-size: 16px;
+  margin-bottom: 4px;
   line-height: 1.3;
 }
 
-.rec-confidence {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.rec-confidence.high {
-  background: var(--success);
-  color: white;
-}
-
-.rec-confidence.medium {
-  background: var(--warning);
-  color: white;
-}
-
-.rec-confidence.low {
-  background: var(--error);
-  color: white;
-}
-
-.rec-details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+.market-type {
   font-size: 14px;
-  background: color-mix(in srgb, var(--surface-bg) 50%, transparent);
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 50%, transparent);
-}
-
-.rec-market {
   color: var(--text-secondary);
   font-weight: 600;
 }
 
-.rec-edge {
-  color: var(--success);
+.edge-badge {
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 700;
-  background: color-mix(in srgb, var(--success) 10%, transparent);
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 13px;
+  text-align: center;
+  min-width: 80px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.rec-odds {
+.edge-badge.high {
+  background: linear-gradient(135deg, var(--success), color-mix(in srgb, var(--success) 80%, #fff));
+  color: white;
+}
+
+.edge-badge.medium {
+  background: linear-gradient(135deg, var(--warning), color-mix(in srgb, var(--warning) 80%, #fff));
+  color: white;
+}
+
+.edge-badge.low {
+  background: linear-gradient(135deg, var(--info), color-mix(in srgb, var(--info) 80%, #fff));
+  color: white;
+}
+
+.bet-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--surface-bg) 40%, transparent);
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
+}
+
+.best-odds,
+.confidence-indicator {
+  text-align: center;
+}
+
+.odds-label,
+.confidence-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.odds-value {
+  font-size: 24px;
+  font-weight: 700;
   color: var(--text-primary);
-  font-weight: 700;
-  font-size: 15px;
+  margin-bottom: 4px;
 }
 
-.rec-bookmaker {
+.bookmaker {
   font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
-  display: flex;
+}
+
+.confidence-level {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.confidence-level.high {
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+  color: var(--success);
+}
+
+.confidence-level.medium {
+  background: color-mix(in srgb, var(--warning) 15%, transparent);
+  color: var(--warning);
+}
+
+.confidence-level.low {
+  background: color-mix(in srgb, var(--info) 15%, transparent);
+  color: var(--info);
+}
+
+.bet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.view-all-odds-btn {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-all-odds-btn:hover {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border-color: var(--accent);
+}
+
+.place-bet-btn {
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 85%, var(--success)));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.place-bet-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.odds-comparison {
+  border-top: 1px solid color-mix(in srgb, var(--border-color) 60%, transparent);
+  padding-top: 20px;
+  margin-top: 16px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comparison-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.odds-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.odds-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.odds-row:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--card-bg));
+}
+
+.book-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.book-odds {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 60px;
+  text-align: center;
+}
+
+.quick-bet-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-bet-btn:hover {
+  background: color-mix(in srgb, var(--accent) 110%, #fff);
+  transform: translateY(-1px);
+}
+
+.view-more-bets {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.view-more-btn {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
-.rec-bookmaker-logo {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  border-radius: 4px;
+.view-more-btn:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
 /* Mini Odds Table Styles */
@@ -456,7 +578,7 @@
     padding: 16px;
   }
   
-  .recommendations-list {
+  .value-bets-grid {
     grid-template-columns: 1fr;
   }
   
@@ -466,35 +588,39 @@
     padding: 16px;
   }
   
-  .rec-main-content {
-    padding: 16px;
+  .value-bet-card {
+    padding: 20px;
   }
   
-  .rec-header {
+  .bet-header {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-start;
   }
   
-  .rec-header-right {
-    width: 100%;
-    justify-content: space-between;
+  .bet-details {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    text-align: left;
   }
   
-  .rec-details {
-    flex-direction: column;
-    align-items: flex-start;
+  .bet-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .odds-grid {
+    gap: 6px;
+  }
+  
+  .odds-row {
+    padding: 10px 12px;
+    grid-template-columns: 1fr auto;
     gap: 8px;
-    padding: 12px;
   }
   
-  .mini-odds-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-  
-  .rec-mini-table {
-    padding: 16px;
+  .quick-bet-btn {
+    grid-column: 1 / -1;
+    margin-top: 8px;
   }
 }
 

@@ -988,8 +988,35 @@ app.get("/api/scores", async (req, res) => {
 
 /* ------------------------------------ Game Reactions ------------------------------------ */
 
-// In-memory storage for reactions (in production, use a database)
-const gameReactions = new Map();
+// Persistent file-based storage for reactions (better than in-memory)
+const fs = require('fs');
+const path = require('path');
+
+const REACTIONS_FILE = path.join(__dirname, 'reactions.json');
+
+// Load reactions from file on startup
+let gameReactions = new Map();
+try {
+  if (fs.existsSync(REACTIONS_FILE)) {
+    const data = fs.readFileSync(REACTIONS_FILE, 'utf8');
+    const parsed = JSON.parse(data);
+    gameReactions = new Map(Object.entries(parsed));
+    console.log(`📝 Loaded ${gameReactions.size} game reactions from file`);
+  }
+} catch (error) {
+  console.warn('⚠️ Failed to load reactions from file:', error.message);
+  gameReactions = new Map();
+}
+
+// Save reactions to file
+function saveReactions() {
+  try {
+    const data = Object.fromEntries(gameReactions);
+    fs.writeFileSync(REACTIONS_FILE, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('❌ Failed to save reactions to file:', error.message);
+  }
+}
 
 // Get reactions for a specific game
 app.get('/api/reactions/:gameKey', (req, res) => {
@@ -1052,6 +1079,7 @@ app.post('/api/reactions/:gameKey', (req, res) => {
     }
 
     gameReactions.set(gameKey, reactions);
+    saveReactions(); // Persist to file
     res.json({ reactions });
   } catch (err) {
     console.error('Add reaction error:', err);

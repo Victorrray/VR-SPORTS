@@ -151,6 +151,18 @@ export function AuthProvider({ children }) {
         user_metadata: { ...prev.user_metadata, username: username.trim() }
       }));
       
+      // Force refresh the session to ensure consistency
+      setTimeout(async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            setUser(session.user);
+          }
+        } catch (refreshError) {
+          console.warn('Failed to refresh session after username update:', refreshError);
+        }
+      }, 100);
+      
       return { success: true };
     } catch (error) {
       console.error("Unexpected error:", error);

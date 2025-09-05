@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle, ChevronDown, ChevronUp, Plus, ArrowRight } from 'lucide-react';
 import './PersonalizedDashboard.css';
 
 export default function PersonalizedDashboard({ games, userPreferences = {} }) {
@@ -26,89 +26,182 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   }, [games?.length]); // Remove userPreferences dependency to prevent unnecessary updates
 
   const generateDashboardData = useCallback(() => {
+    if (!games || games.length === 0) {
+      setDashboardData({
+        todayOpportunities: 0,
+        highEvBets: 0,
+        favoriteLeagues: [],
+        recentPerformance: null,
+        recommendedBets: [],
+        alerts: []
+      });
+      return;
+    }
+
     const today = new Date().toISOString().split('T')[0];
     const todayGames = games.filter(game => 
       game.commence_time && game.commence_time.startsWith(today)
     );
 
-    // Calculate high EV opportunities - use static data to prevent jitter
-    const highEvBets = games.filter((game, index) => {
-      // Use game ID for consistent pseudo-random results
-      const seed = game.id ? game.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0) : index;
-      return Math.abs(seed) % 10 > 7; // ~30% of bets are high EV, but consistent
+    // Calculate actual high EV opportunities based on real odds data
+    const highEvBets = games.filter(game => {
+      if (!game.bookmakers || game.bookmakers.length < 2) return false;
+      
+      // Find best odds for each market
+      const h2hOdds = [];
+      game.bookmakers.forEach(book => {
+        book.markets?.forEach(market => {
+          if (market.key === 'h2h') {
+            market.outcomes?.forEach(outcome => {
+              h2hOdds.push(parseFloat(outcome.price));
+            });
+          }
+        });
+      });
+      
+      if (h2hOdds.length < 2) return false;
+      
+      // Calculate if there's significant odds difference (potential +EV)
+      const maxOdds = Math.max(...h2hOdds);
+      const minOdds = Math.min(...h2hOdds);
+      const oddsSpread = ((maxOdds - minOdds) / minOdds) * 100;
+      
+      return oddsSpread > 5; // 5% or more difference indicates potential value
     });
 
-    // Get user's favorite leagues from preferences or default
-    const favoriteLeagues = userPreferences.favoriteLeagues || [
-      'NFL', 'NBA', 'NCAAF', 'NCAAB'
-    ];
+    // Get user's favorite leagues from preferences or infer from game data
+    const favoriteLeagues = userPreferences.favoriteLeagues || 
+      [...new Set(games.map(g => g.sport_title).filter(Boolean))].slice(0, 4);
 
-    // Generate recommended bets based on user preferences - use deterministic data
-    const recommendedBets = games.slice(0, 5).map((game, index) => {
-      const seed = game.id ? game.id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0) : index;
-      const markets = ['Moneyline', 'Spread', 'Total'];
-      const confidences = ['High', 'Medium', 'Low'];
-      const bookmakers = ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'Pinnacle'];
-      const bookmakerKeys = ['draftkings', 'fanduel', 'betmgm', 'caesars', 'pinnacle'];
+    // Generate recommended bets based on actual odds analysis
+    const recommendedBets = highEvBets.slice(0, 5).map((game) => {
+      if (!game.bookmakers || game.bookmakers.length === 0) return null;
       
-      // Generate mock odds for mini table
-      const mockOdds = bookmakers.map((book, i) => {
-        const bookSeed = seed + i * 17;
-        return {
-          bookmaker: {
-            key: bookmakerKeys[i],
-            title: book
-          },
-          book: book,
-          price: Math.abs(bookSeed) % 2 === 0 ? Math.abs(bookSeed) % 200 + 100 : -(Math.abs(bookSeed) % 200 + 110),
-          odds: Math.abs(bookSeed) % 2 === 0 ? Math.abs(bookSeed) % 200 + 100 : -(Math.abs(bookSeed) % 200 + 110)
-        };
+      // Find the best market and odds for this game
+      let bestMarket = null;
+      let bestOdds = null;
+      let bestBookmaker = null;
+      let maxEdge = 0;
+      
+      // Analyze each market type
+      ['h2h', 'spreads', 'totals'].forEach(marketKey => {
+        const marketOdds = [];
+        game.bookmakers.forEach(book => {
+          const market = book.markets?.find(m => m.key === marketKey);
+          if (market?.outcomes) {
+            market.outcomes.forEach(outcome => {
+              marketOdds.push({
+                bookmaker: book.title,
+                bookmakerKey: book.key,
+                price: parseFloat(outcome.price),
+                outcome: outcome.name
+              });
+            });
+          }
+        });
+        
+        if (marketOdds.length >= 2) {
+          const maxPrice = Math.max(...marketOdds.map(o => o.price));
+          const avgPrice = marketOdds.reduce((sum, o) => sum + o.price, 0) / marketOdds.length;
+          const edge = ((maxPrice - avgPrice) / avgPrice) * 100;
+          
+          if (edge > maxEdge) {
+            maxEdge = edge;
+            bestMarket = marketKey;
+            bestOdds = marketOdds.find(o => o.price === maxPrice);
+            bestBookmaker = bestOdds?.bookmaker;
+          }
+        }
       });
+      
+      if (!bestMarket || !bestOdds) return null;
+      
+      // Get all bookmaker odds for this market
+      const allBooks = [];
+      game.bookmakers.forEach(book => {
+        const market = book.markets?.find(m => m.key === bestMarket);
+        if (market?.outcomes) {
+          const outcome = market.outcomes[0]; // Take first outcome for comparison
+          if (outcome) {
+            allBooks.push({
+              bookmaker: { key: book.key, title: book.title },
+              name: book.title,
+              odds: parseFloat(outcome.price)
+            });
+          }
+        }
+      });
+      
+      const marketNames = {
+        'h2h': 'Moneyline',
+        'spreads': 'Spread',
+        'totals': 'Total'
+      };
+      
+      const confidence = maxEdge > 8 ? 'High' : maxEdge > 4 ? 'Medium' : 'Low';
       
       return {
         id: game.id,
         matchup: `${game.away_team} @ ${game.home_team}`,
-        market: markets[Math.abs(seed) % 3],
-        edge: (Math.abs(seed) % 50 / 10 + 1).toFixed(1),
-        confidence: confidences[Math.abs(seed * 2) % 3],
-        bookmaker: bookmakers[Math.abs(seed * 3) % 5],
-        odds: Math.abs(seed) % 2 === 0 ? `+${Math.abs(seed) % 200 + 100}` : `-${Math.abs(seed) % 200 + 110}`,
-        allBooks: mockOdds,
+        market: marketNames[bestMarket] || bestMarket,
+        edge: maxEdge.toFixed(1),
+        confidence: confidence,
+        bookmaker: bestBookmaker,
+        odds: bestOdds.price > 0 ? `+${bestOdds.price}` : `${bestOdds.price}`,
+        allBooks: allBooks.slice(0, 6),
         game: game
       };
-    });
+    }).filter(Boolean);
 
-    // Generate performance alerts
-    const alerts = [
-      {
+    // Generate dynamic alerts based on actual data
+    const alerts = [];
+    
+    if (highEvBets.length > 0) {
+      alerts.push({
         type: 'opportunity',
-        message: `${highEvBets.length} high-value bets available today`,
+        message: `${highEvBets.length} high-value betting opportunities found`,
         icon: TrendingUp,
         color: 'var(--success)'
-      },
-      {
-        type: 'warning',
-        message: 'Consider diversifying across more sportsbooks',
-        icon: AlertTriangle,
-        color: 'var(--warning)'
-      },
-      {
+      });
+    }
+    
+    if (todayGames.length > 10) {
+      alerts.push({
         type: 'info',
-        message: 'Your favorite NFL team has a game tonight',
+        message: `${todayGames.length} games available today - busy betting day!`,
         icon: Clock,
         color: 'var(--info)'
-      }
-    ];
+      });
+    }
+    
+    const uniqueBooks = new Set();
+    games.forEach(game => {
+      game.bookmakers?.forEach(book => uniqueBooks.add(book.key));
+    });
+    
+    if (uniqueBooks.size < 5) {
+      alerts.push({
+        type: 'warning',
+        message: 'Consider checking more sportsbooks for better odds',
+        icon: AlertTriangle,
+        color: 'var(--warning)'
+      });
+    }
+
+    // Calculate actual average edge from recommended bets
+    const actualAvgEdge = recommendedBets.length > 0 
+      ? (recommendedBets.reduce((sum, bet) => sum + parseFloat(bet.edge), 0) / recommendedBets.length).toFixed(1)
+      : '0.0';
 
     setDashboardData({
       todayOpportunities: todayGames.length,
       highEvBets: highEvBets.length,
       favoriteLeagues,
       recentPerformance: {
-        winRate: (60 + (Math.abs(games[0]?.id?.charCodeAt(0) || 0) % 200) / 10).toFixed(1),
-        avgEdge: (2.1 + (Math.abs(games[0]?.id?.charCodeAt(1) || 0) % 20) / 10).toFixed(1),
-        roi: (8.5 + (Math.abs(games[0]?.id?.charCodeAt(2) || 0) % 100) / 10).toFixed(1),
-        totalBets: Math.floor((Math.abs(games[0]?.id?.charCodeAt(3) || 0) % 50)) + 25
+        winRate: '0.0', // Will be replaced with real data when user tracking is implemented
+        avgEdge: actualAvgEdge,
+        roi: '0.0', // Will be replaced with real data when user tracking is implemented
+        totalBets: 0 // Will be replaced with real data when user tracking is implemented
       },
       recommendedBets,
       alerts: alerts.slice(0, 2) // Show max 2 alerts
@@ -183,94 +276,91 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
         />
       </div>
 
-      {/* Alerts */}
-      {dashboardData.alerts.length > 0 && (
-        <div className="dashboard-alerts">
-          <h3>Alerts & Insights</h3>
-          <div className="alerts-list">
-            {dashboardData.alerts.map((alert, index) => {
-              const Icon = alert.icon;
-              return (
-                <div key={index} className="alert-item" style={{ borderLeft: `4px solid ${alert.color}` }}>
-                  <Icon size={16} style={{ color: alert.color }} />
-                  <span>{alert.message}</span>
-                </div>
-              );
-            })}
+
+      {/* Top Value Bets */}
+      {dashboardData.recommendedBets.length > 0 && (
+        <div className="top-value-bets">
+          <div className="section-header">
+            <div className="section-title">
+              <TrendingUp size={20} />
+              <h3>Top Value Bets</h3>
+            </div>
+            <div className="section-subtitle">
+              Best opportunities based on odds analysis
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Recommended Bets */}
-      <div className="dashboard-recommendations">
-        <h3>
-          <Zap size={18} />
-          Recommended Bets
-        </h3>
-        <div className="recommendations-list">
-          {dashboardData.recommendedBets.map((bet, index) => {
-            const isExpanded = expandedBets[bet.id || index];
-            return (
-              <div key={bet.id || index} className={`recommendation-card ${isExpanded ? 'expanded' : ''}`}>
-                <div 
-                  className="rec-main-content"
-                  onClick={() => toggleBetExpansion(bet.id || index)}
-                >
-                  <div className="rec-header">
-                    <div className="rec-matchup">{bet.matchup}</div>
-                    <div className="rec-header-right">
-                      <div className={`rec-confidence ${bet.confidence.toLowerCase()}`}>
-                        {bet.confidence}
-                      </div>
-                      <div className="expand-indicator">
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </div>
-                    </div>
+          
+          <div className="value-bets-grid">
+            {dashboardData.recommendedBets.slice(0, 3).map((bet, index) => (
+              <div key={bet.id || index} className="value-bet-card">
+                <div className="bet-header">
+                  <div className="matchup-info">
+                    <div className="teams">{bet.matchup}</div>
+                    <div className="market-type">{bet.market}</div>
                   </div>
-                  <div className="rec-details">
-                    <div className="rec-bet-info">
-                      <div className="bet-card-bookmaker">
-                        <span className="bookmaker-name">
-                          {bet.bookmaker}
-                        </span>
-                      </div>
-                      <div className="rec-market">{bet.market}</div>
-                      <div className="rec-odds">{bet.odds}</div>
-                      <div className="rec-edge">+{bet.edge}% EV</div>
+                  <div className={`edge-badge ${bet.confidence.toLowerCase()}`}>
+                    +{bet.edge}% EV
+                  </div>
+                </div>
+                
+                <div className="bet-details">
+                  <div className="best-odds">
+                    <div className="odds-label">Best Odds</div>
+                    <div className="odds-value">{bet.odds}</div>
+                    <div className="bookmaker">{bet.bookmaker}</div>
+                  </div>
+                  
+                  <div className="confidence-indicator">
+                    <div className="confidence-label">Confidence</div>
+                    <div className={`confidence-level ${bet.confidence.toLowerCase()}`}>
+                      {bet.confidence}
                     </div>
                   </div>
                 </div>
-
-                {/* Mini Odds Table */}
-                {isExpanded && (
-                  <div className="mini-odds-table">
-                    <div className="mini-table-header">
+                
+                <div className="bet-actions">
+                  <button 
+                    className="view-all-odds-btn"
+                    onClick={() => toggleBetExpansion(bet.id || index)}
+                  >
+                    {expandedBets[bet.id || index] ? 'Hide' : 'Compare'} Odds
+                  </button>
+                  <button className="place-bet-btn">
+                    Place Bet
+                  </button>
+                </div>
+                
+                {/* Expanded Odds Comparison */}
+                {expandedBets[bet.id || index] && (
+                  <div className="odds-comparison">
+                    <div className="comparison-header">
                       <span>Sportsbook Comparison</span>
                     </div>
-                    <div className="mini-table-content">
+                    <div className="odds-grid">
                       {bet.allBooks.slice(0, 6).map((book, bookIndex) => (
-                        <div key={bookIndex} className="mini-table-row">
-                          <div className="mini-table-bookmaker">
-                            <span className="bookmaker-name">
-                              {book.name}
-                            </span>
-                          </div>
-                          <div className="mini-table-odds">
-                            {formatOdds(book.odds)}
-                          </div>
-                          <div className="mini-table-action">
-                            <button className="mini-bet-btn">Bet</button>
-                          </div>
+                        <div key={bookIndex} className="odds-row">
+                          <div className="book-name">{book.name}</div>
+                          <div className="book-odds">{formatOdds(book.odds)}</div>
+                          <button className="quick-bet-btn">Bet</button>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
-            );
-          })}
+            ))}
+          </div>
+          
+          {dashboardData.recommendedBets.length > 3 && (
+            <div className="view-more-bets">
+              <button className="view-more-btn">
+                View All {dashboardData.recommendedBets.length} Opportunities
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Performance Summary */}
       {dashboardData.recentPerformance && (

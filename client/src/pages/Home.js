@@ -62,6 +62,15 @@ export default function Home() {
   const { user } = useAuth();
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
   
+  // Debug logging for username changes
+  React.useEffect(() => {
+    console.log('Home component user object updated:', {
+      userId: user?.id,
+      username: user?.user_metadata?.username,
+      email: user?.email
+    });
+  }, [user?.user_metadata?.username, user?.email]);
+  
   // Fetch live odds data for dashboard with reduced polling (only for logged-in users)
   const { games } = useMarkets(
     user ? ["americanfootball_nfl", "basketball_nba", "baseball_mlb"] : [], // sports
@@ -215,7 +224,7 @@ export default function Home() {
             fontWeight: '700',
             margin: 0
           }}>
-            {user.user_metadata?.username || user.email?.split('@')[0]}'s Dashboard
+            {user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
           </h1>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
