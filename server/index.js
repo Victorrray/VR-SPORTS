@@ -23,7 +23,8 @@ const corsOptions = {
       'http://localhost:3000',
       'http://localhost:3001',
       'https://odds-frontend-j2pn.onrender.com',
-      'https://oddssightseer.com'
+      'https://oddssightseer.com',
+      'https://oddsightseer.com'
     ];
     
     if (allowedOrigins.includes(origin)) {
