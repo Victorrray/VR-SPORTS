@@ -122,7 +122,7 @@ export default function Home() {
 
           {/* CTA Buttons */}
           <div className="cta-buttons">
-            <Link to="/sportsbooks" className="cta-primary">
+            <Link to="/login" className="cta-primary">
               <TrendingUp size={20} />
               Compare Odds Now
             </Link>
@@ -148,7 +148,7 @@ export default function Home() {
                     {action.description}
                   </p>
                   <Link
-                    to={action.link}
+                    to="/login"
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',

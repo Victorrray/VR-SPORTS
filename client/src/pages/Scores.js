@@ -338,16 +338,28 @@ export default function Scores() {
                   <div className="game-status">
                     {isLive && <div className="status-badge live">LIVE</div>}
                     {isCompleted && <div className="status-badge final">FINAL</div>}
-                    {isUpcoming && <div className="status-badge upcoming">UPCOMING</div>}
+                    {isUpcoming && <div className="status-badge upcoming">{kickoffLabel(g.commence_time)}</div>}
                   </div>
                   
-                  <div className="game-time-compact">
-                    {isLive ? (
-                      <span className="live-text">Live Now</span>
-                    ) : isUpcoming ? (
-                      <span>{kickoffLabel(g.commence_time)}</span>
-                    ) : null}
-                  </div>
+                  {/* Game lines in header */}
+                  {g.odds && (g.odds.spread || g.odds.overUnder) && (
+                    <div className="game-lines-header">
+                      {g.odds.spread && (
+                        <div className="odds-line">
+                          <span>Spread:</span> 
+                          <span className="spread-value">
+                            {parseFloat(g.odds.spread) > 0 ? `+${g.odds.spread}` : g.odds.spread}
+                          </span>
+                        </div>
+                      )}
+                      {g.odds.overUnder != null && (
+                        <div className="odds-line">
+                          <span>O/U:</span> 
+                          <span className="total-value">{g.odds.overUnder}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="teams-compact">
@@ -391,23 +403,19 @@ export default function Scores() {
                     )}
                   </div>
                   
-                  {/* Game lines right-aligned with team names */}
-                  {g.odds && (g.odds.spread || g.odds.overUnder) && (
-                    <div className="game-lines-right">
-                      {g.odds.spread && <div className="odds-line"><span>Line:</span> {g.odds.spread}</div>}
-                      {g.odds.overUnder != null && <div className="odds-line"><span>O/U:</span> {g.odds.overUnder}</div>}
+                  {/* Show which team is favored with spread */}
+                  {g.odds && g.odds.spread && (
+                    <div className="team-spread-indicators">
+                      <div className="team-spread away">
+                        {parseFloat(g.odds.spread) > 0 ? `+${g.odds.spread}` : ''}
+                      </div>
+                      <div className="team-spread home">
+                        {parseFloat(g.odds.spread) < 0 ? g.odds.spread : `+${Math.abs(parseFloat(g.odds.spread))}`}
+                      </div>
                     </div>
                   )}
                 </div>
 
-                <div className="game-info">
-                  {isLive && (
-                    <div className="live-indicator">
-                      <div className="live-dot"></div>
-                      <span>Live Now</span>
-                    </div>
-                  )}
-                </div>
 
                 {/* Game Reactions moved under game lines */}
                 <GameReactions 
