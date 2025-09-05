@@ -407,14 +407,46 @@ export default function SportsbookMarkets() {
     return baseMarkets;
   }, [marketKeys, showPlayerProps]);
 
-  const { games: hookGames, books: hookBooks, loading: hookLoading, error: hookError } = useMarkets(
-    selectedSports, // sports array
-    ["us", "us2", "us_ex"], // regions array
-    marketsToFetch // markets array including player props
-  );
+  const {
+    games: hookGames,
+    books: hookBooks,
+    loading: hookLoading,
+    error: hookError,
+    lastUpdate,
+    quota
+  } = useMarkets(picked, ["us"], marketsToFetch);
+
+  // Debug logging for hook data
+  useEffect(() => {
+    console.log('🎯 SportsbookMarkets: Rendering with state:', {
+      gamesCount: games.length,
+      booksCount: bookList.length,
+      selectedBooksCount: selectedBooks.length,
+      effectiveSelectedBooksCount: effectiveSelectedBooks.length,
+      filteredGamesCount: filteredGames.length,
+      loading,
+      error,
+      picked,
+      showPlayerProps,
+      marketKeys,
+      firstGameSample: games[0] ? {
+        id: games[0].id,
+        home_team: games[0].home_team,
+        away_team: games[0].away_team,
+        bookmakers_count: games[0].bookmakers?.length || 0
+      } : null
+    });
+  }, [games, bookList, selectedBooks, effectiveSelectedBooks, filteredGames, loading, error, picked, showPlayerProps, marketKeys]);
 
   // Sync back to local state expected by existing UI
   useEffect(() => {
+    console.log('🎯 SportsbookMarkets: Syncing hook data to local state:', {
+      hookGames: hookGames?.length || 0,
+      hookBooks: hookBooks?.length || 0,
+      hookLoading,
+      hookError
+    });
+    
     setGames(hookGames || []);
     setLoad(!!hookLoading);
     setErr(hookError || null);
@@ -440,9 +472,13 @@ export default function SportsbookMarkets() {
   // Derive effective book filter; if none of selected are available, show all
   const availableBookKeys = useMemo(() => new Set((bookList || []).map((b) => b.key)), [bookList]);
   const effectiveSelectedBooks = useMemo(() => {
-    const filtered = (selectedBooks || []).filter((k) => availableBookKeys.has(k));
-    // If no books are selected or available, return empty array to show all books
-    return filtered.length ? filtered : [];
+    // If no books are selected, show all books (empty filter)
+    if (!selectedBooks || selectedBooks.length === 0) {
+      return [];
+    }
+    // Otherwise, filter to only selected books that are available
+    const filtered = selectedBooks.filter((k) => availableBookKeys.has(k));
+    return filtered;
   }, [selectedBooks, availableBookKeys]);
 
   // Removed problematic book syncing to prevent re-render loops

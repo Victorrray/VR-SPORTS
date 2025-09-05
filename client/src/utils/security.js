@@ -41,8 +41,8 @@ export const secureFetch = async (url, options = {}) => {
       'X-Requested-With': 'XMLHttpRequest',
       ...options.headers
     },
-    // Include credentials for same-origin, localhost, and our VR-Sports API
-    credentials: isCrossOrigin ? 'omit' : 'include',
+    // Always include credentials for VR-Sports API to ensure proper authentication
+    credentials: isVRSportsAPI ? 'include' : (isCrossOrigin ? 'omit' : 'include'),
   };
 
   // Add referrer policy for external APIs

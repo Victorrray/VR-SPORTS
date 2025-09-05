@@ -6,6 +6,11 @@ services:
     rootDir: server
     buildCommand: npm install
     startCommand: node index.js
+    routes:
+      - type: redirect
+        source: /
+        destination: https://www.oddsightseer.com/
+        statusCode: 301
     envVars:
       - key: NODE_ENV
         value: production

@@ -22,6 +22,8 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
   const [quota, setQuota] = useState({ remain: "–", used: "–" });
 
   const fetchMarkets = useMemoizedCallback(async () => {
+    console.log('🔍 useMarkets: fetchMarkets called with:', { sports, regions, markets });
+    
     if (!sports.length || !regions.length || !markets.length) {
       console.log('🔍 useMarkets: Skipping fetch - missing required params:', { sports, regions, markets });
       return;
@@ -31,11 +33,12 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
     const cacheKey = `markets-${sports.join(',')}-${regions.join(',')}-${markets.join(',')}`;
     const cachedData = APICache.get(cacheKey);
     if (cachedData) {
-      console.log('🔍 useMarkets: Using cached data');
+      console.log('🔍 useMarkets: Using cached data, length:', cachedData.length);
       setGames(cachedData);
       return;
     }
 
+    console.log('🔍 useMarkets: Setting loading to true');
     setLoading(true);
     setError(null);
 
@@ -57,28 +60,37 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
       const fullUrl = `${BASE_URL}/api/odds?${params}`;
       console.log('🔍 useMarkets: Final API URL:', fullUrl);
+      console.log('🔍 useMarkets: BASE_URL from env:', process.env.REACT_APP_API_URL);
+      console.log('🔍 useMarkets: NODE_ENV:', process.env.NODE_ENV);
       
       const response = await secureFetch(fullUrl);
+      console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
-      console.log('🔍 useMarkets: Raw API response:', data);
+      console.log('🔍 useMarkets: Raw API response type:', typeof data);
+      console.log('🔍 useMarkets: Raw API response length:', Array.isArray(data) ? data.length : 'not array');
+      console.log('🔍 useMarkets: Raw API response sample:', data);
       
       const normalizedGames = normalizeArray(data);
-      console.log('🔍 useMarkets: Normalized games:', normalizedGames);
+      console.log('🔍 useMarkets: Normalized games length:', normalizedGames.length);
+      console.log('🔍 useMarkets: First normalized game:', normalizedGames[0]);
       
       // Cache the result
       APICache.set(cacheKey, normalizedGames);
       
+      console.log('🔍 useMarkets: Setting games state with', normalizedGames.length, 'games');
       setGames(normalizedGames);
       setLastUpdate(Date.now());
     } catch (err) {
       console.error('🔍 useMarkets: Fetch error:', err);
+      console.error('🔍 useMarkets: Error stack:', err.stack);
       setError(err.message);
     } finally {
+      console.log('🔍 useMarkets: Setting loading to false');
       setLoading(false);
     }
   }, [sports, regions, markets]);
