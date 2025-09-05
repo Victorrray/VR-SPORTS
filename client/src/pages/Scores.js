@@ -319,7 +319,8 @@ export default function Scores() {
 
       <div className="scores-grid">
         {sorted.map((g) => {
-          const isLive = g.live === true || g.status === 'in_progress' || g.status_type?.state === 'in';
+          // Only trust the backend's live flag - it now has strict validation
+          const isLive = g.live === true;
           const isCompleted = g.completed === true || g.status === 'final' || g.status_type?.completed === true;
           const isUpcoming = !isLive && !isCompleted;
 
@@ -341,10 +342,8 @@ export default function Scores() {
                   </div>
                   
                   <div className="game-time-compact">
-                    {isLive ? (
+                    {isLive && (
                       <span className="live-text">Live Now</span>
-                    ) : (
-                      <span>{kickoffLabel(g.commence_time)}</span>
                     )}
                   </div>
                 </div>
@@ -412,19 +411,6 @@ export default function Scores() {
                   gameKey={`${g.away_team}-${g.home_team}-${g.commence_time}`}
                 />
 
-                {/* Live Chat Feature for Live Games */}
-                {isLive && (
-                  <div className="live-chat-toggle">
-                    <button 
-                      className="chat-btn"
-                      onClick={() => {/* TODO: Implement chat modal */}}
-                      title="Join live chat"
-                    >
-                      <MessageCircle size={14} />
-                      <span>Chat</span>
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           );

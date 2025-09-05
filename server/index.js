@@ -851,16 +851,9 @@ app.get("/api/scores", async (req, res) => {
         return 'scheduled';
       }
       
-      // Fallback based on scores presence and time
-      const hasScores = competition.competitors?.some(c => c.score && Number(c.score) > 0);
-      const gameTime = new Date(event.date);
-      const now = new Date();
-      
-      if (hasScores && gameTime <= now) {
-        return 'in_progress';
-      }
-      
-      return gameTime > now ? 'scheduled' : 'final';
+      // Only mark as in_progress if explicitly indicated by ESPN status
+      // Don't use fallback logic that could incorrectly mark games as live
+      return 'scheduled';
     };
 
     const statusTuple = (e, comp) => {
@@ -940,7 +933,7 @@ app.get("/api/scores", async (req, res) => {
         clock: enhancedClock,
         // Enhanced live game metadata
         completed: enhancedStatus === 'final',
-        live: enhancedStatus === 'in_progress',
+        live: enhancedStatus === 'in_progress' && (homeScore > 0 || awayScore > 0 || enhancedClock !== ''),
         period: e.status?.period || comp.status?.period || null,
         situation: e.status?.type?.situation || null,
         week: r.data?.week?.number ?? r.data?.week ?? null,
