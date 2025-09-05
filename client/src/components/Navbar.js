@@ -26,8 +26,10 @@ export default function Navbar() {
 
   const mobileLinks = [
     { label: "Home", to: "/" },
-    { label: "Sportsbooks", to: "/sportsbooks" },
-    ...(user ? [{ label: "Account", to: "/account" }] : [{ label: "Login", to: "/login" }]),
+    { label: "Odds", to: "/sportsbooks" },
+    { label: "Picks", to: "/picks" },
+    { label: "Scores", to: "/scores" },
+    ...(user ? [{ label: "Profile", to: "/account" }] : [{ label: "Login", to: "/login" }]),
   ];
 
   function handleSearchSubmit(e) {
@@ -85,8 +87,24 @@ export default function Navbar() {
           to="/sportsbooks"
           className={`${styles.link} ${isActive("/sportsbooks") ? styles.active : ""}`}
         >
-          Sportsbooks
+          Odds
         </Link>
+        {user && (
+          <Link
+            to="/picks"
+            className={`${styles.link} ${isActive("/picks") ? styles.active : ""}`}
+          >
+            Picks
+          </Link>
+        )}
+        {user && (
+          <Link
+            to="/scores"
+            className={`${styles.link} ${isActive("/scores") ? styles.active : ""}`}
+          >
+            Scores
+          </Link>
+        )}
 
         {!user ? (
           <Link
@@ -102,7 +120,7 @@ export default function Navbar() {
             className={`${styles.link} ${isActive("/account") ? styles.active : ""}`}
             style={{ marginLeft: "auto" }}
           >
-            Account
+            Profile
           </Link>
         )}
       </div>

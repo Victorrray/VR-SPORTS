@@ -1,30 +1,35 @@
 /* Accessibility Settings Card Styles */
 .accessibility-settings-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
   padding: 0;
   margin-bottom: 24px;
-  backdrop-filter: blur(16px);
+  backdrop-filter: var(--backdrop-blur-light);
+  -webkit-backdrop-filter: var(--backdrop-blur-light);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
 .accessibility-settings-card .card-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
+  padding: 24px 24px 0;
+  margin-bottom: 20px;
 }
 
 .accessibility-settings-card .card-header h2 {
   margin: 0;
-  color: var(--text-primary);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .accessibility-options {
-  padding: 24px;
+  padding: 0 24px 24px;
 }
 
 .option-group {
@@ -40,7 +45,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
-  color: var(--text-primary);
+  color: var(--text);
   font-weight: 600;
   font-size: 16px;
 }
@@ -52,14 +57,14 @@
   cursor: pointer;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(255, 255, 255, 0.02);
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .option-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .option-control {
@@ -76,17 +81,18 @@
 }
 
 .option-label {
-  color: var(--text-primary);
-  font-size: 16px;
+  color: var(--text);
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
 }
 
 .option-description {
-  color: var(--text-secondary);
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
   margin-left: 30px;
   line-height: 1.4;
+  font-weight: 500;
 }
 
 .font-size-options {
@@ -102,14 +108,14 @@
   cursor: pointer;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   background: rgba(255, 255, 255, 0.02);
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .font-size-option:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .font-size-option input[type="radio"] {
@@ -120,7 +126,7 @@
 }
 
 .font-preview {
-  color: var(--text-primary);
+  color: var(--text);
   font-weight: 500;
   cursor: pointer;
 }
@@ -139,16 +145,18 @@
 
 .keyboard-info {
   padding: 16px;
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.08);
   border-radius: 12px;
-  border-left: 4px solid var(--accent);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-left: 4px solid #8b5cf6;
 }
 
 .keyboard-info p {
   margin: 0;
-  color: var(--text-secondary);
-  font-size: 14px;
+  color: var(--text-muted);
+  font-size: 13px;
   line-height: 1.5;
+  font-weight: 500;
 }
 
 /* Mobile Responsive */
