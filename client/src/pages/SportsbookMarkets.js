@@ -5,9 +5,7 @@ import MobileBottomBar from "../components/MobileBottomBar";
 import MobileFiltersSheet from "../components/MobileFiltersSheet";
 import { useBetSlip } from "../contexts/BetSlipContext";
 import BetSlip from "../components/BetSlip";
-import PersonalizedDashboard from "../components/PersonalizedDashboard";
-import EdgeCalculator from "../components/EdgeCalculator";
-import AlertSystem from "../components/AlertSystem";
+// Removed unused imports: PersonalizedDashboard, EdgeCalculator, AlertSystem
 
 // ⬇️ Adjust these paths if needed
 import SportMultiSelect from "../components/SportMultiSelect";
@@ -189,27 +187,6 @@ const FEATURED_SPORTS = new Set([
   "boxing_boxing",
 ]);
 
-
-// Limit sportsbook universe: keep US books, Pinnacle, and US exchanges
-const ALLOWED_BOOKS = new Set(
-  [
-    // Major US books
-    "draftkings","fanduel","betmgm","caesars","bet365","pointsbetus","fanatics","fanatics_sportsbook","espnbet",
-    "betrivers","sugarhouse","unibet_us","betparx","betway","si_sportsbook","betfred","superbook","circasports",
-    "hardrockbet","wynnbet","barstool","foxbet","ballybet","windcreek",
-    // US-friendly/offshore commonly compared
-    "bovada","betonlineag","betus","mybookieag","lowvig","betanysports","fliff","fliff_sportsbook",
-    // Exchanges and peer-to-peer (US)
-    "betopenly","novig","prophetx","rebet",
-    // DFS books for player props
-    "prizepicks","underdog","draftkings_pick6",
-    // Explicitly include Pinnacle for reference pricing
-    "pinnacle",
-    // If present in feed, allow explicit US exchange key
-    "betfair_ex_us",
-  ].map((k) => k.toLowerCase())
-);
-
 /* =========================
    Component
    ========================= */
@@ -228,7 +205,7 @@ export default function SportsbookMarkets() {
   const [error, setErr] = useState(null);
   const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
   const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [minEV, setMinEV] = useState("");
   const [activePreset, setActivePreset] = useState(null);
@@ -303,27 +280,6 @@ export default function SportsbookMarkets() {
   }, []);
 
 
-  // Compute market options based on selected sports (union)
-  const marketOptions = useMemo(() => {
-    let keys = new Set();
-    const selectedSports = picked.includes("ALL")
-      ? sportList.filter((s) => s.key !== "ALL").map((s) => s.key)
-      : picked;
-    if (!selectedSports || selectedSports.length === 0) {
-      GAME_LINES.forEach((k) => keys.add(k));
-    } else {
-      selectedSports.forEach((sk) => {
-        (SPORT_MARKETS[sk] || GAME_LINES).forEach((k) => keys.add(k));
-      });
-    }
-    return Array.from(keys).map((k) => ({ key: k, title: MARKET_TITLES[k] || k }));
-  }, [picked, sportList]);
-
-  // Removed problematic market syncing to prevent infinite loops
-
-  // Removed auto-market selection to prevent infinite loops
-
-
   const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
 
   // Fetch sport list (defensive against non-array errors), map to friendly titles
@@ -370,40 +326,28 @@ export default function SportsbookMarkets() {
     // eslint-disable-next-line
   }, []);
 
-  // Use shared hook for sportsbook odds data
-  const selectedSports = picked.includes("ALL")
-    ? sportList.filter((s) => s.key !== "ALL").map((s) => s.key)
-    : picked;
-  // Add player props markets when in props mode
+  // Memoize markets to prevent unnecessary re-renders
   const marketsToFetch = useMemo(() => {
     const baseMarkets = marketKeys.length ? [...marketKeys] : [...GAME_LINES];
     if (showPlayerProps) {
-      console.log('Player props mode enabled - adding prop markets to fetch');
-      
-      // NFL player props
       const nflProps = [
         "player_pass_tds", "player_pass_yds", "player_rush_yds", "player_receptions",
         "player_receiving_yds", "player_rush_attempts", "player_pass_attempts",
         "player_pass_completions", "player_pass_interceptions"
       ];
       
-      // MLB player props
       const mlbProps = [
         "batter_home_runs", "batter_hits", "batter_total_bases", "batter_rbis",
         "batter_runs_scored", "pitcher_strikeouts", "pitcher_hits_allowed"
       ];
       
-      // NBA player props
       const nbaProps = [
         "player_points", "player_rebounds", "player_assists", "player_threes",
         "player_blocks", "player_steals"
       ];
       
-      const propsToAdd = [...nflProps, ...mlbProps, ...nbaProps];
-      console.log('Adding player prop markets:', propsToAdd);
-      baseMarkets.push(...propsToAdd);
+      baseMarkets.push(...nflProps, ...mlbProps, ...nbaProps);
     }
-    console.log('Final markets to fetch:', baseMarkets);
     return baseMarkets;
   }, [marketKeys, showPlayerProps]);
 
@@ -416,59 +360,6 @@ export default function SportsbookMarkets() {
     quota
   } = useMarkets(picked, ["us"], marketsToFetch);
 
-  // Debug logging for hook data
-  useEffect(() => {
-    console.log('🎯 SportsbookMarkets: Rendering with state:', {
-      gamesCount: games.length,
-      booksCount: bookList.length,
-      selectedBooksCount: selectedBooks.length,
-      effectiveSelectedBooksCount: effectiveSelectedBooks.length,
-      filteredGamesCount: filteredGames.length,
-      loading,
-      error,
-      picked,
-      showPlayerProps,
-      marketKeys,
-      firstGameSample: games[0] ? {
-        id: games[0].id,
-        home_team: games[0].home_team,
-        away_team: games[0].away_team,
-        bookmakers_count: games[0].bookmakers?.length || 0
-      } : null
-    });
-  }, [games, bookList, selectedBooks, effectiveSelectedBooks, filteredGames, loading, error, picked, showPlayerProps, marketKeys]);
-
-  // Sync back to local state expected by existing UI
-  useEffect(() => {
-    console.log('🎯 SportsbookMarkets: Syncing hook data to local state:', {
-      hookGames: hookGames?.length || 0,
-      hookBooks: hookBooks?.length || 0,
-      hookLoading,
-      hookError
-    });
-    
-    setGames(hookGames || []);
-    setLoad(!!hookLoading);
-    setErr(hookError || null);
-    // setQuota(hookQuota || { remain: "–", used: "–" });
-    if (Array.isArray(hookBooks) && hookBooks.length > 0) {
-      // Add DFS books to the book list for filtering
-      const dfsBooks = [
-        { key: 'prizepicks', title: 'PrizePicks' },
-        { key: 'underdog', title: 'Underdog Fantasy' },
-        { key: 'draftkings_pick6', title: 'DraftKings Pick6' }
-      ];
-      
-      const combinedBooks = [...hookBooks, ...dfsBooks];
-      setBookList(combinedBooks);
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("booksCache", JSON.stringify(combinedBooks));
-        } catch {}
-      }
-    }
-  }, [hookGames, hookLoading, hookError, hookBooks]);
-
   // Derive effective book filter; if none of selected are available, show all
   const availableBookKeys = useMemo(() => new Set((bookList || []).map((b) => b.key)), [bookList]);
   const effectiveSelectedBooks = useMemo(() => {
@@ -480,8 +371,6 @@ export default function SportsbookMarkets() {
     const filtered = selectedBooks.filter((k) => availableBookKeys.has(k));
     return filtered;
   }, [selectedBooks, availableBookKeys]);
-
-  // Removed problematic book syncing to prevent re-render loops
 
   // ===== Filtering before passing to OddsTable =====
   let filteredGames = games;
@@ -523,6 +412,59 @@ export default function SportsbookMarkets() {
       return !(now >= start && now < start + 3 * 3600 * 1000);
     });
   }
+
+  // Sync back to local state expected by existing UI
+  useEffect(() => {
+    console.log('🎯 SportsbookMarkets: Syncing hook data to local state:', {
+      hookGames: hookGames?.length || 0,
+      hookBooks: hookBooks?.length || 0,
+      hookLoading,
+      hookError
+    });
+    
+    setGames(hookGames || []);
+    setLoad(!!hookLoading);
+    setErr(hookError || null);
+    // setQuota(hookQuota || { remain: "–", used: "–" });
+    if (Array.isArray(hookBooks) && hookBooks.length > 0) {
+      // Add DFS books to the book list for filtering
+      const dfsBooks = [
+        { key: 'prizepicks', title: 'PrizePicks' },
+        { key: 'underdog', title: 'Underdog Fantasy' },
+        { key: 'draftkings_pick6', title: 'DraftKings Pick6' }
+      ];
+      
+      const combinedBooks = [...hookBooks, ...dfsBooks];
+      setBookList(combinedBooks);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("booksCache", JSON.stringify(combinedBooks));
+        } catch {}
+      }
+    }
+  }, [hookGames, hookLoading, hookError, hookBooks]);
+
+  // Debug logging for hook data (moved after all variables are initialized)
+  useEffect(() => {
+    console.log('🎯 SportsbookMarkets: Rendering with state:', {
+      gamesCount: games.length,
+      booksCount: bookList.length,
+      selectedBooksCount: selectedBooks.length,
+      effectiveSelectedBooksCount: effectiveSelectedBooks.length,
+      filteredGamesCount: filteredGames.length,
+      loading,
+      error,
+      picked,
+      showPlayerProps,
+      marketKeys,
+      firstGameSample: games[0] ? {
+        id: games[0].id,
+        home_team: games[0].home_team,
+        away_team: games[0].away_team,
+        bookmakers_count: games[0].bookmakers?.length || 0
+      } : null
+    });
+  }, [games, bookList, selectedBooks, effectiveSelectedBooks, filteredGames, loading, error, picked, showPlayerProps, marketKeys]);
 
   return (
     <main className="page-wrap">

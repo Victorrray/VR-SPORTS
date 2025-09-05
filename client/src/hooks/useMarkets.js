@@ -114,15 +114,25 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
     }
   }, [games]);
 
-  // Debounced fetch to prevent excessive API calls
-  const debouncedFetch = useMemo(
-    () => debounce(fetchMarkets, 500),
-    [fetchMarkets]
-  );
-
+  // Stable reference to prevent jitter
+  const stableFetch = useRef(null);
+  
   useEffect(() => {
-    debouncedFetch();
-  }, [sports, regions, markets, debouncedFetch]);
+    // Only create new debounced function if params actually changed
+    const paramsKey = `${sports.join(',')}-${regions.join(',')}-${markets.join(',')}`;
+    
+    if (!stableFetch.current || stableFetch.current.paramsKey !== paramsKey) {
+      if (stableFetch.current?.cancel) {
+        stableFetch.current.cancel();
+      }
+      
+      const debouncedFn = debounce(fetchMarkets, 500);
+      debouncedFn.paramsKey = paramsKey;
+      stableFetch.current = debouncedFn;
+    }
+    
+    stableFetch.current();
+  }, [sports, regions, markets, fetchMarkets]);
 
   return {
     games,

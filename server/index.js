@@ -18,7 +18,7 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:3001', // Alternative port
-    'https://my-react-frontend-021i.onrender.com',
+    'https://odds-frontend-j2pn.onrender.com',
     'https://oddssightseer.com'
   ],
   credentials: false, // Disable credentials for cross-origin requests

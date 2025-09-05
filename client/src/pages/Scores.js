@@ -106,7 +106,7 @@ export default function Scores() {
     setErr("");
     setConnectionStatus('connecting');
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://vr-sports.onrender.com' : 'http://localhost:10000');
+      const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
       console.log('🔍 Scores API URL:', `${apiUrl}/api/scores?sport=${sport}`);
       
       // Configure fetch options for cross-origin requests
