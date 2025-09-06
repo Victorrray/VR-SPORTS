@@ -19,6 +19,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
 
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return placeholder;
+    if (dateStr === "live") return "🔴 Live Games";
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
@@ -36,6 +37,9 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     
     // Add "All Dates" option
     options.push({ value: "", label: "All Dates" });
+    
+    // Add "Live Games" option
+    options.push({ value: "live", label: "🔴 Live Games" });
     
     // Add today
     options.push({ 

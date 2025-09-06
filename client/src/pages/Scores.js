@@ -7,6 +7,21 @@ import ScoresLoadingSkeleton from '../components/ScoresLoadingSkeleton';
 import MobileBottomBar from '../components/MobileBottomBar';
 import './Scores.css';
 
+function TeamInitials({ name }) {
+  const initials = (name || "")
+    .split(/\s+/)
+    .map(word => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  return (
+    <div className="team-logo-fallback">
+      {initials}
+    </div>
+  );
+}
+
 function TeamLogo({ src, name }) {
   const [ok, setOk] = React.useState(true);
   const initials = (name || "")
@@ -19,18 +34,7 @@ function TeamLogo({ src, name }) {
 
   if (!src || !ok) {
     return (
-      <div
-        aria-hidden
-        style={{
-          width: 28, height: 28, borderRadius: 6,
-          display: "grid", placeItems: "center",
-          background: "#0b1220", color: "#cfe0ff",
-          fontSize: 11, fontWeight: 900
-        }}
-        title={name}
-      >
-        {initials || "??"}
-      </div>
+      <TeamInitials name={name} />
     );
   }
   return (

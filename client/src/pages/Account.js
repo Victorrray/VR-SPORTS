@@ -1,10 +1,11 @@
 // src/pages/Account.js
-import React, { useMemo, useState, useEffect } from "react";
-import { User, Shield, Copy, Check, AlertCircle, Settings, Mail, Key, LogOut } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { supabase } from "../lib/supabase";
-import MobileBottomBar from "../components/MobileBottomBar";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut } from "lucide-react";
 import AccessibilitySettings from "../components/AccessibilitySettings";
+import MobileBottomBar from "../components/MobileBottomBar";
+import SportMultiSelect from "../components/SportMultiSelect";
 import "./Account.css";
 
 function initialsFromEmail(email = "") {
@@ -19,6 +20,39 @@ function maskId(id = "") {
   return `${id.slice(0, 6)}…${id.slice(-4)}`;
 }
 
+const AVAILABLE_SPORTSBOOKS = [
+  { key: 'draftkings', name: 'DraftKings', popular: true },
+  { key: 'fanduel', name: 'FanDuel', popular: true },
+  { key: 'betmgm', name: 'BetMGM', popular: true },
+  { key: 'caesars', name: 'Caesars', popular: true },
+  { key: 'espnbet', name: 'ESPN BET', popular: true },
+  { key: 'pointsbetau', name: 'PointsBet', popular: true },
+  { key: 'hardrockbet', name: 'Hard Rock Bet', popular: true },
+  { key: 'unibet_us', name: 'Unibet', popular: false },
+  { key: 'williamhill_us', name: 'William Hill', popular: false },
+  { key: 'betrivers', name: 'BetRivers', popular: false },
+  { key: 'wynnbet', name: 'WynnBET', popular: false },
+  { key: 'superbook', name: 'SuperBook', popular: false },
+  { key: 'barstool', name: 'Barstool', popular: false },
+  { key: 'twinspires', name: 'TwinSpires', popular: false },
+  { key: 'foxbet', name: 'FOX Bet', popular: false },
+  { key: 'betfred_us', name: 'Betfred', popular: false },
+  { key: 'fliff', name: 'Fliff', popular: false },
+  { key: 'superdraft', name: 'SuperDraft', popular: false },
+  { key: 'prizepicks', name: 'PrizePicks', popular: false },
+  { key: 'underdog', name: 'Underdog Fantasy', popular: false },
+  { key: 'draftkings_pick6', name: 'DraftKings Pick6', popular: false },
+  { key: 'betonlineag', name: 'BetOnline.ag', popular: false },
+  { key: 'lowvig', name: 'LowVig.ag', popular: false },
+  { key: 'mybookieag', name: 'MyBookie.ag', popular: false },
+  { key: 'bovada', name: 'Bovada', popular: false },
+  { key: 'gtbets', name: 'GTBets', popular: false },
+  { key: 'betdsi', name: 'BetDSI', popular: false },
+  { key: 'heritage', name: 'Heritage Sports', popular: false },
+  { key: 'intertops', name: 'Intertops', popular: false },
+  { key: 'sportsbetting', name: 'SportsBetting.ag', popular: false }
+];
+
 export default function Account() {
   const { user, signOut } = useAuth();
   const [busy, setBusy] = useState(false);
@@ -32,7 +66,12 @@ export default function Account() {
   const [value, setValue] = useState("");
   const [status, setStatus] = useState("idle"); // idle|checking|ok|invalid|taken|saving|saved|error|locked
 
-  // Load profile (username)
+  // Sportsbook selection
+  const [selectedBooks, setSelectedBooks] = useState([]);
+  const [showAllBooks, setShowAllBooks] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('');
+
+  // Load profile (username) and sportsbooks
   useEffect(() => {
     async function load() {
       if (!user) { setLoadingProfile(false); return; }
@@ -46,7 +85,28 @@ export default function Account() {
       setLoadingProfile(false);
     }
     load();
+    
+    // Load user's selected sportsbooks from localStorage
+    const saved = localStorage.getItem('userSelectedSportsbooks');
+    if (saved) {
+      setSelectedBooks(JSON.parse(saved));
+    } else {
+      // Default to popular sportsbooks
+      setSelectedBooks(['draftkings', 'fanduel', 'betmgm', 'caesars']);
+    }
   }, [user]);
+
+  // Handle sportsbook preferences save
+  const handleSavePreferences = () => {
+    try {
+      localStorage.setItem('userSelectedSportsbooks', JSON.stringify(selectedBooks));
+      setSaveStatus('Preferences saved successfully!');
+      setTimeout(() => setSaveStatus(''), 3000);
+    } catch (error) {
+      setSaveStatus('Error saving preferences');
+      setTimeout(() => setSaveStatus(''), 3000);
+    }
+  };
 
   // Availability check (debounced)
   useEffect(() => {
@@ -62,6 +122,22 @@ export default function Account() {
     }, 350);
     return () => clearTimeout(t);
   }, [value, editingUN]);
+
+  const handleBookToggle = (bookKey) => {
+    setSelectedBooks(prev => {
+      if (prev.includes(bookKey)) {
+        return prev.filter(key => key !== bookKey);
+      } else {
+        return [...prev, bookKey];
+      }
+    });
+  };
+
+  const handleSaveSportsbooks = () => {
+    localStorage.setItem('userSelectedSportsbooks', JSON.stringify(selectedBooks));
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus(''), 2000);
+  };
 
   async function saveUsername() {
     const v = value.trim();
@@ -333,6 +409,49 @@ export default function Account() {
               <small>End your current session</small>
             </div>
           </button>
+        </div>
+      </section>
+
+      {/* Sportsbook Selection */}
+      <section className="sportsbook-card">
+        <div className="card-header">
+          <BookOpen size={20} />
+          <h2>My Sportsbooks</h2>
+        </div>
+        <p className="section-description">Select the sportsbooks you use to see personalized odds and recommendations</p>
+        
+        <div className="sportsbook-selection">
+          <div className="selection-info">
+            <span className="selected-count">{selectedBooks.length} sportsbooks selected</span>
+          </div>
+          
+          <div className="dropdown-container">
+            <SportMultiSelect
+              list={AVAILABLE_SPORTSBOOKS.map(book => ({
+                key: book.key,
+                title: book.name
+              }))}
+              selected={selectedBooks}
+              onChange={setSelectedBooks}
+              placeholderText="Select sportsbooks..."
+              allLabel="All Sportsbooks"
+              grid={true}
+              columns={2}
+              leftAlign={true}
+              usePortal={true}
+              portalAlign="up"
+            />
+          </div>
+          
+          <div className="save-section">
+            <button className="save-btn" onClick={handleSavePreferences}>
+              <Save size={16} />
+              Save Preferences
+            </button>
+            <p className="save-note">
+              Your dashboard will only show odds from your selected sportsbooks
+            </p>
+          </div>
         </div>
       </section>
 

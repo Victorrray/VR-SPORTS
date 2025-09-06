@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
-import logos from "../data/logos";
 import "./OddsTable.css";
+
+// Removed logos import for compliance
+const logos = {};
 
 /* ---------- Helpers (unchanged core math) ---------- */
 function calculateEV(odds, fairLine) {

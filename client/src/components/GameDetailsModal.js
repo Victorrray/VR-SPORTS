@@ -171,9 +171,6 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
               <div className="game-header">
                 <div className="teams-display">
                   <div className="team-info">
-                    {game.away_logo && (
-                      <img src={game.away_logo} alt={game.away_team} className="team-logo-modal" />
-                    )}
                     <div className="team-details">
                       <h3>{game.away_team}</h3>
                       <span className="team-record">{gameDetails.teamStats[game.away_team]?.record}</span>
@@ -197,9 +194,6 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                     )}
                   </div>
                   <div className="team-info">
-                    {game.home_logo && (
-                      <img src={game.home_logo} alt={game.home_team} className="team-logo-modal" />
-                    )}
                     <div className="team-details">
                       <h3>{game.home_team}</h3>
                       <span className="team-record">{gameDetails.teamStats[game.home_team]?.record}</span>

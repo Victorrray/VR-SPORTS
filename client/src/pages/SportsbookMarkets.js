@@ -424,16 +424,27 @@ export default function SportsbookMarkets() {
     );
   }
 
-  // Date filter (local date)
+  // Date filter (local date) or live games filter
   if (selectedDate) {
-    filteredGames = filteredGames.filter((g) => {
-      const d = new Date(g.commence_time);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      const local = `${y}-${m}-${day}`;
-      return local === selectedDate;
-    });
+    if (selectedDate === "live") {
+      // Filter for live games (games that have started but not finished)
+      filteredGames = filteredGames.filter((g) => {
+        const gameStart = new Date(g.commence_time).getTime();
+        const now = Date.now();
+        const gameEnd = gameStart + (3.5 * 60 * 60 * 1000); // Assume 3.5 hours max game duration
+        return now >= gameStart && now <= gameEnd;
+      });
+    } else {
+      // Regular date filtering
+      filteredGames = filteredGames.filter((g) => {
+        const d = new Date(g.commence_time);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        const gameDate = `${y}-${m}-${day}`;
+        return gameDate === selectedDate;
+      });
+    }
   }
 
   if (picked && picked.length && !picked.includes("ALL")) {
@@ -679,23 +690,18 @@ export default function SportsbookMarkets() {
                   Game Odds
                 </button>
                 <button
-                  onClick={() => {
-                    if (!showPlayerProps) {
-                      // Add delay to prevent rapid switching
-                      setTimeout(() => {
-                        setShowPlayerProps(true);
-                      }, 300);
-                    }
-                  }}
+                  disabled
+                  title="Coming Soon"
                   style={{
                     padding: '8px 16px',
                     border: 'none',
-                    background: showPlayerProps ? 'var(--accent)' : 'transparent',
-                    color: showPlayerProps ? '#fff' : 'var(--text-primary)',
+                    background: 'transparent',
+                    color: '#6b7280',
                     fontSize: '14px',
                     fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
+                    cursor: 'not-allowed',
+                    transition: 'all 0.2s ease',
+                    opacity: 0.5
                   }}
                 >
                   Player Props
