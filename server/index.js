@@ -159,7 +159,7 @@ app.get("/api/odds", async (req, res) => {
       // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
       for (const sport of sportsArray) {
         try {
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics,fanduel,lowvig,mybookieag,espnbet,ballybet,betanysports,betparx,hardrockbet,fliff,rebet,windcreek,betopenly,novig,prophetx,prizepicks,underdog,draftkings_pick6,pointsbet,bet365,unibet`;
           console.log(`Fetching base games for ${sport} from:`, url);
           
           const response = await axios.get(url);
@@ -192,7 +192,7 @@ app.get("/api/odds", async (req, res) => {
       for (const game of allGames) {
         try {
           // Use TheOddsAPI's /events/{eventId}/odds endpoint for player props
-          const eventUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
+          const eventUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics,fanduel,lowvig,mybookieag,espnbet,ballybet,betanysports,betparx,hardrockbet,fliff,rebet,windcreek,betopenly,novig,prophetx,prizepicks,underdog,draftkings_pick6,pointsbet,bet365,unibet`;
           console.log(`Fetching props for game ${game.id}:`, eventUrl);
           
           const propResponse = await axios.get(eventUrl);
@@ -637,7 +637,7 @@ app.get("/api/player-props", async (req, res) => {
     let marketsToFetch = markets;
     if (!markets) {
       try {
-        const marketsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
+        const marketsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics,fanduel,lowvig,mybookieag,espnbet,ballybet,betanysports,betparx,hardrockbet,fliff,rebet,windcreek,betopenly,novig,prophetx,prizepicks,underdog,draftkings_pick6,pointsbet,bet365,unibet`;
         const marketsResp = await axios.get(marketsUrl);
         
         // Extract player prop markets (typically contain "player" in the key)
@@ -674,7 +674,7 @@ app.get("/api/player-props", async (req, res) => {
       return res.json({ message: "No player prop markets available for this event", bookmakers: [] });
     }
 
-    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/odds?apiKey=${API_KEY}&regions=${regions}&oddsFormat=${oddsFormat}&markets=${marketsToFetch}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/odds?apiKey=${API_KEY}&regions=${regions}&oddsFormat=${oddsFormat}&markets=${marketsToFetch}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics,fanduel,lowvig,mybookieag,espnbet,ballybet,betanysports,betparx,hardrockbet,fliff,rebet,windcreek,betopenly,novig,prophetx,prizepicks,underdog,draftkings_pick6,pointsbet,bet365,unibet`;
 
     const r = await axios.get(url);
     res.json(r.data);
@@ -692,7 +692,7 @@ app.get("/api/event-markets", async (req, res) => {
     const { sport, eventId, regions = "us" } = req.query;
     if (!sport || !eventId) return res.status(400).json({ error: "Missing sport or eventId" });
 
-    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics_us,fanduel,lowvig,mybookieag,espnbet,pointsbetau,unibet_us,betfred_us,hardrockbet,fliff,superdraft,prizepicks`;
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics,fanduel,lowvig,mybookieag,espnbet,ballybet,betanysports,betparx,hardrockbet,fliff,rebet,windcreek,betopenly,novig,prophetx,prizepicks,underdog,draftkings_pick6,pointsbet,bet365,unibet`;
     const r = await axios.get(url);
     res.json(r.data);
   } catch (err) {

@@ -52,7 +52,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     }
 
     // Get user's selected sportsbooks from localStorage
-    const userSelectedBooks = JSON.parse(localStorage.getItem('userSelectedSportsbooks') || '["draftkings", "fanduel", "betmgm", "caesars"]');
+    const userSelectedBooks = JSON.parse(localStorage.getItem('userSelectedSportsbooks') || '["draftkings", "fanduel", "betmgm", "caesars", "betrivers", "espnbet"]');
     console.log('User selected sportsbooks:', userSelectedBooks);
 
     const todayDate = new Date().toISOString().split('T')[0];

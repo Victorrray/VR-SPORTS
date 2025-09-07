@@ -4,15 +4,44 @@ import UsernameForm from '../components/UsernameForm';
 import './Profile.css';
 
 const AVAILABLE_SPORTSBOOKS = [
+  // Popular US Sportsbooks
   { key: 'draftkings', name: 'DraftKings', popular: true },
   { key: 'fanduel', name: 'FanDuel', popular: true },
   { key: 'betmgm', name: 'BetMGM', popular: true },
   { key: 'caesars', name: 'Caesars', popular: true },
-  { key: 'pointsbet', name: 'PointsBet', popular: true },
-  { key: 'bet365', name: 'Bet365', popular: true },
+  { key: 'betrivers', name: 'BetRivers', popular: true },
+  { key: 'espnbet', name: 'ESPN BET', popular: true },
+  
+  // Additional US Sportsbooks
+  { key: 'betonlineag', name: 'BetOnline.ag', popular: false },
+  { key: 'betus', name: 'BetUS', popular: false },
+  { key: 'bovada', name: 'Bovada', popular: false },
+  { key: 'fanatics', name: 'Fanatics Sportsbook', popular: false },
+  { key: 'lowvig', name: 'LowVig.ag', popular: false },
+  { key: 'mybookieag', name: 'MyBookie.ag', popular: false },
+  { key: 'ballybet', name: 'Bally Bet', popular: false },
+  { key: 'betanysports', name: 'BetAnySports', popular: false },
+  { key: 'betparx', name: 'betPARX', popular: false },
+  { key: 'fliff', name: 'Fliff', popular: false },
+  { key: 'hardrockbet', name: 'Hard Rock Bet', popular: false },
+  { key: 'rebet', name: 'ReBet', popular: false },
+  { key: 'windcreek', name: 'Wind Creek (Betfred PA)', popular: false },
+  
+  // US DFS Sites (Player Props)
+  { key: 'draftkings_pick6', name: 'DraftKings Pick6', popular: false, type: 'dfs' },
+  { key: 'prizepicks', name: 'PrizePicks', popular: false, type: 'dfs' },
+  { key: 'underdog', name: 'Underdog Fantasy', popular: false, type: 'dfs' },
+  
+  // US Betting Exchanges
+  { key: 'betopenly', name: 'BetOpenly', popular: false, type: 'exchange' },
+  { key: 'novig', name: 'Novig', popular: false, type: 'exchange' },
+  { key: 'prophetx', name: 'ProphetX', popular: false, type: 'exchange' },
+  
+  // Legacy sportsbooks (keeping for compatibility)
+  { key: 'pointsbet', name: 'PointsBet', popular: false },
+  { key: 'bet365', name: 'Bet365', popular: false },
   { key: 'unibet', name: 'Unibet', popular: false },
-  { key: 'williamhill_us', name: 'William Hill', popular: false },
-  { key: 'betrivers', name: 'BetRivers', popular: false },
+  { key: 'williamhill_us', name: 'William Hill US', popular: false },
   { key: 'wynnbet', name: 'WynnBET', popular: false },
   { key: 'superbook', name: 'SuperBook', popular: false },
   { key: 'barstool', name: 'Barstool', popular: false },
@@ -32,7 +61,7 @@ export default function ProfilePage() {
       setSelectedBooks(JSON.parse(saved));
     } else {
       // Default to popular sportsbooks
-      setSelectedBooks(['draftkings', 'fanduel', 'betmgm', 'caesars']);
+      setSelectedBooks(['draftkings', 'fanduel', 'betmgm', 'caesars', 'betrivers', 'espnbet']);
     }
   }, []);
 
@@ -106,7 +135,11 @@ export default function ProfilePage() {
                 >
                   <div className="book-info">
                     <span className="book-name">{book.name}</span>
-                    {book.popular && <span className="popular-badge">Popular</span>}
+                    <div className="book-badges">
+                      {book.popular && <span className="popular-badge">Popular</span>}
+                      {book.type === 'dfs' && <span className="type-badge dfs">DFS</span>}
+                      {book.type === 'exchange' && <span className="type-badge exchange">Exchange</span>}
+                    </div>
                   </div>
                   <div className="selection-indicator">
                     {selectedBooks.includes(book.key) && <Check size={16} />}
