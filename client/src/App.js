@@ -1,7 +1,7 @@
 // file: src/App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider } from './auth/AuthProvider';
+import { AuthProvider, useAuth } from './hooks/useAuth';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AccessibilityProvider } from './components/AccessibilityProvider';
 import { BetSlipProvider } from './contexts/BetSlipContext';
@@ -17,14 +17,12 @@ import Home from './pages/Home';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
 import Account from './pages/Account';
-import UsernameSetup from './components/UsernameSetup';
 import LoadingBar from "./components/LoadingBar";
-import PrivateRoute from "./auth/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoute";
 import MyPicks from './pages/MyPicks';
 import Scores from './pages/Scores';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
-import { useAuth } from "./auth/AuthProvider";
 import { initBrowserCompat } from "./utils/browserCompat";
 import "./App.css";
 import './styles/accessibility.css';
@@ -35,6 +33,19 @@ function AppRoutes() {
   const { user } = useAuth();
   const location = useLocation();
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
+  const [mobileSearchCallback, setMobileSearchCallback] = useState(null);
+
+  // Clear mobile search callback when navigating away from sportsbooks
+  useEffect(() => {
+    if (!location.pathname.startsWith('/sportsbooks')) {
+      setMobileSearchCallback(null);
+    }
+  }, [location.pathname]);
+
+  // Debug logging for callback state
+  useEffect(() => {
+    console.log('App: mobileSearchCallback changed:', mobileSearchCallback);
+  }, [mobileSearchCallback]);
 
   useEffect(() => {
     if (user && !user.user_metadata?.username) {
@@ -69,11 +80,16 @@ function AppRoutes() {
       <div className="app">
         <div className="app-layout">
           <LoadingBar />
-          <Navbar />
+          <Navbar onOpenMobileSearch={() => {
+            console.log('Navbar: onOpenMobileSearch called, callback exists:', !!mobileSearchCallback);
+            if (mobileSearchCallback) {
+              mobileSearchCallback();
+            }
+          }} />
           <main className="main-content" id="main-content" tabIndex="-1">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/sportsbooks" element={user ? <SportsbookMarkets /> : <Navigate to="/" replace />} />
+              <Route path="/sportsbooks" element={user ? <SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /> : <Navigate to="/" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
               <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
@@ -86,10 +102,7 @@ function AppRoutes() {
           {/* Only show footer on login page */}
           {location.pathname === "/login" && <Footer />}
           
-          {/* Username Setup Modal */}
-          {showUsernameSetup && (
-            <UsernameSetup onComplete={() => setShowUsernameSetup(false)} />
-          )}
+          {/* Username Setup Modal - Removed for now */}
           
           {/* Mobile bottom bar is handled by individual pages */}
         </div>

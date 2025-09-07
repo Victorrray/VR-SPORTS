@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth } from "../hooks/useAuth";
 import { User, Check, X } from 'lucide-react';
 import './UsernameSetup.css';
 

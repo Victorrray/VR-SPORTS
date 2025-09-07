@@ -18,8 +18,17 @@ export default function MobileSearchModal({ isOpen, onClose, onSearch, currentQu
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('🔍 MobileSearchModal: handleSubmit called with searchTerm:', searchTerm);
+    console.log('🔍 MobileSearchModal: onSearch function:', onSearch);
     onSearch(searchTerm);
+    console.log('🔍 MobileSearchModal: onSearch called, closing modal');
     onClose();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
   };
 
   const handleClear = () => {
@@ -49,6 +58,7 @@ export default function MobileSearchModal({ isOpen, onClose, onSearch, currentQu
               placeholder="Search teams, games, or markets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
               className="search-input"
             />
             {searchTerm && (

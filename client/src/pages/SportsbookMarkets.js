@@ -1,8 +1,9 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MobileBottomBar from "../components/MobileBottomBar";
 import MobileFiltersSheet from "../components/MobileFiltersSheet";
+import MobileSearchModal from "../components/MobileSearchModal";
 import { useBetSlip } from "../contexts/BetSlipContext";
 import BetSlip from "../components/BetSlip";
 // Removed unused imports: PersonalizedDashboard, EdgeCalculator, AlertSystem
@@ -193,23 +194,100 @@ const FEATURED_SPORTS = new Set([
 
 export default function SportsbookMarkets() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
   const [sportList, setSportList] = useState([]);
-  const [picked, setPicked] = useState(["americanfootball_nfl", "americanfootball_ncaaf"]);
-  const [query, setQuery] = useState("");
+  // Initialize state from localStorage or defaults
+  const [picked, setPicked] = useState(() => {
+    if (typeof window === "undefined") return ["americanfootball_nfl", "americanfootball_ncaaf"];
+    try {
+      const saved = localStorage.getItem("vr-odds-sports");
+      return saved ? JSON.parse(saved) : ["americanfootball_nfl", "americanfootball_ncaaf"];
+    } catch {
+      return ["americanfootball_nfl", "americanfootball_ncaaf"];
+    }
+  });
+  const [query, setQuery] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("vr-odds-query") || "";
+  });
   const [games, setGames] = useState([]);
   const [bookList, setBookList] = useState([]);
-  const [selectedBooks, setSelectedBooks] = useState([]);
+  const [selectedBooks, setSelectedBooks] = useState(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("vr-odds-books");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [tableNonce, setTableNonce] = useState(0);
   const [loading, setLoad] = useState(false);
   const [error, setErr] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
-  const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("vr-odds-date") || "";
+  });
+  const [marketKeys, setMarketKeys] = useState(() => {
+    if (typeof window === "undefined") return ["h2h", "spreads", "totals"];
+    try {
+      const saved = localStorage.getItem("vr-odds-markets");
+      return saved ? JSON.parse(saved) : ["h2h", "spreads", "totals"];
+    } catch {
+      return ["h2h", "spreads", "totals"];
+    }
+  });
   const [settingsOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [minEV, setMinEV] = useState("");
-  const [activePreset, setActivePreset] = useState(null);
-  const [showPlayerProps, setShowPlayerProps] = useState(false);
+  const [minEV, setMinEV] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("vr-odds-minev") || "";
+  });
+  const [activePreset, setActivePreset] = useState(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("vr-odds-preset") || null;
+  });
+  const [showPlayerProps, setShowPlayerProps] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("vr-odds-playerprops") === "true";
+  });
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+  function handleMobileSearch(searchTerm) {
+    console.log('📱 SportsbookMarkets: handleMobileSearch called with:', searchTerm);
+    console.log('📱 SportsbookMarkets: Current query before update:', query);
+    setQuery(searchTerm);
+    console.log('📱 SportsbookMarkets: setQuery called with:', searchTerm);
+    
+    // Update URL to include search parameter
+    const params = new URLSearchParams(location.search);
+    if (searchTerm.trim()) {
+      params.set('q', searchTerm);
+    } else {
+      params.delete('q');
+    }
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+    
+    // Update localStorage to persist the search
+    localStorage.setItem("vr-odds-query", searchTerm);
+    console.log('📱 SportsbookMarkets: localStorage updated');
+    setShowMobileSearch(false);
+  }
+
+  // Listen for mobile search button clicks
+  useEffect(() => {
+    const handleOpenMobileSearch = () => {
+      setShowMobileSearch(true);
+    };
+
+    window.addEventListener('openMobileSearch', handleOpenMobileSearch);
+    
+    return () => {
+      window.removeEventListener('openMobileSearch', handleOpenMobileSearch);
+    };
+  }, []);
+
   // Enhanced filter presets with sportsbook recommendations
   const filterPresets = [
     {
@@ -282,14 +360,22 @@ export default function SportsbookMarkets() {
     return localStorage.getItem("oddsFormat") || "american";
   });
 
-  // ✅ Debounce defined ONCE
-  const debouncedQuery = useDebounce(query, 300);
+  // ✅ Debounce defined ONCE - temporarily bypassed for debugging
+  const debouncedQuery = query; // useDebounce(query, 300);
+  
+  // Debug logging for query changes
+  useEffect(() => {
+    console.log('🔄 Query changed from', query, 'to debouncedQuery:', debouncedQuery);
+  }, [query, debouncedQuery]);
 
   // Sync with URL search params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const urlQuery = params.get('q') || '';
+    console.log('🔗 URL Sync: location.search =', location.search);
+    console.log('🔗 URL Sync: urlQuery =', urlQuery, 'current query =', query);
     if (urlQuery !== query) {
+      console.log('🔗 URL Sync: Setting query to urlQuery:', urlQuery);
       setQuery(urlQuery);
     }
   }, [location.search, query]);
@@ -301,6 +387,71 @@ export default function SportsbookMarkets() {
       } catch {}
     }
   }, [oddsFormat]);
+
+  // Save filter states to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-sports", JSON.stringify(picked));
+      } catch {}
+    }
+  }, [picked]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-query", query);
+      } catch {}
+    }
+  }, [query]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-books", JSON.stringify(selectedBooks));
+      } catch {}
+    }
+  }, [selectedBooks]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-date", selectedDate);
+      } catch {}
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-markets", JSON.stringify(marketKeys));
+      } catch {}
+    }
+  }, [marketKeys]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-minev", minEV);
+      } catch {}
+    }
+  }, [minEV]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-preset", activePreset || "");
+      } catch {}
+    }
+  }, [activePreset]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("vr-odds-playerprops", showPlayerProps.toString());
+      } catch {}
+    }
+  }, [showPlayerProps]);
 
   // Hydrate books list from localStorage cache on first mount (to avoid empty dropdown)
   useEffect(() => {
@@ -411,44 +562,66 @@ export default function SportsbookMarkets() {
   // ===== Filtering before passing to OddsTable =====
   let filteredGames = games;
 
-  if (debouncedQuery.trim()) {
+  // When search is active, it overrides date and sport filters but keeps sportsbook filters
+  const hasActiveSearch = debouncedQuery.trim();
+
+  if (hasActiveSearch) {
+    console.log('🔍 Search active - overriding date/sport filters');
+    console.log('🔍 Filtering games with debouncedQuery:', debouncedQuery);
+    console.log('🔍 Total games before filter:', filteredGames.length);
     const q = debouncedQuery.toLowerCase();
     filteredGames = filteredGames.filter(
       (g) =>
         (g.home_team && g.home_team.toLowerCase().includes(q)) ||
         (g.away_team && g.away_team.toLowerCase().includes(q)) ||
         (g.sport_title && g.sport_title.toLowerCase().includes(q)) ||
-        // Also search by league/sport
-        (getSportLeague(g.sport_key).league.toLowerCase().includes(q)) ||
-        (getSportLeague(g.sport_key).sport.toLowerCase().includes(q))
+        (g.bookmakers &&
+          g.bookmakers.some((bm) =>
+            bm.markets.some((market) =>
+              market.key.toLowerCase().includes(q)
+            )
+          ))
     );
-  }
-
-  // Date filter (local date) or live games filter
-  if (selectedDate) {
-    if (selectedDate === "live") {
-      // Filter for live games (games that have started but not finished)
+    console.log('🔍 Games after search filter:', filteredGames.length);
+  } else {
+    // Only apply date and sport filters when no search is active
+    
+    // Date filter (local date) or live games filter
+    if (selectedDate) {
+      if (selectedDate === "live") {
+        // Filter for live games (games that have started but not finished)
+        filteredGames = filteredGames.filter((g) => {
+          const gameStart = new Date(g.commence_time).getTime();
+          const now = Date.now();
+          const gameEnd = gameStart + (3.5 * 60 * 60 * 1000); // Assume 3.5 hours max game duration
+          return now >= gameStart && now <= gameEnd;
+        });
+      } else {
+        // Regular date filtering
+        filteredGames = filteredGames.filter((g) => {
+          const d = new Date(g.commence_time);
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          const gameDate = `${y}-${m}-${day}`;
+          return gameDate === selectedDate;
+        });
+      }
+    } else {
+      // Hide live games by default unless specifically selected
       filteredGames = filteredGames.filter((g) => {
         const gameStart = new Date(g.commence_time).getTime();
         const now = Date.now();
         const gameEnd = gameStart + (3.5 * 60 * 60 * 1000); // Assume 3.5 hours max game duration
-        return now >= gameStart && now <= gameEnd;
-      });
-    } else {
-      // Regular date filtering
-      filteredGames = filteredGames.filter((g) => {
-        const d = new Date(g.commence_time);
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        const gameDate = `${y}-${m}-${day}`;
-        return gameDate === selectedDate;
+        const isLive = now >= gameStart && now <= gameEnd;
+        return !isLive; // Hide live games when no date filter is selected
       });
     }
-  }
 
-  if (picked && picked.length && !picked.includes("ALL")) {
-    filteredGames = filteredGames.filter((g) => picked.includes(g.sport_key));
+    // Sport filter - only when no search is active
+    if (picked && picked.length && !picked.includes("ALL")) {
+      filteredGames = filteredGames.filter((g) => picked.includes(g.sport_key));
+    }
   }
 
   // Show all games by default
@@ -707,6 +880,50 @@ export default function SportsbookMarkets() {
                   Player Props
                 </button>
               </div>
+              
+              {/* Refresh Button */}
+              <button
+                onClick={() => {
+                  setLoad(true);
+                  setTableNonce(n => n + 1);
+                  // Reset loading after a brief moment to show the table loading state
+                  setTimeout(() => setLoad(false), 2000);
+                }}
+                title="Refresh odds data"
+                aria-label="Refresh"
+                style={{
+                  padding: '8px',
+                  border: '1px solid var(--border-color)',
+                  background: 'transparent',
+                  color: 'var(--accent)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '36px',
+                  height: '36px'
+                }}
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M3 21v-5h5"/>
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -718,8 +935,8 @@ export default function SportsbookMarkets() {
             bookFilter={effectiveSelectedBooks}
             marketFilter={marketKeys}
             evMin={minEV === "" ? null : Number(minEV)}
-            loading={loading}
-            error={error}
+            loading={loading || hookLoading}
+            error={error || hookError}
             oddsFormat={oddsFormat}
             allCaps={
               typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
@@ -823,6 +1040,14 @@ export default function SportsbookMarkets() {
           onRemoveBet={removeBet}
           onClearAll={clearAllBets}
           onPlaceBets={placeBets}
+        />
+
+        {/* Mobile Search Modal */}
+        <MobileSearchModal 
+          isOpen={showMobileSearch}
+          onClose={() => setShowMobileSearch(false)}
+          onSearch={handleMobileSearch}
+          currentQuery={debouncedQuery}
         />
 
       </div>

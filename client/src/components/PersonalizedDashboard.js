@@ -1,15 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle, ChevronDown, ChevronUp, Plus, ArrowRight } from 'lucide-react';
 import { useBetSlip } from '../contexts/BetSlipContext';
 import './PersonalizedDashboard.css';
 
 export default function PersonalizedDashboard({ games, userPreferences = {} }) {
+  const location = useLocation();
   const [dashboardData, setDashboardData] = useState(null);
   const [expandedBets, setExpandedBets] = useState({});
   const { addBet, openBetSlip } = useBetSlip();
 
+  // Only process data when on home page
+  const isHomePage = location.pathname === '/' || location.pathname === '/home';
+
   // Initialize with real data from API immediately
   useEffect(() => {
+    if (!isHomePage) return; // Don't process if not on home page
+    
     console.log('PersonalizedDashboard - games data:', {
       gamesLength: games?.length || 0,
       hasGames: !!games,
@@ -24,10 +31,12 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [games?.length]);
+  }, [games?.length, isHomePage]);
+
+  // Update callback dependency to include isHomePage
 
   const generateDashboardData = useCallback(() => {
-    if (!games || games.length === 0) {
+    if (!isHomePage || !games || games.length === 0) {
       // No real games available - show empty state
       console.log('No games data available from API');
       setDashboardData({
@@ -350,7 +359,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
 
     console.log('Setting dashboard data:', dashboardDataToSet);
     setDashboardData(dashboardDataToSet);
-  }, [games]);
+  }, [games, isHomePage]);
 
 
   const StatCard = ({ icon: Icon, title, value, subtitle, color = 'var(--accent)' }) => (

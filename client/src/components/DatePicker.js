@@ -20,7 +20,9 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return placeholder;
     if (dateStr === "live") return "🔴 Live Games";
-    const date = new Date(dateStr);
+    // Parse YYYY-MM-DD format in local timezone to avoid UTC offset issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 

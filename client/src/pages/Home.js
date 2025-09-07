@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { 
   Target, 
@@ -25,7 +25,7 @@ import Footer from '../components/Footer';
 
 // Hooks
 import { useMarkets } from '../hooks/useMarkets';
-import { useAuth } from '../auth/AuthProvider';
+import { useAuth } from '../hooks/useAuth';
 
 // Styles
 import '../styles/landing.css';
@@ -54,28 +54,27 @@ const QUICK_ACTIONS = [
   }
 ];
 
-
-
-
 // Landing Page Component for non-authenticated users
 export default function Home() {
   const { user } = useAuth();
+  const location = useLocation();
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [showAlerts, setShowAlerts] = useState(false);
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
-  
-  // Debug logging for username changes
+
+  // Create memory for user preferences
   React.useEffect(() => {
-    console.log('Home component user object updated:', {
-      userId: user?.id,
-      username: user?.user_metadata?.username,
-      email: user?.email
-    });
+    if (user?.user_metadata?.username || user?.email) {
+      // Save user info to memory for personalization
+    }
   }, [user?.user_metadata?.username, user?.email]);
   
-  // Fetch live odds data for dashboard with reduced polling (only for logged-in users)
+  // Only fetch live odds data when actually on the home page
+  const isHomePage = location.pathname === '/' || location.pathname === '/home';
   const { games } = useMarkets(
-    user ? ["americanfootball_nfl", "basketball_nba", "baseball_mlb"] : [], // sports
-    user ? ["us"] : [], // regions
-    user ? ["h2h", "spreads", "totals"] : [] // markets
+    (user && isHomePage) ? ["americanfootball_nfl", "basketball_nba", "baseball_mlb"] : [], // sports
+    (user && isHomePage) ? ["us"] : [], // regions
+    (user && isHomePage) ? ["h2h", "spreads", "totals"] : [] // markets
   );
 
   // Landing page for non-authenticated users

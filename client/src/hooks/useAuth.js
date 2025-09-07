@@ -13,49 +13,70 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
+      console.log('🔐 useAuth: Getting initial session, isSupabaseEnabled:', isSupabaseEnabled);
+      
       if (!isSupabaseEnabled) {
+        console.log('🔐 useAuth: Supabase disabled, setting loading false');
         setLoading(false);
         return;
       }
 
       try {
+        console.log('🔐 useAuth: Calling db.auth.getSession()');
         const { data: { session }, error } = await db.auth.getSession();
         if (error) throw error;
         
+        console.log('🔐 useAuth: Session received:', !!session, session?.user?.email);
         setSession(session);
         setUser(session?.user || null);
         
         if (session?.user) {
+          console.log('🔐 useAuth: Fetching user profile for:', session.user.id);
           await fetchUserProfile(session.user.id);
         }
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error('🔐 useAuth: Error getting session:', error);
       } finally {
+        console.log('🔐 useAuth: Setting loading to false');
         setLoading(false);
       }
     };
 
     getInitialSession();
 
+    // Fallback timeout to ensure loading never stays true indefinitely
+    const fallbackTimeout = setTimeout(() => {
+      console.log('🔐 useAuth: Fallback timeout - forcing loading to false');
+      setLoading(false);
+    }, 3000);
+
     // Listen for auth changes
     if (isSupabaseEnabled) {
       const { data: { subscription } } = db.auth.onAuthStateChange(
         async (event, session) => {
+          console.log('🔐 useAuth: Auth state change:', event, !!session);
           setSession(session);
           setUser(session?.user || null);
           
           if (session?.user) {
+            console.log('🔐 useAuth: Auth change - fetching profile for:', session.user.id);
             await fetchUserProfile(session.user.id);
           } else {
             setProfile(null);
           }
           
+          console.log('🔐 useAuth: Auth change - setting loading false');
           setLoading(false);
         }
       );
 
-      return () => subscription?.unsubscribe();
+      return () => {
+        subscription?.unsubscribe();
+        clearTimeout(fallbackTimeout);
+      };
     }
+
+    return () => clearTimeout(fallbackTimeout);
   }, []);
 
   const fetchUserProfile = async (userId) => {
@@ -79,10 +100,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signUp = async (email, password, metadata = {}) => {
-    if (!isSupabaseEnabled) {
-      throw new Error('Authentication not available in demo mode');
-    }
-
     const { data, error } = await db.auth.signUp({
       email,
       password,
@@ -96,10 +113,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signIn = async (email, password) => {
-    if (!isSupabaseEnabled) {
-      throw new Error('Authentication not available in demo mode');
-    }
-
     const { data, error } = await db.auth.signInWithPassword({
       email,
       password
@@ -154,6 +167,16 @@ export const AuthProvider = ({ children }) => {
     loading,
     signUp,
     signIn,
+    signInEmail: signIn,
+    signUpEmail: signUp,
+    signInWithProvider: async (provider) => {
+      if (!isSupabaseEnabled) {
+        throw new Error('Authentication not available in demo mode');
+      }
+      const { data, error } = await db.auth.signInWithOAuth({ provider });
+      if (error) throw error;
+      return data;
+    },
     signOut,
     updateProfile,
     updateBankroll,
@@ -171,7 +194,7 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

@@ -1,6 +1,6 @@
 // src/pages/Account.js
 import React, { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabase";
 import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut } from "lucide-react";
 import AccessibilitySettings from "../components/AccessibilitySettings";

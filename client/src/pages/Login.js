@@ -1,12 +1,13 @@
 // src/pages/Login.js
 import React, { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../auth/AuthProvider";
+import { useAuth } from "../hooks/useAuth";
 import { Mail, Lock, ArrowRight, Chrome } from "lucide-react";
 import "./Login.css";
 
 export default function Login() {
-  const { signInEmail, signUpEmail, signInWithProvider } = useAuth();
+  const auth = useAuth();
+  const { signInEmail, signUpEmail, signInWithProvider } = auth || {};
   const [tab, setTab] = useState("login"); // 'login' | 'signup'
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -16,10 +17,18 @@ export default function Login() {
   const next = search.get("next") || "/account";
 
   const go = async (fn) => {
+    if (!fn) {
+      setErr("Authentication not available. Please try again.");
+      return;
+    }
     setErr("");
-    const { error } = await fn(email, pw);
-    if (error) setErr(error.message);
-    else navigate(next, { replace: true });
+    try {
+      const { error } = await fn(email, pw);
+      if (error) setErr(error.message);
+      else navigate(next, { replace: true });
+    } catch (err) {
+      setErr("Authentication failed. Please try again.");
+    }
   };
 
   return (

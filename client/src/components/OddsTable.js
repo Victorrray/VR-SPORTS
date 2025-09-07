@@ -39,7 +39,7 @@ function formatMarket(key="") {
   const k = String(key).toLowerCase();
   if (k === "h2h") return "MONEYLINE";
   if (k.includes("spread")) return "SPREAD";
-  if (k.includes("total")) return "TOTALS";
+  if (k.includes("total")) return "TOTAL";
   return key.replace("player_", "").toUpperCase();
 }
 function marketTypeLabel(key="") {
@@ -95,6 +95,15 @@ function shortTeam(name="", sportKey="") {
 function formatKickoffNice(commence){
   try{
     const d = new Date(commence);
+    const gameStart = d.getTime();
+    const now = Date.now();
+    const gameEnd = gameStart + (3.5 * 60 * 60 * 1000); // Assume 3.5 hours max game duration
+    const isLive = now >= gameStart && now <= gameEnd;
+    
+    if (isLive) {
+      return "🔴 LIVE";
+    }
+    
     const date = d.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
     const time = d.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
     return `${date} at ${time}`;
@@ -611,9 +620,16 @@ export default function OddsTable({
             })),
             sport: game.sport_key
           };
-          // Only add rows with valid odds (not zero or empty)
+          // Only add rows with valid odds and minimum 6 comparable books
         const hasValidOdds = Number(filteredOutcome.price || filteredOutcome.odds || 0) !== 0;
-        if (hasValidOdds) {
+        const uniqueBooks = new Set();
+        allBooksForOutcome.forEach(book => {
+          const key = String(book?.bookmaker?.key || book?.book || '').toLowerCase();
+          if (key) uniqueBooks.add(key);
+        });
+        const hasMinimumBooks = uniqueBooks.size >= 6;
+        
+        if (hasValidOdds && hasMinimumBooks) {
           gameRows.push(gameRow);
         }
         });
@@ -722,7 +738,7 @@ export default function OddsTable({
         return true;
       });
     }
-    // keep only best EV per game/market/point bucket
+    // keep only best odds per game/market/point bucket (most favorable for bettor)
     const bestBy = new Map();
     const groupKey = (r) => {
       const mk = String(r?.mkt?.key || '').toLowerCase();
@@ -732,11 +748,31 @@ export default function OddsTable({
         : String(rawPt ?? '');
       return mk === 'h2h' ? `${r.game.id}:${mk}` : `${r.game.id}:${mk}:${ptKey}`;
     };
+    
+    const isBetterOdds = (newOdds, currentOdds) => {
+      // For positive odds (+200), higher is better
+      // For negative odds (-150), closer to 0 is better (less negative)
+      if (newOdds > 0 && currentOdds > 0) return newOdds > currentOdds;
+      if (newOdds < 0 && currentOdds < 0) return newOdds > currentOdds; // -120 > -150
+      if (newOdds > 0 && currentOdds < 0) return true; // positive always better than negative
+      if (newOdds < 0 && currentOdds > 0) return false; // negative never better than positive
+      return false;
+    };
+    
     r.forEach(rr => {
       const gk = groupKey(rr);
+      const odds = Number(rr?.out?.price ?? rr?.out?.odds ?? 0);
       const ev = evMap.get(rr.key) ?? -999;
       const cur = bestBy.get(gk);
-      if (!cur || ev > cur.ev) bestBy.set(gk, { row: rr, ev });
+      
+      if (!cur) {
+        bestBy.set(gk, { row: rr, odds, ev });
+      } else {
+        // Prioritize best odds, but use EV as tiebreaker
+        if (isBetterOdds(odds, cur.odds) || (odds === cur.odds && ev > cur.ev)) {
+          bestBy.set(gk, { row: rr, odds, ev });
+        }
+      }
     });
     r = Array.from(bestBy.values()).map(v => v.row);
     return r.slice().sort((a, b) => (sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b)));
@@ -777,25 +813,76 @@ export default function OddsTable({
 
   /* ---------- Render ---------- */
   if (loading) return (
-    <>
-      <div className="desktop-skeleton">
-        <OddsTableSkeleton rows={8} />
-      </div>
-      <div className="mobile-skeleton">
-        <OddsTableSkeletonMobile rows={6} />
-      </div>
-    </>
-  );
-  if (!allRows.length) return (
-    <div className="odds-table-card">
-      <div className="spinner-wrap" style={{ padding:"2em 0" }}>
-        <p>No player props available from sportsbooks at this time.</p>
-        <p style={{ fontSize: '0.9em', opacity: 0.7, marginTop: '0.5em' }}>
-          Player props may not be available for all games or may be limited by the odds provider.
-        </p>
-      </div>
+    <div className="odds-table-loading">
+      <div className="loading-spinner"></div>
+      <div className="loading-text">Refreshing odds data...</div>
+      <div className="loading-subtext">Getting the latest odds from all sportsbooks</div>
+      <style jsx>{`
+        .odds-table-loading {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 4rem 2rem;
+          text-align: center;
+          background: var(--card-bg);
+          border-radius: 12px;
+          border: 1px solid var(--border-color);
+          margin: 1rem 0;
+        }
+        
+        .loading-spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid var(--border-color);
+          border-top: 3px solid var(--accent);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin-bottom: 1.5rem;
+        }
+        
+        .loading-text {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+        }
+        
+        .loading-subtext {
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          opacity: 0.7;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        .mob-total-stack {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          line-height: 1.2;
+          text-align: left;
+        }
+        
+        .mob-total-market {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+        
+        .mob-total-side {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: var(--text-secondary);
+          margin-top: 1px;
+        }
+      `}</style>
     </div>
   );
+  if (!allRows.length && !loading) return null;
 
   return (
     <div className={`odds-table-card revamp${allCaps ? ' all-caps' : ''}`}>
@@ -1057,10 +1144,14 @@ export default function OddsTable({
                             </div>
                           ) : (
                             <>
-                              {formatMarket(row.mkt?.key || '')}
-                              {String(row.mkt?.key || '').includes('total') 
-                                ? ` ${row.out.name || ''}` 
-                                : ''}
+                              {String(row.mkt?.key || '').includes('total') ? (
+                                <div className="mob-total-stack">
+                                  <div className="mob-total-market">TOTAL</div>
+                                  <div className="mob-total-side">{(row.out.name || '').toUpperCase()}</div>
+                                </div>
+                              ) : (
+                                formatMarket(row.mkt?.key || '')
+                              )}
                             </>
                           )}
                         </div>

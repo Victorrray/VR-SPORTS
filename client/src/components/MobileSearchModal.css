@@ -1,6 +1,6 @@
 /* Mobile Search Modal */
 .mobile-search-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -9,19 +9,19 @@
   backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding-bottom: calc(130px + env(safe-area-inset-bottom));
+  padding: 20px;
 }
 
 .mobile-search-modal {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 16px 16px 0 0;
+  border-radius: 16px;
   width: 100%;
-  max-width: 360px;
+  max-width: 400px;
   margin: 0 auto;
-  box-shadow: 0 -10px 40px color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--accent) 30%, transparent);
   animation: searchModalSlideUp 0.3s ease-out;
 }
 

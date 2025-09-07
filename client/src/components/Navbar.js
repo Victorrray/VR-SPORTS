@@ -2,18 +2,17 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Search, User } from "lucide-react";
-import { useAuth } from "../auth/AuthProvider";
-import MobileSearchModal from "./MobileSearchModal";
+import { useAuth } from "../hooks/useAuth";
 import styles from "./Navbar.module.css";
 
-export default function Navbar() {
+export default function Navbar({ onOpenMobileSearch }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const auth = useAuth();
+  const user = auth?.user;
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [q, setQ] = useState("");
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
@@ -45,7 +44,6 @@ export default function Navbar() {
     if (searchTerm) params.set("q", searchTerm);
     else params.delete("q");
     navigate(`/sportsbooks?${params.toString()}`);
-    setShowMobileSearch(false);
   }
 
   return (
@@ -65,16 +63,14 @@ export default function Navbar() {
         <button 
           className={styles.mobileSearchBtn} 
           aria-label="Search"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setShowMobileSearch(true);
+          onClick={() => {
+            // Directly dispatch custom event to trigger modal
+            window.dispatchEvent(new CustomEvent('openMobileSearch'));
           }}
         >
           <Search size={20} />
         </button>
       )}
-
       <div className={styles.navLeft}>
         <Link to="/" className={styles.brandBtn}>
           <span className={styles.brandTitle}>OddsSightSeer</span>
@@ -175,13 +171,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Mobile Search Modal */}
-      <MobileSearchModal 
-        isOpen={showMobileSearch}
-        onClose={() => setShowMobileSearch(false)}
-        onSearch={handleMobileSearch}
-        currentQuery={q}
-      />
+
     </nav>
   );
 }

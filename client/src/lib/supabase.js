@@ -9,26 +9,16 @@ const SUPABASE_ANON_KEY =
   viteEnv?.VITE_SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error(
-    [
-      "Supabase env vars are missing.",
-      "In Create React App, add to a file named `.env` in your project root:",
-      "",
-      "REACT_APP_SUPABASE_URL=YOUR_SUPABASE_URL",
-      "REACT_APP_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY",
-      "",
-      "If you migrate to Vite, use:",
-      "VITE_SUPABASE_URL=YOUR_SUPABASE_URL",
-      "VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY",
-    ].join("\n")
-  );
+  console.warn("Supabase env vars missing. Running in demo mode.");
+  console.log("SUPABASE_URL:", SUPABASE_URL);
+  console.log("SUPABASE_ANON_KEY:", SUPABASE_ANON_KEY ? "Present" : "Missing");
 }
 
 // Helpful for OAuth: send users back to your site root after provider auth.
 const redirectTo =
   (typeof window !== "undefined" && `${window.location.origin}/`) || undefined;
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export const supabase = SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -38,7 +28,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   global: {
     headers: { "x-oss-app": "odds-sight-seer" }, // optional: easy header to spot traffic
   },
-});
+}) : null;
 
 // Optional: export the redirect so AuthProvider can use it for signInWithOAuth
 export const OAUTH_REDIRECT_TO = redirectTo;

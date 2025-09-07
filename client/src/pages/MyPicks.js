@@ -6,6 +6,7 @@ import "./MyPicks.css";
 const LS_KEY = "oss_my_picks_v1";
 
 export default function MyPicks() {
+  console.log('🎯 MyPicks component rendering');
   const [picks, setPicks] = useState([]);
   const [view, setView] = useState('overview'); // 'overview', 'analytics', 'history'
   const [filter, setFilter] = useState('all'); // 'all', 'pending', 'won', 'lost'
@@ -91,6 +92,71 @@ export default function MyPicks() {
     ];
     save([...picks, ...samplePicks]);
   }
+
+  function exportPicks() {
+    try {
+      const dataStr = JSON.stringify(picks, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `my-picks-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    }
+  }
+
+  function importPicks(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedPicks = JSON.parse(e.target.result);
+        if (Array.isArray(importedPicks)) {
+          // Merge with existing picks, avoiding duplicates by ID
+          const existingIds = new Set(picks.map(p => p.id));
+          const newPicks = importedPicks.filter(p => !existingIds.has(p.id));
+          save([...picks, ...newPicks]);
+          alert(`Successfully imported ${newPicks.length} new picks!`);
+        } else {
+          alert('Invalid file format. Please select a valid picks export file.');
+        }
+      } catch (error) {
+        console.error('Import failed:', error);
+        alert('Import failed. Please check the file format and try again.');
+      }
+    };
+    reader.readAsText(file);
+    // Reset input to allow importing the same file again
+    event.target.value = '';
+  }
+
+  const refreshData = () => {
+    // Force re-render by updating timestamps on all picks
+    const updatedPicks = picks.map(pick => ({
+      ...pick,
+      lastRefresh: new Date().toISOString()
+    }));
+    setPicks(updatedPicks);
+    localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
+  };
+
+  const updateActualPayout = (pickId, actualPayout) => {
+    const updatedPicks = picks.map(pick => 
+      pick.id === pickId 
+        ? { ...pick, actualPayout: actualPayout }
+        : pick
+    );
+    setPicks(updatedPicks);
+    localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
+  };
 
   // Calculate analytics
   const analytics = useMemo(() => {
@@ -277,10 +343,16 @@ export default function MyPicks() {
               <Zap size={16} />
               Load Sample Data
             </button>
-            <button className="import-btn">
+            <label className="import-btn">
               <Download size={16} />
               Import Picks
-            </button>
+              <input 
+                type="file" 
+                accept=".json" 
+                onChange={importPicks} 
+                style={{ display: 'none' }} 
+              />
+            </label>
           </div>
         </div>
       )}
@@ -305,11 +377,11 @@ export default function MyPicks() {
                 </select>
               </div>
               <div className="action-controls">
-                <button className="export-btn">
+                <button className="export-btn" onClick={exportPicks}>
                   <Download size={14} />
                   Export
                 </button>
-                <button className="refresh-btn">
+                <button className="refresh-btn" onClick={refreshData}>
                   <RefreshCw size={14} />
                   Refresh
                 </button>
@@ -355,6 +427,20 @@ export default function MyPicks() {
                       <span className="label">Potential:</span>
                       <span className="value">${Number(p.potential) || 0}</span>
                     </div>
+                    {p.status === 'won' && (
+                      <div className="financial-row">
+                        <span className="label">Actual Payout:</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={p.actualPayout || ''}
+                          onChange={(e) => updateActualPayout(p.id, e.target.value)}
+                          className="payout-input"
+                          placeholder="Enter payout"
+                        />
+                      </div>
+                    )}
                     {p.status !== 'pending' && (
                       <div className="financial-row profit">
                         <span className="label">Profit:</span>
