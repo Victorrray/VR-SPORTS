@@ -18,6 +18,7 @@ PORT=10000
 
 # New Stripe Configuration
 <<<<<<< HEAD
+<<<<<<< HEAD
 STRIPE_SECRET_KEY=your_stripe_secret_key_here
 STRIPE_PRICE_PLATINUM=your_platinum_price_id_here
 STRIPE_WEBHOOK_SECRET=your_webhook_secret_here
@@ -26,6 +27,11 @@ STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
 STRIPE_PRICE_PLATINUM=price_your_platinum_price_id_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 >>>>>>> e3a0bd6 (1.25)
+=======
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
+STRIPE_PRICE_PLATINUM=your_platinum_price_id_here
+STRIPE_WEBHOOK_SECRET=your_webhook_secret_here
+>>>>>>> a469834 (chore(secrets): ignore server/.env and add .env.example (no secrets))
 APP_URL=http://localhost:3000
 ```
 
@@ -40,10 +46,14 @@ APP_URL=http://localhost:3000
    - URL: `https://yourdomain.com/api/billing/webhook`
    - Events: `checkout.session.completed`
 <<<<<<< HEAD
+<<<<<<< HEAD
    - Copy the webhook secret
 =======
    - Copy the webhook secret (starts with `whsec_`)
 >>>>>>> e3a0bd6 (1.25)
+=======
+   - Copy the webhook secret
+>>>>>>> a469834 (chore(secrets): ignore server/.env and add .env.example (no secrets))
 
 ## Database Migration
 

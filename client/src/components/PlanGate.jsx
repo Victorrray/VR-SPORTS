@@ -1,62 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Star, Zap, Loader2 } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+// Blocking plan selection gate for users without a plan
+import React, { useState } from 'react';
 import { useMe } from '../hooks/useMe';
+import { useNavigate } from 'react-router-dom';
+import { Loader2, Star, Zap, Check } from 'lucide-react';
 
-// Intent persistence helpers
-function saveIntent(intent, returnTo) {
-  localStorage.setItem('pricingIntent', JSON.stringify({ intent, returnTo, ts: Date.now() }));
-}
+const DEBUG_PRICING = process.env.NODE_ENV === 'development';
 
-function getIntent() {
-  try {
-    const stored = localStorage.getItem('pricingIntent');
-    if (!stored) return null;
-    const parsed = JSON.parse(stored);
-    // Expire after 30 minutes
-    if (Date.now() - parsed.ts > 30 * 60 * 1000) {
-      localStorage.removeItem('pricingIntent');
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function clearIntent() {
-  localStorage.removeItem('pricingIntent');
-}
-
-const Pricing = ({ onUpgrade }) => {
-  const { me } = useMe();
+export default function PlanGate({ children }) {
+  const { me, loading, refresh } = useMe();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [autoStarting, setAutoStarting] = useState(false);
-  
-  const DEBUG_PRICING = process.env.NODE_ENV === 'development' || 
-                       searchParams.has('debug') || 
-                       localStorage.getItem('DEBUG_PRICING') === '1';
 
-  const handleStartFree = async () => {
-    if (DEBUG_PRICING) console.log('🔍 Start Free clicked');
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={32} className="animate-spin mx-auto mb-4" style={{ color: 'var(--accent)' }} />
+          <p style={{ color: 'var(--text-secondary)' }}>Loading your account...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user has a plan, render children
+  if (me?.plan) {
+    return children;
+  }
+
+  const chooseFree = async () => {
+    if (DEBUG_PRICING) console.log('🔍 PlanGate: Choosing free trial');
     
     try {
+      setBusy(true);
       setError('');
-      setLoading(true);
       
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to signup');
-        saveIntent('start-free', '/app');
-        navigate('/signup?returnTo=/pricing&intent=start-free');
-        return;
-      }
-
-      // Set plan immediately (no Stripe)
       const response = await fetch('/api/users/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,190 +42,102 @@ const Pricing = ({ onUpgrade }) => {
         credentials: 'include'
       });
       
-      if (response.ok) {
-        navigate('/app');
-      } else {
-        setError('Failed to set plan. Please try again.');
+      if (!response.ok) {
+        throw new Error('Failed to set plan');
       }
-    } catch (error) {
-      console.error('Failed to start free plan:', error);
-      setError('Failed to start free plan. Please try again.');
+      
+      await refresh();
+      navigate('/app', { replace: true });
+    } catch (err) {
+      console.error('Failed to set free plan:', err);
+      setError('Failed to set plan. Please try again.');
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  const handleUpgrade = async () => {
-    if (DEBUG_PRICING) console.log('🔍 Upgrade clicked');
+  const choosePlatinum = async () => {
+    if (DEBUG_PRICING) console.log('🔍 PlanGate: Choosing platinum');
     
     try {
+      setBusy(true);
       setError('');
-      setLoading(true);
       
-      const { data: sessionData2 } = await supabase.auth.getSession();
-      if (!sessionData2.session) {
-        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to login');
-        saveIntent('upgrade', '/pricing');
-        navigate('/login?returnTo=/pricing&intent=upgrade');
-        return;
-      }
-
       const response = await fetch('/api/billing/create-checkout-session', {
         method: 'POST',
         credentials: 'include'
       });
       
-      const responseData = await response.json();
-      if (responseData?.url) {
-        window.location.href = responseData.url;
-      } else {
-        setError('Checkout unavailable. Please try again.');
+      const data = await response.json();
+      
+      if (!response.ok || !data?.url) {
+        throw new Error(data?.error || 'Unable to start checkout');
       }
-    } catch (error) {
-      console.error('Failed to handle upgrade:', error);
-      setError(`Upgrade failed: ${error.message}. Please try again.`);
-    } finally {
-      setLoading(false);
+      
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('Failed to create checkout:', err);
+      setError('Unable to start checkout. Please try again.');
+      setBusy(false);
     }
   };
-  
-
-  // Auto-continue upgrade flow if user just logged in with intent=upgrade
-  useEffect(() => {
-    const urlIntent = searchParams.get('intent');
-    const autoStart = searchParams.get('autostart');
-    const storedIntent = getIntent();
-    
-    if (DEBUG_PRICING) {
-      console.log('🔍 Pricing useEffect:', {
-        urlIntent,
-        autoStart,
-        storedIntent,
-        me,
-        loading,
-        autoStarting
-      });
-    }
-    
-    // Auto-start upgrade if conditions are met
-    if ((urlIntent === 'upgrade' || storedIntent?.intent === 'upgrade') && 
-        me?.plan !== 'platinum' && 
-        !loading && 
-        !autoStarting && 
-        autoStart === '1') {
-      
-      if (DEBUG_PRICING) console.log('🔍 Auto-starting upgrade after authentication');
-      setAutoStarting(true);
-      clearIntent();
-      
-      // Small delay to show the "Opening checkout..." message
-      setTimeout(async () => {
-        try {
-          const response = await fetch('/api/billing/create-checkout-session', {
-            method: 'POST',
-            credentials: 'include'
-          });
-          const data = await response.json();
-          if (data?.url) {
-            window.location.href = data.url;
-          } else {
-            throw new Error('No checkout URL received');
-          }
-        } catch (error) {
-          console.error('Auto-start checkout failed:', error);
-          setError(`Auto-start failed: ${error.message}`);
-          setAutoStarting(false);
-        }
-      }, 1000);
-    }
-  }, [me, loading, searchParams]);
-  
-  // Debug helper
-  useEffect(() => {
-    if (DEBUG_PRICING) {
-      console.log('🔍 Pricing component mounted/updated:', {
-        me,
-        loading,
-        autoStarting,
-        searchParams: Object.fromEntries(searchParams.entries()),
-        storedIntent: getIntent()
-      });
-    }
-  }, [me, loading, autoStarting, searchParams]);
 
   return (
-    <section style={{
-      padding: '60px 20px',
-      background: 'var(--bg-primary)',
-      borderTop: '1px solid var(--border-color)'
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      background: 'var(--bg-primary)'
     }}>
       <div style={{
-        maxWidth: '1000px',
-        margin: '0 auto',
-        textAlign: 'center'
+        maxWidth: '900px',
+        width: '100%'
       }}>
-        <h2 style={{
-          fontSize: '36px',
-          fontWeight: '700',
-          color: 'var(--text-primary)',
-          marginBottom: '16px'
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '48px'
         }}>
-          Choose Your Plan
-        </h2>
-        
-        <p style={{
-          fontSize: '18px',
-          color: 'var(--text-secondary)',
-          marginBottom: '48px',
-          maxWidth: '600px',
-          margin: '0 auto 48px auto'
-        }}>
-          Start free and upgrade when you need unlimited access to premium odds data
-        </p>
-        
-        {(error || autoStarting) && (
+          <h1 style={{
+            fontSize: '36px',
+            fontWeight: '700',
+            color: 'var(--text-primary)',
+            marginBottom: '16px'
+          }}>
+            Choose Your Plan
+          </h1>
+          <p style={{
+            fontSize: '18px',
+            color: 'var(--text-secondary)',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            Select a plan to continue using VR-Odds. You can upgrade or downgrade at any time.
+          </p>
+        </div>
+
+        {error && (
           <div style={{
-            background: autoStarting ? '#f0f9ff' : '#fee2e2',
-            border: `1px solid ${autoStarting ? '#bae6fd' : '#fecaca'}`,
+            background: '#fee2e2',
+            border: '1px solid #fecaca',
             borderRadius: '8px',
             padding: '12px 16px',
             marginBottom: '24px',
-            color: autoStarting ? '#0369a1' : '#dc2626',
+            color: '#dc2626',
             fontSize: '14px',
-            maxWidth: '600px',
-            margin: '0 auto 24px auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
+            textAlign: 'center'
           }}>
-            {autoStarting && <Loader2 size={16} className="animate-spin" />}
-            {autoStarting ? 'Opening checkout...' : error}
-            {error && !autoStarting && (
-              <button 
-                onClick={() => setError('')}
-                style={{
-                  marginLeft: '8px',
-                  background: 'none',
-                  border: 'none',
-                  color: '#dc2626',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
-              >
-                Try again
-              </button>
-            )}
+            {error}
           </div>
         )}
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '24px',
-          maxWidth: '800px',
-          margin: '0 auto'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+          gap: '24px'
         }}>
-          {/* Free Trial Plan */}
+          {/* Free Trial Card */}
           <div style={{
             background: 'var(--card-bg)',
             border: '1px solid var(--border-color)',
@@ -342,45 +232,33 @@ const Pricing = ({ onUpgrade }) => {
             </ul>
 
             <button
-              data-testid="pricing-start-free"
-              onClick={handleStartFree}
-              disabled={loading}
+              data-testid="gate-start-free"
+              onClick={chooseFree}
+              disabled={busy}
               style={{
                 width: '100%',
                 padding: '16px',
                 background: 'transparent',
                 border: '2px solid var(--accent)',
                 borderRadius: '12px',
-                color: loading ? '#999' : 'var(--accent)',
+                color: busy ? '#999' : 'var(--accent)',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: busy ? 'not-allowed' : 'pointer',
                 transition: 'all 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                opacity: loading ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.background = 'var(--accent)';
-                  e.target.style.color = 'white';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = 'var(--accent)';
-                }
+                opacity: busy ? 0.6 : 1
               }}
             >
-              {loading && <Loader2 size={16} className="animate-spin" />}
+              {busy && <Loader2 size={16} className="animate-spin" />}
               Start Free
             </button>
           </div>
 
-          {/* Platinum Plan */}
+          {/* Platinum Card */}
           <div style={{
             background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
             border: '1px solid #8b5cf6',
@@ -501,47 +379,33 @@ const Pricing = ({ onUpgrade }) => {
             </ul>
 
             <button
-              data-testid="pricing-upgrade"
-              onClick={handleUpgrade}
-              disabled={loading}
+              data-testid="gate-upgrade"
+              onClick={choosePlatinum}
+              disabled={busy}
               style={{
                 width: '100%',
                 padding: '16px',
-                background: loading ? '#f3f4f6' : 'white',
+                background: busy ? '#f3f4f6' : 'white',
                 border: 'none',
                 borderRadius: '12px',
-                color: loading ? '#999' : '#7c3aed',
+                color: busy ? '#999' : '#7c3aed',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                cursor: busy ? 'not-allowed' : 'pointer',
                 transition: 'all 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                opacity: loading ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }
+                opacity: busy ? 0.6 : 1
               }}
             >
-              {loading && <Loader2 size={16} className="animate-spin" />}
+              {busy && <Loader2 size={16} className="animate-spin" />}
               Upgrade to Platinum
             </button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
-};
-
-export default Pricing;
+}
