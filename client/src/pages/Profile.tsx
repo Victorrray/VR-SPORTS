@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, Settings, BookOpen, Save, Check } from 'lucide-react';
 import UsernameForm from '../components/UsernameForm';
+import { useAuth } from '../hooks/useAuth';
 import './Profile.css';
 
 const AVAILABLE_SPORTSBOOKS = [
@@ -50,6 +51,7 @@ const AVAILABLE_SPORTSBOOKS = [
 ];
 
 export default function ProfilePage() {
+  const { signOut } = useAuth();
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
@@ -79,6 +81,16 @@ export default function ProfilePage() {
     localStorage.setItem('userSelectedSportsbooks', JSON.stringify(selectedBooks));
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus(''), 2000);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      // Redirect to home page after sign out
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const displayedBooks = showAllBooks 
@@ -192,7 +204,7 @@ export default function ProfilePage() {
                 <span className="security-title">Sign Out</span>
                 <span className="security-desc">End your current session</span>
               </div>
-              <button className="security-btn danger">Sign Out</button>
+              <button className="security-btn danger" onClick={handleSignOut}>Sign Out</button>
             </div>
           </div>
         </div>
