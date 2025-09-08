@@ -1,6 +1,6 @@
 // src/pages/Login.js
 import React, { useState } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Mail, Lock, ArrowRight, Chrome } from "lucide-react";
 import "./Login.css";
@@ -8,13 +8,14 @@ import "./Login.css";
 export default function Login() {
   const auth = useAuth();
   const { signInEmail, signUpEmail, signInWithProvider } = auth || {};
-  const [tab, setTab] = useState("login"); // 'login' | 'signup'
+  const location = useLocation();
+  const [tab, setTab] = useState(location.pathname === '/signup' ? 'signup' : 'login');
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
   const [search] = useSearchParams();
   const navigate = useNavigate();
-  const next = search.get("next") || "/account";
+  const next = search.get("next") || search.get("returnTo") || "/account";
 
   const go = async (fn) => {
     if (!fn) {

@@ -1,21 +1,31 @@
-import React from 'react';
-import { Check, Star, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, Star, Zap, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Pricing = ({ onUpgrade }) => {
   const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const isDev = process.env.NODE_ENV === 'development';
 
   const handleStartFree = async () => {
+    if (isDev) console.log('🔍 Start Free clicked', { user: !!user });
+    
     try {
+      setError('');
+      setLoading(true);
+      
       if (!user) {
-        // Redirect to signup if not authenticated
-        navigate('/signup');
+        if (isDev) console.log('🔍 User not authenticated, redirecting to signup');
+        navigate('/login?returnTo=/pricing?intent=start-free');
         return;
       }
 
-      // Set user to free plan
+      if (isDev) console.log('🔍 Setting user to free plan');
       await updateProfile({ 
         subscription_plan: 'free',
         subscription_status: 'active',
@@ -24,47 +34,75 @@ const Pricing = ({ onUpgrade }) => {
       });
 
       console.log('✅ User started free plan');
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
+      navigate('/app');
     } catch (error) {
       console.error('Failed to start free plan:', error);
-      // Fallback: just redirect to signup
-      navigate('/signup');
+      setError('Failed to start free plan. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpgrade = async () => {
+    if (isDev) console.log('🔍 Upgrade clicked', { user: !!user });
+    
     try {
+      setError('');
+      setLoading(true);
+      
       if (!user) {
-        // Redirect to signup first
-        navigate('/signup');
+        if (isDev) console.log('🔍 User not authenticated, redirecting to login');
+        navigate('/login?returnTo=/pricing?intent=upgrade');
         return;
       }
 
-      // For now, simulate upgrade process
-      // In production, this would integrate with Stripe or another payment processor
-      const confirmed = window.confirm(
-        'This would normally redirect to a payment processor. For demo purposes, would you like to simulate upgrading to Platinum?'
-      );
-
-      if (confirmed) {
-        await updateProfile({ 
-          subscription_plan: 'platinum',
-          subscription_status: 'active',
-          api_calls_limit: -1, // Unlimited
-          updated_at: new Date().toISOString()
-        });
-
-        console.log('✅ User upgraded to Platinum plan');
-        alert('Successfully upgraded to Platinum! You now have unlimited access.');
-        
-        // Redirect to dashboard
-        navigate('/dashboard');
+      if (isDev) console.log('🔍 Creating Stripe checkout session');
+      
+      const response = await fetch('/api/billing/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.id || 'demo-user'
+        },
+        credentials: 'include'
+      });
+      
+      if (isDev) console.log('🔍 Checkout response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+      
+      const { url } = await response.json();
+      if (isDev) console.log('🔍 Redirecting to Stripe:', url);
+      
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error) {
-      console.error('Failed to upgrade:', error);
-      alert('Upgrade failed. Please try again.');
+      console.error('Failed to create checkout session:', error);
+      setError(`Upgrade failed: ${error.message}. Please try again.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Auto-continue upgrade flow if user just logged in with intent=upgrade
+  useEffect(() => {
+    const intent = searchParams.get('intent');
+    if (intent === 'upgrade' && user && !loading) {
+      if (isDev) console.log('🔍 Auto-continuing upgrade after login');
+      handleUpgrade();
+    }
+  }, [user, searchParams]);
+  
+  const continueUpgradeIfNeeded = () => {
+    const intent = searchParams.get('intent');
+    if (intent === 'upgrade' && user) {
+      handleUpgrade();
     }
   };
 
@@ -97,6 +135,35 @@ const Pricing = ({ onUpgrade }) => {
         }}>
           Start free and upgrade when you need unlimited access to premium odds data
         </p>
+        
+        {error && (
+          <div style={{
+            background: '#fee2e2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '24px',
+            color: '#dc2626',
+            fontSize: '14px',
+            maxWidth: '600px',
+            margin: '0 auto 24px auto'
+          }}>
+            {error}
+            <button 
+              onClick={() => setError('')}
+              style={{
+                marginLeft: '8px',
+                background: 'none',
+                border: 'none',
+                color: '#dc2626',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         <div style={{
           display: 'grid',
@@ -200,28 +267,40 @@ const Pricing = ({ onUpgrade }) => {
             </ul>
 
             <button
+              data-testid="start-free"
               onClick={handleStartFree}
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '16px',
                 background: 'transparent',
                 border: '2px solid var(--accent)',
                 borderRadius: '12px',
-                color: 'var(--accent)',
+                color: loading ? '#999' : 'var(--accent)',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: loading ? 0.6 : 1
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'var(--accent)';
-                e.target.style.color = 'white';
+                if (!loading) {
+                  e.target.style.background = 'var(--accent)';
+                  e.target.style.color = 'white';
+                }
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'transparent';
-                e.target.style.color = 'var(--accent)';
+                if (!loading) {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = 'var(--accent)';
+                }
               }}
             >
+              {loading && <Loader2 size={16} className="animate-spin" />}
               Start Free
             </button>
           </div>
@@ -347,28 +426,40 @@ const Pricing = ({ onUpgrade }) => {
             </ul>
 
             <button
+              data-testid="upgrade-platinum"
               onClick={handleUpgrade}
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '16px',
-                background: 'white',
+                background: loading ? '#f3f4f6' : 'white',
                 border: 'none',
                 borderRadius: '12px',
-                color: '#7c3aed',
+                color: loading ? '#999' : '#7c3aed',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: loading ? 0.6 : 1
               }}
               onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }
               }}
             >
+              {loading && <Loader2 size={16} className="animate-spin" />}
               Upgrade to Platinum
             </button>
           </div>

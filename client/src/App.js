@@ -91,6 +91,10 @@ function AppRoutes() {
               <Route path="/" element={<Home />} />
               <Route path="/sportsbooks" element={user ? <SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /> : <Navigate to="/" replace />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Login />} />
+              <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
+              <Route path="/dashboard" element={user ? <Navigate to="/account" replace /> : <Navigate to="/login" replace />} />
+              <Route path="/pricing" element={<Home />} />
               <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
               <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
               <Route path="/scores" element={user ? <Scores /> : <Navigate to="/" replace />} />
