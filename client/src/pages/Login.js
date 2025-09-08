@@ -1,20 +1,35 @@
 // src/pages/Login.js
-import React, { useState } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { savePricingIntent } from "../lib/intent";
 import { Mail, Lock, ArrowRight, Chrome } from "lucide-react";
 import "./Login.css";
 
 export default function Login() {
   const auth = useAuth();
   const { signInEmail, signUpEmail, signInWithProvider } = auth || {};
-  const [tab, setTab] = useState("login"); // 'login' | 'signup'
+  const location = useLocation();
+  const [tab, setTab] = useState(location.pathname === '/signup' ? 'signup' : 'login');
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
   const [search] = useSearchParams();
   const navigate = useNavigate();
-  const next = search.get("next") || "/account";
+  const next = search.get("next") || search.get("returnTo") || "/account";
+  
+  const DEBUG_PRICING = process.env.NODE_ENV === 'development';
+
+  // Save intent to localStorage on mount to survive OAuth redirects
+  useEffect(() => {
+    const intent = search.get("intent");
+    const returnTo = search.get("returnTo");
+    
+    if (intent && returnTo) {
+      if (DEBUG_PRICING) console.log('🔍 Login: Saving intent to localStorage', { intent, returnTo });
+      savePricingIntent(intent, returnTo);
+    }
+  }, [search]);
 
   const go = async (fn) => {
     if (!fn) {

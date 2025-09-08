@@ -230,9 +230,41 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
       return res.status(500).json({ error: 'Stripe not configured' });
     }
     
-    const userId = req.headers['x-user-id'] || 'demo-user';
+    const userId = req.headers['x-user-id'];
     
-    const session = await stripe.checkout.sessions.create({
+    // Require authentication
+    if (!userId || userId === 'demo-user') {
+      return res.status(401).json({ error: 'auth_required' });
+    }
+    
+    console.log(`Creating checkout session for user: ${userId}`);
+    
+    // Check if user already has a Stripe customer ID (in production, this would be stored in database)
+    // For now, we'll create a new customer each time or reuse based on user ID
+    let customer;
+    try {
+      // In production, lookup existing customer by user_id in metadata
+      const existingCustomers = await stripe.customers.list({
+        limit: 1,
+        metadata: { user_id: userId }
+      });
+      
+      if (existingCustomers.data.length > 0) {
+        customer = existingCustomers.data[0];
+        console.log(`Found existing Stripe customer: ${customer.id}`);
+      } else {
+        // Create new customer
+        customer = await stripe.customers.create({
+          metadata: { user_id: userId }
+        });
+        console.log(`Created new Stripe customer: ${customer.id}`);
+      }
+    } catch (customerError) {
+      console.error('Error handling Stripe customer:', customerError);
+      // Continue without customer - Stripe will create one during checkout
+    }
+    
+    const sessionConfig = {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{
@@ -243,8 +275,16 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
       cancel_url: `${APP_URL}/billing/cancel`,
       client_reference_id: userId,
       metadata: { user_id: userId }
-    });
+    };
     
+    // Add customer if we have one
+    if (customer) {
+      sessionConfig.customer = customer.id;
+    }
+    
+    const session = await stripe.checkout.sessions.create(sessionConfig);
+    
+    console.log(`Created checkout session: ${session.id} for user: ${userId}`);
     res.json({ url: session.url });
   } catch (error) {
     console.error('Stripe checkout error:', error);

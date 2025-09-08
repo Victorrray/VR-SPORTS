@@ -1,25 +1,153 @@
-import React from 'react';
-import { Check, Star, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, Star, Zap, Loader2 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { savePricingIntent, getPricingIntent, clearPricingIntent } from '../lib/intent';
 
 const Pricing = ({ onUpgrade }) => {
-  const handleUpgrade = async () => {
+  const { user, updateProfile } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [autoStarting, setAutoStarting] = useState(false);
+  
+  const DEBUG_PRICING = process.env.NODE_ENV === 'development' || 
+                       searchParams.has('debug') || 
+                       localStorage.getItem('DEBUG_PRICING') === '1';
+
+  const handleStartFree = async () => {
+    if (DEBUG_PRICING) console.log('🔍 Start Free clicked', { user: !!user, authenticated: !!user });
+    
     try {
-      const response = await fetch('/api/billing/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': 'demo-user' // Replace with actual user ID from auth
-        }
-      });
+      setError('');
+      setLoading(true);
       
-      const { url } = await response.json();
-      if (url) {
-        window.location.href = url;
+      if (!user) {
+        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to signup');
+        savePricingIntent('start-free', '/app');
+        navigate('/signup?returnTo=/pricing&intent=start-free');
+        return;
       }
+
+      if (DEBUG_PRICING) console.log('🔍 User authenticated, going directly to app');
+      navigate('/app');
     } catch (error) {
-      console.error('Failed to create checkout session:', error);
+      console.error('Failed to start free plan:', error);
+      setError('Failed to start free plan. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleUpgrade = async () => {
+    if (DEBUG_PRICING) console.log('🔍 Upgrade clicked', { user: !!user, authenticated: !!user });
+    
+    try {
+      setError('');
+      setLoading(true);
+      
+      if (!user) {
+        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to login');
+        savePricingIntent('upgrade', '/pricing');
+        navigate('/login?returnTo=/pricing&intent=upgrade');
+        return;
+      }
+
+      return await createCheckoutSession();
+    } catch (error) {
+      console.error('Failed to handle upgrade:', error);
+      setError(`Upgrade failed: ${error.message}. Please try again.`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const createCheckoutSession = async () => {
+    if (DEBUG_PRICING) console.log('🔍 Creating Stripe checkout session');
+    
+    const response = await fetch('/api/billing/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': user.id || user.email || 'demo-user'
+      },
+      credentials: 'include'
+    });
+    
+    if (DEBUG_PRICING) console.log('🔍 Checkout response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+    
+    const { url } = await response.json();
+    if (DEBUG_PRICING) console.log('🔍 Redirecting to Stripe:', url);
+    
+    if (url) {
+      window.location.href = url;
+    } else {
+      throw new Error('No checkout URL received');
+    }
+  };
+
+  // Auto-continue upgrade flow if user just logged in with intent=upgrade
+  useEffect(() => {
+    const urlIntent = searchParams.get('intent');
+    const autoStart = searchParams.get('autostart');
+    const storedIntent = getPricingIntent();
+    
+    if (DEBUG_PRICING) {
+      console.log('🔍 Pricing useEffect:', {
+        urlIntent,
+        autoStart,
+        storedIntent,
+        user: !!user,
+        loading,
+        autoStarting
+      });
+    }
+    
+    // Auto-start upgrade if conditions are met
+    if ((urlIntent === 'upgrade' || storedIntent?.intent === 'upgrade') && 
+        user && 
+        !loading && 
+        !autoStarting && 
+        (autoStart === '1' || storedIntent?.intent === 'upgrade')) {
+      
+      if (DEBUG_PRICING) console.log('🔍 Auto-starting upgrade after authentication');
+      setAutoStarting(true);
+      clearPricingIntent();
+      
+      // Small delay to show the "Opening checkout..." message
+      setTimeout(async () => {
+        try {
+          await createCheckoutSession();
+        } catch (error) {
+          console.error('Auto-start checkout failed:', error);
+          setError(`Auto-start failed: ${error.message}`);
+          setAutoStarting(false);
+        }
+      }, 1000);
+    }
+  }, [user, loading, searchParams]);
+  
+  // Debug helper
+  useEffect(() => {
+    if (DEBUG_PRICING) {
+      console.log('🔍 Pricing component mounted/updated:', {
+        user: !!user,
+        loading,
+        autoStarting,
+        searchParams: Object.fromEntries(searchParams.entries()),
+        storedIntent: getPricingIntent()
+      });
+    }
+  }, [user, loading, autoStarting, searchParams]);
 
   return (
     <section style={{
@@ -50,6 +178,41 @@ const Pricing = ({ onUpgrade }) => {
         }}>
           Start free and upgrade when you need unlimited access to premium odds data
         </p>
+        
+        {(error || autoStarting) && (
+          <div style={{
+            background: autoStarting ? '#f0f9ff' : '#fee2e2',
+            border: `1px solid ${autoStarting ? '#bae6fd' : '#fecaca'}`,
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '24px',
+            color: autoStarting ? '#0369a1' : '#dc2626',
+            fontSize: '14px',
+            maxWidth: '600px',
+            margin: '0 auto 24px auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            {autoStarting && <Loader2 size={16} className="animate-spin" />}
+            {autoStarting ? 'Opening checkout...' : error}
+            {error && !autoStarting && (
+              <button 
+                onClick={() => setError('')}
+                style={{
+                  marginLeft: '8px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#dc2626',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Try again
+              </button>
+            )}
+          </div>
+        )}
 
         <div style={{
           display: 'grid',
@@ -153,27 +316,40 @@ const Pricing = ({ onUpgrade }) => {
             </ul>
 
             <button
+              data-testid="start-free"
+              onClick={handleStartFree}
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '16px',
                 background: 'transparent',
                 border: '2px solid var(--accent)',
                 borderRadius: '12px',
-                color: 'var(--accent)',
+                color: loading ? '#999' : 'var(--accent)',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: loading ? 0.6 : 1
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'var(--accent)';
-                e.target.style.color = 'white';
+                if (!loading) {
+                  e.target.style.background = 'var(--accent)';
+                  e.target.style.color = 'white';
+                }
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'transparent';
-                e.target.style.color = 'var(--accent)';
+                if (!loading) {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = 'var(--accent)';
+                }
               }}
             >
+              {loading && <Loader2 size={16} className="animate-spin" />}
               Start Free
             </button>
           </div>
@@ -299,28 +475,40 @@ const Pricing = ({ onUpgrade }) => {
             </ul>
 
             <button
+              data-testid="upgrade-platinum"
               onClick={handleUpgrade}
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '16px',
-                background: 'white',
+                background: loading ? '#f3f4f6' : 'white',
                 border: 'none',
                 borderRadius: '12px',
-                color: '#7c3aed',
+                color: loading ? '#999' : '#7c3aed',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: loading ? 0.6 : 1
               }}
               onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }
               }}
             >
+              {loading && <Loader2 size={16} className="animate-spin" />}
               Upgrade to Platinum
             </button>
           </div>
