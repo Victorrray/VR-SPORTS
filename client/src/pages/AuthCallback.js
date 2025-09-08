@@ -1,8 +1,7 @@
 // Auth callback handler for Supabase OAuth flows
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { getPricingIntent, clearPricingIntent } from '../lib/intent';
+import { supabase } from '../utils/supabase';
 
 const DEBUG_PRICING = process.env.NODE_ENV === 'development' || 
                      new URLSearchParams(window.location.search).has('debug');
@@ -10,62 +9,45 @@ const DEBUG_PRICING = process.env.NODE_ENV === 'development' ||
 export default function AuthCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, loading } = useAuth();
   const [status, setStatus] = useState('Processing authentication...');
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      if (loading) {
-        if (DEBUG_PRICING) console.log('🔍 AuthCallback: Still loading auth state');
-        return;
-      }
-
       try {
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) {
+          setStatus('Authentication failed. Redirecting to login...');
+          setTimeout(() => navigate('/login'), 2000);
+          return;
+        }
+
         // Get intent from URL params or localStorage
         const urlIntent = searchParams.get('intent');
         const urlReturnTo = searchParams.get('returnTo');
-        const storedIntent = getPricingIntent();
+        const storedIntent = JSON.parse(localStorage.getItem('pricingIntent') || 'null');
         
         if (DEBUG_PRICING) {
           console.log('🔍 AuthCallback: URL params:', { intent: urlIntent, returnTo: urlReturnTo });
           console.log('🔍 AuthCallback: Stored intent:', storedIntent);
-          console.log('🔍 AuthCallback: User authenticated:', !!user);
-        }
-
-        if (!user) {
-          if (DEBUG_PRICING) console.log('🔍 AuthCallback: No user, redirecting to login');
-          setStatus('Authentication failed. Redirecting to login...');
-          setTimeout(() => navigate('/login'), 2000);
-          return;
         }
 
         // Determine final intent and returnTo
         const finalIntent = urlIntent || storedIntent?.intent;
         const finalReturnTo = urlReturnTo || storedIntent?.returnTo || '/app';
 
-        if (DEBUG_PRICING) {
-          console.log('🔍 AuthCallback: Final routing decision:', { 
-            intent: finalIntent, 
-            returnTo: finalReturnTo 
-          });
-        }
-
         // Clear stored intent since we're processing it
-        clearPricingIntent();
+        localStorage.removeItem('pricingIntent');
 
         // Route based on intent
         if (finalIntent === 'upgrade') {
           setStatus('Authentication successful! Opening checkout...');
-          if (DEBUG_PRICING) console.log('🔍 AuthCallback: Routing to pricing with upgrade intent');
-          navigate('/pricing?intent=upgrade&autostart=1');
+          navigate('/pricing?intent=upgrade&autostart=1', { replace: true });
         } else if (finalIntent === 'start-free') {
           setStatus('Authentication successful! Welcome to your free trial!');
-          if (DEBUG_PRICING) console.log('🔍 AuthCallback: Routing to app for free trial');
-          navigate('/app');
+          navigate('/app', { replace: true });
         } else {
           setStatus('Authentication successful! Redirecting...');
-          if (DEBUG_PRICING) console.log('🔍 AuthCallback: Routing to default location:', finalReturnTo);
-          navigate(finalReturnTo);
+          navigate(finalReturnTo, { replace: true });
         }
 
       } catch (error) {
@@ -76,7 +58,7 @@ export default function AuthCallback() {
     };
 
     handleAuthCallback();
-  }, [user, loading, navigate, searchParams]);
+  }, [navigate, searchParams]);
 
   return (
     <div style={{

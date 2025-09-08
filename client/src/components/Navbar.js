@@ -1,8 +1,9 @@
 // src/components/Navbar.js
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { Search, User } from "lucide-react";
+import { Search, User, ChevronDown, CreditCard, Settings } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useMe } from "../hooks/useMe";
 import styles from "./Navbar.module.css";
 
 export default function Navbar({ onOpenMobileSearch }) {
@@ -10,8 +11,10 @@ export default function Navbar({ onOpenMobileSearch }) {
   const navigate = useNavigate();
   const auth = useAuth();
   const user = auth?.user;
+  const { me } = useMe();
 
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [q, setQ] = useState("");
 
   const isActive = (path) => location.pathname === path;
@@ -45,6 +48,29 @@ export default function Navbar({ onOpenMobileSearch }) {
     else params.delete("q");
     navigate(`/sportsbooks?${params.toString()}`);
   }
+
+  const handleUpgrade = async () => {
+    try {
+      const response = await fetch('/api/billing/create-checkout-session', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Unable to start checkout. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to create checkout:', error);
+      alert('Unable to start checkout. Please try again.');
+    }
+  };
+
+  const handleManageBilling = () => {
+    // TODO: Implement customer portal link
+    alert('Billing management coming soon!');
+  };
 
   return (
     <nav className={styles.navbar}>
@@ -111,13 +137,54 @@ export default function Navbar({ onOpenMobileSearch }) {
             Login
           </Link>
         ) : (
-          <Link
-            to="/account"
-            className={`${styles.link} ${isActive("/account") ? styles.active : ""}`}
-            style={{ marginLeft: "auto" }}
-          >
-            Profile
-          </Link>
+          <div className={styles.userMenu} style={{ marginLeft: "auto" }}>
+            <button 
+              className={styles.userMenuButton}
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              aria-expanded={userMenuOpen}
+            >
+              <User size={16} />
+              <span>Account</span>
+              <ChevronDown size={14} />
+            </button>
+            
+            {userMenuOpen && (
+              <div className={styles.userMenuDropdown}>
+                <Link 
+                  to="/account" 
+                  className={styles.userMenuItem}
+                  onClick={() => setUserMenuOpen(false)}
+                >
+                  <Settings size={16} />
+                  Profile Settings
+                </Link>
+                
+                {me?.plan === 'platinum' ? (
+                  <button 
+                    className={styles.userMenuItem}
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      handleManageBilling();
+                    }}
+                  >
+                    <CreditCard size={16} />
+                    Manage Billing
+                  </button>
+                ) : (
+                  <button 
+                    className={styles.userMenuItem}
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      handleUpgrade();
+                    }}
+                  >
+                    <CreditCard size={16} />
+                    Upgrade to Platinum
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

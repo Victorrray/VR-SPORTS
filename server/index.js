@@ -195,32 +195,50 @@ app.get("/health", (req, res) => {
 });
 
 // Usage endpoint - get current user's quota info
-app.get('/api/usage/me', (req, res) => {
-  const userId = req.headers['x-user-id'] || 'demo-user';
-  const userPlan = userPlans.get(userId) || 'free_trial';
-  
-  if (userPlan === 'platinum') {
-    return res.json({
-      plan: 'platinum',
-      limit: null,
-      calls_made: null,
-      remaining: null,
-      period_end: null
+app.get('/api/usage/me', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] || 'demo-user';
+    
+    // Fetch user plan from database
+    let userPlan = 'free_trial'; // default
+    if (userId !== 'demo-user') {
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('plan')
+        .eq('id', userId)
+        .single();
+      
+      if (!error && user?.plan) {
+        userPlan = user.plan;
+      }
+    }
+    
+    if (userPlan === 'platinum') {
+      return res.json({
+        plan: 'platinum',
+        limit: null,
+        calls_made: null,
+        remaining: null,
+        period_end: null
+      });
+    }
+    
+    // Free trial: return current month usage
+    const { start, end } = currentMonthlyWindow();
+    const periodKey = `${userId}-${start.toISOString()}`;
+    const usage = userUsage.get(periodKey) || { calls_made: 0 };
+    
+    res.json({
+      plan: userPlan || 'free_trial',
+      limit: 1000,
+      calls_made: usage.calls_made,
+      remaining: Math.max(0, 1000 - usage.calls_made),
+      period_end: end.toISOString()
     });
+  } catch (error) {
+    console.error('Error fetching user usage:', error);
+    res.status(500).json({ error: 'internal_error' });
   }
-  
-  // Free trial: return current month usage
-  const { start, end } = currentMonthlyWindow();
-  const periodKey = `${userId}-${start.toISOString()}`;
-  const usage = userUsage.get(periodKey) || { calls_made: 0 };
-  
-  res.json({
-    plan: 'free_trial',
-    limit: 1000,
-    calls_made: usage.calls_made,
-    remaining: Math.max(0, 1000 - usage.calls_made),
-    period_end: end.toISOString()
-  });
 });
 
 // Stripe: Create checkout session for Platinum subscription
@@ -292,7 +310,43 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
   }
 });
 
-// Stripe: Webhook handler
+// Set user plan (for free trial)
+app.post('/api/users/plan', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'];
+    if (!userId || userId === 'demo-user') {
+      return res.status(401).json({ error: 'auth_required' });
+    }
+
+    const { plan } = req.body || {};
+    if (plan !== 'free_trial') {
+      return res.status(400).json({ error: 'invalid_plan' });
+    }
+
+    console.log(`Setting plan for user ${userId}: ${plan}`);
+
+    // Update user plan in database
+    const { error } = await supabase
+      .from('users')
+      .upsert({ 
+        id: userId, 
+        plan: 'free_trial',
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error('Failed to update user plan:', error);
+      return res.status(500).json({ error: 'database_error' });
+    }
+
+    res.json({ ok: true, plan: 'free_trial' });
+  } catch (error) {
+    console.error('Error setting user plan:', error);
+    res.status(500).json({ error: 'internal_error' });
+  }
+});
+
+// Stripe webhook handler
 app.post('/api/billing/webhook', (req, res) => {
   if (!stripe) {
     return res.status(500).json({ error: 'Stripe not configured' });

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { User, Settings, BookOpen, Save, Check } from 'lucide-react';
 import UsernameForm from '../components/UsernameForm';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../utils/supabase';
+import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
 const AVAILABLE_SPORTSBOOKS = [
@@ -51,10 +53,11 @@ const AVAILABLE_SPORTSBOOKS = [
 ];
 
 export default function ProfilePage() {
-  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     // Load user's selected sportsbooks from localStorage
@@ -85,11 +88,17 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      // Redirect to home page after sign out
-      window.location.href = '/';
+      setBusy(true);
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+      localStorage.removeItem('pricingIntent');
+      navigate('/login', { replace: true });
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Sign out failed:', error);
+      alert('Sign out failed. Please try again.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -204,7 +213,14 @@ export default function ProfilePage() {
                 <span className="security-title">Sign Out</span>
                 <span className="security-desc">End your current session</span>
               </div>
-              <button className="security-btn danger" onClick={handleSignOut}>Sign Out</button>
+              <button 
+                className="security-btn danger" 
+                onClick={handleSignOut}
+                disabled={busy}
+                data-testid="btn-signout"
+              >
+                {busy ? 'Signing out...' : 'Sign Out'}
+              </button>
             </div>
           </div>
         </div>
