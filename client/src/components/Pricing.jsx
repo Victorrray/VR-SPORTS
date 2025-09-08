@@ -1,23 +1,70 @@
 import React from 'react';
 import { Check, Star, Zap } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const Pricing = ({ onUpgrade }) => {
+  const { user, updateProfile } = useAuth();
+  const navigate = useNavigate();
+
+  const handleStartFree = async () => {
+    try {
+      if (!user) {
+        // Redirect to signup if not authenticated
+        navigate('/signup');
+        return;
+      }
+
+      // Set user to free plan
+      await updateProfile({ 
+        subscription_plan: 'free',
+        subscription_status: 'active',
+        api_calls_limit: 1000,
+        updated_at: new Date().toISOString()
+      });
+
+      console.log('✅ User started free plan');
+      
+      // Redirect to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Failed to start free plan:', error);
+      // Fallback: just redirect to signup
+      navigate('/signup');
+    }
+  };
+
   const handleUpgrade = async () => {
     try {
-      const response = await fetch('/api/billing/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': 'demo-user' // Replace with actual user ID from auth
-        }
-      });
-      
-      const { url } = await response.json();
-      if (url) {
-        window.location.href = url;
+      if (!user) {
+        // Redirect to signup first
+        navigate('/signup');
+        return;
+      }
+
+      // For now, simulate upgrade process
+      // In production, this would integrate with Stripe or another payment processor
+      const confirmed = window.confirm(
+        'This would normally redirect to a payment processor. For demo purposes, would you like to simulate upgrading to Platinum?'
+      );
+
+      if (confirmed) {
+        await updateProfile({ 
+          subscription_plan: 'platinum',
+          subscription_status: 'active',
+          api_calls_limit: -1, // Unlimited
+          updated_at: new Date().toISOString()
+        });
+
+        console.log('✅ User upgraded to Platinum plan');
+        alert('Successfully upgraded to Platinum! You now have unlimited access.');
+        
+        // Redirect to dashboard
+        navigate('/dashboard');
       }
     } catch (error) {
-      console.error('Failed to create checkout session:', error);
+      console.error('Failed to upgrade:', error);
+      alert('Upgrade failed. Please try again.');
     }
   };
 
@@ -153,6 +200,7 @@ const Pricing = ({ onUpgrade }) => {
             </ul>
 
             <button
+              onClick={handleStartFree}
               style={{
                 width: '100%',
                 padding: '16px',

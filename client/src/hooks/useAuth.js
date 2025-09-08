@@ -123,14 +123,28 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
-    if (!isSupabaseEnabled) return;
-
-    const { error } = await db.auth.signOut();
-    if (error) throw error;
-    
-    setUser(null);
-    setProfile(null);
-    setSession(null);
+    try {
+      if (isSupabaseEnabled) {
+        const { error } = await db.auth.signOut();
+        if (error) throw error;
+      }
+      
+      // Always clear local state regardless of Supabase availability
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      
+      // Clear any local storage items related to auth
+      localStorage.removeItem('supabase.auth.token');
+      
+      console.log('🔐 useAuth: Successfully signed out');
+    } catch (error) {
+      console.error('🔐 useAuth: Error during sign out:', error);
+      // Still clear local state even if Supabase signOut fails
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+    }
   };
 
   const updateProfile = async (updates) => {
