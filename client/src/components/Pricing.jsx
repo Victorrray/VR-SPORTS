@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Check, Star, Zap, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { savePricingIntent, getPricingIntent, clearPricingIntent } from '../lib/intent';
 
 const Pricing = ({ onUpgrade }) => {
   const { user, updateProfile } = useAuth();
@@ -9,31 +10,27 @@ const Pricing = ({ onUpgrade }) => {
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [autoStarting, setAutoStarting] = useState(false);
   
-  const isDev = process.env.NODE_ENV === 'development';
+  const DEBUG_PRICING = process.env.NODE_ENV === 'development' || 
+                       searchParams.has('debug') || 
+                       localStorage.getItem('DEBUG_PRICING') === '1';
 
   const handleStartFree = async () => {
-    if (isDev) console.log('🔍 Start Free clicked', { user: !!user });
+    if (DEBUG_PRICING) console.log('🔍 Start Free clicked', { user: !!user, authenticated: !!user });
     
     try {
       setError('');
       setLoading(true);
       
       if (!user) {
-        if (isDev) console.log('🔍 User not authenticated, redirecting to signup');
-        navigate('/login?returnTo=/pricing?intent=start-free');
+        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to signup');
+        savePricingIntent('start-free', '/app');
+        navigate('/signup?returnTo=/pricing&intent=start-free');
         return;
       }
 
-      if (isDev) console.log('🔍 Setting user to free plan');
-      await updateProfile({ 
-        subscription_plan: 'free',
-        subscription_status: 'active',
-        api_calls_limit: 1000,
-        updated_at: new Date().toISOString()
-      });
-
-      console.log('✅ User started free plan');
+      if (DEBUG_PRICING) console.log('🔍 User authenticated, going directly to app');
       navigate('/app');
     } catch (error) {
       console.error('Failed to start free plan:', error);
@@ -44,67 +41,113 @@ const Pricing = ({ onUpgrade }) => {
   };
 
   const handleUpgrade = async () => {
-    if (isDev) console.log('🔍 Upgrade clicked', { user: !!user });
+    if (DEBUG_PRICING) console.log('🔍 Upgrade clicked', { user: !!user, authenticated: !!user });
     
     try {
       setError('');
       setLoading(true);
       
       if (!user) {
-        if (isDev) console.log('🔍 User not authenticated, redirecting to login');
-        navigate('/login?returnTo=/pricing?intent=upgrade');
+        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to login');
+        savePricingIntent('upgrade', '/pricing');
+        navigate('/login?returnTo=/pricing&intent=upgrade');
         return;
       }
 
-      if (isDev) console.log('🔍 Creating Stripe checkout session');
-      
-      const response = await fetch('/api/billing/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.id || 'demo-user'
-        },
-        credentials: 'include'
-      });
-      
-      if (isDev) console.log('🔍 Checkout response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
-      }
-      
-      const { url } = await response.json();
-      if (isDev) console.log('🔍 Redirecting to Stripe:', url);
-      
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
+      return await createCheckoutSession();
     } catch (error) {
-      console.error('Failed to create checkout session:', error);
+      console.error('Failed to handle upgrade:', error);
       setError(`Upgrade failed: ${error.message}. Please try again.`);
     } finally {
       setLoading(false);
     }
   };
+  
+  const createCheckoutSession = async () => {
+    if (DEBUG_PRICING) console.log('🔍 Creating Stripe checkout session');
+    
+    const response = await fetch('/api/billing/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': user.id || user.email || 'demo-user'
+      },
+      credentials: 'include'
+    });
+    
+    if (DEBUG_PRICING) console.log('🔍 Checkout response status:', response.status);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      throw new Error(errorData.error || `HTTP ${response.status}`);
+    }
+    
+    const { url } = await response.json();
+    if (DEBUG_PRICING) console.log('🔍 Redirecting to Stripe:', url);
+    
+    if (url) {
+      window.location.href = url;
+    } else {
+      throw new Error('No checkout URL received');
+    }
+  };
 
   // Auto-continue upgrade flow if user just logged in with intent=upgrade
   useEffect(() => {
-    const intent = searchParams.get('intent');
-    if (intent === 'upgrade' && user && !loading) {
-      if (isDev) console.log('🔍 Auto-continuing upgrade after login');
-      handleUpgrade();
+    const urlIntent = searchParams.get('intent');
+    const autoStart = searchParams.get('autostart');
+    const storedIntent = getPricingIntent();
+    
+    if (DEBUG_PRICING) {
+      console.log('🔍 Pricing useEffect:', {
+        urlIntent,
+        autoStart,
+        storedIntent,
+        user: !!user,
+        loading,
+        autoStarting
+      });
     }
-  }, [user, searchParams]);
+    
+    // Auto-start upgrade if conditions are met
+    if ((urlIntent === 'upgrade' || storedIntent?.intent === 'upgrade') && 
+        user && 
+        !loading && 
+        !autoStarting && 
+        (autoStart === '1' || storedIntent?.intent === 'upgrade')) {
+      
+      if (DEBUG_PRICING) console.log('🔍 Auto-starting upgrade after authentication');
+      setAutoStarting(true);
+      clearPricingIntent();
+      
+      // Small delay to show the "Opening checkout..." message
+      setTimeout(async () => {
+        try {
+          await createCheckoutSession();
+        } catch (error) {
+          console.error('Auto-start checkout failed:', error);
+          setError(`Auto-start failed: ${error.message}`);
+          setAutoStarting(false);
+        }
+      }, 1000);
+    }
+  }, [user, loading, searchParams]);
   
-  const continueUpgradeIfNeeded = () => {
-    const intent = searchParams.get('intent');
-    if (intent === 'upgrade' && user) {
-      handleUpgrade();
+  // Debug helper
+  useEffect(() => {
+    if (DEBUG_PRICING) {
+      console.log('🔍 Pricing component mounted/updated:', {
+        user: !!user,
+        loading,
+        autoStarting,
+        searchParams: Object.fromEntries(searchParams.entries()),
+        storedIntent: getPricingIntent()
+      });
     }
-  };
+  }, [user, loading, autoStarting, searchParams]);
 
   return (
     <section style={{
@@ -136,32 +179,38 @@ const Pricing = ({ onUpgrade }) => {
           Start free and upgrade when you need unlimited access to premium odds data
         </p>
         
-        {error && (
+        {(error || autoStarting) && (
           <div style={{
-            background: '#fee2e2',
-            border: '1px solid #fecaca',
+            background: autoStarting ? '#f0f9ff' : '#fee2e2',
+            border: `1px solid ${autoStarting ? '#bae6fd' : '#fecaca'}`,
             borderRadius: '8px',
             padding: '12px 16px',
             marginBottom: '24px',
-            color: '#dc2626',
+            color: autoStarting ? '#0369a1' : '#dc2626',
             fontSize: '14px',
             maxWidth: '600px',
-            margin: '0 auto 24px auto'
+            margin: '0 auto 24px auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            {error}
-            <button 
-              onClick={() => setError('')}
-              style={{
-                marginLeft: '8px',
-                background: 'none',
-                border: 'none',
-                color: '#dc2626',
-                cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
-            >
-              Try again
-            </button>
+            {autoStarting && <Loader2 size={16} className="animate-spin" />}
+            {autoStarting ? 'Opening checkout...' : error}
+            {error && !autoStarting && (
+              <button 
+                onClick={() => setError('')}
+                style={{
+                  marginLeft: '8px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#dc2626',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Try again
+              </button>
+            )}
           </div>
         )}
 

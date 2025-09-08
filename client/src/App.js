@@ -17,6 +17,7 @@ import Home from './pages/Home';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
 import Account from './pages/Account';
+import AuthCallback from './pages/AuthCallback';
 import LoadingBar from "./components/LoadingBar";
 import PrivateRoute from "./components/PrivateRoute";
 import MyPicks from './pages/MyPicks';
@@ -92,6 +93,7 @@ function AppRoutes() {
               <Route path="/sportsbooks" element={user ? <SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /> : <Navigate to="/" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Login />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
               <Route path="/dashboard" element={user ? <Navigate to="/account" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Home />} />
