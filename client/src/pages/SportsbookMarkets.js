@@ -863,18 +863,16 @@ export default function SportsbookMarkets() {
                   Game Odds
                 </button>
                 <button
-                  disabled
-                  title="Coming Soon"
+                  onClick={() => setShowPlayerProps(true)}
                   style={{
                     padding: '8px 16px',
                     border: 'none',
-                    background: 'transparent',
-                    color: '#6b7280',
+                    background: showPlayerProps ? 'var(--accent)' : 'transparent',
+                    color: showPlayerProps ? '#fff' : 'var(--text-primary)',
                     fontSize: '14px',
                     fontWeight: '600',
-                    cursor: 'not-allowed',
-                    transition: 'all 0.2s ease',
-                    opacity: 0.5
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   Player Props
