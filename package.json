@@ -4,7 +4,8 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "scan:secrets": "npx gitleaks detect --no-banner --redact || true"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.1",

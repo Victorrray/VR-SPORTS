@@ -17,9 +17,9 @@ SPORTSGAMEODDS_API_KEY=your_sportsgameodds_api_key_here
 PORT=10000
 
 # New Stripe Configuration
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
-STRIPE_PRICE_PLATINUM=price_your_platinum_price_id_here
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
+STRIPE_PRICE_PLATINUM=your_platinum_price_id_here
+STRIPE_WEBHOOK_SECRET=your_webhook_secret_here
 APP_URL=http://localhost:3000
 ```
 
@@ -33,7 +33,7 @@ APP_URL=http://localhost:3000
 3. **Setup Webhook Endpoint**:
    - URL: `https://yourdomain.com/api/billing/webhook`
    - Events: `checkout.session.completed`
-   - Copy the webhook secret (starts with `whsec_`)
+   - Copy the webhook secret
 
 ## Database Migration
 
