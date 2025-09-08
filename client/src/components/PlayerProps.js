@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { getApiBase } from "../lib/apiBase";
+import React, { useState, useEffect } from 'react';
+import { getApiBase } from '../lib/apiBase';
+import { useQuotaHandler } from '../hooks/useQuotaHandler';
+import QuotaExceededModal from './QuotaExceededModal';
 
 const DEFAULT_MARKETS = [
   "player_points","player_assists","player_rebounds",
@@ -16,28 +18,29 @@ function useDebugFlag() {
 export default function PlayerProps({
   eventId: rawEventId,
   game_id, // back-compat
-  sport_key = "americanfootball_nfl",
+  sport = "americanfootball_nfl",
   markets = DEFAULT_MARKETS,
-  bookmakers, // optional
+  bookmakers = []
 }) {
-  const eventId = rawEventId || game_id || null;
+  const eventId = rawEventId || game_id;
   const debug = useDebugFlag();
   const [payload, setPayload] = useState(null);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [lastUrl, setLastUrl] = useState("");
+  const { quotaExceeded, quotaError, handleApiResponse } = useQuotaHandler();
 
   const qs = useMemo(() => {
     const p = new URLSearchParams({
-      sport: sport_key,
+      sport: sport,
       eventId: eventId ?? "",
       markets: Array.isArray(markets) ? markets.join(",") : String(markets || ""),
     });
-    if (bookmakers) {
+    if (bookmakers && bookmakers.length > 0) {
       p.set("bookmakers", Array.isArray(bookmakers) ? bookmakers.join(",") : String(bookmakers));
     }
     return p.toString();
-  }, [sport_key, eventId, markets, bookmakers]);
+  }, [sport, eventId, markets, bookmakers]);
 
   useEffect(() => {
     if (!eventId) {
@@ -50,13 +53,26 @@ export default function PlayerProps({
     setLastUrl(url);
     setLoading(true);
     setError(null);
-    fetch(url, { credentials: "include" })
+    fetch(url, { 
+      credentials: "include",
+      headers: {
+        'x-user-id': 'demo-user' // Replace with actual user ID from auth
+      }
+    })
       .then(async (r) => {
+        // Handle quota exceeded before other processing
+        const quotaResult = await handleApiResponse(r);
+        if (quotaResult.quotaExceeded) {
+          return; // Stop processing if quota exceeded
+        }
+        
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j?.error || r.statusText || "Request failed");
         return j;
       })
-      .then((j) => setPayload(j))
+      .then((j) => {
+        if (j) setPayload(j);
+      })
       .catch((e) => setError(e.message || "Failed to load props"))
       .finally(() => setLoading(false));
   }, [qs, eventId]);
@@ -143,6 +159,13 @@ export default function PlayerProps({
         ))}
       </div>
       {debugPanel}
+      
+      {/* Quota Exceeded Modal */}
+      <QuotaExceededModal 
+        isOpen={quotaExceeded}
+        onClose={() => {}} // Don't allow closing - user must upgrade or wait
+        quotaError={quotaError}
+      />
     </div>
   );
 }

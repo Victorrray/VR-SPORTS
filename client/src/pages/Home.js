@@ -22,6 +22,7 @@ import EdgeCalculator from '../components/EdgeCalculator';
 import AlertSystem from '../components/AlertSystem';
 import MobileBottomBar from '../components/MobileBottomBar';
 import Footer from '../components/Footer';
+import Pricing from '../components/Pricing';
 
 // Hooks
 import { useMarkets } from '../hooks/useMarkets';
@@ -180,6 +181,9 @@ export default function Home() {
             })}
           </div>
         </div>
+
+        {/* Pricing Section */}
+        <Pricing />
 
         {/* Edge Calculator Modal */}
         {showEdgeCalculator && (

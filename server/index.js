@@ -4,10 +4,22 @@ const cors = require("cors");
 const axios = require("axios");
 require("dotenv").config();
 
+// Initialize Stripe after dotenv loads
+const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
+
 const app = express();
 const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ODDS_API_KEY;
 const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
+
+// Stripe configuration
+const STRIPE_PRICE_PLATINUM = process.env.STRIPE_PRICE_PLATINUM;
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+
+// In-memory storage for usage tracking (replace with Supabase in production)
+const userUsage = new Map(); // user_id -> { period_start, period_end, calls_made }
+const userPlans = new Map(); // user_id -> 'free_trial' | 'platinum'
 
 // Constants for improved player props stability
 const FOCUSED_BOOKMAKERS = [
@@ -20,6 +32,13 @@ const PLAYER_PROP_MARKETS = [
 ];
 
 const MAX_BOOKMAKERS = 10;
+
+// Helper function to get current monthly window (UTC)
+function currentMonthlyWindow(now = new Date()) {
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  return { start, end };
+}
 
 // Helper function to clamp bookmaker lists
 function clampBookmakers(bookmakers = []) {
@@ -128,123 +147,143 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Middleware to enforce API usage limits
+function enforceUsage(req, res, next) {
+  // Mock user extraction - replace with actual JWT/session logic
+  const userId = req.headers['x-user-id'] || 'demo-user';
+  const userPlan = userPlans.get(userId) || 'free_trial';
+  
+  // Platinum users bypass all limits
+  if (userPlan === 'platinum') {
+    req.user = { id: userId, plan: userPlan };
+    return next();
+  }
+  
+  // Free trial users: enforce 1000 calls per month
+  const { start, end } = currentMonthlyWindow();
+  const periodKey = `${userId}-${start.toISOString()}`;
+  
+  // Get or create usage record for current month
+  let usage = userUsage.get(periodKey);
+  if (!usage) {
+    usage = { period_start: start, period_end: end, calls_made: 0 };
+    userUsage.set(periodKey, usage);
+  }
+  
+  // Check if quota exceeded
+  if (usage.calls_made >= 1000) {
+    return res.status(403).json({
+      error: 'quota_exceeded',
+      message: 'Monthly API limit of 1,000 calls exceeded. Upgrade to Platinum for unlimited access.',
+      calls_made: usage.calls_made,
+      limit: 1000,
+      period_end: usage.period_end.toISOString()
+    });
+  }
+  
+  // Increment usage and continue
+  usage.calls_made += 1;
+  userUsage.set(periodKey, usage);
+  
+  req.user = { id: userId, plan: userPlan };
+  next();
+}
+
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV,
-    hasOddsAPI: !!API_KEY,
-    hasSportsGameOddsAPI: !!SPORTSGAMEODDS_API_KEY
+app.get("/health", (req, res) => {
+  res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// Usage endpoint - get current user's quota info
+app.get('/api/usage/me', (req, res) => {
+  const userId = req.headers['x-user-id'] || 'demo-user';
+  const userPlan = userPlans.get(userId) || 'free_trial';
+  
+  if (userPlan === 'platinum') {
+    return res.json({
+      plan: 'platinum',
+      limit: null,
+      calls_made: null,
+      remaining: null,
+      period_end: null
+    });
+  }
+  
+  // Free trial: return current month usage
+  const { start, end } = currentMonthlyWindow();
+  const periodKey = `${userId}-${start.toISOString()}`;
+  const usage = userUsage.get(periodKey) || { calls_made: 0 };
+  
+  res.json({
+    plan: 'free_trial',
+    limit: 1000,
+    calls_made: usage.calls_made,
+    remaining: Math.max(0, 1000 - usage.calls_made),
+    period_end: end.toISOString()
   });
 });
 
-/* ------------------------------------ Helpers ------------------------------------ */
+// Stripe: Create checkout session for Platinum subscription
+app.post('/api/billing/create-checkout-session', async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+    
+    const userId = req.headers['x-user-id'] || 'demo-user';
+    
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [{
+        price: STRIPE_PRICE_PLATINUM,
+        quantity: 1,
+      }],
+      success_url: `${APP_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${APP_URL}/billing/cancel`,
+      client_reference_id: userId,
+      metadata: { user_id: userId }
+    });
+    
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Stripe checkout error:', error);
+    res.status(500).json({ error: 'Failed to create checkout session' });
+  }
+});
 
-// Clamp and deduplicate bookmakers list
-function clampBookmakers(list) {
-  if (!Array.isArray(list)) return FOCUSED_BOOKMAKERS.slice(0, MAX_BOOKMAKERS);
-  const unique = [...new Set(list)];
-  return unique.slice(0, MAX_BOOKMAKERS);
-}
-
-// Build event odds URL helper
-function buildEventOddsUrl({ sportKey, eventId, apiKey, markets, bookmakers }) {
-  const marketsList = Array.isArray(markets) ? markets.join(',') : markets || PLAYER_PROP_MARKETS.join(',');
-  const bookmakersList = Array.isArray(bookmakers) ? bookmakers.join(',') : bookmakers || FOCUSED_BOOKMAKERS.join(',');
+// Stripe: Webhook handler
+app.post('/api/billing/webhook', (req, res) => {
+  if (!stripe) {
+    return res.status(500).json({ error: 'Stripe not configured' });
+  }
   
-  return `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/events/${encodeURIComponent(eventId)}/odds?apiKey=${apiKey}&regions=us&oddsFormat=american&markets=${marketsList}&bookmakers=${bookmakersList}`;
-}
-
-// Axios wrapper with retry and quota diagnostics
-async function axiosWithRetry(url, opts = {}, { tries = 2, backoffMs = 700 } = {}) {
-  const config = {
-    timeout: 9000,
-    ...opts
-  };
+  const sig = req.headers['stripe-signature'];
+  let event;
   
-  for (let attempt = 1; attempt <= tries; attempt++) {
-    try {
-      const response = await axios.get(url, config);
-      
-      // Log quota information
-      console.log(`API Response Status: ${response.status}`);
-      console.log(`X-Requests-Remaining: ${response.headers['x-requests-remaining'] || 'N/A'}`);
-      console.log(`X-Requests-Used: ${response.headers['x-requests-used'] || 'N/A'}`);
-      
-      return response;
-    } catch (error) {
-      const status = error.response?.status;
-      const remaining = error.response?.headers?.['x-requests-remaining'];
-      
-      console.log(`Attempt ${attempt}/${tries} failed. Status: ${status}, Remaining: ${remaining || 'N/A'}`);
-      
-      // Don't retry on quota/plan limits
-      if (status === 402 || status === 429) {
-        throw error;
-      }
-      
-      // Retry on transient errors
-      if (attempt < tries && (status >= 500 || !status)) {
-        console.log(`Retrying in ${backoffMs * attempt}ms...`);
-        await new Promise(resolve => setTimeout(resolve, backoffMs * attempt));
-        continue;
-      }
-      
-      throw error;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const userId = session.client_reference_id || session.metadata?.user_id;
+    
+    if (userId) {
+      // Upgrade user to platinum
+      userPlans.set(userId, 'platinum');
+      console.log(`User ${userId} upgraded to Platinum`);
     }
   }
-}
-
-function toNum(v) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
-function firstLogo(teamObj) {
-  try {
-    // Most ESPN team objects: team.logos = [{ href, ...}, ...]
-    const logos = teamObj?.logos || teamObj?.team?.logos || [];
-    const href = Array.isArray(logos) ? logos[0]?.href : null;
-    if (!href) return null;
-
-    // Prefer transparent PNG with a reasonable height
-    const u = new URL(href);
-    u.searchParams.set("format", "png");
-    u.searchParams.set("bgc", "transparent");
-    u.searchParams.set("h", "80");
-    return u.toString();
-  } catch {
-    return null;
-  }
-}
-
-function recordText(teamObj) {
-  // e.g., team.record.items[0].summary -> "10-2", or displayValue
-  const rec = teamObj?.record?.items?.[0];
-  return rec?.summary || rec?.displayValue || null;
-}
-
-function rankNum(teamObj) {
-  // NCAAF/NFL sometimes include rank fields
-  return teamObj?.rank ?? teamObj?.rankings?.[0]?.rank ?? null;
-}
-
-function normalizeStatusFromEspn(typeObj) {
-  // ESPN: type.state ∈ "pre" | "in" | "post"; type.completed boolean
-  if (!typeObj) return "scheduled";
-  if (typeObj.completed) return "final";
-  if (typeObj.state === "in") return "in_progress";
-  return "scheduled";
-}
-
-/* ------------------------------------ Routes ------------------------------------ */
-
-// health
-app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+  
+  res.json({ received: true });
+});
 
 // sports list (Odds API)
-app.get("/api/sports", async (_req, res) => {
+app.get("/api/sports", enforceUsage, async (_req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     const url = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
@@ -257,7 +296,7 @@ app.get("/api/sports", async (_req, res) => {
 });
 
 // events by sport (Odds API)
-app.get("/api/events", async (req, res) => {
+app.get("/api/events", enforceUsage, async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     const { sport } = req.query;
@@ -273,7 +312,7 @@ app.get("/api/events", async (req, res) => {
 });
 
 // odds endpoint (unified for multiple sports)
-app.get("/api/odds", async (req, res) => {
+app.get("/api/odds", enforceUsage, async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     
@@ -764,7 +803,7 @@ function addNFLPlayerProps(game, requestedMarkets) {
 }
 
 // odds snapshot (Odds API) - legacy endpoint
-app.get("/api/odds-data", async (req, res) => {
+app.get("/api/odds-data", enforceUsage, async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     const sport = req.query.sport || "basketball_nba";
@@ -789,7 +828,7 @@ app.get("/api/odds-data", async (req, res) => {
 });
 
 // player props (Odds API) - enhanced with stability improvements
-app.get("/api/player-props", async (req, res) => {
+app.get("/api/player-props", enforceUsage, async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     
@@ -990,7 +1029,7 @@ app.get("/api/player-props", async (req, res) => {
 });
 
 // available markets for an event (useful for discovering player props)
-app.get("/api/event-markets", async (req, res) => {
+app.get("/api/event-markets", enforceUsage, async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     const { sport, eventId, regions = "us" } = req.query;
@@ -1021,7 +1060,7 @@ app.get("/api/event-markets", async (req, res) => {
  */
 // ---------- Scores (ESPN public JSON; logos, records, ranks, week) ----------
 // ---------- Scores (ESPN with logos/records/ranks robust) ----------
-app.get("/api/scores", async (req, res) => {
+app.get("/api/scores", enforceUsage, async (req, res) => {
   try {
     const sport = String(req.query.sport || "americanfootball_nfl").toLowerCase();
     const dateParam = (req.query.date || "").toString().replace(/-/g, "");
@@ -1323,7 +1362,7 @@ function saveReactions() {
 }
 
 // Get reactions for a specific game
-app.get('/api/reactions/:gameKey', (req, res) => {
+app.get('/api/reactions/:gameKey', enforceUsage, (req, res) => {
   try {
     const { gameKey } = req.params;
     const reactions = gameReactions.get(gameKey) || {};

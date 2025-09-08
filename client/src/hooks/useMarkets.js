@@ -4,6 +4,7 @@ import { debounce, APICache } from '../utils/performance';
 import { useMemoizedCallback } from './useMemoizedCallback';
 import { secureFetch, apiRateLimiter } from '../utils/security';
 import { useCachedFetch, useRealtimeCachedFetch } from './useCachedFetch';
+import { useQuotaHandler } from './useQuotaHandler';
 
 // Small utility to normalize arrays from API responses
 function normalizeArray(resp) {
@@ -20,6 +21,8 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [cacheStats, setCacheStats] = useState(null);
   const [quota, setQuota] = useState({ remain: "–", used: "–" });
+  
+  const { quotaExceeded, quotaError, handleApiResponse } = useQuotaHandler();
 
   const fetchMarkets = useMemoizedCallback(async () => {
     console.log('🔍 useMarkets: fetchMarkets called with:', { sports, regions, markets });
@@ -65,6 +68,13 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       
       const response = await secureFetch(fullUrl);
       console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
+      
+      // Handle quota exceeded before other errors
+      const quotaResult = await handleApiResponse(response);
+      if (quotaResult.quotaExceeded) {
+        console.log('🔍 useMarkets: Quota exceeded, stopping further requests');
+        return;
+      }
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -140,6 +150,8 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
     loading,
     error,
     lastUpdate,
-    refresh: fetchMarkets
+    refresh: fetchMarkets,
+    quotaExceeded,
+    quotaError
   };
 }
