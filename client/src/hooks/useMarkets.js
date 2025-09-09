@@ -60,7 +60,7 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         dateFormat: 'iso'
       });
 
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
+      const BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
       const fullUrl = `${BASE_URL}/api/odds?${params}`;
       console.log('🔍 useMarkets: Final API URL:', fullUrl);
       console.log('🔍 useMarkets: BASE_URL from env:', process.env.REACT_APP_API_BASE_URL);

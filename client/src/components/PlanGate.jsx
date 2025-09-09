@@ -35,7 +35,8 @@ export default function PlanGate({ children }) {
       setBusy(true);
       setError('');
       
-      const response = await fetch('/api/users/plan', {
+      const { withApiBase } = require('../config/api');
+      const response = await fetch(withApiBase('/api/users/plan'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: 'free_trial' }),
@@ -63,7 +64,7 @@ export default function PlanGate({ children }) {
       setBusy(true);
       setError('');
       
-      const response = await fetch('/api/billing/create-checkout-session', {
+      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
         credentials: 'include'
       });

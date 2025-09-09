@@ -27,9 +27,15 @@ export const AuthProvider = ({ children }) => {
             console.log('🔐 useAuth: Found demo session:', sessionData.email);
             setUser(sessionData);
             setSession({ user: sessionData });
+          } else {
+            console.log('🔐 useAuth: No demo session found');
+            setUser(null);
+            setSession(null);
           }
         } catch (error) {
           console.error('🔐 useAuth: Error parsing demo session:', error);
+          setUser(null);
+          setSession(null);
         }
         
         setLoading(false);

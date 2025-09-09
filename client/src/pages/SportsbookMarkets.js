@@ -479,7 +479,8 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
   }, []);
 
 
-  const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
+  const { withApiBase } = require('../config/api');
+  const BASE_URL = withApiBase('');
 
   // Fetch sport list (defensive against non-array errors), map to friendly titles
   useEffect(() => {
@@ -562,12 +563,14 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
   // Derive effective book filter; if none of selected are available, show all
   const availableBookKeys = useMemo(() => new Set((bookList || []).map((b) => b.key)), [bookList]);
   const effectiveSelectedBooks = useMemo(() => {
-    // If no books are selected, show all books (empty filter)
+    // If no books are selected, show all books (empty filter means show all)
     if (!selectedBooks || selectedBooks.length === 0) {
+      console.log('🔍 SportsbookMarkets: No books selected, showing all books');
       return [];
     }
     // Otherwise, filter to only selected books that are available
     const filtered = selectedBooks.filter((k) => availableBookKeys.has(k));
+    console.log('🔍 SportsbookMarkets: Effective selected books:', filtered);
     return filtered;
   }, [selectedBooks, availableBookKeys]);
 

@@ -168,6 +168,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:3001',
+  'http://localhost:10000',
   'https://odds-frontend-j2pn.onrender.com',
   'https://my-react-frontend-021i.onrender.com',
   'https://oddssightseer.com',
