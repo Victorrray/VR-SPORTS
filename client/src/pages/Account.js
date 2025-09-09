@@ -1,7 +1,9 @@
 // src/pages/Account.js
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { signOutAndRefresh } from "../lib/authActions";
 import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut } from "lucide-react";
 import AccessibilitySettings from "../components/AccessibilitySettings";
 import MobileBottomBar from "../components/MobileBottomBar";
@@ -54,14 +56,25 @@ const AVAILABLE_SPORTSBOOKS = [
 ];
 
 export default function Account() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [selectedSportsbooks, setSelectedSportsbooks] = useState([]);
+  const [pageLoading, setPageLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [signOutBusy, setSignOutBusy] = useState(false);
+
+  // Debug logging
+  console.log('🔍 Account component render:', { user: !!user, userId: user?.id });
 
   // Profile bits
-  const [username, setUsername] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
-
-  // Set-once editor
   const [editingUN, setEditingUN] = useState(false);
   const [value, setValue] = useState("");
   const [status, setStatus] = useState("idle"); // idle|checking|ok|invalid|taken|saving|saved|error|locked
@@ -74,15 +87,15 @@ export default function Account() {
   // Load profile (username) and sportsbooks
   useEffect(() => {
     async function load() {
-      if (!user) { setLoadingProfile(false); return; }
-      setLoadingProfile(true);
+      if (!user) { setPageLoading(false); return; }
+      setPageLoading(true);
       const { data, error } = await supabase
         .from("profiles")
         .select("username")
         .eq("id", user.id)
         .single();
       if (!error && data) setUsername(data.username);
-      setLoadingProfile(false);
+      setPageLoading(false);
     }
     load();
     
@@ -222,15 +235,19 @@ export default function Account() {
     try { navigator.clipboard.writeText(text); } catch {}
   }
 
-  if (!user) {
+  const handleSignOut = async () => {
+    if (signOutBusy) return;
+    setSignOutBusy(true);
+    await signOutAndRefresh('/');
+  };
+
+  if (!user || pageLoading) {
     return (
-      <main className="account-page not-signed">
-        <div className="not-signed-inner">
-          <h2>You’re not signed in</h2>
-          <p>Please log in to view your account.</p>
+      <div className="loading-fallback">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
         </div>
-        <MobileBottomBar active="account" showFilter={false} />
-      </main>
+      </div>
     );
   }
 
@@ -301,7 +318,7 @@ export default function Account() {
                 <span>Username</span>
               </div>
               <div className="username-section">
-                {loadingProfile ? (
+                {pageLoading ? (
                   <span className="loading-text">Loading…</span>
                 ) : username ? (
                   <div className="username-display">
@@ -401,11 +418,13 @@ export default function Account() {
           
           <button 
             className="security-btn signout-btn" 
-            onClick={signOut}
+            onClick={handleSignOut}
+            disabled={signOutBusy}
+            data-testid="btn-signout"
           >
             <LogOut size={18} />
             <div className="btn-content">
-              <span>Sign Out</span>
+              <span>{signOutBusy ? 'Signing out...' : 'Sign Out'}</span>
               <small>End your current session</small>
             </div>
           </button>

@@ -9,6 +9,7 @@ import { ToastProvider } from './components/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import SkipToContent from './components/SkipToContent';
 import AccessibilityMenu from './components/AccessibilityMenu';
+import AuthDebug from './components/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import Navbar from './components/Navbar';
 import MobileBottomBar from './components/MobileBottomBar';
@@ -20,6 +21,7 @@ import Account from './pages/Account';
 import AuthCallback from './pages/AuthCallback';
 import LoadingBar from "./components/LoadingBar";
 import PrivateRoute from "./components/PrivateRoute";
+import PlanGuard from "./components/PlanGuard";
 import MyPicks from './pages/MyPicks';
 import Scores from './pages/Scores';
 import Terms from './pages/Terms';
@@ -56,12 +58,11 @@ function AppRoutes() {
     }
   }, [user]);
 
-  // Redirect non-authenticated users from protected pages to landing page
+  // Only redirect non-authenticated users from login-required pages to landing page
   const shouldRedirectToLanding = !user && (
-    location.pathname === '/sportsbooks' ||
-    location.pathname === '/scores' ||
-    location.pathname === '/picks' ||
-    location.pathname === '/account'
+    location.pathname === '/account' ||
+    location.pathname === '/app' ||
+    location.pathname === '/dashboard'
   );
 
   if (shouldRedirectToLanding) {
@@ -88,18 +89,19 @@ function AppRoutes() {
             }
           }} />
           <main className="main-content" id="main-content" tabIndex="-1">
+            <AuthDebug />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/sportsbooks" element={user ? <SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /> : <Navigate to="/" replace />} />
+              <Route path="/sportsbooks" element={<PlanGuard requiresPlatinum={true}><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PlanGuard>} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
-              <Route path="/dashboard" element={user ? <Navigate to="/account" replace /> : <Navigate to="/login" replace />} />
+              <Route path="/app" element={user ? <PlanGuard><Navigate to="/sportsbooks" replace /></PlanGuard> : <Navigate to="/login" replace />} />
+              <Route path="/dashboard" element={user ? <PlanGuard><Navigate to="/scores" replace /></PlanGuard> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Home />} />
-              <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
-              <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
-              <Route path="/scores" element={user ? <Scores /> : <Navigate to="/" replace />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/picks" element={<PrivateRoute><PlanGuard><MyPicks /></PlanGuard></PrivateRoute>} />
+              <Route path="/scores" element={<Scores />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<Navigate to="/" replace />} />

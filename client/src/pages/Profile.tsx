@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Settings, BookOpen, Save, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { signOutAndRefresh } from '../lib/authActions';
+import { User, Settings, BookOpen, Check, Save } from 'lucide-react';
 import UsernameForm from '../components/UsernameForm';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../utils/supabase';
-import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
 const AVAILABLE_SPORTSBOOKS = [
@@ -87,19 +88,9 @@ export default function ProfilePage() {
   };
 
   const handleSignOut = async () => {
-    try {
-      setBusy(true);
-      if (supabase) {
-        await supabase.auth.signOut();
-      }
-      localStorage.removeItem('pricingIntent');
-      navigate('/login', { replace: true });
-    } catch (error) {
-      console.error('Sign out failed:', error);
-      alert('Sign out failed. Please try again.');
-    } finally {
-      setBusy(false);
-    }
+    if (busy) return;
+    setBusy(true);
+    await signOutAndRefresh('/');
   };
 
   const displayedBooks = showAllBooks 

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { savePricingIntent } from "../lib/intent";
+import { debugLog, debugIntentPersistence } from "../lib/debug";
 import { Mail, Lock, ArrowRight, Chrome } from "lucide-react";
 import "./Login.css";
 
@@ -14,9 +15,10 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [search] = useSearchParams();
   const navigate = useNavigate();
-  const next = search.get("next") || search.get("returnTo") || "/account";
+  const next = search.get("next") || search.get("returnTo") || "/scores";
   
   const DEBUG_PRICING = process.env.NODE_ENV === 'development';
 
@@ -26,23 +28,46 @@ export default function Login() {
     const returnTo = search.get("returnTo");
     
     if (intent && returnTo) {
-      if (DEBUG_PRICING) console.log('🔍 Login: Saving intent to localStorage', { intent, returnTo });
+      debugLog('LOGIN', 'Saving intent to localStorage', { intent, returnTo });
+      debugIntentPersistence('save', intent, returnTo);
       savePricingIntent(intent, returnTo);
     }
   }, [search]);
+
+  // Listen for auth state changes and redirect when authenticated
+  useEffect(() => {
+    if (auth?.user && !auth?.loading) {
+      console.log('User authenticated, redirecting to:', next);
+      navigate(next, { replace: true });
+    }
+  }, [auth?.user, auth?.loading, next, navigate]);
 
   const go = async (fn) => {
     if (!fn) {
       setErr("Authentication not available. Please try again.");
       return;
     }
+    if (!email || !pw) {
+      setErr("Please enter both email and password.");
+      return;
+    }
     setErr("");
     try {
-      const { error } = await fn(email, pw);
-      if (error) setErr(error.message);
-      else navigate(next, { replace: true });
+      const { data, error } = await fn(email, pw);
+      if (error) {
+        console.error('Login error:', error);
+        setErr(error.message || "Authentication failed. Please try again.");
+      } else {
+        console.log('Login successful, data:', data);
+        console.log('Navigating to:', next);
+        // Small delay to ensure auth state is updated
+        setTimeout(() => {
+          navigate(next, { replace: true });
+        }, 100);
+      }
     } catch (err) {
-      setErr("Authentication failed. Please try again.");
+      console.error('Login exception:', err);
+      setErr(err.message || "Authentication failed. Please try again.");
     }
   };
 
@@ -98,6 +123,13 @@ export default function Login() {
             className="login-input"
           />
         </div>
+
+        {tab === "login" && (
+          <div className="remember-me" onClick={() => setRememberMe(!rememberMe)}>
+            <div className={`remember-toggle ${rememberMe ? 'checked' : ''}`}></div>
+            <span className="remember-label">Remember me</span>
+          </div>
+        )}
 
         {tab === "login" ? (
           <button

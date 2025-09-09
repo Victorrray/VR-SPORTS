@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Star, Zap, Loader2 } from 'lucide-react';
+import { Check, Star, Zap, Loader2, Crown, Sparkles, ArrowRight } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../lib/supabase';
 import { useMe } from '../hooks/useMe';
+import { debugLog, debugPricingClick, debugCheckoutResult, debugPlanUpdate } from '../lib/debug';
+import './Pricing.css';
 
 // Intent persistence helpers
 function saveIntent(intent, returnTo) {
@@ -41,71 +43,38 @@ const Pricing = ({ onUpgrade }) => {
                        searchParams.has('debug') || 
                        localStorage.getItem('DEBUG_PRICING') === '1';
 
-  const handleStartFree = async () => {
-    if (DEBUG_PRICING) console.log('🔍 Start Free clicked');
-    
-    try {
-      setError('');
-      setLoading(true);
-      
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to signup');
-        saveIntent('start-free', '/app');
-        navigate('/signup?returnTo=/pricing&intent=start-free');
-        return;
-      }
-
-      // Set plan immediately (no Stripe)
-      const response = await fetch('/api/users/plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: 'free_trial' }),
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        navigate('/app');
-      } else {
-        setError('Failed to set plan. Please try again.');
-      }
-    } catch (error) {
-      console.error('Failed to start free plan:', error);
-      setError('Failed to start free plan. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Removed handleStartFree since free trial card is removed
 
   const handleUpgrade = async () => {
-    if (DEBUG_PRICING) console.log('🔍 Upgrade clicked');
-    
     try {
       setError('');
       setLoading(true);
       
-      const { data: sessionData2 } = await supabase.auth.getSession();
-      if (!sessionData2.session) {
-        if (DEBUG_PRICING) console.log('🔍 User not authenticated, saving intent and redirecting to login');
-        saveIntent('upgrade', '/pricing');
-        navigate('/login?returnTo=/pricing&intent=upgrade');
+      if (!supabase) {
+        // No Supabase configured, redirect to login
+        navigate('/login?returnTo=/sportsbooks&intent=upgrade');
+        return;
+      }
+      
+      const { data: sessionData } = await supabase.auth.getSession();
+      const isAuthenticated = !!sessionData.session;
+      
+      debugPricingClick('upgrade', isAuthenticated, 'upgrade');
+      
+      if (!isAuthenticated) {
+        debugLog('PRICING', 'User not authenticated, redirecting to login');
+        saveIntent('upgrade', '/sportsbooks');
+        navigate('/login?returnTo=/sportsbooks&intent=upgrade');
         return;
       }
 
-      const response = await fetch('/api/billing/create-checkout-session', {
-        method: 'POST',
-        credentials: 'include'
-      });
+      // For now, redirect to sportsbooks (upgrade functionality can be added later)
+      navigate('/sportsbooks');
       
-      const responseData = await response.json();
-      if (responseData?.url) {
-        window.location.href = responseData.url;
-      } else {
-        setError('Checkout unavailable. Please try again.');
-      }
     } catch (error) {
       console.error('Failed to handle upgrade:', error);
-      setError(`Upgrade failed: ${error.message}. Please try again.`);
+      // Fallback to login page
+      navigate('/login?returnTo=/sportsbooks&intent=upgrade');
     } finally {
       setLoading(false);
     }
@@ -176,367 +145,264 @@ const Pricing = ({ onUpgrade }) => {
   }, [me, loading, autoStarting, searchParams]);
 
   return (
-    <section style={{
-      padding: '60px 20px',
-      background: 'var(--bg-primary)',
-      borderTop: '1px solid var(--border-color)'
-    }}>
-      <div style={{
-        maxWidth: '1000px',
-        margin: '0 auto',
-        textAlign: 'center'
-      }}>
-        <h2 style={{
-          fontSize: '36px',
-          fontWeight: '700',
-          color: 'var(--text-primary)',
-          marginBottom: '16px'
-        }}>
-          Choose Your Plan
-        </h2>
-        
-        <p style={{
-          fontSize: '18px',
-          color: 'var(--text-secondary)',
-          marginBottom: '48px',
-          maxWidth: '600px',
-          margin: '0 auto 48px auto'
-        }}>
-          Start free and upgrade when you need unlimited access to premium odds data
-        </p>
-        
+    <section className="pricing-section">
+      <div className="pricing-container">
+        {/* Hero Header */}
+        <div className="pricing-hero">
+          <div className="hero-badge">
+            <Sparkles size={16} />
+            <span>Premium Sports Intelligence</span>
+          </div>
+          <h2 className="hero-title">
+            Unlock Your <span className="gradient-text">Winning Edge</span>
+          </h2>
+          <p className="hero-subtitle">
+            Join thousands of winning bettors with real-time odds, advanced analytics, and premium insights
+          </p>
+        </div>
+
+        {/* Status Messages */}
         {(error || autoStarting) && (
-          <div style={{
-            background: autoStarting ? '#f0f9ff' : '#fee2e2',
-            border: `1px solid ${autoStarting ? '#bae6fd' : '#fecaca'}`,
-            borderRadius: '8px',
-            padding: '12px 16px',
-            marginBottom: '24px',
-            color: autoStarting ? '#0369a1' : '#dc2626',
-            fontSize: '14px',
-            maxWidth: '600px',
-            margin: '0 auto 24px auto',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            {autoStarting && <Loader2 size={16} className="animate-spin" />}
-            {autoStarting ? 'Opening checkout...' : error}
-            {error && !autoStarting && (
-              <button 
-                onClick={() => setError('')}
-                style={{
-                  marginLeft: '8px',
-                  background: 'none',
-                  border: 'none',
-                  color: '#dc2626',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
-              >
-                Try again
-              </button>
-            )}
+          <div className="status-message">
+            <div className={`status-content ${autoStarting ? 'loading' : 'error'}`}>
+              {autoStarting && <Loader2 size={16} className="status-spinner" />}
+              <span>{autoStarting ? 'Opening secure checkout...' : error}</span>
+              {error && !autoStarting && (
+                <button 
+                  onClick={() => setError('')}
+                  className="status-retry"
+                >
+                  Try again
+                </button>
+              )}
+            </div>
           </div>
         )}
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '24px',
-          maxWidth: '800px',
-          margin: '0 auto'
-        }}>
-          {/* Free Trial Plan */}
-          <div style={{
-            background: 'var(--card-bg)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '16px',
-            padding: '32px',
-            position: 'relative'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px'
-            }}>
-              <Star size={24} color="var(--accent)" />
-              <h3 style={{
-                fontSize: '24px',
-                fontWeight: '600',
-                color: 'var(--text-primary)',
-                margin: 0
-              }}>
-                Free Trial
-              </h3>
+        {/* Pricing Cards */}
+        <div className="pricing-showcase two-cards">
+          {/* Free Trial Card */}
+          <div className="free-trial-card">
+            {/* Free Badge */}
+            <div className="free-badge">
+              <Sparkles size={16} />
+              <span>Free Forever</span>
             </div>
-            
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: 'var(--text-primary)',
-              marginBottom: '8px'
-            }}>
-              $0
-              <span style={{
-                fontSize: '16px',
-                fontWeight: '400',
-                color: 'var(--text-secondary)'
-              }}>
-                /month
-              </span>
+
+            {/* Card Header */}
+            <div className="card-header">
+              <div className="plan-icon-wrapper free">
+                <div className="plan-icon">
+                  <Star size={28} />
+                </div>
+              </div>
+              <div className="plan-info">
+                <h3 className="plan-title">Free Access</h3>
+                <p className="plan-tagline">Start your winning journey</p>
+              </div>
             </div>
-            
-            <p style={{
-              color: 'var(--text-secondary)',
-              marginBottom: '24px'
-            }}>
-              Perfect for getting started
-            </p>
 
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: '0 0 32px 0'
-            }}>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px',
-                color: 'var(--text-primary)'
-              }}>
-                <Check size={20} color="var(--success)" />
-                1,000 API calls per month
-              </li>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px',
-                color: 'var(--text-primary)'
-              }}>
-                <Check size={20} color="var(--success)" />
-                Basic odds comparison
-              </li>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px',
-                color: 'var(--text-primary)'
-              }}>
-                <Check size={20} color="var(--success)" />
-                Player props analysis
-              </li>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                color: 'var(--text-primary)'
-              }}>
-                <Check size={20} color="var(--success)" />
-                Live scores & updates
-              </li>
-            </ul>
+            {/* Pricing */}
+            <div className="pricing-display">
+              <div className="price-main">
+                <span className="currency">$</span>
+                <span className="amount">0</span>
+                <span className="period">/forever</span>
+              </div>
+              <div className="price-note">
+                <span className="savings">No credit card required</span>
+              </div>
+            </div>
 
+            {/* Benefits List */}
+            <div className="features-grid">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Live scores for NFL, NBA, MLB, NHL</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Team stats and player performance data</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Game schedules and results history</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Mobile app with push notifications</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Basic analytics and trends</span>
+              </div>
+            </div>
+
+            {/* CTA Button */}
             <button
-              data-testid="pricing-start-free"
-              onClick={handleStartFree}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: 'transparent',
-                border: '2px solid var(--accent)',
-                borderRadius: '12px',
-                color: loading ? '#999' : 'var(--accent)',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                opacity: loading ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.background = 'var(--accent)';
-                  e.target.style.color = 'white';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = 'var(--accent)';
-                }
-              }}
+              data-testid="pricing-signup"
+              onClick={() => navigate('/login')}
+              className="signup-button"
             >
-              {loading && <Loader2 size={16} className="animate-spin" />}
-              Start Free
+              <div className="button-content">
+                <span>Get Started Free</span>
+                <ArrowRight size={20} className="button-arrow" />
+              </div>
             </button>
+
+            {/* Trust Signals */}
+            <div className="trust-signals">
+              <div className="trust-item">
+                <span>✓ Instant access</span>
+              </div>
+              <div className="trust-item">
+                <span>•</span>
+              </div>
+              <div className="trust-item">
+                <span>No commitments</span>
+              </div>
+            </div>
           </div>
 
-          {/* Platinum Plan */}
-          <div style={{
-            background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-            border: '1px solid #8b5cf6',
-            borderRadius: '16px',
-            padding: '32px',
-            position: 'relative',
-            transform: 'scale(1.05)'
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: '-12px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-              color: 'white',
-              padding: '6px 16px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: '600'
-            }}>
-              MOST POPULAR
+          <div className="platinum-card">
+            {/* Premium Badge */}
+            <div className="premium-badge">
+              <Crown size={16} />
+              <span>Most Popular</span>
             </div>
 
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px'
-            }}>
-              <Zap size={24} color="white" />
-              <h3 style={{
-                fontSize: '24px',
-                fontWeight: '600',
-                color: 'white',
-                margin: 0
-              }}>
-                Platinum
-              </h3>
+            {/* Card Header */}
+            <div className="card-header">
+              <div className="plan-icon-wrapper">
+                <div className="plan-icon">
+                  <Zap size={28} />
+                </div>
+              </div>
+              <div className="plan-info">
+                <h3 className="plan-title">Platinum Access</h3>
+                <p className="plan-tagline">Everything you need to win</p>
+              </div>
             </div>
-            
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: 'white',
-              marginBottom: '8px'
-            }}>
-              $25
-              <span style={{
-                fontSize: '16px',
-                fontWeight: '400',
-                opacity: 0.8
-              }}>
-                /month
-              </span>
+
+            {/* Pricing */}
+            <div className="pricing-display">
+              <div className="price-main">
+                <span className="currency">$</span>
+                <span className="amount">25</span>
+                <span className="period">/month</span>
+              </div>
+              <div className="price-note">
+                <span className="savings">Save 40% vs daily subscriptions</span>
+              </div>
             </div>
-            
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.8)',
-              marginBottom: '24px'
-            }}>
-              Unlimited access for serious bettors
-            </p>
 
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: '0 0 32px 0'
-            }}>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px',
-                color: 'white'
-              }}>
-                <Check size={20} color="#10b981" />
-                Unlimited API calls
-              </li>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px',
-                color: 'white'
-              }}>
-                <Check size={20} color="#10b981" />
-                Advanced analytics
-              </li>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px',
-                color: 'white'
-              }}>
-                <Check size={20} color="#10b981" />
-                Priority data updates
-              </li>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: '12px',
-                color: 'white'
-              }}>
-                <Check size={20} color="#10b981" />
-                Premium support
-              </li>
-              <li style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                color: 'white'
-              }}>
-                <Check size={20} color="#10b981" />
-                All future features
-              </li>
-            </ul>
+            {/* Value Proposition */}
+            <div className="value-prop">
+              <div className="value-item">
+                <div className="value-number">15+</div>
+                <div className="value-label">Sportsbooks</div>
+              </div>
+              <div className="value-item">
+                <div className="value-number">24/7</div>
+                <div className="value-label">Live Updates</div>
+              </div>
+              <div className="value-item">
+                <div className="value-number">4.2%</div>
+                <div className="value-label">Avg Edge</div>
+              </div>
+            </div>
 
+            {/* Benefits List */}
+            <div className="features-grid">
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Live odds from DraftKings, FanDuel, BetMGM + 12 more</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Expected value (+EV) bet finder with edge calculations</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Player props, spreads, totals, and live betting markets</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Arbitrage opportunities and line shopping alerts</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Advanced filtering by sport, market, and edge %</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Priority support and feature requests</span>
+              </div>
+            </div>
+
+            {/* CTA Button */}
             <button
               data-testid="pricing-upgrade"
               onClick={handleUpgrade}
               disabled={loading}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: loading ? '#f3f4f6' : 'white',
-                border: 'none',
-                borderRadius: '12px',
-                color: loading ? '#999' : '#7c3aed',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                opacity: loading ? 0.6 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.2)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }
-              }}
+              className="upgrade-button"
             >
-              {loading && <Loader2 size={16} className="animate-spin" />}
-              Upgrade to Platinum
+              <div className="button-content">
+                {loading ? (
+                  <>
+                    <Loader2 size={20} className="button-spinner" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Start Winning Today</span>
+                    <ArrowRight size={20} className="button-arrow" />
+                  </>
+                )}
+              </div>
             </button>
+
+            {/* Trust Signals */}
+            <div className="trust-signals">
+              <div className="trust-item">
+                <Star size={14} className="trust-icon" />
+                <span>4.8/5 user rating</span>
+              </div>
+              <div className="trust-item">
+                <span>•</span>
+              </div>
+              <div className="trust-item">
+                <span>5,000+ active users</span>
+              </div>
+              <div className="trust-item">
+                <span>•</span>
+              </div>
+              <div className="trust-item">
+                <span>7-day free trial</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

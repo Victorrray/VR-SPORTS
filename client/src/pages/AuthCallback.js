@@ -1,7 +1,8 @@
 // Auth callback handler for Supabase OAuth flows
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../lib/supabase';
+import { debugLog, debugRedirectDecision, debugIntentPersistence } from '../lib/debug';
 
 const DEBUG_PRICING = process.env.NODE_ENV === 'development' || 
                      new URLSearchParams(window.location.search).has('debug');
@@ -26,10 +27,11 @@ export default function AuthCallback() {
         const urlReturnTo = searchParams.get('returnTo');
         const storedIntent = JSON.parse(localStorage.getItem('pricingIntent') || 'null');
         
-        if (DEBUG_PRICING) {
-          console.log('🔍 AuthCallback: URL params:', { intent: urlIntent, returnTo: urlReturnTo });
-          console.log('🔍 AuthCallback: Stored intent:', storedIntent);
-        }
+        debugLog('AUTH_CALLBACK', 'Processing auth callback', {
+          urlIntent,
+          urlReturnTo,
+          storedIntent
+        });
 
         // Determine final intent and returnTo
         const finalIntent = urlIntent || storedIntent?.intent;
@@ -41,12 +43,15 @@ export default function AuthCallback() {
         // Route based on intent
         if (finalIntent === 'upgrade') {
           setStatus('Authentication successful! Opening checkout...');
+          debugRedirectDecision('/auth/callback', '/pricing?intent=upgrade&autostart=1', 'upgrade intent');
           navigate('/pricing?intent=upgrade&autostart=1', { replace: true });
         } else if (finalIntent === 'start-free') {
           setStatus('Authentication successful! Welcome to your free trial!');
+          debugRedirectDecision('/auth/callback', '/app', 'start-free intent');
           navigate('/app', { replace: true });
         } else {
           setStatus('Authentication successful! Redirecting...');
+          debugRedirectDecision('/auth/callback', finalReturnTo, 'default redirect');
           navigate(finalReturnTo, { replace: true });
         }
 

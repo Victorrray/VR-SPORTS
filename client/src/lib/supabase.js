@@ -24,6 +24,7 @@ export const supabase = SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABAS
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: "pkce", // best practice for browser apps
+    storageKey: 'sb-oddsightseer-auth', // stable key for consistent storage
   },
   global: {
     headers: { "x-oss-app": "odds-sight-seer" }, // optional: easy header to spot traffic
