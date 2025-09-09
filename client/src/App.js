@@ -26,6 +26,9 @@ import MyPicks from './pages/MyPicks';
 import Scores from './pages/Scores';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import BillingSuccess from './pages/BillingSuccess';
+import BillingCancel from './pages/BillingCancel';
+import QuotaModal from './components/QuotaModal';
 import { initBrowserCompat } from "./utils/browserCompat";
 import "./App.css";
 import './styles/accessibility.css';
@@ -36,6 +39,7 @@ function AppRoutes() {
   const { user } = useAuth();
   const location = useLocation();
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
+  const [quotaModal, setQuotaModal] = useState({ open: false, detail: null });
   const [mobileSearchCallback, setMobileSearchCallback] = useState(null);
 
   // Clear mobile search callback when navigating away from sportsbooks
@@ -44,6 +48,16 @@ function AppRoutes() {
       setMobileSearchCallback(null);
     }
   }, [location.pathname]);
+
+  // Global quota exceeded event listener
+  useEffect(() => {
+    const handleQuotaExceeded = (event) => {
+      setQuotaModal({ open: true, detail: event.detail });
+    };
+    
+    window.addEventListener("plangate", handleQuotaExceeded);
+    return () => window.removeEventListener("plangate", handleQuotaExceeded);
+  }, []);
 
   // Debug logging for callback state
   useEffect(() => {
@@ -92,16 +106,18 @@ function AppRoutes() {
             <AuthDebug />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/sportsbooks" element={<PlanGuard requiresPlatinum={true}><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PlanGuard>} />
+              <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/app" element={user ? <PlanGuard><Navigate to="/sportsbooks" replace /></PlanGuard> : <Navigate to="/login" replace />} />
-              <Route path="/dashboard" element={user ? <PlanGuard><Navigate to="/scores" replace /></PlanGuard> : <Navigate to="/login" replace />} />
+              <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
+              <Route path="/dashboard" element={user ? <Navigate to="/scores" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Home />} />
               <Route path="/account" element={<Account />} />
-              <Route path="/picks" element={<PrivateRoute><PlanGuard><MyPicks /></PlanGuard></PrivateRoute>} />
+              <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
               <Route path="/scores" element={<Scores />} />
+              <Route path="/billing/success" element={<BillingSuccess />} />
+              <Route path="/billing/cancel" element={<BillingCancel />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="*" element={<Navigate to="/" replace />} />
@@ -111,6 +127,13 @@ function AppRoutes() {
           {location.pathname === "/login" && <Footer />}
           
           {/* Username Setup Modal - Removed for now */}
+          
+          {/* Quota Exceeded Modal */}
+          <QuotaModal 
+            open={quotaModal.open} 
+            detail={quotaModal.detail} 
+            onClose={() => setQuotaModal({ open: false, detail: null })} 
+          />
           
           {/* Mobile bottom bar is handled by individual pages */}
         </div>

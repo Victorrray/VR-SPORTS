@@ -2,10 +2,21 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const bodyParser = require("body-parser");
 require("dotenv").config();
 
+// Import usage configuration
+const { FREE_QUOTA } = require("./config/usage.js");
+
 // Initialize Stripe after dotenv loads
-const stripe = process.env.STRIPE_SECRET_KEY ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
+const Stripe = require("stripe");
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+
+// Initialize Supabase client for server operations
+const { createClient } = require('@supabase/supabase-js');
+const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY 
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -15,7 +26,8 @@ const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
 // Stripe configuration
 const STRIPE_PRICE_PLATINUM = process.env.STRIPE_PRICE_PLATINUM;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
-const APP_URL = process.env.APP_URL || 'http://localhost:3000';
+const FRONTEND_URL = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 // In-memory storage for usage tracking (replace with Supabase in production)
 const userUsage = new Map(); // user_id -> { period_start, period_end, calls_made }
@@ -71,6 +83,39 @@ function buildEventOddsUrl({ sportKey, eventId, apiKey, regions = "us", markets,
   return `${baseUrl}?${params.toString()}`;
 }
 
+// Helper function to get or create user profile
+async function getUserProfile(userId) {
+  if (!supabase) {
+    // Fallback to in-memory storage if Supabase not configured
+    if (!userUsage.has(userId)) {
+      userUsage.set(userId, { api_request_count: 0, plan: 'free' });
+    }
+    return userUsage.get(userId);
+  }
+
+  const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
+  if (error && error.code === "PGRST116") {
+    // User doesn't exist, create them
+    const { data: inserted, error: insertErr } = await supabase
+      .from("users")
+      .insert({ id: userId, plan: "free", api_request_count: 0 })
+      .select("*")
+      .single();
+    if (insertErr) throw insertErr;
+    return inserted;
+  }
+  if (error) throw error;
+  return data;
+}
+
+// Middleware to require authenticated user
+function requireUser(req, res, next) {
+  const userId = req.user?.id || req.headers["x-user-id"];
+  if (!userId) return res.status(401).json({ error: "UNAUTHENTICATED" });
+  req.__userId = userId;
+  next();
+}
+
 // Enhanced axios wrapper with retry logic and quota diagnostics
 async function axiosWithRetry(url, options = {}, { tries = 2, backoffMs = 700 } = {}) {
   const axiosConfig = {
@@ -118,18 +163,21 @@ if (!API_KEY) {
 }
 
 // Configure CORS for production
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:3001',
+  'https://odds-frontend-j2pn.onrender.com',
+  'https://my-react-frontend-021i.onrender.com',
+  'https://oddssightseer.com',
+  'https://oddsightseer.com',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'https://odds-frontend-j2pn.onrender.com',
-      'https://oddssightseer.com',
-      'https://oddsightseer.com'
-    ];
     
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -138,55 +186,68 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: false,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept', 'stripe-signature'],
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
 
-// Middleware to enforce API usage limits
-function enforceUsage(req, res, next) {
-  // Mock user extraction - replace with actual JWT/session logic
-  const userId = req.headers['x-user-id'] || 'demo-user';
-  const userPlan = userPlans.get(userId) || 'free_trial';
-  
-  // Platinum users bypass all limits
-  if (userPlan === 'platinum') {
-    req.user = { id: userId, plan: userPlan };
-    return next();
+// Use bodyParser.json() for most routes, but we'll override for webhook
+app.use(bodyParser.json());
+
+// Usage tracking middleware for Odds API proxy
+async function trackUsage(req, res, next) {
+  try {
+    const userId = req.__userId;
+    const profile = await getUserProfile(userId);
+
+    // Enforce quota for non-platinum users
+    if (profile.plan !== "platinum" && profile.api_request_count >= FREE_QUOTA) {
+      return res.status(402).json({
+        error: "QUOTA_EXCEEDED",
+        code: "QUOTA_EXCEEDED",
+        used: profile.api_request_count,
+        quota: FREE_QUOTA,
+        message: "You've reached the free 1,000 request limit. Upgrade to continue."
+      });
+    }
+
+    // Store profile for later use
+    req.__userProfile = profile;
+    next();
+  } catch (error) {
+    console.error('Usage tracking error:', error);
+    res.status(500).json({ error: "USAGE_TRACKING_FAILED" });
   }
-  
-  // Free trial users: enforce 1000 calls per month
-  const { start, end } = currentMonthlyWindow();
-  const periodKey = `${userId}-${start.toISOString()}`;
-  
-  // Get or create usage record for current month
-  let usage = userUsage.get(periodKey);
-  if (!usage) {
-    usage = { period_start: start, period_end: end, calls_made: 0 };
-    userUsage.set(periodKey, usage);
+}
+
+// Increment usage after successful API call
+async function incrementUsage(userId, profile) {
+  if (profile.plan === "platinum") return; // Platinum users don't count against quota
+
+  if (supabase) {
+    try {
+      // Try atomic increment function first
+      const { error: rpcError } = await supabase.rpc("increment_usage", { uid: userId });
+      if (rpcError) {
+        // Fallback to update if RPC not available
+        await supabase.from("users")
+          .update({ api_request_count: profile.api_request_count + 1 })
+          .eq("id", userId);
+      }
+    } catch (error) {
+      console.error('Failed to increment usage:', error);
+    }
+  } else {
+    // Fallback to in-memory storage
+    const userData = userUsage.get(userId);
+    if (userData) {
+      userData.api_request_count += 1;
+      userUsage.set(userId, userData);
+    }
   }
-  
-  // Check if quota exceeded
-  if (usage.calls_made >= 1000) {
-    return res.status(403).json({
-      error: 'quota_exceeded',
-      message: 'Monthly API limit of 1,000 calls exceeded. Upgrade to Platinum for unlimited access.',
-      calls_made: usage.calls_made,
-      limit: 1000,
-      period_end: usage.period_end.toISOString()
-    });
-  }
-  
-  // Increment usage and continue
-  usage.calls_made += 1;
-  userUsage.set(periodKey, usage);
-  
-  req.user = { id: userId, plan: userPlan };
-  next();
 }
 
 // Health check endpoint
@@ -195,7 +256,54 @@ app.get("/health", (req, res) => {
 });
 
 // Usage endpoint - get current user's quota info
-app.get('/api/usage/me', async (req, res) => {
+app.get('/api/me/usage', requireUser, async (req, res) => {
+  try {
+    const profile = await getUserProfile(req.__userId);
+    res.json({
+      userId: profile.id,
+      plan: profile.plan,
+      used: profile.api_request_count,
+      quota: profile.plan === "platinum" ? null : FREE_QUOTA
+    });
+  } catch (error) {
+    console.error('me/usage error:', error);
+    res.status(500).json({ error: "USAGE_FETCH_FAILED" });
+  }
+});
+
+// Apply usage tracking to all Odds API proxy routes
+app.use("/api/odds", requireUser, trackUsage);
+
+// Odds API proxy with usage tracking
+app.get("/api/odds/*", async (req, res) => {
+  try {
+    const userId = req.__userId;
+    const profile = req.__userProfile;
+
+    // Proxy to Odds API
+    const upstreamPath = req.path.replace("/api/odds", "");
+    const upstreamUrl = `https://api.the-odds-api.com${upstreamPath}`;
+    
+    const response = await axios.get(upstreamUrl, { 
+      params: { ...req.query, apiKey: API_KEY },
+      timeout: 9000
+    });
+
+    // If success, increment usage for non-platinum users
+    if (response.status === 200) {
+      await incrementUsage(userId, profile);
+    }
+
+    return res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error("Odds proxy error:", error?.response?.data || error.message);
+    const status = error?.response?.status || 500;
+    return res.status(status).json({ error: "PROXY_FAILED", detail: error.message });
+  }
+});
+
+// Legacy usage endpoint
+app.get('/api/usage/me', requireUser, async (req, res) => {
   try {
     const userId = req.headers['x-user-id'] || 'demo-user';
     
@@ -248,65 +356,41 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
       return res.status(500).json({ error: 'Stripe not configured' });
     }
     
-    const userId = req.headers['x-user-id'];
+    if (!STRIPE_PRICE_PLATINUM) {
+      return res.status(500).json({ error: 'Server misconfig: STRIPE_PRICE_PLATINUM not set' });
+    }
+    
+    const { supabaseUserId } = req.body;
     
     // Require authentication
-    if (!userId || userId === 'demo-user') {
-      return res.status(401).json({ error: 'auth_required' });
+    if (!supabaseUserId) {
+      return res.status(400).json({ error: 'Missing supabaseUserId' });
     }
     
-    console.log(`Creating checkout session for user: ${userId}`);
+    console.log(`Creating checkout session for user: ${supabaseUserId}`);
     
-    // Check if user already has a Stripe customer ID (in production, this would be stored in database)
-    // For now, we'll create a new customer each time or reuse based on user ID
-    let customer;
-    try {
-      // In production, lookup existing customer by user_id in metadata
-      const existingCustomers = await stripe.customers.list({
-        limit: 1,
-        metadata: { user_id: userId }
-      });
-      
-      if (existingCustomers.data.length > 0) {
-        customer = existingCustomers.data[0];
-        console.log(`Found existing Stripe customer: ${customer.id}`);
-      } else {
-        // Create new customer
-        customer = await stripe.customers.create({
-          metadata: { user_id: userId }
-        });
-        console.log(`Created new Stripe customer: ${customer.id}`);
-      }
-    } catch (customerError) {
-      console.error('Error handling Stripe customer:', customerError);
-      // Continue without customer - Stripe will create one during checkout
-    }
-    
-    const sessionConfig = {
+    const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{
         price: STRIPE_PRICE_PLATINUM,
         quantity: 1,
       }],
-      success_url: `${APP_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${APP_URL}/billing/cancel`,
-      client_reference_id: userId,
-      metadata: { user_id: userId }
-    };
+      success_url: `${FRONTEND_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONTEND_URL}/billing/cancel`,
+      customer_creation: 'if_required',
+      allow_promotion_codes: true,
+      metadata: { 
+        userId: supabaseUserId, 
+        plan: 'platinum' 
+      }
+    });
     
-    // Add customer if we have one
-    if (customer) {
-      sessionConfig.customer = customer.id;
-    }
-    
-    const session = await stripe.checkout.sessions.create(sessionConfig);
-    
-    console.log(`Created checkout session: ${session.id} for user: ${userId}`);
+    console.log(`Created checkout session: ${session.id} for user: ${supabaseUserId}`);
     res.json({ url: session.url });
   } catch (error) {
     console.error('Stripe checkout error:', error);
-    res.status(500).json({ error: 'Failed to create checkout session' });
+    res.status(500).json({ error: 'CHECKOUT_START_FAILED', detail: error.message });
   }
 });
 
@@ -343,6 +427,43 @@ app.post('/api/admin/signout-all', async (req, res) => {
   }
 });
 
+// Admin override route to grant platinum manually
+app.post("/api/admin/set-plan", async (req, res) => {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!token || token !== ADMIN_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { userId, plan } = req.body;
+  if (!userId || !plan) {
+    return res.status(400).json({ error: "Missing userId or plan" });
+  }
+
+  if (!supabase) {
+    // Fallback to in-memory storage
+    const userData = userUsage.get(userId) || { api_request_count: 0, plan: 'free' };
+    userData.plan = plan;
+    userUsage.set(userId, userData);
+    return res.json({ ok: true, userId, plan });
+  }
+
+  try {
+    const { error } = await supabase.from("users").update({ plan }).eq("id", userId);
+    if (error) {
+      return res.status(500).json({ error: "SET_PLAN_FAILED", detail: error.message });
+      // Fallback to in-memory storage
+      userPlans.set(userId, 'platinum');
+    }
+
+    console.log(`✅ Admin granted platinum to user: ${userId}`);
+    res.json({ ok: true, userId });
+  } catch (error) {
+    console.error('grant-platinum error:', error);
+    res.status(500).json({ error: 'GRANT_PLATINUM_FAILED', detail: error.message });
+  }
+});
+
 // Set user plan (for free trial)
 app.post('/api/users/plan', async (req, res) => {
   try {
@@ -358,18 +479,23 @@ app.post('/api/users/plan', async (req, res) => {
 
     console.log(`Setting plan for user ${userId}: ${plan}`);
 
-    // Update user plan in database
-    const { error } = await supabase
-      .from('users')
-      .upsert({ 
-        id: userId, 
-        plan: 'free_trial',
-        updated_at: new Date().toISOString()
-      });
+    if (supabase) {
+      // Update user plan in Supabase
+      const { error } = await supabase
+        .from('users')
+        .upsert({ 
+          id: userId, 
+          plan: 'free_trial',
+          updated_at: new Date().toISOString()
+        });
 
-    if (error) {
-      console.error('Failed to update user plan:', error);
-      return res.status(500).json({ error: 'database_error' });
+      if (error) {
+        console.error('Failed to update user plan:', error);
+        return res.status(500).json({ error: 'database_error' });
+      }
+    } else {
+      // Fallback to in-memory storage
+      userPlans.set(userId, 'free_trial');
     }
 
     res.json({ ok: true, plan: 'free_trial' });
@@ -379,35 +505,56 @@ app.post('/api/users/plan', async (req, res) => {
   }
 });
 
-// Stripe webhook handler
-app.post('/api/billing/webhook', (req, res) => {
-  if (!stripe) {
-    return res.status(500).json({ error: 'Stripe not configured' });
-  }
-  
-  const sig = req.headers['stripe-signature'];
-  let event;
-  
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-  
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const userId = session.client_reference_id || session.metadata?.user_id;
+// Stripe webhook handler (raw body required for signature verification)
+app.post('/api/billing/webhook',
+  bodyParser.raw({ type: 'application/json' }),
+  async (req, res) => {
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
     
-    if (userId) {
-      // Upgrade user to platinum
-      userPlans.set(userId, 'platinum');
-      console.log(`User ${userId} upgraded to Platinum`);
+    const sig = req.headers['stripe-signature'];
+    let event;
+    
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
+    } catch (err) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    
+    try {
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        const userId = session.metadata?.userId;
+        
+        if (userId && supabase) {
+          // Update user plan in Supabase
+          const { error } = await supabase
+            .from('users')
+            .update({ plan: 'platinum' })
+            .eq('id', userId);
+            
+          if (error) {
+            console.error('Failed to update user plan in Supabase:', error);
+            throw error;
+          }
+          
+          console.log(`✅ Plan set to platinum via webhook: ${userId}`);
+        } else {
+          // Fallback to in-memory storage
+          userPlans.set(userId, 'platinum');
+          console.log(`User ${userId} upgraded to Platinum (in-memory)`);
+        }
+      }
+      
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook handling error:', error);
+      res.status(500).send('Webhook handler failed');
     }
   }
-  
-  res.json({ received: true });
-});
+);
 
 // sports list (Odds API)
 app.get("/api/sports", enforceUsage, async (_req, res) => {

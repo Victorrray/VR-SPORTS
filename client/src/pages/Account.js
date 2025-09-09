@@ -8,6 +8,7 @@ import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Sett
 import AccessibilitySettings from "../components/AccessibilitySettings";
 import MobileBottomBar from "../components/MobileBottomBar";
 import SportMultiSelect from "../components/SportMultiSelect";
+import UsagePlanCard from "../components/UsagePlanCard";
 import "./Account.css";
 
 function initialsFromEmail(email = "") {
@@ -430,6 +431,9 @@ export default function Account() {
           </button>
         </div>
       </section>
+
+      {/* Usage & Plan Card */}
+      <UsagePlanCard />
 
       {/* Sportsbook Selection */}
       <section className="sportsbook-card">
