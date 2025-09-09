@@ -5,24 +5,29 @@ export const useQuotaHandler = () => {
   const [quotaError, setQuotaError] = useState(null);
 
   const handleApiResponse = useCallback(async (response) => {
-    if (response.status === 403) {
+    if (response.status === 402) {
       try {
         const errorData = await response.json();
-        if (errorData.error === 'quota_exceeded') {
+        if (errorData.code === 'QUOTA_EXCEEDED') {
           setQuotaExceeded(true);
           setQuotaError(errorData);
+          // Trigger global plangate modal
+          window.dispatchEvent(new CustomEvent("plangate", { detail: errorData }));
           return { quotaExceeded: true, error: errorData };
         }
       } catch (e) {
-        // If we can't parse the error, still treat 403 as quota exceeded
+        // If we can't parse the error, still treat 402 as quota exceeded
+        const fallbackError = {
+          error: 'QUOTA_EXCEEDED',
+          code: 'QUOTA_EXCEEDED',
+          message: 'You\'ve reached the free 1,000 request limit. Upgrade to continue.',
+          used: 1000,
+          quota: 1000
+        };
         setQuotaExceeded(true);
-        setQuotaError({
-          error: 'quota_exceeded',
-          message: 'Monthly API limit exceeded. Upgrade to Platinum for unlimited access.',
-          calls_made: null,
-          limit: 1000
-        });
-        return { quotaExceeded: true, error: null };
+        setQuotaError(fallbackError);
+        window.dispatchEvent(new CustomEvent("plangate", { detail: fallbackError }));
+        return { quotaExceeded: true, error: fallbackError };
       }
     }
     

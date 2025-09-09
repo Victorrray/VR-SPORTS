@@ -17,19 +17,41 @@ const PlanGate = ({ user, onPlanSelected }) => {
       
       debugLog('PLAN_GATE', 'User selecting platinum plan', { userId: user?.id });
       
+      // Get authenticated user from Supabase
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.REACT_APP_SUPABASE_URL || import.meta?.env?.VITE_SUPABASE_URL,
+        process.env.REACT_APP_SUPABASE_ANON_KEY || import.meta?.env?.VITE_SUPABASE_ANON_KEY
+      );
+      
+      if (!supabase) {
+        setError('Authentication service not available. Please try again.');
+        return;
+      }
+      
+      const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !supabaseUser) {
+        // Redirect to login if not authenticated
+        window.location.href = '/login?next=/pricing';
+        return;
+      }
+      
+      const backendUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+      
       // For development, show a message about Stripe setup
       if (process.env.NODE_ENV === 'development') {
         setError('Stripe checkout is not configured for local development. This would redirect to payment in production.');
         return;
       }
       
-      const response = await fetch('/api/billing/create-checkout-session', {
+      const response = await fetch(`${backendUrl}/api/billing/create-checkout-session`, {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user?.id
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ supabaseUserId: supabaseUser.id })
       });
       
       const responseData = await response.json();
@@ -38,15 +60,15 @@ const PlanGate = ({ user, onPlanSelected }) => {
         console.error('Checkout session error:', responseData);
         if (responseData.error === 'Stripe not configured') {
           setError('Payment processing is not configured. Please contact support.');
+        } else if (responseData.error === 'CHECKOUT_START_FAILED') {
+          setError(responseData.detail || 'Failed to start checkout. Please try again.');
         } else {
           setError(responseData.error || 'Checkout unavailable. Please try again.');
         }
         return;
       }
       
-      const success = !!responseData?.url;
-      
-      if (success) {
+      if (responseData?.url) {
         // Redirect to Stripe checkout
         window.location.href = responseData.url;
       } else {

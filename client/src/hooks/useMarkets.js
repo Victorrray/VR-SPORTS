@@ -60,23 +60,35 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         dateFormat: 'iso'
       });
 
-      const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
+      const BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001');
       const fullUrl = `${BASE_URL}/api/odds?${params}`;
       console.log('🔍 useMarkets: Final API URL:', fullUrl);
-      console.log('🔍 useMarkets: BASE_URL from env:', process.env.REACT_APP_API_URL);
+      console.log('🔍 useMarkets: BASE_URL from env:', process.env.REACT_APP_API_BASE_URL);
       console.log('🔍 useMarkets: NODE_ENV:', process.env.NODE_ENV);
       
-      const response = await secureFetch(fullUrl);
+      const response = await secureFetch(fullUrl, {
+        headers: {
+          'x-user-id': 'demo-user' // Temporary fallback for development
+        }
+      });
       console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
       
       // Handle quota exceeded before other errors
       const quotaResult = await handleApiResponse(response);
       if (quotaResult.quotaExceeded) {
         console.log('🔍 useMarkets: Quota exceeded, stopping further requests');
+        setError('Quota exceeded - upgrade to continue');
         return;
       }
       
       if (!response.ok) {
+        // For development, provide fallback data instead of infinite loading
+        if (response.status === 401 || response.status === 500) {
+          console.warn('🔍 useMarkets: API unavailable, using fallback data');
+          setGames([]);
+          setError('API temporarily unavailable');
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
@@ -95,10 +107,13 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       console.log('🔍 useMarkets: Setting games state with', normalizedGames.length, 'games');
       setGames(normalizedGames);
       setLastUpdate(Date.now());
+      setError(null); // Clear any previous errors
     } catch (err) {
       console.error('🔍 useMarkets: Fetch error:', err);
       console.error('🔍 useMarkets: Error stack:', err.stack);
       setError(err.message);
+      // Set empty games to prevent infinite loading
+      setGames([]);
     } finally {
       console.log('🔍 useMarkets: Setting loading to false');
       setLoading(false);
