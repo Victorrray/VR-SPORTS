@@ -17,7 +17,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl' }) => {
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Fetch odds data for arbitrage analysis
-  const { data: oddsData, loading, refresh, lastUpdate } = useCachedFetch('/api/odds', {
+  const { data: oddsData, loading, refresh, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../config/api'); return withApiBase('/api/odds'); })(), {
     params: { 
       sports: sport,
       markets: selectedMarkets.join(','),

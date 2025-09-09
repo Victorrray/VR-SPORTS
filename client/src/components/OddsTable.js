@@ -372,12 +372,13 @@ export default function OddsTable({
 
   /* ---------- Build rows (game mode) ---------- */
   const allRows = useMemo(() => {
-    if (mode === "props") {
-      const propsRows = [];
-      const propGroups = new Map(); // Group props by player+market+point
-      
-      // First pass: collect all props and group them
-      console.log('Processing games for props mode. Total games:', games?.length);
+    try {
+      if (mode === "props") {
+        const propsRows = [];
+        const propGroups = new Map(); // Group props by player+market+point
+        
+        // First pass: collect all props and group them
+        console.log('Processing games for props mode. Total games:', games?.length);
       
       // Log what markets we're looking for
       console.log('Looking for player prop markets containing: player_, batter_, pitcher_');
@@ -637,6 +638,10 @@ export default function OddsTable({
     });
     
     return gameRows;
+    } catch (error) {
+      console.error('Error processing games data:', error);
+      return [];
+    }
   }, [games, mode, marketFilter, bookFilter]);
 
   // Price change detection for flash animations

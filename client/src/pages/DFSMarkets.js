@@ -96,7 +96,9 @@ export default function DFSMarkets() {
   const fetchSeedsForSport = async (sportKey) => {
     // Try /api/events first
     try {
-      const ev = await fetch(`${BASE_URL}/api/events?sport=${sportKey}`);
+      const { withApiBase } = require('../config/api');
+      const base = withApiBase('');
+      const ev = await fetch(`${base}/api/events?sport=${sportKey}`);
       if (ev.ok) {
         const data = await ev.json();
         const arr = normalizeArray(data).filter(e => e?.id && e?.sport_key);
@@ -106,8 +108,10 @@ export default function DFSMarkets() {
 
     // Fallback: /api/odds-data (US region, h2h only) to harvest IDs
     try {
+      const { withApiBase } = require('../config/api');
+      const base = withApiBase('');
       const r = await fetch(
-        `${BASE_URL}/api/odds-data?sport=${sportKey}&regions=us&markets=h2h`
+        `${base}/api/odds-data?sport=${sportKey}&regions=us&markets=h2h`
       );
       if (!r.ok) return [];
       const oddsArr = normalizeArray(await r.json());
@@ -130,7 +134,9 @@ export default function DFSMarkets() {
   useEffect(() => {
     (async () => {
       try {
-        const r = await fetch(`${BASE_URL}/api/sports`);
+        const { withApiBase } = require('../config/api');
+        const base = withApiBase('');
+        const r = await fetch(`${base}/api/sports`);
         if (!r.ok) {
           setSportList([{ key: "ALL", title: "All Sports" }]);
           return;
@@ -179,7 +185,7 @@ export default function DFSMarkets() {
 
         const eventsWithProps = await runLimited(CONCURRENCY, seeds, async (ev) => {
           const markets = getMarketsForSport(ev.sport_key); // include _alternate
-          const url = `${BASE_URL}/api/player-props?sport=${ev.sport_key}` +
+          const url = `${base}/api/player-props?sport=${ev.sport_key}` +
             `&eventId=${encodeURIComponent(ev.id)}` +
             `&regions=us&markets=${encodeURIComponent(markets)}`;
 

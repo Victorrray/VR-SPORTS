@@ -21,7 +21,8 @@ export function useMe() {
       }
 
       // Fetch user plan and usage info from backend
-      const response = await fetch('/api/usage/me', { 
+      const { withApiBase } = require('../config/api');
+      const response = await fetch(withApiBase('/api/usage/me'), { 
         credentials: 'include',
         headers: {
           'x-user-id': session.session.user.id

@@ -25,7 +25,10 @@ const LiveBetting = ({ sport = 'americanfootball_nfl' }) => {
     isPolling,
     startPolling,
     stopPolling
-  } = useRealtimeCachedFetch('/api/live-odds', {
+  } = useRealtimeCachedFetch((() => {
+    const { withApiBase } = require('../config/api');
+    return withApiBase('/api/live-odds');
+  })(), {
     params: { 
       sports: sport,
       markets: 'h2h,spreads,totals',

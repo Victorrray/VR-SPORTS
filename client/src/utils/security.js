@@ -150,7 +150,8 @@ export const CSPUtils = {
     
     if (process.env.NODE_ENV === 'production') {
       // TODO: Send to security monitoring service
-      fetch('/api/csp-report', {
+      const { withApiBase } = require('../config/api');
+      fetch(withApiBase('/api/csp-report'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(violation)
