@@ -31,7 +31,7 @@ const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 // In-memory storage for usage tracking (replace with Supabase in production)
 const userUsage = new Map(); // user_id -> { period_start, period_end, calls_made }
-const userPlans = new Map(); // user_id -> 'free_trial' | 'platinum'
+// userPlans removed - now using Supabase exclusively for plan management
 
 // Constants for improved player props stability
 const FOCUSED_BOOKMAKERS = [
@@ -534,8 +534,6 @@ app.post("/api/admin/set-plan", async (req, res) => {
     const { error } = await supabase.from("users").update({ plan }).eq("id", userId);
     if (error) {
       return res.status(500).json({ error: "SET_PLAN_FAILED", detail: error.message });
-      // Fallback to in-memory storage
-      userPlans.set(userId, 'platinum');
     }
 
     console.log(`✅ Admin granted platinum to user: ${userId}`);
@@ -576,8 +574,7 @@ app.post('/api/users/plan', async (req, res) => {
         return res.status(500).json({ error: 'database_error' });
       }
     } else {
-      // Fallback to in-memory storage
-      userPlans.set(userId, 'free_trial');
+      return res.status(500).json({ error: "SUPABASE_REQUIRED", message: "Supabase connection required for plan management" });
     }
 
     res.json({ ok: true, plan: 'free_trial' });
@@ -624,9 +621,7 @@ app.post('/api/billing/webhook',
           
           console.log(`✅ Plan set to platinum via webhook: ${userId}`);
         } else {
-          // Fallback to in-memory storage
-          userPlans.set(userId, 'platinum');
-          console.log(`User ${userId} upgraded to Platinum (in-memory)`);
+          console.error(`Failed to update plan in Supabase for user ${userId}`);
         }
       }
       
