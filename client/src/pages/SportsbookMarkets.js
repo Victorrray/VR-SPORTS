@@ -192,7 +192,7 @@ const FEATURED_SPORTS = new Set([
    Component
    ========================= */
 
-export default function SportsbookMarkets() {
+export default function SportsbookMarkets({ onRegisterMobileSearch }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
@@ -287,6 +287,18 @@ export default function SportsbookMarkets() {
       window.removeEventListener('openMobileSearch', handleOpenMobileSearch);
     };
   }, []);
+
+  // Register mobile search callback with parent
+  useEffect(() => {
+    if (onRegisterMobileSearch) {
+      onRegisterMobileSearch(() => setShowMobileSearch(true));
+    }
+    return () => {
+      if (onRegisterMobileSearch) {
+        onRegisterMobileSearch(null);
+      }
+    };
+  }, [onRegisterMobileSearch]);
 
   // Enhanced filter presets with sportsbook recommendations
   const filterPresets = [

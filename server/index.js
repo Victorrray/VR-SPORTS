@@ -310,6 +310,39 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
   }
 });
 
+// Server logout endpoint - clears HTTP-only session cookies if any
+app.post('/api/logout', (req, res) => {
+  // Clear any session cookies that might be set
+  res.clearCookie('session', { path: '/', sameSite: 'lax', httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+  res.clearCookie('auth-token', { path: '/', sameSite: 'lax', httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+  return res.json({ ok: true });
+});
+
+// Admin endpoint to sign out all users (invalidate all sessions)
+app.post('/api/admin/signout-all', async (req, res) => {
+  try {
+    console.log('🔐 Admin: Signing out all users');
+    
+    // Use Supabase Admin API to sign out all users
+    const { data, error } = await supabase.auth.admin.signOutAllUsers();
+    
+    if (error) {
+      console.error('Failed to sign out all users:', error);
+      return res.status(500).json({ error: 'Failed to sign out users', details: error.message });
+    }
+    
+    console.log('✅ Successfully signed out all users');
+    return res.json({ 
+      ok: true, 
+      message: 'All users have been signed out',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error signing out all users:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Set user plan (for free trial)
 app.post('/api/users/plan', async (req, res) => {
   try {

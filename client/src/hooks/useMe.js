@@ -1,6 +1,6 @@
 // Hook to fetch user plan and drive menu + gate logic
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../lib/supabase';
 
 export function useMe() {
   const [me, setMe] = useState(null);
@@ -9,6 +9,11 @@ export function useMe() {
   const fetchMe = useCallback(async () => {
     setLoading(true);
     try {
+      if (!supabase) {
+        setMe(null);
+        return;
+      }
+
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) { 
         setMe(null); 
@@ -48,12 +53,14 @@ export function useMe() {
     fetchMe();
     
     // Listen for auth state changes and refetch user data
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 Auth state changed:', event, !!session);
-      fetchMe();
-    });
+    if (supabase) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log('🔐 Auth state changed:', event, !!session);
+        fetchMe();
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    }
   }, [fetchMe]);
 
   return { me, loading, refresh: fetchMe };

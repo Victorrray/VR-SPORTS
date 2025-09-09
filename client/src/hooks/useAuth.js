@@ -1,6 +1,6 @@
 // Authentication hook with Supabase integration
 import { useState, useEffect, useContext, createContext } from 'react';
-import { db, isSupabaseEnabled } from '../utils/supabase';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext({});
 
@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
+  const isSupabaseEnabled = !!supabase;
 
   useEffect(() => {
     // Get initial session
@@ -16,14 +17,28 @@ export const AuthProvider = ({ children }) => {
       console.log('🔐 useAuth: Getting initial session, isSupabaseEnabled:', isSupabaseEnabled);
       
       if (!isSupabaseEnabled) {
-        console.log('🔐 useAuth: Supabase disabled, setting loading false');
+        console.log('🔐 useAuth: Supabase disabled - checking localStorage for demo session');
+        
+        // Check for demo session in localStorage
+        try {
+          const demoSession = localStorage.getItem('demo-auth-session');
+          if (demoSession) {
+            const sessionData = JSON.parse(demoSession);
+            console.log('🔐 useAuth: Found demo session:', sessionData.email);
+            setUser(sessionData);
+            setSession({ user: sessionData });
+          }
+        } catch (error) {
+          console.error('🔐 useAuth: Error parsing demo session:', error);
+        }
+        
         setLoading(false);
         return;
       }
 
       try {
-        console.log('🔐 useAuth: Calling db.auth.getSession()');
-        const { data: { session }, error } = await db.auth.getSession();
+        console.log('🔐 useAuth: Calling supabase.auth.getSession()');
+        const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
         
         console.log('🔐 useAuth: Session received:', !!session, session?.user?.email);
@@ -52,7 +67,7 @@ export const AuthProvider = ({ children }) => {
 
     // Listen for auth changes
     if (isSupabaseEnabled) {
-      const { data: { subscription } } = db.auth.onAuthStateChange(
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, session) => {
           console.log('🔐 useAuth: Auth state change:', event, !!session);
           setSession(session);
@@ -83,7 +98,7 @@ export const AuthProvider = ({ children }) => {
     if (!isSupabaseEnabled) return;
 
     try {
-      const { data, error } = await db
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -100,7 +115,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signUp = async (email, password, metadata = {}) => {
-    const { data, error } = await db.auth.signUp({
+    if (!isSupabaseEnabled) {
+      throw new Error('Authentication not available - Supabase not configured');
+    }
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -113,7 +131,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signIn = async (email, password) => {
-    const { data, error } = await db.auth.signInWithPassword({
+    if (!isSupabaseEnabled) {
+      // Demo mode - create a fake session and persist it
+      const demoUser = {
+        id: '54276b6c-5255-4117-be95-70c22132591c',
+        email: email,
+        created_at: new Date().toISOString(),
+        app_metadata: {},
+        user_metadata: {}
+      };
+      
+      // Store in localStorage for persistence across refreshes
+      localStorage.setItem('demo-auth-session', JSON.stringify(demoUser));
+      
+      setUser(demoUser);
+      setSession({ user: demoUser });
+      
+      console.log('🔐 useAuth: Demo login successful for:', email);
+      return { user: demoUser, session: { user: demoUser } };
+    }
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
@@ -125,7 +163,7 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     try {
       if (isSupabaseEnabled) {
-        const { error } = await db.auth.signOut();
+        const { error } = await supabase.auth.signOut();
         if (error) throw error;
       }
       
@@ -136,6 +174,7 @@ export const AuthProvider = ({ children }) => {
       
       // Clear any local storage items related to auth
       localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('demo-auth-session'); // Clear demo session
       
       console.log('🔐 useAuth: Successfully signed out');
     } catch (error) {
@@ -144,6 +183,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setProfile(null);
       setSession(null);
+      localStorage.removeItem('demo-auth-session');
     }
   };
 
@@ -152,7 +192,7 @@ export const AuthProvider = ({ children }) => {
       throw new Error('Authentication required');
     }
 
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from('profiles')
       .update({
         ...updates,
@@ -185,9 +225,14 @@ export const AuthProvider = ({ children }) => {
     signUpEmail: signUp,
     signInWithProvider: async (provider) => {
       if (!isSupabaseEnabled) {
-        throw new Error('Authentication not available in demo mode');
+        throw new Error('Authentication not available - Supabase not configured');
       }
-      const { data, error } = await db.auth.signInWithOAuth({ provider });
+      const { data, error } = await supabase.auth.signInWithOAuth({ 
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
       if (error) throw error;
       return data;
     },

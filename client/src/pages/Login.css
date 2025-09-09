@@ -9,7 +9,7 @@
     radial-gradient(1200px 600px at 50% -200px,
       color-mix(in srgb, var(--accent) 8%, transparent), transparent),
     var(--bg-body);
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 2rem 1rem;
 }
 
 .login-card {
@@ -208,6 +208,54 @@
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--bg-elev-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.remember-toggle.checked {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: var(--accent);
+}
+
+.remember-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.remember-toggle.checked::after {
+  transform: translateX(20px);
+}
+
+.remember-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .terms-text {
