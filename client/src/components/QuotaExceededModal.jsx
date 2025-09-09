@@ -6,7 +6,8 @@ const QuotaExceededModal = ({ isOpen, onClose, quotaError, onUpgrade }) => {
 
   const handleUpgrade = async () => {
     try {
-      const response = await fetch('/api/billing/create-checkout-session', {
+      const { withApiBase } = require('../config/api');
+      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
