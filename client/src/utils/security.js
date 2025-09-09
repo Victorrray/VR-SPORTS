@@ -30,8 +30,8 @@ export const secureFetch = async (url, options = {}) => {
   // Check if this is a cross-origin request
   const isLocalhost = url.startsWith('http://localhost');
   const isSameOrigin = url.startsWith(window.location.origin);
-  const isVRSportsAPI = url.includes('vr-sports.onrender.com');
-  const isCrossOrigin = !isLocalhost && !isSameOrigin && !isVRSportsAPI;
+  const isBackendAPI = url.includes('odds-backend-4e9q.onrender.com');
+  const isCrossOrigin = !isLocalhost && !isSameOrigin && !isBackendAPI;
   
   const secureOptions = {
     ...options,
@@ -41,8 +41,8 @@ export const secureFetch = async (url, options = {}) => {
       'X-Requested-With': 'XMLHttpRequest',
       ...options.headers
     },
-    // Always include credentials for VR-Sports API to ensure proper authentication
-    credentials: isVRSportsAPI ? 'include' : (isCrossOrigin ? 'omit' : 'include'),
+    // Always include credentials for backend API to ensure proper authentication
+    credentials: isBackendAPI ? 'include' : (isCrossOrigin ? 'omit' : 'include'),
   };
 
   // Add referrer policy for external APIs

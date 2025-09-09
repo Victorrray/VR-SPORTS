@@ -60,15 +60,20 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         dateFormat: 'iso'
       });
 
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
-      const fullUrl = `${BASE_URL}/api/odds?${params}`;
+      // Use the configured API base URL with fallback to production URL
+      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://odds-backend-4e9q.onrender.com';
+      // Use the correct endpoint for fetching odds
+      const fullUrl = `${BASE_URL.replace(/\/$/, '')}/api/odds?${params}`;
       console.log('🔍 useMarkets: Final API URL:', fullUrl);
       console.log('🔍 useMarkets: BASE_URL from env:', process.env.REACT_APP_API_BASE_URL);
       console.log('🔍 useMarkets: NODE_ENV:', process.env.NODE_ENV);
       
+      // Include proper headers for authentication
       const response = await secureFetch(fullUrl, {
         headers: {
-          'x-user-id': 'demo-user' // Temporary fallback for development
+          'x-user-id': 'demo-user', // Will be replaced with actual user ID in production
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
       });
       console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
@@ -85,11 +90,25 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         // For development, provide fallback data instead of infinite loading
         if (response.status === 401 || response.status === 500) {
           console.warn('🔍 useMarkets: API unavailable, using fallback data');
+          console.warn('🔍 Response status:', response.status);
+          try {
+            const errorBody = await response.text();
+            console.warn('🔍 Error response body:', errorBody);
+          } catch (e) {
+            console.warn('🔍 Could not read error response body');
+          }
           setGames([]);
           setError('API temporarily unavailable');
           return;
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('🔍 API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          error: errorText
+        });
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
       
       const data = await response.json();

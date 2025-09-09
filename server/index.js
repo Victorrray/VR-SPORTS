@@ -173,8 +173,13 @@ const allowedOrigins = [
   'https://my-react-frontend-021i.onrender.com',
   'https://oddssightseer.com',
   'https://oddsightseer.com',
+  'https://www.oddssightseer.com',
+  'https://www.oddsightseer.com',
   process.env.FRONTEND_URL
 ].filter(Boolean);
+
+// Log allowed origins for debugging
+console.log('🔄 CORS Allowed Origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
