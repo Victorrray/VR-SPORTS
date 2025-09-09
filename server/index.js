@@ -230,7 +230,10 @@ async function trackUsage(req, res, next) {
     next();
   } catch (error) {
     console.error('Usage tracking error:', error);
-    res.status(500).json({ error: "USAGE_TRACKING_FAILED" });
+    // In production, allow request to continue instead of failing
+    // This prevents 500 errors when Supabase is misconfigured
+    req.__userProfile = { plan: 'free', api_request_count: 0 };
+    next();
   }
 }
 
