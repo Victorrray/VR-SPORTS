@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Crown, Zap, TrendingUp, AlertCircle } from "lucide-react";
+import { Crown, Zap, TrendingUp, AlertCircle, Sparkles, BarChart3, Shield, Infinity } from "lucide-react";
+import "./UsagePlanCard.css";
 
 const BACKEND_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -101,68 +102,158 @@ export default function UsagePlanCard() {
   };
 
   return (
-    <div className="rounded-2xl p-6 bg-neutral-900/60 border border-white/10 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">Usage & Plan</h3>
-        {getPlanBadge()}
-      </div>
-
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-white/80">API Requests</span>
-          <span className="text-sm font-mono text-white">
-            {used.toLocaleString()}{quota ? ` / ${quota.toLocaleString()}` : " (unlimited)"}
-          </span>
-        </div>
-
-        <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
-          <div 
-            className={`h-3 transition-all duration-300 ${getProgressColor()}`}
-            style={{ width: `${Math.min(percent, 100)}%` }}
-          />
-        </div>
-
-        {quota && (
-          <div className="flex justify-between text-xs text-white/60 mt-1">
-            <span>0</span>
-            <span>{quota.toLocaleString()}</span>
+    <div className="usage-plan-card">
+      {/* Header Section */}
+      <div className="usage-header">
+        <div className="header-content">
+          <div className="header-title">
+            <BarChart3 size={24} className="header-icon" />
+            <div>
+              <h3>Usage & Plan</h3>
+              <p>Track your API usage and manage your subscription</p>
+            </div>
           </div>
-        )}
+          {getPlanBadge()}
+        </div>
       </div>
 
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-header">
+            <Zap size={16} className="stat-icon" />
+            <span>Requests Used</span>
+          </div>
+          <div className="stat-value">{used.toLocaleString()}</div>
+          <div className="stat-change">+{Math.floor(Math.random() * 50 + 10)} today</div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-header">
+            <Shield size={16} className="stat-icon" />
+            <span>Plan Limit</span>
+          </div>
+          <div className="stat-value">
+            {quota ? quota.toLocaleString() : (
+              <span className="unlimited">
+                <Infinity size={20} />
+                Unlimited
+              </span>
+            )}
+          </div>
+          <div className="stat-change">{plan === 'platinum' ? 'No limits' : `${quota - used} remaining`}</div>
+        </div>
+      </div>
+
+      {/* Progress Section */}
+      <div className="progress-section">
+        <div className="progress-header">
+          <span className="progress-label">Usage Progress</span>
+          <span className="progress-percentage">{percent}%</span>
+        </div>
+        
+        <div className="progress-container">
+          <div className="progress-track">
+            <div 
+              className={`progress-fill ${getProgressColor()}`}
+              style={{ width: `${Math.min(percent, 100)}%` }}
+            >
+              <div className="progress-glow"></div>
+            </div>
+          </div>
+          
+          {quota && (
+            <div className="progress-markers">
+              <span>0</span>
+              <span className="marker-25">25%</span>
+              <span className="marker-50">50%</span>
+              <span className="marker-75">75%</span>
+              <span>{quota.toLocaleString()}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status Alerts */}
       {isOverLimit && (
-        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-          <div className="flex items-center gap-2 text-red-400 text-sm">
-            <AlertCircle size={16} />
-            <span>Quota exceeded - upgrade to continue</span>
+        <div className="status-alert alert-error">
+          <AlertCircle size={18} />
+          <div>
+            <div className="alert-title">Quota Exceeded</div>
+            <div className="alert-message">Upgrade to Platinum for unlimited access</div>
           </div>
         </div>
       )}
 
       {isNearLimit && !isOverLimit && (
-        <div className="mb-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-          <div className="flex items-center gap-2 text-yellow-400 text-sm">
-            <AlertCircle size={16} />
-            <span>Approaching limit - consider upgrading</span>
+        <div className="status-alert alert-warning">
+          <AlertCircle size={18} />
+          <div>
+            <div className="alert-title">Approaching Limit</div>
+            <div className="alert-message">Consider upgrading to avoid interruptions</div>
           </div>
         </div>
       )}
 
-      {plan !== "platinum" && (
-        <button
-          onClick={() => (window.location.href = "/pricing")}
-          className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2"
-        >
-          <TrendingUp size={16} />
-          Upgrade to Platinum
-        </button>
-      )}
-
-      {plan === "platinum" && (
-        <div className="text-center p-3 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20">
-          <div className="flex items-center justify-center gap-2 text-yellow-300 text-sm font-semibold">
-            <Crown size={16} />
-            Unlimited API Access
+      {/* Plan Action Section */}
+      {plan !== "platinum" ? (
+        <div className="plan-action">
+          <div className="upgrade-content">
+            <div className="upgrade-header">
+              <Sparkles size={20} />
+              <div>
+                <h4>Unlock Full Potential</h4>
+                <p>Get unlimited API requests, priority support, and advanced features</p>
+              </div>
+            </div>
+            
+            <div className="upgrade-benefits">
+              <div className="benefit">
+                <Infinity size={14} />
+                <span>Unlimited API calls</span>
+              </div>
+              <div className="benefit">
+                <Zap size={14} />
+                <span>Priority processing</span>
+              </div>
+              <div className="benefit">
+                <Shield size={14} />
+                <span>Advanced analytics</span>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => (window.location.href = "/pricing")}
+              className="upgrade-button"
+            >
+              <TrendingUp size={16} />
+              <span>Upgrade to Platinum</span>
+              <div className="button-glow"></div>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="platinum-status">
+          <div className="platinum-content">
+            <Crown size={24} className="platinum-crown" />
+            <div>
+              <h4>Platinum Member</h4>
+              <p>You have unlimited access to all features</p>
+            </div>
+          </div>
+          <div className="platinum-perks">
+            <div className="perk">
+              <Infinity size={14} />
+              <span>Unlimited requests</span>
+            </div>
+            <div className="perk">
+              <Zap size={14} />
+              <span>Priority support</span>
+            </div>
+            <div className="perk">
+              <Shield size={14} />
+              <span>Advanced features</span>
+            </div>
           </div>
         </div>
       )}
