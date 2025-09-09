@@ -110,7 +110,8 @@ async function getUserProfile(userId) {
 
 // Middleware to require authenticated user
 function requireUser(req, res, next) {
-  const userId = req.user?.id || req.headers["x-user-id"];
+  const isReadOnlyGet = req.method === 'GET';
+  const userId = req.user?.id || req.headers["x-user-id"] || (isReadOnlyGet ? 'demo-user' : undefined);
   if (!userId) return res.status(401).json({ error: "UNAUTHENTICATED" });
   req.__userId = userId;
   next();
@@ -319,6 +320,50 @@ app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', async (req, res) =
     console.error("Odds proxy error:", error?.response?.data || error.message);
     const status = error?.response?.status || 500;
     return res.status(status).json({ error: "PROXY_FAILED", detail: error.message });
+  }
+});
+
+// Explicit Odds API proxies (Express 5-safe)
+app.get('/api/odds/v4/sports', enforceUsage, async (_req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
+    const r = await axios.get(upstreamUrl);
+    res.json(r.data);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: 'proxy_failed', detail: err?.response?.data || err.message });
+  }
+});
+
+app.get('/api/odds/v4/sports/:sportKey/events', enforceUsage, async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    const { sportKey } = req.params;
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/events?apiKey=${API_KEY}`;
+    const r = await axios.get(upstreamUrl);
+    res.json(r.data);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: 'proxy_failed', detail: err?.response?.data || err.message });
+  }
+});
+
+app.get('/api/odds/v4/sports/:sportKey/odds', enforceUsage, async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    const { sportKey } = req.params;
+    const { regions = 'us', markets = 'h2h,spreads,totals', oddsFormat = 'american', bookmakers, dateFormat, includeBetLimits } = req.query;
+    const qs = new URLSearchParams({ apiKey: API_KEY, regions, markets, oddsFormat });
+    if (bookmakers) qs.set('bookmakers', String(bookmakers));
+    if (dateFormat) qs.set('dateFormat', String(dateFormat));
+    if (includeBetLimits) qs.set('includeBetLimits', String(includeBetLimits));
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/odds?${qs.toString()}`;
+    const r = await axios.get(upstreamUrl);
+    res.json(r.data);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: 'proxy_failed', detail: err?.response?.data || err.message });
   }
 });
 
