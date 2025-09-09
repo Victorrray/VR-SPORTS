@@ -71,14 +71,22 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       return gameDate === todayDate;
     });
 
+    // Normalize user's selected sportsbook keys for comparison
+    const normalizedUserBooks = userSelectedBooks.map(book => 
+      book.toLowerCase().replace(/[^a-z0-9]/g, '')
+    );
+    
     // Filter games to only include user's selected sportsbooks
     const filteredGames = todaysGames.filter(game => {
       if (!game.bookmakers || game.bookmakers.length === 0) return false;
       
       // Check if any of the game's bookmakers match user's selected books
-      const hasUserBooks = game.bookmakers.some(book => 
-        userSelectedBooks.includes(book.key)
-      );
+      const hasUserBooks = game.bookmakers.some(book => {
+        const normalizedKey = book.key.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return normalizedUserBooks.some(userBook => 
+          normalizedKey.includes(userBook) || userBook.includes(normalizedKey)
+        );
+      });
       
       return hasUserBooks;
     });
@@ -90,9 +98,12 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       if (!game.bookmakers || game.bookmakers.length < 1) return false;
       
       // Filter bookmakers to only user's selected books
-      const userBookmakers = game.bookmakers.filter(book => 
-        userSelectedBooks.includes(book.key)
-      );
+      const userBookmakers = game.bookmakers.filter(book => {
+        const normalizedKey = book.key.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return normalizedUserBooks.some(userBook => 
+          normalizedKey.includes(userBook) || userBook.includes(normalizedKey)
+        );
+      });
       
       if (userBookmakers.length === 0) return false;
       
