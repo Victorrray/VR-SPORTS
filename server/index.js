@@ -232,6 +232,12 @@ async function trackUsage(req, res, next) {
   }
 }
 
+// Lightweight usage gate used by public GET endpoints to prevent accidental abuse.
+// Currently a no-op that forwards the request; retain hook for future expansion.
+function enforceUsage(req, res, next) {
+  return next();
+}
+
 // Increment usage after successful API call
 async function incrementUsage(userId, profile) {
   if (profile.plan === "platinum") return; // Platinum users don't count against quota
@@ -1744,8 +1750,11 @@ app.get('/api/reactions-summary', (req, res) => {
 
 
 /* ------------------------------------ Start ------------------------------------ */
-// SPA fallback: keep last, after static and API routes
-app.get('/*', (req, res) => {
+// SPA fallback: keep last, after static and API routes.
+// Use a middleware without a path to catch unmatched GETs in Express 5 safely.
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (req.path.startsWith('/api/')) return next();
   const indexPath = path.join(clientBuildPath, 'index.html');
   res.sendFile(indexPath, err => {
     if (err) {
