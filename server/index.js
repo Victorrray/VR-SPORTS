@@ -197,6 +197,15 @@ app.use(cors(corsOptions));
 // Use bodyParser.json() for most routes, but we'll override for webhook
 app.use(bodyParser.json());
 
+// Serve static client build if available
+const path = require('path');
+const clientBuildPath = path.join(__dirname, '..', 'client', 'build');
+try {
+  app.use(express.static(clientBuildPath));
+} catch (_) {
+  // ok if not present locally
+}
+
 // Usage tracking middleware for Odds API proxy
 async function trackUsage(req, res, next) {
   try {
@@ -250,8 +259,11 @@ async function incrementUsage(userId, profile) {
   }
 }
 
-// Health check endpoint
-app.get("/health", (req, res) => {
+// Health check endpoints (for Render and monitors)
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true });
+});
+app.get("/health", (_req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
@@ -275,13 +287,15 @@ app.get('/api/me/usage', requireUser, async (req, res) => {
 app.use("/api/odds", requireUser, trackUsage);
 
 // Odds API proxy with usage tracking
-app.get("/api/odds/*", async (req, res) => {
+// Proxy only explicit Odds API endpoints to avoid path-to-regexp wildcards
+app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', async (req, res) => {
   try {
     const userId = req.__userId;
     const profile = req.__userProfile;
 
     // Proxy to Odds API
-    const upstreamPath = req.path.replace("/api/odds", "");
+    const { sportKey, eventId } = req.params;
+    const upstreamPath = `/v4/sports/${encodeURIComponent(sportKey)}/events/${encodeURIComponent(eventId)}/odds`;
     const upstreamUrl = `https://api.the-odds-api.com${upstreamPath}`;
     
     const response = await axios.get(upstreamUrl, { 
@@ -1607,7 +1621,6 @@ app.get("/api/scores", enforceUsage, async (req, res) => {
 
 // Persistent file-based storage for reactions (better than in-memory)
 const fs = require('fs');
-const path = require('path');
 
 const REACTIONS_FILE = path.join(__dirname, 'reactions.json');
 
@@ -1731,6 +1744,16 @@ app.get('/api/reactions-summary', (req, res) => {
 
 
 /* ------------------------------------ Start ------------------------------------ */
+// SPA fallback: keep last, after static and API routes
+app.get('/*', (req, res) => {
+  const indexPath = path.join(clientBuildPath, 'index.html');
+  res.sendFile(indexPath, err => {
+    if (err) {
+      res.status(404).send('Not Found');
+    }
+  });
+});
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
