@@ -112,7 +112,8 @@ const Pricing = ({ onUpgrade }) => {
       // Small delay to show the "Opening checkout..." message
       setTimeout(async () => {
         try {
-          const response = await fetch('/api/billing/create-checkout-session', {
+          const { withApiBase } = require('../config/api');
+          const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
             method: 'POST',
             credentials: 'include'
           });

@@ -44,7 +44,8 @@ export async function signOutAndRedirect(navigate, redirectPath = '/', debug = f
 
     // 3) Call server logout endpoint to clear any HTTP-only cookies
     try {
-      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      const { withApiBase } = require('../config/api');
+      await fetch(withApiBase('/api/logout'), { method: 'POST', credentials: 'include' });
       if (debugAuth) console.log('🔐 signOutAndRedirect: Server logout successful');
     } catch (logoutError) {
       if (debugAuth) console.warn('🔐 signOutAndRedirect: Server logout failed:', logoutError);
@@ -103,7 +104,8 @@ export async function signOutAndRefresh(redirectPath = '/', debug = false) {
     
     // 3) Call server logout endpoint to clear any HTTP-only cookies
     try {
-      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+      const { withApiBase: withApiBase2 } = require('../config/api');
+      await fetch(withApiBase2('/api/logout'), { method: 'POST', credentials: 'include' });
       if (debugAuth) console.log('🔐 signOutAndRefresh: Server logout successful');
     } catch (logoutError) {
       if (debugAuth) console.warn('🔐 signOutAndRefresh: Server logout failed:', logoutError);

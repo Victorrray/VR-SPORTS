@@ -49,9 +49,10 @@ export default function Navbar({ onOpenMobileSearch }) {
     navigate(`/sportsbooks?${params.toString()}`);
   }
 
+  const { withApiBase } = require('../config/api');
   const handleUpgrade = async () => {
     try {
-      const response = await fetch('/api/billing/create-checkout-session', {
+      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
         credentials: 'include'
       });

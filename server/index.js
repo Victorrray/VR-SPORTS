@@ -273,6 +273,19 @@ app.get("/api/health", (_req, res) => {
 app.get("/health", (_req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
+// Readiness endpoint with non-secret env presence for quick verification
+app.get('/healthz', (_req, res) => {
+  res.json({
+    ok: true,
+    env: process.env.NODE_ENV || 'development',
+    hasStripe: !!process.env.STRIPE_SECRET_KEY,
+    hasStripePrice: !!process.env.STRIPE_PRICE_PLATINUM,
+    hasStripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET,
+    hasSupabase: !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    frontendUrl: process.env.FRONTEND_URL || null,
+    version: process.env.GIT_COMMIT || process.env.RENDER_GIT_COMMIT || null,
+  });
+});
 
 // Usage endpoint - get current user's quota info
 app.get('/api/me/usage', requireUser, async (req, res) => {
@@ -326,7 +339,7 @@ app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', async (req, res) =
 // Explicit Odds API proxies (Express 5-safe)
 app.get('/api/odds/v4/sports', enforceUsage, async (_req, res) => {
   try {
-    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    if (!API_KEY) return res.status(400).json({ code: 'MISSING_ENV', message: "Missing ODDS_API_KEY", hint: 'Set ODDS_API_KEY in backend env' });
     const upstreamUrl = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
     const r = await axios.get(upstreamUrl);
     res.json(r.data);
@@ -338,7 +351,7 @@ app.get('/api/odds/v4/sports', enforceUsage, async (_req, res) => {
 
 app.get('/api/odds/v4/sports/:sportKey/events', enforceUsage, async (req, res) => {
   try {
-    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    if (!API_KEY) return res.status(400).json({ code: 'MISSING_ENV', message: "Missing ODDS_API_KEY", hint: 'Set ODDS_API_KEY in backend env' });
     const { sportKey } = req.params;
     const upstreamUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/events?apiKey=${API_KEY}`;
     const r = await axios.get(upstreamUrl);
@@ -351,7 +364,7 @@ app.get('/api/odds/v4/sports/:sportKey/events', enforceUsage, async (req, res) =
 
 app.get('/api/odds/v4/sports/:sportKey/odds', enforceUsage, async (req, res) => {
   try {
-    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    if (!API_KEY) return res.status(400).json({ code: 'MISSING_ENV', message: "Missing ODDS_API_KEY", hint: 'Set ODDS_API_KEY in backend env' });
     const { sportKey } = req.params;
     const { regions = 'us', markets = 'h2h,spreads,totals', oddsFormat = 'american', bookmakers, dateFormat, includeBetLimits } = req.query;
     const qs = new URLSearchParams({ apiKey: API_KEY, regions, markets, oddsFormat });
@@ -418,18 +431,18 @@ app.get('/api/usage/me', requireUser, async (req, res) => {
 app.post('/api/billing/create-checkout-session', async (req, res) => {
   try {
     if (!stripe) {
-      return res.status(500).json({ error: 'Stripe not configured' });
+      return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured', hint: 'Set STRIPE_SECRET_KEY in backend env' });
     }
     
     if (!STRIPE_PRICE_PLATINUM) {
-      return res.status(500).json({ error: 'Server misconfig: STRIPE_PRICE_PLATINUM not set' });
+      return res.status(500).json({ code: 'MISSING_ENV', message: 'STRIPE_PRICE_PLATINUM not set', hint: 'Set STRIPE_PRICE_PLATINUM (Price ID)' });
     }
     
     const { supabaseUserId } = req.body;
     
     // Require authentication
     if (!supabaseUserId) {
-      return res.status(400).json({ error: 'Missing supabaseUserId' });
+      return res.status(400).json({ code: 'AUTH_REQUIRED', message: 'Missing supabaseUserId', hint: 'Ensure frontend passes authenticated user id' });
     }
     
     console.log(`Creating checkout session for user: ${supabaseUserId}`);
@@ -575,7 +588,7 @@ app.post('/api/billing/webhook',
   bodyParser.raw({ type: 'application/json' }),
   async (req, res) => {
     if (!stripe) {
-      return res.status(500).json({ error: 'Stripe not configured' });
+      return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' });
     }
     
     const sig = req.headers['stripe-signature'];
