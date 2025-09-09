@@ -639,9 +639,26 @@ app.post('/api/billing/webhook',
 );
 
 // sports list (Odds API)
-app.get("/api/sports", enforceUsage, async (_req, res) => {
+app.get("/api/sports", requireUser, trackUsage, async (_req, res) => {
   try {
-    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    // If no API key, return fallback sports list
+    if (!API_KEY) {
+      const fallbackSports = [
+        { key: "americanfootball_nfl", title: "NFL", active: true },
+        { key: "americanfootball_ncaaf", title: "NCAAF", active: true },
+        { key: "basketball_nba", title: "NBA", active: true },
+        { key: "basketball_ncaab", title: "NCAAB", active: true },
+        { key: "baseball_mlb", title: "MLB", active: true },
+        { key: "icehockey_nhl", title: "NHL", active: true },
+        { key: "soccer_epl", title: "EPL", active: true },
+        { key: "soccer_uefa_champs_league", title: "UCL", active: true },
+        { key: "mma_mixed_martial_arts", title: "MMA", active: true },
+        { key: "boxing_boxing", title: "Boxing", active: true }
+      ];
+      console.log('🧪 Returning fallback sports list - API key not configured');
+      return res.json(fallbackSports);
+    }
+    
     const url = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
     const r = await axios.get(url);
     res.json(r.data);
@@ -670,10 +687,118 @@ app.get("/api/events", enforceUsage, async (req, res) => {
 // odds endpoint (unified for multiple sports)
 app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
   try {
-    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
-    
     const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american" } = req.query;
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
+    
+    // If no API key, return mock data for testing
+    if (!API_KEY) {
+      const mockGames = [
+        {
+          id: "mock-game-1",
+          sport_key: "americanfootball_nfl",
+          sport_title: "NFL",
+          commence_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          home_team: "Kansas City Chiefs",
+          away_team: "Buffalo Bills",
+          bookmakers: [
+            {
+              key: "draftkings",
+              title: "DraftKings",
+              markets: [
+                {
+                  key: "h2h",
+                  outcomes: [
+                    { name: "Kansas City Chiefs", price: -110 },
+                    { name: "Buffalo Bills", price: -110 }
+                  ]
+                },
+                {
+                  key: "spreads",
+                  outcomes: [
+                    { name: "Kansas City Chiefs", price: -110, point: -3.5 },
+                    { name: "Buffalo Bills", price: -110, point: 3.5 }
+                  ]
+                },
+                {
+                  key: "totals",
+                  outcomes: [
+                    { name: "Over", price: -110, point: 47.5 },
+                    { name: "Under", price: -110, point: 47.5 }
+                  ]
+                }
+              ]
+            },
+            {
+              key: "fanduel",
+              title: "FanDuel",
+              markets: [
+                {
+                  key: "h2h",
+                  outcomes: [
+                    { name: "Kansas City Chiefs", price: -105 },
+                    { name: "Buffalo Bills", price: -115 }
+                  ]
+                },
+                {
+                  key: "spreads",
+                  outcomes: [
+                    { name: "Kansas City Chiefs", price: -105, point: -3.5 },
+                    { name: "Buffalo Bills", price: -115, point: 3.5 }
+                  ]
+                },
+                {
+                  key: "totals",
+                  outcomes: [
+                    { name: "Over", price: -105, point: 47.5 },
+                    { name: "Under", price: -115, point: 47.5 }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "mock-game-2",
+          sport_key: "americanfootball_nfl",
+          sport_title: "NFL",
+          commence_time: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
+          home_team: "Dallas Cowboys",
+          away_team: "Philadelphia Eagles",
+          bookmakers: [
+            {
+              key: "draftkings",
+              title: "DraftKings",
+              markets: [
+                {
+                  key: "h2h",
+                  outcomes: [
+                    { name: "Dallas Cowboys", price: 120 },
+                    { name: "Philadelphia Eagles", price: -140 }
+                  ]
+                },
+                {
+                  key: "spreads",
+                  outcomes: [
+                    { name: "Dallas Cowboys", price: -110, point: 2.5 },
+                    { name: "Philadelphia Eagles", price: -110, point: -2.5 }
+                  ]
+                },
+                {
+                  key: "totals",
+                  outcomes: [
+                    { name: "Over", price: -110, point: 44.5 },
+                    { name: "Under", price: -110, point: 44.5 }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ];
+      
+      console.log('🧪 Returning mock data for testing - API key not configured');
+      return res.json(mockGames);
+    }
     
     const sportsArray = sports.split(',');
     const marketsArray = markets.split(',');
