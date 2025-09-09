@@ -307,8 +307,8 @@ app.get('/api/me/usage', requireUser, async (req, res) => {
   }
 });
 
-// Apply usage tracking to all Odds API proxy routes
-app.use("/api/odds", requireUser, trackUsage);
+// Apply usage tracking to specific Odds API proxy routes (not the main /api/odds endpoint)
+// Note: Main /api/odds endpoint has its own middleware
 
 // Odds API proxy with usage tracking
 // Proxy only explicit Odds API endpoints to avoid path-to-regexp wildcards
@@ -668,7 +668,7 @@ app.get("/api/events", enforceUsage, async (req, res) => {
 });
 
 // odds endpoint (unified for multiple sports)
-app.get("/api/odds", enforceUsage, async (req, res) => {
+app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     
