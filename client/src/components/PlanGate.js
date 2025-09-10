@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, Zap, Star } from 'lucide-react';
 import { debugLog, debugPlanUpdate } from '../lib/debug';
 import './PlanGate.css';
+import { withApiBase } from '../config/api';
 
 const PlanGate = ({ user, onPlanSelected }) => {
   const [loading, setLoading] = useState(false);
@@ -37,15 +38,13 @@ const PlanGate = ({ user, onPlanSelected }) => {
         return;
       }
       
-      const backendUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
-      
       // For development, show a message about Stripe setup
       if (process.env.NODE_ENV === 'development') {
         setError('Stripe checkout is not configured for local development. This would redirect to payment in production.');
         return;
       }
       
-      const response = await fetch(`${backendUrl}/api/billing/create-checkout-session`, {
+      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
         credentials: 'include',
         headers: {

@@ -6,6 +6,7 @@ import GameDetailsModal from '../components/GameDetailsModal';
 import ScoresLoadingSkeleton from '../components/ScoresLoadingSkeleton';
 import MobileBottomBar from '../components/MobileBottomBar';
 import './Scores.css';
+import { withApiBase } from '../config/api';
 
 function TeamInitials({ name }) {
   const initials = (name || "")
@@ -110,8 +111,10 @@ export default function Scores() {
     setErr("");
     setConnectionStatus('connecting');
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
-      console.log('🔍 Scores API URL:', `${apiUrl}/api/scores?sport=${sport}`);
+      const url = withApiBase(`/api/scores?sport=${sport}`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔍 Scores API URL:', url);
+      }
       
       // Configure fetch options for cross-origin requests
       const fetchOptions = {
@@ -119,11 +122,10 @@ export default function Scores() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // Don't include credentials for cross-origin requests in production
-        credentials: apiUrl.includes('localhost') ? 'include' : 'omit'
+        // Credentials set at call-site
       };
       
-      const r = await fetch(`${apiUrl}/api/scores?sport=${sport}`, fetchOptions);
+      const r = await fetch(url, { ...fetchOptions, credentials: 'include' });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       setGames(data || []);

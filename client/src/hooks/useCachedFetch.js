@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { oddsCacheManager } from '../utils/cacheManager';
+import { withApiBase } from '../config/api';
 
 // Enhanced fetch hook with intelligent caching
 export const useCachedFetch = (url, options = {}) => {
@@ -66,10 +67,8 @@ export const useCachedFetch = (url, options = {}) => {
     setError(null);
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 
-        (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
-      
-      const fullUrl = url.startsWith('http') ? url : `${apiUrl}${url}`;
+      // Resolve relative API paths consistently
+      const fullUrl = url.startsWith('http') ? url : withApiBase(url);
       const queryParams = options.params ? `?${new URLSearchParams(options.params)}` : '';
       
       const response = await fetch(`${fullUrl}${queryParams}`, {
@@ -241,10 +240,7 @@ export const useBatchCachedFetch = (requests = []) => {
     if (missingRequests.length > 0) {
       const fetchPromises = missingRequests.map(async (req) => {
         try {
-          const apiUrl = process.env.REACT_APP_API_URL || 
-            (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
-          
-          const fullUrl = req.url.startsWith('http') ? req.url : `${apiUrl}${req.url}`;
+          const fullUrl = req.url.startsWith('http') ? req.url : withApiBase(req.url);
           const queryParams = req.params ? `?${new URLSearchParams(req.params)}` : '';
           
           const response = await fetch(`${fullUrl}${queryParams}`, {

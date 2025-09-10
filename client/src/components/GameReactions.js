@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "../hooks/useAuth";
 import { secureFetch } from '../utils/security';
+import { withApiBase } from '../config/api';
 import './GameReactions.css';
 
 const REACTION_EMOJIS = [
@@ -19,12 +20,10 @@ export default function GameReactions({ gameId, gameKey }) {
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const apiUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
-
   // Load reactions from server
   const loadReactions = async () => {
     try {
-      const response = await secureFetch(`${apiUrl}/api/reactions/${encodeURIComponent(gameKey)}`);
+      const response = await secureFetch(withApiBase(`/api/reactions/${encodeURIComponent(gameKey)}`));
       if (response.ok) {
         const data = await response.json();
         const serverReactions = data.reactions || {};
@@ -67,7 +66,7 @@ export default function GameReactions({ gameId, gameKey }) {
 
     setLoading(true);
     try {
-      const response = await secureFetch(`${apiUrl}/api/reactions/${encodeURIComponent(gameKey)}`, {
+      const response = await secureFetch(withApiBase(`/api/reactions/${encodeURIComponent(gameKey)}`), {
         method: 'POST',
         body: JSON.stringify({
           userId: user.id,
@@ -133,7 +132,7 @@ export default function GameReactions({ gameId, gameKey }) {
 
     setLoading(true);
     try {
-      const response = await secureFetch(`${apiUrl}/api/reactions/${encodeURIComponent(gameKey)}`, {
+      const response = await secureFetch(withApiBase(`/api/reactions/${encodeURIComponent(gameKey)}`), {
         method: 'POST',
         body: JSON.stringify({
           userId: user.id,

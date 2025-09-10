@@ -5,6 +5,7 @@ import { useMemoizedCallback } from './useMemoizedCallback';
 import { secureFetch, apiRateLimiter } from '../utils/security';
 import { useCachedFetch, useRealtimeCachedFetch } from './useCachedFetch';
 import { useQuotaHandler } from './useQuotaHandler';
+import { withApiBase } from '../config/api';
 
 // Small utility to normalize arrays from API responses
 function normalizeArray(resp) {
@@ -98,10 +99,8 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         _t: Date.now() // Cache buster
       });
 
-      // Use the configured API base URL with fallback to production URL
-      const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://vr-sports.onrender.com';
-      // Use the correct endpoint for fetching odds
-      const fullUrl = `${BASE_URL.replace(/\/$/, '')}/api/odds?${params}`;
+      // Build path with centralized API base handling
+      const fullUrl = withApiBase(`/api/odds?${params.toString()}`);
       console.log('🔍 useMarkets: Final API URL:', fullUrl);
       
       // Enhanced fetch with better error handling and timeout

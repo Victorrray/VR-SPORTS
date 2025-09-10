@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Crown, Zap, TrendingUp, AlertCircle, Sparkles, BarChart3, Shield, Infinity } from "lucide-react";
 import "./UsagePlanCard.css";
-
-const BACKEND_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+import { withApiBase } from "../config/api";
 
 export default function UsagePlanCard() {
   const [data, setData] = useState({ plan: "free", used: 0, quota: 1000 });
@@ -12,7 +11,7 @@ export default function UsagePlanCard() {
   useEffect(() => {
     const fetchUsage = async () => {
       try {
-        const resp = await fetch(`${BACKEND_URL}/api/me/usage`, { 
+        const resp = await fetch(withApiBase('/api/me/usage'), { 
           credentials: "include",
           headers: {
             'Content-Type': 'application/json',

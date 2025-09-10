@@ -64,7 +64,6 @@ export default function DFSMarkets() {
   const [quota] = useState({ remain: "–", used: "–" });
   const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
 
-  const BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:10000');
   const debounced = useDebounce(query, 300);
 
   // ---- helpers ----
@@ -156,7 +155,7 @@ export default function DFSMarkets() {
         setSportList([{ key: "ALL", title: "All Sports" }]);
       }
     })();
-  }, [BASE_URL]);
+  }, []);
 
   // ---- 2) load DFS props ----
   useEffect(() => {
@@ -217,7 +216,7 @@ export default function DFSMarkets() {
         setLoad(false);
       }
     })();
-  }, [BASE_URL, picked, sportList]);
+  }, [picked, sportList]);
 
   // ---- client-side search ----
   const filtered = useMemo(() => {
