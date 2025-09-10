@@ -356,13 +356,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         const normalized = (Array.isArray(arr) ? arr : [])
           .filter(s => s && (s.active === undefined || s.active))
           .map(s => ({ key: s.key, title: s.title || (FRIENDLY_TITLES[s.key] || s.key) }));
+        console.log('Fetched sports list:', normalized);
         if (!cancelled) setSportList(normalized);
       } catch (e) {
+        console.error('Failed to fetch sports list:', e);
         // Fallback to featured list
         const fallback = Array.from(FEATURED_SPORTS).map(key => ({
           key,
           title: FRIENDLY_TITLES[key] || key
         }));
+        console.log('Using fallback sports list:', fallback);
         if (!cancelled) setSportList(fallback);
       }
     })();
@@ -693,16 +696,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </div>
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: 12, marginTop: 8, justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                 <button
                   onClick={resetDraftFilters}
                   style={{
-                    padding: '10px 14px',
-                    borderRadius: 10,
+                    flex: 1,
+                    padding: '12px 16px',
+                    borderRadius: 8,
                     border: '1px solid var(--border-color)',
                     background: 'transparent',
                     color: 'var(--text-secondary)',
-                    fontWeight: 600
+                    fontWeight: 500,
+                    fontSize: '14px'
                   }}
                 >
                   Reset
@@ -710,12 +715,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <button
                   onClick={applyFilters}
                   style={{
-                    padding: '10px 14px',
-                    borderRadius: 10,
+                    flex: 1,
+                    padding: '12px 16px',
+                    borderRadius: 8,
                     border: 'none',
-                    background: 'var(--accent)',
+                    background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
                     color: '#fff',
-                    fontWeight: 700
+                    fontWeight: 600,
+                    fontSize: '14px'
                   }}
                 >
                   Apply

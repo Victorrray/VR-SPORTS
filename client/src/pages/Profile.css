@@ -2,9 +2,9 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  background: var(--bg-primary);
+  background: var(--bg-body);
   min-height: 100vh;
-  color: var(--text-primary);
+  color: var(--text);
 }
 
 .profile-header {
@@ -21,14 +21,14 @@
 }
 
 .profile-title h1 {
-  color: var(--text-primary);
+  color: var(--text);
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
 }
 
 .profile-header p {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 1rem;
   margin: 0;
 }
@@ -40,7 +40,7 @@
 }
 
 .profile-section {
-  background: var(--bg-secondary);
+  background: var(--bg-elev);
   border-radius: 16px;
   padding: 2rem;
   border: 1px solid rgba(139, 92, 246, 0.15);
@@ -56,14 +56,14 @@
 }
 
 .section-header h2 {
-  color: var(--text-primary);
+  color: var(--text);
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
 }
 
 .section-header p {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin: 0;
   width: 100%;
@@ -89,7 +89,7 @@
 }
 
 .selected-count {
-  color: var(--text-primary);
+  color: var(--text);
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -120,7 +120,7 @@
 }
 
 .sportsbook-card {
-  background: linear-gradient(135deg, var(--bg-primary) 0%, color-mix(in srgb, var(--bg-primary) 96%, var(--accent) 4%) 100%);
+  background: linear-gradient(135deg, var(--bg-elev) 0%, color-mix(in srgb, var(--bg-elev) 96%, var(--accent) 4%) 100%);
   border: 2px solid rgba(139, 92, 246, 0.15);
   border-radius: 12px;
   padding: 1.25rem;
@@ -157,7 +157,7 @@
 
 .sportsbook-card.selected {
   border-color: var(--accent);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--bg-primary)) 0%, color-mix(in srgb, var(--accent) 15%, var(--bg-primary)) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--bg-elev)) 0%, color-mix(in srgb, var(--accent) 15%, var(--bg-elev)) 100%);
   box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 20%, rgba(0, 0, 0, 0.1));
 }
 
@@ -172,7 +172,7 @@
 }
 
 .book-name {
-  color: var(--text-primary);
+  color: var(--text);
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -264,7 +264,7 @@
 }
 
 .save-note {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.75rem;
   text-align: center;
   margin: 0;
@@ -285,11 +285,11 @@
 }
 
 .username-input {
-  background: var(--bg-primary);
+  background: var(--bg-elev-2);
   border: 2px solid rgba(139, 92, 246, 0.15);
   border-radius: 8px;
   padding: 0.75rem 1rem;
-  color: var(--text-primary);
+  color: var(--text);
   font-size: 0.875rem;
   transition: all 0.2s ease;
 }
@@ -301,7 +301,7 @@
 }
 
 .username-input::placeholder {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   opacity: 0.7;
 }
 
@@ -319,7 +319,7 @@
 }
 
 .status.checking {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   background: rgba(139, 92, 246, 0.1);
 }
 
@@ -353,7 +353,7 @@
 }
 
 .username-save-btn:disabled {
-  background: var(--text-secondary);
+  background: var(--text-muted);
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -389,13 +389,13 @@
 }
 
 .security-title {
-  color: var(--text-primary);
+  color: var(--text);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .security-desc {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -430,7 +430,7 @@
 }
 
 .accessibility-subtitle {
-  color: var(--text-primary);
+  color: var(--text);
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -461,13 +461,13 @@
 }
 
 .accessibility-title {
-  color: var(--text-primary);
+  color: var(--text);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .accessibility-desc {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -492,7 +492,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--text-secondary);
+  background-color: var(--text-muted);
   transition: 0.3s;
   border-radius: 24px;
 }
@@ -548,13 +548,13 @@ input:checked + .toggle-slider:before {
 }
 
 .radio-label {
-  color: var(--text-primary);
+  color: var(--text);
   font-weight: 500;
   font-size: 0.9rem;
 }
 
 .section-description {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin-bottom: 1.5rem;
   line-height: 1.5;

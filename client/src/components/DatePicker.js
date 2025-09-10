@@ -95,11 +95,6 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
             </div>
           ))}
         </div>
-        <div className="dp-mobile-footer">
-          <button className="dp-mobile-done" onClick={() => setOpen(false)}>
-            Done
-          </button>
-        </div>
       </div>
     </div>
   );
