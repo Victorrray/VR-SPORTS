@@ -164,8 +164,8 @@ if (!API_KEY) {
   console.warn("⚠️  Missing ODDS_API_KEY in .env (odds endpoints will still work for ESPN scores).");
 }
 
-// Configure CORS for production
-const allowedOrigins = [
+// Configure CORS
+const allowedOrigins = new Set([
   'http://localhost:3000',
   'http://localhost:5173',
   'http://localhost:3001',
@@ -173,41 +173,53 @@ const allowedOrigins = [
   'https://odds-frontend-j2pn.onrender.com',
   'https://my-react-frontend-021i.onrender.com',
   'https://oddssightseer.com',
-  'https://www.oddssightseer.com',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+  'https://www.oddssightseer.com'
+]);
 
-// Log allowed origins for debugging
-console.log('🔄 CORS Allowed Origins:', allowedOrigins);
+// Add FRONTEND_URL if it exists and isn't already in the set
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.add(process.env.FRONTEND_URL);
+}
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // In development, allow all origins
-    if (process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
+console.log('🔄 CORS Allowed Origins:', Array.from(allowedOrigins));
+
+// Create CORS middleware with proper origin validation
+const corsMiddleware = (req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // In development, allow all origins
+  if (process.env.NODE_ENV !== 'production') {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, stripe-signature, x-user-id');
     
-    // In production, only allow whitelisted origins
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('🚫 CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
     }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept', 'stripe-signature', 'x-user-id'],
-  optionsSuccessStatus: 200,
-  preflightContinue: false,
-  maxAge: 86400 // 24 hours
+    return next();
+  }
+  
+  // In production, only allow whitelisted origins
+  if (!origin || allowedOrigins.has(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, stripe-signature, x-user-id');
+    res.header('Access-Control-Max-Age', '86400');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    return next();
+  }
+  
+  console.log('🚫 CORS blocked origin:', origin);
+  return res.status(403).json({ error: 'Not allowed by CORS' });
 };
 
-// Handle OPTIONS requests for all routes
-app.options('*', cors(corsOptions));
-
 // Apply CORS middleware
-app.use(cors(corsOptions));
+app.use(corsMiddleware);
 
 // Use bodyParser.json() for most routes, but we'll override for webhook
 app.use(bodyParser.json());
