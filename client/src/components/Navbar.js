@@ -190,7 +190,7 @@ export default function Navbar({ onOpenMobileSearch }) {
         )}
       </div>
 
-      {/* Profile hamburger menu - only on profile page (left side) */}
+      {/* Profile hamburger menu - only on profile page (after logo) */}
       {location.pathname === "/account" && user && (
         <button 
           className={styles.mobileProfileBtn} 
@@ -198,7 +198,7 @@ export default function Navbar({ onOpenMobileSearch }) {
           onClick={() => setProfileMenuOpen(!profileMenuOpen)}
           style={{ 
             position: 'absolute',
-            left: '16px',
+            left: '180px',
             top: '50%',
             transform: 'translateY(-50%)'
           }}
