@@ -23,6 +23,7 @@ const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ODDS_API_KEY;
 const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
 
+
 // Stripe configuration
 const STRIPE_PRICE_PLATINUM = process.env.STRIPE_PRICE_PLATINUM;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -183,10 +184,13 @@ console.log('🔄 CORS Allowed Origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
+    // In development, allow all origins
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
     
-    if (allowedOrigins.includes(origin)) {
+    // In production, only allow whitelisted origins
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.log('🚫 CORS blocked origin:', origin);
@@ -196,9 +200,15 @@ const corsOptions = {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept', 'stripe-signature', 'x-user-id'],
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  preflightContinue: false,
+  maxAge: 86400 // 24 hours
 };
 
+// Handle OPTIONS requests for all routes
+app.options('*', cors(corsOptions));
+
+// Apply CORS middleware
 app.use(cors(corsOptions));
 
 // Use bodyParser.json() for most routes, but we'll override for webhook

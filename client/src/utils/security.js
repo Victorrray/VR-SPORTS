@@ -27,10 +27,18 @@ export const getCSRFToken = () => {
 export const secureFetch = async (url, options = {}) => {
   const csrfToken = getCSRFToken();
   
+  // In development, use the proxy for all API requests
+  if (process.env.NODE_ENV === 'development' && url.includes('vr-sports.onrender.com')) {
+    const proxyUrl = new URL(url);
+    url = `/api${proxyUrl.pathname}${proxyUrl.search}`;
+  }
+  
   // Check if this is a cross-origin request
   const isLocalhost = url.startsWith('http://localhost');
   const isSameOrigin = url.startsWith(window.location.origin);
-  const isBackendAPI = url.includes('odds-backend-4e9q.onrender.com');
+  const isBackendAPI = url.includes('odds-backend-4e9q.onrender.com') || 
+                      url.includes('vr-sports.onrender.com') ||
+                      url.startsWith('/api');
   const isCrossOrigin = !isLocalhost && !isSameOrigin && !isBackendAPI;
   
   const secureOptions = {

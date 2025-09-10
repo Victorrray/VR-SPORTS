@@ -12,69 +12,82 @@ export const AuthProvider = ({ children }) => {
   const isSupabaseEnabled = !!supabase;
 
   useEffect(() => {
+    let isMounted = true;
+    let subscription;
+    let fallbackTimeout;
+
     // Get initial session
     const getInitialSession = async () => {
+      if (!isMounted) return;
+      
       console.log('🔐 useAuth: Getting initial session, isSupabaseEnabled:', isSupabaseEnabled);
       
-      if (!isSupabaseEnabled) {
-        console.log('🔐 useAuth: Supabase disabled - checking localStorage for demo session');
-        
-        // Check for demo session in localStorage
-        try {
-          const demoSession = localStorage.getItem('demo-auth-session');
-          if (demoSession) {
-            const sessionData = JSON.parse(demoSession);
-            console.log('🔐 useAuth: Found demo session:', sessionData.email);
-            setUser(sessionData);
-            setSession({ user: sessionData });
-          } else {
-            console.log('🔐 useAuth: No demo session found');
-            setUser(null);
-            setSession(null);
-          }
-        } catch (error) {
-          console.error('🔐 useAuth: Error parsing demo session:', error);
-          setUser(null);
-          setSession(null);
-        }
-        
-        setLoading(false);
-        return;
-      }
-
       try {
+        if (!isSupabaseEnabled) {
+          console.log('🔐 useAuth: Supabase disabled - checking localStorage for demo session');
+          
+          // Check for demo session in localStorage
+          try {
+            const demoSession = localStorage.getItem('demo-auth-session');
+            if (demoSession) {
+              const sessionData = JSON.parse(demoSession);
+              console.log('🔐 useAuth: Found demo session:', sessionData.email);
+              if (isMounted) {
+                setUser(sessionData);
+                setSession({ user: sessionData });
+              }
+            } else if (isMounted) {
+              console.log('🔐 useAuth: No demo session found');
+              setUser(null);
+              setSession(null);
+            }
+          } catch (error) {
+            console.error('🔐 useAuth: Error parsing demo session:', error);
+            if (isMounted) {
+              setUser(null);
+              setSession(null);
+            }
+          }
+          
+          if (isMounted) setLoading(false);
+          return;
+        }
+
         console.log('🔐 useAuth: Calling supabase.auth.getSession()');
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
         
         console.log('🔐 useAuth: Session received:', !!session, session?.user?.email);
-        setSession(session);
-        setUser(session?.user || null);
         
-        if (session?.user) {
-          console.log('🔐 useAuth: Fetching user profile for:', session.user.id);
-          await fetchUserProfile(session.user.id);
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user || null);
+          
+          if (session?.user) {
+            console.log('🔐 useAuth: Fetching user profile for:', session.user.id);
+            await fetchUserProfile(session.user.id);
+          }
         }
       } catch (error) {
         console.error('🔐 useAuth: Error getting session:', error);
       } finally {
-        console.log('🔐 useAuth: Setting loading to false');
-        setLoading(false);
+        if (isMounted) {
+          console.log('🔐 useAuth: Setting loading to false');
+          setLoading(false);
+        }
       }
     };
 
-    getInitialSession();
-
-    // Fallback timeout to ensure loading never stays true indefinitely
-    const fallbackTimeout = setTimeout(() => {
-      console.log('🔐 useAuth: Fallback timeout - forcing loading to false');
-      setLoading(false);
-    }, 3000);
-
-    // Listen for auth changes
-    if (isSupabaseEnabled) {
+    // Set up auth state change listener
+    const setupAuthListener = () => {
+      if (!isSupabaseEnabled || !isMounted) return null;
+      
+      console.log('🔐 useAuth: Setting up auth state listener');
+      
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, session) => {
+          if (!isMounted) return;
+          
           console.log('🔐 useAuth: Auth state change:', event, !!session);
           setSession(session);
           setUser(session?.user || null);
@@ -90,14 +103,28 @@ export const AuthProvider = ({ children }) => {
           setLoading(false);
         }
       );
+      
+      return subscription;
+    };
 
-      return () => {
-        subscription?.unsubscribe();
-        clearTimeout(fallbackTimeout);
-      };
-    }
+    // Initialize
+    getInitialSession();
+    subscription = setupAuthListener();
 
-    return () => clearTimeout(fallbackTimeout);
+    // Fallback timeout to ensure loading never stays true indefinitely
+    fallbackTimeout = setTimeout(() => {
+      if (isMounted) {
+        console.log('🔐 useAuth: Fallback timeout - forcing loading to false');
+        setLoading(false);
+      }
+    }, 3000);
+
+    // Cleanup
+    return () => {
+      isMounted = false;
+      if (subscription) subscription.unsubscribe();
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
+    };
   }, []);
 
   const fetchUserProfile = async (userId) => {

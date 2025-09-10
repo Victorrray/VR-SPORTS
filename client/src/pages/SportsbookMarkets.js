@@ -859,14 +859,26 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
               </div>
             )}
 
-            <div className="filter-group">
-              <span className="filter-label">Search</span>
-              <input
-                placeholder="Search team / league"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
+            {/* Search bar hidden by default, shown via MobileSearchModal */}
+            {showMobileSearch && (
+              <div className="filter-group" style={{marginBottom: '15px'}}>
+                <input
+                  placeholder="Search team / league"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  autoFocus
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid #334c',
+                    background: '#11192c',
+                    color: 'white',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+            )}
 
             {/* Smart Filter Presets */}
             <div className="filter-presets" style={{ marginBottom: '16px' }}>
