@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import OddsTable from "../components/OddsTable";
 import SportMultiSelect from "../components/SportMultiSelect";
 import useDebounce from "../hooks/useDebounce";
+import { withApiBase } from "../config/api";
 
 // Only these 3 DFS apps
 const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
@@ -185,6 +186,7 @@ export default function DFSMarkets() {
 
         const eventsWithProps = await runLimited(CONCURRENCY, seeds, async (ev) => {
           const markets = getMarketsForSport(ev.sport_key); // include _alternate
+          const base = withApiBase('');
           const url = `${base}/api/player-props?sport=${ev.sport_key}` +
             `&eventId=${encodeURIComponent(ev.id)}` +
             `&regions=us&markets=${encodeURIComponent(markets)}`;

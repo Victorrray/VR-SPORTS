@@ -221,8 +221,32 @@ const corsMiddleware = (req, res, next) => {
 // Apply CORS middleware
 app.use(corsMiddleware);
 
-// Use bodyParser.json() for most routes, but we'll override for webhook
-app.use(bodyParser.json());
+// Attempt to authenticate user (populate req.user) if Authorization header is present
+async function authenticate(req, _res, next) {
+  try {
+    const auth = req.headers.authorization || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (token && supabase && typeof supabase.auth?.getUser === 'function') {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (!error && data?.user) {
+        req.user = data.user;
+      }
+    }
+  } catch (e) {
+    // Non-fatal: continue without req.user
+    console.warn('Auth token verification failed:', e.message);
+  }
+  next();
+}
+
+// Apply authentication on API routes
+app.use('/api', authenticate);
+
+// Use JSON parser for most routes, but skip Stripe webhook which requires raw body
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/billing/webhook') return next();
+  return bodyParser.json()(req, res, next);
+});
 
 // Serve static client build if available
 const path = require('path');
@@ -270,6 +294,7 @@ function enforceUsage(req, res, next) {
 
 // Increment usage after successful API call
 async function incrementUsage(userId, profile) {
+  if (!profile || !userId) return; // Guard missing context
   if (profile.plan === "platinum") return; // Platinum users don't count against quota
 
   if (supabase) {
@@ -332,12 +357,9 @@ app.get('/api/me/usage', requireUser, async (req, res) => {
   }
 });
 
-// Apply usage tracking to specific Odds API proxy routes (not the main /api/odds endpoint)
-// Note: Main /api/odds endpoint has its own middleware
-
 // Odds API proxy with usage tracking
 // Proxy only explicit Odds API endpoints to avoid path-to-regexp wildcards
-app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', async (req, res) => {
+app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', requireUser, trackUsage, async (req, res) => {
   try {
     const userId = req.__userId;
     const profile = req.__userProfile;
@@ -512,6 +534,12 @@ app.post('/api/logout', (req, res) => {
 // Admin endpoint to sign out all users (invalidate all sessions)
 app.post('/api/admin/signout-all', async (req, res) => {
   try {
+    // Require admin token
+    const auth = req.headers.authorization || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+    if (!token || token !== ADMIN_API_KEY) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     console.log('🔐 Admin: Signing out all users');
     
     // Use Supabase Admin API to sign out all users

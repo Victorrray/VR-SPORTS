@@ -4,21 +4,20 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'https://vr-sports.onrender.com',
+      target: 'http://localhost:10000',
       changeOrigin: true,
       secure: false,
       pathRewrite: {
-        '^/api': '/api', // rewrite path
+        '^/api': '/api',
       },
-      onProxyReq: (proxyReq, req, res) => {
-        // Add CORS headers
-        proxyReq.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-        proxyReq.setHeader('Access-Control-Allow-Credentials', 'true');
+      onProxyReq: (proxyReq) => {
+        // Ensure cookies can flow during local dev
+        proxyReq.setHeader('Origin', 'http://localhost:3000');
       },
-      onProxyRes: (proxyRes, req, res) => {
-        // Add CORS headers to the response
+      onProxyRes: (proxyRes) => {
+        // Allow dev UI to access backend
         proxyRes.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000';
-        proxyReq.setHeader('Access-Control-Allow-Credentials', 'true');
+        proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
       }
     })
   );
