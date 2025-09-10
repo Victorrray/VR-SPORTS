@@ -1,4 +1,4 @@
-// src/pages/Account.js
+// src/pages/Account.js - Updated styling
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
