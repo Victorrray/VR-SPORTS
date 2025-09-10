@@ -38,8 +38,13 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
+  // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
-  "mybookie", "betonline", "williamhill", "unibet", "betrivers", "superbook"
+  "mybookie", "betonline", "unibet", "betrivers",
+  // US2 region books
+  "wynnbet", "twinspires", "circasports", "lowvig", "espnbet",
+  // US exchange books
+  "betfair_ex_us", "matchbook", "prophet_exchange"
 ];
 
 const PLAYER_PROP_MARKETS = [
@@ -47,7 +52,7 @@ const PLAYER_PROP_MARKETS = [
   "player_pass_yds", "player_rush_yds", "player_receptions", "player_reception_yds"
 ];
 
-const MAX_BOOKMAKERS = 4; // Reduced from 10 to 4
+const MAX_BOOKMAKERS = 16; // Increased to accommodate all US, US2, and exchange books
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes cache
 const MAX_GAMES_FOR_PROPS = 0; // DISABLED: Player props entirely disabled to save API costs
 
@@ -964,6 +969,32 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
                   outcomes: [
                     { name: "Green Bay Packers", price: -170 },
                     { name: "Chicago Bears", price: 140 }
+                  ]
+                }
+              ]
+            },
+            {
+              key: "wynnbet",
+              title: "WynnBET",
+              markets: [
+                {
+                  key: "h2h",
+                  outcomes: [
+                    { name: "Green Bay Packers", price: -165 },
+                    { name: "Chicago Bears", price: 135 }
+                  ]
+                }
+              ]
+            },
+            {
+              key: "betfair_ex_us",
+              title: "Betfair Exchange",
+              markets: [
+                {
+                  key: "h2h",
+                  outcomes: [
+                    { name: "Green Bay Packers", price: -160 },
+                    { name: "Chicago Bears", price: 130 }
                   ]
                 }
               ]
