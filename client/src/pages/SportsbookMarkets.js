@@ -192,7 +192,7 @@ const FEATURED_SPORTS = new Set([
    Component
    ========================= */
 
-export default function SportsbookMarkets({ onRegisterMobileSearch }) {
+const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
@@ -386,11 +386,7 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
 
   return (
     <div className="sportsbook-markets">
-      {/* Header with Bet Type Toggle */}
       <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
         marginBottom: '16px', 
         paddingTop: '20px', 
         textAlign: 'center',
@@ -398,107 +394,50 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
         paddingRight: 'var(--mobile-gutter, 16px)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Header with Bet Type Toggle */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            marginBottom: '16px', 
-            paddingTop: '20px', 
-            textAlign: 'center',
-            paddingLeft: 'var(--mobile-gutter, 16px)',
-            paddingRight: 'var(--mobile-gutter, 16px)'
+          <div style={{
+            display: 'flex',
+            background: 'var(--card-bg)',
+            borderRadius: '8px',
+            border: '1px solid var(--border-color)',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-{/* <AlertSystem games={filteredGames} /> */}
-              <div style={{
-                display: 'flex',
-                background: 'var(--card-bg)',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                overflow: 'hidden'
-              }}>
-                <button
-                  onClick={() => {
-                    if (showPlayerProps) {
-                      setShowPlayerProps(false);
-                    }
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    border: 'none',
-                    background: !showPlayerProps ? 'var(--accent)' : 'transparent',
-                    color: !showPlayerProps ? '#fff' : 'var(--text-primary)',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Game Odds
-                </button>
-                <button
-                  onClick={() => setShowPlayerProps(true)}
-                  style={{
-                    padding: '8px 16px',
-                    border: 'none',
-                    background: showPlayerProps ? 'var(--accent)' : 'transparent',
-                    color: showPlayerProps ? '#fff' : 'var(--text-primary)',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  Player Props
-                </button>
-              </div>
-              
-              {/* Refresh Button */}
-              <button
-                onClick={() => {
-                  setLoad(true);
-                  setTableNonce(n => n + 1);
-                  // Reset loading after a brief moment to show the table loading state
-                  setTimeout(() => setLoad(false), 2000);
-                }}
-                title="Refresh odds data"
-                aria-label="Refresh"
-                style={{
-                  padding: '8px',
-                  border: '1px solid var(--border-color)',
-                  background: 'transparent',
-                  color: 'var(--accent)',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '36px',
-                  height: '36px'
-                }}
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                  <path d="M21 3v5h-5"/>
-                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                  <path d="M3 21v-5h5"/>
-                </svg>
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                if (showPlayerProps) {
+                  setShowPlayerProps(false);
+                }
+              }}
+              style={{
+                padding: '8px 16px',
+                border: 'none',
+                background: !showPlayerProps ? 'var(--accent)' : 'transparent',
+                color: !showPlayerProps ? '#fff' : 'var(--text-primary)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Game Odds
+            </button>
+            <button
+              onClick={() => setShowPlayerProps(true)}
+              style={{
+                padding: '8px 16px',
+                border: 'none',
+                background: showPlayerProps ? 'var(--accent)' : 'transparent',
+                color: showPlayerProps ? '#fff' : 'var(--text-primary)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Player Props
+            </button>
           </div>
+        </div>
+      </div>
 
           <OddsTable
             key={tableNonce}
@@ -518,126 +457,33 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
             betSlipCount={bets.length}
             onOpenBetSlip={openBetSlip}
           />
-        </section>
 
-        {/* Mobile footer nav + filter pill */}
-        <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
-        <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
-          <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
-            <div className="filter-group">
-              <span className="filter-label">Date</span>
-              <DatePicker
-                value={selectedDate}
-                onChange={setSelectedDate}
-                placeholder="All Dates"
-              />
+          {/* Mobile footer nav + filter pill */}
+          <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
+          <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
+            <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
+              {/* Filter groups */}
             </div>
-            <div className="filter-group">
-              <span className="filter-label">Sports</span>
-              <SportMultiSelect
-                list={sportList}
-                selected={picked}
-                onChange={setPicked}
-                placeholderText="Choose sports…"
-                allLabel="All Sports"
-                grid={true}
-                columns={2}
-                leftAlign={true}
-                usePortal={true}
-                portalAlign={"up"}
-              />
-            </div>
-            <div className="filter-group">
-              <span className="filter-label">Books</span>
-              <SportMultiSelect
-                list={bookList}
-                selected={selectedBooks}
-                onChange={setSelectedBooks}
-                placeholderText="Choose books…"
-                allLabel="All Books"
-                grid={true}
-                columns={2}
-                leftAlign={true}
-              />
-            </div>
-            <div className="filter-actions">
-              <button
-                type="button"
-                className="filter-btn apply-btn"
-                onClick={() => {
-                  // Close any open dropdowns first
-                  const openDropdowns = document.querySelectorAll('.ms-menu');
-                  openDropdowns.forEach(dropdown => {
-                    const toggle = dropdown.parentElement?.querySelector('.ms-toggle');
-                    if (toggle) {
-                      toggle.setAttribute('aria-expanded', 'false');
-                    }
-                  });
-                  
-                  // Force re-fetch with current filter settings
-                  setTableNonce(n => n + 1);
-                  setTimeout(() => setMobileFiltersOpen(false), 100);
-                }}
-              >
-                Apply Filters
-              </button>
-              <button
-                type="button"
-                className="filter-btn reset-btn"
-                onClick={() => {
-                  // Close any open dropdowns first
-                  const openDropdowns = document.querySelectorAll('.ms-menu');
-                  openDropdowns.forEach(dropdown => {
-                    const toggle = dropdown.parentElement?.querySelector('.ms-toggle');
-                    if (toggle) {
-                      toggle.setAttribute('aria-expanded', 'false');
-                    }
-                  });
-                  
-                  resetFilters();
-                  setTimeout(() => setMobileFiltersOpen(false), 100);
-                }}
-              >
-                Reset All
-              </button>
-            </div>
-          </div>
-        </MobileFiltersSheet>
-        
-        {/* BetSlip Component */}
-        <BetSlip
-          isOpen={isOpen}
-          onClose={closeBetSlip}
-          bets={bets}
-          onUpdateBet={updateBet}
-          onRemoveBet={removeBet}
-          onClearAll={clearAllBets}
-          onPlaceBets={placeBets}
-        />
+          </MobileFiltersSheet>
 
-        {/* Mobile Search Modal */}
-        <MobileSearchModal 
-          isOpen={showMobileSearch}
-          onClose={() => setShowMobileSearch(false)}
-          onSearch={handleMobileSearch}
-          currentQuery={debouncedQuery}
-        />
+          {/* BetSlip Component */}
+          <BetSlip
+            isOpen={isOpen}
+            onClose={closeBetSlip}
+            bets={bets}
+            onUpdateBet={updateBet}
+            onRemoveBet={removeBet}
+            onClearAll={clearAllBets}
+            onPlaceBets={placeBets}
+          />
 
-      </div>
-    </main>
+          {/* Mobile Search Modal */}
+          <MobileSearchModal 
+            isOpen={showMobileSearch}
+            onClose={() => setShowMobileSearch(false)}
+            onSearch={handleMobileSearch}
+            currentQuery={debouncedQuery}
+          />
+    </div>
   );
-
-  // Helpers scoped inside component
-  function resetFilters() {
-    setQuery("");
-    setSelectedDate("");
-    setMinEV("");
-
-    const DEFAULT_SPORTS = ["americanfootball_nfl", "americanfootball_ncaaf"];
-    setPicked(DEFAULT_SPORTS);
-
-    // Reset to no books selected (show all)
-    setSelectedBooks([]);
-    setTableNonce((n) => n + 1);
-  }
 }

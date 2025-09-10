@@ -108,8 +108,9 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
+      let response;
       try {
-        const response = await secureFetch(fullUrl, {
+        response = await secureFetch(fullUrl, {
           signal: controller.signal,
           credentials: 'include',
           headers: {
@@ -126,100 +127,99 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         });
         
         clearTimeout(timeoutId);
-        return response;
+        
+        console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
+        
+        // Handle quota exceeded before other errors
+        const quotaResult = await handleApiResponse(response);
+        if (quotaResult.quotaExceeded) {
+          console.log('🔍 useMarkets: Quota exceeded, stopping further requests');
+          setError('Quota exceeded - upgrade to continue');
+          return { response, data: null };
+        }
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('🔴 useMarkets: API error response:', errorText);
+          throw new Error(`API request failed with status ${response.status}: ${errorText.substring(0, 200)}`);
+        }
+        
+        // Check if response is valid JSON
+        const data = await response.json();
+        return { response, data };
+        
       } catch (error) {
         clearTimeout(timeoutId);
         if (error.name === 'AbortError') {
           throw new Error('Request timed out. Please try again.');
         }
-        throw error;
-      }
-      
-      console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
-      
-      // Check if response is valid JSON
-      let data;
-      try {
-        data = await response.clone().json();
-      } catch (e) {
-        const text = await response.text();
-        console.error('🔴 useMarkets: Failed to parse JSON response:', text);
-        throw new Error(`Invalid JSON response: ${text.substring(0, 200)}`);
-      }
-      
-      // Handle quota exceeded before other errors
-      const quotaResult = await handleApiResponse(response);
-      if (quotaResult.quotaExceeded) {
-        console.log('🔍 useMarkets: Quota exceeded, stopping further requests');
-        setError('Quota exceeded - upgrade to continue');
-        return;
-      }
-      
-      if (!response.ok) {
-        let errorMessage = `API request failed with status ${response.status}`;
-        let errorDetails = '';
         
-        try {
-          const errorBody = await response.text();
-          console.error('🔴 useMarkets: API error response:', errorBody);
-          errorMessage = errorBody || errorMessage;
-          errorDetails = errorBody;
-        } catch (e) {
-          console.error('🔴 useMarkets: Failed to read error response');
+        // If we have a response, try to extract error details
+        if (error.response) {
+          try {
+            const errorBody = await error.response.text();
+            console.error('🔴 useMarkets: API error response:', errorBody);
+            error.message = errorBody || error.message;
+            
+            console.error('🔍 API Error:', {
+              status: error.response.status,
+              statusText: error.response.statusText,
+              url: error.response.url,
+              error: errorBody
+            });
+            
+            // Handle errors with retry logic
+            if ((error.response.status >= 500 || error.response.status === 0) && retryCount.current < MAX_RETRIES) {
+              retryCount.current += 1;
+              const retryAfter = error.response.headers.get('Retry-After') || RETRY_DELAY;
+              const delay = typeof retryAfter === 'string' ? parseInt(retryAfter, 10) * 1000 : RETRY_DELAY;
+              
+              console.log(`🔄 useMarkets: Retrying (${retryCount.current}/${MAX_RETRIES}) in ${delay/1000} seconds...`);
+              
+              // Clear the current request
+              activeRequest.current = null;
+              
+              // Show user feedback about the retry
+              setError(`Temporarily unavailable. Retrying in ${delay/1000} seconds... (${retryCount.current}/${MAX_RETRIES})`);
+              
+              // Schedule a retry with exponential backoff
+              return new Promise(resolve => {
+                setTimeout(() => {
+                  fetchMarkets(true).then(resolve);
+                }, delay * Math.pow(2, retryCount.current - 1)); // Exponential backoff
+              });
+            }
+          } catch (e) {
+            console.error('🔴 useMarkets: Failed to read error response');
+          }
         }
-        
-        console.error('🔍 API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          url: response.url,
-          error: errorDetails
-        });
-        
-        // Handle errors with retry logic
-      if ((response.status >= 500 || response.status === 0) && retryCount.current < MAX_RETRIES) {
-        retryCount.current += 1;
-        const retryAfter = response.headers.get('Retry-After') || RETRY_DELAY;
-        const delay = typeof retryAfter === 'string' ? parseInt(retryAfter, 10) * 1000 : RETRY_DELAY;
-        
-        console.log(`🔄 useMarkets: Retrying (${retryCount.current}/${MAX_RETRIES}) in ${delay/1000} seconds...`);
-        
-        // Clear the current request
-        activeRequest.current = null;
-        
-        // Show user feedback about the retry
-        setError(`Temporarily unavailable. Retrying in ${delay/1000} seconds... (${retryCount.current}/${MAX_RETRIES})`);
-        
-        // Schedule a retry with exponential backoff
-        return new Promise(resolve => {
-          setTimeout(() => {
-            fetchMarkets(true).then(resolve);
-          }, delay * Math.pow(2, retryCount.current - 1)); // Exponential backoff
-        });
-      }
         
         // Reset retry counter on non-retryable errors or max retries reached
         retryCount.current = 0;
         
         // Provide more user-friendly error messages
         let userFriendlyError = 'Failed to load data. Please try again later.';
-        if (response.status === 401 || response.status === 403) {
-          userFriendlyError = 'Authentication required. Please log in again.';
-        } else if (response.status === 429) {
-          userFriendlyError = 'Too many requests. Please wait before trying again.';
-        } else if (response.status >= 500) {
-          userFriendlyError = 'Server error. Our team has been notified.';
+        
+        if (error.response) {
+          if (error.response.status === 401 || error.response.status === 403) {
+            userFriendlyError = 'Authentication required. Please log in again.';
+          } else if (error.response.status === 429) {
+            userFriendlyError = 'Too many requests. Please wait before trying again.';
+          } else if (error.response.status >= 500) {
+            userFriendlyError = 'Server error. Our team has been notified.';
+          }
+          
+          // In development, log the full error but still show something to the user
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('🔍 useMarkets: Request failed with status', error.response.status, error.message);
+          }
         }
         
         setError(userFriendlyError);
         setGames([]);
         
-        // In development, log the full error but still show something to the user
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('🔍 useMarkets: Request failed with status', response.status, errorMessage);
-          return;
-        }
-        
-        throw new Error(`API request failed: ${response.status} - ${response.statusText}`);
+        // Re-throw the error to be caught by the error boundary
+        throw error;
       }
       
       console.log('🔍 useMarkets: Response data:', data);
