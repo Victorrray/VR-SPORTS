@@ -337,19 +337,6 @@ export default function Account() {
             </div>
 
 
-            {providers.length > 0 && (
-              <div className="detail-row">
-                <div className="detail-label">
-                  <Settings size={16} />
-                  <span>Auth Providers</span>
-                </div>
-                <div className="providers">
-                  {providers.map((p) => (
-                    <span key={p} className="provider-badge">{p}</span>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <div className="detail-row">
               <div className="detail-label">
