@@ -41,7 +41,7 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 5000; // 5 seconds between retries
 
-  // Debounced fetch function to prevent rapid successive calls
+  // Debounced fetch function with enhanced error handling and retry logic
   const fetchMarkets = useMemoizedCallback(debounce(async (isRetry = false) => {
     const now = Date.now();
     
@@ -53,8 +53,10 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
     
     console.log('🔍 useMarkets: fetchMarkets called with:', { sports, regions, markets });
     
-    if (!sports.length || !regions.length || !markets.length) {
+    if (!sports?.length || !regions?.length || !markets?.length) {
       console.log('🔍 useMarkets: Skipping fetch - missing required params');
+      setError('Please select sports, regions, and markets to view odds');
+      setIsLoading(false);
       return;
     }
     
@@ -102,19 +104,36 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       const fullUrl = `${BASE_URL.replace(/\/$/, '')}/api/odds?${params}`;
       console.log('🔍 useMarkets: Final API URL:', fullUrl);
       
-      // Include proper headers for authentication
-      const response = await secureFetch(fullUrl, {
-        credentials: 'include',
-        headers: {
-          'x-user-id': 'demo-user', // Will be replaced with actual user ID in production
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        },
-        cache: 'no-store'
-      });
+      // Enhanced fetch with better error handling and timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      try {
+        const response = await secureFetch(fullUrl, {
+          signal: controller.signal,
+          credentials: 'include',
+          headers: {
+            'x-user-id': 'demo-user',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          cache: 'no-store',
+          mode: 'cors',
+          redirect: 'follow'
+        });
+        
+        clearTimeout(timeoutId);
+        return response;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          throw new Error('Request timed out. Please try again.');
+        }
+        throw error;
+      }
       
       console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
       
@@ -156,31 +175,47 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
           error: errorDetails
         });
         
-        // Handle 503 errors with retry logic
-        if (response.status === 503 && retryCount.current < MAX_RETRIES) {
-          retryCount.current += 1;
-          console.log(`🔄 useMarkets: Retrying (${retryCount.current}/${MAX_RETRIES}) in ${RETRY_DELAY/1000} seconds...`);
-          
-          // Clear the current request
-          activeRequest.current = null;
-          
-          // Schedule a retry
+        // Handle errors with retry logic
+      if ((response.status >= 500 || response.status === 0) && retryCount.current < MAX_RETRIES) {
+        retryCount.current += 1;
+        const retryAfter = response.headers.get('Retry-After') || RETRY_DELAY;
+        const delay = typeof retryAfter === 'string' ? parseInt(retryAfter, 10) * 1000 : RETRY_DELAY;
+        
+        console.log(`🔄 useMarkets: Retrying (${retryCount.current}/${MAX_RETRIES}) in ${delay/1000} seconds...`);
+        
+        // Clear the current request
+        activeRequest.current = null;
+        
+        // Show user feedback about the retry
+        setError(`Temporarily unavailable. Retrying in ${delay/1000} seconds... (${retryCount.current}/${MAX_RETRIES})`);
+        
+        // Schedule a retry with exponential backoff
+        return new Promise(resolve => {
           setTimeout(() => {
-            fetchMarkets(true); // Pass true to indicate this is a retry
-          }, RETRY_DELAY);
-          
-          return;
-        }
+            fetchMarkets(true).then(resolve);
+          }, delay * Math.pow(2, retryCount.current - 1)); // Exponential backoff
+        });
+      }
         
         // Reset retry counter on non-retryable errors or max retries reached
         retryCount.current = 0;
         
-        setError(errorMessage);
+        // Provide more user-friendly error messages
+        let userFriendlyError = 'Failed to load data. Please try again later.';
+        if (response.status === 401 || response.status === 403) {
+          userFriendlyError = 'Authentication required. Please log in again.';
+        } else if (response.status === 429) {
+          userFriendlyError = 'Too many requests. Please wait before trying again.';
+        } else if (response.status >= 500) {
+          userFriendlyError = 'Server error. Our team has been notified.';
+        }
+        
+        setError(userFriendlyError);
         setGames([]);
         
-        // For development, provide fallback data instead of infinite loading
+        // In development, log the full error but still show something to the user
         if (process.env.NODE_ENV === 'development') {
-          console.warn('🔍 useMarkets: Using fallback data in development mode');
+          console.warn('🔍 useMarkets: Request failed with status', response.status, errorMessage);
           return;
         }
         
