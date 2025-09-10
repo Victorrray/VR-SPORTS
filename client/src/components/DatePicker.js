@@ -17,6 +17,28 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    if (!open) return;
+    
+    const handleClickOutside = (event) => {
+      const dropdown = event.target.closest('.dp-wrap');
+      if (!dropdown) {
+        setOpen(false);
+      }
+    };
+    
+    // Use a small delay to prevent immediate closing
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [open]);
+
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return placeholder;
     if (dateStr === "live") return "🔴 Live Games";
@@ -104,7 +126,10 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     <div className="dp-wrap">
       <button 
         className="dp-toggle" 
-        onClick={() => setOpen(!open)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
         aria-label="Select date"
       >
         <Calendar size={16} />
@@ -119,7 +144,10 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
             <div 
               key={option.value}
               className={`dp-item ${value === option.value ? 'dp-selected' : ''}`}
-              onClick={() => handleDateSelect(option.value)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDateSelect(option.value);
+              }}
             >
               {option.label}
             </div>
