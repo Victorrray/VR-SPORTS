@@ -1,6 +1,8 @@
 // server/index.js
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const axios = require("axios");
 const bodyParser = require("body-parser");
 require("dotenv").config();
@@ -218,6 +220,15 @@ const corsMiddleware = (req, res, next) => {
   return res.status(403).json({ error: 'Not allowed by CORS' });
 };
 
+// Trust proxy (Render/Heroku) for correct IPs in rate-limiting
+app.set('trust proxy', 1);
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+
 // Apply CORS middleware
 app.use(corsMiddleware);
 
@@ -241,6 +252,18 @@ async function authenticate(req, _res, next) {
 
 // Apply authentication on API routes
 app.use('/api', authenticate);
+
+// Basic API rate limiting (production only)
+if (process.env.NODE_ENV === 'production') {
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'rate_limited', hint: 'Too many requests, please try again later.' },
+  });
+  app.use('/api/', apiLimiter);
+}
 
 // Use JSON parser for most routes, but skip Stripe webhook which requires raw body
 app.use((req, res, next) => {

@@ -276,6 +276,39 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return localStorage.getItem("vr-odds-playerprops") === "true";
   });
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [oddsFormat] = useState('american');
+  // Debounced query for smoother filtering and to feed MobileSearchModal
+  const debouncedQuery = useDebounce(query, 300);
+
+  // Filtered games based on date and query
+  const filteredGames = useMemo(() => {
+    let base = Array.isArray(marketGames) ? marketGames : [];
+    // Filter by selected date (local date)
+    if (selectedDate) {
+      base = base.filter(g => {
+        const d = new Date(g.commence_time);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const local = `${y}-${m}-${day}`;
+        return local === selectedDate;
+      });
+    }
+    const q = (debouncedQuery || '').trim().toLowerCase();
+    if (!q) return base;
+    return base.filter(g =>
+      (g.home_team && g.home_team.toLowerCase().includes(q)) ||
+      (g.away_team && g.away_team.toLowerCase().includes(q)) ||
+      (g.sport_title && g.sport_title.toLowerCase().includes(q))
+    );
+  }, [marketGames, selectedDate, debouncedQuery]);
+
+  // Effective book filter (all if none selected)
+  const effectiveSelectedBooks = useMemo(() => {
+    return (selectedBooks && selectedBooks.length)
+      ? selectedBooks
+      : (Array.isArray(marketBooks) ? marketBooks.map(b => b.key) : []);
+  }, [selectedBooks, marketBooks]);
 
   function handleMobileSearch(searchTerm) {
     try {
@@ -447,8 +480,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             bookFilter={effectiveSelectedBooks}
             marketFilter={marketKeys}
             evMin={minEV === "" ? null : Number(minEV)}
-            loading={loading || hookLoading}
-            error={error || hookError}
+            loading={loading || marketsLoading}
+            error={error || marketsError}
             oddsFormat={oddsFormat}
             allCaps={
               typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
@@ -487,3 +520,5 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     </div>
   );
 }
+
+export default SportsbookMarkets;

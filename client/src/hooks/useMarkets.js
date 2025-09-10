@@ -109,6 +109,7 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
       let response;
+      let data;
       try {
         response = await secureFetch(fullUrl, {
           signal: controller.signal,
@@ -135,7 +136,8 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         if (quotaResult.quotaExceeded) {
           console.log('🔍 useMarkets: Quota exceeded, stopping further requests');
           setError('Quota exceeded - upgrade to continue');
-          return { response, data: null };
+          setGames([]);
+          return;
         }
         
         if (!response.ok) {
@@ -145,9 +147,8 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         }
         
         // Check if response is valid JSON
-        const data = await response.json();
-        return { response, data };
-        
+        data = await response.json();
+      
       } catch (error) {
         clearTimeout(timeoutId);
         if (error.name === 'AbortError') {
