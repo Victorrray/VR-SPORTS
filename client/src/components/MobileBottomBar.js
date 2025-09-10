@@ -29,14 +29,14 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
       label: "Odds", 
       icon: TrendingUp, 
       href: "/sportsbooks",
-      badge: activeCount > 0 ? `${activeCount}` : null
+      badge: null
     },
     { 
       key: "picks", 
       label: "Picks", 
       icon: BarChart3, 
       href: "/picks",
-      badge: hasNotifications ? "!" : null
+      badge: null
     },
     { 
       key: "scores", 
