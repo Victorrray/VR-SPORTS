@@ -83,6 +83,7 @@ export default function Account() {
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
+  const [savingPrefs, setSavingPrefs] = useState(false);
 
   // Load profile (username) and sportsbooks
   useEffect(() => {
@@ -134,13 +135,21 @@ export default function Account() {
 
   // Handle sportsbook preferences save
   const handleSavePreferences = () => {
+    setSavingPrefs(true);
     try {
       localStorage.setItem('userSelectedSportsbooks', JSON.stringify(selectedBooks));
       setSaveStatus('Preferences saved successfully!');
-      setTimeout(() => setSaveStatus(''), 3000);
+      setTimeout(() => {
+        setSaveStatus('');
+        setSavingPrefs(false);
+      }, 3000);
     } catch (error) {
+      console.error('Error saving preferences:', error);
       setSaveStatus('Error saving preferences');
-      setTimeout(() => setSaveStatus(''), 3000);
+      setTimeout(() => {
+        setSaveStatus('');
+        setSavingPrefs(false);
+      }, 3000);
     }
   };
 
