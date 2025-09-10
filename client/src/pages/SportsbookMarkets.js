@@ -179,14 +179,12 @@ const FRIENDLY_TITLES = {
 // Removed sports causing 404 errors: tennis_atp, tennis_wta, baseball_kbo, baseball_npb, baseball_cpbl
 const FEATURED_SPORTS = new Set([
   "basketball_nba",
+  "basketball_wnba", 
   "baseball_mlb",
+  "baseball_kbo",
   "americanfootball_nfl",
   "americanfootball_ncaaf",
-  "icehockey_nhl",
   "soccer_epl",
-  "soccer_uefa_champs_league",
-  "mma_mixed_martial_arts",
-  "boxing_boxing",
 ]);
 
 /* =========================
@@ -296,7 +294,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   }, [mobileFiltersOpen]);
 
   // Helpers to reset/apply filters
-  const getDefaultSports = () => ["americanfootball_nfl", "americanfootball_ncaaf"];
+  const getDefaultSports = () => ["basketball_nba", "americanfootball_nfl"];
 
   const applyFilters = () => {
     // Apply draft → live state and persist
@@ -673,27 +671,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 />
               </div>
 
-              {/* Market toggles */}
-              <div style={{ marginBottom: 16 }}>
-                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Markets</h4>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {GAME_LINES.map((m) => (
-                    <label key={m} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      <input
-                        type="checkbox"
-                        checked={draftMarketKeys.includes(m)}
-                        onChange={(e) => {
-                          const next = e.target.checked
-                            ? Array.from(new Set([...(draftMarketKeys || []), m]))
-                            : (draftMarketKeys || []).filter((x) => x !== m);
-                          setDraftMarketKeys(next);
-                        }}
-                      />
-                      <span>{MARKET_TITLES[m] || m}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>

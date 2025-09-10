@@ -86,7 +86,10 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
             <div 
               key={option.value} 
               className={`dp-mobile-option ${value === option.value ? 'dp-selected' : ''}`}
-              onClick={() => handleDateSelect(option.value)}
+              onClick={() => {
+                onChange(option.value);
+                setTimeout(() => setOpen(false), 150);
+              }}
             >
               <span className={`dp-mobile-checkbox ${value === option.value ? 'dp-checked' : ''}`}>
                 {value === option.value ? "✓" : "○"}
