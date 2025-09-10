@@ -198,15 +198,36 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
   const [sportList, setSportList] = useState([]);
   // Initialize state from localStorage or defaults
-  const [picked, setPicked] = useState(() => {
+  // Get initial sports from URL or fallback to localStorage/default
+  const getInitialSports = () => {
     if (typeof window === "undefined") return ["americanfootball_nfl", "americanfootball_ncaaf"];
+    
     try {
+      // Check URL params first
+      const params = new URLSearchParams(window.location.search);
+      const sportsParam = params.get('sports');
+      
+      if (sportsParam) {
+        const sports = sportsParam.split(',');
+        // Validate sports to prevent XSS
+        const validSports = sports.filter(sport => 
+          /^[a-z_]+$/.test(sport) // Basic validation for sport keys
+        );
+        if (validSports.length > 0) {
+          return validSports;
+        }
+      }
+      
+      // Fallback to localStorage
       const saved = localStorage.getItem("vr-odds-sports");
       return saved ? JSON.parse(saved) : ["americanfootball_nfl", "americanfootball_ncaaf"];
-    } catch {
+    } catch (error) {
+      console.error('Error getting initial sports:', error);
       return ["americanfootball_nfl", "americanfootball_ncaaf"];
     }
-  });
+  };
+
+  const [picked, setPicked] = useState(getInitialSports);
   const [query, setQuery] = useState(() => {
     if (typeof window === "undefined") return "";
     return localStorage.getItem("vr-odds-query") || "";
@@ -274,6 +295,48 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
     console.log('📱 SportsbookMarkets: localStorage updated');
     setShowMobileSearch(false);
   }
+
+  // Handle sport selection with URL and state synchronization
+  const handleSportChange = (newPicked) => {
+    if (JSON.stringify(newPicked) !== JSON.stringify(picked)) {
+      console.log('🏈 Sport selection changed:', newPicked);
+      setPicked(newPicked);
+      
+      // Update URL to reflect the change
+      const params = new URLSearchParams(window.location.search);
+      if (newPicked.length > 0) {
+        params.set('sports', newPicked.join(','));
+      } else {
+        params.delete('sports');
+      }
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.pushState({}, '', newUrl);
+      
+      // Force data reload
+      setLoad(true);
+      setErr(null);
+    }
+  };
+
+  // Handle URL changes (e.g., back/forward navigation)
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const sportsParam = params.get('sports');
+      
+      if (sportsParam) {
+        const newPicked = sportsParam.split(',');
+        if (JSON.stringify(newPicked) !== JSON.stringify(picked)) {
+          setPicked(newPicked);
+          setLoad(true);
+          setErr(null);
+        }
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [picked]);
 
   // Listen for mobile search button clicks
   useEffect(() => {
@@ -380,17 +443,40 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
     console.log('🔄 Query changed from', query, 'to debouncedQuery:', debouncedQuery);
   }, [query, debouncedQuery]);
 
-  // Sync with URL search params
+  // Sync with URL search params and handle initial load
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    
+    // Handle query param
     const urlQuery = params.get('q') || '';
-    console.log('🔗 URL Sync: location.search =', location.search);
-    console.log('🔗 URL Sync: urlQuery =', urlQuery, 'current query =', query);
     if (urlQuery !== query) {
       console.log('🔗 URL Sync: Setting query to urlQuery:', urlQuery);
       setQuery(urlQuery);
     }
-  }, [location.search, query]);
+    
+    // Handle sports param on initial load
+    const urlSports = params.get('sports');
+    if (urlSports) {
+      const sports = urlSports.split(',').filter(Boolean);
+      if (JSON.stringify(sports) !== JSON.stringify(picked)) {
+        console.log('🔗 URL Sync: Setting sports from URL:', sports);
+        setPicked(sports);
+      }
+    }
+    
+    // Handle other params (books, markets, etc.)
+    const urlBooks = params.get('books');
+    if (urlBooks) {
+      const books = urlBooks.split(',').filter(Boolean);
+      if (JSON.stringify(books) !== JSON.stringify(selectedBooks)) {
+        console.log('🔗 URL Sync: Setting books from URL:', books);
+        setSelectedBooks(books);
+      }
+    }
+    
+    // Add more param syncs as needed
+    
+  }, [location.search]); // Removed query from deps to prevent loops
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -400,12 +486,25 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
     }
   }, [oddsFormat]);
 
-  // Save filter states to localStorage
+  // Sync state with URL and localStorage when picked changes
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (picked.length > 0) {
+      // Update URL
+      const params = new URLSearchParams(window.location.search);
+      params.set('sports', picked.join(','));
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+      
+      // Update localStorage
       try {
         localStorage.setItem("vr-odds-sports", JSON.stringify(picked));
-      } catch {}
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+      
+      // Force reload data when sports change
+      setLoad(true);
+      setErr(null);
     }
   }, [picked]);
 
