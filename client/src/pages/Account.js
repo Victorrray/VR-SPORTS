@@ -87,15 +87,33 @@ export default function Account() {
   // Load profile (username) and sportsbooks
   useEffect(() => {
     async function load() {
-      if (!user) { setPageLoading(false); return; }
-      setPageLoading(true);
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .single();
-      if (!error && data) setUsername(data.username);
-      setPageLoading(false);
+      try {
+        if (!user) { setPageLoading(false); return; }
+        // If Supabase client is not available, fail fast
+        if (!supabase) {
+          console.warn('Account: Supabase client not initialized');
+          setError('Unable to load profile. Please try again later.');
+          setPageLoading(false);
+          return;
+        }
+        setPageLoading(true);
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+        if (!error && data && data.username) setUsername(data.username);
+        if (error && error.code !== 'PGRST116') {
+          // Log non-not-found errors
+          console.error('Account: Failed to load username', error);
+          setError('Failed to load profile');
+        }
+      } catch (e) {
+        console.error('Account: Exception while loading profile', e);
+        setError('Failed to load profile');
+      } finally {
+        setPageLoading(false);
+      }
     }
     load();
     
