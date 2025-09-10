@@ -6,6 +6,7 @@ import { secureFetch, apiRateLimiter } from '../utils/security';
 import { useCachedFetch, useRealtimeCachedFetch } from './useCachedFetch';
 import { useQuotaHandler } from './useQuotaHandler';
 import { withApiBase } from '../config/api';
+import { cacheManager } from '../utils/cacheManager';
 
 // Small utility to normalize arrays from API responses
 function normalizeArray(resp) {
@@ -248,7 +249,11 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       
       // Update cache
       APICache.set(cacheKey, normalizedData, 2 * 60 * 1000); // 2 minutes cache for odds data
-      setCacheStats(APICache.getStats());
+      try {
+        setCacheStats(cacheManager.getStats());
+      } catch (_) {
+        // stats optional
+      }
       
       // Extract unique bookmakers with their display names
       const bookmakerMap = new Map();
