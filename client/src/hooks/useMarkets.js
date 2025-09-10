@@ -114,12 +114,7 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
           signal: controller.signal,
           credentials: 'include',
           headers: {
-            'x-user-id': 'demo-user',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
+            'Accept': 'application/json'
           },
           cache: 'no-store',
           mode: 'cors',

@@ -79,8 +79,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle API requests
-  if (url.pathname.startsWith('/api/')) {
+  // Handle same-origin API requests only
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) {
     event.respondWith(handleApiRequest(request));
     return;
   }
