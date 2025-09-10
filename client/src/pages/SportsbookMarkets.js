@@ -578,41 +578,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         paddingLeft: 'var(--mobile-gutter, 16px)',
         paddingRight: 'var(--mobile-gutter, 16px)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: 'var(--card-bg)',
-            borderRadius: '8px',
-            padding: '4px',
-            border: '1px solid var(--border-color)'
-          }}>
-            <button
-              style={{
-                padding: '8px 16px',
-                border: 'none',
-                background: 'var(--accent)',
-                color: '#fff',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'default',
-                borderRadius: '6px',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              Game Lines
-            </button>
-            <span style={{
-              padding: '8px 16px',
-              fontSize: '12px',
-              color: 'var(--text-secondary)',
-              fontStyle: 'italic'
-            }}>
-              Player Props Disabled
-            </span>
-          </div>
-        </div>
+        <h2 style={{
+          fontSize: '18px',
+          fontWeight: '600',
+          color: 'var(--text-primary)',
+          margin: 0
+        }}>
+          Game Odds
+        </h2>
       </div>
 
           <OddsTable
