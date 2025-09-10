@@ -572,20 +572,36 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   return (
     <div className="sportsbook-markets">
       <div style={{ 
-        marginBottom: '16px', 
+        marginBottom: '24px', 
         paddingTop: '20px', 
         textAlign: 'center',
         paddingLeft: 'var(--mobile-gutter, 16px)',
-        paddingRight: 'var(--mobile-gutter, 16px)'
+        paddingRight: 'var(--mobile-gutter, 16px)',
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))',
+        borderRadius: '12px',
+        padding: '24px 16px',
+        border: '1px solid rgba(139, 92, 246, 0.2)'
       }}>
         <h2 style={{
-          fontSize: '18px',
-          fontWeight: '600',
+          fontSize: '24px',
+          fontWeight: '700',
           color: 'var(--text-primary)',
-          margin: 0
+          margin: '0 0 8px 0',
+          background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
         }}>
           Game Odds
         </h2>
+        <p style={{
+          fontSize: '14px',
+          color: 'var(--text-secondary)',
+          margin: 0,
+          opacity: 0.8
+        }}>
+          Compare odds across all major sportsbooks
+        </p>
       </div>
 
           <OddsTable

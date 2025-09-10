@@ -233,27 +233,6 @@ export default function Home() {
             {me?.username || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
           </h1>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              onClick={() => setShowEdgeCalculator(true)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                background: 'var(--card-bg)',
-                color: 'var(--text-primary)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <Calculator size={16} />
-              Calculator
-            </button>
-          </div>
         </div>
 
 
