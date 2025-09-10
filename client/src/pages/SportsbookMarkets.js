@@ -665,21 +665,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Actions */}
               <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
                 <button
-                  onClick={resetDraftFilters}
-                  style={{
-                    flex: 1,
-                    padding: '12px 16px',
-                    borderRadius: 8,
-                    border: '1px solid var(--border-color)',
-                    background: 'transparent',
-                    color: 'var(--text-secondary)',
-                    fontWeight: 500,
-                    fontSize: '14px'
-                  }}
-                >
-                  Reset
-                </button>
-                <button
                   onClick={applyFilters}
                   style={{
                     flex: 1,
@@ -693,6 +678,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   }}
                 >
                   Apply
+                </button>
+                <button
+                  onClick={resetDraftFilters}
+                  style={{
+                    flex: 1,
+                    padding: '12px 16px',
+                    borderRadius: 8,
+                    border: '1px solid var(--border-color)',
+                    background: 'transparent',
+                    color: 'var(--text-secondary)',
+                    fontWeight: 500,
+                    fontSize: '14px'
+                  }}
+                >
+                  Reset
                 </button>
               </div>
             </div>

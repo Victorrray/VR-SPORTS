@@ -30,7 +30,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     });
   };
 
-  const generateDateOptions = () => {
+  const dateOptions = React.useMemo(() => {
     const options = [];
     // Get current date in user's local timezone
     const today = new Date();
@@ -63,9 +63,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     }
     
     return options;
-  };
-
-  const dateOptions = generateDateOptions();
+  }, []); // Empty dependency array - only compute once
 
   const handleDateSelect = (dateValue) => {
     onChange(dateValue);
