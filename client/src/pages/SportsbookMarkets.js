@@ -414,7 +414,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     error: marketsError,
   } = useMarkets(
     picked,
-    ["us"],
+    ["us", "us2", "us_exchanges"],
     marketKeys,
     selectedDate ? new Date(selectedDate) : null
   );
