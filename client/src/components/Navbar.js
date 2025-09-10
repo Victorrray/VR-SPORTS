@@ -198,7 +198,7 @@ export default function Navbar({ onOpenMobileSearch }) {
           onClick={() => setProfileMenuOpen(!profileMenuOpen)}
           style={{ 
             position: 'absolute',
-            left: '180px',
+            right: '80px',
             top: '50%',
             transform: 'translateY(-50%)'
           }}
