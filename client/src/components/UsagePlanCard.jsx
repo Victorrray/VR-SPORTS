@@ -220,7 +220,24 @@ export default function UsagePlanCard() {
             </div>
             
             <button
-              onClick={() => (window.location.href = "/pricing")}
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/billing/create-checkout-session', {
+                    method: 'POST',
+                    credentials: 'include'
+                  });
+                  const data = await response.json();
+                  if (data?.url) {
+                    window.location.href = data.url;
+                  } else {
+                    console.error('No checkout URL returned');
+                    window.location.href = "/pricing";
+                  }
+                } catch (error) {
+                  console.error('Failed to create checkout:', error);
+                  window.location.href = "/pricing";
+                }
+              }}
               className="upgrade-button"
             >
               <TrendingUp size={16} />
