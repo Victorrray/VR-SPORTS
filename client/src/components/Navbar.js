@@ -1,7 +1,7 @@
 // src/components/Navbar.js
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { Search, User, ChevronDown, CreditCard, Settings } from "lucide-react";
+import { Search, User, ChevronDown, CreditCard, Settings, Menu } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useMe } from "../hooks/useMe";
 import styles from "./Navbar.module.css";
@@ -15,6 +15,7 @@ export default function Navbar({ onOpenMobileSearch }) {
 
   const [mobileMenu, setMobileMenu] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [q, setQ] = useState("");
 
   const isActive = (path) => location.pathname === path;
@@ -190,13 +191,83 @@ export default function Navbar({ onOpenMobileSearch }) {
       </div>
 
       {/* Mobile profile button - top right (all pages) */}
-      <button 
-        className={styles.mobileProfileBtn} 
-        aria-label="Profile"
-        onClick={() => navigate(user ? "/account" : "/login")}
-      >
-        <User size={20} />
-      </button>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        {/* Profile hamburger menu - only on profile page */}
+        {location.pathname === "/account" && user && (
+          <button 
+            className={styles.mobileProfileBtn} 
+            aria-label="Profile Menu"
+            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+            style={{ position: 'relative' }}
+          >
+            <Menu size={20} />
+            
+            {/* Profile menu dropdown */}
+            {profileMenuOpen && (
+              <div 
+                className={styles.profileMenuDropdown}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  background: 'var(--card-bg)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  minWidth: '200px',
+                  zIndex: 1000,
+                  overflow: 'hidden'
+                }}
+              >
+                <div 
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    document.getElementById('usage-plan-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  style={{
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid var(--border-color)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = 'var(--hover-bg)'}
+                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                >
+                  Usage & Plan
+                </div>
+                <div 
+                  onClick={() => {
+                    setProfileMenuOpen(false);
+                    document.getElementById('sportsbooks-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  style={{
+                    padding: '12px 16px',
+                    cursor: 'pointer',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}
+                  onMouseEnter={(e) => e.target.style.background = 'var(--hover-bg)'}
+                  onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                >
+                  My Sportsbooks
+                </div>
+              </div>
+            )}
+          </button>
+        )}
+        
+        <button 
+          className={styles.mobileProfileBtn} 
+          aria-label="Profile"
+          onClick={() => navigate(user ? "/account" : "/login")}
+        >
+          <User size={20} />
+        </button>
+      </div>
 
       {/* Inline search bar only on Sportsbooks page (desktop only) */}
       {location.pathname.startsWith("/sportsbooks") && (

@@ -458,10 +458,12 @@ export default function Account() {
       </section>
 
       {/* Usage & Plan Card */}
-      <UsagePlanCard />
+      <div id="usage-plan-section">
+        <UsagePlanCard />
+      </div>
 
       {/* Sportsbook Selection */}
-      <section className="sportsbook-card">
+      <section id="sportsbooks-section" className="sportsbook-card">
         <div className="card-header">
           <BookOpen size={20} />
           <h2>My Sportsbooks</h2>
