@@ -97,6 +97,8 @@ export default function Account() {
           return;
         }
         setPageLoading(true);
+        // Safety guard to prevent indefinite spinner
+        const safetyTimer = setTimeout(() => setPageLoading(false), 2500);
         const { data, error } = await supabase
           .from("profiles")
           .select("username")
@@ -113,6 +115,8 @@ export default function Account() {
         setError('Failed to load profile');
       } finally {
         setPageLoading(false);
+        // Clear safety guard
+        try { clearTimeout(safetyTimer); } catch {}
       }
     }
     load();

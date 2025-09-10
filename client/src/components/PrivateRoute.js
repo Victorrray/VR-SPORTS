@@ -85,9 +85,9 @@ const PrivateRoute = ({ children }) => {
   }
 
   if (!authed) {
-    // Redirect to login, but save the current location to return to after login
-    console.log(`🔐 Redirecting to login from ${location.pathname}`);
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Redirect unauthenticated users to the landing page (never force-login)
+    console.log(`🔐 Redirecting to landing from ${location.pathname}`);
+    return <Navigate to="/" replace />;
   }
 
   return children;
