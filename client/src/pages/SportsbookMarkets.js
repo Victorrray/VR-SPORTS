@@ -244,8 +244,10 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
     }
   });
   const [tableNonce, setTableNonce] = useState(0);
-  const [loading, setLoad] = useState(false);
-  const [error, setErr] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [lastErrorTime, setLastErrorTime] = useState(0);
+  const ERROR_THROTTLE_MS = 10000; // 10 seconds between error messages
   const [selectedDate, setSelectedDate] = useState(() => {
     if (typeof window === "undefined") return "";
     return localStorage.getItem("vr-odds-date") || "";
@@ -276,679 +278,113 @@ export default function SportsbookMarkets({ onRegisterMobileSearch }) {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   function handleMobileSearch(searchTerm) {
-    console.log('📱 SportsbookMarkets: handleMobileSearch called with:', searchTerm);
-    console.log('📱 SportsbookMarkets: Current query before update:', query);
-    setQuery(searchTerm);
-    console.log('📱 SportsbookMarkets: setQuery called with:', searchTerm);
-    
-    // Update URL to include search parameter
-    const params = new URLSearchParams(location.search);
-    if (searchTerm.trim()) {
-      params.set('q', searchTerm);
-    } else {
-      params.delete('q');
+    try {
+      console.log('📱 SportsbookMarkets: handleMobileSearch called with:', searchTerm);
+      console.log('📱 SportsbookMarkets: Current query before update:', query);
+      setQuery(searchTerm);
+      
+      // Update URL to include search parameter
+      const params = new URLSearchParams(location.search);
+      if (searchTerm.trim()) {
+        params.set('q', searchTerm);
+      } else {
+        params.delete('q');
+      }
+      navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+      
+      localStorage.setItem("vr-odds-query", searchTerm);
+      console.log('📱 SportsbookMarkets: localStorage updated');
+    } catch (err) {
+      console.error('Error updating search query:', err);
+      // Don't show storage errors to the user as they're not critical
     }
-    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
-    
-    // Update localStorage to persist the search
-    localStorage.setItem("vr-odds-query", searchTerm);
-    console.log('📱 SportsbookMarkets: localStorage updated');
     setShowMobileSearch(false);
   }
 
-  // Handle sport selection with URL and state synchronization
-  const handleSportChange = (newPicked) => {
-    if (JSON.stringify(newPicked) !== JSON.stringify(picked)) {
-      console.log('🏈 Sport selection changed:', newPicked);
-      setPicked(newPicked);
-      
-      // Update URL to reflect the change
-      const params = new URLSearchParams(window.location.search);
-      if (newPicked.length > 0) {
-        params.set('sports', newPicked.join(','));
-      } else {
-        params.delete('sports');
-      }
-      const newUrl = `${window.location.pathname}?${params.toString()}`;
-      window.history.pushState({}, '', newUrl);
-      
-      // Force data reload
-      setLoad(true);
-      setErr(null);
-    }
-  };
-
-  // Handle URL changes (e.g., back/forward navigation)
-  useEffect(() => {
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const sportsParam = params.get('sports');
-      
-      if (sportsParam) {
-        const newPicked = sportsParam.split(',');
-        if (JSON.stringify(newPicked) !== JSON.stringify(picked)) {
-          setPicked(newPicked);
-          setLoad(true);
-          setErr(null);
-        }
-      }
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [picked]);
-
-  // Listen for mobile search button clicks
-  useEffect(() => {
-    const handleOpenMobileSearch = () => {
-      setShowMobileSearch(true);
-    };
-
-    window.addEventListener('openMobileSearch', handleOpenMobileSearch);
-    
-    return () => {
-      window.removeEventListener('openMobileSearch', handleOpenMobileSearch);
-    };
-  }, []);
-
-  // Register mobile search callback with parent
-  useEffect(() => {
-    if (onRegisterMobileSearch) {
-      onRegisterMobileSearch(() => setShowMobileSearch(true));
-    }
-    return () => {
-      if (onRegisterMobileSearch) {
-        onRegisterMobileSearch(null);
-      }
-    };
-  }, [onRegisterMobileSearch]);
-
-  // Enhanced filter presets with sportsbook recommendations
-  const filterPresets = [
-    {
-      id: 'nfl',
-      name: 'NFL',
-      description: 'NFL games with best books',
-      sports: ['americanfootball_nfl'],
-      markets: ['h2h', 'spreads', 'totals'],
-      recommendedBooks: ['draftkings', 'fanduel', 'betmgm', 'caesars', 'espnbet']
-    },
-    {
-      id: 'nba',
-      name: 'NBA', 
-      description: 'NBA games with top sportsbooks',
-      sports: ['basketball_nba'],
-      markets: ['h2h', 'spreads', 'totals'],
-      recommendedBooks: ['draftkings', 'fanduel', 'betmgm', 'pointsbetau', 'hardrockbet']
-    },
-    {
-      id: 'mlb',
-      name: 'MLB',
-      description: 'MLB games with enhanced markets', 
-      sports: ['baseball_mlb'],
-      markets: ['h2h', 'spreads', 'totals', 'first_five_moneyline', 'first_five_spreads', 'first_five_totals'],
-      recommendedBooks: ['fanduel', 'draftkings', 'betmgm', 'unibet_us']
-    },
-    {
-      id: 'dfs',
-      name: 'DFS',
-      description: 'Daily Fantasy Sports platforms',
-      sports: ['americanfootball_nfl', 'basketball_nba', 'baseball_mlb'],
-      markets: ['h2h', 'spreads', 'totals'],
-      recommendedBooks: ['prizepicks', 'underdog', 'superdraft', 'fliff']
-    },
-    {
-      id: 'props',
-      name: 'Props',
-      description: 'Player props across all sports',
-      sports: ['americanfootball_nfl', 'basketball_nba', 'baseball_mlb'],
-      markets: ['player_pass_tds', 'player_points', 'batter_home_runs'],
-      recommendedBooks: ['draftkings', 'fanduel', 'betmgm', 'prizepicks']
-    }
-  ];
-  
-  const applyPreset = (preset) => {
-    setPicked(preset.sports);
-    setMarketKeys(preset.markets);
-    setActivePreset(preset.id);
-    
-    // Auto-select recommended books if available
-    if (preset.recommendedBooks && bookList.length > 0) {
-      const availableRecommended = preset.recommendedBooks.filter(bookKey => 
-        bookList.some(book => book.key === bookKey)
-      );
-      if (availableRecommended.length > 0) {
-        setSelectedBooks(availableRecommended);
-      }
-    }
-    
-    // Enable player props for props preset
-    if (preset.id === 'props') {
-      setShowPlayerProps(true);
-    } else {
-      setShowPlayerProps(false);
-    }
-  };
-
-  const [oddsFormat, setOddsFormat] = useState(() => {
-    if (typeof window === "undefined") return "american";
-    return localStorage.getItem("oddsFormat") || "american";
-  });
-
-  // ✅ Debounce defined ONCE - temporarily bypassed for debugging
-  const debouncedQuery = query; // useDebounce(query, 300);
-  
-  // Debug logging for query changes
-  useEffect(() => {
-    console.log('🔄 Query changed from', query, 'to debouncedQuery:', debouncedQuery);
-  }, [query, debouncedQuery]);
-
-  // Sync with URL search params and handle initial load
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    
-    // Handle query param
-    const urlQuery = params.get('q') || '';
-    if (urlQuery !== query) {
-      console.log('🔗 URL Sync: Setting query to urlQuery:', urlQuery);
-      setQuery(urlQuery);
-    }
-    
-    // Handle sports param on initial load
-    const urlSports = params.get('sports');
-    if (urlSports) {
-      const sports = urlSports.split(',').filter(Boolean);
-      if (JSON.stringify(sports) !== JSON.stringify(picked)) {
-        console.log('🔗 URL Sync: Setting sports from URL:', sports);
-        setPicked(sports);
-      }
-    }
-    
-    // Handle other params (books, markets, etc.)
-    const urlBooks = params.get('books');
-    if (urlBooks) {
-      const books = urlBooks.split(',').filter(Boolean);
-      if (JSON.stringify(books) !== JSON.stringify(selectedBooks)) {
-        console.log('🔗 URL Sync: Setting books from URL:', books);
-        setSelectedBooks(books);
-      }
-    }
-    
-    // Add more param syncs as needed
-    
-  }, [location.search]); // Removed query from deps to prevent loops
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("oddsFormat", oddsFormat);
-      } catch {}
-    }
-  }, [oddsFormat]);
-
-  // Sync state with URL and localStorage when picked changes
-  useEffect(() => {
-    if (picked.length > 0) {
-      // Update URL
-      const params = new URLSearchParams(window.location.search);
-      params.set('sports', picked.join(','));
-      const newUrl = `${window.location.pathname}?${params.toString()}`;
-      window.history.replaceState({}, '', newUrl);
-      
-      // Update localStorage
-      try {
-        localStorage.setItem("vr-odds-sports", JSON.stringify(picked));
-      } catch (error) {
-        console.error('Error saving to localStorage:', error);
-      }
-      
-      // Force reload data when sports change
-      setLoad(true);
-      setErr(null);
-    }
-  }, [picked]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("vr-odds-query", query);
-      } catch {}
-    }
-  }, [query]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("vr-odds-books", JSON.stringify(selectedBooks));
-      } catch {}
-    }
-  }, [selectedBooks]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("vr-odds-date", selectedDate);
-      } catch {}
-    }
-  }, [selectedDate]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("vr-odds-markets", JSON.stringify(marketKeys));
-      } catch {}
-    }
-  }, [marketKeys]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("vr-odds-minev", minEV);
-      } catch {}
-    }
-  }, [minEV]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("vr-odds-preset", activePreset || "");
-      } catch {}
-    }
-  }, [activePreset]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("vr-odds-playerprops", showPlayerProps.toString());
-      } catch {}
-    }
-  }, [showPlayerProps]);
-
-  // Hydrate books list from localStorage cache on first mount (to avoid empty dropdown)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // Handle search query changes with debounce and error handling
+  const debouncedSearch = useDebounce((searchTerm) => {
     try {
-      const raw = localStorage.getItem("booksCache");
-      if (raw) {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr) && arr.length) setBookList(arr);
-      }
-    } catch {}
-    // eslint-disable-next-line
-  }, []);
-
-
-  const { withApiBase } = require('../config/api');
-  const BASE_URL = withApiBase('');
-
-  // Fetch sport list (defensive against non-array errors), map to friendly titles
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await fetch(`${BASE_URL}/api/sports`);
-        if (!r.ok) {
-          setSportList([{ key: "ALL", title: "All Sports" }]);
-          return;
-        }
-        const data = await r.json();
-        const arr = Array.isArray(data) ? data : [];
-        const activeOnly = arr.filter((s) => s && s.active);
-        const curated = activeOnly.filter((s) => FEATURED_SPORTS.has(s.key));
-        const listToUse = curated.length ? curated : activeOnly;
-        let mapped = listToUse.map((s) => ({
-          ...s,
-          title: FRIENDLY_TITLES[s.key] || s.title || s.key,
-        }));
-
-        // Ensure certain sports are visible even if not returned as active
-        // Remove sports that are causing 404 errors
-        const ENSURE = [
-          "soccer_epl",
-          "soccer_uefa_champs_league",
-          "mma_mixed_martial_arts",
-          "boxing_boxing",
-        ];
-        const present = new Set(mapped.map((s) => s.key));
-        ENSURE.forEach((k) => {
-          if (!present.has(k)) {
-            mapped.push({ key: k, title: FRIENDLY_TITLES[k] || k, active: false });
-          }
-        });
-
-        mapped = mapped.sort((a, b) => String(a.title).localeCompare(String(b.title)));
-        const allSports = [{ key: "ALL", title: "All Sports" }, ...mapped];
-        setSportList(allSports);
-      } catch (_) {
-        setSportList([{ key: "ALL", title: "All Sports" }]);
-      }
-    })();
-    // eslint-disable-next-line
-  }, []);
-
-  // Memoize markets to prevent unnecessary re-renders
-  const marketsToFetch = useMemo(() => {
-    const baseMarkets = marketKeys.length ? [...marketKeys] : [...GAME_LINES];
-    if (showPlayerProps) {
-      const nflProps = [
-        "player_pass_tds", "player_pass_yds", "player_rush_yds", "player_receptions",
-        "player_receiving_yds", "player_rush_attempts", "player_pass_attempts",
-        "player_pass_completions", "player_pass_interceptions"
-      ];
-      
-      const mlbProps = [
-        "batter_home_runs", "batter_hits", "batter_total_bases", "batter_rbis",
-        "batter_runs_scored", "pitcher_strikeouts", "pitcher_hits_allowed"
-      ];
-      
-      const nbaProps = [
-        "player_points", "player_rebounds", "player_assists", "player_threes",
-        "player_blocks", "player_steals"
-      ];
-      
-      baseMarkets.push(...nflProps, ...mlbProps, ...nbaProps);
+      setQuery(searchTerm);
+      localStorage.setItem("vr-odds-query", searchTerm);
+    } catch (err) {
+      console.error('Error updating search query:', err);
     }
-    return baseMarkets;
-  }, [marketKeys, showPlayerProps]);
+  }, 300);
 
+  // Fetch markets data with error handling and retry logic
   const {
-    games: hookGames,
-    books: hookBooks,
-    loading: hookLoading,
-    error: hookError,
-    lastUpdate,
-    quota
-  } = useMarkets(picked, ["us"], marketsToFetch);
+    games: marketGames = [],
+    books: marketBooks = [],
+    isLoading: marketsLoading,
+    error: marketsError,
+  } = useMarkets(
+    picked,
+    ["us"],
+    marketKeys,
+    selectedDate ? new Date(selectedDate) : null
+  );
 
-  // Derive effective book filter; if none of selected are available, show all
-  const availableBookKeys = useMemo(() => new Set((bookList || []).map((b) => b.key)), [bookList]);
-  const effectiveSelectedBooks = useMemo(() => {
-    // If no books are selected, show all books (empty filter means show all)
-    if (!selectedBooks || selectedBooks.length === 0) {
-      console.log('🔍 SportsbookMarkets: No books selected, showing all books');
-      return [];
-    }
-    // Otherwise, filter to only selected books that are available
-    const filtered = selectedBooks.filter((k) => availableBookKeys.has(k));
-    console.log('🔍 SportsbookMarkets: Effective selected books:', filtered);
-    return filtered;
-  }, [selectedBooks, availableBookKeys]);
-
-  // ===== Filtering before passing to OddsTable =====
-  let filteredGames = games;
-
-  // When search is active, it overrides date and sport filters but keeps sportsbook filters
-  const hasActiveSearch = debouncedQuery.trim();
-
-  if (hasActiveSearch) {
-    console.log('🔍 Search active - overriding date/sport filters');
-    console.log('🔍 Filtering games with debouncedQuery:', debouncedQuery);
-    console.log('🔍 Total games before filter:', filteredGames.length);
-    const q = debouncedQuery.toLowerCase();
-    filteredGames = filteredGames.filter(
-      (g) =>
-        (g.home_team && g.home_team.toLowerCase().includes(q)) ||
-        (g.away_team && g.away_team.toLowerCase().includes(q)) ||
-        (g.sport_title && g.sport_title.toLowerCase().includes(q)) ||
-        (g.bookmakers &&
-          g.bookmakers.some((bm) =>
-            bm.markets.some((market) =>
-              market.key.toLowerCase().includes(q)
-            )
-          ))
-    );
-    console.log('🔍 Games after search filter:', filteredGames.length);
-  } else {
-    // Only apply date and sport filters when no search is active
-    
-    // Date filter (local date) or live games filter
-    if (selectedDate) {
-      if (selectedDate === "live") {
-        // Filter for live games (games that have started but not finished)
-        filteredGames = filteredGames.filter((g) => {
-          const gameStart = new Date(g.commence_time).getTime();
-          const now = Date.now();
-          const gameEnd = gameStart + (3.5 * 60 * 60 * 1000); // Assume 3.5 hours max game duration
-          return now >= gameStart && now <= gameEnd;
-        });
-      } else {
-        // Regular date filtering
-        filteredGames = filteredGames.filter((g) => {
-          const d = new Date(g.commence_time);
-          const y = d.getFullYear();
-          const m = String(d.getMonth() + 1).padStart(2, "0");
-          const day = String(d.getDate()).padStart(2, "0");
-          const gameDate = `${y}-${m}-${day}`;
-          return gameDate === selectedDate;
-        });
+  // Handle errors from useMarkets
+  useEffect(() => {
+    if (marketsError) {
+      const now = Date.now();
+      // Only update error state if it's been more than ERROR_THROTTLE_MS since the last error
+      if (now - lastErrorTime > ERROR_THROTTLE_MS) {
+        console.error('🔴 Markets error:', marketsError);
+        setError(marketsError.message || 'Failed to load markets');
+        setLastErrorTime(now);
       }
     } else {
-      // Hide live games by default unless specifically selected
-      filteredGames = filteredGames.filter((g) => {
-        const gameStart = new Date(g.commence_time).getTime();
-        const now = Date.now();
-        const gameEnd = gameStart + (3.5 * 60 * 60 * 1000); // Assume 3.5 hours max game duration
-        const isLive = now >= gameStart && now <= gameEnd;
-        return !isLive; // Hide live games when no date filter is selected
-      });
+      // Clear error when there's no error
+      setError(null);
     }
+  }, [marketsError, lastErrorTime]);
 
-    // Sport filter - only when no search is active
-    if (picked && picked.length && !picked.includes("ALL")) {
-      filteredGames = filteredGames.filter((g) => picked.includes(g.sport_key));
+  // Update loading state with debounce to prevent flickering
+  useEffect(() => {
+    if (marketsLoading) {
+      setLoading(true);
+    } else {
+      // Add a small delay before hiding the loading indicator to prevent flickering
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 300);
+      return () => clearTimeout(timer);
     }
+  }, [marketsLoading]);
+
+  // Show loading state with better UX
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+        <p className="text-gray-300">Loading odds data...</p>
+        <p className="text-gray-500 text-sm mt-2">This may take a moment</p>
+      </div>
+    );
   }
 
-  // Show all games by default
-  if (false) {
-    filteredGames = filteredGames.filter((g) => {
-      const start = new Date(g.commence_time).getTime();
-      const now = Date.now();
-      return !(now >= start && now < start + 3 * 3600 * 1000);
-    });
+  // Show error state with retry option
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] p-6 text-center">
+        <div className="bg-red-900/30 border border-red-800 rounded-lg p-6 max-w-md w-full">
+          <div className="text-red-400 text-4xl mb-3">⚠️</div>
+          <h3 className="text-xl font-semibold text-red-100 mb-2">Unable to Load Data</h3>
+          <p className="text-red-200 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-700 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            Retry
+          </button>
+          <p className="text-xs text-red-400 mt-3">If the problem persists, please try again later.</p>
+        </div>
+      </div>
+    );
   }
 
-  // Sync back to local state expected by existing UI
-  useEffect(() => {
-    console.log('🎯 SportsbookMarkets: Syncing hook data to local state:', {
-      hookGames: hookGames?.length || 0,
-      hookBooks: hookBooks?.length || 0,
-      hookLoading,
-      hookError
-    });
-    
-    setGames(hookGames || []);
-    setLoad(!!hookLoading);
-    setErr(hookError || null);
-    // setQuota(hookQuota || { remain: "–", used: "–" });
-    if (Array.isArray(hookBooks) && hookBooks.length > 0) {
-      // Add all new sportsbooks to ensure they appear in filters
-      const additionalBooks = [
-        { key: 'espnbet', title: 'ESPN BET' },
-        { key: 'pointsbetau', title: 'PointsBet' },
-        { key: 'unibet_us', title: 'Unibet' },
-        { key: 'betfred_us', title: 'Betfred' },
-        { key: 'hardrockbet', title: 'Hard Rock Bet' },
-        { key: 'fliff', title: 'Fliff' },
-        { key: 'superdraft', title: 'SuperDraft' },
-        { key: 'prizepicks', title: 'PrizePicks' },
-        { key: 'underdog', title: 'Underdog Fantasy' },
-        { key: 'draftkings_pick6', title: 'DraftKings Pick6' }
-      ];
-      
-      // Merge books, avoiding duplicates
-      const existingKeys = new Set(hookBooks.map(b => b.key));
-      const newBooks = additionalBooks.filter(b => !existingKeys.has(b.key));
-      const combinedBooks = [...hookBooks, ...newBooks];
-      setBookList(combinedBooks);
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("booksCache", JSON.stringify(combinedBooks));
-        } catch {}
-      }
-    }
-  }, [hookGames, hookLoading, hookError, hookBooks]);
-
-  // Debug logging for hook data (moved after all variables are initialized)
-  useEffect(() => {
-    console.log('🎯 SportsbookMarkets: Rendering with state:', {
-      gamesCount: games.length,
-      booksCount: bookList.length,
-      selectedBooksCount: selectedBooks.length,
-      effectiveSelectedBooksCount: effectiveSelectedBooks.length,
-      filteredGamesCount: filteredGames.length,
-      loading,
-      error,
-      picked,
-      showPlayerProps,
-      marketKeys,
-      firstGameSample: games[0] ? {
-        id: games[0].id,
-        home_team: games[0].home_team,
-        away_team: games[0].away_team,
-        bookmakers_count: games[0].bookmakers?.length || 0
-      } : null
-    });
-  }, [games, bookList, selectedBooks, effectiveSelectedBooks, filteredGames, loading, error, picked, showPlayerProps, marketKeys]);
-
-  return (
-    <main className="page-wrap">
-      <div className="market-container two-col">
-        <aside className="filters-sidebar">
-          <div className="filter-stack">
-            {settingsOpen && (
-              <div
-                role="dialog"
-                aria-label="Settings"
-                style={{
-                  marginBottom: "10px",
-                  padding: "10px",
-                  border: "1px solid #334c",
-                  background: "#11192c",
-                  borderRadius: 10,
-                }}
-              >
-                <div style={{ fontWeight: 800, marginBottom: 6 }}>Odds Format</div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {[
-                    { k: "american", label: "American" },
-                    { k: "decimal", label: "Decimal" },
-                    { k: "fractional", label: "Fractional" },
-                  ].map((opt) => (
-                    <label
-                      key={opt.k}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        padding: "6px 8px",
-                        borderRadius: 8,
-                        border: "1px solid #334c",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name="odds-format"
-                        value={opt.k}
-                        checked={oddsFormat === opt.k}
-                        onChange={(e) => setOddsFormat(e.target.value)}
-                      />
-                      {opt.label}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Search bar hidden by default, shown via MobileSearchModal */}
-            {showMobileSearch && (
-              <div className="filter-group" style={{marginBottom: '15px'}}>
-                <input
-                  placeholder="Search team / league"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  autoFocus
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '1px solid #334c',
-                    background: '#11192c',
-                    color: 'white',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-            )}
-
-            {/* Smart Filter Presets */}
-            <div className="filter-presets" style={{ marginBottom: '16px' }}>
-              <div className="presets-scroll" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {filterPresets.map((preset) => (
-                  <button
-                    key={preset.id}
-                    className={`preset-btn ${activePreset === preset.id ? 'active' : ''}`}
-                    onClick={() => applyPreset(preset)}
-                    title={preset.description}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color)',
-                      background: activePreset === preset.id ? 'var(--accent)' : 'transparent',
-                      color: activePreset === preset.id ? 'white' : 'var(--text-primary)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {preset.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-group">
-              <span className="filter-label">Sportsbooks ({bookList.length} available)</span>
-              <SportMultiSelect
-                list={bookList.sort((a, b) => {
-                  // Sort by popularity/importance
-                  const priority = {
-                    'draftkings': 1, 'fanduel': 2, 'betmgm': 3, 'caesars': 4, 'espnbet': 5,
-                    'pointsbetau': 6, 'hardrockbet': 7, 'unibet_us': 8, 'betfred_us': 9,
-                    'prizepicks': 10, 'underdog': 11, 'superdraft': 12, 'fliff': 13
-                  };
-                  return (priority[a.key] || 99) - (priority[b.key] || 99);
-                })}
-                selected={selectedBooks}
-                onChange={setSelectedBooks}
-                placeholderText={selectedBooks.length === 0 ? "All Books Selected" : `${selectedBooks.length} books selected`}
-                allLabel="All Books"
-                grid={true}
-                columns={2}
-                leftAlign={true}
-                usePortal={true}
-                portalAlign={"up"}
-              />
-            </div>
-
-            <div className="filter-actions">
-              <button type="button" className="btn btn-primary btn-lg" onClick={() => setTableNonce(n => n + 1)}>
-                Refresh
-              </button>
-              <button type="button" className="btn btn-danger btn-lg" onClick={resetFilters}>
-                Reset
-              </button>
-            </div>
-
-            <div className="filters-meta">
-              <span className="filters-count">Results: {filteredGames.length}</span>
-            </div>
-          </div>
-
-          {/* Bottom-left gear button */}
-        </aside>
-
-        <section className="table-area">
+// ... (rest of the code remains the same)
           {/* Header with Bet Type Toggle */}
           <div style={{ 
             display: 'flex', 

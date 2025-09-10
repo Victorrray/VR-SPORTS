@@ -36,13 +36,17 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
   const lastFetchTime = useRef(0);
   // Track if we have an active request
   const activeRequest = useRef(null);
+  // Track retry attempts
+  const retryCount = useRef(0);
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 5000; // 5 seconds between retries
 
   // Debounced fetch function to prevent rapid successive calls
-  const fetchMarkets = useMemoizedCallback(debounce(async () => {
+  const fetchMarkets = useMemoizedCallback(debounce(async (isRetry = false) => {
     const now = Date.now();
     
-    // Skip if we have a recent successful fetch
-    if (now - lastFetchTime.current < 5000 && activeRequest.current) {
+    // Skip if we have a recent successful fetch (unless it's a retry)
+    if (!isRetry && now - lastFetchTime.current < 5000 && activeRequest.current) {
       console.log('🔍 useMarkets: Skipping fetch - too soon after last successful fetch');
       return activeRequest.current;
     }
@@ -77,7 +81,7 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
     activeRequest.current = requestId;
 
     try {
-      console.log('🔍 useMarkets: Starting fetch with params:', { sports, regions, markets });
+      console.log(`🔍 useMarkets: Starting ${isRetry ? `retry ${retryCount.current}/` : ''}fetch with params:`, { sports, regions, markets });
       
       // Process markets parameter properly
       const marketsParam = Array.isArray(markets) ? markets.join(',') : markets;
@@ -152,6 +156,25 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
           error: errorDetails
         });
         
+        // Handle 503 errors with retry logic
+        if (response.status === 503 && retryCount.current < MAX_RETRIES) {
+          retryCount.current += 1;
+          console.log(`🔄 useMarkets: Retrying (${retryCount.current}/${MAX_RETRIES}) in ${RETRY_DELAY/1000} seconds...`);
+          
+          // Clear the current request
+          activeRequest.current = null;
+          
+          // Schedule a retry
+          setTimeout(() => {
+            fetchMarkets(true); // Pass true to indicate this is a retry
+          }, RETRY_DELAY);
+          
+          return;
+        }
+        
+        // Reset retry counter on non-retryable errors or max retries reached
+        retryCount.current = 0;
+        
         setError(errorMessage);
         setGames([]);
         
@@ -217,12 +240,33 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       setBooks(uniqueBooks);
       setLastUpdate(new Date());
       
-      // Update last fetch time
+      // Update last fetch time and reset retry counter on success
       lastFetchTime.current = Date.now();
+      retryCount.current = 0;
       
     } catch (err) {
       console.error('🔍 useMarkets: Fetch error:', err);
       console.error('🔍 useMarkets: Error stack:', err.stack);
+      
+      // Handle network errors with retry logic
+      if (err.name === 'TypeError' && err.message.includes('Failed to fetch') && retryCount.current < MAX_RETRIES) {
+        retryCount.current += 1;
+        console.log(`🔄 useMarkets: Network error - Retrying (${retryCount.current}/${MAX_RETRIES}) in ${RETRY_DELAY/1000} seconds...`);
+        
+        // Clear the current request
+        activeRequest.current = null;
+        
+        // Schedule a retry
+        setTimeout(() => {
+          fetchMarkets(true); // Pass true to indicate this is a retry
+        }, RETRY_DELAY);
+        
+        return;
+      }
+      
+      // Reset retry counter on non-retryable errors or max retries reached
+      retryCount.current = 0;
+      
       setError(err.message);
       // Set empty games to prevent infinite loading
       setGames([]);

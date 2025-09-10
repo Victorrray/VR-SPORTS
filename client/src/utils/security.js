@@ -27,8 +27,12 @@ export const getCSRFToken = () => {
 export const secureFetch = async (url, options = {}) => {
   const csrfToken = getCSRFToken();
   
-  // In development, use the proxy for all API requests
-  if (process.env.NODE_ENV === 'development' && url.includes('vr-sports.onrender.com')) {
+  // Handle API URL for both development and production
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isVRSportsAPI = url.includes('vr-sports.onrender.com') || url.includes('odds-backend-4e9q.onrender.com');
+  
+  // In development, use the proxy for all API requests to avoid CORS issues
+  if (!isProduction && isVRSportsAPI) {
     const proxyUrl = new URL(url);
     url = `/api${proxyUrl.pathname}${proxyUrl.search}`;
   }
@@ -50,7 +54,8 @@ export const secureFetch = async (url, options = {}) => {
       ...options.headers
     },
     // Always include credentials for backend API to ensure proper authentication
-    credentials: isBackendAPI ? 'include' : (isCrossOrigin ? 'omit' : 'include'),
+    // In development, we need to be explicit about credentials due to proxy
+    credentials: isBackendAPI || !isProduction ? 'include' : (isCrossOrigin ? 'omit' : 'include'),
   };
 
   // Add referrer policy for external APIs

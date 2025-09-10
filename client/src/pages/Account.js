@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { signOutAndRefresh } from "../lib/authActions";
 import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut } from "lucide-react";
-import AccessibilitySettings from "../components/AccessibilitySettings";
 import MobileBottomBar from "../components/MobileBottomBar";
 import SportMultiSelect from "../components/SportMultiSelect";
 import UsagePlanCard from "../components/UsagePlanCard";
@@ -477,9 +476,6 @@ export default function Account() {
           </div>
         </div>
       </section>
-
-      {/* Accessibility Settings */}
-      <AccessibilitySettings />
 
       <MobileBottomBar active="profile" showFilter={false} />
     </main>
