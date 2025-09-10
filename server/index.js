@@ -38,7 +38,8 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
-  "draftkings", "fanduel", "betmgm", "caesars" // Reduced to top 4 to cut costs
+  "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
+  "mybookie", "betonline", "williamhill", "unibet", "betrivers", "superbook"
 ];
 
 const PLAYER_PROP_MARKETS = [
@@ -817,6 +818,7 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     
     // If no API key, return mock data for testing
     if (!API_KEY) {
+      console.log('🔧 No API_KEY found, returning mock data');
       const mockGames = [
         {
           id: "mock-game-1",
@@ -913,6 +915,55 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
                   outcomes: [
                     { name: "Over", price: -110, point: 44.5 },
                     { name: "Under", price: -110, point: 44.5 }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "mock-game-3",
+          sport_key: "americanfootball_nfl", 
+          sport_title: "NFL",
+          commence_time: new Date(Date.now() + 26 * 60 * 60 * 1000).toISOString(),
+          home_team: "Green Bay Packers",
+          away_team: "Chicago Bears",
+          bookmakers: [
+            {
+              key: "betmgm",
+              title: "BetMGM",
+              markets: [
+                {
+                  key: "h2h",
+                  outcomes: [
+                    { name: "Green Bay Packers", price: -180 },
+                    { name: "Chicago Bears", price: 150 }
+                  ]
+                }
+              ]
+            },
+            {
+              key: "pointsbet",
+              title: "PointsBet", 
+              markets: [
+                {
+                  key: "h2h",
+                  outcomes: [
+                    { name: "Green Bay Packers", price: -175 },
+                    { name: "Chicago Bears", price: 145 }
+                  ]
+                }
+              ]
+            },
+            {
+              key: "bovada",
+              title: "Bovada",
+              markets: [
+                {
+                  key: "h2h", 
+                  outcomes: [
+                    { name: "Green Bay Packers", price: -170 },
+                    { name: "Chicago Bears", price: 140 }
                   ]
                 }
               ]
