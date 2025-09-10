@@ -47,9 +47,14 @@ export const secureFetch = async (url, options = {}) => {
   const headers = { ...(options.headers || {}) };
   if (backendAPI) {
     try {
-      const { supabase } = require('../lib/supabase');
-      const { data: { session } = {} } = await supabase?.auth?.getSession?.() || { data: {} };
-      if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+      const { getAccessToken, supabase } = require('../lib/supabase');
+      const cached = getAccessToken?.();
+      if (cached) {
+        headers['Authorization'] = `Bearer ${cached}`;
+      } else {
+        const { data: { session } = {} } = await supabase?.auth?.getSession?.() || { data: {} };
+        if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
     } catch (_) {}
   }
 
