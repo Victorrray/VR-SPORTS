@@ -173,9 +173,7 @@ const allowedOrigins = [
   'https://odds-frontend-j2pn.onrender.com',
   'https://my-react-frontend-021i.onrender.com',
   'https://oddssightseer.com',
-  'https://oddsightseer.com',
   'https://www.oddssightseer.com',
-  'https://www.oddsightseer.com',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
