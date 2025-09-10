@@ -40,11 +40,13 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 const FOCUSED_BOOKMAKERS = [
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
-  "mybookie", "betonline", "unibet", "betrivers",
+  "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
   // US2 region books
-  "wynnbet", "twinspires", "circasports", "lowvig", "espnbet",
+  "circasports", "lowvig", "espnbet",
   // US exchange books
-  "betfair_ex_us", "matchbook", "prophet_exchange"
+  "prophet_exchange",
+  // International (for comparison)
+  "pinnacle"
 ];
 
 const PLAYER_PROP_MARKETS = [
@@ -821,190 +823,13 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american" } = req.query;
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
     
-    // If no API key, return mock data for testing
+    // If no API key, return error instead of mock data
     if (!API_KEY) {
-      console.log('🔧 No API_KEY found, returning mock data');
-      const mockGames = [
-        {
-          id: "mock-game-1",
-          sport_key: "americanfootball_nfl",
-          sport_title: "NFL",
-          commence_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-          home_team: "Kansas City Chiefs",
-          away_team: "Buffalo Bills",
-          bookmakers: [
-            {
-              key: "draftkings",
-              title: "DraftKings",
-              markets: [
-                {
-                  key: "h2h",
-                  outcomes: [
-                    { name: "Kansas City Chiefs", price: -110 },
-                    { name: "Buffalo Bills", price: -110 }
-                  ]
-                },
-                {
-                  key: "spreads",
-                  outcomes: [
-                    { name: "Kansas City Chiefs", price: -110, point: -3.5 },
-                    { name: "Buffalo Bills", price: -110, point: 3.5 }
-                  ]
-                },
-                {
-                  key: "totals",
-                  outcomes: [
-                    { name: "Over", price: -110, point: 47.5 },
-                    { name: "Under", price: -110, point: 47.5 }
-                  ]
-                }
-              ]
-            },
-            {
-              key: "fanduel",
-              title: "FanDuel",
-              markets: [
-                {
-                  key: "h2h",
-                  outcomes: [
-                    { name: "Kansas City Chiefs", price: -105 },
-                    { name: "Buffalo Bills", price: -115 }
-                  ]
-                },
-                {
-                  key: "spreads",
-                  outcomes: [
-                    { name: "Kansas City Chiefs", price: -105, point: -3.5 },
-                    { name: "Buffalo Bills", price: -115, point: 3.5 }
-                  ]
-                },
-                {
-                  key: "totals",
-                  outcomes: [
-                    { name: "Over", price: -105, point: 47.5 },
-                    { name: "Under", price: -115, point: 47.5 }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: "mock-game-2",
-          sport_key: "americanfootball_nfl",
-          sport_title: "NFL",
-          commence_time: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
-          home_team: "Dallas Cowboys",
-          away_team: "Philadelphia Eagles",
-          bookmakers: [
-            {
-              key: "draftkings",
-              title: "DraftKings",
-              markets: [
-                {
-                  key: "h2h",
-                  outcomes: [
-                    { name: "Dallas Cowboys", price: 120 },
-                    { name: "Philadelphia Eagles", price: -140 }
-                  ]
-                },
-                {
-                  key: "spreads",
-                  outcomes: [
-                    { name: "Dallas Cowboys", price: -110, point: 2.5 },
-                    { name: "Philadelphia Eagles", price: -110, point: -2.5 }
-                  ]
-                },
-                {
-                  key: "totals",
-                  outcomes: [
-                    { name: "Over", price: -110, point: 44.5 },
-                    { name: "Under", price: -110, point: 44.5 }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: "mock-game-3",
-          sport_key: "americanfootball_nfl", 
-          sport_title: "NFL",
-          commence_time: new Date(Date.now() + 26 * 60 * 60 * 1000).toISOString(),
-          home_team: "Green Bay Packers",
-          away_team: "Chicago Bears",
-          bookmakers: [
-            {
-              key: "betmgm",
-              title: "BetMGM",
-              markets: [
-                {
-                  key: "h2h",
-                  outcomes: [
-                    { name: "Green Bay Packers", price: -180 },
-                    { name: "Chicago Bears", price: 150 }
-                  ]
-                }
-              ]
-            },
-            {
-              key: "pointsbet",
-              title: "PointsBet", 
-              markets: [
-                {
-                  key: "h2h",
-                  outcomes: [
-                    { name: "Green Bay Packers", price: -175 },
-                    { name: "Chicago Bears", price: 145 }
-                  ]
-                }
-              ]
-            },
-            {
-              key: "bovada",
-              title: "Bovada",
-              markets: [
-                {
-                  key: "h2h", 
-                  outcomes: [
-                    { name: "Green Bay Packers", price: -170 },
-                    { name: "Chicago Bears", price: 140 }
-                  ]
-                }
-              ]
-            },
-            {
-              key: "wynnbet",
-              title: "WynnBET",
-              markets: [
-                {
-                  key: "h2h",
-                  outcomes: [
-                    { name: "Green Bay Packers", price: -165 },
-                    { name: "Chicago Bears", price: 135 }
-                  ]
-                }
-              ]
-            },
-            {
-              key: "betfair_ex_us",
-              title: "Betfair Exchange",
-              markets: [
-                {
-                  key: "h2h",
-                  outcomes: [
-                    { name: "Green Bay Packers", price: -160 },
-                    { name: "Chicago Bears", price: 130 }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ];
-      
-      console.log('🧪 Returning mock data for testing - API key not configured');
-      return res.json(mockGames);
+      console.log('🔧 No API_KEY found, returning error');
+      return res.status(500).json({ 
+        error: "ODDS_API_KEY not configured", 
+        message: "Please configure ODDS_API_KEY environment variable" 
+      });
     }
     
     const sportsArray = sports.split(',');
