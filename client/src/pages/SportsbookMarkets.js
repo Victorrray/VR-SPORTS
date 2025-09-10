@@ -527,48 +527,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     );
   }
 
-  // Empty state when there are no games to render
-  if (!filteredGames || filteredGames.length === 0) {
-    return (
-      <div className="sportsbook-markets">
-        <div style={{ 
-          marginBottom: '16px', 
-          paddingTop: '20px', 
-          textAlign: 'center',
-          paddingLeft: 'var(--mobile-gutter, 16px)',
-          paddingRight: 'var(--mobile-gutter, 16px)'
-        }}>
-          <div className="odds-table-card" style={{ padding: '24px', maxWidth: 720, margin: '0 auto' }}>
-            <p style={{ margin: 0 }}>No games found for the current selection.</p>
-            <p style={{ opacity: 0.7, marginTop: 6 }}>
-              Try different sports, clear date filters, or remove book filters.
-            </p>
-          </div>
-        </div>
-
-        <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
-        <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
-          <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
-            {/* Sports selector */}
-            <div style={{ marginBottom: 16 }}>
-              <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Sports</h4>
-              <SportMultiSelect
-                list={sportList}
-                selected={picked}
-                onChange={(next) => {
-                  setPicked(next);
-                  try { localStorage.setItem('vr-odds-sports', JSON.stringify(next)); } catch {}
-                }}
-                usePortal
-                leftAlign
-              />
-            </div>
-          </div>
-        </MobileFiltersSheet>
-      </div>
-    );
-  }
-
   return (
     <div className="sportsbook-markets">
       <div style={{ 
