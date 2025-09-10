@@ -27,6 +27,7 @@ import Pricing from '../components/Pricing';
 // Hooks
 import { useMarkets } from '../hooks/useMarkets';
 import { useAuth } from '../hooks/useAuth';
+import { useMe } from '../hooks/useMe';
 
 // Styles
 import '../styles/landing.css';
@@ -58,6 +59,7 @@ const QUICK_ACTIONS = [
 // Landing Page Component for non-authenticated users
 export default function Home() {
   const { user } = useAuth();
+  const { me } = useMe();
   const location = useLocation();
   const [showCalculator, setShowCalculator] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
@@ -217,17 +219,18 @@ export default function Home() {
       }}>
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          flexDirection: 'column',
           alignItems: 'center',
+          textAlign: 'center',
           marginBottom: '24px'
         }}>
           <h1 style={{
             color: 'var(--text-primary)',
             fontSize: '28px',
             fontWeight: '700',
-            margin: 0
+            margin: '0 0 16px 0'
           }}>
-            {user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
+            {me?.username || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
           </h1>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
