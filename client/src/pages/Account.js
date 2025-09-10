@@ -457,13 +457,12 @@ export default function Account() {
         </div>
       </section>
 
-      {/* Usage & Plan Card */}
-      <div id="usage-plan-section">
+      {/* Hidden sections - only accessible via hamburger menu */}
+      <div id="usage-plan-section" style={{ display: 'none' }}>
         <UsagePlanCard />
       </div>
 
-      {/* Sportsbook Selection */}
-      <section id="sportsbooks-section" className="sportsbook-card">
+      <section id="sportsbooks-section" style={{ display: 'none' }} className="sportsbook-card">
         <div className="card-header">
           <BookOpen size={20} />
           <h2>My Sportsbooks</h2>
@@ -475,33 +474,28 @@ export default function Account() {
             <span className="selected-count">{selectedBooks.length} sportsbooks selected</span>
           </div>
           
-          <div className="dropdown-container">
-            <SportMultiSelect
-              list={AVAILABLE_SPORTSBOOKS.map(book => ({
-                key: book.key,
-                title: book.name
-              }))}
-              selected={selectedBooks}
-              onChange={setSelectedBooks}
-              placeholderText="Select sportsbooks..."
-              allLabel="All Sportsbooks"
-              grid={true}
-              columns={2}
-              leftAlign={true}
-              usePortal={true}
-              portalAlign="up"
-            />
-          </div>
+          <SportMultiSelect
+            list={AVAILABLE_SPORTSBOOKS}
+            selected={selectedBooks}
+            onChange={setSelectedBooks}
+            placeholderText="Choose sportsbooks…"
+            allLabel="All Sportsbooks"
+            grid={true}
+            columns={2}
+          />
           
-          <div className="save-section">
-            <button className="save-btn" onClick={handleSavePreferences}>
-              <Save size={16} />
-              Save Preferences
-            </button>
-            <p className="save-note">
-              Your dashboard will only show odds from your selected sportsbooks
-            </p>
-          </div>
+          <button 
+            className="save-preferences-btn"
+            onClick={handleSavePreferences}
+            disabled={savingPrefs}
+          >
+            <Save size={16} />
+            {savingPrefs ? 'Saving...' : 'Save Preferences'}
+          </button>
+          
+          <p className="preferences-note">
+            Your dashboard will only show odds from your selected sportsbooks
+          </p>
         </div>
       </section>
 
