@@ -207,13 +207,13 @@ export default function Home() {
     <main style={{ 
       minHeight: '100vh', 
       background: 'var(--bg-primary)',
-      paddingTop: '80px',
+      paddingTop: '20px',
       position: 'relative',
       zIndex: 1
     }}>
       {/* Header Section */}
       <div style={{ 
-        padding: '20px',
+        padding: '16px 20px',
         maxWidth: '1200px',
         margin: '0 auto'
       }}>
@@ -222,19 +222,17 @@ export default function Home() {
           flexDirection: 'column',
           alignItems: 'center',
           textAlign: 'center',
-          marginBottom: '24px'
+          marginBottom: '16px'
         }}>
           <h1 style={{
             color: 'var(--text-primary)',
             fontSize: '28px',
             fontWeight: '700',
-            margin: '0 0 16px 0'
+            margin: '0'
           }}>
             {me?.username || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
           </h1>
-          
         </div>
-
 
         {/* Main Dashboard */}
         <PersonalizedDashboard games={games} />
