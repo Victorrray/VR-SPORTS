@@ -344,7 +344,7 @@ export default function Scores() {
                   <div className="game-status">
                     {isLive && <div className="status-badge live">LIVE</div>}
                     {isCompleted && <div className="status-badge final">FINAL</div>}
-                    {isUpcoming && <div className="status-badge upcoming">{kickoffLabel(g.commence_time)}</div>}
+                    {isUpcoming && <div className="status-badge upcoming">Upcoming</div>}
                   </div>
                   
                   {/* Game lines in header */}
@@ -413,10 +413,12 @@ export default function Scores() {
                   {g.odds && g.odds.spread && (
                     <div className="team-spread-indicators">
                       <div className="team-spread away">
-                        {parseFloat(g.odds.spread) > 0 ? `+${g.odds.spread}` : ''}
+                        {parseFloat(g.odds.spread) > 0 ? `+${g.odds.spread}` : 
+                         parseFloat(g.odds.spread) < 0 ? '' : `+${g.odds.spread}`}
                       </div>
                       <div className="team-spread home">
-                        {parseFloat(g.odds.spread) < 0 ? g.odds.spread : `+${Math.abs(parseFloat(g.odds.spread))}`}
+                        {parseFloat(g.odds.spread) < 0 ? g.odds.spread : 
+                         parseFloat(g.odds.spread) > 0 ? `-${g.odds.spread}` : g.odds.spread}
                       </div>
                     </div>
                   )}
