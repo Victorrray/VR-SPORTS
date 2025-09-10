@@ -11,12 +11,9 @@ export default function UsagePlanCard() {
   useEffect(() => {
     const fetchUsage = async () => {
       try {
-        const resp = await fetch(withApiBase('/api/me/usage'), { 
-          credentials: "include",
-          headers: {
-            'Content-Type': 'application/json',
-            'x-user-id': 'demo-user' // Temporary fallback for development
-          }
+        const resp = await fetch(withApiBase('/api/me/usage'), {
+          credentials: 'include',
+          headers: { 'Accept': 'application/json' }
         });
         
         if (resp.ok) {

@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }) => {
         if (isMounted) {
           console.log('🔐 useAuth: Setting loading to false');
           setLoading(false);
+          if (fallbackTimeout) clearTimeout(fallbackTimeout);
         }
       }
     };
@@ -101,6 +102,7 @@ export const AuthProvider = ({ children }) => {
           
           console.log('🔐 useAuth: Auth change - setting loading false');
           setLoading(false);
+          if (fallbackTimeout) clearTimeout(fallbackTimeout);
         }
       );
       
