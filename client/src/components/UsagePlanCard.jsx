@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Crown, Zap, TrendingUp, AlertCircle, Sparkles, BarChart3, Shield, Infinity } from "lucide-react";
 import "./UsagePlanCard.css";
 import { withApiBase } from "../config/api";
+import { secureFetch } from "../utils/security";
 
 export default function UsagePlanCard() {
   const [data, setData] = useState({ plan: "free", used: 0, quota: 1000 });
@@ -11,7 +12,7 @@ export default function UsagePlanCard() {
   useEffect(() => {
     const fetchUsage = async () => {
       try {
-        const resp = await fetch(withApiBase('/api/me/usage'), {
+        const resp = await secureFetch(withApiBase('/api/me/usage'), {
           credentials: 'include',
           headers: { 'Accept': 'application/json' }
         });

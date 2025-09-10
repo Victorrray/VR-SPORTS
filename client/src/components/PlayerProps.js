@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { getApiBase } from '../lib/apiBase';
+import React, { useState, useEffect, useMemo } from 'react';
+import { withApiBase } from '../config/api';
+import { secureFetch } from '../utils/security';
 import { useQuotaHandler } from '../hooks/useQuotaHandler';
 import QuotaExceededModal from './QuotaExceededModal';
 
@@ -48,17 +49,12 @@ export default function PlayerProps({
       setError("No eventId provided");
       return;
     }
-    const base = getApiBase();
+    const base = withApiBase('');
     const url = `${base}/api/player-props?${qs}`;
     setLastUrl(url);
     setLoading(true);
     setError(null);
-    fetch(url, { 
-      credentials: "include",
-      headers: {
-        'x-user-id': 'demo-user' // Replace with actual user ID from auth
-      }
-    })
+    secureFetch(url, { credentials: 'include', headers: { 'Accept': 'application/json' } })
       .then(async (r) => {
         // Handle quota exceeded before other processing
         const quotaResult = await handleApiResponse(r);
@@ -169,4 +165,3 @@ export default function PlayerProps({
     </div>
   );
 }
-

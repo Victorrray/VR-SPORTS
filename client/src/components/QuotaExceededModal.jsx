@@ -7,12 +7,11 @@ const QuotaExceededModal = ({ isOpen, onClose, quotaError, onUpgrade }) => {
   const handleUpgrade = async () => {
     try {
       const { withApiBase } = require('../config/api');
-      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
+      const { secureFetch } = require('../utils/security');
+      const response = await secureFetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': 'demo-user' // Replace with actual user ID from auth
-        }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
       });
       
       const { url } = await response.json();

@@ -26,40 +26,52 @@ export const getCSRFToken = () => {
 // Enhanced fetch wrapper with security headers
 export const secureFetch = async (url, options = {}) => {
   const csrfToken = getCSRFToken();
-  
+
   // Handle API URL for both development and production
   const isProduction = process.env.NODE_ENV === 'production';
-  const isVRSportsAPI = url.includes('vr-sports.onrender.com') || url.includes('odds-backend-4e9q.onrender.com');
-  
-  // In development, use the proxy for all API requests to avoid CORS issues
-  if (!isProduction && isVRSportsAPI) {
+  const isBackendHost = (u) => u.includes('odds-backend-4e9q.onrender.com') || u.includes('vr-sports.onrender.com') || u.startsWith('/api');
+
+  // In development, proxy backend calls to avoid CORS
+  if (!isProduction && (isBackendHost(url) && url.startsWith('http'))) {
     const proxyUrl = new URL(url);
     url = `/api${proxyUrl.pathname}${proxyUrl.search}`;
   }
-  
-  // Check if this is a cross-origin request
-  const isLocalhost = url.startsWith('http://localhost');
-  const isSameOrigin = url.startsWith(window.location.origin);
-  const isBackendAPI = url.includes('odds-backend-4e9q.onrender.com') || 
-                      url.includes('vr-sports.onrender.com') ||
-                      url.startsWith('/api');
-  const isCrossOrigin = !isLocalhost && !isSameOrigin && !isBackendAPI;
-  
+
+  // Same-origin vs cross-origin
+  const isRelative = url.startsWith('/');
+  const sameOrigin = isRelative || url.startsWith(window.location.origin);
+  const backendAPI = isBackendHost(url);
+  const method = (options.method || 'GET').toUpperCase();
+
+  // Build headers conservatively for cross-origin GETs
+  const headers = { ...(options.headers || {}) };
+  if (backendAPI) {
+    try {
+      const { supabase } = require('../lib/supabase');
+      const { data: { session } = {} } = await supabase?.auth?.getSession?.() || { data: {} };
+      if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+    } catch (_) {}
+  }
+
+  // Only attach CSRF and X-Requested-With for same-origin requests
+  if (sameOrigin) {
+    headers['X-CSRF-Token'] = csrfToken;
+    headers['X-Requested-With'] = 'XMLHttpRequest';
+  }
+
+  // Avoid Content-Type on GET/HEAD to prevent preflight
+  if (method !== 'GET' && method !== 'HEAD' && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const secureOptions = {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': csrfToken,
-      'X-Requested-With': 'XMLHttpRequest',
-      ...options.headers
-    },
-    // Always include credentials for backend API to ensure proper authentication
-    // In development, we need to be explicit about credentials due to proxy
-    credentials: isBackendAPI || !isProduction ? 'include' : (isCrossOrigin ? 'omit' : 'include'),
+    headers,
+    credentials: backendAPI || !isProduction ? 'include' : (sameOrigin ? 'include' : 'omit'),
   };
 
   // Add referrer policy for external APIs
-  if (url.includes('external') || !url.startsWith(window.location.origin)) {
+  if (!sameOrigin) {
     secureOptions.referrerPolicy = 'no-referrer';
   }
 

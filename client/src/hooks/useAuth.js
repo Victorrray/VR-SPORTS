@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true;
     let subscription;
     let fallbackTimeout;
+    let settled = false;
 
     // Get initial session
     const getInitialSession = async () => {
@@ -75,6 +76,7 @@ export const AuthProvider = ({ children }) => {
           console.log('🔐 useAuth: Setting loading to false');
           setLoading(false);
           if (fallbackTimeout) clearTimeout(fallbackTimeout);
+          settled = true;
         }
       }
     };
@@ -103,6 +105,7 @@ export const AuthProvider = ({ children }) => {
           console.log('🔐 useAuth: Auth change - setting loading false');
           setLoading(false);
           if (fallbackTimeout) clearTimeout(fallbackTimeout);
+          settled = true;
         }
       );
       
@@ -115,7 +118,7 @@ export const AuthProvider = ({ children }) => {
 
     // Fallback timeout to ensure loading never stays true indefinitely
     fallbackTimeout = setTimeout(() => {
-      if (isMounted) {
+      if (isMounted && !settled) {
         console.log('🔐 useAuth: Fallback timeout - forcing loading to false');
         setLoading(false);
       }

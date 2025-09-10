@@ -1,6 +1,8 @@
 // Hook to fetch user plan and drive menu + gate logic
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { withApiBase } from '../config/api';
+import { secureFetch } from '../utils/security';
 
 export function useMe() {
   const [me, setMe] = useState(null);
@@ -21,12 +23,9 @@ export function useMe() {
       }
 
       // Fetch user plan and usage info from backend
-      const { withApiBase } = require('../config/api');
-      const response = await fetch(withApiBase('/api/usage/me'), { 
+      const response = await secureFetch(withApiBase('/api/me/usage'), {
         credentials: 'include',
-        headers: {
-          'x-user-id': session.session.user.id
-        }
+        headers: { 'Accept': 'application/json' }
       });
       
       if (!response.ok) {

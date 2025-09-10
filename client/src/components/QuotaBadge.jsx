@@ -16,11 +16,8 @@ const QuotaBadge = () => {
   const fetchUsage = async () => {
     try {
       const { withApiBase } = require('../config/api');
-      const response = await fetch(withApiBase('/api/usage/me'), {
-        headers: {
-          'x-user-id': 'demo-user' // Replace with actual user ID from auth
-        }
-      });
+      const { secureFetch } = require('../utils/security');
+      const response = await secureFetch(withApiBase('/api/me/usage'), { headers: { 'Accept': 'application/json' }, credentials: 'include' });
       
       if (!response.ok) {
         throw new Error('Failed to fetch usage');
