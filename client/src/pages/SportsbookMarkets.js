@@ -281,6 +281,72 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Debounced query for smoother filtering and to feed MobileSearchModal
   const debouncedQuery = useDebounce(query, 300);
 
+  // Draft filter state (edited in the sheet, applied on "Apply")
+  const [draftPicked, setDraftPicked] = useState([]);
+  const [draftSelectedDate, setDraftSelectedDate] = useState('');
+  const [draftSelectedBooks, setDraftSelectedBooks] = useState([]);
+  const [draftMarketKeys, setDraftMarketKeys] = useState([]);
+
+  // Seed draft values whenever the filter sheet opens
+  useEffect(() => {
+    if (mobileFiltersOpen) {
+      setDraftPicked(picked);
+      setDraftSelectedDate(selectedDate || '');
+      setDraftSelectedBooks(selectedBooks);
+      setDraftMarketKeys(marketKeys);
+    }
+  }, [mobileFiltersOpen]);
+
+  // Helpers to reset/apply filters
+  const getDefaultSports = () => ["americanfootball_nfl", "americanfootball_ncaaf"];
+
+  const applyFilters = () => {
+    // Apply draft → live state and persist
+    setPicked(draftPicked && draftPicked.length ? draftPicked : getDefaultSports());
+    setSelectedDate(draftSelectedDate || '');
+    setSelectedBooks(draftSelectedBooks || []);
+    setMarketKeys(draftMarketKeys && draftMarketKeys.length ? draftMarketKeys : ["h2h", "spreads", "totals"]);
+
+    try {
+      localStorage.setItem('vr-odds-sports', JSON.stringify(draftPicked && draftPicked.length ? draftPicked : getDefaultSports()));
+      localStorage.setItem('vr-odds-date', draftSelectedDate || '');
+      localStorage.setItem('vr-odds-books', JSON.stringify(draftSelectedBooks || []));
+      localStorage.setItem('vr-odds-markets', JSON.stringify(draftMarketKeys && draftMarketKeys.length ? draftMarketKeys : ["h2h", "spreads", "totals"]));
+    } catch {}
+
+    // Update URL for sports param for shareability
+    const params = new URLSearchParams(location.search);
+    const sportsForUrl = (draftPicked && draftPicked.length ? draftPicked : getDefaultSports()).join(',');
+    if (sportsForUrl) params.set('sports', sportsForUrl); else params.delete('sports');
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+
+    setMobileFiltersOpen(false);
+  };
+
+  const resetDraftFilters = () => {
+    setDraftPicked(getDefaultSports());
+    setDraftSelectedDate('');
+    setDraftSelectedBooks([]);
+    setDraftMarketKeys(["h2h", "spreads", "totals"]);
+  };
+
+  const resetAndApplyDefaults = () => {
+    // Quick reset (used by empty-state button)
+    setPicked(getDefaultSports());
+    setSelectedDate('');
+    setSelectedBooks([]);
+    setMarketKeys(["h2h", "spreads", "totals"]);
+    try {
+      localStorage.setItem('vr-odds-sports', JSON.stringify(getDefaultSports()));
+      localStorage.setItem('vr-odds-date', '');
+      localStorage.setItem('vr-odds-books', JSON.stringify([]));
+      localStorage.setItem('vr-odds-markets', JSON.stringify(["h2h", "spreads", "totals"]));
+    } catch {}
+    const params = new URLSearchParams(location.search);
+    params.set('sports', getDefaultSports().join(','));
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  };
+
   // Load sports list (for the picker)
   useEffect(() => {
     let cancelled = false;
@@ -449,6 +515,48 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     );
   }
 
+  // Empty state when there are no games to render
+  if (!filteredGames || filteredGames.length === 0) {
+    return (
+      <div className="sportsbook-markets">
+        <div style={{ 
+          marginBottom: '16px', 
+          paddingTop: '20px', 
+          textAlign: 'center',
+          paddingLeft: 'var(--mobile-gutter, 16px)',
+          paddingRight: 'var(--mobile-gutter, 16px)'
+        }}>
+          <div className="odds-table-card" style={{ padding: '24px', maxWidth: 720, margin: '0 auto' }}>
+            <p style={{ margin: 0 }}>No games found for the current selection.</p>
+            <p style={{ opacity: 0.7, marginTop: 6 }}>
+              Try different sports, clear date filters, or remove book filters.
+            </p>
+          </div>
+        </div>
+
+        <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
+        <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
+          <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
+            {/* Sports selector */}
+            <div style={{ marginBottom: 16 }}>
+              <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Sports</h4>
+              <SportMultiSelect
+                list={sportList}
+                selected={picked}
+                onChange={(next) => {
+                  setPicked(next);
+                  try { localStorage.setItem('vr-odds-sports', JSON.stringify(next)); } catch {}
+                }}
+                usePortal
+                leftAlign
+              />
+            </div>
+          </div>
+        </MobileFiltersSheet>
+      </div>
+    );
+  }
+
   return (
     <div className="sportsbook-markets">
       <div style={{ 
@@ -486,17 +594,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               Game Odds
             </button>
             <button
-              onClick={() => setShowPlayerProps(true)}
+              disabled
               style={{
                 padding: '8px 16px',
                 border: 'none',
-                background: showPlayerProps ? 'var(--accent)' : 'transparent',
-                color: showPlayerProps ? '#fff' : 'var(--text-primary)',
+                background: 'transparent',
+                color: 'var(--text-secondary)',
                 fontSize: '14px',
                 fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                cursor: 'not-allowed',
+                opacity: 0.5
               }}
+              title="Player props are temporarily unavailable"
             >
               Player Props
             </button>
@@ -532,18 +641,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Sports</h4>
                 <SportMultiSelect
                   list={sportList}
-                  selected={picked}
-                  onChange={(next) => {
-                    setPicked(next);
-                    try {
-                      localStorage.setItem('vr-odds-sports', JSON.stringify(next));
-                    } catch {}
-                    // reflect in URL for shareability
-                    const params = new URLSearchParams(location.search);
-                    if (next && next.length) params.set('sports', next.join(','));
-                    else params.delete('sports');
-                    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
-                  }}
+                  selected={draftPicked}
+                  onChange={(next) => setDraftPicked(next)}
                   usePortal
                   leftAlign
                 />
@@ -553,11 +652,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               <div style={{ marginBottom: 16 }}>
                 <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Date</h4>
                 <DatePicker
-                  value={selectedDate}
-                  onChange={(val) => {
-                    setSelectedDate(val || '');
-                    try { localStorage.setItem('vr-odds-date', val || ''); } catch {}
-                  }}
+                  value={draftSelectedDate}
+                  onChange={(val) => setDraftSelectedDate(val || '')}
                 />
               </div>
 
@@ -566,11 +662,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Books</h4>
                 <SportMultiSelect
                   list={bookList}
-                  selected={selectedBooks}
-                  onChange={(next) => {
-                    setSelectedBooks(next);
-                    try { localStorage.setItem('vr-odds-books', JSON.stringify(next)); } catch {}
-                  }}
+                  selected={draftSelectedBooks}
+                  onChange={(next) => setDraftSelectedBooks(next)}
                   usePortal
                   leftAlign
                 />
@@ -584,19 +677,48 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     <label key={m} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                       <input
                         type="checkbox"
-                        checked={marketKeys.includes(m)}
+                        checked={draftMarketKeys.includes(m)}
                         onChange={(e) => {
                           const next = e.target.checked
-                            ? Array.from(new Set([...marketKeys, m]))
-                            : marketKeys.filter((x) => x !== m);
-                          setMarketKeys(next);
-                          try { localStorage.setItem('vr-odds-markets', JSON.stringify(next)); } catch {}
+                            ? Array.from(new Set([...(draftMarketKeys || []), m]))
+                            : (draftMarketKeys || []).filter((x) => x !== m);
+                          setDraftMarketKeys(next);
                         }}
                       />
                       <span>{MARKET_TITLES[m] || m}</span>
                     </label>
                   ))}
                 </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 12, marginTop: 8, justifyContent: 'flex-end' }}>
+                <button
+                  onClick={resetDraftFilters}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    border: '1px solid var(--border-color)',
+                    background: 'transparent',
+                    color: 'var(--text-secondary)',
+                    fontWeight: 600
+                  }}
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={applyFilters}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    fontWeight: 700
+                  }}
+                >
+                  Apply
+                </button>
               </div>
             </div>
           </MobileFiltersSheet>

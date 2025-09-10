@@ -97,7 +97,7 @@ export default function PlayerProps({
 
   if (!payload) return panel(<div>No payload received.{debugPanel}</div>);
 
-  const { __nonEmpty, data = [], books = [], markets: usedMarkets = [] } = payload;
+  const { __nonEmpty, data = [], books = [] } = payload;
 
   // Build rows
   const rows = [];
@@ -120,9 +120,9 @@ export default function PlayerProps({
     return panel(
       <div>
         <div>No player props available yet for this event.</div>
-        <div className="opacity-70 mt-1">
-          Markets tried: {usedMarkets?.join(", ") || "default"} • Books: {books?.join(", ") || "server default"}
-        </div>
+        {Array.isArray(books) && books.length > 0 && (
+          <div className="opacity-70 mt-1">Books: {books.join(", ")}</div>
+        )}
         {debugPanel}
       </div>
     );
@@ -130,9 +130,9 @@ export default function PlayerProps({
 
   return (
     <div className="space-y-2">
-      <div className="text-xs opacity-70">
-        Showing props from: {books.join(", ") || "—"} — Markets: {usedMarkets.join(", ") || "—"}
-      </div>
+      {Array.isArray(books) && books.length > 0 && (
+        <div className="text-xs opacity-70">Showing props from: {books.join(", ")}</div>
+      )}
       
       {/* Fallback renderer with payload info */}
       {payload ? (
