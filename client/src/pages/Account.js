@@ -87,6 +87,7 @@ export default function Account() {
   // Load profile (username) and sportsbooks
   useEffect(() => {
     async function load() {
+      let safetyTimer;
       try {
         if (!user) { setPageLoading(false); return; }
         // If Supabase client is not available, fail fast
@@ -98,7 +99,7 @@ export default function Account() {
         }
         setPageLoading(true);
         // Safety guard to prevent indefinite spinner
-        const safetyTimer = setTimeout(() => setPageLoading(false), 2500);
+        safetyTimer = setTimeout(() => setPageLoading(false), 2500);
         const { data, error } = await supabase
           .from("profiles")
           .select("username")
@@ -116,7 +117,7 @@ export default function Account() {
       } finally {
         setPageLoading(false);
         // Clear safety guard
-        try { clearTimeout(safetyTimer); } catch {}
+        try { if (safetyTimer) clearTimeout(safetyTimer); } catch {}
       }
     }
     load();
