@@ -515,12 +515,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           <div className="text-red-400 text-4xl mb-3">⚠️</div>
           <h3 className="text-xl font-semibold text-red-100 mb-2">Unable to Load Data</h3>
           <p className="text-red-200 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-red-700 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          >
-            Retry
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={resetAndApplyDefaults}
+              className="bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex-1"
+            >
+              Reset Filters
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-red-700 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex-1"
+            >
+              Retry
+            </button>
+          </div>
           <p className="text-xs text-red-400 mt-3">If the problem persists, please try again later.</p>
         </div>
       </div>
