@@ -286,8 +286,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     let cancelled = false;
     (async () => {
       try {
-        const base = withApiBase('');
-        const r = await fetch(`${base}/api/sports`);
+        const r = await fetch(withApiBase('/api/sports'));
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const arr = await r.json();
         const normalized = (Array.isArray(arr) ? arr : [])
@@ -306,35 +305,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return () => { cancelled = true; };
   }, []);
 
-  // Filtered games based on date and query
-  const filteredGames = useMemo(() => {
-    let base = Array.isArray(marketGames) ? marketGames : [];
-    // Filter by selected date (local date)
-    if (selectedDate) {
-      base = base.filter(g => {
-        const d = new Date(g.commence_time);
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const local = `${y}-${m}-${day}`;
-        return local === selectedDate;
-      });
-    }
-    const q = (debouncedQuery || '').trim().toLowerCase();
-    if (!q) return base;
-    return base.filter(g =>
-      (g.home_team && g.home_team.toLowerCase().includes(q)) ||
-      (g.away_team && g.away_team.toLowerCase().includes(q)) ||
-      (g.sport_title && g.sport_title.toLowerCase().includes(q))
-    );
-  }, [marketGames, selectedDate, debouncedQuery]);
-
-  // Effective book filter (all if none selected)
-  const effectiveSelectedBooks = useMemo(() => {
-    return (selectedBooks && selectedBooks.length)
-      ? selectedBooks
-      : (Array.isArray(marketBooks) ? marketBooks.map(b => b.key) : []);
-  }, [selectedBooks, marketBooks]);
+  // NOTE: moved filteredGames/effectiveSelectedBooks after useMarkets to avoid TDZ errors
 
   function handleMobileSearch(searchTerm) {
     try {
@@ -382,6 +353,41 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     marketKeys,
     selectedDate ? new Date(selectedDate) : null
   );
+
+  // Keep local book list in sync with hook results
+  useEffect(() => {
+    if (Array.isArray(marketBooks)) setBookList(marketBooks);
+  }, [marketBooks]);
+
+  // Filtered games based on date and query
+  const filteredGames = useMemo(() => {
+    let base = Array.isArray(marketGames) ? marketGames : [];
+    // Filter by selected date (local date)
+    if (selectedDate) {
+      base = base.filter(g => {
+        const d = new Date(g.commence_time);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const local = `${y}-${m}-${day}`;
+        return local === selectedDate;
+      });
+    }
+    const q = (debouncedQuery || '').trim().toLowerCase();
+    if (!q) return base;
+    return base.filter(g =>
+      (g.home_team && g.home_team.toLowerCase().includes(q)) ||
+      (g.away_team && g.away_team.toLowerCase().includes(q)) ||
+      (g.sport_title && g.sport_title.toLowerCase().includes(q))
+    );
+  }, [marketGames, selectedDate, debouncedQuery]);
+
+  // Effective book filter (all if none selected)
+  const effectiveSelectedBooks = useMemo(() => {
+    return (selectedBooks && selectedBooks.length)
+      ? selectedBooks
+      : (Array.isArray(marketBooks) ? marketBooks.map(b => b.key) : []);
+  }, [selectedBooks, marketBooks]);
 
   // Handle errors from useMarkets
   useEffect(() => {
@@ -541,6 +547,56 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   usePortal
                   leftAlign
                 />
+              </div>
+
+              {/* Date selector */}
+              <div style={{ marginBottom: 16 }}>
+                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Date</h4>
+                <DatePicker
+                  value={selectedDate}
+                  onChange={(val) => {
+                    setSelectedDate(val || '');
+                    try { localStorage.setItem('vr-odds-date', val || ''); } catch {}
+                  }}
+                />
+              </div>
+
+              {/* Books selector */}
+              <div style={{ marginBottom: 16 }}>
+                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Books</h4>
+                <SportMultiSelect
+                  list={bookList}
+                  selected={selectedBooks}
+                  onChange={(next) => {
+                    setSelectedBooks(next);
+                    try { localStorage.setItem('vr-odds-books', JSON.stringify(next)); } catch {}
+                  }}
+                  usePortal
+                  leftAlign
+                />
+              </div>
+
+              {/* Market toggles */}
+              <div style={{ marginBottom: 16 }}>
+                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Markets</h4>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  {GAME_LINES.map((m) => (
+                    <label key={m} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <input
+                        type="checkbox"
+                        checked={marketKeys.includes(m)}
+                        onChange={(e) => {
+                          const next = e.target.checked
+                            ? Array.from(new Set([...marketKeys, m]))
+                            : marketKeys.filter((x) => x !== m);
+                          setMarketKeys(next);
+                          try { localStorage.setItem('vr-odds-markets', JSON.stringify(next)); } catch {}
+                        }}
+                      />
+                      <span>{MARKET_TITLES[m] || m}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           </MobileFiltersSheet>
