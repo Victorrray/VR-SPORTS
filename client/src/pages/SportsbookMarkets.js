@@ -657,6 +657,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   onChange={(next) => setDraftSelectedBooks(next)}
                   usePortal
                   leftAlign
+                  allLabel="All Books"
                 />
               </div>
 
