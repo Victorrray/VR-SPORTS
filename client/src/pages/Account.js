@@ -319,9 +319,9 @@ export default function Account() {
         </div>
         
         <div className="profile-content">
-          <div className="avatar-section">
-            <div className="avatar">{initialsFromEmail(email)}</div>
-            <div className="avatar-status">
+          <div className="user-info-grid">
+            <div className="user-avatar-section">
+              <div className="avatar">{initialsFromEmail(email)}</div>
               {emailVerified ? (
                 <div className="status-badge verified">
                   <Check size={12} />
@@ -334,50 +334,49 @@ export default function Account() {
                 </div>
               )}
             </div>
+
+            <div className="user-details-section">
+              <div className="user-field">
+                <div className="field-header">
+                  <Mail size={16} />
+                  <span className="field-label">Email Address</span>
+                </div>
+                <div className="field-value">{email}</div>
+              </div>
+
+              <div className="user-field">
+                <div className="field-header">
+                  <User size={16} />
+                  <span className="field-label">Username</span>
+                </div>
+                <div className="field-value">
+                  {pageLoading ? (
+                    <span className="loading-text">Loading…</span>
+                  ) : username ? (
+                    <div className="username-display">
+                      <strong>@{username}</strong>
+                      <span className="permanent-note">Permanent</span>
+                    </div>
+                  ) : (
+                    <div className="username-empty">
+                      <span className="not-set">Not set</span>
+                      {!editingUN && (
+                        <button
+                          type="button"
+                          className="set-username-btn"
+                          onClick={() => { setEditingUN(true); setValue(""); setStatus("idle"); }}
+                        >
+                          Set Username
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="profile-details">
-            <div className="detail-row">
-              <div className="detail-label">
-                <Mail size={16} />
-                <span>Email Address</span>
-              </div>
-              <div className="detail-value">{email}</div>
-            </div>
-
-
-
-            <div className="detail-row">
-              <div className="detail-label">
-                <User size={16} />
-                <span>Username</span>
-              </div>
-              <div className="username-section">
-                {pageLoading ? (
-                  <span className="loading-text">Loading…</span>
-                ) : username ? (
-                  <div className="username-display">
-                    <strong>@{username}</strong>
-                    <span className="permanent-note">Permanent</span>
-                  </div>
-                ) : (
-                  <div className="username-empty">
-                    <span className="not-set">Not set</span>
-                    {!editingUN && (
-                      <button
-                        type="button"
-                        className="set-username-btn"
-                        onClick={() => { setEditingUN(true); setValue(""); setStatus("idle"); }}
-                      >
-                        Set Username
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {editingUN && !username && (
+          {editingUN && !username && (
               <div className="username-editor">
                 <div className="editor-field">
                   <input
@@ -426,8 +425,6 @@ export default function Account() {
                 </div>
               </div>
             )}
-
-          </div>
         </div>
       </section>
 

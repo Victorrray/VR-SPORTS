@@ -90,9 +90,53 @@
 .profile-content {
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+}
+
+.user-info-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.user-avatar-section {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  text-align: center;
+  gap: 0.75rem;
+}
+
+.user-details-section {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
+}
+
+.user-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.field-label {
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.field-value {
+  font-size: 1rem;
+  color: var(--text);
+  font-weight: 500;
 }
 
 .avatar-section {
@@ -514,23 +558,19 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .account-page {
-    padding: 1rem 0.5rem;
+  .user-info-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .user-details-section {
+    gap: 1rem;
   }
   
   .profile-content {
     flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  .avatar-section {
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 1rem;
-  }
-  
-  .security-btn {
-    padding: 0.875rem 1rem;
+    text-align: center;
   }
   
   .editor-actions {
