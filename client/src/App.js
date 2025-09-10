@@ -8,7 +8,6 @@ import { BetSlipProvider } from './contexts/BetSlipContext';
 import { ToastProvider } from './components/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import SkipToContent from './components/SkipToContent';
-import AccessibilityMenu from './components/AccessibilityMenu';
 import AuthDebug from './components/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import Navbar from './components/Navbar';

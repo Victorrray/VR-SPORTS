@@ -13,6 +13,7 @@ import SportMultiSelect from "../components/SportMultiSelect";
 import DatePicker from "../components/DatePicker";
 import OddsTable from "../components/OddsTable";
 import useDebounce from "../hooks/useDebounce";
+import { withApiBase } from "../config/api";
 import { useMarkets } from '../hooks/useMarkets';
 
 // Import getSportLeague function
@@ -280,6 +281,31 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Debounced query for smoother filtering and to feed MobileSearchModal
   const debouncedQuery = useDebounce(query, 300);
 
+  // Load sports list (for the picker)
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const base = withApiBase('');
+        const r = await fetch(`${base}/api/sports`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const arr = await r.json();
+        const normalized = (Array.isArray(arr) ? arr : [])
+          .filter(s => s && (s.active === undefined || s.active))
+          .map(s => ({ key: s.key, title: s.title || (FRIENDLY_TITLES[s.key] || s.key) }));
+        if (!cancelled) setSportList(normalized);
+      } catch (e) {
+        // Fallback to featured list
+        const fallback = Array.from(FEATURED_SPORTS).map(key => ({
+          key,
+          title: FRIENDLY_TITLES[key] || key
+        }));
+        if (!cancelled) setSportList(fallback);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   // Filtered games based on date and query
   const filteredGames = useMemo(() => {
     let base = Array.isArray(marketGames) ? marketGames : [];
@@ -495,7 +521,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
           <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
             <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
-              {/* Filter groups */}
+              {/* Sports selector */}
+              <div style={{ marginBottom: 16 }}>
+                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Sports</h4>
+                <SportMultiSelect
+                  list={sportList}
+                  selected={picked}
+                  onChange={(next) => {
+                    setPicked(next);
+                    try {
+                      localStorage.setItem('vr-odds-sports', JSON.stringify(next));
+                    } catch {}
+                    // reflect in URL for shareability
+                    const params = new URLSearchParams(location.search);
+                    if (next && next.length) params.set('sports', next.join(','));
+                    else params.delete('sports');
+                    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+                  }}
+                  usePortal
+                  leftAlign
+                />
+              </div>
             </div>
           </MobileFiltersSheet>
 
