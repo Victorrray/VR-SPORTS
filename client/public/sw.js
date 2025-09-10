@@ -61,6 +61,19 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Ignore unsupported schemes (e.g., extensions)
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return; // let the browser handle it
+  }
+
+  // Always handle navigations with a network-first strategy
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
   // Skip non-GET requests
   if (request.method !== 'GET') {
     return;
@@ -131,6 +144,14 @@ async function handleApiRequest(request) {
 
 // Static asset handler - cache first strategy
 async function handleStaticRequest(request) {
+  // Guard against unsupported schemes
+  try {
+    const u = new URL(request.url);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+      return fetch(request);
+    }
+  } catch (_) {}
+
   const cache = await caches.open(STATIC_CACHE);
   const cachedResponse = await cache.match(request);
   

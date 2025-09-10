@@ -271,6 +271,22 @@ export default function Account() {
 
   return (
     <main className="account-page">
+      {error && (
+        <div
+          role="alert"
+          style={{
+            margin: '12px auto',
+            maxWidth: 960,
+            padding: '10px 12px',
+            borderRadius: 8,
+            background: 'rgba(220,38,38,0.12)',
+            border: '1px solid rgba(248,113,113,0.35)',
+            color: 'rgb(252,165,165)'
+          }}
+        >
+          Profile failed to load. Some info may be unavailable.
+        </div>
+      )}
       <header className="account-header">
         <div className="header-title">
           <User className="header-icon" size={32} />

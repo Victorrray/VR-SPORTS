@@ -174,8 +174,9 @@ const allowedOrigins = new Set([
   'http://localhost:10000',
   'https://odds-frontend-j2pn.onrender.com',
   'https://my-react-frontend-021i.onrender.com',
-  'https://oddssightseer.com',
-  'https://www.oddssightseer.com'
+  // Primary production domains (correct spelling)
+  'https://oddsightseer.com',
+  'https://www.oddsightseer.com'
 ]);
 
 // Add FRONTEND_URL if it exists and isn't already in the set
