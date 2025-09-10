@@ -36,9 +36,9 @@ const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 const userUsage = new Map(); // user_id -> { period_start, period_end, calls_made }
 // userPlans removed - now using Supabase exclusively for plan management
 
-// Constants for improved player props stability
+// Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
-  "draftkings", "fanduel", "betmgm", "caesars", "espnbet", "fanatics", "prizepicks", "underdog"
+  "draftkings", "fanduel", "betmgm", "caesars" // Reduced to top 4 to cut costs
 ];
 
 const PLAYER_PROP_MARKETS = [
@@ -46,7 +46,33 @@ const PLAYER_PROP_MARKETS = [
   "player_pass_yds", "player_rush_yds", "player_receptions", "player_reception_yds"
 ];
 
-const MAX_BOOKMAKERS = 10;
+const MAX_BOOKMAKERS = 4; // Reduced from 10 to 4
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes cache
+const MAX_GAMES_FOR_PROPS = 0; // DISABLED: Player props entirely disabled to save API costs
+
+// In-memory cache for API responses
+const apiCache = new Map();
+
+function getCacheKey(endpoint, params) {
+  return `${endpoint}_${JSON.stringify(params)}`;
+}
+
+function getCachedResponse(cacheKey) {
+  const cached = apiCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION_MS) {
+    console.log(`📦 Cache HIT for ${cacheKey}`);
+    return cached.data;
+  }
+  if (cached) {
+    apiCache.delete(cacheKey); // Remove expired cache
+  }
+  return null;
+}
+
+function setCachedResponse(cacheKey, data) {
+  apiCache.set(cacheKey, { data, timestamp: Date.now() });
+  console.log(`💾 Cached response for ${cacheKey}`);
+}
 
 // Helper function to get current monthly window (UTC)
 function currentMonthlyWindow(now = new Date()) {
@@ -710,7 +736,7 @@ app.post('/api/billing/webhook',
   }
 );
 
-// sports list (Odds API)
+// sports list (Odds API) - CACHED to reduce API calls
 app.get("/api/sports", requireUser, trackUsage, async (_req, res) => {
   try {
     // If no API key, return fallback sports list
@@ -731,8 +757,21 @@ app.get("/api/sports", requireUser, trackUsage, async (_req, res) => {
       return res.json(fallbackSports);
     }
     
+    // Check cache first - sports list rarely changes
+    const cacheKey = getCacheKey('sports', {});
+    const cachedSports = getCachedResponse(cacheKey);
+    
+    if (cachedSports) {
+      console.log('📦 Using cached sports list');
+      return res.json(cachedSports);
+    }
+    
+    console.log('🌐 API call for sports list');
     const url = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
     const r = await axios.get(url);
+    
+    // Cache for longer since sports list is stable
+    setCachedResponse(cacheKey, r.data);
     res.json(r.data);
   } catch (err) {
     console.error("sports error:", err?.response?.status, err?.response?.data || err.message);
@@ -740,15 +779,29 @@ app.get("/api/sports", requireUser, trackUsage, async (_req, res) => {
   }
 });
 
-// events by sport (Odds API)
+// events by sport (Odds API) - CACHED to reduce API calls
 app.get("/api/events", enforceUsage, async (req, res) => {
   try {
     if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
     const { sport } = req.query;
     if (!sport) return res.status(400).json({ error: "Missing sport" });
+    
+    // Check cache first
+    const cacheKey = getCacheKey('events', { sport });
+    const cachedEvents = getCachedResponse(cacheKey);
+    
+    if (cachedEvents) {
+      console.log(`📦 Using cached events for ${sport}`);
+      return res.json(cachedEvents);
+    }
+    
+    console.log(`🌐 API call for events: ${sport}`);
     const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
     const r = await axios.get(url);
-    res.json(Array.isArray(r.data) ? r.data : (r.data ? Object.values(r.data) : []));
+    const events = Array.isArray(r.data) ? r.data : (r.data ? Object.values(r.data) : []);
+    
+    setCachedResponse(cacheKey, events);
+    res.json(events);
   } catch (err) {
     const status = err?.response?.status || 500;
     console.error("events error:", status, err?.response?.data || err.message);
@@ -876,11 +929,13 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     const marketsArray = markets.split(',');
     let allGames = [];
     
-    // Check if player props are requested
-    const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
+    // Player props DISABLED - filter them out entirely
+    const playerPropMarkets = []; // Always empty - player props disabled
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
     
-    console.log('Player prop markets requested:', playerPropMarkets);
+    if (marketsArray.some(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'))) {
+      console.log('🚫 Player prop markets requested but DISABLED to save API costs');
+    }
     console.log('Regular markets requested:', regularMarkets);
     
     // Step 1: Fetch regular odds (h2h, spreads, totals) if requested, OR fetch base games for player props
@@ -891,10 +946,22 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
       // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
       for (const sport of sportsArray) {
         try {
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=betmgm,betonlineag,betrivers,betus,bovada,williamhill_us,draftkings,fanatics,fanduel,lowvig,mybookieag,espnbet,ballybet,betanysports,betparx,hardrockbet,fliff,rebet,windcreek,betopenly,novig,prophetx,prizepicks,underdog,draftkings_pick6,pointsbet,bet365,unibet`;
-          console.log(`Fetching base games for ${sport} from:`, url);
+          // COST REDUCTION: Use only focused bookmakers (4 instead of 30+)
+          const bookmakerList = FOCUSED_BOOKMAKERS.join(',');
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
+          // Check cache first to avoid redundant API calls
+          const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsToFetch, bookmakers: bookmakerList });
+          const cachedData = getCachedResponse(cacheKey);
           
-          const response = await axios.get(url);
+          let response;
+          if (cachedData) {
+            response = { data: cachedData };
+            console.log(`📦 Using cached data for ${sport}`);
+          } else {
+            console.log(`🌐 API call for ${sport}:`, url);
+            response = await axios.get(url);
+            setCachedResponse(cacheKey, response.data);
+          }
           const sportGames = response.data || [];
           console.log(`Got ${sportGames.length} games for ${sport}`);
           
@@ -917,11 +984,13 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
       }
     }
     
-    // Step 2: Fetch player props for each game individually (if requested)
-    if (playerPropMarkets.length > 0 && allGames.length > 0) {
-      console.log(`Fetching player props for ${allGames.length} games...`);
+    // Step 2: Player props DISABLED to eliminate API costs
+    if (playerPropMarkets.length > 0 && allGames.length > 0 && MAX_GAMES_FOR_PROPS > 0) {
+      // DISABLED: Player props completely disabled
+      console.log(`🚫 Player props DISABLED - skipping all player prop API calls to save costs`);
       
-      for (const game of allGames) {
+      // This code block will never execute since MAX_GAMES_FOR_PROPS = 0
+      for (const game of []) {
         try {
           // Use TheOddsAPI's /events/{eventId}/odds endpoint for player props
           // Use focused bookmaker list to prevent timeouts
@@ -934,9 +1003,19 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
             markets: playerPropMarkets,
             bookmakers: clampedBookmakers
           });
-          console.log(`Fetching props for game ${game.id}:`, eventUrl);
+          // Check cache for player props
+          const propCacheKey = getCacheKey('props', { sportKey: game.sport_key, eventId: game.id, markets: playerPropMarkets });
+          const cachedProps = getCachedResponse(propCacheKey);
           
-          const propResponse = await axios.get(eventUrl);
+          let propResponse;
+          if (cachedProps) {
+            propResponse = { data: cachedProps, headers: {} };
+            console.log(`📦 Using cached props for game ${game.id}`);
+          } else {
+            console.log(`🌐 API call for props ${game.id}:`, eventUrl);
+            propResponse = await axios.get(eventUrl);
+            setCachedResponse(propCacheKey, propResponse.data);
+          }
           const propData = propResponse.data;
           
           // Log API quota and response details

@@ -12,10 +12,17 @@ export default function Login() {
   const { signInEmail, signUpEmail, signInWithProvider } = auth || {};
   const location = useLocation();
   const [tab, setTab] = useState(location.pathname === '/signup' ? 'signup' : 'login');
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const remembered = localStorage.getItem('vr-odds-remember-me') === 'true';
+    return remembered ? (localStorage.getItem('vr-odds-remembered-email') || "") : "";
+  });
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem('vr-odds-remember-me') === 'true';
+  });
   const [search] = useSearchParams();
   const navigate = useNavigate();
   const next = search.get("next") || search.get("returnTo") || "/scores";
@@ -53,6 +60,13 @@ export default function Login() {
     }
     setErr("");
     try {
+      // Handle Remember Me functionality by storing preference
+      if (rememberMe) {
+        localStorage.setItem('vr-odds-remember-me', 'true');
+      } else {
+        localStorage.removeItem('vr-odds-remember-me');
+      }
+      
       const { data, error } = await fn(email, pw);
       if (error) {
         console.error('Login error:', error);
@@ -60,6 +74,12 @@ export default function Login() {
       } else {
         console.log('Login successful, data:', data);
         console.log('Navigating to:', next);
+        
+        // If Remember Me is checked, store user email for next time
+        if (rememberMe) {
+          localStorage.setItem('vr-odds-remembered-email', email);
+        }
+        
         // Small delay to ensure auth state is updated
         setTimeout(() => {
           navigate(next, { replace: true });

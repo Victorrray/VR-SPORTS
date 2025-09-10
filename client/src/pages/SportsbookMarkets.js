@@ -272,10 +272,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("vr-odds-preset") || null;
   });
-  const [showPlayerProps, setShowPlayerProps] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("vr-odds-playerprops") === "true";
-  });
+  // Player props DISABLED - always false to eliminate broken functionality
+  const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [oddsFormat] = useState('american');
   // Debounced query for smoother filtering and to feed MobileSearchModal
@@ -484,6 +482,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
   }, [marketsLoading]);
 
+  // Set up event listener for mobile search modal
+  useEffect(() => {
+    const handleOpenMobileSearch = () => {
+      setShowMobileSearch(true);
+    };
+
+    window.addEventListener('openMobileSearch', handleOpenMobileSearch);
+    
+    return () => {
+      window.removeEventListener('openMobileSearch', handleOpenMobileSearch);
+    };
+  }, []);
+
   // Show loading state with better UX
   if (loading) {
     return (
@@ -569,46 +580,36 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
             display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
             background: 'var(--card-bg)',
             borderRadius: '8px',
-            border: '1px solid var(--border-color)',
-            overflow: 'hidden'
+            padding: '4px',
+            border: '1px solid var(--border-color)'
           }}>
             <button
-              onClick={() => {
-                if (showPlayerProps) {
-                  setShowPlayerProps(false);
-                }
-              }}
               style={{
                 padding: '8px 16px',
                 border: 'none',
-                background: !showPlayerProps ? 'var(--accent)' : 'transparent',
-                color: !showPlayerProps ? '#fff' : 'var(--text-primary)',
+                background: 'var(--accent)',
+                color: '#fff',
                 fontSize: '14px',
                 fontWeight: '600',
-                cursor: 'pointer',
+                cursor: 'default',
+                borderRadius: '6px',
                 transition: 'all 0.2s ease'
               }}
             >
-              Game Odds
+              Game Lines
             </button>
-            <button
-              disabled
-              style={{
-                padding: '8px 16px',
-                border: 'none',
-                background: 'transparent',
-                color: 'var(--text-secondary)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'not-allowed',
-                opacity: 0.5
-              }}
-              title="Player props are temporarily unavailable"
-            >
-              Player Props
-            </button>
+            <span style={{
+              padding: '8px 16px',
+              fontSize: '12px',
+              color: 'var(--text-secondary)',
+              fontStyle: 'italic'
+            }}>
+              Player Props Disabled
+            </span>
           </div>
         </div>
       </div>
@@ -617,7 +618,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             key={tableNonce}
             games={filteredGames}
             pageSize={15}
-            mode={showPlayerProps ? "props" : "game"}
+            mode="game"
             bookFilter={effectiveSelectedBooks}
             marketFilter={marketKeys}
             evMin={minEV === "" ? null : Number(minEV)}
