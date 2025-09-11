@@ -1,5 +1,5 @@
 // src/components/DatePicker.js
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { Calendar, ChevronDown, X } from "lucide-react";
 import "./DatePicker.css";
@@ -8,6 +8,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
+  const boxRef = useRef(null);
 
   React.useEffect(() => {
     const checkMobile = () => {
