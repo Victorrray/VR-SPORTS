@@ -229,6 +229,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [picked, setPicked] = useState(getInitialSports);
   const [query, setQuery] = useState(() => {
     if (typeof window === "undefined") return "";
+    // Check URL first, then localStorage
+    const params = new URLSearchParams(window.location.search);
+    const urlQuery = params.get("q");
+    if (urlQuery) return urlQuery;
     return localStorage.getItem("vr-odds-query") || "";
   });
   const [games, setGames] = useState([]);
@@ -276,6 +280,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [oddsFormat] = useState('american');
   // Debounced query for smoother filtering and to feed MobileSearchModal
   const debouncedQuery = useDebounce(query, 300);
+
+  // Sync query with URL parameters on route changes
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlQuery = params.get("q") || "";
+    if (urlQuery !== query) {
+      setQuery(urlQuery);
+      localStorage.setItem("vr-odds-query", urlQuery);
+    }
+  }, [location.search, query]);
 
   // Draft filter state (edited in the sheet, applied on "Apply")
   const [draftPicked, setDraftPicked] = useState([]);
