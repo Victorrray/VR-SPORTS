@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import './ArbitrageDetector.css';
 
-const ArbitrageDetector = ({ sport = 'americanfootball_nfl' }) => {
+const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilter = [], compact = false }) => {
   const { user, profile } = useAuth();
   const [minProfit, setMinProfit] = useState(2); // Minimum 2% profit
   const [maxStake, setMaxStake] = useState(1000);
@@ -302,186 +302,189 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl' }) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const executeArbitrage = (opportunity) => {
+  const getMarketLabel = (market) => {
+    switch (market) {
+      case 'h2h':
+        return 'Moneyline';
+      case 'spreads':
+        return 'Point Spread';
+      case 'totals':
+        return 'Over/Under';
+      default:
+        return market;
+    }
+  };
+
+  const ArbitrageCard = ({ opportunity, onExecute, compact = false }) => {
+    return (
+      <div className={`arbitrage-card ${compact ? 'compact' : ''}`}>
+        <div className="card-header">
+          <div className="game-info">
+            <h4>{compact ? opportunity.game.split(' @ ')[0].split(' ').slice(-1)[0] + ' @ ' + opportunity.game.split(' @ ')[1].split(' ').slice(-1)[0] : opportunity.game}</h4>
+            <span className="market-type">{getMarketLabel(opportunity.market)}</span>
+          </div>
+          <div className="profit-info">
+            <div className="profit-percentage">
+              <TrendingUp className="profit-icon" />
+              {opportunity.opportunities[0].profit_percentage.toFixed(2)}%
+            </div>
+            {!compact && (
+              <div className="profit-amount">
+                <DollarSign className="dollar-icon" />
+                ${opportunity.opportunities[0].profit_amount.toFixed(2)}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="bets-grid">
+          {opportunity.opportunities[0].bets.map((bet, betIndex) => (
+            <div key={betIndex} className="bet-card">
+              <div className="bet-header">
+                <div className="bookmaker">{bet.bookmaker}</div>
+                <div className="odds">{formatOdds(bet.odds)}</div>
+              </div>
+              <div className="bet-selection">{bet.selection}</div>
+              <div className="bet-details">
+                <div className="stake">Stake: {formatCurrency(bet.stake)}</div>
+                <div className="payout">Payout: {formatCurrency(bet.payout)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="opportunity-meta">
+          <div className="meta-item">
+            <Clock size={14} />
+            Found {new Date(opportunity.opportunities[0].time_found).toLocaleTimeString()}
+          </div>
+          <div className="meta-item expires">
+            <AlertTriangle size={14} />
+            Expires in {formatTimeRemaining(opportunity.opportunities[0].expires_in)}
+          </div>
+          <div className="meta-item">
+            <Calculator size={14} />
+            Total Prob: {opportunity.opportunities[0].total_implied_prob.toFixed(1)}%
+          </div>
+        </div>
+        <div className="opportunity-actions">
+          <button 
+            className="execute-btn"
+            onClick={() => onExecute(opportunity.opportunities[0])}
+          >
+            <Zap size={16} />
+            Execute Arbitrage
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const handleExecuteArbitrage = (opportunity) => {
     // This would integrate with your bet placement system
     console.log('Executing arbitrage:', opportunity);
     alert(`Arbitrage opportunity added to bet slip!\nProfit: ${opportunity.profit_percentage.toFixed(2)}%`);
   };
 
   return (
-    <div className="arbitrage-detector-container">
+    <div className={`arbitrage-detector ${compact ? 'compact' : ''}`}>
       <div className="arbitrage-header">
-        <div className="header-left">
-          <h2>Arbitrage Detector</h2>
-          <div className="opportunities-count">
-            {filteredOpportunities.length} opportunities found
-          </div>
+        <div className="header-title">
+          <Zap className="header-icon" />
+          <h2>{compact ? 'Arbitrage' : 'Arbitrage Opportunities'}</h2>
+          <span className="opportunity-count">{filteredOpportunities.length}</span>
         </div>
-        
-        <div className="header-controls">
-          <button 
-            className="refresh-btn"
-            onClick={refresh}
-            disabled={loading}
-          >
-            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
-            Refresh
-          </button>
-          
-          <label className="auto-refresh-toggle">
+        {!compact && (
+          <div className="header-actions">
+            <button 
+              className={`refresh-btn ${loading ? 'loading' : ''}`}
+              onClick={refresh}
+              disabled={loading}
+            >
+              <RefreshCw className={loading ? 'spinning' : ''} />
+              {loading ? 'Updating...' : 'Refresh'}
+            </button>
+          </div>
+        )}
+      </div>
+      {!compact && (
+        <div className="arbitrage-controls">
+          <div className="control-group">
+            <label>Min Profit %</label>
             <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
+              type="number"
+              value={minProfit}
+              onChange={(e) => setMinProfit(Number(e.target.value))}
+              min="0.1"
+              max="50"
+              step="0.1"
             />
-            Auto-refresh
-          </label>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="arbitrage-filters">
-        <div className="filter-group">
-          <label>Min Profit %</label>
-          <input
-            type="number"
-            value={minProfit}
-            onChange={(e) => setMinProfit(Number(e.target.value))}
-            min="0.1"
-            max="20"
-            step="0.1"
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>Max Stake</label>
-          <input
-            type="number"
-            value={maxStake}
-            onChange={(e) => setMaxStake(Number(e.target.value))}
-            min="100"
-            max="10000"
-            step="100"
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>Markets</label>
-          <div className="market-checkboxes">
-            {[
-              { key: 'h2h', label: 'Moneyline' },
-              { key: 'spreads', label: 'Spreads' },
-              { key: 'totals', label: 'Totals' }
-            ].map(market => (
-              <label key={market.key} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={selectedMarkets.includes(market.key)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedMarkets([...selectedMarkets, market.key]);
-                    } else {
-                      setSelectedMarkets(selectedMarkets.filter(m => m !== market.key));
-                    }
-                  }}
-                />
-                {market.label}
-              </label>
-            ))}
           </div>
-        </div>
-
-        <div className="filter-group">
-          <label>Sort by</label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="profit">Profit %</option>
-            <option value="amount">Profit Amount</option>
-            <option value="time">Time Found</option>
-            <option value="expires">Expires Soon</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Opportunities List */}
-      {filteredOpportunities.length > 0 ? (
-        <div className="opportunities-list">
-          {filteredOpportunities.map(opportunity => (
-            <div key={opportunity.id} className="arbitrage-card">
-              {opportunity.opportunities.map((arb, index) => (
-                <div key={index} className="arbitrage-opportunity">
-                  <div className="opportunity-header">
-                    <div className="game-info">
-                      <h3>{opportunity.game}</h3>
-                      <div className="market-type">
-                        {opportunity.market === 'h2h' ? 'Moneyline' : 
-                         opportunity.market === 'spreads' ? 'Point Spread' : 
-                         opportunity.market === 'totals' ? 'Total Points' : opportunity.market}
-                      </div>
-                    </div>
-                    
-                    <div className="profit-info">
-                      <div className="profit-percentage">
-                        {arb.profit_percentage.toFixed(2)}%
-                      </div>
-                      <div className="profit-amount">
-                        {formatCurrency(arb.profit_amount)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bets-grid">
-                    {arb.bets.map((bet, betIndex) => (
-                      <div key={betIndex} className="bet-card">
-                        <div className="bet-header">
-                          <div className="bookmaker">{bet.bookmaker}</div>
-                          <div className="odds">{formatOdds(bet.odds)}</div>
-                        </div>
-                        <div className="bet-selection">{bet.selection}</div>
-                        <div className="bet-details">
-                          <div className="stake">Stake: {formatCurrency(bet.stake)}</div>
-                          <div className="payout">Payout: {formatCurrency(bet.payout)}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="opportunity-meta">
-                    <div className="meta-item">
-                      <Clock size={14} />
-                      Found {new Date(arb.time_found).toLocaleTimeString()}
-                    </div>
-                    <div className="meta-item expires">
-                      <AlertTriangle size={14} />
-                      Expires in {formatTimeRemaining(arb.expires_in)}
-                    </div>
-                    <div className="meta-item">
-                      <Calculator size={14} />
-                      Total Prob: {arb.total_implied_prob.toFixed(1)}%
-                    </div>
-                  </div>
-
-                  <div className="opportunity-actions">
-                    <button 
-                      className="execute-btn"
-                      onClick={() => executeArbitrage(arb)}
-                    >
-                      <Zap size={16} />
-                      Execute Arbitrage
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="no-opportunities">
-          <Target size={48} />
-          <h3>No Arbitrage Opportunities</h3>
-          <p>No profitable arbitrage opportunities found with current filters.</p>
-          <p>Try adjusting your minimum profit percentage or maximum stake.</p>
+          <div className="control-group">
+            <label>Max Stake ($)</label>
+            <input
+              type="number"
+              value={maxStake}
+              onChange={(e) => setMaxStake(Number(e.target.value))}
+              min="100"
+              max="10000"
+              step="100"
+            />
+          </div>
+          <div className="control-group">
+            <label>Markets</label>
+            <select 
+              multiple 
+              value={selectedMarkets}
+              onChange={(e) => setSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
+            >
+              <option value="h2h">Moneyline</option>
+              <option value="spreads">Point Spread</option>
+              <option value="totals">Over/Under</option>
+            </select>
+          </div>
+          <div className="control-group">
+            <label>Sort By</label>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="profit">Profit %</option>
+              <option value="amount">Profit Amount</option>
+              <option value="time">Time to Game</option>
+            </select>
+          </div>
+          <div className="control-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+              />
+              Auto Refresh
+            </label>
+          </div>
         </div>
       )}
+
+      <div className={`opportunities-list ${compact ? 'compact' : ''}`}>
+        {loading && opportunities.length === 0 ? (
+          <div className="loading-state">
+            <RefreshCw className="spinning" />
+            <p>{compact ? 'Scanning...' : 'Scanning for arbitrage opportunities...'}</p>
+          </div>
+        ) : opportunities.length === 0 ? (
+          <div className="empty-state">
+            <Target className="empty-icon" />
+            <h3>{compact ? 'No Opportunities' : 'No Arbitrage Opportunities Found'}</h3>
+            {!compact && <p>Try adjusting your filters or check back later.</p>}
+          </div>
+        ) : (
+          opportunities.map((opportunity, index) => (
+            <ArbitrageCard 
+              key={opportunity.id || index} 
+              opportunity={opportunity} 
+              onExecute={handleExecuteArbitrage}
+              compact={compact}
+            />
+          ))
+        )}
+      </div>
 
       {lastUpdate && (
         <div className="last-update">

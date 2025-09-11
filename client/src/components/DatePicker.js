@@ -1,5 +1,5 @@
 // src/components/DatePicker.js
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { Calendar, ChevronDown, X } from "lucide-react";
 import "./DatePicker.css";
@@ -8,41 +8,76 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
+  const [isRendered, setIsRendered] = useState(false);
   const boxRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const clickTimeoutRef = useRef(null);
 
-  React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 600);
-    };
+  // Debounced mobile detection to prevent rapid state changes
+  const checkMobile = useCallback(() => {
+    const mobile = window.innerWidth <= 600;
+    if (mobile !== isMobile) {
+      setIsMobile(mobile);
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    const debouncedResize = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(checkMobile, 100);
+    };
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [checkMobile]);
 
-  // Close dropdown when clicking outside (matching SportMultiSelect pattern)
+  // Improved click outside handler with better timing
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!boxRef.current) return;
+      if (!open || !boxRef.current) return;
+      
+      // Check if click is inside our component
       if (boxRef.current.contains(event.target)) return;
       
-      // Don't close if clicking inside mobile filter sheet or any dropdown content
-      if (event.target.closest('.mfs-content') || 
-          event.target.closest('.mobile-filters-sheet') ||
-          event.target.closest('.dp-menu') ||
-          event.target.closest('.dp-mobile-sheet')) return;
+      // Check for portal elements
+      const portalElements = [
+        '.dp-mobile-overlay',
+        '.dp-mobile-sheet', 
+        '.dp-menu',
+        '.mfs-content',
+        '.mobile-filters-sheet',
+        '.ms-mobile-overlay',
+        '.ms-mobile-sheet'
+      ];
       
-      setOpen(false);
+      for (const selector of portalElements) {
+        if (event.target.closest(selector)) return;
+      }
+      
+      // Close with slight delay to prevent race conditions
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = setTimeout(() => {
+        setOpen(false);
+      }, 10);
     };
     
     if (open) {
-      // Add small delay to prevent immediate closing on open
+      // Wait for render before adding listener
       const timer = setTimeout(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-      }, 50);
+        setIsRendered(true);
+        document.addEventListener('mousedown', handleClickOutside, { passive: true });
+        document.addEventListener('touchstart', handleClickOutside, { passive: true });
+      }, 100);
       
       return () => {
         clearTimeout(timer);
+        setIsRendered(false);
         document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+        if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
       };
     }
   }, [open]);
@@ -95,51 +130,90 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     return options;
   }, []); // Empty dependency array - only compute once
 
-  const handleDateSelect = (dateValue) => {
+  const handleDateSelect = useCallback((dateValue) => {
     if (isChanging) return; // Prevent multiple rapid changes
     
     setIsChanging(true);
-    setOpen(false);
-    onChange(dateValue);
     
-    // Reset changing flag after a brief delay
-    setTimeout(() => setIsChanging(false), 200);
-  };
+    // Close dropdown immediately for better UX
+    setOpen(false);
+    
+    // Delay the onChange to prevent conflicts
+    setTimeout(() => {
+      onChange(dateValue);
+      setIsChanging(false);
+    }, 50);
+  }, [isChanging, onChange]);
 
-  const MobileSheet = () => (
-    <div className="dp-mobile-overlay" onClick={() => setOpen(false)}>
-      <div className="dp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="dp-mobile-header">
-          <h3>Select Date</h3>
-          <button className="dp-mobile-close" onClick={() => setOpen(false)}>
-            <X size={20} />
-          </button>
-        </div>
-        <div className="dp-mobile-content">
-          {dateOptions.map((option) => (
-            <div 
-              key={option.value} 
-              className={`dp-mobile-option ${value === option.value ? 'dp-selected' : ''}`}
-              onClick={() => handleDateSelect(option.value)}
-            >
-              <span className={`dp-mobile-checkbox ${value === option.value ? 'dp-checked' : ''}`}>
-                {value === option.value ? "✓" : "○"}
-              </span>
-              <span className="dp-mobile-label">{option.label}</span>
-            </div>
-          ))}
+  const handleToggle = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isChanging) return;
+    
+    setOpen(prev => !prev);
+  }, [isChanging]);
+
+  const MobileSheet = useCallback(() => {
+    const handleOverlayClick = (e) => {
+      if (e.target === e.currentTarget) {
+        setOpen(false);
+      }
+    };
+
+    const handleClose = () => {
+      setOpen(false);
+    };
+
+    const handleOptionClick = (optionValue) => {
+      handleDateSelect(optionValue);
+    };
+
+    return (
+      <div className="dp-mobile-overlay" onClick={handleOverlayClick}>
+        <div className="dp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
+          <div className="dp-mobile-header">
+            <h3>Select Date</h3>
+            <button className="dp-mobile-close" onClick={handleClose} type="button">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="dp-mobile-content">
+            {dateOptions.map((option) => (
+              <div 
+                key={option.value} 
+                className={`dp-mobile-option ${value === option.value ? 'dp-selected' : ''}`}
+                onClick={() => handleOptionClick(option.value)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOptionClick(option.value);
+                  }
+                }}
+              >
+                <span className={`dp-mobile-checkbox ${value === option.value ? 'dp-checked' : ''}`}>
+                  {value === option.value ? "✓" : "○"}
+                </span>
+                <span className="dp-mobile-label">{option.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }, [dateOptions, value, handleDateSelect]);
 
   return (
     <div className="dp-wrap">
       <button 
         className="dp-toggle" 
-        onClick={() => setOpen(!open)}
+        onClick={handleToggle}
         aria-expanded={open}
         aria-haspopup="listbox"
+        type="button"
+        disabled={isChanging}
       >
         <Calendar size={16} />
         <span>{formatDisplayDate(value)}</span>
@@ -147,13 +221,22 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
       </button>
 
       {/* Desktop dropdown */}
-      {open && !isMobile && (
-        <div className="dp-menu">
+      {open && !isMobile && isRendered && (
+        <div className="dp-menu" role="listbox">
           {dateOptions.map((option) => (
             <div 
               key={option.value}
               className={`dp-item ${value === option.value ? 'dp-selected' : ''}`}
               onClick={() => handleDateSelect(option.value)}
+              role="option"
+              aria-selected={value === option.value}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleDateSelect(option.value);
+                }
+              }}
             >
               {option.label}
             </div>
@@ -162,7 +245,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
       )}
 
       {/* Mobile sheet */}
-      {open && isMobile && typeof document !== "undefined" && 
+      {open && isMobile && isRendered && typeof document !== "undefined" && 
         ReactDOM.createPortal(<MobileSheet />, document.body)
       }
     </div>

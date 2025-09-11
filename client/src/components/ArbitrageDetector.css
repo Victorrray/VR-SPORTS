@@ -9,9 +9,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.arbitrage-detector.compact .arbitrage-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
 }
 
 .header-left {
@@ -20,11 +25,15 @@
   gap: 1rem;
 }
 
-.arbitrage-header h2 {
-  color: white;
-  font-size: 2rem;
-  font-weight: 700;
+.arbitrage-header-title h2 {
   margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.arbitrage-detector.compact .header-title h2 {
+  font-size: 18px;
 }
 
 .opportunities-count {
@@ -92,6 +101,22 @@
 }
 
 /* Filters */
+.arbitrage-detector {
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.arbitrage-detector.compact {
+  padding: 16px;
+  margin-bottom: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .arbitrage-filters {
   background: rgba(26, 16, 37, 0.95);
   border: 1px solid rgba(139, 92, 246, 0.2);
@@ -157,7 +182,14 @@
 .opportunities-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 16px;
+}
+
+.opportunities-list.compact {
+  flex: 1;
+  overflow-y: auto;
+  gap: 12px;
+  max-height: calc(100vh - 200px);
 }
 
 .arbitrage-card {
@@ -169,10 +201,8 @@
   transition: all 0.3s ease;
 }
 
-.arbitrage-card:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+.arbitrage-card.compact {
+  padding: 1rem;
 }
 
 .arbitrage-opportunity {
@@ -190,11 +220,16 @@
   gap: 1rem;
 }
 
-.game-info h3 {
-  color: white;
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
+.game-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.arbitrage-card.compact .game-info h4 {
+  font-size: 14px;
+  margin-bottom: 2px;
 }
 
 .market-type {
@@ -225,8 +260,15 @@
 /* Bets Grid */
 .bets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bets-grid.compact {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .bet-card {
@@ -237,9 +279,9 @@
   transition: all 0.2s ease;
 }
 
-.bet-card:hover {
-  background: rgba(139, 92, 246, 0.1);
-  border-color: rgba(139, 92, 246, 0.4);
+.bet-card.compact {
+  padding: 0.75rem;
+  border-radius: 8px;
 }
 
 .bet-header {
@@ -306,17 +348,22 @@
 
 .execute-btn {
   background: linear-gradient(135deg, #22c55e, #16a34a);
-  border: none;
   color: white;
-  padding: 1rem 2rem;
+  border: none;
   border-radius: 8px;
+  padding: 12px 24px;
   font-weight: 600;
-  font-size: 1rem;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
+  gap: 8px;
   transition: all 0.2s ease;
+}
+
+.execute-btn.compact {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 6px;
 }
 
 .execute-btn:hover {
@@ -325,31 +372,19 @@
 }
 
 /* Empty State */
-.no-opportunities {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
+.empty-state {
   text-align: center;
-  color: rgba(255, 255, 255, 0.6);
+  padding: 48px 24px;
+  color: var(--text-secondary);
 }
 
-.no-opportunities svg {
-  color: rgba(139, 92, 246, 0.3);
-  margin-bottom: 1rem;
+.arbitrage-detector.compact .empty-state {
+  padding: 24px 16px;
 }
 
-.no-opportunities h3 {
-  color: white;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-}
-
-.no-opportunities p {
-  font-size: 1rem;
-  margin: 0.25rem 0;
+.arbitrage-detector.compact .empty-state h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
 }
 
 /* Last Update */
