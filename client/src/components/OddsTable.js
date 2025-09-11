@@ -658,6 +658,21 @@ export default function OddsTable({
       return marketNames[market] || market;
     };
 
+    // Helper function to format selection text
+    const formatSelection = (market, name, point) => {
+      if (market === 'h2h') return name;
+      if (market === 'spreads') return `${name} ${point > 0 ? '+' : ''}${point}`;
+      if (market === 'totals') return `${name} ${point}`;
+      return `${name} ${point || ''}`;
+    };
+
+    // Helper function to get edge color
+    const getEdgeColor = (edge) => {
+      if (edge >= 5) return '#10b981'; // green
+      if (edge >= 2) return '#f59e0b'; // yellow
+      return '#6b7280'; // gray
+    };
+
     const gameRows = [];
     games?.forEach((game) => {
       const baseKeys = ["h2h", "spreads", "totals"];
@@ -1480,90 +1495,13 @@ export default function OddsTable({
                                     )}
                                   </div>
                                   {mode === "props" ? (
-                                    // For props, show single odds column spanning both columns
+                                    // For props, show single odds column
                                     <>
-                                      {bookmakerKeys.map((bookmakerKey) => {
-                          const bookmaker = row.bookmakers?.find(b => b.key === bookmakerKey);
-                          const market = bookmaker?.markets?.find(m => m.key === selectedMarket);
-                          const outcome = market?.outcomes?.find(o => 
-                            selectedMarket === "h2h" ? o.name === row.home_team || o.name === row.away_team :
-                            selectedMarket === "spreads" ? o.name === row.home_team || o.name === row.away_team :
-                            selectedMarket === "totals" ? o.name === "Over" || o.name === "Under" :
-                            true
-                          );
-
-                          const odds = outcome?.price;
-                          const point = outcome?.point;
-                          const edge = outcome?.edge || 0;
-                          const previousOdds = outcome?.previousPrice; // Assuming we store previous odds
-                          
-                          // Get all odds for this market to find the best one
-                          const allOddsForMarket = row.bookmakers
-                            ?.map(b => b.markets?.find(m => m.key === selectedMarket))
-                            ?.filter(Boolean)
-                            .flatMap(m => m.outcomes || [])
-                            .filter(o => {
-                              if (selectedMarket === "h2h") return o.name === outcome?.name;
-                              if (selectedMarket === "spreads") return o.name === outcome?.name && Math.abs(o.point - (point || 0)) < 0.1;
-                              if (selectedMarket === "totals") return o.name === outcome?.name;
-                              return true;
-                            })
-                            .map(o => o.price)
-                            .filter(Boolean) || [];
-                          
-                          const bestOdds = findBestOdds(allOddsForMarket, selectedMarket);
-                          const isBestOdds = odds && odds === bestOdds;
-                          const movement = getOddsMovement(odds, previousOdds);
-
-                          return (
-                            <td key={bookmakerKey} className="odds-cell">
-                              {odds ? (
-                                <button
-                                  className={`odds-button ${edge > 0 ? 'positive-edge' : ''} ${isBestOdds ? 'best-odds' : ''} ${movement?.trend || ''}`}
-                                  onClick={() => onAddBet?.({
-                                    id: `${row.id}_${bookmakerKey}_${selectedMarket}_${outcome.name}`,
-                                    matchup: `${row.away_team} @ ${row.home_team}`,
-                                    selection: formatSelection(selectedMarket, outcome.name, point),
-                                    americanOdds: odds,
-                                    market: getMarketDisplayName(selectedMarket),
-                                    bookmaker: bookmakerKey,
-                                    edge: edge,
-                                    sport: row.sport_key,
-                                    commence_time: row.commence_time
-                                  })}
-                                  title={`${formatSelection(selectedMarket, outcome.name, point)} at ${formatOdds(odds)}${edge > 0 ? ` (${edge.toFixed(1)}% edge)` : ''}${isBestOdds ? ' - BEST ODDS' : ''}${movement ? ` (${movement.diff})` : ''}`}
-                                >
-                                  <div className="odds-content">
-                                    {isBestOdds && (
-                                      <div className="best-odds-badge">
-                                        <Trophy size={10} />
-                                        BEST
+                                      <div className="mini-odds-col">
+                                        <div className="mini-swipe-odds">
+                                          {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
+                                        </div>
                                       </div>
-                                    )}
-                                    {movement && (
-                                      <div className="movement-indicator" style={{ color: movement.color }}>
-                                        <span className="movement-arrow">{movement.icon}</span>
-                                      </div>
-                                    )}
-                                    <span className="odds-value">{formatOdds(odds)}</span>
-                                    {point && selectedMarket !== "totals" && (
-                                      <span className="odds-point">
-                                        {point > 0 ? `+${point}` : point}
-                                      </span>
-                                    )}
-                                    {edge > 0 && (
-                                      <span className="edge-indicator" style={{ color: getEdgeColor(edge) }}>
-                                        +{edge.toFixed(1)}%
-                                      </span>
-                                    )}
-                                  </div>
-                                </button>
-                              ) : (
-                                <span className="no-odds">—</span>
-                              )}
-                            </td>
-                          );
-                        })}
                                     </>
                                   ) : (
                                     // For regular games, show two odds columns
