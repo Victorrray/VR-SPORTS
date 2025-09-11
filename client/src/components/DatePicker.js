@@ -19,13 +19,10 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   }, []);
 
   // Close dropdown when clicking outside (matching SportMultiSelect pattern)
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      const dropdownElement = document.querySelector('.dp-wrap');
-      if (!dropdownElement) return;
-      
-      // Don't close if clicking inside the toggle button or menu
-      if (dropdownElement.contains(event.target)) return;
+      if (!boxRef.current) return;
+      if (boxRef.current.contains(event.target)) return;
       
       // Don't close if clicking inside mobile filter sheet or any dropdown content
       if (event.target.closest('.mfs-content') || 
@@ -37,8 +34,13 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     };
     
     if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
+      // Add small delay to prevent immediate closing on open
+      const timer = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 50);
+      
       return () => {
+        clearTimeout(timer);
         document.removeEventListener('mousedown', handleClickOutside);
       };
     }
@@ -96,8 +98,8 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     if (isChanging) return; // Prevent multiple rapid changes
     
     setIsChanging(true);
-    onChange(dateValue);
     setOpen(false);
+    onChange(dateValue);
     
     // Reset changing flag after a brief delay
     setTimeout(() => setIsChanging(false), 200);

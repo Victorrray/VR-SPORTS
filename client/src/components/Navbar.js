@@ -263,11 +263,17 @@ export default function Navbar({ onOpenMobileSearch }) {
         </button>
       )}
 
-      {/* Mobile profile button - top right (all pages) */}
+      {/* Mobile profile button - top right corner (all pages) */}
       <button 
         className={styles.mobileProfileBtn} 
         aria-label="Profile"
         onClick={() => navigate(user ? "/account" : "/login")}
+        style={{ 
+          position: 'absolute',
+          right: '16px',
+          top: '50%',
+          transform: 'translateY(-50%)'
+        }}
       >
         <User size={20} />
       </button>
