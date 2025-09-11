@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
 import "./OddsTable.css";
 
@@ -17,6 +18,11 @@ function americanToProb(odds) {
   const o = Number(odds);
   if (!o) return null;
   return o > 0 ? 100 / (o + 100) : (-o) / ((-o) + 100);
+}
+function americanToDecimal(odds) {
+  const o = Number(odds);
+  if (!o) return null;
+  return o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1;
 }
 function decimalToAmerican(dec) {
   if (!dec || dec <= 1) return 0;
@@ -567,6 +573,91 @@ export default function OddsTable({
     }
 
     // Regular game mode processing
+    // Helper function to get odds movement indicator
+    const getOddsMovement = (currentOdds, previousOdds) => {
+      if (!previousOdds || !currentOdds) return null;
+      const diff = currentOdds - previousOdds;
+      if (Math.abs(diff) < 5) return { trend: 'stable', icon: '→', color: '#6b7280' };
+      return diff > 0 ? 
+        { trend: 'up', icon: '↗', color: '#10b981', diff: `+${diff}` } : 
+        { trend: 'down', icon: '↘', color: '#ef4444', diff: `${diff}` };
+    };
+
+    // Helper function to find best odds for highlighting
+    const findBestOdds = (odds, market) => {
+      if (!odds || odds.length === 0) return null;
+      
+      // For positive odds (underdog), higher is better
+      // For negative odds (favorite), closer to 0 is better (less negative)
+      let bestOdds = odds[0];
+      let bestValue = americanToDecimal(odds[0]);
+      
+      odds.forEach(odd => {
+        const decimal = americanToDecimal(odd);
+        if (decimal > bestValue) {
+          bestValue = decimal;
+          bestOdds = odd;
+        }
+      });
+      
+      return bestOdds;
+    };
+
+    // Helper function to detect arbitrage opportunities
+    const detectArbitrage = (gameData, marketKey) => {
+      if (!gameData.bookmakers || gameData.bookmakers.length < 2) return null;
+      
+      const market = gameData.bookmakers
+        .map(b => b.markets?.find(m => m.key === marketKey))
+        .filter(Boolean);
+      
+      if (market.length < 2) return null;
+      
+      // For H2H markets, check if we can bet both sides profitably
+      if (marketKey === 'h2h') {
+        const allOutcomes = market.flatMap(m => m.outcomes || []);
+        const homeOdds = allOutcomes.filter(o => o.name === gameData.home_team).map(o => o.price);
+        const awayOdds = allOutcomes.filter(o => o.name === gameData.away_team).map(o => o.price);
+        
+        if (homeOdds.length && awayOdds.length) {
+          const bestHome = Math.max(...homeOdds);
+          const bestAway = Math.max(...awayOdds);
+          
+          // Convert to implied probabilities
+          const homeProb = bestHome > 0 ? 100 / (bestHome + 100) : Math.abs(bestHome) / (Math.abs(bestHome) + 100);
+          const awayProb = bestAway > 0 ? 100 / (bestAway + 100) : Math.abs(bestAway) / (Math.abs(bestAway) + 100);
+          
+          const totalProb = homeProb + awayProb;
+          
+          // Arbitrage exists if total probability < 1 (100%)
+          if (totalProb < 0.98) { // 2% margin for profit
+            return {
+              profit: ((1 - totalProb) * 100).toFixed(2),
+              homeOdds: bestHome,
+              awayOdds: bestAway,
+              homeStake: (1 / (bestHome > 0 ? (bestHome/100 + 1) : (100/Math.abs(bestHome) + 1))).toFixed(2),
+              awayStake: (1 / (bestAway > 0 ? (bestAway/100 + 1) : (100/Math.abs(bestAway) + 1))).toFixed(2)
+            };
+          }
+        }
+      }
+      
+      return null;
+    };
+
+    // Helper function to get market display name
+    const getMarketDisplayName = (market) => {
+      const marketNames = {
+        h2h: "Moneyline",
+        spreads: "Spread", 
+        totals: "Total",
+        player_points: "Player Points",
+        player_rebounds: "Player Rebounds",
+        player_assists: "Player Assists"
+      };
+      return marketNames[market] || market;
+    };
+
     const gameRows = [];
     games?.forEach((game) => {
       const baseKeys = ["h2h", "spreads", "totals"];
@@ -1391,16 +1482,88 @@ export default function OddsTable({
                                   {mode === "props" ? (
                                     // For props, show single odds column spanning both columns
                                     <>
-                                      <div className="mini-odds-col">
-                                        <div className="mini-swipe-odds">
-                                          {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
-                                        </div>
+                                      {bookmakerKeys.map((bookmakerKey) => {
+                          const bookmaker = row.bookmakers?.find(b => b.key === bookmakerKey);
+                          const market = bookmaker?.markets?.find(m => m.key === selectedMarket);
+                          const outcome = market?.outcomes?.find(o => 
+                            selectedMarket === "h2h" ? o.name === row.home_team || o.name === row.away_team :
+                            selectedMarket === "spreads" ? o.name === row.home_team || o.name === row.away_team :
+                            selectedMarket === "totals" ? o.name === "Over" || o.name === "Under" :
+                            true
+                          );
+
+                          const odds = outcome?.price;
+                          const point = outcome?.point;
+                          const edge = outcome?.edge || 0;
+                          const previousOdds = outcome?.previousPrice; // Assuming we store previous odds
+                          
+                          // Get all odds for this market to find the best one
+                          const allOddsForMarket = row.bookmakers
+                            ?.map(b => b.markets?.find(m => m.key === selectedMarket))
+                            ?.filter(Boolean)
+                            .flatMap(m => m.outcomes || [])
+                            .filter(o => {
+                              if (selectedMarket === "h2h") return o.name === outcome?.name;
+                              if (selectedMarket === "spreads") return o.name === outcome?.name && Math.abs(o.point - (point || 0)) < 0.1;
+                              if (selectedMarket === "totals") return o.name === outcome?.name;
+                              return true;
+                            })
+                            .map(o => o.price)
+                            .filter(Boolean) || [];
+                          
+                          const bestOdds = findBestOdds(allOddsForMarket, selectedMarket);
+                          const isBestOdds = odds && odds === bestOdds;
+                          const movement = getOddsMovement(odds, previousOdds);
+
+                          return (
+                            <td key={bookmakerKey} className="odds-cell">
+                              {odds ? (
+                                <button
+                                  className={`odds-button ${edge > 0 ? 'positive-edge' : ''} ${isBestOdds ? 'best-odds' : ''} ${movement?.trend || ''}`}
+                                  onClick={() => onAddBet?.({
+                                    id: `${row.id}_${bookmakerKey}_${selectedMarket}_${outcome.name}`,
+                                    matchup: `${row.away_team} @ ${row.home_team}`,
+                                    selection: formatSelection(selectedMarket, outcome.name, point),
+                                    americanOdds: odds,
+                                    market: getMarketDisplayName(selectedMarket),
+                                    bookmaker: bookmakerKey,
+                                    edge: edge,
+                                    sport: row.sport_key,
+                                    commence_time: row.commence_time
+                                  })}
+                                  title={`${formatSelection(selectedMarket, outcome.name, point)} at ${formatOdds(odds)}${edge > 0 ? ` (${edge.toFixed(1)}% edge)` : ''}${isBestOdds ? ' - BEST ODDS' : ''}${movement ? ` (${movement.diff})` : ''}`}
+                                >
+                                  <div className="odds-content">
+                                    {isBestOdds && (
+                                      <div className="best-odds-badge">
+                                        <Trophy size={10} />
+                                        BEST
                                       </div>
-                                      <div className="mini-odds-col">
-                                        <div className="mini-swipe-odds" style={{ opacity: 0.3 }}>
-                                          —
-                                        </div>
+                                    )}
+                                    {movement && (
+                                      <div className="movement-indicator" style={{ color: movement.color }}>
+                                        <span className="movement-arrow">{movement.icon}</span>
                                       </div>
+                                    )}
+                                    <span className="odds-value">{formatOdds(odds)}</span>
+                                    {point && selectedMarket !== "totals" && (
+                                      <span className="odds-point">
+                                        {point > 0 ? `+${point}` : point}
+                                      </span>
+                                    )}
+                                    {edge > 0 && (
+                                      <span className="edge-indicator" style={{ color: getEdgeColor(edge) }}>
+                                        +{edge.toFixed(1)}%
+                                      </span>
+                                    )}
+                                  </div>
+                                </button>
+                              ) : (
+                                <span className="no-odds">—</span>
+                              )}
+                            </td>
+                          );
+                        })}
                                     </>
                                   ) : (
                                     // For regular games, show two odds columns
