@@ -66,30 +66,13 @@
   margin-right: auto;
 }
 
-.mobile-bottom-bar .betslip-pill {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-color: #10b981;
-  box-shadow: 0 4px 16px color-mix(in srgb, #10b981 30%, transparent);
-}
 
-.betslip-icon {
-  font-size: 18px;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.mobile-bottom-bar .filter-pill:hover,
-.mobile-bottom-bar .betslip-pill:hover {
+.mobile-bottom-bar .filter-pill:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
-.mobile-bottom-bar .betslip-pill:hover {
-  box-shadow: 0 6px 20px color-mix(in srgb, #10b981 40%, transparent);
-}
-
-.mobile-bottom-bar .filter-pill:active,
-.mobile-bottom-bar .betslip-pill:active {
+.mobile-bottom-bar .filter-pill:active {
   transform: translateY(0);
 }
 

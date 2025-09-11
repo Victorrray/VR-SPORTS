@@ -592,7 +592,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           {/* Mobile footer nav + filter pill */}
           <MobileBottomBar 
             onFilterClick={() => setMobileFiltersOpen(true)} 
-            onBetSlipClick={openBetSlip}
             active="sportsbooks" 
             showFilter={true} 
           />
