@@ -111,11 +111,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -194,14 +195,25 @@
 .dp-mobile-option {
   display: flex;
   align-items: center;
-  padding: 16px 24px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   transition: background-color 0.2s ease;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 5%, transparent);
+  min-height: 56px;
+  touch-action: manipulation;
 }
 
 .dp-mobile-option:hover {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  background: var(--bg-elev);
+}
+
+.dp-mobile-option:active {
+  background: var(--bg-elev-2);
+  transform: scale(0.98);
+}
+
+.dp-mobile-option:last-child {
+  border-bottom: none;
 }
 
 .dp-mobile-option.dp-selected {

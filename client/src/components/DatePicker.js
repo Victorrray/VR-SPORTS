@@ -22,17 +22,23 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     if (!open) return;
     
     const handleClickOutside = (event) => {
-      // Check if click is inside the dropdown wrapper
+      // Don't close if clicking inside the toggle button or menu
       const dropdownElement = document.querySelector('.dp-wrap');
-      if (dropdownElement && !dropdownElement.contains(event.target)) {
-        setOpen(false);
-      }
+      if (dropdownElement && dropdownElement.contains(event.target)) return;
+      
+      // Don't close if clicking inside mobile filter sheet or any dropdown content
+      if (event.target.closest('.mfs-content') || 
+          event.target.closest('.mobile-filters-sheet') ||
+          event.target.closest('.dp-menu') ||
+          event.target.closest('.dp-mobile-sheet')) return;
+      
+      setOpen(false);
     };
     
     // Add event listener with a delay to prevent immediate closing
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
-    }, 50);
+    }, 100);
     
     return () => {
       clearTimeout(timeoutId);
@@ -94,7 +100,12 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   };
 
   const MobileSheet = () => (
-    <div className="dp-mobile-overlay" onClick={() => setOpen(false)}>
+    <div className="dp-mobile-overlay" onClick={(e) => {
+      // Only close if clicking the overlay itself, not the sheet content
+      if (e.target === e.currentTarget) {
+        setOpen(false);
+      }
+    }}>
       <div className="dp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="dp-mobile-header">
           <h3>Select Date</h3>
@@ -107,7 +118,8 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
             <div 
               key={option.value} 
               className={`dp-mobile-option ${value === option.value ? 'dp-selected' : ''}`}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onChange(option.value);
                 setTimeout(() => setOpen(false), 150);
               }}
