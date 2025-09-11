@@ -590,7 +590,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           />
 
           {/* Mobile footer nav + filter pill */}
-          <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
+          <MobileBottomBar 
+            onFilterClick={() => setMobileFiltersOpen(true)} 
+            onBetSlipClick={openBetSlip}
+            active="sportsbooks" 
+            showFilter={true} 
+          />
           <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
             <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
               {/* Date selector */}

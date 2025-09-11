@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Home, TrendingUp, BarChart3, User, Filter, Activity } from "lucide-react";
 import "./MobileBottomBar.css";
 
-export default function MobileBottomBar({ onFilterClick, active = "sportsbooks", showFilter = true }) {
+export default function MobileBottomBar({ onFilterClick, active = "sportsbooks", showFilter = true, onBetSlipClick }) {
   const [hasNotifications, setHasNotifications] = useState(true);
   const [activeCount, setActiveCount] = useState(0);
 
@@ -66,6 +66,18 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
             <Filter size={16} className="filter-icon" />
             <span className="filter-text">Filters</span>
             <div className="filter-pulse" />
+          </button>
+        )}
+        
+        {onBetSlipClick && (
+          <button
+            className="betslip-pill"
+            type="button"
+            onClick={onBetSlipClick}
+            aria-label="Open bet slip"
+          >
+            <span className="betslip-icon">+</span>
+            <span className="betslip-text">Bet Slip</span>
           </button>
         )}
 

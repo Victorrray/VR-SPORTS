@@ -549,6 +549,21 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                           </div>
                         )}
                         
+                        {/* Kelly Criterion Recommendation */}
+                        {bet.edge && bet.edge > 0 && (
+                          <div className="kelly-recommendation">
+                            <Calculator size={12} />
+                            <span>Kelly suggests: ${getRecommendedBet(bet)}</span>
+                            <button
+                              onClick={() => updateBetAmount(bet.id, getRecommendedBet(bet))}
+                              className="apply-kelly-btn"
+                              title="Apply Kelly Criterion"
+                            >
+                              Apply
+                            </button>
+                          </div>
+                        )}
+                        
                         {/* Validation Error */}
                         {validationErrors[bet.id] && (
                           <div className="validation-error">
