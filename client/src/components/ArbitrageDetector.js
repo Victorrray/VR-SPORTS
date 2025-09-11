@@ -463,19 +463,19 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
       )}
 
       <div className={`opportunities-list ${compact ? 'compact' : ''}`}>
-        {loading && opportunities.length === 0 ? (
+        {loading && filteredOpportunities.length === 0 ? (
           <div className="loading-state">
             <RefreshCw className="spinning" />
             <p>{compact ? 'Scanning...' : 'Scanning for arbitrage opportunities...'}</p>
           </div>
-        ) : opportunities.length === 0 ? (
+        ) : filteredOpportunities.length === 0 ? (
           <div className="empty-state">
             <Target className="empty-icon" />
             <h3>{compact ? 'No Opportunities' : 'No Arbitrage Opportunities Found'}</h3>
             {!compact && <p>Try adjusting your filters or check back later.</p>}
           </div>
         ) : (
-          opportunities.map((opportunity, index) => (
+          filteredOpportunities.map((opportunity, index) => (
             <ArbitrageCard 
               key={opportunity.id || index} 
               opportunity={opportunity} 
