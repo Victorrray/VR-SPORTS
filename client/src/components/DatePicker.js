@@ -22,20 +22,21 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     if (!open) return;
     
     const handleClickOutside = (event) => {
-      const dropdown = event.target.closest('.dp-wrap');
-      if (!dropdown) {
+      // Check if click is inside the dropdown wrapper
+      const dropdownElement = document.querySelector('.dp-wrap');
+      if (dropdownElement && !dropdownElement.contains(event.target)) {
         setOpen(false);
       }
     };
     
-    // Use a small delay to prevent immediate closing
+    // Add event listener with a delay to prevent immediate closing
     const timeoutId = setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
-    }, 100);
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 50);
     
     return () => {
       clearTimeout(timeoutId);
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [open]);
 

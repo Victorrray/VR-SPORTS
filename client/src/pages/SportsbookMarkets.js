@@ -593,6 +593,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           <MobileBottomBar onFilterClick={() => setMobileFiltersOpen(true)} active="sportsbooks" showFilter={true} />
           <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
             <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
+              {/* Date selector */}
+              <div style={{ marginBottom: 16 }}>
+                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Date</h4>
+                <DatePicker
+                  value={draftSelectedDate}
+                  onChange={(val) => setDraftSelectedDate(val || '')}
+                />
+              </div>
+
               {/* Sports selector */}
               <div style={{ marginBottom: 16 }}>
                 <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Sports</h4>
@@ -602,15 +611,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   onChange={(next) => setDraftPicked(next)}
                   usePortal
                   leftAlign
-                />
-              </div>
-
-              {/* Date selector */}
-              <div style={{ marginBottom: 16 }}>
-                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Date</h4>
-                <DatePicker
-                  value={draftSelectedDate}
-                  onChange={(val) => setDraftSelectedDate(val || '')}
                 />
               </div>
 
