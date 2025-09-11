@@ -301,7 +301,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   useEffect(() => {
     if (mobileFiltersOpen) {
       setDraftPicked(picked);
-      setDraftSelectedDate(selectedDate || '');
+      setDraftSelectedDate((prev) => prev || selectedDate || '');
       setDraftSelectedBooks(selectedBooks);
       setDraftMarketKeys(marketKeys);
     }
