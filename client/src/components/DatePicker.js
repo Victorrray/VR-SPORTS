@@ -18,14 +18,14 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside (matching SportMultiSelect pattern)
   React.useEffect(() => {
-    if (!open) return;
-    
     const handleClickOutside = (event) => {
-      // Don't close if clicking inside the toggle button or menu
       const dropdownElement = document.querySelector('.dp-wrap');
-      if (dropdownElement && dropdownElement.contains(event.target)) return;
+      if (!dropdownElement) return;
+      
+      // Don't close if clicking inside the toggle button or menu
+      if (dropdownElement.contains(event.target)) return;
       
       // Don't close if clicking inside mobile filter sheet or any dropdown content
       if (event.target.closest('.mfs-content') || 
@@ -36,15 +36,12 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
       setOpen(false);
     };
     
-    // Add event listener with a delay to prevent immediate closing
-    const timeoutId = setTimeout(() => {
+    if (open) {
       document.addEventListener('mousedown', handleClickOutside);
-    }, 150);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
   }, [open]);
 
   const formatDisplayDate = (dateStr) => {
@@ -107,12 +104,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   };
 
   const MobileSheet = () => (
-    <div className="dp-mobile-overlay" onClick={(e) => {
-      // Only close if clicking the overlay itself, not the sheet content
-      if (e.target === e.currentTarget) {
-        setOpen(false);
-      }
-    }}>
+    <div className="dp-mobile-overlay" onClick={() => setOpen(false)}>
       <div className="dp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="dp-mobile-header">
           <h3>Select Date</h3>
@@ -125,10 +117,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
             <div 
               key={option.value} 
               className={`dp-mobile-option ${value === option.value ? 'dp-selected' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDateSelect(option.value);
-              }}
+              onClick={() => handleDateSelect(option.value)}
             >
               <span className={`dp-mobile-checkbox ${value === option.value ? 'dp-checked' : ''}`}>
                 {value === option.value ? "✓" : "○"}
@@ -145,11 +134,9 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     <div className="dp-wrap">
       <button 
         className="dp-toggle" 
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(!open);
-        }}
-        aria-label="Select date"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
       >
         <Calendar size={16} />
         <span>{formatDisplayDate(value)}</span>
@@ -163,10 +150,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
             <div 
               key={option.value}
               className={`dp-item ${value === option.value ? 'dp-selected' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDateSelect(option.value);
-              }}
+              onClick={() => handleDateSelect(option.value)}
             >
               {option.label}
             </div>
