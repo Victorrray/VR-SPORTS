@@ -301,11 +301,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   useEffect(() => {
     if (mobileFiltersOpen) {
       setDraftPicked(picked);
-      setDraftSelectedDate((prev) => prev || selectedDate || '');
+      setDraftSelectedDate(selectedDate || '');
       setDraftSelectedBooks(selectedBooks);
       setDraftMarketKeys(marketKeys);
     }
-  }, [mobileFiltersOpen]);
+  }, [mobileFiltersOpen, picked, selectedDate, selectedBooks, marketKeys]);
 
   // Helpers to reset/apply filters
   const getDefaultSports = () => ["basketball_nba", "americanfootball_nfl"];

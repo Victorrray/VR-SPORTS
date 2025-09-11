@@ -7,6 +7,7 @@ import "./DatePicker.css";
 export default function DatePicker({ value, onChange, placeholder = "Select Date" }) {
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isChanging, setIsChanging] = useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -38,7 +39,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     // Add event listener with a delay to prevent immediate closing
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
-    }, 100);
+    }, 150);
     
     return () => {
       clearTimeout(timeoutId);
@@ -95,8 +96,14 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   }, []); // Empty dependency array - only compute once
 
   const handleDateSelect = (dateValue) => {
+    if (isChanging) return; // Prevent multiple rapid changes
+    
+    setIsChanging(true);
     onChange(dateValue);
     setOpen(false);
+    
+    // Reset changing flag after a brief delay
+    setTimeout(() => setIsChanging(false), 200);
   };
 
   const MobileSheet = () => (
@@ -120,8 +127,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
               className={`dp-mobile-option ${value === option.value ? 'dp-selected' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
-                onChange(option.value);
-                setTimeout(() => setOpen(false), 150);
+                handleDateSelect(option.value);
               }}
             >
               <span className={`dp-mobile-checkbox ${value === option.value ? 'dp-checked' : ''}`}>
