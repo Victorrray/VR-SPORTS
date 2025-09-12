@@ -1,0 +1,240 @@
+/* BillingSuccess Page Animations and Styling */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.8) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+}
+
+@keyframes crownGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(251, 191, 36, 0.6), 0 0 60px rgba(251, 191, 36, 0.3);
+  }
+}
+
+@keyframes floatUp {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes buttonPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Main container animations */
+.billing-success-container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.billing-success-card {
+  animation: bounceIn 1s ease-out 0.2s both;
+}
+
+/* Crown and sparkles animations */
+.crown-container {
+  animation: floatUp 3s ease-in-out infinite;
+}
+
+.crown-icon {
+  animation: crownGlow 2s ease-in-out infinite;
+}
+
+.sparkle-1 {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.sparkle-2 {
+  animation: sparkle 2s ease-in-out infinite 1s;
+}
+
+/* Text animations */
+.welcome-title {
+  animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.congratulations-text {
+  animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.description-text {
+  animation: fadeInUp 1s ease-out 0.8s both;
+}
+
+/* Features section animations */
+.features-container {
+  animation: fadeInUp 1s ease-out 1s both;
+}
+
+.feature-item:nth-child(1) {
+  animation: slideInLeft 0.6s ease-out 1.2s both;
+}
+
+.feature-item:nth-child(2) {
+  animation: slideInRight 0.6s ease-out 1.4s both;
+}
+
+.feature-item:nth-child(3) {
+  animation: slideInLeft 0.6s ease-out 1.6s both;
+}
+
+.feature-item:nth-child(4) {
+  animation: slideInRight 0.6s ease-out 1.8s both;
+}
+
+/* Button animations */
+.action-buttons {
+  animation: fadeInUp 1s ease-out 2s both;
+}
+
+.primary-button {
+  transition: all 0.3s ease;
+}
+
+.primary-button:hover {
+  animation: buttonPulse 0.6s ease-in-out infinite;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(147, 51, 234, 0.4);
+}
+
+.secondary-button {
+  transition: all 0.3s ease;
+}
+
+.secondary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Session info animation */
+.session-info {
+  animation: fadeInUp 1s ease-out 2.2s both;
+}
+
+/* Gradient background animation */
+.billing-success-bg {
+  background: linear-gradient(-45deg, #0f172a, #581c87, #1e1b4b, #0f172a);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Loading spinner enhancement */
+.loading-spinner {
+  animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive animations */
+@media (max-width: 768px) {
+  .billing-success-card {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  
+  .feature-item {
+    animation: fadeInUp 0.6s ease-out both !important;
+  }
+  
+  .feature-item:nth-child(1) { animation-delay: 1.2s !important; }
+  .feature-item:nth-child(2) { animation-delay: 1.3s !important; }
+  .feature-item:nth-child(3) { animation-delay: 1.4s !important; }
+  .feature-item:nth-child(4) { animation-delay: 1.5s !important; }
+}
+
+/* Accessibility - Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
