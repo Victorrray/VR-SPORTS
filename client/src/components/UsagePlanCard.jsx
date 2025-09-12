@@ -3,9 +3,11 @@ import { Crown, Zap, TrendingUp, AlertCircle, Sparkles, BarChart3, Shield, Infin
 import "./UsagePlanCard.css";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
+import { useAuth } from "../hooks/useAuth";
 
 export default function UsagePlanCard() {
-  const [data, setData] = useState({ plan: "free", used: 0, quota: 1000 });
+  const { user } = useAuth();
+  const [data, setData] = useState({ plan: "free", used: 0, quota: 250 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -19,16 +21,17 @@ export default function UsagePlanCard() {
         
         if (resp.ok) {
           const json = await resp.json();
+          console.log('🔍 UsagePlanCard: Backend response:', json);
           setData(json);
         } else {
           console.warn('Usage API failed:', resp.status, resp.statusText);
           // Set default data instead of error to prevent infinite loading
-          setData({ plan: "free", used: 0, quota: 1000 });
+          setData({ plan: "free", used: 0, quota: 250 });
         }
       } catch (err) {
         console.error('Usage fetch error:', err);
         // Set default data instead of error to prevent infinite loading
-        setData({ plan: "free", used: 0, quota: 1000 });
+        setData({ plan: "free", used: 0, quota: 250 });
       } finally {
         setLoading(false);
       }
@@ -122,7 +125,7 @@ export default function UsagePlanCard() {
             <span>Requests Used</span>
           </div>
           <div className="stat-value">{used.toLocaleString()}</div>
-          <div className="stat-change">+{Math.floor(Math.random() * 50 + 10)} today</div>
+          <div className="stat-change">+0 today</div>
         </div>
         
         <div className="stat-card">
@@ -222,9 +225,15 @@ export default function UsagePlanCard() {
             <button
               onClick={async () => {
                 try {
-                  const response = await fetch('/api/billing/create-checkout-session', {
+                  const response = await secureFetch(withApiBase('/api/billing/create-checkout-session'), {
                     method: 'POST',
-                    credentials: 'include'
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      supabaseUserId: user?.id
+                    })
                   });
                   const data = await response.json();
                   if (data?.url) {

@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { Crown, Zap, TrendingUp, Shield, Check, ArrowLeft } from 'lucide-react';
 import UsagePlanCard from '../components/UsagePlanCard';
 import MobileBottomBar from '../components/MobileBottomBar';
+import { withApiBase } from '../config/api';
+import { secureFetch } from '../utils/security';
 import './UsagePlan.css';
 
 export default function UsagePlan() {
@@ -12,12 +14,15 @@ export default function UsagePlan() {
   const { me, loading } = useMe();
   const navigate = useNavigate();
 
+  console.log('🔍 UsagePlan: Component render', { user: !!user, me, loading });
+
   if (!user) {
     navigate('/login');
     return null;
   }
 
   if (loading) {
+    console.log('🔍 UsagePlan: Still loading, showing spinner');
     return (
       <div className="usage-plan-page">
         <div className="loading-container">
@@ -27,6 +32,8 @@ export default function UsagePlan() {
       </div>
     );
   }
+
+  console.log('🔍 UsagePlan: Loading complete, rendering main content');
 
   const isPlatinum = me?.plan === 'platinum';
 
@@ -93,7 +100,7 @@ export default function UsagePlan() {
                 <>
                   <div className="feature-item">
                     <Check size={16} />
-                    <span>50 API calls per month</span>
+                    <span>250 API calls per month</span>
                   </div>
                   <div className="feature-item">
                     <Check size={16} />
@@ -136,14 +143,51 @@ export default function UsagePlan() {
                 <span>Priority support</span>
               </div>
             </div>
-            <button className="upgrade-button">
+            <button 
+              className="upgrade-button"
+              onClick={async (e) => {
+                e.preventDefault();
+                console.log('🔍 Upgrade button clicked, user ID:', user?.id);
+                
+                try {
+                  console.log('🔍 Making request to:', withApiBase('/api/billing/create-checkout-session'));
+                  const response = await secureFetch(withApiBase('/api/billing/create-checkout-session'), {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      supabaseUserId: user?.id
+                    })
+                  });
+                  
+                  console.log('🔍 Response status:', response.status);
+                  console.log('🔍 Response ok:', response.ok);
+                  
+                  const data = await response.json();
+                  console.log('🔍 Response data:', data);
+                  
+                  if (data?.url) {
+                    console.log('🔍 Redirecting to Stripe:', data.url);
+                    window.location.href = data.url;
+                  } else {
+                    console.error('🔍 No checkout URL returned, data:', data);
+                    window.location.href = "/pricing";
+                  }
+                } catch (error) {
+                  console.error('🔍 Failed to create checkout:', error);
+                  window.location.href = "/pricing";
+                }
+              }}
+            >
               Upgrade Now
             </button>
           </div>
         </div>
       )}
 
-      <MobileBottomBar />
+      <MobileBottomBar showFilter={false} />
     </div>
   );
 }

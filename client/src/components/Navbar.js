@@ -193,38 +193,39 @@ export default function Navbar({ onOpenMobileSearch }) {
 
       {/* Profile menu button - to the left of brand logo */}
       {location.pathname === "/account" && user && (
-        <button 
-          className={styles.mobileProfileBtn} 
-          aria-label="Profile Menu"
-          onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-          style={{ 
-            position: 'absolute',
-            left: '16px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 10
-          }}
-        >
-          <Menu size={20} />
+        <>
+          <button 
+            className={styles.mobileProfileBtn} 
+            aria-label="Profile Menu"
+            onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+            style={{ 
+              position: 'absolute',
+              left: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              zIndex: 10
+            }}
+          >
+            <Menu size={20} />
+          </button>
           
-          {/* Profile menu dropdown */}
+          {/* Profile menu dropdown - moved outside button */}
           {profileMenuOpen && (
-            <div 
-              className={styles.profileMenuDropdown}
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                marginTop: '8px',
-                background: '#1a1b23',
-                border: '2px solid #3b82f6',
-                borderRadius: '12px',
-                boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
-                minWidth: '220px',
-                zIndex: 1000,
-                overflow: 'hidden'
-              }}
-            >
+          <div 
+            className={styles.profileMenuDropdown}
+            style={{
+              position: 'absolute',
+              top: 'calc(100% + 8px)',
+              left: '16px',
+              background: '#1a1b23',
+              border: '2px solid #3b82f6',
+              borderRadius: '12px',
+              boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
+              minWidth: '220px',
+              zIndex: 1000,
+              overflow: 'hidden'
+            }}
+          >
               <button 
                 onClick={() => {
                   setProfileMenuOpen(false);
@@ -257,11 +258,12 @@ export default function Navbar({ onOpenMobileSearch }) {
               <button 
                 onClick={() => {
                   setProfileMenuOpen(false);
-                  navigate('/my-sportsbooks');
+                  navigate('/account');
                 }}
                 style={{
                   padding: '16px 20px',
                   cursor: 'pointer',
+                  borderBottom: '1px solid #374151',
                   color: '#ffffff',
                   fontSize: '15px',
                   fontWeight: '600',
@@ -280,11 +282,11 @@ export default function Navbar({ onOpenMobileSearch }) {
                   e.target.style.color = '#ffffff';
                 }}
               >
-                My Sportsbooks
+                My Account
               </button>
             </div>
           )}
-        </button>
+        </>
       )}
 
       {/* Mobile profile button - top right corner */}

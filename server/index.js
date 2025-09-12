@@ -41,13 +41,16 @@ const FOCUSED_BOOKMAKERS = [
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
-  // US2 region books
-  "circasports", "lowvig", "espnbet",
+  // UK region books
+  "bet365", "williamhill", "ladbrokes", "coral", "paddypower", "skybet",
   // US exchange books
   "prophet_exchange",
   // International (for comparison)
   "pinnacle"
 ];
+
+// Trial user bookmaker restrictions (3 major books only)
+const TRIAL_BOOKMAKERS = ["draftkings", "fanduel", "caesars"];
 
 const PLAYER_PROP_MARKETS = [
   "player_points", "player_assists", "player_rebounds", "player_pass_tds", 
@@ -98,6 +101,14 @@ function clampBookmakers(bookmakers = []) {
   // Dedupe and limit to MAX_BOOKMAKERS
   const uniqueBooks = [...new Set(bookmakers)];
   return uniqueBooks.slice(0, MAX_BOOKMAKERS);
+}
+
+// Helper function to filter bookmakers based on user plan
+function getBookmakersForPlan(userPlan) {
+  if (userPlan === 'platinum') {
+    return FOCUSED_BOOKMAKERS; // Full access to all bookmakers
+  }
+  return TRIAL_BOOKMAKERS; // Trial users get only 3 major books
 }
 
 // Helper function to build event odds URLs consistently
@@ -328,7 +339,7 @@ async function trackUsage(req, res, next) {
         code: "QUOTA_EXCEEDED",
         used: profile.api_request_count,
         quota: FREE_QUOTA,
-        message: "You've reached the free 1,000 request limit. Upgrade to continue."
+        message: "You've reached the free 250 request limit. Upgrade to continue."
       });
     }
 
@@ -525,9 +536,9 @@ app.get('/api/usage/me', requireUser, async (req, res) => {
     
     res.json({
       plan: userPlan || 'free_trial',
-      limit: 1000,
+      limit: FREE_QUOTA,
       calls_made: usage.calls_made,
-      remaining: Math.max(0, 1000 - usage.calls_made),
+      remaining: Math.max(0, FREE_QUOTA - usage.calls_made),
       period_end: end.toISOString()
     });
   } catch (error) {
@@ -565,7 +576,6 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
       }],
       success_url: `${FRONTEND_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${FRONTEND_URL}/billing/cancel`,
-      customer_creation: 'if_required',
       allow_promotion_codes: true,
       metadata: { 
         userId: supabaseUserId, 
@@ -853,8 +863,10 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
       // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
       for (const sport of sportsArray) {
         try {
-          // COST REDUCTION: Use only focused bookmakers (4 instead of 30+)
-          const bookmakerList = FOCUSED_BOOKMAKERS.join(',');
+          // COST REDUCTION: Use bookmakers based on user plan
+          const userProfile = req.__userProfile || { plan: 'free' };
+          const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+          const bookmakerList = allowedBookmakers.join(',');
           const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
           // Check cache first to avoid redundant API calls
           const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsToFetch, bookmakers: bookmakerList });
@@ -881,6 +893,16 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
       
       console.log(`Got ${allGames.length} total games with base markets`);
       
+      // Filter bookmakers based on user plan before returning
+      const userProfile = req.__userProfile || { plan: 'free' };
+      const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+      
+      allGames.forEach(game => {
+        game.bookmakers = game.bookmakers.filter(bookmaker => 
+          allowedBookmakers.includes(bookmaker.key)
+        );
+      });
+
       // If we only fetched h2h for player props, remove those markets to avoid confusion
       if (regularMarkets.length === 0 && playerPropMarkets.length > 0) {
         allGames.forEach(game => {

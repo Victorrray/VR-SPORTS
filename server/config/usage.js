@@ -1,3 +1,3 @@
-const FREE_QUOTA = 1000;
+const FREE_QUOTA = 250;
 
 module.exports = { FREE_QUOTA };
