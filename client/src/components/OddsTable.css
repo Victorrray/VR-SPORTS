@@ -877,10 +877,15 @@ body,
   }
   
   .mini-header-odds {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #8b9dc3;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     flex: 0 0 auto;
     min-width: 50px;
-    text-align: center;
-    font-size: 0.75em;
   }
 
   .mini-swipe-odds {
@@ -891,6 +896,12 @@ body,
     background: color-mix(in srgb, var(--accent) 12%, transparent);
     color: #ffffff;
     white-space: nowrap;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 50px;
   }
 
   /* Hide desktop mini-table on mobile */

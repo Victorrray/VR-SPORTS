@@ -88,11 +88,18 @@ export async function signOutAndRefresh(redirectPath = '/', debug = false) {
     
     // 1) Supabase: clear session for all tabs
     if (supabase) {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('🔐 signOutAndRefresh: Supabase sign out error:', error);
-      } else {
-        if (debugAuth) console.log('🔐 signOutAndRefresh: Supabase sign out successful');
+      try {
+        const { error } = await Promise.race([
+          supabase.auth.signOut(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Supabase signOut timeout')), 3000))
+        ]);
+        if (error) {
+          console.error('🔐 signOutAndRefresh: Supabase sign out error:', error);
+        } else {
+          if (debugAuth) console.log('🔐 signOutAndRefresh: Supabase sign out successful');
+        }
+      } catch (timeoutError) {
+        if (debugAuth) console.warn('🔐 signOutAndRefresh: Supabase sign out timeout, continuing anyway:', timeoutError);
       }
     }
 

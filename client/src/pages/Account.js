@@ -239,8 +239,17 @@ export default function Account() {
 
   const handleSignOut = async () => {
     if (signOutBusy) return;
+    console.log('🔐 Account: Sign out button clicked');
     setSignOutBusy(true);
-    await signOutAndRefresh('/');
+    
+    try {
+      console.log('🔐 Account: Calling signOutAndRefresh...');
+      await signOutAndRefresh('/?signed_out=true', true); // Enable debug logging
+      console.log('🔐 Account: signOutAndRefresh completed');
+    } catch (error) {
+      console.error('🔐 Account: Sign out error:', error);
+      setSignOutBusy(false);
+    }
   };
 
   if (!user || pageLoading) {

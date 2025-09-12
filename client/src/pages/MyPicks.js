@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Plus, Trash2, Trophy, Target, Calendar, DollarSign, AlertCircle, CheckCircle2, BarChart3, PieChart, Filter, Download, Share2, Edit3, Clock, Zap, TrendingDown, Award, Activity, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import MobileBottomBar from "../components/MobileBottomBar";
 import "./MyPicks.css";
 
@@ -7,8 +8,8 @@ const LS_KEY = "oss_my_picks_v1";
 
 export default function MyPicks() {
   console.log('🎯 MyPicks component rendering');
+  const navigate = useNavigate();
   const [picks, setPicks] = useState([]);
-  const [view, setView] = useState('overview'); // 'overview', 'analytics', 'history'
   const [filter, setFilter] = useState('all'); // 'all', 'pending', 'won', 'lost'
   const [timeRange, setTimeRange] = useState('30d'); // '7d', '30d', '90d', 'all'
   const [sortBy, setSortBy] = useState('date'); // 'date', 'profit', 'odds', 'sport'
@@ -254,30 +255,6 @@ export default function MyPicks() {
           </div>
         </div>
         
-        {/* Navigation Tabs */}
-        <div className="view-tabs">
-          <button 
-            className={`tab-btn ${view === 'overview' ? 'active' : ''}`}
-            onClick={() => setView('overview')}
-          >
-            <Activity size={16} />
-            Overview
-          </button>
-          <button 
-            className={`tab-btn ${view === 'analytics' ? 'active' : ''}`}
-            onClick={() => setView('analytics')}
-          >
-            <BarChart3 size={16} />
-            Analytics
-          </button>
-          <button 
-            className={`tab-btn ${view === 'history' ? 'active' : ''}`}
-            onClick={() => setView('history')}
-          >
-            <Clock size={16} />
-            History
-          </button>
-        </div>
         
         {/* Key Performance Metrics */}
         <div className="performance-grid">
@@ -339,26 +316,16 @@ export default function MyPicks() {
           <h3>Start Your Betting Journey</h3>
           <p>Track your picks, analyze performance, and improve your betting strategy with detailed analytics.</p>
           <div className="empty-actions">
-            <button onClick={addSampleData} className="sample-btn">
+            <button onClick={() => navigate('/sportsbooks')} className="sample-btn">
               <Zap size={16} />
-              Load Sample Data
+              Find Bets
             </button>
-            <label className="import-btn">
-              <Download size={16} />
-              Import Picks
-              <input 
-                type="file" 
-                accept=".json" 
-                onChange={importPicks} 
-                style={{ display: 'none' }} 
-              />
-            </label>
           </div>
         </div>
       )}
 
-      {/* Content based on active view */}
-      {view === 'overview' && (
+      {/* Overview Content */}
+      {
         <div className="overview-content">
           {picks.length > 0 && (
             <div className="controls-bar">
@@ -483,127 +450,7 @@ export default function MyPicks() {
             })}
           </div>
         </div>
-      )}
-      
-      {view === 'analytics' && (
-        <div className="analytics-content">
-          <div className="analytics-grid">
-            <div className="chart-card">
-              <h3>Sport Performance</h3>
-              <div className="sport-breakdown">
-                {Object.entries(analytics.sportStats).map(([sport, stats]) => {
-                  const winRate = stats.total > 0 ? (stats.won / (stats.won + stats.lost)) * 100 : 0;
-                  const profit = stats.returns - stats.staked;
-                  return (
-                    <div key={sport} className="sport-stat">
-                      <div className="sport-header">
-                        <span className="sport-name">{sport}</span>
-                        <span className="sport-count">{stats.total} picks</span>
-                      </div>
-                      <div className="sport-metrics">
-                        <div className="metric">
-                          <span className="metric-label">Win Rate</span>
-                          <span className="metric-value">{winRate.toFixed(1)}%</span>
-                        </div>
-                        <div className="metric">
-                          <span className="metric-label">Profit</span>
-                          <span className={`metric-value ${profit >= 0 ? 'positive' : 'negative'}`}>
-                            {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            
-            <div className="chart-card">
-              <h3>Recent Trends</h3>
-              <div className="trend-summary">
-                <div className="trend-item">
-                  <Award size={16} />
-                  <div>
-                    <div className="trend-value">{analytics.avgOdds > 0 ? '+' : ''}{analytics.avgOdds}</div>
-                    <div className="trend-label">Avg Odds</div>
-                  </div>
-                </div>
-                <div className="trend-item">
-                  <Target size={16} />
-                  <div>
-                    <div className="trend-value">${(analytics.totalStaked / Math.max(analytics.totalPicks, 1)).toFixed(2)}</div>
-                    <div className="trend-label">Avg Stake</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {view === 'history' && (
-        <div className="history-content">
-          <div className="time-filters">
-            {['7d', '30d', '90d', 'all'].map(range => (
-              <button 
-                key={range}
-                className={`time-btn ${timeRange === range ? 'active' : ''}`}
-                onClick={() => setTimeRange(range)}
-              >
-                {range === 'all' ? 'All Time' : range.toUpperCase()}
-              </button>
-            ))}
-          </div>
-          
-          <div className="history-stats">
-            <div className="history-summary">
-              <h3>Performance Summary ({timeRange})</h3>
-              <div className="summary-grid">
-                <div className="summary-item">
-                  <span className="summary-label">Total Picks</span>
-                  <span className="summary-value">{filteredPicks.length}</span>
-                </div>
-                <div className="summary-item">
-                  <span className="summary-label">Win Rate</span>
-                  <span className="summary-value">{analytics.winRate}%</span>
-                </div>
-                <div className="summary-item">
-                  <span className="summary-label">Net Profit</span>
-                  <span className={`summary-value ${analytics.netProfit >= 0 ? 'positive' : 'negative'}`}>
-                    {analytics.netProfit >= 0 ? '+' : ''}${analytics.netProfit.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="history-list">
-            {filteredPicks.map(p => {
-              const profit = p.status === 'won' ? (Number(p.actualPayout) || Number(p.potential) || 0) - (Number(p.stake) || 0) : 
-                            p.status === 'lost' ? -(Number(p.stake) || 0) : 0;
-              
-              return (
-                <div key={p.id} className={`history-item ${p.status || 'pending'}`}>
-                  <div className="history-main">
-                    <div className="history-game">
-                      <span className="game-title">{p.game}</span>
-                      <span className="game-details">{p.league} • {p.market} • {p.selection}</span>
-                    </div>
-                    <div className="history-result">
-                      {p.status !== 'pending' && (
-                        <span className={`profit ${profit >= 0 ? 'positive' : 'negative'}`}>
-                          {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
-                        </span>
-                      )}
-                      <span className="date">{new Date(p.dateAdded).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      }
 
       <MobileBottomBar active="picks" showFilter={false} />
     </main>

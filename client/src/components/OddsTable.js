@@ -732,14 +732,18 @@ export default function OddsTable({
             })),
             sport: game.sport_key
           };
-          // Only add rows with valid odds and minimum 6 comparable books
+          // Only add rows with valid odds and minimum 6 books with actual odds
         const hasValidOdds = Number(filteredOutcome.price || filteredOutcome.odds || 0) !== 0;
-        const uniqueBooks = new Set();
+        const uniqueBooksWithOdds = new Set();
         allBooksForOutcome.forEach(book => {
           const key = String(book?.bookmaker?.key || book?.book || '').toLowerCase();
-          if (key) uniqueBooks.add(key);
+          const odds = Number(book?.price || book?.odds || 0);
+          // Only count books that have valid, non-zero odds
+          if (key && odds !== 0) {
+            uniqueBooksWithOdds.add(key);
+          }
         });
-        const hasMinimumBooks = uniqueBooks.size >= 6;
+        const hasMinimumBooks = uniqueBooksWithOdds.size >= 6;
         
         if (hasValidOdds && hasMinimumBooks) {
           gameRows.push(gameRow);
@@ -868,10 +872,27 @@ export default function OddsTable({
     const isBetterOdds = (newOdds, currentOdds) => {
       // For positive odds (+200), higher is better
       // For negative odds (-150), closer to 0 is better (less negative)
-      if (newOdds > 0 && currentOdds > 0) return newOdds > currentOdds;
-      if (newOdds < 0 && currentOdds < 0) return newOdds > currentOdds; // -120 > -150
-      if (newOdds > 0 && currentOdds < 0) return true; // positive always better than negative
-      if (newOdds < 0 && currentOdds > 0) return false; // negative never better than positive
+      console.log(`🎯 Comparing odds: ${newOdds} vs ${currentOdds}`);
+      
+      if (newOdds > 0 && currentOdds > 0) {
+        const result = newOdds > currentOdds;
+        console.log(`🎯 Both positive: ${newOdds} > ${currentOdds} = ${result}`);
+        return result;
+      }
+      if (newOdds < 0 && currentOdds < 0) {
+        const result = newOdds > currentOdds; // -120 > -150
+        console.log(`🎯 Both negative: ${newOdds} > ${currentOdds} = ${result}`);
+        return result;
+      }
+      if (newOdds > 0 && currentOdds < 0) {
+        console.log(`🎯 New positive vs current negative: ${newOdds} vs ${currentOdds} = true`);
+        return true; // positive always better than negative
+      }
+      if (newOdds < 0 && currentOdds > 0) {
+        console.log(`🎯 New negative vs current positive: ${newOdds} vs ${currentOdds} = false`);
+        return false; // negative never better than positive
+      }
+      console.log(`🎯 Default case: ${newOdds} vs ${currentOdds} = false`);
       return false;
     };
     

@@ -174,10 +174,10 @@
 
 /* Bet Settings Section */
 .bet-settings-section {
-  margin-bottom: 20px;
+  margin: 0 20px 16px;
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 12px;
   background: var(--card-bg);
 }
 
@@ -185,12 +185,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .settings-header h4 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
@@ -399,7 +399,7 @@
 }
 
 .bet-item {
-  padding: 16px;
+  padding: 20px;
   background: rgba(139, 92, 246, 0.05);
   border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 12px;
@@ -498,18 +498,20 @@
 .amount-input-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  position: relative;
 }
 
 .amount-input {
   flex: 1;
-  padding: 10px 12px;
+  padding: 12px 40px 12px 12px;
   border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 8px;
   background: rgba(139, 92, 246, 0.1);
   color: var(--text);
   font-size: 16px;
   font-weight: 600;
+  height: 44px;
+  box-sizing: border-box;
 }
 
 .amount-input:focus {
@@ -518,20 +520,19 @@
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }
 
-.amount-controls {
-  display: flex;
-  gap: 4px;
-}
-
-.quick-apply-btn, .clear-amount-btn {
+.clear-amount-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  border: none;
   border-radius: 6px;
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.2);
   color: var(--accent);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -551,7 +552,10 @@
   font-size: 14px;
   color: var(--success);
   font-weight: 600;
-  text-align: right;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Parlay Section */
@@ -727,6 +731,7 @@
 /* Summary */
 .betslip-summary {
   padding: 20px;
+  margin-top: 24px;
   background: rgba(139, 92, 246, 0.05);
   border-top: 1px solid rgba(139, 92, 246, 0.2);
 }

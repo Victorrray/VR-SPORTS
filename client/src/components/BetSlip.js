@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Plus, Minus, Calculator, TrendingUp, AlertCircle, CheckCircle2, Zap, Target, DollarSign, Trophy, Share2, Download, Trash2, Copy, Eye, EyeOff, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './BetSlip.css';
 
 const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClearAll, onPlaceBets }) => {
+  const navigate = useNavigate();
   const [betAmounts, setBetAmounts] = useState({});
   const [parlayAmount, setParlayAmount] = useState('');
   const [betType, setBetType] = useState('single'); // 'single', 'parlay', 'round-robin'
@@ -77,15 +79,28 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     const newAmounts = { ...betAmounts };
     bets.forEach(bet => {
       if (!newAmounts[bet.id]) {
-        newAmounts[bet.id] = autoCalculate ? getRecommendedBet(bet) : '';
+        newAmounts[bet.id] = autoCalculate ? getRecommendedBet(bet) : getBaseBetAmount();
       }
     });
     setBetAmounts(newAmounts);
-  }, [bets, autoCalculate]);
+  }, [bets, autoCalculate, bankroll, riskTolerance]);
+
+  // Calculate base bet amount based on bankroll and risk tolerance
+  const getBaseBetAmount = () => {
+    const riskMultipliers = {
+      conservative: 0.01, // 1% of bankroll
+      moderate: 0.025,    // 2.5% of bankroll  
+      aggressive: 0.05    // 5% of bankroll
+    };
+    
+    return Math.round(bankroll * riskMultipliers[riskTolerance]);
+  };
 
   // Calculate recommended bet size based on Kelly Criterion and risk tolerance
   const getRecommendedBet = (bet) => {
-    if (!bet.edge || bet.edge <= 0) return quickBetAmount;
+    const baseBetAmount = getBaseBetAmount();
+    
+    if (!bet.edge || bet.edge <= 0) return baseBetAmount;
     
     const edge = bet.edge / 100;
     const odds = bet.americanOdds;
@@ -106,7 +121,7 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     const recommendedFraction = Math.max(0, kellyFraction * riskMultiplier);
     const recommendedAmount = Math.min(bankroll * recommendedFraction, bankroll * 0.05); // Cap at 5% of bankroll
     
-    return Math.max(quickBetAmount, Math.round(recommendedAmount));
+    return Math.max(baseBetAmount, Math.round(recommendedAmount));
   };
   
   // Validate bet amounts and settings
@@ -367,38 +382,51 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
         const amount = parseFloat(betAmounts[bet.id]);
         if (amount > 0) {
           betsToPlace.push({
-            ...bet,
-            amount,
-            type: 'single',
-            timestamp: new Date().toISOString(),
-            bankrollPercentage: ((amount / bankroll) * 100).toFixed(2)
+            id: `${bet.id}_${Date.now()}`,
+            league: bet.sport || 'Unknown',
+            game: bet.matchup,
+            market: bet.market,
+            selection: bet.selection,
+            odds: bet.americanOdds > 0 ? `+${bet.americanOdds}` : `${bet.americanOdds}`,
+            stake: amount,
+            potential: amount * (bet.americanOdds > 0 ? (bet.americanOdds / 100) + 1 : (100 / Math.abs(bet.americanOdds)) + 1),
+            status: 'pending',
+            dateAdded: new Date().toISOString(),
+            type: 'single'
           });
         }
       });
     } else if (betType === 'parlay' && parlayCalculations && parseFloat(parlayAmount) > 0) {
       betsToPlace.push({
         id: `parlay_${Date.now()}`,
-        type: 'parlay',
-        legs: bets,
-        amount: parseFloat(parlayAmount),
-        odds: parlayCalculations.odds,
-        payout: parlayCalculations.payout,
-        profit: parlayCalculations.profit,
-        expectedValue: parlayCalculations.expectedValue,
-        evPercentage: parlayCalculations.evPercentage,
-        probability: parlayCalculations.probability,
-        timestamp: new Date().toISOString(),
-        bankrollPercentage: ((parseFloat(parlayAmount) / bankroll) * 100).toFixed(2)
+        league: 'PARLAY',
+        game: `${bets.length}-Leg Parlay`,
+        market: 'Parlay',
+        selection: bets.map(bet => `${bet.selection} ${bet.americanOdds > 0 ? '+' : ''}${bet.americanOdds}`).join(', '),
+        odds: parlayCalculations.odds > 0 ? `+${parlayCalculations.odds}` : `${parlayCalculations.odds}`,
+        stake: parseFloat(parlayAmount),
+        potential: parlayCalculations.payout,
+        status: 'pending',
+        dateAdded: new Date().toISOString(),
+        type: 'parlay'
       });
     }
     
     if (betsToPlace.length > 0) {
-      onPlaceBets?.(betsToPlace);
+      // Save to My Picks localStorage
+      const existingPicks = JSON.parse(localStorage.getItem('oss_my_picks_v1') || '[]');
+      const updatedPicks = [...existingPicks, ...betsToPlace];
+      localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
+      
       // Clear the slip after placing bets
       onClearAll?.();
       setBetAmounts({});
       setParlayAmount('');
       setValidationErrors({});
+      
+      // Navigate to My Picks page
+      navigate('/picks');
+      onClose();
     }
   };
 
@@ -576,17 +604,16 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                             <span className="selection-text">{bet.selection}</span>
                             <span className="selection-odds">{formatOdds(bet.americanOdds)}</span>
                           </div>
-                          <div className="bet-details">
-                            <span className="bet-market">{bet.market}</span>
-                            {bet.edge && (
+                          {bet.edge && (
+                            <div className="bet-edge-only">
                               <span 
                                 className="bet-edge"
                                 style={{ color: getEdgeColor(bet.edge) }}
                               >
                                 {bet.edge > 0 ? '+' : ''}{bet.edge.toFixed(1)}% EV
                               </span>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       
@@ -599,22 +626,13 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                             onChange={(e) => updateBetAmount(bet.id, e.target.value)}
                             className="amount-input"
                           />
-                          <div className="amount-controls">
-                            <button
-                              onClick={() => applyQuickBet(bet.id)}
-                              className="quick-apply-btn"
-                              title={`Apply $${quickBetAmount}`}
-                            >
-                              <Zap size={12} />
-                            </button>
-                            <button
-                              onClick={() => clearBetAmount(bet.id)}
-                              className="clear-amount-btn"
-                              title="Clear"
-                            >
-                              <X size={12} />
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => clearBetAmount(bet.id)}
+                            className="clear-amount-btn"
+                            title="Clear"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                         
                         {betAmounts[bet.id] && parseFloat(betAmounts[bet.id]) > 0 && (
@@ -623,9 +641,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                               parseFloat(betAmounts[bet.id]) * 
                               (bet.americanOdds > 0 ? (bet.americanOdds / 100) + 1 : (100 / Math.abs(bet.americanOdds)) + 1)
                             )}</span>
-                            <span className="bankroll-percentage">
-                              ({((parseFloat(betAmounts[bet.id]) / bankroll) * 100).toFixed(1)}% of bankroll)
-                            </span>
                           </div>
                         )}
                         
