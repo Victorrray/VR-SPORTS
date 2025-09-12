@@ -5,7 +5,7 @@ import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { signOutAndRefresh } from "../lib/authActions";
-import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X } from "lucide-react";
 import MobileBottomBar from "../components/MobileBottomBar";
 import SportMultiSelect from "../components/SportMultiSelect";
 import UsagePlanCard from "../components/UsagePlanCard";
@@ -252,6 +252,10 @@ export default function Account() {
     }
   };
 
+  const handleCancelSubscription = () => {
+    navigate('/billing/cancel');
+  };
+
   if (!user || pageLoading) {
     return (
       <div className="loading-fallback">
@@ -441,6 +445,75 @@ export default function Account() {
               <small>End your current session</small>
             </div>
           </button>
+        </div>
+      </section>
+
+      {/* Subscription Management */}
+      <section className="subscription-card">
+        <div className="card-header">
+          <CreditCard size={20} />
+          <h2>Subscription</h2>
+        </div>
+        <div className="subscription-content">
+          <div className="subscription-status">
+            <div className="status-info">
+              <div className="plan-badge">
+                <span className={`plan-indicator ${me?.plan || 'free'}`}>
+                  {me?.plan === 'platinum' ? '💎' : '🆓'}
+                </span>
+                <div className="plan-details">
+                  <span className="plan-name">
+                    {me?.plan === 'platinum' ? 'Platinum Plan' : 'Free Plan'}
+                  </span>
+                  <span className="plan-desc">
+                    {me?.plan === 'platinum' 
+                      ? 'Unlimited API access & premium features' 
+                      : `${me?.calls_made || 0}/${me?.limit || 250} API calls used`
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            {me?.plan === 'platinum' && (
+              <div className="subscription-actions">
+                <button 
+                  className="security-btn cancel-btn"
+                  onClick={handleCancelSubscription}
+                >
+                  <X size={16} />
+                  <div className="btn-content">
+                    <span>Cancel Subscription</span>
+                    <small>Manage your subscription</small>
+                  </div>
+                </button>
+              </div>
+            )}
+            
+            {me?.plan !== 'platinum' && (
+              <div className="subscription-actions">
+                <button 
+                  className="security-btn upgrade-btn"
+                  onClick={() => navigate('/pricing')}
+                >
+                  <CreditCard size={16} />
+                  <div className="btn-content">
+                    <span>Upgrade to Platinum</span>
+                    <small>Unlimited access & features</small>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <div className="subscription-info">
+            <p className="subscription-note">
+              {me?.plan === 'platinum' 
+                ? 'You have unlimited access to all features. Cancel anytime.' 
+                : 'Upgrade to Platinum for unlimited API access and premium features.'
+              }
+            </p>
+          </div>
         </div>
       </section>
 

@@ -1,45 +1,203 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { X, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, ArrowLeft, AlertTriangle, CheckCircle, Loader } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import './BillingCancel.css';
 
 const BillingCancel = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-white/20">
-        <div className="w-16 h-16 bg-gray-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <X size={32} className="text-white" />
-        </div>
-        
-        <h1 className="text-2xl font-bold text-white mb-4">
-          Upgrade Cancelled
-        </h1>
-        
-        <p className="text-gray-300 mb-8">
-          No worries! You can upgrade to Platinum anytime to unlock premium features and advanced analytics.
-        </p>
-        
-        <div className="space-y-3 mb-8">
-          <Link
-            to="/sportsbooks"
-            className="block w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200"
-          >
-            Continue with Free Access
-          </Link>
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
+  const [error, setError] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const handleCancelSubscription = async () => {
+    if (!user?.id) {
+      setError('Please log in to cancel your subscription');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/billing/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.id
+        },
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCancelled(true);
+        setShowConfirmation(false);
+      } else {
+        setError(data.error || 'Failed to cancel subscription');
+      }
+    } catch (err) {
+      console.error('Error cancelling subscription:', err);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (cancelled) {
+    return (
+      <div className="billing-cancel-page">
+        <div className="cancel-container success">
+          <div className="icon-container success">
+            <CheckCircle size={48} />
+          </div>
           
-          <Link
-            to="/pricing"
-            className="block w-full px-6 py-3 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-all duration-200 border border-white/20"
+          <h1>Subscription Cancelled</h1>
+          
+          <p className="description">
+            Your Platinum subscription has been cancelled. You'll continue to have access to premium features until the end of your current billing period.
+          </p>
+          
+          <div className="action-buttons">
+            <Link to="/account" className="btn btn-primary">
+              Back to Account
+            </Link>
+            <Link to="/pricing" className="btn btn-secondary">
+              View Plans
+            </Link>
+          </div>
+          
+          <Link to="/" className="back-link">
+            <ArrowLeft size={16} />
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (showConfirmation) {
+    return (
+      <div className="billing-cancel-page">
+        <div className="cancel-container warning">
+          <div className="icon-container warning">
+            <AlertTriangle size={48} />
+          </div>
+          
+          <h1>Cancel Subscription?</h1>
+          
+          <p className="description">
+            Are you sure you want to cancel your Platinum subscription? You'll lose access to:
+          </p>
+
+          <ul className="feature-list">
+            <li>Unlimited API calls</li>
+            <li>Advanced arbitrage detection</li>
+            <li>Premium analytics</li>
+            <li>Priority support</li>
+          </ul>
+          
+          {error && (
+            <div className="error-message">
+              <AlertTriangle size={16} />
+              {error}
+            </div>
+          )}
+          
+          <div className="action-buttons">
+            <button 
+              onClick={handleCancelSubscription}
+              disabled={loading}
+              className="btn btn-danger"
+            >
+              {loading ? (
+                <>
+                  <Loader size={16} className="spinning" />
+                  Cancelling...
+                </>
+              ) : (
+                'Yes, Cancel Subscription'
+              )}
+            </button>
+            <button 
+              onClick={() => setShowConfirmation(false)}
+              className="btn btn-secondary"
+            >
+              Keep Subscription
+            </button>
+          </div>
+          
+          <Link to="/account" className="back-link">
+            <ArrowLeft size={16} />
+            Back to Account
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="billing-cancel-page">
+      <div className="cancel-container">
+        <div className="icon-container">
+          <X size={48} />
+        </div>
+        
+        <h1>Cancel Subscription</h1>
+        
+        <p className="description">
+          We're sorry to see you go! Before you cancel, here's what you'll be missing out on with your Platinum subscription.
+        </p>
+
+        <div className="benefits-grid">
+          <div className="benefit-item">
+            <div className="benefit-icon">⚡</div>
+            <div>
+              <h3>Unlimited API Calls</h3>
+              <p>No more 250 call limits</p>
+            </div>
+          </div>
+          <div className="benefit-item">
+            <div className="benefit-icon">🎯</div>
+            <div>
+              <h3>Arbitrage Detection</h3>
+              <p>Find profitable opportunities</p>
+            </div>
+          </div>
+          <div className="benefit-item">
+            <div className="benefit-icon">📊</div>
+            <div>
+              <h3>Advanced Analytics</h3>
+              <p>Deep insights & trends</p>
+            </div>
+          </div>
+          <div className="benefit-item">
+            <div className="benefit-icon">🏆</div>
+            <div>
+              <h3>Priority Support</h3>
+              <p>Get help when you need it</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="action-buttons">
+          <button 
+            onClick={() => setShowConfirmation(true)}
+            className="btn btn-danger"
           >
-            View Pricing Again
+            Continue Cancellation
+          </button>
+          <Link to="/account" className="btn btn-primary">
+            Keep My Subscription
           </Link>
         </div>
         
-        <Link
-          to="/"
-          className="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft size={16} className="mr-1" />
-          Back to Home
+        <Link to="/account" className="back-link">
+          <ArrowLeft size={16} />
+          Back to Account
         </Link>
       </div>
     </div>

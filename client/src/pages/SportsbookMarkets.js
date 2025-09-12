@@ -16,6 +16,8 @@ import ArbitrageDetector from "../components/ArbitrageDetector";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { useMarkets } from '../hooks/useMarkets';
+import { useMe } from '../hooks/useMe';
+import { useAuth } from '../hooks/useAuth';
 
 // Add responsive layout styles
 const arbitrageSplitViewStyles = `
@@ -235,6 +237,8 @@ const FEATURED_SPORTS = new Set([
 const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { me } = useMe();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
   const [sportList, setSportList] = useState([]);
   // Initialize state from localStorage or defaults
@@ -319,6 +323,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
+  
+  // Check if user has platinum plan for arbitrage access
+  const hasPlatinum = me?.plan === 'platinum';
+  const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
   const [oddsFormat] = useState('american');
   // Debounced query for smoother filtering and to feed MobileSearchModal
   const debouncedQuery = useDebounce(query, 300);
@@ -463,11 +471,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   }, 300);
 
   // Fetch markets data with error handling and retry logic
-  const {
-    games: marketGames = [],
-    books: marketBooks = [],
-    isLoading: marketsLoading,
-    error: marketsError,
+  const { 
+    games: marketGames = [], 
+    books: marketBooks = [], 
+    isLoading: marketsLoading, 
+    error: marketsError, 
+    bookmakers 
   } = useMarkets(
     picked,
     ["us", "us2", "us_exchanges"],
@@ -632,7 +641,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             📊 Game Odds
           </button>
           <button
-            onClick={() => setShowArbitrage(true)}
+            onClick={() => hasPlatinum ? setShowArbitrage(true) : navigate('/pricing')}
             style={{
               flex: 1,
               background: showArbitrage 
@@ -649,10 +658,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px'
+              gap: '8px',
+              opacity: hasPlatinum ? 1 : 0.6
             }}
           >
-            ⚡ Arbitrage
+            ⚡ Arbitrage {!hasPlatinum && '🔒'}
           </button>
         </div>
         <p style={{
@@ -665,14 +675,47 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </p>
       </div>
 
-      {showArbitrage ? (
+      {/* Show quota exceeded message for free users */}
+      {isOverQuota && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '12px',
+          padding: '24px',
+          margin: '24px 16px',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ color: '#ef4444', margin: '0 0 12px 0' }}>
+            🚫 API Quota Exceeded
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
+            You've reached your monthly limit of {me?.limit || 250} API calls. Upgrade to Platinum for unlimited access.
+          </p>
+          <button
+            onClick={() => navigate('/pricing')}
+            style={{
+              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              color: 'white',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            Upgrade to Platinum
+          </button>
+        </div>
+      )}
+
+      {showArbitrage && hasPlatinum ? (
         <ArbitrageDetector 
           sport={picked[0] || 'americanfootball_nfl'}
           games={filteredGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
         />
-      ) : (
+      ) : !isOverQuota ? (
         <OddsTable
           key={tableNonce}
           games={filteredGames}
@@ -691,7 +734,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           betSlipCount={bets.length}
           onOpenBetSlip={openBetSlip}
         />
-      )}
+      ) : null}
 
           {/* Mobile footer nav + filter pill */}
           <MobileBottomBar 

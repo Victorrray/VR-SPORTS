@@ -705,6 +705,62 @@ app.post('/api/users/plan', async (req, res) => {
   }
 });
 
+// Cancel Stripe subscription
+app.post('/api/billing/cancel-subscription', requireUser, async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const userId = req.__userId;
+    
+    // Get user's current subscription from Supabase
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('stripe_customer_id, stripe_subscription_id')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!user.stripe_subscription_id) {
+      return res.status(400).json({ error: 'No active subscription found' });
+    }
+
+    // Cancel the subscription in Stripe
+    const subscription = await stripe.subscriptions.update(user.stripe_subscription_id, {
+      cancel_at_period_end: true
+    });
+
+    // Update user plan to free in Supabase
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ 
+        plan: 'free',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error updating user plan:', updateError);
+      return res.status(500).json({ error: 'Failed to update user plan' });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Subscription cancelled successfully',
+      cancel_at_period_end: subscription.cancel_at_period_end,
+      current_period_end: subscription.current_period_end
+    });
+
+  } catch (error) {
+    console.error('Error cancelling subscription:', error);
+    res.status(500).json({ error: 'Failed to cancel subscription' });
+  }
+});
+
 // Stripe webhook handler (raw body required for signature verification)
 app.post('/api/billing/webhook',
   bodyParser.raw({ type: 'application/json' }),

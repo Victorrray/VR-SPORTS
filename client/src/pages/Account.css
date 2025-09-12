@@ -41,6 +41,7 @@
 /* Card Styles */
 .profile-card,
 .security-card,
+.subscription-card,
 .sportsbook-card {
   background: var(--bg-elev);
   border-radius: 16px;
@@ -49,6 +50,122 @@
   border: 1px solid rgba(139, 92, 246, 0.15);
   box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
+}
+
+/* Subscription Management Styles */
+.subscription-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.subscription-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.status-info {
+  flex: 1;
+  min-width: 250px;
+}
+
+.plan-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.plan-indicator {
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 2px solid rgba(139, 92, 246, 0.2);
+}
+
+.plan-indicator.platinum {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.2));
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.plan-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.plan-desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.subscription-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cancel-btn {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #ef4444 !important;
+}
+
+.cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.upgrade-btn {
+  background: rgba(139, 92, 246, 0.1) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  color: var(--purple-primary) !important;
+}
+
+.upgrade-btn:hover {
+  background: rgba(139, 92, 246, 0.2) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+}
+
+.subscription-info {
+  padding: 1rem;
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.subscription-note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .subscription-status {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .status-info {
+    min-width: unset;
+  }
+  
+  .subscription-actions {
+    justify-content: center;
+  }
 }
 
 .profile-card:hover,

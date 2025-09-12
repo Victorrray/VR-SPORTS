@@ -128,8 +128,8 @@ const UserProfile = () => {
             <h1>{profile?.display_name || profile?.username || 'User'}</h1>
             <p className="profile-email">{user.email}</p>
             <div className="profile-badges">
-              <span className={`tier-badge ${profile?.subscription_tier || 'free'}`}>
-                {(profile?.subscription_tier || 'free').toUpperCase()}
+              <span className={`tier-badge ${profile?.plan || 'free'}`}>
+                {(profile?.plan || 'free').toUpperCase()}
               </span>
             </div>
           </div>

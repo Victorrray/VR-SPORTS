@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { signOutAndRefresh } from '../lib/authActions';
-import { User, Settings, BookOpen, Check, Save } from 'lucide-react';
+import { User, Settings, BookOpen, Check, Save, CreditCard, X } from 'lucide-react';
 import UsernameForm from '../components/UsernameForm';
 import { useAuth } from '../hooks/useAuth';
 import './Profile.css';
@@ -53,12 +53,20 @@ const AVAILABLE_SPORTSBOOKS = [
   { key: 'foxbet', name: 'FOX Bet', popular: false }
 ];
 
+interface UserProfile {
+  plan: 'free' | 'platinum';
+  calls_made: number;
+  limit: number;
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const [selectedBooks, setSelectedBooks] = useState([]);
+  const { user } = useAuth() as any; // Temporary fix for auth context typing
+  const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
   const [busy, setBusy] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     // Load user's selected sportsbooks from localStorage
@@ -70,6 +78,30 @@ export default function ProfilePage() {
       setSelectedBooks(['draftkings', 'fanduel', 'betmgm', 'caesars', 'betrivers', 'espnbet']);
     }
   }, []);
+
+  useEffect(() => {
+    // Fetch user profile data for subscription info
+    const fetchUserProfile = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await fetch('/api/me/usage', {
+          headers: {
+            'x-user-id': user.id
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setUserProfile(data);
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const handleBookToggle = (bookKey) => {
     setSelectedBooks(prev => {
@@ -91,6 +123,10 @@ export default function ProfilePage() {
     if (busy) return;
     setBusy(true);
     await signOutAndRefresh('/');
+  };
+
+  const handleCancelSubscription = () => {
+    navigate('/billing/cancel');
   };
 
   const displayedBooks = showAllBooks 
@@ -212,6 +248,69 @@ export default function ProfilePage() {
               >
                 {busy ? 'Signing out...' : 'Sign Out'}
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Subscription Management */}
+        <div className="profile-section">
+          <div className="section-header">
+            <CreditCard size={20} />
+            <h2>Subscription</h2>
+          </div>
+          <div className="subscription-card">
+            <div className="subscription-status">
+              <div className="status-info">
+                <div className="plan-badge">
+                  <span className={`plan-indicator ${userProfile?.plan || 'free'}`}>
+                    {userProfile?.plan === 'platinum' ? '💎' : '🆓'}
+                  </span>
+                  <div className="plan-details">
+                    <span className="plan-name">
+                      {userProfile?.plan === 'platinum' ? 'Platinum Plan' : 'Free Plan'}
+                    </span>
+                    <span className="plan-desc">
+                      {userProfile?.plan === 'platinum' 
+                        ? 'Unlimited API access & premium features' 
+                        : `${userProfile?.calls_made || 0}/${userProfile?.limit || 250} API calls used`
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {userProfile?.plan === 'platinum' && (
+                <div className="subscription-actions">
+                  <button 
+                    className="security-btn cancel-btn"
+                    onClick={handleCancelSubscription}
+                  >
+                    <X size={16} />
+                    Cancel Subscription
+                  </button>
+                </div>
+              )}
+              
+              {userProfile?.plan !== 'platinum' && (
+                <div className="subscription-actions">
+                  <button 
+                    className="security-btn upgrade-btn"
+                    onClick={() => navigate('/pricing')}
+                  >
+                    <CreditCard size={16} />
+                    Upgrade to Platinum
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="subscription-info">
+              <p className="subscription-note">
+                {userProfile?.plan === 'platinum' 
+                  ? 'You have unlimited access to all features. Cancel anytime.' 
+                  : 'Upgrade to Platinum for unlimited API access and premium features.'
+                }
+              </p>
             </div>
           </div>
         </div>

@@ -340,9 +340,12 @@ export default function Scores() {
       <div className="scores-grid">
         {sorted.map((g) => {
           // Only trust the backend's live flag - it now has strict validation
-          const isLive = g.live === true;
+          // Fix game status logic - check actual game time vs current time
+          const now = new Date();
+          const gameTime = new Date(g.commence_time);
+          const isActuallyLive = g.status === 'in_progress' && g.live === true;
           const isCompleted = g.completed === true || g.status === 'final' || g.status_type?.completed === true;
-          const isUpcoming = !isLive && !isCompleted;
+          const isUpcoming = gameTime > now && !isCompleted && !isActuallyLive;
 
           return (
             <div 
@@ -356,9 +359,13 @@ export default function Scores() {
               <div className="game-content">
                 <div className="game-header">
                   <div className="game-status">
-                    {isLive && <div className="status-badge live">LIVE</div>}
+                    {isActuallyLive && <div className="status-badge live">LIVE</div>}
                     {isCompleted && <div className="status-badge final">FINAL</div>}
-                    {isUpcoming && <div className="status-badge upcoming">Upcoming</div>}
+                    {isUpcoming && (
+                      <div className="status-badge upcoming">
+                        <span>{kickoffLabel(g.commence_time)}</span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Game lines in header */}
@@ -396,7 +403,7 @@ export default function Scores() {
                         )}
                       </div>
                     </div>
-                    {(isCompleted || isLive) && g.scores && (
+                    {(isCompleted || isActuallyLive) && g.scores && (
                       <div className="team-score">
                         {g.scores.away || 0}
                       </div>
@@ -416,7 +423,7 @@ export default function Scores() {
                         )}
                       </div>
                     </div>
-                    {(isCompleted || isLive) && g.scores && (
+                    {(isCompleted || isActuallyLive) && g.scores && (
                       <div className="team-score">
                         {g.scores.home || 0}
                       </div>

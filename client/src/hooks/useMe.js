@@ -34,22 +34,24 @@ export function useMe() {
         session = data;
         console.log('🔍 useMe: Session result:', !!session?.session);
       } catch (error) {
-        console.log('🔍 useMe: Session timeout or error, proceeding with default data');
-        setMe({ plan: 'free', remaining: 250, limit: 250, calls_made: 0 });
-        return;
+        console.log('🔍 useMe: Session timeout or error, trying API call anyway');
+        // Don't return here - try the API call anyway since secureFetch handles auth
       }
       
-      if (!session.session) { 
-        console.log('🔍 useMe: No session, setting default data');
-        setMe({ plan: 'free', remaining: 250, limit: 250, calls_made: 0 }); 
-        return; 
+      // Try API call even if session failed - secureFetch handles demo auth
+      if (!session?.session) { 
+        console.log('🔍 useMe: No session, but trying API call with demo auth');
       }
 
       console.log('🔍 useMe: Fetching user data from /api/me/usage');
-      // Fetch user plan and usage info from backend
-      const response = await secureFetch(withApiBase('/api/me/usage'), {
+      // Fetch user plan and usage info from backend with cache busting
+      const cacheBuster = `?t=${Date.now()}`;
+      const response = await secureFetch(withApiBase(`/api/me/usage${cacheBuster}`), {
         credentials: 'include',
-        headers: { 'Accept': 'application/json' }
+        headers: { 
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
       });
       
       if (!response.ok) {

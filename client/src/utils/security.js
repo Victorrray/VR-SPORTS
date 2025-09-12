@@ -53,7 +53,26 @@ export const secureFetch = async (url, options = {}) => {
         headers['Authorization'] = `Bearer ${cached}`;
       } else {
         const { data: { session } = {} } = await supabase?.auth?.getSession?.() || { data: {} };
-        if (session?.access_token) headers['Authorization'] = `Bearer ${session.access_token}`;
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+          // Send user ID in header for backend authentication
+          if (session.user?.id) {
+            headers['x-user-id'] = session.user.id;
+          }
+        }
+      }
+      
+      // Fallback: check localStorage for demo session
+      if (!headers['x-user-id']) {
+        try {
+          const demoSession = localStorage.getItem('demo-auth-session');
+          if (demoSession) {
+            const sessionData = JSON.parse(demoSession);
+            if (sessionData.id) {
+              headers['x-user-id'] = sessionData.id;
+            }
+          }
+        } catch (_) {}
       }
     } catch (_) {}
   }

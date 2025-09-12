@@ -12,6 +12,10 @@ export const API_BASE_URL = (
 
 export function withApiBase(path) {
   const base = API_BASE_URL;
+  // Force local development to use relative paths for proxy
+  if (process.env.NODE_ENV === 'development') {
+    return path; // Use relative path for local proxy
+  }
   if (!base) return path; // fallback to relative for local proxy/dev
   if (path.startsWith('http')) return path;
   return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
