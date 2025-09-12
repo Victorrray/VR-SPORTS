@@ -172,10 +172,125 @@
   gap: 16px;
 }
 
-.quick-bet-controls {
+/* Bet Settings Section */
+.bet-settings-section {
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--card-bg);
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.settings-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.settings-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
+  gap: 4px;
+}
+
+.settings-toggle:hover {
+  background: var(--hover-bg);
+  color: var(--text);
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.setting-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.checkbox-group {
   gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.checkbox-text {
+  user-select: none;
+}
+
+.settings-actions {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+
+.apply-settings-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.apply-settings-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.apply-settings-btn:active {
+  transform: translateY(0);
 }
 
 .setting-label {

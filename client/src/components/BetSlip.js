@@ -8,26 +8,58 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
   const [betType, setBetType] = useState('single'); // 'single', 'parlay', 'round-robin'
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [quickBetAmount, setQuickBetAmount] = useState(25);
-  const [bankroll, setBankroll] = useState(1000);
+  // Get user's bankroll from localStorage, sync with My Sportsbooks setting
+  const getUserBankroll = () => {
+    const saved = localStorage.getItem('userBankroll');
+    return saved ? Number(saved) : 1000;
+  };
+  
+  const [bankroll, setBankroll] = useState(getUserBankroll());
   const [riskTolerance, setRiskTolerance] = useState('moderate'); // 'conservative', 'moderate', 'aggressive'
   const [autoCalculate, setAutoCalculate] = useState(true);
+  const [pendingSettings, setPendingSettings] = useState({
+    bankroll: getUserBankroll(),
+    riskTolerance: 'moderate',
+    autoCalculate: true
+  });
+  const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [showValidation, setShowValidation] = useState(true);
 
-  // Load saved settings
+  // Load saved settings and sync with user bankroll
   useEffect(() => {
     try {
       const saved = localStorage.getItem('betslip_settings');
       if (saved) {
         const settings = JSON.parse(saved);
-        setBankroll(settings.bankroll || 1000);
-        setRiskTolerance(settings.riskTolerance || 'moderate');
+        const loadedBankroll = settings.bankroll || getUserBankroll();
+        const loadedRisk = settings.riskTolerance || 'moderate';
+        const loadedAuto = settings.autoCalculate !== false;
+        
+        setBankroll(loadedBankroll);
+        setRiskTolerance(loadedRisk);
         setQuickBetAmount(settings.quickBetAmount || 25);
-        setAutoCalculate(settings.autoCalculate !== false);
+        setAutoCalculate(loadedAuto);
+        
+        setPendingSettings({
+          bankroll: loadedBankroll,
+          riskTolerance: loadedRisk,
+          autoCalculate: loadedAuto
+        });
       }
     } catch (e) {
       console.warn('Failed to load bet slip settings:', e);
     }
+    
+    // Listen for bankroll changes from My Sportsbooks
+    const handleStorageChange = () => {
+      const newBankroll = getUserBankroll();
+      setBankroll(newBankroll);
+      setPendingSettings(prev => ({ ...prev, bankroll: newBankroll }));
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Save settings when they change
@@ -206,6 +238,53 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
       evPercentage
     };
   }, [bets, parlayAmount]);
+
+  // Handle pending settings changes
+  const handleSettingChange = (field, value) => {
+    setPendingSettings(prev => ({ ...prev, [field]: value }));
+    setHasUnappliedChanges(true);
+  };
+
+  const applySettings = () => {
+    setBankroll(pendingSettings.bankroll);
+    setRiskTolerance(pendingSettings.riskTolerance);
+    setAutoCalculate(pendingSettings.autoCalculate);
+    setHasUnappliedChanges(false);
+    
+    // Recalculate all bet amounts if auto-calculate is enabled
+    if (pendingSettings.autoCalculate) {
+      const newAmounts = {};
+      bets.forEach(bet => {
+        const recommendedAmount = calculateRecommendedAmount(bet.americanOdds, bet.edge, pendingSettings);
+        newAmounts[bet.id] = Math.round(recommendedAmount);
+      });
+      setBetAmounts(newAmounts);
+    }
+  };
+
+  // Calculate recommended bet amount based on bankroll and risk tolerance
+  const calculateRecommendedAmount = (betOdds, edge = 0, settings = null) => {
+    const currentSettings = settings || { bankroll, riskTolerance, autoCalculate };
+    if (!currentSettings.autoCalculate) return 0;
+    
+    const riskMultipliers = {
+      conservative: 0.01, // 1% of bankroll
+      moderate: 0.025,    // 2.5% of bankroll  
+      aggressive: 0.05    // 5% of bankroll
+    };
+    
+    const baseAmount = currentSettings.bankroll * riskMultipliers[currentSettings.riskTolerance];
+    
+    // Kelly Criterion adjustment if we have edge data
+    if (edge > 0) {
+      const decimal = betOdds > 0 ? (betOdds / 100) + 1 : (100 / Math.abs(betOdds)) + 1;
+      const kellyFraction = edge / (decimal - 1);
+      const kellyAmount = currentSettings.bankroll * Math.min(kellyFraction, 0.1); // Cap at 10%
+      return Math.min(baseAmount, kellyAmount);
+    }
+    
+    return baseAmount;
+  };
 
   // Calculate single bet totals
   const singleBetTotals = useMemo(() => {
@@ -415,67 +494,74 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
               </button>
             </div>
 
-            {/* Quick Settings */}
-            <div className="quick-settings">
-              <div className="quick-bet-controls">
-                <span className="setting-label">Quick Bet:</span>
-                <div className="amount-buttons">
-                  {[10, 25, 50, 100].map(amount => (
-                    <button
-                      key={amount}
-                      className={`amount-btn ${quickBetAmount === amount ? 'active' : ''}`}
-                      onClick={() => setQuickBetAmount(amount)}
-                    >
-                      ${amount}
-                    </button>
-                  ))}
-                </div>
+            {/* Bet Settings */}
+            <div className="bet-settings-section">
+              <div className="settings-header">
+                <h4>Bet Settings</h4>
+                <button 
+                  className="settings-toggle"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                >
+                  {showAdvanced ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
-              <button 
-                className="advanced-toggle"
-                onClick={() => setShowAdvanced(!showAdvanced)}
-              >
-                {showAdvanced ? <EyeOff size={14} /> : <Eye size={14} />}
-                Advanced
-              </button>
+              
+              {showAdvanced && (
+                <div className="settings-content">
+                  <div className="settings-grid">
+                    <div className="setting-group">
+                      <label className="setting-label">Bankroll</label>
+                      <input
+                        type="number"
+                        value={pendingSettings.bankroll}
+                        onChange={(e) => handleSettingChange('bankroll', Number(e.target.value))}
+                        className="setting-input"
+                        min="1"
+                      />
+                      <span className="setting-hint">Your total available funds</span>
+                    </div>
+                    
+                    <div className="setting-group">
+                      <label className="setting-label">Risk Level</label>
+                      <select
+                        value={pendingSettings.riskTolerance}
+                        onChange={(e) => handleSettingChange('riskTolerance', e.target.value)}
+                        className="setting-select"
+                      >
+                        <option value="conservative">Conservative (1%)</option>
+                        <option value="moderate">Moderate (2.5%)</option>
+                        <option value="aggressive">Aggressive (5%)</option>
+                      </select>
+                      <span className="setting-hint">Percentage of bankroll per bet</span>
+                    </div>
+                    
+                    <div className="setting-group checkbox-group">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={pendingSettings.autoCalculate}
+                          onChange={(e) => handleSettingChange('autoCalculate', e.target.checked)}
+                        />
+                        <span className="checkbox-text">Auto-calculate bet sizes</span>
+                      </label>
+                      <span className="setting-hint">Automatically set recommended amounts</span>
+                    </div>
+                  </div>
+                  
+                  {hasUnappliedChanges && (
+                    <div className="settings-actions">
+                      <button 
+                        className="apply-settings-btn"
+                        onClick={applySettings}
+                      >
+                        <Calculator size={14} />
+                        Apply & Recalculate Bets
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Advanced Settings */}
-            {showAdvanced && (
-              <div className="advanced-settings">
-                <div className="setting-row">
-                  <label>Bankroll:</label>
-                  <input
-                    type="number"
-                    value={bankroll}
-                    onChange={(e) => setBankroll(Number(e.target.value))}
-                    className="setting-input"
-                  />
-                </div>
-                <div className="setting-row">
-                  <label>Risk Tolerance:</label>
-                  <select
-                    value={riskTolerance}
-                    onChange={(e) => setRiskTolerance(e.target.value)}
-                    className="setting-select"
-                  >
-                    <option value="conservative">Conservative</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="aggressive">Aggressive</option>
-                  </select>
-                </div>
-                <div className="setting-row">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={autoCalculate}
-                      onChange={(e) => setAutoCalculate(e.target.checked)}
-                    />
-                    Auto-calculate bet sizes
-                  </label>
-                </div>
-              </div>
-            )}
 
             {/* Bet List */}
             <div className="betslip-content">
@@ -502,12 +588,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                             )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => onRemoveBet?.(bet.id)}
-                          className="remove-bet-btn"
-                        >
-                          <X size={14} />
-                        </button>
                       </div>
                       
                       <div className="bet-amount-section">

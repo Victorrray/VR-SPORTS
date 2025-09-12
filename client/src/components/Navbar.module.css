@@ -24,9 +24,9 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  overflow: visible;
+  min-height: 70px;
+  height: auto;
 }
 
 /* Mobile search and profile buttons */
@@ -42,7 +42,6 @@
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.3s ease;
   backdrop-filter: var(--backdrop-blur-light, blur(10px));
   -webkit-backdrop-filter: var(--backdrop-blur-light, blur(10px));
   position: relative;
@@ -52,7 +51,6 @@
 .mobileProfileBtn:hover {
   color: var(--accent);
   border-color: var(--accent);
-  transform: scale(1.05);
 }
 
 .notificationDot {
@@ -94,7 +92,6 @@
   cursor: pointer;
   padding: 0.5em 1em;
   border-radius: 12px;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.6em;
@@ -103,26 +100,24 @@
 }
 
 .brandBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 10%, transparent), transparent);
-  transition: left 0.5s ease;
-}
-
-.brandBtn:hover::before {
-  left: 100%;
+  display: none;
 }
 
 .brandBtn:hover {
   background: rgba(61, 126, 255, 0.1);
   border: 1px solid rgba(61, 126, 255, 0.3);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
   color: #fff;
+}
+
+.brandBtn:active,
+.brandBtn:focus {
+  background: rgba(61, 126, 255, 0.1);
+  border: 1px solid rgba(61, 126, 255, 0.3);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+  color: #fff;
+  transform: none;
+  outline: none;
 }
 
 .logo { display: none; }
@@ -340,9 +335,10 @@
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .navbar {
-    padding: 1rem 1.5rem;
+    padding: 1rem 1rem;
+    min-height: 60px;
   }
   
   .mobileSearchBtn,
@@ -373,11 +369,17 @@
     order: 3;
     flex: 1;
     justify-content: center;
-    margin: 0 12px;
+    margin: 0;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     width: auto;
+    max-width: calc(100% - 140px); /* More space for left menu button */
+    display: flex;
+    align-items: center;
+    will-change: auto;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   
   .mobileProfileBtn {
@@ -386,19 +388,43 @@
   
   /* Center brand name only */
   .navLeft { 
-    width: 100%; 
+    width: auto;
     display: flex; 
-    justify-content: center; 
+    justify-content: center;
+    align-items: center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   
   .brandBtn { 
     display: inline-flex !important; 
     padding: 0.4em 0.8em;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    justify-content: center;
+    align-items: center;
+    transform: none !important;
+    will-change: auto;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+  }
+  
+  .brandBtn:active,
+  .brandBtn:focus,
+  .brandBtn:hover {
+    transform: translate3d(0,0,0) !important;
+    -webkit-transform: translate3d(0,0,0) !important;
   }
   
   .brandTitle { 
     display: inline; 
-    font-size: 1.1rem; 
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .brandLogo { display: none; }

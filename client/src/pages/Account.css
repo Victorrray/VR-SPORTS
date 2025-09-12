@@ -173,16 +173,16 @@
   letter-spacing: 0.5px;
 }
 
-.status-badge.verified {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+.status-badge.platinum {
+  background: rgba(255, 215, 0, 0.15);
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
-.status-badge.unverified {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+.status-badge.free-trial {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 .profile-details {

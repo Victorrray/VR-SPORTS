@@ -271,6 +271,11 @@ export default function OddsTable({
     
     onAddBet(bet);
     
+    // Open bet slip automatically
+    if (onOpenBetSlip) {
+      onOpenBetSlip();
+    }
+    
     // Show feedback
     if (buttonElement) {
       const originalText = buttonElement.textContent;
@@ -1203,9 +1208,13 @@ export default function OddsTable({
                             className="mob-add-pick-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                              addToPicks(row, { bookmaker: row.bk, book: row.bk?.title }, false, e.target);
+                              if (onAddBet) {
+                                addToBetSlip(row, { bookmaker: row.bk, book: row.bk?.title }, e.target);
+                              } else {
+                                addToPicks(row, { bookmaker: row.bk, book: row.bk?.title }, false, e.target);
+                              }
                             }}
-                            title="Add to My Picks"
+                            title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
                           >
                             +
                           </button>

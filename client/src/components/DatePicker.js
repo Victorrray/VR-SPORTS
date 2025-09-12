@@ -1,86 +1,79 @@
 // src/components/DatePicker.js
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { Calendar, ChevronDown, X } from "lucide-react";
 import "./DatePicker.css";
 
 export default function DatePicker({ value, onChange, placeholder = "Select Date" }) {
   const [open, setOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isChanging, setIsChanging] = useState(false);
-  const [isRendered, setIsRendered] = useState(false);
   const boxRef = useRef(null);
-  const timeoutRef = useRef(null);
-  const clickTimeoutRef = useRef(null);
+  const menuRef = useRef(null);
+  const [portalStyle, setPortalStyle] = useState({});
 
-  // Debounced mobile detection to prevent rapid state changes
-  const checkMobile = useCallback(() => {
-    const mobile = window.innerWidth <= 600;
-    if (mobile !== isMobile) {
-      setIsMobile(mobile);
-    }
-  }, [isMobile]);
+  // Use a portal automatically on small screens
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 800;
+  const shouldPortal = isMobile;
 
+  // Close on outside click
   useEffect(() => {
-    checkMobile();
-    const debouncedResize = () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(checkMobile, 100);
+    const h = (e) => {
+      if (!open) return;
+      if (boxRef.current?.contains(e.target)) return;
+      if (shouldPortal && e.target.closest('.dp-mobile-overlay, .dp-mobile-sheet')) return;
+      if (!shouldPortal && menuRef.current?.contains(e.target)) return;
+      setOpen(false);
     };
-    window.addEventListener('resize', debouncedResize);
+    document.addEventListener("mousedown", h);
+    document.addEventListener("touchstart", h);
     return () => {
-      window.removeEventListener('resize', debouncedResize);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      document.removeEventListener("mousedown", h);
+      document.removeEventListener("touchstart", h);
     };
-  }, [checkMobile]);
+  }, [open, shouldPortal]);
 
-  // Improved click outside handler with better timing
+  // Portal positioning (desktop only)
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!open || !boxRef.current) return;
+    if (!open || !boxRef.current || shouldPortal) return;
+
+    const compute = () => {
+      const r = boxRef.current.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      const pad = 8;
+      const minW = 200;
       
-      // Check if click is inside our component
-      if (boxRef.current.contains(event.target)) return;
-      
-      // Check for portal elements
-      const portalElements = [
-        '.dp-mobile-overlay',
-        '.dp-mobile-sheet', 
-        '.dp-menu',
-        '.mfs-content',
-        '.mobile-filters-sheet',
-        '.ms-mobile-overlay',
-        '.ms-mobile-sheet'
-      ];
-      
-      for (const selector of portalElements) {
-        if (event.target.closest(selector)) return;
-      }
-      
-      // Close with slight delay to prevent race conditions
-      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
-      clickTimeoutRef.current = setTimeout(() => {
-        setOpen(false);
-      }, 10);
-    };
-    
-    if (open) {
-      // Wait for render before adding listener
-      const timer = setTimeout(() => {
-        setIsRendered(true);
-        document.addEventListener('mousedown', handleClickOutside, { passive: true });
-        document.addEventListener('touchstart', handleClickOutside, { passive: true });
-      }, 100);
-      
-      return () => {
-        clearTimeout(timer);
-        setIsRendered(false);
-        document.removeEventListener('mousedown', handleClickOutside);
-        document.removeEventListener('touchstart', handleClickOutside);
-        if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+      const spaceBelow = vh - r.bottom - pad;
+      const spaceAbove = r.top - pad;
+      const align = spaceBelow >= 200 ? "down" : "up";
+
+      const base = {
+        position: "fixed",
+        zIndex: 9999,
+        minWidth: Math.max(minW, r.width),
+        left: Math.max(pad, Math.min(r.left, vw - pad - minW)),
+        borderRadius: 12,
+        overflow: "auto",
       };
-    }
-  }, [open]);
+
+      if (align === "up") {
+        base.bottom = Math.max(8, vh - r.top + 8);
+        base.maxHeight = Math.max(160, spaceAbove);
+      } else {
+        base.top = Math.min(vh - pad, r.bottom + 8);
+        base.maxHeight = Math.max(160, spaceBelow);
+      }
+
+      setPortalStyle(base);
+    };
+
+    compute();
+    window.addEventListener("resize", compute);
+    window.addEventListener("scroll", compute, true);
+    return () => {
+      window.removeEventListener("resize", compute);
+      window.removeEventListener("scroll", compute, true);
+    };
+  }, [open, shouldPortal]);
 
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return placeholder;
@@ -95,7 +88,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     });
   };
 
-  const dateOptions = React.useMemo(() => {
+  const dateOptions = useMemo(() => {
     const options = [];
     // Get current date in user's local timezone
     const today = new Date();
@@ -103,149 +96,143 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     
     // Add "All Dates" option
-    options.push({ value: "", label: "All Dates" });
+    options.push({ key: "", title: "All Dates" });
     
     // Add "Live Games" option
-    options.push({ value: "live", label: "🔴 Live Games" });
+    options.push({ key: "live", title: "🔴 Live Games" });
     
     // Add today
     options.push({ 
-      value: localToday.toISOString().split('T')[0], 
-      label: "Today" 
+      key: localToday.toISOString().split('T')[0], 
+      title: "Today" 
     });
     
     // Add next 7 days
     for (let i = 1; i <= 7; i++) {
       const date = new Date(localToday);
       date.setDate(localToday.getDate() + i);
-      const value = date.toISOString().split('T')[0];
-      const label = date.toLocaleDateString('en-US', { 
+      const key = date.toISOString().split('T')[0];
+      const title = date.toLocaleDateString('en-US', { 
         weekday: 'short',
         month: 'short', 
         day: 'numeric' 
       });
-      options.push({ value, label });
+      options.push({ key, title });
     }
     
     return options;
   }, []); // Empty dependency array - only compute once
 
-  const handleDateSelect = useCallback((dateValue) => {
-    if (isChanging) return; // Prevent multiple rapid changes
-    
-    setIsChanging(true);
-    
-    // Close dropdown immediately for better UX
-    setOpen(false);
-    
-    // Delay the onChange to prevent conflicts
-    setTimeout(() => {
-      onChange(dateValue);
-      setIsChanging(false);
-    }, 50);
-  }, [isChanging, onChange]);
-
-  const handleToggle = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isChanging) return;
-    
-    setOpen(prev => !prev);
-  }, [isChanging]);
-
-  const MobileSheet = useCallback(() => {
-    const handleOverlayClick = (e) => {
-      if (e.target === e.currentTarget) {
-        setOpen(false);
-      }
-    };
-
-    const handleClose = () => {
+  const handleDateSelect = (dateValue) => {
+    try {
       setOpen(false);
-    };
+      onChange(dateValue);
+    } catch (error) {
+      console.error('Error updating date selection:', error);
+    }
+  };
 
-    const handleOptionClick = (optionValue) => {
-      handleDateSelect(optionValue);
-    };
+  const displayText = useMemo(() => {
+    if (!value) return placeholder;
+    if (value === "live") return "🔴 Live Games";
+    
+    const option = dateOptions.find(opt => opt.key === value);
+    if (option) return option.title;
+    
+    // Fallback formatting
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  }, [value, dateOptions, placeholder]);
 
+  const MobileSheet = () => {
     return (
-      <div className="dp-mobile-overlay" onClick={handleOverlayClick}>
+      <div className="dp-mobile-overlay" onClick={(e) => {
+        if (e.target === e.currentTarget) setOpen(false);
+      }}>
         <div className="dp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
           <div className="dp-mobile-header">
             <h3>Select Date</h3>
-            <button className="dp-mobile-close" onClick={handleClose} type="button">
+            <button className="dp-mobile-close" onClick={() => setOpen(false)} type="button">
               <X size={20} />
             </button>
           </div>
           <div className="dp-mobile-content">
             {dateOptions.map((option) => (
               <div 
-                key={option.value} 
-                className={`dp-mobile-option ${value === option.value ? 'dp-selected' : ''}`}
-                onClick={() => handleOptionClick(option.value)}
+                key={option.key} 
+                className={`dp-mobile-option ${value === option.key ? 'dp-selected' : ''}`}
+                onClick={() => handleDateSelect(option.key)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    handleOptionClick(option.value);
+                    handleDateSelect(option.key);
                   }
                 }}
               >
-                <span className={`dp-mobile-checkbox ${value === option.value ? 'dp-checked' : ''}`}>
-                  {value === option.value ? "✓" : "○"}
+                <span className={`dp-mobile-checkbox ${value === option.key ? 'dp-checked' : ''}`}>
+                  {value === option.key ? "✓" : "○"}
                 </span>
-                <span className="dp-mobile-label">{option.label}</span>
+                <span className="dp-mobile-label">{option.title}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
     );
-  }, [dateOptions, value, handleDateSelect]);
+  };
 
   return (
-    <div className="dp-wrap">
+    <div className="dp-wrap" ref={boxRef}>
       <button 
         className="dp-toggle" 
-        onClick={handleToggle}
+        onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-haspopup="listbox"
         type="button"
-        disabled={isChanging}
       >
         <Calendar size={16} />
-        <span>{formatDisplayDate(value)}</span>
+        <span>{displayText}</span>
         <ChevronDown size={16} className={`dp-chevron ${open ? 'dp-open' : ''}`} />
       </button>
 
       {/* Desktop dropdown */}
-      {open && !isMobile && isRendered && (
-        <div className="dp-menu" role="listbox">
+      {open && !shouldPortal && (
+        <div 
+          ref={menuRef}
+          className="dp-menu" 
+          style={portalStyle}
+          role="listbox"
+        >
           {dateOptions.map((option) => (
             <div 
-              key={option.value}
-              className={`dp-item ${value === option.value ? 'dp-selected' : ''}`}
-              onClick={() => handleDateSelect(option.value)}
+              key={option.key}
+              className={`dp-item ${value === option.key ? 'dp-selected' : ''}`}
+              onClick={() => handleDateSelect(option.key)}
               role="option"
-              aria-selected={value === option.value}
+              aria-selected={value === option.key}
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  handleDateSelect(option.value);
+                  handleDateSelect(option.key);
                 }
               }}
             >
-              {option.label}
+              {option.title}
             </div>
           ))}
         </div>
       )}
 
       {/* Mobile sheet */}
-      {open && isMobile && isRendered && typeof document !== "undefined" && 
+      {open && shouldPortal && typeof document !== "undefined" && 
         ReactDOM.createPortal(<MobileSheet />, document.body)
       }
     </div>

@@ -190,7 +190,8 @@ export default function Navbar({ onOpenMobileSearch }) {
         )}
       </div>
 
-      {/* Profile hamburger menu - only on profile page (after logo) */}
+
+      {/* Profile menu button - to the left of brand logo */}
       {location.pathname === "/account" && user && (
         <button 
           className={styles.mobileProfileBtn} 
@@ -198,9 +199,10 @@ export default function Navbar({ onOpenMobileSearch }) {
           onClick={() => setProfileMenuOpen(!profileMenuOpen)}
           style={{ 
             position: 'absolute',
-            right: '80px',
+            left: '16px',
             top: '50%',
-            transform: 'translateY(-50%)'
+            transform: 'translateY(-50%)',
+            zIndex: 10
           }}
         >
           <Menu size={20} />
@@ -214,56 +216,78 @@ export default function Navbar({ onOpenMobileSearch }) {
                 top: '100%',
                 left: 0,
                 marginTop: '8px',
-                background: 'var(--card-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                minWidth: '200px',
+                background: '#1a1b23',
+                border: '2px solid #3b82f6',
+                borderRadius: '12px',
+                boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
+                minWidth: '220px',
                 zIndex: 1000,
                 overflow: 'hidden'
               }}
             >
-              <div 
+              <button 
                 onClick={() => {
                   setProfileMenuOpen(false);
-                  document.getElementById('usage-plan-section')?.scrollIntoView({ behavior: 'smooth' });
+                  navigate('/usage-plan');
                 }}
                 style={{
-                  padding: '12px 16px',
+                  padding: '16px 20px',
                   cursor: 'pointer',
-                  borderBottom: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                  fontSize: '14px',
-                  fontWeight: '500'
+                  borderBottom: '1px solid #374151',
+                  color: '#ffffff',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  background: 'transparent',
+                  border: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease'
                 }}
-                onMouseEnter={(e) => e.target.style.background = 'var(--hover-bg)'}
-                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#3b82f6';
+                  e.target.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#ffffff';
+                }}
               >
                 Usage & Plan
-              </div>
-              <div 
+              </button>
+              <button 
                 onClick={() => {
                   setProfileMenuOpen(false);
-                  document.getElementById('sportsbooks-section')?.scrollIntoView({ behavior: 'smooth' });
+                  navigate('/my-sportsbooks');
                 }}
                 style={{
-                  padding: '12px 16px',
+                  padding: '16px 20px',
                   cursor: 'pointer',
-                  color: 'var(--text-primary)',
-                  fontSize: '14px',
-                  fontWeight: '500'
+                  color: '#ffffff',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  background: 'transparent',
+                  border: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease'
                 }}
-                onMouseEnter={(e) => e.target.style.background = 'var(--hover-bg)'}
-                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#3b82f6';
+                  e.target.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#ffffff';
+                }}
               >
                 My Sportsbooks
-              </div>
+              </button>
             </div>
           )}
         </button>
       )}
 
-      {/* Mobile profile button - top right corner (all pages) */}
+      {/* Mobile profile button - top right corner */}
       <button 
         className={styles.mobileProfileBtn} 
         aria-label="Profile"

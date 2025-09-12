@@ -1,13 +1,15 @@
 // src/pages/Account.js - Updated styling
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { signOutAndRefresh } from "../lib/authActions";
-import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap } from "lucide-react";
 import MobileBottomBar from "../components/MobileBottomBar";
 import SportMultiSelect from "../components/SportMultiSelect";
 import UsagePlanCard from "../components/UsagePlanCard";
+import { AVAILABLE_SPORTSBOOKS } from '../constants/sportsbooks';
 import "./Account.css";
 
 function initialsFromEmail(email = "") {
@@ -22,41 +24,9 @@ function maskId(id = "") {
   return `${id.slice(0, 6)}…${id.slice(-4)}`;
 }
 
-const AVAILABLE_SPORTSBOOKS = [
-  { key: 'draftkings', name: 'DraftKings', popular: true },
-  { key: 'fanduel', name: 'FanDuel', popular: true },
-  { key: 'betmgm', name: 'BetMGM', popular: true },
-  { key: 'caesars', name: 'Caesars', popular: true },
-  { key: 'espnbet', name: 'ESPN BET', popular: true },
-  { key: 'pointsbetau', name: 'PointsBet', popular: true },
-  { key: 'hardrockbet', name: 'Hard Rock Bet', popular: true },
-  { key: 'unibet_us', name: 'Unibet', popular: false },
-  { key: 'williamhill_us', name: 'William Hill', popular: false },
-  { key: 'betrivers', name: 'BetRivers', popular: false },
-  { key: 'wynnbet', name: 'WynnBET', popular: false },
-  { key: 'superbook', name: 'SuperBook', popular: false },
-  { key: 'barstool', name: 'Barstool', popular: false },
-  { key: 'twinspires', name: 'TwinSpires', popular: false },
-  { key: 'foxbet', name: 'FOX Bet', popular: false },
-  { key: 'betfred_us', name: 'Betfred', popular: false },
-  { key: 'fliff', name: 'Fliff', popular: false },
-  { key: 'superdraft', name: 'SuperDraft', popular: false },
-  { key: 'prizepicks', name: 'PrizePicks', popular: false },
-  { key: 'underdog', name: 'Underdog Fantasy', popular: false },
-  { key: 'draftkings_pick6', name: 'DraftKings Pick6', popular: false },
-  { key: 'betonlineag', name: 'BetOnline.ag', popular: false },
-  { key: 'lowvig', name: 'LowVig.ag', popular: false },
-  { key: 'mybookieag', name: 'MyBookie.ag', popular: false },
-  { key: 'bovada', name: 'Bovada', popular: false },
-  { key: 'gtbets', name: 'GTBets', popular: false },
-  { key: 'betdsi', name: 'BetDSI', popular: false },
-  { key: 'heritage', name: 'Heritage Sports', popular: false },
-  { key: 'intertops', name: 'Intertops', popular: false },
-  { key: 'sportsbetting', name: 'SportsBetting.ag', popular: false }
-];
-
 export default function Account() {
   const { user } = useAuth();
+  const { me } = useMe();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -322,17 +292,19 @@ export default function Account() {
           <div className="user-info-grid">
             <div className="user-avatar-section">
               <div className="avatar">{initialsFromEmail(email)}</div>
-              {emailVerified ? (
-                <div className="status-badge verified">
-                  <Check size={12} />
-                  <span>Verified</span>
-                </div>
-              ) : (
-                <div className="status-badge unverified">
-                  <AlertCircle size={12} />
-                  <span>Unverified</span>
-                </div>
-              )}
+              <div className={`status-badge ${me?.plan === 'platinum' ? 'platinum' : 'free-trial'}`}>
+                {me?.plan === 'platinum' ? (
+                  <>
+                    <Crown size={12} />
+                    <span>Platinum</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={12} />
+                    <span>Free Trial</span>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="user-details-section">

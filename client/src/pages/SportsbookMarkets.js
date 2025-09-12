@@ -599,107 +599,79 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         textAlign: 'center',
         paddingLeft: 'var(--mobile-gutter, 16px)',
         paddingRight: 'var(--mobile-gutter, 16px)',
-        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))',
-        borderRadius: '12px',
-        padding: '24px 16px',
-        border: '1px solid rgba(139, 92, 246, 0.2)'
+        padding: '24px 16px'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h2 style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: 'var(--text-primary)',
-              margin: '0 0 8px 0',
-              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>
-              {showArbitrage ? 'Arbitrage Opportunities' : 'Game Odds'}
-            </h2>
-            <p style={{
-              fontSize: '14px',
-              color: 'var(--text-secondary)',
-              margin: 0,
-              opacity: 0.8
-            }}>
-              {showArbitrage ? 'Find profitable arbitrage opportunities' : 'Compare odds across all major sportsbooks'}
-            </p>
-          </div>
+        <div style={{ 
+          display: 'flex', 
+          background: 'rgba(0, 0, 0, 0.2)',
+          borderRadius: '12px',
+          padding: '4px',
+          gap: '0'
+        }}>
           <button
-            onClick={() => setShowArbitrage(!showArbitrage)}
+            onClick={() => setShowArbitrage(false)}
             style={{
-              background: showArbitrage 
-                ? 'linear-gradient(135deg, #22c55e, #16a34a)' 
-                : 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              flex: 1,
+              background: !showArbitrage 
+                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
+                : 'transparent',
               border: 'none',
-              color: 'white',
-              padding: '12px 24px',
+              color: !showArbitrage ? 'white' : 'var(--text-secondary)',
+              padding: '16px 24px',
               borderRadius: '8px',
               fontWeight: '600',
-              fontSize: '14px',
+              fontSize: '16px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '8px'
             }}
           >
-            {showArbitrage ? '📊 Game Odds' : '⚡ Arbitrage'}
+            📊 Game Odds
+          </button>
+          <button
+            onClick={() => setShowArbitrage(true)}
+            style={{
+              flex: 1,
+              background: showArbitrage 
+                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
+                : 'transparent',
+              border: 'none',
+              color: showArbitrage ? 'white' : 'var(--text-secondary)',
+              padding: '16px 24px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '16px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+          >
+            ⚡ Arbitrage
           </button>
         </div>
+        <p style={{
+          fontSize: '14px',
+          color: 'var(--text-secondary)',
+          margin: '16px 0 0 0',
+          opacity: 0.8
+        }}>
+          {showArbitrage ? 'Find profitable arbitrage opportunities' : 'Compare odds across all major sportsbooks'}
+        </p>
       </div>
 
       {showArbitrage ? (
-        <div className="arbitrage-split-view">
-          {/* Game Odds - Left Side */}
-          <div>
-            <h3 style={{ 
-              color: 'var(--text)', 
-              fontSize: '18px', 
-              fontWeight: '600', 
-              marginBottom: '16px',
-              padding: '0 16px'
-            }}>
-              Game Odds
-            </h3>
-            <OddsTable
-              key={tableNonce}
-              games={filteredGames}
-              pageSize={10}
-              mode="game"
-              bookFilter={effectiveSelectedBooks}
-              marketFilter={marketKeys}
-              evMin={minEV === "" ? null : Number(minEV)}
-              loading={loading || marketsLoading}
-              error={error || marketsError}
-              oddsFormat={oddsFormat}
-              allCaps={
-                typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
-              }
-              onAddBet={addBet}
-              betSlipCount={bets.length}
-              onOpenBetSlip={openBetSlip}
-              compact={true}
-            />
-          </div>
-          
-          {/* Arbitrage Panel - Right Side */}
-          <div style={{
-            position: 'sticky',
-            top: '20px',
-            maxHeight: 'calc(100vh - 40px)',
-            overflow: 'hidden'
-          }}>
-            <ArbitrageDetector 
-              sport={picked[0] || 'americanfootball_nfl'}
-              games={filteredGames}
-              bookFilter={effectiveSelectedBooks}
-              compact={true}
-            />
-          </div>
-        </div>
+        <ArbitrageDetector 
+          sport={picked[0] || 'americanfootball_nfl'}
+          games={filteredGames}
+          bookFilter={effectiveSelectedBooks}
+          compact={false}
+        />
       ) : (
         <OddsTable
           key={tableNonce}

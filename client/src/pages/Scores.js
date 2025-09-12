@@ -136,12 +136,26 @@ export default function Scores() {
       setLastUpdate(new Date());
       setConnectionStatus('connected');
       
-      // Log live games for debugging
-      if (liveCount > 0) {
-        console.log(`🔴 Found ${liveCount} live games:`, 
-          (data || []).filter(g => g.live === true).map(g => `${g.away_team} @ ${g.home_team}`)
-        );
-      }
+      // Enhanced debugging for game status
+      console.log(`🔴 Found ${liveCount} live games:`, 
+        (data || []).filter(g => g.live === true || g.status === 'in_progress').map(g => ({
+          game: `${g.away_team} @ ${g.home_team}`,
+          live: g.live,
+          status: g.status,
+          commence_time: g.commence_time,
+          completed: g.completed
+        }))
+      );
+      
+      // Debug all games to see their status
+      console.log('🔍 All games status:', (data || []).map(g => ({
+        game: `${g.away_team} @ ${g.home_team}`,
+        live: g.live,
+        status: g.status,
+        completed: g.completed,
+        commence_time: g.commence_time,
+        now: new Date().toISOString()
+      })));
     } catch (error) {
       console.error("Error loading scores:", error);
       setConnectionStatus('error');

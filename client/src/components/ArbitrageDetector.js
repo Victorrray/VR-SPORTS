@@ -11,10 +11,28 @@ import './ArbitrageDetector.css';
 const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilter = [], compact = false }) => {
   const { user, profile } = useAuth();
   const [minProfit, setMinProfit] = useState(2); // Minimum 2% profit
-  const [maxStake, setMaxStake] = useState(1000);
+  
+  // Get user's bankroll from localStorage, default to 1000 if not set
+  const getUserBankroll = () => {
+    const saved = localStorage.getItem('userBankroll');
+    return saved ? Number(saved) : 1000;
+  };
+  
+  const [maxStake, setMaxStake] = useState(getUserBankroll());
   const [selectedMarkets, setSelectedMarkets] = useState(['h2h', 'spreads', 'totals']);
   const [sortBy, setSortBy] = useState('profit');
   const [autoRefresh, setAutoRefresh] = useState(true);
+
+  // Update maxStake when bankroll changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newBankroll = getUserBankroll();
+      setMaxStake(newBankroll);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Fetch odds data for arbitrage analysis
   const { data: oddsData, loading, refresh, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../config/api'); return withApiBase('/api/odds'); })(), {
@@ -208,9 +226,12 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     // Check if arbitrage exists
     if (totalProb >= 1) return null;
     
-    // Calculate optimal stakes
-    const stake1 = (prob1 / totalProb) * maxStake;
-    const stake2 = (prob2 / totalProb) * maxStake;
+    // Calculate optimal stakes with bankroll constraint
+    const userBankroll = getUserBankroll();
+    const effectiveMaxStake = Math.min(maxStake, userBankroll);
+  
+    const stake1 = (prob1 / totalProb) * effectiveMaxStake;
+    const stake2 = (prob2 / totalProb) * effectiveMaxStake;
     const totalStake = stake1 + stake2;
     
     // Calculate payouts
@@ -386,81 +407,6 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
 
   return (
     <div className={`arbitrage-detector ${compact ? 'compact' : ''}`}>
-      <div className="arbitrage-header">
-        <div className="header-title">
-          <Zap className="header-icon" />
-          <h2>{compact ? 'Arbitrage' : 'Arbitrage Opportunities'}</h2>
-          <span className="opportunity-count">{filteredOpportunities.length}</span>
-        </div>
-        {!compact && (
-          <div className="header-actions">
-            <button 
-              className={`refresh-btn ${loading ? 'loading' : ''}`}
-              onClick={refresh}
-              disabled={loading}
-            >
-              <RefreshCw className={loading ? 'spinning' : ''} />
-              {loading ? 'Updating...' : 'Refresh'}
-            </button>
-          </div>
-        )}
-      </div>
-      {!compact && (
-        <div className="arbitrage-controls">
-          <div className="control-group">
-            <label>Min Profit %</label>
-            <input
-              type="number"
-              value={minProfit}
-              onChange={(e) => setMinProfit(Number(e.target.value))}
-              min="0.1"
-              max="50"
-              step="0.1"
-            />
-          </div>
-          <div className="control-group">
-            <label>Max Stake ($)</label>
-            <input
-              type="number"
-              value={maxStake}
-              onChange={(e) => setMaxStake(Number(e.target.value))}
-              min="100"
-              max="10000"
-              step="100"
-            />
-          </div>
-          <div className="control-group">
-            <label>Markets</label>
-            <select 
-              multiple 
-              value={selectedMarkets}
-              onChange={(e) => setSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
-            >
-              <option value="h2h">Moneyline</option>
-              <option value="spreads">Point Spread</option>
-              <option value="totals">Over/Under</option>
-            </select>
-          </div>
-          <div className="control-group">
-            <label>Sort By</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="profit">Profit %</option>
-              <option value="amount">Profit Amount</option>
-              <option value="time">Time to Game</option>
-            </select>
-          </div>
-          <div className="control-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
-              />
-              Auto Refresh
-            </label>
-          </div>
-        </div>
-      )}
 
       <div className={`opportunities-list ${compact ? 'compact' : ''}`}>
         {loading && filteredOpportunities.length === 0 ? (

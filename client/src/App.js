@@ -17,6 +17,8 @@ import Home from './pages/Home';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
 import Account from './pages/Account';
+import UsagePlan from './pages/UsagePlan';
+import MySportsbooks from './pages/MySportsbooks';
 import AuthCallback from './pages/AuthCallback';
 import LoadingBar from "./components/LoadingBar";
 import PrivateRoute from "./components/PrivateRoute";
@@ -113,6 +115,8 @@ function AppRoutes() {
               <Route path="/dashboard" element={user ? <Navigate to="/scores" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Home />} />
               <Route path="/account" element={<Account />} />
+              <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />
+              <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
               <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
               <Route path="/scores" element={<Scores />} />
               <Route path="/billing/success" element={<BillingSuccess />} />
