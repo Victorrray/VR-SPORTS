@@ -4,6 +4,8 @@ import { debounce, APICache, throttle } from '../utils/performance';
 import { useMemoizedCallback } from './useMemoizedCallback';
 import { withApiBase } from '../config/api';
 import { useQuotaHandler } from './useQuotaHandler';
+import { secureFetch } from '../utils/security';
+import { cacheManager } from '../utils/cacheManager';
 
 // Global event emitter for API usage updates
 export const apiUsageEvents = new EventTarget();

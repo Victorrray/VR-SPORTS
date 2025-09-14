@@ -325,6 +325,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+  const [showArbitrage, setShowArbitrage] = useState(false);
   
   // Check if user has platinum plan for arbitrage access
   const hasPlatinum = me?.plan === 'platinum';
