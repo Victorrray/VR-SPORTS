@@ -15,15 +15,18 @@ export function useMe() {
   const fetchMe = useCallback(async () => {
     // Prevent concurrent fetches
     if (fetchingRef.current) {
+      console.log('🔍 useMe: Already fetching, skipping');
       return;
     }
     
+    console.log('🔍 useMe: Starting fetch');
     fetchingRef.current = true;
     setLoading(true);
     setError(null);
     
     try {
       if (!supabase) {
+        console.log('🔍 useMe: No supabase, using default data');
         const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
         if (mountedRef.current) {
           setMe(defaultData);
@@ -36,11 +39,14 @@ export function useMe() {
       try {
         const { data } = await supabase.auth.getSession();
         hasSession = !!data?.session;
+        console.log('🔍 useMe: Session check:', hasSession);
       } catch (sessionError) {
+        console.log('🔍 useMe: Session error:', sessionError);
         // Continue without session - API will handle demo auth
       }
 
       // Fetch user data with simplified error handling
+      console.log('🔍 useMe: Fetching from:', withApiBase('/api/me/usage'));
       const response = await secureFetch(withApiBase('/api/me/usage'), {
         credentials: 'include',
         headers: { 
@@ -49,7 +55,10 @@ export function useMe() {
         }
       });
       
+      console.log('🔍 useMe: Response status:', response.status, 'ok:', response.ok);
+      
       if (!response.ok) {
+        console.log('🔍 useMe: Response not ok, using default data');
         // For 500 errors or auth issues, use default free plan data
         const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
         if (mountedRef.current) {
@@ -59,6 +68,7 @@ export function useMe() {
       }
       
       const userData = await response.json();
+      console.log('🔍 useMe: User data received:', userData);
       
       const meData = { 
         plan: userData.plan || 'free', 
@@ -66,6 +76,8 @@ export function useMe() {
         limit: userData.quota || 250,
         calls_made: userData.used || 0
       };
+      
+      console.log('🔍 useMe: Processed meData:', meData);
       
       if (mountedRef.current) {
         setMe(meData);
