@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
+import { useMe } from "../hooks/useMe";
 import "./OddsTable.css";
 
 // Removed logos import for compliance
@@ -244,6 +245,9 @@ export default function OddsTable({
   betSlipCount = 0,
   onOpenBetSlip = null,
 }) {
+  
+  // Get user plan information for free trial restrictions
+  const { me } = useMe();
   
   // Bet Slip functionality
   const addToBetSlip = (row, book, buttonElement) => {
@@ -1669,7 +1673,20 @@ export default function OddsTable({
                               return `${num/g}/${den/g}`;
                             };
 
-                            return sortedAll.map((p, i) => {
+                            // Apply free trial restrictions - only show first 3 books for free users
+                            const isFreeTrial = me?.plan === 'free' || !me?.plan;
+                            const maxBooks = isFreeTrial ? 3 : 8;
+                            const displayBooks = sortedAll.slice(0, maxBooks);
+                            
+                            console.log('Mini-table sportsbook restriction:', {
+                              userPlan: me?.plan,
+                              isFreeTrial,
+                              totalBooks: sortedAll.length,
+                              maxBooks,
+                              displayedBooks: displayBooks.length
+                            });
+                            
+                            return displayBooks.map((p, i) => {
                               if (mode === "props") {
                                 // For player props, show single odds value
                                 return (

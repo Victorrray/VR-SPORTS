@@ -644,28 +644,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           return isLive;
         });
         console.log(`🔴 LIVE GAMES FILTER RESULT: ${base.length} games found`);
-        
-        // If no live games found, let's check what we have in the original data
-        if (base.length === 0) {
-          console.log('🔍 NO LIVE GAMES FOUND - Checking all games for live indicators:');
-          const allGames = Array.isArray(marketGames) ? marketGames : [];
-          allGames.slice(0, 5).forEach((g, index) => {
-            const gameString = JSON.stringify(g);
-            console.log(`Game ${index + 1}: ${g.home_team} vs ${g.away_team}`, {
-              status: g.status,
-              live: g.live,
-              completed: g.completed,
-              commence_time: g.commence_time,
-              hasRedDot: gameString.includes('🔴'),
-              hasLIVE: gameString.includes('LIVE'),
-              hasScores: !!(g.scores && g.scores.length > 0),
-              rawGameString: gameString.substring(0, 300)
-            });
-          });
-        }
       } else {
         // Show only non-live games for specific dates (including today)
         const today = new Date().toISOString().split('T')[0];
+        console.log(`📅 DATE FILTER: selectedDate="${selectedDate}", today="${today}"`);
         base = base.filter(g => {
           const d = new Date(g.commence_time);
           const y = d.getFullYear();
@@ -699,23 +681,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           // For today's date, exclude live games; for future dates, show all games
           if (selectedDate === today) {
             const result = isSelectedDate && !isLive;
-            if (isSelectedDate) {
-              console.log(`TODAY FILTER - ${g.home_team} vs ${g.away_team}:`, {
-                hasLiveIndicator,
-                startedRecently,
-                isLive,
-                included: result,
-                gameTime: gameTime.toISOString(),
-                hasStarted,
-                isCompleted,
-                fourHoursAgo: fourHoursAgo.toISOString()
-              });
-            }
+            console.log(`📅 TODAY FILTER - ${g.home_team} vs ${g.away_team}:`, {
+              isSelectedDate,
+              hasLiveIndicator,
+              startedRecently,
+              isLive,
+              included: result,
+              gameTime: gameTime.toISOString(),
+              hasStarted,
+              isCompleted,
+              fourHoursAgo: fourHoursAgo.toISOString()
+            });
             return result;
           } else {
             return isSelectedDate;
           }
         });
+        console.log(`📅 TODAY FILTER RESULT: ${base.length} games found (should exclude live games)`);
       }
     }
     const q = (debouncedQuery || '').trim().toLowerCase();
