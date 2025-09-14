@@ -1,27 +1,32 @@
 // src/components/DatePicker.js
 import React, { useState, useEffect, useMemo } from "react";
-import { Calendar, ChevronDown } from "lucide-react";
+import { Calendar, ChevronDown, X } from "lucide-react";
 import "./DatePicker.css";
 
 export default function DatePicker({ value, onChange, placeholder = "Select Date" }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedDates, setSelectedDates] = useState(() => {
+    return value ? [value] : [];
+  });
 
-  // Generate date options
+  // Generate date options with categories
   const dateOptions = useMemo(() => {
-    const options = [];
     const today = new Date();
     
-    // Add "All Dates" option
-    options.push({ key: "", title: "All Dates" });
+    const quickOptions = [
+      { key: "", title: "All Dates", category: "quick" },
+      { key: "live", title: "Live Games", category: "quick" }
+    ];
     
-    // Add "Live Games" option
-    options.push({ key: "live", title: "🔴 Live Games" });
+    const todayOptions = [
+      { 
+        key: today.toISOString().split('T')[0], 
+        title: "Today", 
+        category: "today" 
+      }
+    ];
     
-    // Add today
-    const todayKey = today.toISOString().split('T')[0];
-    options.push({ key: todayKey, title: "Today" });
-    
-    // Add next 7 days
+    const upcomingOptions = [];
     for (let i = 1; i <= 7; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
@@ -31,18 +36,25 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
         month: 'short', 
         day: 'numeric' 
       });
-      options.push({ key, title });
+      upcomingOptions.push({ key, title, category: "upcoming" });
     }
     
-    return options;
+    return { quickOptions, todayOptions, upcomingOptions };
   }, []);
 
   // Get display text for selected value
   const displayText = useMemo(() => {
     if (!value) return placeholder;
     if (value === "live") return "🔴 Live Games";
+    if (value === "") return "All Dates";
     
-    const option = dateOptions.find(opt => opt.key === value);
+    // Check all categories for the option
+    const allOptions = [
+      ...dateOptions.quickOptions,
+      ...dateOptions.todayOptions,
+      ...dateOptions.upcomingOptions
+    ];
+    const option = allOptions.find(opt => opt.key === value);
     if (option) return option.title;
     
     // Fallback for custom dates
@@ -58,9 +70,21 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     }
   }, [value, dateOptions, placeholder]);
 
-  // Handle option selection
-  const handleSelect = (selectedKey) => {
-    onChange(selectedKey);
+  // Handle checkbox toggle
+  const handleDateToggle = (dateKey) => {
+    if (dateKey === "" || dateKey === "live") {
+      // Quick options are single-select
+      setSelectedDates([dateKey]);
+    } else {
+      // Other dates can be multi-select, but for now keep single-select behavior
+      setSelectedDates([dateKey]);
+    }
+  };
+
+  // Handle Done button
+  const handleDone = () => {
+    const selectedDate = selectedDates.length > 0 ? selectedDates[0] : "";
+    onChange(selectedDate);
     setIsOpen(false);
   };
 
@@ -78,6 +102,11 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     }
   }, [isOpen]);
 
+  // Update selectedDates when value changes
+  useEffect(() => {
+    setSelectedDates(value ? [value] : []);
+  }, [value]);
+
   return (
     <div className="dp-wrap">
       <button 
@@ -91,16 +120,82 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
       </button>
 
       {isOpen && (
-        <div className="dp-dropdown">
-          {dateOptions.map((option) => (
-            <div
-              key={option.key}
-              className={`dp-item ${value === option.key ? 'dp-selected' : ''}`}
-              onClick={() => handleSelect(option.key)}
-            >
-              {option.title}
+        <div className="dp-mobile-overlay">
+          <div className="dp-mobile-sheet">
+            <div className="dp-mobile-header">
+              <h3>Select Dates</h3>
+              <button 
+                className="dp-mobile-close"
+                onClick={() => setIsOpen(false)}
+              >
+                <X size={20} />
+              </button>
             </div>
-          ))}
+
+            <div className="dp-mobile-content">
+              {/* Quick Options */}
+              <div className="dp-mobile-category-header">
+                <span>Quick Options</span>
+              </div>
+              {dateOptions.quickOptions.map((option) => (
+                <div
+                  key={option.key}
+                  className="dp-mobile-option"
+                  onClick={() => handleDateToggle(option.key)}
+                >
+                  <div className={`dp-mobile-checkbox ${selectedDates.includes(option.key) ? 'dp-checked' : ''}`}>
+                    {selectedDates.includes(option.key) && '✓'}
+                  </div>
+                  <span className="dp-mobile-label">
+                    {option.key === "live" ? "🔴 Live Games" : option.title}
+                  </span>
+                </div>
+              ))}
+
+              {/* Today */}
+              <div className="dp-mobile-category-header">
+                <span>Today</span>
+              </div>
+              {dateOptions.todayOptions.map((option) => (
+                <div
+                  key={option.key}
+                  className="dp-mobile-option"
+                  onClick={() => handleDateToggle(option.key)}
+                >
+                  <div className={`dp-mobile-checkbox ${selectedDates.includes(option.key) ? 'dp-checked' : ''}`}>
+                    {selectedDates.includes(option.key) && '✓'}
+                  </div>
+                  <span className="dp-mobile-label">{option.title}</span>
+                </div>
+              ))}
+
+              {/* Upcoming Days */}
+              <div className="dp-mobile-category-header">
+                <span>Upcoming Days</span>
+              </div>
+              {dateOptions.upcomingOptions.map((option) => (
+                <div
+                  key={option.key}
+                  className="dp-mobile-option"
+                  onClick={() => handleDateToggle(option.key)}
+                >
+                  <div className={`dp-mobile-checkbox ${selectedDates.includes(option.key) ? 'dp-checked' : ''}`}>
+                    {selectedDates.includes(option.key) && '✓'}
+                  </div>
+                  <span className="dp-mobile-label">{option.title}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="dp-mobile-footer">
+              <button 
+                className="dp-mobile-done"
+                onClick={handleDone}
+              >
+                Done ({selectedDates.length} selected)
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
