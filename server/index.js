@@ -995,6 +995,14 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
             console.log(`🌐 API call for ${sport}:`, url);
             response = await axios.get(url);
             setCachedResponse(cacheKey, response.data);
+            
+            // Increment usage for each actual external API call made
+            const userId = req.__userId;
+            const profile = req.__userProfile;
+            if (userId && profile) {
+              await incrementUsage(userId, profile);
+              console.log(`📊 Incremented usage for ${sport} API call`);
+            }
           }
           const sportGames = response.data || [];
           console.log(`Got ${sportGames.length} games for ${sport}`);
@@ -1022,12 +1030,8 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     
     console.log(`Returning ${allGames.length} games total`);
     
-    // Increment usage counter for successful API calls
-    const userId = req.__userId;
-    const profile = req.__userProfile;
-    if (userId && profile) {
-      await incrementUsage(userId, profile);
-    }
+    // Usage already incremented per external API call above
+    // No need to increment again here
     
     res.json(allGames);
   } catch (err) {
