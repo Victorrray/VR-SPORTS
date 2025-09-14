@@ -621,7 +621,7 @@ export default function Account() {
 
       {/* Version info */}
       <div className="version-info">
-        <span>Version 2.50</span>
+        <span>Version 2.51</span>
       </div>
 
       <MobileBottomBar active="profile" showFilter={false} />
