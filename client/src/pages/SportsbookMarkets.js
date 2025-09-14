@@ -536,16 +536,36 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Filtered games based on date and query
   const filteredGames = useMemo(() => {
     let base = Array.isArray(marketGames) ? marketGames : [];
-    // Filter by selected date (local date)
+    // Filter by selected date (local date) or live games
     if (selectedDate) {
-      base = base.filter(g => {
-        const d = new Date(g.commence_time);
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const local = `${y}-${m}-${day}`;
-        return local === selectedDate;
-      });
+      if (selectedDate === 'live') {
+        // Show only live games
+        base = base.filter(g => 
+          g.status === 'in_progress' || 
+          g.live === true ||
+          (g.completed === false && new Date(g.commence_time) <= new Date())
+        );
+      } else {
+        // Show only non-live games for specific dates (including today)
+        const today = new Date().toISOString().split('T')[0];
+        base = base.filter(g => {
+          const d = new Date(g.commence_time);
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          const local = `${y}-${m}-${day}`;
+          const isSelectedDate = local === selectedDate;
+          const isLive = g.status === 'in_progress' || g.live === true || 
+                        (g.completed === false && new Date(g.commence_time) <= new Date());
+          
+          // For today's date, exclude live games; for future dates, show all games
+          if (selectedDate === today) {
+            return isSelectedDate && !isLive;
+          } else {
+            return isSelectedDate;
+          }
+        });
+      }
     }
     const q = (debouncedQuery || '').trim().toLowerCase();
     if (!q) return base;

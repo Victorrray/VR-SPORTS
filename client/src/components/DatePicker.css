@@ -7,9 +7,6 @@
 
 .dp-toggle {
   width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   padding: 14px 16px;
   border: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
   border-radius: 12px;
@@ -19,10 +16,14 @@
     color-mix(in srgb, var(--bg-elev-2) 90%, transparent)
   );
   color: var(--text);
+  text-align: left;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   position: relative;
   overflow: hidden;
 }
@@ -109,10 +110,24 @@
   padding: 12px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
-  position: relative;
-  user-select: none;
+  border-radius: 6px;
+  margin: 2px 8px;
+  color: var(--text);
   -webkit-tap-highlight-color: transparent;
+}
+
+.dp-item:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.dp-item.dp-selected {
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--accent) 15%, transparent),
+    color-mix(in srgb, var(--accent) 8%, transparent)
+  );
+  border-left: 3px solid var(--accent);
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .dp-item:focus {

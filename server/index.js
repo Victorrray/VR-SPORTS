@@ -41,10 +41,8 @@ const FOCUSED_BOOKMAKERS = [
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
-  // UK region books
-  "bet365", "williamhill", "ladbrokes", "coral", "paddypower", "skybet",
   // US exchange books
-  "prophet_exchange",
+  "prophet_exchange", "rebet",
   // International (for comparison)
   "pinnacle"
 ];
@@ -1283,6 +1281,21 @@ app.get("/api/scores", enforceUsage, async (req, res) => {
         if (o?.details) provider = o.details;
       }
 
+      // Additional ESPN data extraction
+      const venue = comp.venue || {};
+      const weather = comp.weather || null;
+      const attendance = comp.attendance || null;
+      const broadcasts = Array.isArray(comp.broadcasts) ? comp.broadcasts : [];
+      const notes = Array.isArray(comp.notes) ? comp.notes : [];
+      
+      // Team statistics if available
+      const homeStats = home.statistics || [];
+      const awayStats = away.statistics || [];
+      
+      // Injury reports if available
+      const homeInjuries = home.injuries || [];
+      const awayInjuries = away.injuries || [];
+
       return {
         id: e.id || comp.id || `${awayName}-${homeName}-${e.date}`,
         sport_key: sport,
@@ -1312,6 +1325,49 @@ app.get("/api/scores", enforceUsage, async (req, res) => {
           vegasLine || overUnder != null
             ? { spread: vegasLine, overUnder, provider }
             : null,
+        // Additional ESPN details
+        venue: {
+          name: venue.fullName || venue.name || null,
+          city: venue.address?.city || null,
+          state: venue.address?.state || null,
+          capacity: venue.capacity || null,
+          indoor: venue.indoor || null,
+          grass: venue.grass || null
+        },
+        weather: weather ? {
+          temperature: weather.temperature || null,
+          condition: weather.conditionId || weather.displayValue || null,
+          humidity: weather.humidity || null,
+          windSpeed: weather.windSpeed || null
+        } : null,
+        attendance: attendance || null,
+        broadcasts: broadcasts.map(b => ({
+          network: b.market || b.type || null,
+          name: b.media?.shortName || b.names?.[0] || null
+        })).filter(b => b.network || b.name),
+        notes: notes.map(n => n.headline || n.text || n).filter(Boolean),
+        teamStats: {
+          home: homeStats.length > 0 ? homeStats.reduce((acc, stat) => {
+            acc[stat.name] = stat.displayValue;
+            return acc;
+          }, {}) : null,
+          away: awayStats.length > 0 ? awayStats.reduce((acc, stat) => {
+            acc[stat.name] = stat.displayValue;
+            return acc;
+          }, {}) : null
+        },
+        injuries: {
+          home: homeInjuries.length > 0 ? homeInjuries.map(inj => ({
+            player: inj.athlete?.displayName || null,
+            status: inj.status || null,
+            details: inj.details || null
+          })) : null,
+          away: awayInjuries.length > 0 ? awayInjuries.map(inj => ({
+            player: inj.athlete?.displayName || null,
+            status: inj.status || null,
+            details: inj.details || null
+          })) : null
+        }
       };
     });
 

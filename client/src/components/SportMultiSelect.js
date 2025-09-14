@@ -11,12 +11,12 @@ const SPORTSBOOK_CATEGORIES = {
   popular: {
     title: "Popular Sportsbooks",
     icon: Star,
-    books: ["draftkings", "fanduel", "betmgm", "caesars", "bet365", "pointsbet"]
+    books: ["draftkings", "fanduel", "betmgm", "caesars", "pointsbet"]
   },
   premium: {
     title: "Premium Options", 
     icon: TrendingUp,
-    books: ["pinnacle", "circa", "superbook", "westgate"]
+    books: ["pinnacle", "circa", "superbook", "westgate", "rebet"]
   },
   regional: {
     title: "Regional & Others",

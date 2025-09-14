@@ -27,7 +27,6 @@ const AVAILABLE_SPORTSBOOKS = [
   { key: 'betparx', name: 'betPARX', popular: false },
   { key: 'fliff', name: 'Fliff', popular: false },
   { key: 'hardrockbet', name: 'Hard Rock Bet', popular: false },
-  { key: 'rebet', name: 'ReBet', popular: false },
   { key: 'windcreek', name: 'Wind Creek (Betfred PA)', popular: false },
   
   // US DFS Sites (Player Props)
@@ -42,9 +41,9 @@ const AVAILABLE_SPORTSBOOKS = [
   
   // Legacy sportsbooks (keeping for compatibility)
   { key: 'pointsbet', name: 'PointsBet', popular: false },
-  { key: 'bet365', name: 'Bet365', popular: false },
   { key: 'unibet', name: 'Unibet', popular: false },
   { key: 'williamhill_us', name: 'William Hill US', popular: false },
+  { key: 'rebet', name: 'Rebet', popular: false, type: 'platinum' },
   { key: 'wynnbet', name: 'WynnBET', popular: false },
   { key: 'superbook', name: 'SuperBook', popular: false },
   { key: 'barstool', name: 'Barstool', popular: false },

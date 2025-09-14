@@ -26,6 +26,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'bovada', name: 'Bovada', popular: false },
   { key: 'betonlineag', name: 'BetOnline', popular: false },
   { key: 'mybookieag', name: 'MyBookie', popular: false },
+  { key: 'rebet', name: 'Rebet', popular: false },
 ];
 
 // Helper function to get sportsbook by key
@@ -45,6 +46,19 @@ export const getFreePlanSportsbooks = () => {
     book.key === 'fanduel' || 
     book.key === 'caesars'
   );
+};
+
+// Helper function to get sportsbooks available to platinum users (includes all)
+export const getPlatinumPlanSportsbooks = () => {
+  return AVAILABLE_SPORTSBOOKS;
+};
+
+// Helper function to filter sportsbooks by user plan
+export const getSportsbooksByPlan = (userPlan) => {
+  if (userPlan === 'platinum') {
+    return AVAILABLE_SPORTSBOOKS;
+  }
+  return getFreePlanSportsbooks();
 };
 
 // Helper function to get all sportsbook keys
