@@ -165,13 +165,22 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     }
   }, [value, dateOptions, placeholder]);
 
+  // Handle option click with debounce protection
+  const handleOptionClick = useCallback((optionKey) => {
+    // Prevent multiple rapid calls
+    if (isSelectingRef.current) return;
+    isSelectingRef.current = true;
+    
+    handleDateSelect(optionKey);
+    
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      isSelectingRef.current = false;
+    }, 100);
+  }, [handleDateSelect]);
+
   // Mobile sheet component
   const MobileSheet = useCallback(() => {
-    const handleOptionClick = useCallback((optionKey) => {
-      // Prevent event bubbling and multiple calls
-      handleDateSelect(optionKey);
-    }, []);
-
     return (
       <div className="dp-mobile-overlay" onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -222,7 +231,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
         </div>
       </div>
     );
-  }, [dateOptions, value, handleDateSelect]);
+  }, [dateOptions, value, handleOptionClick]);
 
   return (
     <div className="dp-wrap" ref={containerRef}>
