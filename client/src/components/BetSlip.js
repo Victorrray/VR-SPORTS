@@ -96,32 +96,60 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     return Math.round(bankroll * riskMultipliers[riskTolerance]);
   };
 
-  // Calculate recommended bet size based on Kelly Criterion and risk tolerance
+  // Calculate recommended bet size based on value betting and Kelly Criterion
   const getRecommendedBet = (bet) => {
     const baseBetAmount = getBaseBetAmount();
     
+    // If no edge data, fall back to basic risk management
     if (!bet.edge || bet.edge <= 0) return baseBetAmount;
     
-    const edge = bet.edge / 100;
-    const odds = bet.americanOdds;
-    const prob = odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+    const marketOdds = bet.americanOdds;
+    const edge = bet.edge / 100; // Convert percentage to decimal
+    
+    // Calculate implied probability from market odds
+    const marketImpliedProb = marketOdds > 0 
+      ? 100 / (marketOdds + 100) 
+      : Math.abs(marketOdds) / (Math.abs(marketOdds) + 100);
+    
+    // Calculate fair probability (market prob adjusted by edge)
+    // If we have +5% edge, our fair prob = market prob / (1 - edge)
+    const fairProb = marketImpliedProb / (1 - edge);
+    
+    // Calculate decimal odds for Kelly formula
+    const decimalOdds = marketOdds > 0 
+      ? (marketOdds / 100) + 1 
+      : (100 / Math.abs(marketOdds)) + 1;
     
     // Kelly Criterion: f = (bp - q) / b
-    // where b = decimal odds - 1, p = probability, q = 1 - p
-    const b = odds > 0 ? odds / 100 : 100 / Math.abs(odds);
-    const kellyFraction = (b * prob - (1 - prob)) / b;
+    // where b = decimal odds - 1, p = fair probability, q = 1 - p
+    const b = decimalOdds - 1;
+    const p = fairProb;
+    const q = 1 - p;
     
-    // Adjust for risk tolerance
+    const kellyFraction = (b * p - q) / b;
+    
+    // Only bet if Kelly is positive (we have an edge)
+    if (kellyFraction <= 0) return baseBetAmount;
+    
+    // Adjust Kelly based on confidence and risk tolerance
     const riskMultiplier = {
-      conservative: 0.25,
-      moderate: 0.5,
-      aggressive: 0.75
+      conservative: 0.25, // Quarter Kelly
+      moderate: 0.5,      // Half Kelly  
+      aggressive: 0.75    // Three-quarter Kelly
     }[riskTolerance];
     
-    const recommendedFraction = Math.max(0, kellyFraction * riskMultiplier);
-    const recommendedAmount = Math.min(bankroll * recommendedFraction, bankroll * 0.05); // Cap at 5% of bankroll
+    // Scale bet size based on edge strength
+    const edgeMultiplier = Math.min(1, edge * 10); // Higher edge = larger multiplier
+    const adjustedKelly = kellyFraction * riskMultiplier * edgeMultiplier;
     
-    return Math.max(baseBetAmount, Math.round(recommendedAmount));
+    // Calculate recommended amount
+    const kellyAmount = bankroll * adjustedKelly;
+    
+    // Apply caps: minimum base bet, maximum 10% of bankroll
+    const cappedAmount = Math.min(kellyAmount, bankroll * 0.1);
+    const finalAmount = Math.max(baseBetAmount, cappedAmount);
+    
+    return Math.round(finalAmount);
   };
   
   // Validate bet amounts and settings
@@ -644,15 +672,15 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                           </div>
                         )}
                         
-                        {/* Kelly Criterion Recommendation */}
+                        {/* Value-Based Recommendation */}
                         {bet.edge && bet.edge > 0 && (
                           <div className="kelly-recommendation">
                             <Calculator size={12} />
-                            <span>Kelly suggests: ${getRecommendedBet(bet)}</span>
+                            <span>Value bet: ${getRecommendedBet(bet)} ({bet.edge > 0 ? '+' : ''}{bet.edge.toFixed(1)}% edge)</span>
                             <button
                               onClick={() => updateBetAmount(bet.id, getRecommendedBet(bet))}
                               className="apply-kelly-btn"
-                              title="Apply Kelly Criterion"
+                              title="Apply value-based sizing"
                             >
                               Apply
                             </button>
