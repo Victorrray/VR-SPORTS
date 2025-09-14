@@ -329,6 +329,35 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     return baseAmount;
   };
 
+  // Calculate individual bet statistics with proper EV calculation
+  const calculateBetStats = (bet) => {
+    const amount = parseFloat(bet.amount) || 0;
+    const odds = bet.americanOdds;
+    const decimalOdds = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+    const payout = amount * decimalOdds;
+    const profit = payout - amount;
+    
+    // Calculate proper EV using fair odds comparison
+    let edge = 0;
+    if (bet.fairOdds && bet.fairOdds !== odds) {
+      // Convert fair odds to decimal
+      const fairDecimal = bet.fairOdds > 0 ? (bet.fairOdds / 100) + 1 : (100 / Math.abs(bet.fairOdds)) + 1;
+      // Calculate EV percentage: (bookmaker_decimal / fair_decimal - 1) * 100
+      edge = ((decimalOdds / fairDecimal) - 1) * 100;
+    } else if (bet.edge) {
+      // Fallback to provided edge if available
+      edge = bet.edge;
+    }
+    
+    return {
+      amount,
+      payout,
+      profit,
+      edge,
+      decimalOdds
+    };
+  };
+
   // Calculate single bet totals
   const singleBetTotals = useMemo(() => {
     let totalStake = 0;
