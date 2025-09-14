@@ -958,6 +958,14 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     }
     
     console.log(`Returning ${allGames.length} games total`);
+    
+    // Increment usage counter for successful API calls
+    const userId = req.__userId;
+    const profile = req.__userProfile;
+    if (userId && profile) {
+      await incrementUsage(userId, profile);
+    }
+    
     res.json(allGames);
   } catch (err) {
     console.error("odds error:", err?.response?.status, err?.response?.data || err.message);

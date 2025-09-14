@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { debounce, APICache, throttle } from '../utils/performance';
 import { useMemoizedCallback } from './useMemoizedCallback';
 import { withApiBase } from '../config/api';
-import { handleApiResponse } from '../utils/apiUtils';
+import { useQuotaHandler } from './useQuotaHandler';
 
 // Global event emitter for API usage updates
 export const apiUsageEvents = new EventTarget();
