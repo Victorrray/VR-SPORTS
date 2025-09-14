@@ -503,15 +503,16 @@
 
 .amount-input {
   flex: 1;
-  padding: 12px 40px 12px 12px;
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-radius: 8px;
-  background: rgba(139, 92, 246, 0.1);
-  color: var(--text);
+  padding: 16px 50px 16px 16px;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  background: rgba(15, 11, 26, 0.8);
+  color: white;
   font-size: 16px;
-  font-weight: 600;
-  height: 44px;
+  font-weight: 500;
+  transition: all 0.2s ease;
   box-sizing: border-box;
+  min-height: 48px;
 }
 
 .amount-input:focus {
@@ -730,7 +731,7 @@
 
 /* Summary */
 .betslip-summary {
-  padding: 20px;
+  padding: 24px;
   margin-top: 24px;
   background: rgba(139, 92, 246, 0.05);
   border-top: 1px solid rgba(139, 92, 246, 0.2);
@@ -739,14 +740,15 @@
 .single-summary, .parlay-summary {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 16px;
+  padding: 8px 0;
 }
 
 .summary-row.profit {
@@ -756,9 +758,16 @@
   border-top: 1px solid rgba(139, 92, 246, 0.2);
 }
 
+.bet-amount-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+}
+
 .summary-value {
   font-weight: 600;
-  color: var(--text);
+  color: white;
+  font-size: 18px;
 }
 
 .summary-value.profit {

@@ -331,7 +331,7 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
 
   // Calculate individual bet statistics with proper EV calculation
   const calculateBetStats = (bet) => {
-    const amount = parseFloat(bet.amount) || 0;
+    const amount = parseFloat(betAmounts[bet.id]) || 0;
     const odds = bet.americanOdds;
     const decimalOdds = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
     const payout = amount * decimalOdds;
