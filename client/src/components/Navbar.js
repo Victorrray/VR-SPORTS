@@ -192,7 +192,7 @@ export default function Navbar({ onOpenMobileSearch }) {
 
 
       {/* Profile menu button - to the left of brand logo */}
-      {location.pathname === "/account" && user && (
+      {(location.pathname === "/account" || location.pathname === "/my-sportsbooks" || location.pathname === "/usage-plan") && user && (
         <>
           <button 
             className={styles.mobileProfileBtn} 
