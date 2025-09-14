@@ -125,23 +125,22 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     return options;
   }, []); // Empty dependency array - only compute once
 
-  // Handle date selection with stable state management
-  const handleDateSelect = useCallback((dateValue) => {
-    // Clear any pending timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+  // Add ref to prevent multiple selections
+  const isSelectingRef = useRef(false);
+
+  // Handle date selection with immediate close and debounce protection
+  const handleDateSelect = useCallback((selectedKey) => {
+    // Prevent multiple rapid calls
+    if (isSelectingRef.current) return;
+    isSelectingRef.current = true;
     
-    // Close dropdown immediately
+    onChange(selectedKey);
     setIsOpen(false);
     
-    // Call onChange immediately without delay
-    try {
-      onChange(dateValue);
-    } catch (error) {
-      console.error('Error updating date selection:', error);
-    }
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      isSelectingRef.current = false;
+    }, 100);
   }, [onChange]);
 
   // Display text for the selected date
@@ -168,6 +167,11 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
 
   // Mobile sheet component
   const MobileSheet = useCallback(() => {
+    const handleOptionClick = useCallback((optionKey) => {
+      // Prevent event bubbling and multiple calls
+      handleDateSelect(optionKey);
+    }, []);
+
     return (
       <div className="dp-mobile-overlay" onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -190,14 +194,22 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
               <div 
                 key={option.key} 
                 className={`dp-mobile-option ${value === option.key ? 'dp-selected' : ''}`}
-                onClick={() => handleDateSelect(option.key)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOptionClick(option.key);
+                }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    handleDateSelect(option.key);
+                    handleOptionClick(option.key);
                   }
+                }}
+                style={{
+                  pointerEvents: 'auto',
+                  touchAction: 'manipulation'
                 }}
               >
                 <span className={`dp-mobile-checkbox ${value === option.key ? 'dp-checked' : ''}`}>

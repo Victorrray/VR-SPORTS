@@ -271,10 +271,13 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       });
       
       // Convert to array of {key, title} objects
-      const uniqueBooks = Array.from(bookmakerMap.entries()).map(([key, title]) => ({
+      let uniqueBooks = Array.from(bookmakerMap.entries()).map(([key, title]) => ({
         key,
         title
       }));
+      
+      // Filter books for free users - only allow DraftKings, FanDuel, and Caesars
+      // This will be handled by the component using useMe hook
       
       console.log('🔍 useMarkets: Extracted bookmakers:', uniqueBooks);
       setBooks(uniqueBooks);

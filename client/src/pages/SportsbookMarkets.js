@@ -517,10 +517,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     selectedDate ? new Date(selectedDate) : null
   );
 
-  // Keep local book list in sync with hook results
+  // Keep local book list in sync with hook results and filter for free users
   useEffect(() => {
-    if (Array.isArray(marketBooks)) setBookList(marketBooks);
-  }, [marketBooks]);
+    if (Array.isArray(marketBooks)) {
+      // Filter books for free users - only allow DraftKings, FanDuel, and Caesars
+      let filteredBooks = marketBooks;
+      if (me?.plan !== 'platinum') {
+        filteredBooks = marketBooks.filter(book => 
+          book.key === 'draftkings' || 
+          book.key === 'fanduel' || 
+          book.key === 'caesars'
+        );
+      }
+      setBookList(filteredBooks);
+    }
+  }, [marketBooks, me?.plan]);
 
   // Filtered games based on date and query
   const filteredGames = useMemo(() => {
