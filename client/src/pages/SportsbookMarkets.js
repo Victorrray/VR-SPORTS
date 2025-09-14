@@ -540,12 +540,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Debug: Log a sample game to see available properties
     if (base.length > 0) {
       console.log('Sample game data:', {
+        id: base[0].id,
+        home_team: base[0].home_team,
+        away_team: base[0].away_team,
+        commence_time: base[0].commence_time,
         status: base[0].status,
         live: base[0].live,
         completed: base[0].completed,
-        commence_time: base[0].commence_time,
-        home_team: base[0].home_team,
-        away_team: base[0].away_team,
         scores: base[0].scores,
         all_properties: Object.keys(base[0])
       });
@@ -573,6 +574,33 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Filter by selected date (local date) or live games
     if (selectedDate) {
+      console.log(`🔍 DEBUG: Filtering by selectedDate: ${selectedDate}`);
+      console.log(`🔍 DEBUG: Total games before date filter: ${base.length}`);
+      if (base.length > 0) {
+        console.log('🔍 DEBUG: Sample game data:', {
+          id: base[0].id,
+          home_team: base[0].home_team,
+          away_team: base[0].away_team,
+          commence_time: base[0].commence_time,
+          status: base[0].status,
+          live: base[0].live,
+          completed: base[0].completed,
+          scores: base[0].scores,
+          all_properties: Object.keys(base[0])
+        });
+        
+        // Check current time vs game times for debugging
+        const now = new Date();
+        console.log(`Current time: ${now.toISOString()}`);
+        console.log(`Today's date string: ${now.toISOString().split('T')[0]}`);
+        
+        // Sample game time analysis
+        const sampleGame = base[0];
+        const sampleGameTime = new Date(sampleGame.commence_time);
+        console.log(`Sample game time: ${sampleGameTime.toISOString()}`);
+        console.log(`Sample game has started: ${sampleGameTime <= now}`);
+      }
+      
       if (selectedDate === 'live') {
         // Show only live games - check multiple conditions including visual indicators
         base = base.filter(g => {
@@ -581,20 +609,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const hasStarted = gameTime <= now;
           const isCompleted = g.completed === true || g.status === 'completed';
           
-          // Check for live indicators in the data - look in sport_title field
-          const hasLiveIndicator = JSON.stringify(g).includes('🔴') || 
-                                  JSON.stringify(g).includes('LIVE') ||
-                                  (g.home_team && g.home_team.includes('🔴')) ||
-                                  (g.away_team && g.away_team.includes('🔴')) ||
-                                  (g.sport_title && g.sport_title.includes('🔴')) ||
-                                  (g.sport_title && g.sport_title.includes('LIVE'));
+          // Check for live indicators in the data - look in sport_title field and team names
+          const gameString = JSON.stringify(g);
+          const hasLiveIndicator = gameString.includes('🔴') || 
+                                  gameString.includes('LIVE') ||
+                                  (g.home_team && (g.home_team.includes('🔴') || g.home_team.includes('LIVE'))) ||
+                                  (g.away_team && (g.away_team.includes('🔴') || g.away_team.includes('LIVE'))) ||
+                                  (g.sport_title && (g.sport_title.includes('🔴') || g.sport_title.includes('LIVE')));
           
           const isLive = g.status === 'in_progress' || 
                         g.live === true || 
                         hasLiveIndicator ||
                         (hasStarted && !isCompleted && g.scores && g.scores.length > 0);
           
-          console.log(`Game ${g.home_team} vs ${g.away_team}:`, {
+          console.log(`LIVE FILTER - ${g.home_team} vs ${g.away_team}:`, {
             status: g.status,
             live: g.live,
             completed: g.completed,
@@ -602,7 +630,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             isCompleted,
             hasLiveIndicator,
             isLive,
-            scores: g.scores
+            scores: g.scores,
+            gameString: gameString.substring(0, 100) + '...'
           });
           
           return isLive;
@@ -625,12 +654,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const isCompleted = g.completed === true || g.status === 'completed';
           
           // Check for live indicators in the data (same as live games filter)
-          const hasLiveIndicator = JSON.stringify(g).includes('🔴') || 
-                                  JSON.stringify(g).includes('LIVE') ||
-                                  (g.home_team && g.home_team.includes('🔴')) ||
-                                  (g.away_team && g.away_team.includes('🔴')) ||
-                                  (g.sport_title && g.sport_title.includes('🔴')) ||
-                                  (g.sport_title && g.sport_title.includes('LIVE'));
+          const gameString = JSON.stringify(g);
+          const hasLiveIndicator = gameString.includes('🔴') || 
+                                  gameString.includes('LIVE') ||
+                                  (g.home_team && (g.home_team.includes('🔴') || g.home_team.includes('LIVE'))) ||
+                                  (g.away_team && (g.away_team.includes('🔴') || g.away_team.includes('LIVE'))) ||
+                                  (g.sport_title && (g.sport_title.includes('🔴') || g.sport_title.includes('LIVE')));
           
           const isLive = g.status === 'in_progress' || 
                         g.live === true || 
@@ -641,10 +670,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           if (selectedDate === today) {
             const result = isSelectedDate && !isLive;
             if (isSelectedDate) {
-              console.log(`Today filter - ${g.home_team} vs ${g.away_team}:`, {
+              console.log(`TODAY FILTER - ${g.home_team} vs ${g.away_team}:`, {
                 hasLiveIndicator,
                 isLive,
-                included: result
+                included: result,
+                gameTime: gameTime.toISOString(),
+                hasStarted,
+                isCompleted,
+                gameString: gameString.substring(0, 100) + '...'
               });
             }
             return result;
