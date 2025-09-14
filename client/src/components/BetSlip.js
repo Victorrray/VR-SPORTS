@@ -584,30 +584,32 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
               {showAdvanced && (
                 <div className="settings-content">
                   <div className="settings-grid">
-                    <div className="setting-group">
-                      <label className="setting-label">Bankroll</label>
-                      <input
-                        type="number"
-                        value={pendingSettings.bankroll}
-                        onChange={(e) => handleSettingChange('bankroll', Number(e.target.value))}
-                        className="setting-input"
-                        min="1"
-                      />
-                      <span className="setting-hint">Your total available funds</span>
-                    </div>
-                    
-                    <div className="setting-group">
-                      <label className="setting-label">Risk Level</label>
-                      <select
-                        value={pendingSettings.riskTolerance}
-                        onChange={(e) => handleSettingChange('riskTolerance', e.target.value)}
-                        className="setting-select"
-                      >
-                        <option value="conservative">Conservative (1%)</option>
-                        <option value="moderate">Moderate (2.5%)</option>
-                        <option value="aggressive">Aggressive (5%)</option>
-                      </select>
-                      <span className="setting-hint">Percentage of bankroll per bet</span>
+                    <div className="settings-row">
+                      <div className="setting-group">
+                        <label className="setting-label">Bankroll</label>
+                        <input
+                          type="number"
+                          value={pendingSettings.bankroll}
+                          onChange={(e) => handleSettingChange('bankroll', Number(e.target.value))}
+                          className="setting-input"
+                          min="1"
+                        />
+                        <span className="setting-hint">Your total available funds</span>
+                      </div>
+                      
+                      <div className="setting-group">
+                        <label className="setting-label">Risk Level</label>
+                        <select
+                          value={pendingSettings.riskTolerance}
+                          onChange={(e) => handleSettingChange('riskTolerance', e.target.value)}
+                          className="setting-select"
+                        >
+                          <option value="conservative">Conservative (1%)</option>
+                          <option value="moderate">Moderate (2.5%)</option>
+                          <option value="aggressive">Aggressive (5%)</option>
+                        </select>
+                        <span className="setting-hint">Percentage of bankroll per bet</span>
+                      </div>
                     </div>
                     
                     <div className="setting-group checkbox-group">
@@ -682,10 +684,13 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                         
                         {betAmounts[bet.id] && parseFloat(betAmounts[bet.id]) > 0 && (
                           <div className="bet-payout">
-                            <span>Payout: {formatCurrency(
-                              parseFloat(betAmounts[bet.id]) * 
-                              (bet.americanOdds > 0 ? (bet.americanOdds / 100) + 1 : (100 / Math.abs(bet.americanOdds)) + 1)
-                            )}</span>
+                            <div className="payout-info">
+                              <span>Stake: {formatCurrency(parseFloat(betAmounts[bet.id]))}</span>
+                              <span>Payout: {formatCurrency(
+                                parseFloat(betAmounts[bet.id]) * 
+                                (bet.americanOdds > 0 ? (bet.americanOdds / 100) + 1 : (100 / Math.abs(bet.americanOdds)) + 1)
+                              )} ({((parseFloat(betAmounts[bet.id]) / bankroll) * 100).toFixed(1)}% of bankroll)</span>
+                            </div>
                           </div>
                         )}
                         

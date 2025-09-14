@@ -220,7 +220,14 @@
 .settings-grid {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .setting-group {
@@ -413,6 +420,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  padding-top: 16px;
   margin-bottom: 12px;
 }
 
@@ -564,6 +572,25 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.payout-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  width: 100%;
+}
+
+.payout-info span:first-child {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.payout-info span:last-child {
+  color: var(--text);
+  font-weight: 500;
+  font-size: 12px;
 }
 
 /* Parlay Section */
