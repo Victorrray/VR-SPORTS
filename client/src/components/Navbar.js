@@ -341,6 +341,27 @@ export default function Navbar({ onOpenMobileSearch }) {
                 {link.label}
               </Link>
             ))}
+            
+            {/* My Sportsbooks button for authenticated users */}
+            {user && (
+              <button
+                className={styles.mobileLink}
+                onClick={() => {
+                  setMobileMenu(false);
+                  // Toggle sportsbook section visibility
+                  const section = document.getElementById('sportsbooks-section');
+                  if (section) {
+                    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+                  }
+                  // Navigate to account page if not already there
+                  if (location.pathname !== '/account') {
+                    navigate('/account');
+                  }
+                }}
+              >
+                My Sportsbooks
+              </button>
+            )}
           </div>
         </div>
       )}

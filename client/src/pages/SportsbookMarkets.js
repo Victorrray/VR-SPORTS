@@ -60,6 +60,7 @@ if (typeof document !== 'undefined' && !document.getElementById('arbitrage-style
 }
 
 // Import getSportLeague function
+
 function getSportLeague(sportKey='', sportTitle=''){
   const key = String(sportKey).toLowerCase();
   const map = {
@@ -322,7 +323,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Player props DISABLED - always false to eliminate broken functionality
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [showArbitrage, setShowArbitrage] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
   
   // Check if user has platinum plan for arbitrage access
   const hasPlatinum = me?.plan === 'platinum';
@@ -415,23 +417,53 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         const r = await fetch(withApiBase('/api/sports'));
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const arr = await r.json();
-        const normalized = (Array.isArray(arr) ? arr : [])
+        let normalized = (Array.isArray(arr) ? arr : [])
           .filter(s => s && (s.active === undefined || s.active))
           .map(s => ({ key: s.key, title: s.title || (FRIENDLY_TITLES[s.key] || s.key) }));
+        
+        // Limit free users to only NFL, NBA, and MLB
+        if (me?.plan !== 'platinum') {
+          normalized = normalized.filter(sport => 
+            sport.key === 'americanfootball_nfl' || 
+            sport.key === 'basketball_nba' || 
+            sport.key === 'baseball_mlb'
+          );
+        }
+        
         console.log('Fetched sports list:', normalized);
         if (!cancelled) setSportList(normalized);
       } catch (e) {
         console.error('Failed to fetch sports list:', e);
         // Fallback to featured list
-        const fallback = Array.from(FEATURED_SPORTS).map(key => ({
+        let fallback = Array.from(FEATURED_SPORTS).map(key => ({
           key,
           title: FRIENDLY_TITLES[key] || key
         }));
+        
+        // Limit free users to only NFL, NBA, and MLB
+        if (me?.plan !== 'platinum') {
+          fallback = fallback.filter(sport => 
+            sport.key === 'americanfootball_nfl' || 
+            sport.key === 'basketball_nba' || 
+            sport.key === 'baseball_mlb'
+          );
+        }
+        
         console.log('Using fallback sports list:', fallback);
         if (!cancelled) setSportList(fallback);
       }
     })();
     return () => { cancelled = true; };
+  }, [me?.plan]);
+
+  // Handle window resize for desktop filter visibility
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // NOTE: moved filteredGames/effectiveSelectedBooks after useMarkets to avoid TDZ errors
@@ -705,6 +737,118 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           >
             Upgrade to Platinum
           </button>
+        </div>
+      )}
+
+      {/* Desktop Filter Bar */}
+      {isDesktop && (
+        <div 
+          className="desktop-filter-bar"
+          style={{
+            padding: '16px',
+            background: 'var(--card-bg)',
+            borderRadius: '12px',
+            margin: '16px',
+            display: 'flex',
+            gap: '16px',
+            alignItems: 'center',
+            flexWrap: 'wrap'
+          }}
+        >
+        <div style={{ minWidth: '200px' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '4px', 
+            fontSize: '14px', 
+            fontWeight: '600',
+            color: 'var(--text)'
+          }}>
+            Date
+          </label>
+          <DatePicker
+            value={selectedDate}
+            onChange={(val) => {
+              setSelectedDate(val || '');
+              try {
+                localStorage.setItem("vr-odds-date", val || '');
+              } catch {}
+            }}
+            placeholder="Select Date"
+          />
+        </div>
+        
+        <div style={{ minWidth: '200px' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '4px', 
+            fontSize: '14px', 
+            fontWeight: '600',
+            color: 'var(--text)'
+          }}>
+            Sports
+          </label>
+          <SportMultiSelect
+            list={sportList}
+            selected={picked}
+            onChange={(next) => {
+              setPicked(next);
+              try {
+                localStorage.setItem("vr-odds-sports", JSON.stringify(next));
+              } catch {}
+            }}
+            placeholderText="Choose sports..."
+            allLabel="All Sports"
+          />
+        </div>
+        
+        <div style={{ minWidth: '200px' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '4px', 
+            fontSize: '14px', 
+            fontWeight: '600',
+            color: 'var(--text)'
+          }}>
+            Sportsbooks
+          </label>
+          <SportMultiSelect
+            list={bookList}
+            selected={selectedBooks}
+            onChange={(next) => {
+              setSelectedBooks(next);
+              try {
+                localStorage.setItem("vr-odds-books", JSON.stringify(next));
+              } catch {}
+            }}
+            placeholderText="Choose sportsbooks..."
+            allLabel="All Sportsbooks"
+            isSportsbook={true}
+          />
+        </div>
+        
+        <button
+          onClick={() => {
+            setPicked(getDefaultSports());
+            setSelectedDate('');
+            setSelectedBooks([]);
+            try {
+              localStorage.setItem('vr-odds-sports', JSON.stringify(getDefaultSports()));
+              localStorage.setItem('vr-odds-date', '');
+              localStorage.setItem('vr-odds-books', JSON.stringify([]));
+            } catch {}
+          }}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '8px',
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Reset
+        </button>
         </div>
       )}
 

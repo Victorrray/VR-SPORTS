@@ -573,24 +573,6 @@ export default function Account() {
               }
             </p>
             
-            {/* Sportsbook Selection Button */}
-            <div className="sportsbook-access">
-              <button 
-                className="security-btn sportsbook-btn"
-                onClick={() => {
-                  const section = document.getElementById('sportsbooks-section');
-                  if (section) {
-                    section.style.display = section.style.display === 'none' ? 'block' : 'none';
-                  }
-                }}
-              >
-                <BookOpen size={16} />
-                <div className="btn-content">
-                  <span>My Sportsbooks</span>
-                  <small>Select your preferred sportsbooks</small>
-                </div>
-              </button>
-            </div>
           </div>
         </div>
       </section>
