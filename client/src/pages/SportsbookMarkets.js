@@ -542,8 +542,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         // Show only live games
         base = base.filter(g => 
           g.status === 'in_progress' || 
-          g.live === true ||
-          (g.completed === false && new Date(g.commence_time) <= new Date())
+          g.live === true
         );
       } else {
         // Show only non-live games for specific dates (including today)
@@ -555,8 +554,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const day = String(d.getDate()).padStart(2, '0');
           const local = `${y}-${m}-${day}`;
           const isSelectedDate = local === selectedDate;
-          const isLive = g.status === 'in_progress' || g.live === true || 
-                        (g.completed === false && new Date(g.commence_time) <= new Date());
+          const isLive = g.status === 'in_progress' || g.live === true;
           
           // For today's date, exclude live games; for future dates, show all games
           if (selectedDate === today) {
