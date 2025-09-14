@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { withApiBase } from '../config/api';
 import { secureFetch } from '../utils/security';
+import { apiUsageEvents } from './useMarkets';
 
 export function useMe() {
   const [me, setMe] = useState(null);
@@ -102,12 +103,21 @@ export function useMe() {
       subscription = data.subscription;
     }
 
+    // Listen for API usage events to refresh counter
+    const handleApiUsage = () => {
+      // Debounce the refresh to avoid too many calls
+      setTimeout(fetchMe, 1000);
+    };
+    
+    apiUsageEvents.addEventListener('apiCallMade', handleApiUsage);
+
     // Cleanup
     return () => {
       mountedRef.current = false;
       if (subscription) {
         subscription.unsubscribe();
       }
+      apiUsageEvents.removeEventListener('apiCallMade', handleApiUsage);
     };
   }, []); // Empty dependency array to prevent re-runs
 

@@ -2,11 +2,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { debounce, APICache, throttle } from '../utils/performance';
 import { useMemoizedCallback } from './useMemoizedCallback';
-import { secureFetch, apiRateLimiter } from '../utils/security';
-import { useCachedFetch, useRealtimeCachedFetch } from './useCachedFetch';
-import { useQuotaHandler } from './useQuotaHandler';
 import { withApiBase } from '../config/api';
-import { cacheManager } from '../utils/cacheManager';
+import { handleApiResponse } from '../utils/apiUtils';
+
+// Global event emitter for API usage updates
+export const apiUsageEvents = new EventTarget();
 
 // Small utility to normalize arrays from API responses
 function normalizeArray(resp) {
@@ -143,6 +143,9 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         
         // Check if response is valid JSON
         data = await response.json();
+        
+        // Emit API usage event to trigger usage counter refresh
+        apiUsageEvents.dispatchEvent(new CustomEvent('apiCallMade'));
       
       } catch (error) {
         clearTimeout(timeoutId);
