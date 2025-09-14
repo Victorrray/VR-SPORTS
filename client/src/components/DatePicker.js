@@ -11,7 +11,18 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   const timeoutRef = useRef(null);
 
   // Determine if we should use mobile layout
-  const isMobile = typeof window !== "undefined" && window.innerWidth <= 800;
+  const [isMobile, setIsMobile] = useState(false);
+  
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 800);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Stable toggle function to prevent rapid open/close
   const toggleDropdown = useCallback((e) => {
@@ -31,11 +42,9 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   const closeDropdown = useCallback(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setIsOpen(false);
       timeoutRef.current = null;
-    }, 100);
+    }
+    setIsOpen(false);
   }, []);
 
   // Handle clicks outside the component
@@ -127,14 +136,12 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     // Close dropdown immediately
     setIsOpen(false);
     
-    // Call onChange after a brief delay to ensure state is stable
-    setTimeout(() => {
-      try {
-        onChange(dateValue);
-      } catch (error) {
-        console.error('Error updating date selection:', error);
-      }
-    }, 50);
+    // Call onChange immediately without delay
+    try {
+      onChange(dateValue);
+    } catch (error) {
+      console.error('Error updating date selection:', error);
+    }
   }, [onChange]);
 
   // Display text for the selected date

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, ArrowLeft, Save, Check, Settings, Star, TrendingUp, DollarSign } from 'lucide-react';
 import SportMultiSelect from '../components/SportMultiSelect';
 import MobileBottomBar from '../components/MobileBottomBar';
-import { AVAILABLE_SPORTSBOOKS } from '../constants/sportsbooks';
+import { AVAILABLE_SPORTSBOOKS, getFreePlanSportsbooks } from '../constants/sportsbooks';
 import './MySportsbooks.css';
 
 export default function MySportsbooks() {
   const { user } = useAuth();
+  const { me } = useMe();
   const navigate = useNavigate();
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [saveStatus, setSaveStatus] = useState('');
@@ -27,8 +29,11 @@ export default function MySportsbooks() {
     if (saved) {
       setSelectedBooks(JSON.parse(saved));
     } else {
-      // Default to popular sportsbooks
-      setSelectedBooks(['draftkings', 'fanduel', 'betmgm', 'caesars']);
+      // Default to free plan sportsbooks for free users, popular for platinum
+      const defaultBooks = me?.plan === 'platinum' 
+        ? ['draftkings', 'fanduel', 'betmgm', 'caesars']
+        : ['draftkings', 'fanduel', 'caesars'];
+      setSelectedBooks(defaultBooks);
     }
 
     // Load user's bankroll from localStorage
@@ -142,11 +147,14 @@ export default function MySportsbooks() {
     );
   };
 
-  const popularBooks = AVAILABLE_SPORTSBOOKS.filter(book => book.popular);
-  const otherBooks = AVAILABLE_SPORTSBOOKS.filter(book => !book.popular);
+  // Filter sportsbooks based on user plan
+  const availableSportsbooks = me?.plan === 'platinum' ? AVAILABLE_SPORTSBOOKS : getFreePlanSportsbooks();
+  
+  const popularBooks = availableSportsbooks.filter(book => book.popular);
+  const otherBooks = availableSportsbooks.filter(book => !book.popular);
 
   const getSelectedCount = () => selectedBooks.length;
-  const getTotalAvailable = () => AVAILABLE_SPORTSBOOKS.length;
+  const getTotalAvailable = () => availableSportsbooks.length;
 
   return (
     <div className="sportsbooks-page">
@@ -250,6 +258,11 @@ export default function MySportsbooks() {
                 key={book.key}
                 className={`sportsbook-card ${selectedBooks.includes(book.key) ? 'selected' : ''}`}
                 onClick={() => {
+                  // For free users, only allow selection of free plan sportsbooks
+                  if (me?.plan !== 'platinum' && !getFreePlanSportsbooks().some(b => b.key === book.key)) {
+                    return; // Don't allow selection
+                  }
+                  
                   if (selectedBooks.includes(book.key)) {
                     setSelectedBooks(selectedBooks.filter(b => b !== book.key));
                   } else {
@@ -281,6 +294,11 @@ export default function MySportsbooks() {
                 key={book.key}
                 className={`sportsbook-card ${selectedBooks.includes(book.key) ? 'selected' : ''}`}
                 onClick={() => {
+                  // For free users, only allow selection of free plan sportsbooks
+                  if (me?.plan !== 'platinum' && !getFreePlanSportsbooks().some(b => b.key === book.key)) {
+                    return; // Don't allow selection
+                  }
+                  
                   if (selectedBooks.includes(book.key)) {
                     setSelectedBooks(selectedBooks.filter(b => b !== book.key));
                   } else {

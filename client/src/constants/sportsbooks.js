@@ -38,6 +38,15 @@ export const getPopularSportsbooks = () => {
   return AVAILABLE_SPORTSBOOKS.filter(book => book.popular);
 };
 
+// Helper function to get sportsbooks available to free users
+export const getFreePlanSportsbooks = () => {
+  return AVAILABLE_SPORTSBOOKS.filter(book => 
+    book.key === 'draftkings' || 
+    book.key === 'fanduel' || 
+    book.key === 'caesars'
+  );
+};
+
 // Helper function to get all sportsbook keys
 export const getAllSportsbookKeys = () => {
   return AVAILABLE_SPORTSBOOKS.map(book => book.key);
