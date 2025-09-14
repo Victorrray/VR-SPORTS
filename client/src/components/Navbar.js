@@ -258,12 +258,40 @@ export default function Navbar({ onOpenMobileSearch }) {
               <button 
                 onClick={() => {
                   setProfileMenuOpen(false);
-                  navigate('/account');
+                  navigate('/my-sportsbooks');
                 }}
                 style={{
                   padding: '16px 20px',
                   cursor: 'pointer',
                   borderBottom: '1px solid #374151',
+                  color: '#ffffff',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  background: 'transparent',
+                  border: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#3b82f6';
+                  e.target.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#ffffff';
+                }}
+              >
+                My Sportsbooks
+              </button>
+              <button 
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  navigate('/account');
+                }}
+                style={{
+                  padding: '16px 20px',
+                  cursor: 'pointer',
                   color: '#ffffff',
                   fontSize: '15px',
                   fontWeight: '600',
@@ -348,15 +376,7 @@ export default function Navbar({ onOpenMobileSearch }) {
                 className={styles.mobileLink}
                 onClick={() => {
                   setMobileMenu(false);
-                  // Toggle sportsbook section visibility
-                  const section = document.getElementById('sportsbooks-section');
-                  if (section) {
-                    section.style.display = section.style.display === 'none' ? 'block' : 'none';
-                  }
-                  // Navigate to account page if not already there
-                  if (location.pathname !== '/account') {
-                    navigate('/account');
-                  }
+                  navigate('/my-sportsbooks');
                 }}
               >
                 My Sportsbooks
