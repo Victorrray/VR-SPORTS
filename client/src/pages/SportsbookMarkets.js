@@ -679,18 +679,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const hasStarted = gameTime <= now;
           const isCompleted = g.completed === true || g.status === 'completed';
           
-          // Check for live indicators in the data (same as live games filter)
+          // Use same live detection logic as the live games filter
+          const fourHoursAgo = new Date(now.getTime() - (4 * 60 * 60 * 1000));
+          const gameStartTime = new Date(g.commence_time);
+          const startedRecently = gameStartTime >= fourHoursAgo && gameStartTime <= now;
+          
+          // Check for any live indicators in the data (fallback)
           const gameString = JSON.stringify(g);
           const hasLiveIndicator = gameString.includes('🔴') || 
                                   gameString.includes('LIVE') ||
-                                  (g.home_team && (g.home_team.includes('🔴') || g.home_team.includes('LIVE'))) ||
-                                  (g.away_team && (g.away_team.includes('🔴') || g.away_team.includes('LIVE'))) ||
-                                  (g.sport_title && (g.sport_title.includes('🔴') || g.sport_title.includes('LIVE')));
+                                  gameString.includes('live');
           
+          // Practical live detection for current API structure
           const isLive = g.status === 'in_progress' || 
                         g.live === true || 
                         hasLiveIndicator ||
-                        (hasStarted && !isCompleted && g.scores && g.scores.length > 0);
+                        (hasStarted && startedRecently && !isCompleted);
           
           // For today's date, exclude live games; for future dates, show all games
           if (selectedDate === today) {
@@ -698,12 +702,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             if (isSelectedDate) {
               console.log(`TODAY FILTER - ${g.home_team} vs ${g.away_team}:`, {
                 hasLiveIndicator,
+                startedRecently,
                 isLive,
                 included: result,
                 gameTime: gameTime.toISOString(),
                 hasStarted,
                 isCompleted,
-                gameString: gameString.substring(0, 100) + '...'
+                fourHoursAgo: fourHoursAgo.toISOString()
               });
             }
             return result;
