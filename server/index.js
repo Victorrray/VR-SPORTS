@@ -150,6 +150,26 @@ async function getUserProfile(userId) {
     return inserted;
   }
   if (error) throw error;
+  
+  // Check if platinum subscription has expired
+  if (data.plan === 'platinum' && data.subscription_end_date) {
+    const now = new Date();
+    const endDate = new Date(data.subscription_end_date);
+    
+    if (now > endDate) {
+      // Subscription expired, downgrade to free
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ plan: "free" })
+        .eq("id", userId);
+        
+      if (!updateError) {
+        data.plan = "free";
+        console.log(`⏰ Subscription expired for user: ${userId}`);
+      }
+    }
+  }
+  
   return data;
 }
 
@@ -731,11 +751,12 @@ app.post('/api/billing/cancel-subscription', requireUser, async (req, res) => {
       cancel_at_period_end: true
     });
 
-    // Update user plan to free in Supabase
+    // Set subscription end date instead of immediately removing access
+    const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
     const { error: updateError } = await supabase
       .from('users')
       .update({ 
-        plan: 'free',
+        subscription_end_date: subscriptionEndDate.toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq('id', userId);
@@ -782,10 +803,17 @@ app.post('/api/billing/webhook',
         const userId = session.metadata?.userId;
         
         if (userId && supabase) {
-          // Update user plan in Supabase
+          // Get subscription details from Stripe
+          const subscription = await stripe.subscriptions.retrieve(session.subscription);
+          const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
+          
+          // Update user plan and subscription end date in Supabase
           const { error } = await supabase
             .from('users')
-            .update({ plan: 'platinum' })
+            .update({ 
+              plan: 'platinum',
+              subscription_end_date: subscriptionEndDate.toISOString()
+            })
             .eq('id', userId);
             
           if (error) {
@@ -793,7 +821,7 @@ app.post('/api/billing/webhook',
             throw error;
           }
           
-          console.log(`✅ Plan set to platinum via webhook: ${userId}`);
+          console.log(`✅ Plan set to platinum via webhook: ${userId}, expires: ${subscriptionEndDate}`);
         } else {
           console.error(`Failed to update plan in Supabase for user ${userId}`);
         }
