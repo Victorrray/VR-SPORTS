@@ -536,14 +536,46 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Filtered games based on date and query
   const filteredGames = useMemo(() => {
     let base = Array.isArray(marketGames) ? marketGames : [];
+    
+    // Debug: Log a sample game to see available properties
+    if (base.length > 0) {
+      console.log('Sample game data:', {
+        status: base[0].status,
+        live: base[0].live,
+        completed: base[0].completed,
+        commence_time: base[0].commence_time,
+        home_team: base[0].home_team,
+        away_team: base[0].away_team,
+        scores: base[0].scores
+      });
+    }
+    
     // Filter by selected date (local date) or live games
     if (selectedDate) {
       if (selectedDate === 'live') {
-        // Show only live games
-        base = base.filter(g => 
-          g.status === 'in_progress' || 
-          g.live === true
-        );
+        // Show only live games - check multiple conditions
+        base = base.filter(g => {
+          const now = new Date();
+          const gameTime = new Date(g.commence_time);
+          const hasStarted = gameTime <= now;
+          const isCompleted = g.completed === true || g.status === 'completed';
+          const isLive = g.status === 'in_progress' || 
+                        g.live === true || 
+                        (hasStarted && !isCompleted && g.scores && g.scores.length > 0);
+          
+          console.log(`Game ${g.home_team} vs ${g.away_team}:`, {
+            status: g.status,
+            live: g.live,
+            completed: g.completed,
+            hasStarted,
+            isCompleted,
+            isLive,
+            scores: g.scores
+          });
+          
+          return isLive;
+        });
+        console.log(`Live games filter: ${base.length} games found`);
       } else {
         // Show only non-live games for specific dates (including today)
         const today = new Date().toISOString().split('T')[0];
@@ -554,11 +586,25 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const day = String(d.getDate()).padStart(2, '0');
           const local = `${y}-${m}-${day}`;
           const isSelectedDate = local === selectedDate;
-          const isLive = g.status === 'in_progress' || g.live === true;
+          
+          const now = new Date();
+          const gameTime = new Date(g.commence_time);
+          const hasStarted = gameTime <= now;
+          const isCompleted = g.completed === true || g.status === 'completed';
+          const isLive = g.status === 'in_progress' || 
+                        g.live === true || 
+                        (hasStarted && !isCompleted && g.scores && g.scores.length > 0);
           
           // For today's date, exclude live games; for future dates, show all games
           if (selectedDate === today) {
-            return isSelectedDate && !isLive;
+            const result = isSelectedDate && !isLive;
+            if (isSelectedDate) {
+              console.log(`Today filter - ${g.home_team} vs ${g.away_team}:`, {
+                isLive,
+                included: result
+              });
+            }
+            return result;
           } else {
             return isSelectedDate;
           }
