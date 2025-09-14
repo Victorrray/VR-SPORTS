@@ -827,6 +827,41 @@ app.post('/api/billing/webhook',
         }
       }
       
+      // Handle subscription cancellation/deletion
+      else if (event.type === 'customer.subscription.deleted' || event.type === 'customer.subscription.updated') {
+        const subscription = event.data.object;
+        
+        // Find user by Stripe customer ID
+        if (supabase && subscription.customer) {
+          const { data: users, error: findError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('stripe_customer_id', subscription.customer);
+            
+          if (!findError && users && users.length > 0) {
+            const userId = users[0].id;
+            
+            // If subscription is canceled or deleted, downgrade to free
+            if (subscription.status === 'canceled' || subscription.status === 'unpaid' || event.type === 'customer.subscription.deleted') {
+              const { error } = await supabase
+                .from('users')
+                .update({ 
+                  plan: 'free',
+                  subscription_end_date: null
+                })
+                .eq('id', userId);
+                
+              if (error) {
+                console.error('Failed to downgrade user plan in Supabase:', error);
+                throw error;
+              }
+              
+              console.log(`✅ Plan downgraded to free via webhook: ${userId}`);
+            }
+          }
+        }
+      }
+      
       res.json({ received: true });
     } catch (error) {
       console.error('Webhook handling error:', error);
