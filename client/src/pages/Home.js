@@ -85,14 +85,14 @@ export default function Home() {
     return (
       <div className="home-page">
         <Helmet>
-          <title>OddsSightSeer - Smart Sports Betting Odds Comparison & Analytics</title>
+          <title>OddSightSeer - Smart Sports Betting Odds Comparison & Analytics</title>
           <meta name="description" content="Compare live sports betting odds across major sportsbooks. Find the best lines, track player props, and make smarter bets with real-time analytics." />
           <meta name="keywords" content="sports betting, odds comparison, player props, betting analytics, sportsbook odds" />
-          <meta property="og:title" content="OddsSightSeer - Smart Sports Betting Odds Comparison" />
+          <meta property="og:title" content="OddSightSeer - Smart Sports Betting Odds Comparison" />
           <meta property="og:description" content="Compare live sports betting odds across major sportsbooks and find the best lines with real-time analytics." />
           <meta property="og:type" content="website" />
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="OddsSightSeer - Smart Sports Betting Odds Comparison" />
+          <meta name="twitter:title" content="OddSightSeer - Smart Sports Betting Odds Comparison" />
           <meta name="twitter:description" content="Compare live sports betting odds across major sportsbooks and find the best lines with real-time analytics." />
         </Helmet>
         

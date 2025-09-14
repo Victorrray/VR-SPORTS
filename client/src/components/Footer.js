@@ -8,7 +8,7 @@ export default function Footer({ className }) {
     <footer className={`${styles.footer} ${className || ''}`}>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
-          <span className={styles.brandTitle}>OddsSightSeer</span>
+          <span className={styles.brandTitle}>OddSightSeer</span>
         </Link>
 
         <nav className={styles.links} aria-label="Footer">
@@ -19,7 +19,7 @@ export default function Footer({ className }) {
         </nav>
 
         <div className={styles.meta}>
-          © {year} OddsSightSeer. All rights reserved.
+          © {year} OddSightSeer. All rights reserved.
         </div>
       </div>
     </footer>

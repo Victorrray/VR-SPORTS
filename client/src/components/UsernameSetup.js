@@ -57,7 +57,7 @@ export default function UsernameSetup({ onComplete }) {
             <User size={24} />
           </div>
           <h2>Choose Your Username</h2>
-          <p>This will be your display name on OddsSightSeer. You can change it later in your profile.</p>
+          <p>This will be your display name on OddSightSeer. You can change it later in your profile.</p>
         </div>
         
         <form onSubmit={handleSubmit} className="username-setup-form">

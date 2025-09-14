@@ -1,4 +1,4 @@
-// Service Worker for OddsSightSeer Platform
+// Service Worker for OddSightSeer Platform
 const CACHE_NAME = 'oddssightseer-v1.0.0';
 const STATIC_CACHE = 'oddssightseer-static-v1';
 const API_CACHE = 'oddssightseer-api-v1';
@@ -201,7 +201,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'OddsSightSeer Update', options)
+    self.registration.showNotification(data.title || 'OddSightSeer Update', options)
   );
 });
 

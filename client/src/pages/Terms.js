@@ -15,7 +15,7 @@ export default function Terms() {
         <div className="legal-section">
           <h2>1. Acceptance of Terms</h2>
           <p>
-            By accessing and using OddsSightSeer ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. 
+            By accessing and using OddSightSeer ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. 
             If you do not agree to abide by the above, please do not use this service.
           </p>
         </div>
@@ -23,7 +23,7 @@ export default function Terms() {
         <div className="legal-section">
           <h2>2. Description of Service</h2>
           <p>
-            OddsSightSeer provides sports betting analytics, odds comparison, and expected value calculations. 
+            OddSightSeer provides sports betting analytics, odds comparison, and expected value calculations. 
             The Service is designed to help users make informed betting decisions through data analysis and market insights.
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function Terms() {
         <div className="legal-section">
           <h2>4. Disclaimer of Warranties</h2>
           <p>
-            The information provided by OddsSightSeer is for educational and informational purposes only. 
+            The information provided by OddSightSeer is for educational and informational purposes only. 
             We do not guarantee the accuracy, completeness, or timeliness of any information. 
             Past performance does not guarantee future results.
           </p>
@@ -51,7 +51,7 @@ export default function Terms() {
         <div className="legal-section">
           <h2>5. Limitation of Liability</h2>
           <p>
-            OddsSightSeer shall not be liable for any direct, indirect, incidental, special, or consequential damages 
+            OddSightSeer shall not be liable for any direct, indirect, incidental, special, or consequential damages 
             resulting from the use or inability to use the Service, including but not limited to betting losses.
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function Terms() {
         <div className="legal-section">
           <h2>7. Modifications</h2>
           <p>
-            OddsSightSeer reserves the right to modify these terms at any time. 
+            OddSightSeer reserves the right to modify these terms at any time. 
             Continued use of the Service after changes constitutes acceptance of the new terms.
           </p>
         </div>

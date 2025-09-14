@@ -101,7 +101,7 @@ export default function Navbar({ onOpenMobileSearch }) {
       )}
       <div className={styles.navLeft}>
         <Link to="/" className={styles.brandBtn}>
-          <span className={styles.brandTitle}>OddsSightSeer</span>
+          <span className={styles.brandTitle}>OddSightSeer</span>
         </Link>
       </div>
 
