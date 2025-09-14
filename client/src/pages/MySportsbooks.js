@@ -282,40 +282,38 @@ export default function MySportsbooks() {
           </div>
         </div>
 
-        <div className="section">
-          <div className="section-header">
-            <TrendingUp size={20} />
-            <h3>Other Sportsbooks</h3>
-            <span className="section-count">({otherBooks.length})</span>
-          </div>
-          <div className="sportsbooks-grid">
-            {otherBooks.map(book => (
-              <div 
-                key={book.key}
-                className={`sportsbook-card ${selectedBooks.includes(book.key) ? 'selected' : ''}`}
-                onClick={() => {
-                  // For free users, only allow selection of free plan sportsbooks
-                  if (me?.plan !== 'platinum' && !getFreePlanSportsbooks().some(b => b.key === book.key)) {
-                    return; // Don't allow selection
-                  }
-                  
-                  if (selectedBooks.includes(book.key)) {
-                    setSelectedBooks(selectedBooks.filter(b => b !== book.key));
-                  } else {
-                    setSelectedBooks([...selectedBooks, book.key]);
-                  }
-                }}
-              >
-                <div className="sportsbook-info">
-                  <div className="sportsbook-name">{book.name}</div>
+        {/* Only show Other Sportsbooks section for platinum users */}
+        {me?.plan === 'platinum' && otherBooks.length > 0 && (
+          <div className="section">
+            <div className="section-header">
+              <TrendingUp size={20} />
+              <h3>Other Sportsbooks</h3>
+              <span className="section-count">({otherBooks.length})</span>
+            </div>
+            <div className="sportsbooks-grid">
+              {otherBooks.map(book => (
+                <div 
+                  key={book.key}
+                  className={`sportsbook-card ${selectedBooks.includes(book.key) ? 'selected' : ''}`}
+                  onClick={() => {
+                    if (selectedBooks.includes(book.key)) {
+                      setSelectedBooks(selectedBooks.filter(b => b !== book.key));
+                    } else {
+                      setSelectedBooks([...selectedBooks, book.key]);
+                    }
+                  }}
+                >
+                  <div className="sportsbook-info">
+                    <div className="sportsbook-name">{book.name}</div>
+                  </div>
+                  <div className="selection-indicator">
+                    {selectedBooks.includes(book.key) && <Check size={16} />}
+                  </div>
                 </div>
-                <div className="selection-indicator">
-                  {selectedBooks.includes(book.key) && <Check size={16} />}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="help-section">

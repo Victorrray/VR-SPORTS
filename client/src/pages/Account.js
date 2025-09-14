@@ -582,42 +582,6 @@ export default function Account() {
         <UsagePlanCard />
       </div>
 
-      <section className="sportsbook-card">
-        <div className="card-header">
-          <BookOpen size={20} />
-          <h2>My Sportsbooks</h2>
-        </div>
-        <p className="section-description">Select the sportsbooks you use to see personalized odds and recommendations</p>
-        
-        <div className="sportsbook-selection">
-          <div className="selection-info">
-            <span className="selected-count">{selectedBooks.length} sportsbooks selected</span>
-          </div>
-          
-          <SportMultiSelect
-            list={AVAILABLE_SPORTSBOOKS}
-            selected={selectedBooks}
-            onChange={setSelectedBooks}
-            placeholderText="Choose sportsbooks…"
-            allLabel="All Sportsbooks"
-            grid={true}
-            columns={2}
-          />
-          
-          <button 
-            className="save-preferences-btn"
-            onClick={handleSavePreferences}
-            disabled={savingPrefs}
-          >
-            <Save size={16} />
-            {savingPrefs ? 'Saving...' : 'Save Preferences'}
-          </button>
-          
-          <p className="preferences-note">
-            Your dashboard will only show odds from your selected sportsbooks
-          </p>
-        </div>
-      </section>
 
       {/* Version info */}
       <div className="version-info">
