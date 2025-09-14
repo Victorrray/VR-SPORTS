@@ -609,18 +609,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const hasStarted = gameTime <= now;
           const isCompleted = g.completed === true || g.status === 'completed';
           
-          // Check for live indicators in the data - look in sport_title field and team names
+          // Check for live indicators in the data - comprehensive check
           const gameString = JSON.stringify(g);
           const hasLiveIndicator = gameString.includes('🔴') || 
                                   gameString.includes('LIVE') ||
+                                  gameString.includes('live') ||
                                   (g.home_team && (g.home_team.includes('🔴') || g.home_team.includes('LIVE'))) ||
                                   (g.away_team && (g.away_team.includes('🔴') || g.away_team.includes('LIVE'))) ||
                                   (g.sport_title && (g.sport_title.includes('🔴') || g.sport_title.includes('LIVE')));
           
+          // More lenient live detection - if game has started and has scores, consider it live
+          const hasScores = g.scores && Array.isArray(g.scores) && g.scores.length > 0;
+          const hasNonZeroScores = hasScores && g.scores.some(score => 
+            (score.home && parseInt(score.home) > 0) || (score.away && parseInt(score.away) > 0)
+          );
+          
           const isLive = g.status === 'in_progress' || 
                         g.live === true || 
                         hasLiveIndicator ||
-                        (hasStarted && !isCompleted && g.scores && g.scores.length > 0);
+                        (hasStarted && !isCompleted && hasScores) ||
+                        hasNonZeroScores;
           
           console.log(`LIVE FILTER - ${g.home_team} vs ${g.away_team}:`, {
             status: g.status,
@@ -629,14 +637,36 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             hasStarted,
             isCompleted,
             hasLiveIndicator,
+            hasScores,
+            hasNonZeroScores,
             isLive,
             scores: g.scores,
-            gameString: gameString.substring(0, 100) + '...'
+            gameTime: gameTime.toISOString(),
+            now: now.toISOString()
           });
           
           return isLive;
         });
-        console.log(`Live games filter: ${base.length} games found`);
+        console.log(`🔴 LIVE GAMES FILTER RESULT: ${base.length} games found`);
+        
+        // If no live games found, let's check what we have in the original data
+        if (base.length === 0) {
+          console.log('🔍 NO LIVE GAMES FOUND - Checking all games for live indicators:');
+          const allGames = Array.isArray(marketGames) ? marketGames : [];
+          allGames.slice(0, 5).forEach((g, index) => {
+            const gameString = JSON.stringify(g);
+            console.log(`Game ${index + 1}: ${g.home_team} vs ${g.away_team}`, {
+              status: g.status,
+              live: g.live,
+              completed: g.completed,
+              commence_time: g.commence_time,
+              hasRedDot: gameString.includes('🔴'),
+              hasLIVE: gameString.includes('LIVE'),
+              hasScores: !!(g.scores && g.scores.length > 0),
+              rawGameString: gameString.substring(0, 300)
+            });
+          });
+        }
       } else {
         // Show only non-live games for specific dates (including today)
         const today = new Date().toISOString().split('T')[0];
