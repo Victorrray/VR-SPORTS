@@ -1369,8 +1369,8 @@ export default function OddsTable({
                             const isSpreads = mkRow.includes('spread');
                             const oPointStr = String(row.out.point ?? '');
 
-                            // Priority bookmakers to show first
-                            const priorityBooks = ['fanduel', 'draftkings', 'caesars', 'pinnacle'];
+                            // Priority bookmakers to show first - limit to 3 for free users
+                            const priorityBooks = ['fanduel', 'draftkings', 'caesars'];
                             
                             const getBookPriority = (bookKey) => {
                               const key = String(bookKey || '').toLowerCase();
@@ -1607,8 +1607,8 @@ export default function OddsTable({
                             const isTotals = mkRow.includes('total');
                             const oPointStr = String(row.out.point ?? '');
 
-                            // Priority bookmakers to show first (same as mobile)
-                            const priorityBooks = ['fanduel', 'draftkings', 'caesars', 'pinnacle'];
+                            // Priority bookmakers to show first - limit to 3 for free users
+                            const priorityBooks = ['fanduel', 'draftkings', 'caesars'];
                             
                             const getBookPriority = (bookKey) => {
                               const key = String(bookKey || '').toLowerCase();

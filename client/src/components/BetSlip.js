@@ -338,17 +338,13 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     let validEdges = 0;
 
     bets.forEach(bet => {
-      const amount = parseFloat(betAmounts[bet.id]) || 0;
-      const odds = bet.americanOdds;
-      const decimalOdds = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+      const stats = calculateBetStats(bet);
+      totalStake += stats.amount;
+      totalPayout += stats.payout;
+      totalProfit += stats.profit;
       
-      totalStake += amount;
-      const payout = amount * decimalOdds;
-      totalPayout += payout;
-      totalProfit += (payout - amount);
-      
-      if (bet.edge) {
-        totalEdge += bet.edge;
+      if (stats.edge && !isNaN(stats.edge)) {
+        totalEdge += stats.edge;
         validEdges++;
       }
     });
@@ -511,12 +507,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
             <div className="bet-count">{bets.length}</div>
           </div>
           <div className="betslip-controls">
-            <button onClick={exportBets} className="control-btn" title="Export">
-              <Download size={16} />
-            </button>
-            <button onClick={shareBets} className="control-btn" title="Share">
-              <Share2 size={16} />
-            </button>
             <button onClick={onClose} className="control-btn close-btn">
               <X size={16} />
             </button>
