@@ -609,26 +609,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const hasStarted = gameTime <= now;
           const isCompleted = g.completed === true || g.status === 'completed';
           
-          // Check for live indicators in the data - comprehensive check
+          // Since API doesn't provide live status, use time-based detection
+          // Consider games "live" if they started within the last 4 hours and aren't completed
+          const fourHoursAgo = new Date(now.getTime() - (4 * 60 * 60 * 1000));
+          const gameStartTime = new Date(g.commence_time);
+          const startedRecently = gameStartTime >= fourHoursAgo && gameStartTime <= now;
+          
+          // Check for any live indicators in the data (fallback)
           const gameString = JSON.stringify(g);
           const hasLiveIndicator = gameString.includes('🔴') || 
                                   gameString.includes('LIVE') ||
-                                  gameString.includes('live') ||
-                                  (g.home_team && (g.home_team.includes('🔴') || g.home_team.includes('LIVE'))) ||
-                                  (g.away_team && (g.away_team.includes('🔴') || g.away_team.includes('LIVE'))) ||
-                                  (g.sport_title && (g.sport_title.includes('🔴') || g.sport_title.includes('LIVE')));
+                                  gameString.includes('live');
           
-          // More lenient live detection - if game has started and has scores, consider it live
-          const hasScores = g.scores && Array.isArray(g.scores) && g.scores.length > 0;
-          const hasNonZeroScores = hasScores && g.scores.some(score => 
-            (score.home && parseInt(score.home) > 0) || (score.away && parseInt(score.away) > 0)
-          );
-          
+          // Practical live detection for current API structure
           const isLive = g.status === 'in_progress' || 
                         g.live === true || 
                         hasLiveIndicator ||
-                        (hasStarted && !isCompleted && hasScores) ||
-                        hasNonZeroScores;
+                        (hasStarted && startedRecently && !isCompleted);
           
           console.log(`LIVE FILTER - ${g.home_team} vs ${g.away_team}:`, {
             status: g.status,
@@ -637,12 +634,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             hasStarted,
             isCompleted,
             hasLiveIndicator,
-            hasScores,
-            hasNonZeroScores,
+            startedRecently,
             isLive,
-            scores: g.scores,
             gameTime: gameTime.toISOString(),
-            now: now.toISOString()
+            now: now.toISOString(),
+            fourHoursAgo: fourHoursAgo.toISOString()
           });
           
           return isLive;
