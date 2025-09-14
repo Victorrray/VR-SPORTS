@@ -24,7 +24,7 @@ function QuotaModal({ open, detail, onClose }) {
           </h3>
           
           <p className="text-sm text-white/80 mb-4">
-            You used <strong>{detail?.used || 0}</strong> of your <strong>{detail?.quota || 1000}</strong> free API requests. 
+            You used <strong>{detail?.used || 0}</strong> of your <strong>{detail?.quota || 250}</strong> free API requests. 
             Upgrade to Platinum to keep pulling live odds and unlock unlimited access.
           </p>
         </div>

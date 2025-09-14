@@ -582,7 +582,7 @@ export default function Account() {
         <UsagePlanCard />
       </div>
 
-      <section id="sportsbooks-section" style={{ display: 'none' }} className="sportsbook-card">
+      <section className="sportsbook-card">
         <div className="card-header">
           <BookOpen size={20} />
           <h2>My Sportsbooks</h2>
