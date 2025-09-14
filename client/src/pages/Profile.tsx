@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { signOutAndRefresh } from '../lib/authActions';
 import { User, Settings, BookOpen, Check, Save, CreditCard, X } from 'lucide-react';
 import UsernameForm from '../components/UsernameForm';
 import { useAuth } from '../hooks/useAuth';
@@ -61,7 +60,7 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user } = useAuth() as any; // Temporary fix for auth context typing
+  const { user, profile, updateProfile, signOut } = useAuth() as any; // Temporary fix for auth context typing
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
@@ -119,10 +118,31 @@ export default function ProfilePage() {
     setTimeout(() => setSaveStatus(''), 2000);
   };
 
+  const [signOutProgress, setSignOutProgress] = useState<any>(null);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+
   const handleSignOut = async () => {
     if (busy) return;
     setBusy(true);
-    await signOutAndRefresh('/');
+    setSignOutError(null);
+    
+    try {
+      // Use the useAuth hook's signOut method for consistency
+      await signOut();
+      
+      // Clear any additional local storage items
+      localStorage.removeItem('userSelectedSportsbooks');
+      localStorage.removeItem('pricingIntent');
+      
+      // Navigate to home page
+      navigate('/', { replace: true });
+      
+    } catch (error) {
+      console.error('Sign out error:', error);
+      setSignOutError(error.message);
+      setBusy(false);
+      setSignOutProgress(null);
+    }
   };
 
   const handleCancelSubscription = () => {
@@ -246,8 +266,19 @@ export default function ProfilePage() {
                 disabled={busy}
                 data-testid="btn-signout"
               >
-                {busy ? 'Signing out...' : 'Sign Out'}
+                {busy 
+                  ? (signOutProgress 
+                      ? `${signOutProgress.step}... (${signOutProgress.current}/${signOutProgress.total})`
+                      : 'Signing out...'
+                    )
+                  : 'Sign Out'
+                }
               </button>
+              {signOutError && (
+                <div className="error-message" style={{marginTop: '8px', color: 'var(--danger)', fontSize: '0.875rem'}}>
+                  Error: {signOutError}
+                </div>
+              )}
             </div>
           </div>
         </div>

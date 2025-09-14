@@ -60,8 +60,8 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       return;
     }
 
-    // Get user's selected sportsbooks from localStorage
-    const userSelectedBooks = JSON.parse(localStorage.getItem('userSelectedSportsbooks') || '["draftkings", "fanduel", "betmgm", "caesars", "betrivers", "espnbet"]');
+    // Get user's selected sportsbooks from localStorage - expanded defaults for better free trial experience
+    const userSelectedBooks = JSON.parse(localStorage.getItem('userSelectedSportsbooks') || '["draftkings", "fanduel", "betmgm", "caesars", "betrivers", "pointsbet", "unibet", "bovada"]');
     console.log('User selected sportsbooks:', userSelectedBooks);
 
     const todayDate = new Date().toISOString().split('T')[0];

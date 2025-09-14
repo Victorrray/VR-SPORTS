@@ -7,17 +7,20 @@ module.exports = function(app) {
       target: 'http://localhost:10000',
       changeOrigin: true,
       secure: false,
-      pathRewrite: {
-        '^/api': '/api',
-      },
-      onProxyReq: (proxyReq) => {
-        // Ensure cookies can flow during local dev
+      logLevel: 'debug',
+      onProxyReq: (proxyReq, req, res) => {
+        console.log('🔄 Proxying request:', req.method, req.url, '→', proxyReq.path);
+        // Ensure proper headers for local dev
         proxyReq.setHeader('Origin', 'http://localhost:3000');
       },
-      onProxyRes: (proxyRes) => {
+      onProxyRes: (proxyRes, req, res) => {
+        console.log('✅ Proxy response:', req.url, '→', proxyRes.statusCode);
         // Allow dev UI to access backend
         proxyRes.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000';
         proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+      },
+      onError: (err, req, res) => {
+        console.error('❌ Proxy error:', err.message);
       }
     })
   );

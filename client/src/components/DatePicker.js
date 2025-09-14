@@ -1,79 +1,72 @@
 // src/components/DatePicker.js
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useCallback, useRef, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { Calendar, ChevronDown, X } from "lucide-react";
 import "./DatePicker.css";
 
 export default function DatePicker({ value, onChange, placeholder = "Select Date" }) {
-  const [open, setOpen] = useState(false);
-  const boxRef = useRef(null);
-  const menuRef = useRef(null);
-  const [portalStyle, setPortalStyle] = useState({});
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const timeoutRef = useRef(null);
 
-  // Use a portal automatically on small screens
+  // Determine if we should use mobile layout
   const isMobile = typeof window !== "undefined" && window.innerWidth <= 800;
-  const shouldPortal = isMobile;
 
-  // Close on outside click
-  useEffect(() => {
-    const h = (e) => {
-      if (!open) return;
-      if (boxRef.current?.contains(e.target)) return;
-      if (shouldPortal && e.target.closest('.dp-mobile-overlay, .dp-mobile-sheet')) return;
-      if (!shouldPortal && menuRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    document.addEventListener("mousedown", h);
-    document.addEventListener("touchstart", h);
+  // Stable toggle function to prevent rapid open/close
+  const toggleDropdown = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Clear any pending timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    
+    setIsOpen(prev => !prev);
+  }, []);
+
+  // Close dropdown function
+  const closeDropdown = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+      timeoutRef.current = null;
+    }, 100);
+  }, []);
+
+  // Handle clicks outside the component
+  const handleDocumentClick = useCallback((e) => {
+    if (!isOpen) return;
+    
+    // Don't close if clicking inside the component
+    if (containerRef.current?.contains(e.target)) return;
+    if (dropdownRef.current?.contains(e.target)) return;
+    
+    // Don't close if clicking on mobile overlay elements
+    if (e.target.closest('.dp-mobile-overlay, .dp-mobile-sheet')) return;
+    
+    closeDropdown();
+  }, [isOpen, closeDropdown]);
+
+  // Set up document click listener
+  React.useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('mousedown', handleDocumentClick);
+      document.addEventListener('touchstart', handleDocumentClick);
+    }
+    
     return () => {
-      document.removeEventListener("mousedown", h);
-      document.removeEventListener("touchstart", h);
-    };
-  }, [open, shouldPortal]);
-
-  // Portal positioning (desktop only)
-  useEffect(() => {
-    if (!open || !boxRef.current || shouldPortal) return;
-
-    const compute = () => {
-      const r = boxRef.current.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const vw = window.innerWidth;
-      const pad = 8;
-      const minW = 200;
-      
-      const spaceBelow = vh - r.bottom - pad;
-      const spaceAbove = r.top - pad;
-      const align = spaceBelow >= 200 ? "down" : "up";
-
-      const base = {
-        position: "fixed",
-        zIndex: 9999,
-        minWidth: Math.max(minW, r.width),
-        left: Math.max(pad, Math.min(r.left, vw - pad - minW)),
-        borderRadius: 12,
-        overflow: "auto",
-      };
-
-      if (align === "up") {
-        base.bottom = Math.max(8, vh - r.top + 8);
-        base.maxHeight = Math.max(160, spaceAbove);
-      } else {
-        base.top = Math.min(vh - pad, r.bottom + 8);
-        base.maxHeight = Math.max(160, spaceBelow);
+      document.removeEventListener('mousedown', handleDocumentClick);
+      document.removeEventListener('touchstart', handleDocumentClick);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-
-      setPortalStyle(base);
     };
-
-    compute();
-    window.addEventListener("resize", compute);
-    window.addEventListener("scroll", compute, true);
-    return () => {
-      window.removeEventListener("resize", compute);
-      window.removeEventListener("scroll", compute, true);
-    };
-  }, [open, shouldPortal]);
+  }, [isOpen, handleDocumentClick]);
 
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return placeholder;
@@ -123,15 +116,28 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     return options;
   }, []); // Empty dependency array - only compute once
 
-  const handleDateSelect = (dateValue) => {
-    try {
-      setOpen(false);
-      onChange(dateValue);
-    } catch (error) {
-      console.error('Error updating date selection:', error);
+  // Handle date selection with stable state management
+  const handleDateSelect = useCallback((dateValue) => {
+    // Clear any pending timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
-  };
+    
+    // Close dropdown immediately
+    setIsOpen(false);
+    
+    // Call onChange after a brief delay to ensure state is stable
+    setTimeout(() => {
+      try {
+        onChange(dateValue);
+      } catch (error) {
+        console.error('Error updating date selection:', error);
+      }
+    }, 50);
+  }, [onChange]);
 
+  // Display text for the selected date
   const displayText = useMemo(() => {
     if (!value) return placeholder;
     if (value === "live") return "🔴 Live Games";
@@ -140,24 +146,35 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     if (option) return option.title;
     
     // Fallback formatting
-    const [year, month, day] = value.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    });
+    try {
+      const [year, month, day] = value.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    } catch {
+      return placeholder;
+    }
   }, [value, dateOptions, placeholder]);
 
-  const MobileSheet = () => {
+  // Mobile sheet component
+  const MobileSheet = useCallback(() => {
     return (
       <div className="dp-mobile-overlay" onClick={(e) => {
-        if (e.target === e.currentTarget) setOpen(false);
+        if (e.target === e.currentTarget) {
+          setIsOpen(false);
+        }
       }}>
         <div className="dp-mobile-sheet" onClick={(e) => e.stopPropagation()}>
           <div className="dp-mobile-header">
             <h3>Select Date</h3>
-            <button className="dp-mobile-close" onClick={() => setOpen(false)} type="button">
+            <button 
+              className="dp-mobile-close" 
+              onClick={() => setIsOpen(false)} 
+              type="button"
+            >
               <X size={20} />
             </button>
           </div>
@@ -186,29 +203,41 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
         </div>
       </div>
     );
-  };
+  }, [dateOptions, value, handleDateSelect]);
 
   return (
-    <div className="dp-wrap" ref={boxRef}>
+    <div className="dp-wrap" ref={containerRef}>
       <button 
         className="dp-toggle" 
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
+        onClick={toggleDropdown}
+        aria-expanded={isOpen}
         aria-haspopup="listbox"
         type="button"
       >
         <Calendar size={16} />
         <span>{displayText}</span>
-        <ChevronDown size={16} className={`dp-chevron ${open ? 'dp-open' : ''}`} />
+        <ChevronDown size={16} className={`dp-chevron ${isOpen ? 'dp-open' : ''}`} />
       </button>
 
       {/* Desktop dropdown */}
-      {open && !shouldPortal && (
+      {isOpen && !isMobile && (
         <div 
-          ref={menuRef}
-          className="dp-menu" 
-          style={portalStyle}
+          ref={dropdownRef}
+          className="dp-menu"
           role="listbox"
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            backgroundColor: 'var(--card-bg)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            maxHeight: '300px',
+            overflowY: 'auto'
+          }}
         >
           {dateOptions.map((option) => (
             <div 
@@ -232,7 +261,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
       )}
 
       {/* Mobile sheet */}
-      {open && shouldPortal && typeof document !== "undefined" && 
+      {isOpen && isMobile && typeof document !== "undefined" && 
         ReactDOM.createPortal(<MobileSheet />, document.body)
       }
     </div>

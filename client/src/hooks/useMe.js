@@ -1,52 +1,46 @@
 // Hook to fetch user plan and drive menu + gate logic
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { withApiBase } from '../config/api';
 import { secureFetch } from '../utils/security';
 
 export function useMe() {
-  console.log('🔍 useMe: Hook initialized');
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const fetchingRef = useRef(false);
+  const mountedRef = useRef(true);
 
   const fetchMe = useCallback(async () => {
-    console.log('🔍 useMe: fetchMe function called');
+    // Prevent concurrent fetches
+    if (fetchingRef.current) {
+      return;
+    }
+    
+    fetchingRef.current = true;
     setLoading(true);
+    setError(null);
+    
     try {
-      console.log('🔍 useMe: Checking supabase client:', !!supabase);
       if (!supabase) {
-        console.log('🔍 useMe: No supabase client, setting default data');
-        setMe({ plan: 'free', remaining: 250, limit: 250, calls_made: 0 });
+        const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+        if (mountedRef.current) {
+          setMe(defaultData);
+        }
         return;
       }
 
-      console.log('🔍 useMe: Getting session from supabase');
-      
-      // Add timeout to prevent hanging
-      const sessionPromise = supabase.auth.getSession();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session timeout')), 5000)
-      );
-      
-      let session;
+      // Simplified session check without timeout complexity
+      let hasSession = false;
       try {
-        const { data } = await Promise.race([sessionPromise, timeoutPromise]);
-        session = data;
-        console.log('🔍 useMe: Session result:', !!session?.session);
-      } catch (error) {
-        console.log('🔍 useMe: Session timeout or error, trying API call anyway');
-        // Don't return here - try the API call anyway since secureFetch handles auth
-      }
-      
-      // Try API call even if session failed - secureFetch handles demo auth
-      if (!session?.session) { 
-        console.log('🔍 useMe: No session, but trying API call with demo auth');
+        const { data } = await supabase.auth.getSession();
+        hasSession = !!data?.session;
+      } catch (sessionError) {
+        // Continue without session - API will handle demo auth
       }
 
-      console.log('🔍 useMe: Fetching user data from /api/me/usage');
-      // Fetch user plan and usage info from backend with cache busting
-      const cacheBuster = `?t=${Date.now()}`;
-      const response = await secureFetch(withApiBase(`/api/me/usage${cacheBuster}`), {
+      // Fetch user data with simplified error handling
+      const response = await secureFetch(withApiBase('/api/me/usage'), {
         credentials: 'include',
         headers: { 
           'Accept': 'application/json',
@@ -55,48 +49,74 @@ export function useMe() {
       });
       
       if (!response.ok) {
-        console.error('🔍 useMe: Failed to fetch user data:', response.status);
-        // Set default data instead of null to prevent infinite loading
-        setMe({ plan: 'free', remaining: 250, limit: 250, calls_made: 0 });
+        // For 500 errors or auth issues, use default free plan data
+        const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+        if (mountedRef.current) {
+          setMe(defaultData);
+        }
         return;
       }
       
       const userData = await response.json();
-      console.log('🔍 useMe: Received user data:', userData);
       
       const meData = { 
         plan: userData.plan || 'free', 
-        remaining: userData.quota ? Math.max(0, userData.quota - userData.used) : null,
+        remaining: userData.quota ? Math.max(0, userData.quota - userData.used) : 250,
         limit: userData.quota || 250,
         calls_made: userData.used || 0
       };
       
-      console.log('🔍 useMe: Setting me data:', meData);
-      setMe(meData);
+      if (mountedRef.current) {
+        setMe(meData);
+      }
     } catch (error) {
-      console.error('🔍 useMe: Error fetching user data:', error);
-      // Set default data instead of null to prevent infinite loading
-      setMe({ plan: 'free', remaining: 250, limit: 250, calls_made: 0 });
+      console.error('useMe: Error fetching user data:', error);
+      // Always provide fallback data to prevent infinite loading
+      const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+      if (mountedRef.current) {
+        setMe(defaultData);
+        setError(error.message);
+      }
     } finally {
-      setLoading(false);
+      fetchingRef.current = false;
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    console.log('🔍 useMe: useEffect running, calling fetchMe');
-    console.log('🔍 useMe: fetchMe function is:', typeof fetchMe);
-    fetchMe().catch(err => console.error('🔍 useMe: fetchMe error:', err));
+    let subscription = null;
     
-    // Listen for auth state changes and refetch user data
+    // Initial fetch
+    fetchMe();
+    
+    // Set up auth state listener only once
     if (supabase) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log('🔐 Auth state changed:', event, !!session);
-        fetchMe();
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        // Only refetch on meaningful auth changes
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          fetchMe();
+        }
       });
-
-      return () => subscription.unsubscribe();
+      subscription = data.subscription;
     }
-  }, [fetchMe]);
 
-  return { me, loading, refresh: fetchMe };
+    // Cleanup
+    return () => {
+      mountedRef.current = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  }, []); // Empty dependency array to prevent re-runs
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  return { me, loading, error, refresh: fetchMe };
 }

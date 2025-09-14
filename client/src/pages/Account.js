@@ -4,7 +4,6 @@ import { useAuth } from "../hooks/useAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { signOutAndRefresh } from "../lib/authActions";
 import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X } from "lucide-react";
 import MobileBottomBar from "../components/MobileBottomBar";
 import SportMultiSelect from "../components/SportMultiSelect";
@@ -25,7 +24,7 @@ function maskId(id = "") {
 }
 
 export default function Account() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { me } = useMe();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -237,23 +236,69 @@ export default function Account() {
     try { navigator.clipboard.writeText(text); } catch {}
   }
 
+  const [signOutProgress, setSignOutProgress] = useState(null);
+  const [signOutError, setSignOutError] = useState(null);
+
   const handleSignOut = async () => {
     if (signOutBusy) return;
     console.log('🔐 Account: Sign out button clicked');
     setSignOutBusy(true);
+    setSignOutError(null);
     
     try {
-      console.log('🔐 Account: Calling signOutAndRefresh...');
-      await signOutAndRefresh('/?signed_out=true', true); // Enable debug logging
-      console.log('🔐 Account: signOutAndRefresh completed');
+      console.log('🔐 Account: Starting sign out...');
+      
+      // Use the useAuth hook's signOut method for consistency
+      await signOut();
+      
+      // Clear any additional local storage items
+      localStorage.removeItem('userSelectedSportsbooks');
+      localStorage.removeItem('pricingIntent');
+      
+      // Redirect to home page with signed out indicator
+      window.location.href = '/?signed_out=true';
+      
     } catch (error) {
-      console.error('🔐 Account: Sign out error:', error);
+      console.error('🔐 Account: Sign out failed:', error);
+      setSignOutError(error.message);
       setSignOutBusy(false);
+      setSignOutProgress(null);
     }
   };
 
   const handleCancelSubscription = () => {
     navigate('/billing/cancel');
+  };
+
+  const handleUpgradeToPlatinum = async () => {
+    if (loading || !user) return;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch('/api/billing/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          supabaseUserId: user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
+      }
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      setError(error.message);
+      setLoading(false);
+    }
   };
 
   if (!user || pageLoading) {
@@ -441,8 +486,21 @@ export default function Account() {
           >
             <LogOut size={18} />
             <div className="btn-content">
-              <span>{signOutBusy ? 'Signing out...' : 'Sign Out'}</span>
-              <small>End your current session</small>
+              <span>
+                {signOutBusy 
+                  ? (signOutProgress 
+                      ? `${signOutProgress.step}... (${signOutProgress.current}/${signOutProgress.total})`
+                      : 'Signing out...'
+                    )
+                  : 'Sign Out'
+                }
+              </span>
+              <small>
+                {signOutError 
+                  ? `Error: ${signOutError}` 
+                  : 'End your current session'
+                }
+              </small>
             </div>
           </button>
         </div>
@@ -494,11 +552,12 @@ export default function Account() {
               <div className="subscription-actions">
                 <button 
                   className="security-btn upgrade-btn"
-                  onClick={() => navigate('/pricing')}
+                  onClick={handleUpgradeToPlatinum}
+                  disabled={loading}
                 >
                   <CreditCard size={16} />
                   <div className="btn-content">
-                    <span>Upgrade to Platinum</span>
+                    <span>{loading ? 'Creating checkout...' : 'Upgrade to Platinum'}</span>
                     <small>Unlimited access & features</small>
                   </div>
                 </button>
@@ -513,6 +572,25 @@ export default function Account() {
                 : 'Upgrade to Platinum for unlimited API access and premium features.'
               }
             </p>
+            
+            {/* Sportsbook Selection Button */}
+            <div className="sportsbook-access">
+              <button 
+                className="security-btn sportsbook-btn"
+                onClick={() => {
+                  const section = document.getElementById('sportsbooks-section');
+                  if (section) {
+                    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+                  }
+                }}
+              >
+                <BookOpen size={16} />
+                <div className="btn-content">
+                  <span>My Sportsbooks</span>
+                  <small>Select your preferred sportsbooks</small>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </section>
