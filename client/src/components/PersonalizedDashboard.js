@@ -2,16 +2,36 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { TrendingUp, Target, Clock, DollarSign, BarChart3, Zap, Award, AlertTriangle, ChevronDown, ChevronUp, Plus, ArrowRight } from 'lucide-react';
 import { useBetSlip } from '../contexts/BetSlipContext';
+import { getPerformanceSummary, initializeUserTracking } from '../services/userTrackerService';
 import './PersonalizedDashboard.css';
 
 export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   const location = useLocation();
   const [dashboardData, setDashboardData] = useState(null);
   const [expandedBets, setExpandedBets] = useState({});
+  const [userPerformance, setUserPerformance] = useState(null);
   const { addBet, openBetSlip } = useBetSlip();
 
   // Only process data when on home page
   const isHomePage = location.pathname === '/' || location.pathname === '/home';
+
+  // Initialize user tracking system
+  useEffect(() => {
+    if (isHomePage) {
+      initializeUserTracking();
+      setUserPerformance(getPerformanceSummary());
+    }
+  }, [isHomePage]);
+
+  // Listen for user stats updates
+  useEffect(() => {
+    const handleStatsUpdate = (event) => {
+      setUserPerformance(getPerformanceSummary());
+    };
+
+    window.addEventListener('userStatsUpdated', handleStatsUpdate);
+    return () => window.removeEventListener('userStatsUpdated', handleStatsUpdate);
+  }, []);
 
   // Initialize with real data from API immediately
   useEffect(() => {
@@ -323,18 +343,24 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     console.log('Final recommended bets:', recommendedBets.length);
     console.log('Recommended bets data:', recommendedBets);
 
+    // Use actual user performance data if available
+    const actualPerformance = getPerformanceSummary();
+    
     // Always set dashboard data, even if no recommended bets
     const dashboardDataToSet = {
       todayOpportunities: filteredGames.length,
       highEvBets: highEvBets.length,
       favoriteLeagues,
       recentPerformance: {
-        winRate: '0.0',
-        avgEdge: recommendedBets.length > 0 
+        winRate: actualPerformance.winRate || '0.0',
+        avgEdge: actualPerformance.avgEdge || (recommendedBets.length > 0 
           ? (recommendedBets.reduce((sum, bet) => sum + parseFloat(bet.edge), 0) / recommendedBets.length).toFixed(1)
-          : '0.0',
-        roi: '0.0',
-        totalBets: 0
+          : '0.0'),
+        roi: actualPerformance.roi || '0.0',
+        totalBets: actualPerformance.totalBets || 0,
+        netProfit: actualPerformance.netProfit || 0,
+        currentStreak: actualPerformance.currentStreak || 0,
+        streakType: actualPerformance.streakType
       },
       recommendedBets: recommendedBets,
       alerts: []

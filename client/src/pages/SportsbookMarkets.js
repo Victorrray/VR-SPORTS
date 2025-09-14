@@ -556,14 +556,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         g.live === true ||
         (g.home_team && g.home_team.includes('🔴')) ||
         (g.away_team && g.away_team.includes('🔴')) ||
-        JSON.stringify(g).includes('LIVE')
+        JSON.stringify(g).includes('LIVE') ||
+        JSON.stringify(g).includes('🔴')
       );
       console.log(`Found ${liveGames.length} potentially live games:`, liveGames.map(g => ({
         matchup: `${g.home_team} vs ${g.away_team}`,
         status: g.status,
         live: g.live,
+        rawData: JSON.stringify(g).substring(0, 200),
         hasLiveIndicator: JSON.stringify(g).includes('🔴') || JSON.stringify(g).includes('LIVE')
       })));
+      
+      // Also check if the live indicator is in the sport_title or other fields
+      console.log('Sample game full object:', JSON.stringify(base[0], null, 2));
     }
     
     // Filter by selected date (local date) or live games
@@ -576,11 +581,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const hasStarted = gameTime <= now;
           const isCompleted = g.completed === true || g.status === 'completed';
           
-          // Check for live indicators in the data
+          // Check for live indicators in the data - look in sport_title field
           const hasLiveIndicator = JSON.stringify(g).includes('🔴') || 
                                   JSON.stringify(g).includes('LIVE') ||
                                   (g.home_team && g.home_team.includes('🔴')) ||
-                                  (g.away_team && g.away_team.includes('🔴'));
+                                  (g.away_team && g.away_team.includes('🔴')) ||
+                                  (g.sport_title && g.sport_title.includes('🔴')) ||
+                                  (g.sport_title && g.sport_title.includes('LIVE'));
           
           const isLive = g.status === 'in_progress' || 
                         g.live === true || 
@@ -621,7 +628,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           const hasLiveIndicator = JSON.stringify(g).includes('🔴') || 
                                   JSON.stringify(g).includes('LIVE') ||
                                   (g.home_team && g.home_team.includes('🔴')) ||
-                                  (g.away_team && g.away_team.includes('🔴'));
+                                  (g.away_team && g.away_team.includes('🔴')) ||
+                                  (g.sport_title && g.sport_title.includes('🔴')) ||
+                                  (g.sport_title && g.sport_title.includes('LIVE'));
           
           const isLive = g.status === 'in_progress' || 
                         g.live === true || 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Plus, Trash2, Trophy, Target, Calendar, DollarSign, AlertCircle, CheckCircle2, BarChart3, PieChart, Filter, Download, Share2, Edit3, Clock, Zap, TrendingDown, Award, Activity, RefreshCw } from "lucide-react";
+import { TrendingUp, Plus, Trash2, Trophy, Target, Calendar, DollarSign, AlertCircle, CheckCircle2, BarChart3, PieChart, Filter, Download, Share2, Edit3, Clock, Zap, TrendingDown, Award, Activity, RefreshCw, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileBottomBar from "../components/MobileBottomBar";
+import { autoValidateBets, manualValidateAllBets } from "../services/betValidationService";
 import "./MyPicks.css";
 
 const LS_KEY = "oss_my_picks_v1";
@@ -13,12 +14,34 @@ export default function MyPicks() {
   const [filter, setFilter] = useState('all'); // 'all', 'pending', 'won', 'lost'
   const [timeRange, setTimeRange] = useState('30d'); // '7d', '30d', '90d', 'all'
   const [sortBy, setSortBy] = useState('date'); // 'date', 'profit', 'odds', 'sport'
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LS_KEY);
       if (raw) setPicks(JSON.parse(raw));
     } catch {}
+    
+    // Auto-validate bets on component mount
+    handleAutoValidation();
+  }, []);
+
+  // Listen for validation events
+  useEffect(() => {
+    const handleValidationEvent = (event) => {
+      const result = event.detail;
+      if (result.updated > 0) {
+        // Reload picks from localStorage
+        try {
+          const raw = localStorage.getItem(LS_KEY);
+          if (raw) setPicks(JSON.parse(raw));
+        } catch {}
+      }
+    };
+
+    window.addEventListener('betsValidated', handleValidationEvent);
+    return () => window.removeEventListener('betsValidated', handleValidationEvent);
   }, []);
 
   function save(next) {
@@ -139,6 +162,35 @@ export default function MyPicks() {
     event.target.value = '';
   }
 
+  const handleAutoValidation = async () => {
+    try {
+      const result = await autoValidateBets();
+      if (result.updated > 0) {
+        setValidationMessage(`✅ Auto-validated ${result.updated} bet${result.updated === 1 ? '' : 's'}`);
+        setTimeout(() => setValidationMessage(''), 5000);
+      }
+    } catch (error) {
+      console.error('Auto-validation error:', error);
+    }
+  };
+
+  const handleManualValidation = async () => {
+    setIsValidating(true);
+    setValidationMessage('🔄 Checking ESPN for game results...');
+    
+    try {
+      const result = await manualValidateAllBets();
+      setValidationMessage(result.userMessage || 'Validation completed');
+      setTimeout(() => setValidationMessage(''), 8000);
+    } catch (error) {
+      console.error('Manual validation error:', error);
+      setValidationMessage('❌ Validation failed - please try again');
+      setTimeout(() => setValidationMessage(''), 5000);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const refreshData = () => {
     // Force re-render by updating timestamps on all picks
     const updatedPicks = picks.map(pick => ({
@@ -147,6 +199,9 @@ export default function MyPicks() {
     }));
     setPicks(updatedPicks);
     localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
+    
+    // Also trigger validation
+    handleManualValidation();
   };
 
   const updateActualPayout = (pickId, actualPayout) => {
@@ -252,6 +307,11 @@ export default function MyPicks() {
           <div>
             <h1>My Picks</h1>
             <p>Advanced betting performance analytics</p>
+            {validationMessage && (
+              <div className="validation-message">
+                {validationMessage}
+              </div>
+            )}
           </div>
         </div>
         
@@ -342,11 +402,9 @@ export default function MyPicks() {
                   <option value="odds">Sort by Odds</option>
                   <option value="sport">Sort by Sport</option>
                 </select>
-              </div>
-              <div className="action-controls">
-                <button className="export-btn" onClick={exportPicks}>
-                  <Download size={14} />
-                  Export
+                <button className="validate-btn" onClick={handleManualValidation} disabled={isValidating}>
+                  {isValidating ? <Loader size={14} className="spinning" /> : <CheckCircle2 size={14} />}
+                  {isValidating ? 'Validating...' : 'Validate ESPN'}
                 </button>
                 <button className="refresh-btn" onClick={refreshData}>
                   <RefreshCw size={14} />
@@ -430,16 +488,6 @@ export default function MyPicks() {
                       <span>{new Date(p.dateAdded).toLocaleDateString()}</span>
                     </div>
                     <div className="pick-actions">
-                      {p.status === 'pending' && (
-                        <>
-                          <button onClick={() => updatePickStatus(p.id, 'won')} className="win-btn">
-                            <CheckCircle2 size={14} />
-                          </button>
-                          <button onClick={() => updatePickStatus(p.id, 'lost')} className="lose-btn">
-                            <AlertCircle size={14} />
-                          </button>
-                        </>
-                      )}
                       <button onClick={() => removePick(p.id)} className="remove-btn">
                         <Trash2 size={14} />
                       </button>
