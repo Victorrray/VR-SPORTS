@@ -572,12 +572,12 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
             {/* Bet Settings */}
             <div className="bet-settings-section">
               <div className="settings-header">
-                <h4>Bet Settings</h4>
+                <h5>Bet Settings</h5>
                 <button 
                   className="settings-toggle"
                   onClick={() => setShowAdvanced(!showAdvanced)}
                 >
-                  {showAdvanced ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showAdvanced ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
               
@@ -650,17 +650,15 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                           <div className="bet-selection">
                             <span className="selection-text">{bet.selection}</span>
                             <span className="selection-odds">{formatOdds(bet.americanOdds)}</span>
-                          </div>
-                          {bet.edge && (
-                            <div className="bet-edge-only">
+                            {bet.edge && (
                               <span 
-                                className="bet-edge"
+                                className="bet-edge-inline"
                                 style={{ color: getEdgeColor(bet.edge) }}
                               >
                                 {bet.edge > 0 ? '+' : ''}{bet.edge.toFixed(1)}% EV
                               </span>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </div>
                       
@@ -827,14 +825,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
             <div className="betslip-summary">
               {betType === 'single' ? (
                 <div className="single-summary">
-                  <div className="summary-row">
-                    <span>Total Stake:</span>
-                    <span className="summary-value">{formatCurrency(singleBetTotals.stake)}</span>
-                  </div>
-                  <div className="summary-row">
-                    <span>Potential Payout:</span>
-                    <span className="summary-value">{formatCurrency(singleBetTotals.payout)}</span>
-                  </div>
                   <div className="summary-row profit">
                     <span>Potential Profit:</span>
                     <span className="summary-value profit">

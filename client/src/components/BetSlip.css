@@ -174,21 +174,19 @@
 
 /* Bet Settings Section */
 .bet-settings-section {
-  margin: 0 20px 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  background: var(--card-bg);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  margin-bottom: 12px;
 }
 
 .settings-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  padding: 12px 20px;
+  cursor: pointer;
 }
 
-.settings-header h4 {
+.settings-header h5 {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
@@ -467,6 +465,15 @@
 .bet-edge {
   font-size: 12px;
   font-weight: 600;
+}
+
+.bet-edge-inline {
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.1);
 }
 
 .remove-bet-btn {
