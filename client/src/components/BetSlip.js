@@ -337,17 +337,9 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
     const payout = amount * decimalOdds;
     const profit = payout - amount;
     
-    // Calculate proper EV using fair odds comparison
-    let edge = 0;
-    if (bet.fairOdds && bet.fairOdds !== odds) {
-      // Convert fair odds to decimal
-      const fairDecimal = bet.fairOdds > 0 ? (bet.fairOdds / 100) + 1 : (100 / Math.abs(bet.fairOdds)) + 1;
-      // Calculate EV percentage: (bookmaker_decimal / fair_decimal - 1) * 100
-      edge = ((decimalOdds / fairDecimal) - 1) * 100;
-    } else if (bet.edge) {
-      // Fallback to provided edge if available
-      edge = bet.edge;
-    }
+    // Use the edge value that was calculated when the bet was added to the slip
+    // This ensures consistency with the odds table calculation
+    const edge = bet.edge || 0;
     
     return {
       amount,
@@ -662,6 +654,13 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                             )}
                           </div>
                         </div>
+                        <button
+                          onClick={() => onRemoveBet?.(bet.id)}
+                          className="remove-bet-btn"
+                          title="Remove bet"
+                        >
+                          <X size={16} />
+                        </button>
                       </div>
                       
                       <div className="bet-amount-section">
