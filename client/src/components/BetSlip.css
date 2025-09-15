@@ -404,6 +404,7 @@
 }
 
 .bet-item {
+  position: relative;
   padding: 20px;
   background: rgba(139, 92, 246, 0.05);
   border: 1px solid rgba(139, 92, 246, 0.2);
@@ -499,6 +500,29 @@
 }
 
 .remove-bet-btn:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.remove-bet-btn-top {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.remove-bet-btn-top:hover {
   background: var(--danger);
   color: white;
 }

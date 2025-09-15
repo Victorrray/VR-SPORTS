@@ -638,6 +638,13 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                 <div className="single-bets">
                   {bets.map(bet => (
                     <div key={bet.id} className="bet-item">
+                      <button
+                        onClick={() => onRemoveBet?.(bet.id)}
+                        className="remove-bet-btn-top"
+                        title="Remove bet"
+                      >
+                        <X size={16} />
+                      </button>
                       <div className="bet-header">
                         <div className="bet-info">
                           <div className="bet-matchup">{bet.matchup}</div>
@@ -654,13 +661,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                             )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => onRemoveBet?.(bet.id)}
-                          className="remove-bet-btn"
-                          title="Remove bet"
-                        >
-                          <X size={16} />
-                        </button>
                       </div>
                       
                       <div className="bet-amount-section">

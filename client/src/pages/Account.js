@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, Youtube, MessageCircle } from "lucide-react";
 import MobileBottomBar from "../components/MobileBottomBar";
 import SportMultiSelect from "../components/SportMultiSelect";
 import UsagePlanCard from "../components/UsagePlanCard";
@@ -582,6 +582,61 @@ export default function Account() {
         <UsagePlanCard />
       </div>
 
+
+      {/* Social Media Section */}
+      <section className="social-media-card">
+        <div className="card-header">
+          <MessageCircle size={20} />
+          <h2>Follow Us</h2>
+        </div>
+        <div className="social-content">
+          <p className="social-description">
+            Stay updated with the latest odds, tips, and platform updates
+          </p>
+          <div className="social-links">
+            <a 
+              href="https://twitter.com/vrodds" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="social-link twitter"
+              aria-label="Follow us on Twitter"
+            >
+              <Twitter size={20} />
+              <span>Twitter</span>
+            </a>
+            <a 
+              href="https://instagram.com/vrodds" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="social-link instagram"
+              aria-label="Follow us on Instagram"
+            >
+              <Instagram size={20} />
+              <span>Instagram</span>
+            </a>
+            <a 
+              href="https://youtube.com/@vrodds" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="social-link youtube"
+              aria-label="Subscribe to our YouTube channel"
+            >
+              <Youtube size={20} />
+              <span>YouTube</span>
+            </a>
+            <a 
+              href="https://discord.gg/vrodds" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="social-link discord"
+              aria-label="Join our Discord community"
+            >
+              <MessageCircle size={20} />
+              <span>Discord</span>
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* Version info */}
       <div className="version-info">

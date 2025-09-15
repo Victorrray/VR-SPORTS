@@ -256,9 +256,8 @@ export default function OddsTable({
     const odds = row.out.price || row.out.odds;
     const americanOdds = typeof odds === 'string' ? parseInt(odds) : odds;
     
-    // Calculate edge if available
-    const fairProb = consensusDevigProb(row);
-    const edge = fairProb ? calculateEV(americanOdds, decimalToAmerican(1 / fairProb)) : null;
+    // Use the same EV calculation as the odds table display
+    const edge = getEV(row);
     
     const bet = {
       id: `${row.key}-${book?.bookmaker?.key || book?.book}-${Date.now()}`,
