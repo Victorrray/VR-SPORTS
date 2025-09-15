@@ -301,14 +301,14 @@ export function getPerformanceSummary() {
   const stats = getUserStats();
   
   return {
-    winRate: stats.winRate.toFixed(1),
-    avgEdge: stats.avgEdge.toFixed(1),
-    roi: stats.roi.toFixed(1),
-    totalBets: stats.totalBets,
-    netProfit: stats.netProfit,
-    currentStreak: stats.currentStreak,
-    streakType: stats.streakType,
-    bestStreak: stats.bestStreak
+    winRate: (stats.winRate || 0).toFixed(1),
+    avgEdge: (stats.avgEdge || 0).toFixed(1),
+    roi: (stats.roi || 0).toFixed(1),
+    totalBets: stats.totalBets || 0,
+    netProfit: stats.netProfit || 0,
+    currentStreak: stats.currentStreak || 0,
+    streakType: stats.streakType || null,
+    bestStreak: stats.bestStreak || 0
   };
 }
 
