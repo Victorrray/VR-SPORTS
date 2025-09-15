@@ -48,11 +48,12 @@ function parseGameTeams(gameString) {
 function getSportFromLeague(league) {
   const leagueUpper = league?.toUpperCase();
   
-  // Direct mappings
+  // Direct mappings - ensure we return the correct ESPN API sport codes
   const sportMappings = {
     'NFL': 'NFL',
-    'NBA': 'NBA',
+    'NBA': 'NBA', 
     'MLB': 'MLB',
+    'BASEBALL': 'MLB', // Handle case where sport name is stored instead of league
     'NHL': 'NHL',
     'NCAAF': 'NCAAF',
     'NCAAB': 'NCAAB',
@@ -136,6 +137,8 @@ export async function validateAllBets() {
     const betsBySport = {};
     pendingBets.forEach(bet => {
       const sport = getSportFromLeague(bet.league);
+      console.log(`Debug: bet object:`, bet);
+      console.log(`Debug: bet.league="${bet.league}", mapped sport="${sport}"`);
       if (!betsBySport[sport]) {
         betsBySport[sport] = [];
       }

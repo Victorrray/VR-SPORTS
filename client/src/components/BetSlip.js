@@ -780,12 +780,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                             {formatCurrency(parlayCalculations.payout)}
                           </span>
                         </div>
-                        <div className="payout-row profit">
-                          <span>Potential Profit:</span>
-                          <span className="profit-amount">
-                            {formatCurrency(parlayCalculations.profit)}
-                          </span>
-                        </div>
                         <div className="payout-row probability">
                           <span>Win Probability:</span>
                           <span className="probability-value">
@@ -830,12 +824,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
             <div className="betslip-summary">
               {betType === 'single' ? (
                 <div className="single-summary">
-                  <div className="summary-row profit">
-                    <span>Potential Profit:</span>
-                    <span className="summary-value profit">
-                      {formatCurrency(singleBetTotals.profit)}
-                    </span>
-                  </div>
                   {singleBetTotals.avgEdge !== 0 && (
                     <div className="summary-row">
                       <span>Avg Edge:</span>
@@ -858,12 +846,6 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                     <div className="summary-row">
                       <span>Potential Payout:</span>
                       <span className="summary-value">{formatCurrency(parlayCalculations.payout)}</span>
-                    </div>
-                    <div className="summary-row profit">
-                      <span>Potential Profit:</span>
-                      <span className="summary-value profit">
-                        {formatCurrency(parlayCalculations.profit)}
-                      </span>
                     </div>
                   </div>
                 )

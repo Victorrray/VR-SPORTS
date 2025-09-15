@@ -518,7 +518,7 @@
 
 .amount-input {
   flex: 1;
-  padding: 16px 50px 16px 16px;
+  padding: 16px 45px 16px 16px;
   border: 2px solid rgba(139, 92, 246, 0.3);
   border-radius: 12px;
   background: rgba(15, 11, 26, 0.8);
@@ -538,20 +538,21 @@
 
 .clear-amount-btn {
   position: absolute;
-  right: 6px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: none;
   border-radius: 6px;
   background: rgba(139, 92, 246, 0.2);
   color: var(--accent);
   cursor: pointer;
   transition: all 0.3s ease;
+  z-index: 1;
 }
 
 .quick-apply-btn:hover {
@@ -577,19 +578,24 @@
 .payout-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  text-align: left;
+  gap: 6px;
+  text-align: center;
   width: 100%;
+  padding: 12px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .payout-info span:first-child {
-  color: var(--text-muted);
-  font-size: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .payout-info span:last-child {
-  color: var(--text);
-  font-weight: 500;
+  color: var(--text-muted);
+  font-weight: 400;
   font-size: 12px;
 }
 

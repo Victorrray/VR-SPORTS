@@ -1134,26 +1134,29 @@ export default function OddsTable({
                   </td>
                   <td>
                     <div style={{ textAlign:'left', display:'flex', flexDirection:'column', gap:2 }}>
-                      <span style={{ opacity:.8, fontSize:'0.92em' }}>{formatKickoffNice(row.game.commence_time)}</span>
-                      <span style={{ fontWeight:800 }}>{row.game.home_team} vs {row.game.away_team}</span>
+                      <span style={{ opacity:.8, fontSize:'0.92em' }}>{formatKickoffNice(row.game?.commence_time)}</span>
+                      <span style={{ fontWeight:800 }}>{(row.game?.home_team || 'Home')} vs {(row.game?.away_team || 'Away')}</span>
                       <span style={{ opacity:.9 }}>
-                        {(() => { const { sport, league } = getSportLeague(row.game.sport_key, row.game.sport_title); return `${sport} | ${league}`; })()}
+                        {(() => { 
+                          const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
+                          return `${sport} | ${league}`; 
+                        })()}
                       </span>
                     </div>
                   </td>
                   <td>
                     <div style={{ display:'flex', flexDirection:'column', gap:2, textAlign:'left' }}>
                       <span style={{ fontWeight:800 }}>
-                        {(row.mkt.key || '') === 'h2h'
-                          ? shortTeam(row.out.name, row.game.sport_key)
-                          : (row.out.name || '')}
+                        {(row.mkt?.key || '') === 'h2h'
+                          ? shortTeam(row.out?.name, row.game?.sport_key)
+                          : (row.out?.name || '')}
                       </span>
                       <span style={{ opacity:.9 }}>
                         {formatMarket(row.mkt?.key || '')}
                       </span>
                     </div>
                   </td>
-                  <td>{(row.mkt.key || '') === 'h2h' ? '' : formatLine(row.out.point, row.mkt.key, 'game')}</td>
+                  <td>{(row.mkt?.key || '') === 'h2h' ? '' : formatLine(row.out?.point, row.mkt?.key, 'game')}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {logos[row.bk?.key] && (

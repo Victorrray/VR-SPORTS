@@ -266,6 +266,14 @@ export default function MyPicks() {
   const filteredPicks = useMemo(() => {
     let filtered = picks;
     
+    // Hide picks older than 1 day unless specific filters are used
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const isUsingFilters = filter !== 'all' || sortBy !== 'date';
+    
+    if (!isUsingFilters) {
+      filtered = filtered.filter(p => new Date(p.dateAdded) >= oneDayAgo);
+    }
+    
     // Apply status filter
     if (filter !== 'all') {
       filtered = filtered.filter(p => p.status === filter || (!p.status && filter === 'pending'));
@@ -402,14 +410,6 @@ export default function MyPicks() {
                   <option value="odds">Sort by Odds</option>
                   <option value="sport">Sort by Sport</option>
                 </select>
-                <button className="validate-btn" onClick={handleManualValidation} disabled={isValidating}>
-                  {isValidating ? <Loader size={14} className="spinning" /> : <CheckCircle2 size={14} />}
-                  {isValidating ? 'Validating...' : 'Validate ESPN'}
-                </button>
-                <button className="refresh-btn" onClick={refreshData}>
-                  <RefreshCw size={14} />
-                  Refresh
-                </button>
               </div>
             </div>
           )}
@@ -450,7 +450,7 @@ export default function MyPicks() {
                     </div>
                     <div className="financial-row">
                       <span className="label">Potential:</span>
-                      <span className="value">${Number(p.potential) || 0}</span>
+                      <span className="value">${Math.round(Number(p.potential) || 0)}</span>
                     </div>
                     {p.status === 'won' && (
                       <div className="financial-row">
@@ -460,7 +460,7 @@ export default function MyPicks() {
                           step="0.01"
                           min="0"
                           value={p.actualPayout || ''}
-                          onChange={(e) => updateActualPayout(p.id, e.target.value)}
+                          onChange={(e) => updateActualPayout(p.id, Math.round(Number(e.target.value)))}
                           className="payout-input"
                           placeholder="Enter payout"
                         />
@@ -485,7 +485,22 @@ export default function MyPicks() {
                   <div className="pick-footer">
                     <div className="pick-date">
                       <Calendar size={12} />
-                      <span>{new Date(p.dateAdded).toLocaleDateString()}</span>
+                      <span>
+                        {(() => {
+                          // If game hasn't started yet, show date and time
+                          if (!p.status || p.status === 'pending') {
+                            const gameDate = new Date(p.dateAdded);
+                            const now = new Date();
+                            
+                            // If the game is in the future, show full date and time
+                            if (gameDate > now) {
+                              return gameDate.toLocaleDateString() + ' ' + gameDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            }
+                          }
+                          // Default: just show date
+                          return new Date(p.dateAdded).toLocaleDateString();
+                        })()}
+                      </span>
                     </div>
                     <div className="pick-actions">
                       <button onClick={() => removePick(p.id)} className="remove-btn">
