@@ -1467,11 +1467,14 @@ export default function OddsTable({
                               }
                               if (isSpreads) {
                                 const name = top ? row.game.home_team : row.game.away_team;
-                                const ptAbs = Math.abs(Number(row.out.point ?? 0));
-                                const f = outs.find(x => x && x.name === name && Math.abs(Number(x.point ?? 0)) === ptAbs) ||
-                                          outs.find(x => x && x.name === name);
+                                const targetPoint = Number(row.out.point ?? 0);
+                                
+                                // For spreads, we need to match the exact point value and team
+                                // If the main row shows "Dodgers -1.5", we want to find "Dodgers -1.5" in mini table
+                                const f = outs.find(x => x && x.name === name && Number(x.point ?? 0) === targetPoint) ||
+                                          outs.find(x => x && x.name === name && Math.abs(Number(x.point ?? 0)) === Math.abs(targetPoint));
                                 const result = f ? (f.price ?? f.odds) : '';
-                                console.log('Spreads result:', { name, ptAbs, found: f, result });
+                                console.log('Spreads result:', { name, targetPoint, found: f, result });
                                 return result;
                               }
                               return '';
@@ -1721,16 +1724,22 @@ export default function OddsTable({
                                 // Fix: Check multiple possible data structures for outcomes
                                 const outs = Array.isArray(p?.market?.outcomes) ? p.market.outcomes : 
                                             Array.isArray(p?.outcomes) ? p.outcomes : [];
+                                
+                                // Get the target point from the main row to ensure spread direction matches
+                                const targetPoint = Number(row.out.point ?? 0);
+                                
                                 const top = isML
                                   ? outs.find(x => x && x.name === row.game.home_team)
                                   : isTotals
                                     ? outs.find(x => x && x.name === 'Over' && String(x.point ?? '') === oPointStr)
-                                    : outs.find(x => x && x.name === row.game.home_team);
+                                    : outs.find(x => x && x.name === row.game.home_team && Number(x.point ?? 0) === targetPoint) ||
+                                      outs.find(x => x && x.name === row.game.home_team && Math.abs(Number(x.point ?? 0)) === Math.abs(targetPoint));
                                 const bot = isML
                                   ? outs.find(x => x && x.name === row.game.away_team)
                                   : isTotals
                                     ? outs.find(x => x && x.name === 'Under' && String(x.point ?? '') === oPointStr)
-                                    : outs.find(x => x && x.name === row.game.away_team);
+                                    : outs.find(x => x && x.name === row.game.away_team && Number(x.point ?? 0) === -targetPoint) ||
+                                      outs.find(x => x && x.name === row.game.away_team && Math.abs(Number(x.point ?? 0)) === Math.abs(targetPoint));
                                 return (
                                   <div key={p._rowId || i} className="mini-table-header-cell">
                                     <div className="mini-book-name" title={cleanBookTitle(p.book)}>
