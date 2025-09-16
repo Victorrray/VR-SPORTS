@@ -184,8 +184,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Pricing Section */}
+        {/* Pricing Section - Temporarily removed for redesign
         <Pricing />
+        */}
 
         {/* Edge Calculator Modal */}
         {showEdgeCalculator && (
