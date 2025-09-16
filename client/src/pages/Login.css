@@ -120,6 +120,11 @@
   box-sizing: border-box;
 }
 
+.login-input[type="password"],
+.login-input[type="text"] {
+  padding-right: 42px; /* Make room for the eye icon */
+}
+
 .login-input:focus {
   outline: none;
   border-color: var(--accent);
@@ -131,6 +136,37 @@
 
 .login-input::placeholder {
   color: var(--text-muted);
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: var(--accent);
+}
+
+.password-toggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .primary-btn {
@@ -210,52 +246,66 @@
   box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
+.remember-me-container {
+  margin: 1rem 0 1.5rem;
+}
+
 .remember-me {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 8px;
   cursor: pointer;
   user-select: none;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
 }
 
-.remember-toggle {
+.remember-me:hover {
+  color: var(--text);
+}
+
+.remember-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.remember-custom-checkbox {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 4px;
   position: relative;
-  width: 44px;
-  height: 24px;
-  background: var(--bg-elev-2);
-  border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
-.remember-toggle.checked {
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+.remember-checkbox:checked + .remember-custom-checkbox {
+  background: var(--accent);
   border-color: var(--accent);
 }
 
-.remember-toggle::after {
+.remember-checkbox:checked + .remember-custom-checkbox::after {
   content: '';
   position: absolute;
+  left: 5px;
   top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
-.remember-toggle.checked::after {
-  transform: translateX(20px);
+.remember-checkbox:focus + .remember-custom-checkbox {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .remember-label {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  line-height: 1.4;
 }
 
 .terms-text {

@@ -1291,7 +1291,7 @@ export default function OddsTable({
                             </div>
                           ) : (
                             <>
-                              {String(row.mkt?.key || '').includes('total') ? (
+                              {String(row.mkt?.key).includes('total') ? (
                                 <div className="mob-total-stack">
                                   <div className="mob-total-market">TOTAL</div>
                                   <div className="mob-total-side">{(row.out.name || '').toUpperCase()}</div>
@@ -1449,18 +1449,17 @@ export default function OddsTable({
                               // Special handling for spreads - we want to match the exact point spread
                               if (isSpreads && outs.length > 0) {
                                 const targetPoint = Number(row.out.point ?? 0);
-                                const targetName = row.out.name;
                                 
                                 // 1. First try exact match on team name and point spread
                                 let match = outs.find(o => 
                                   o && 
                                   Math.abs(Number(o.point) - targetPoint) < 0.1 && // Allow small floating point differences
-                                  o.name === targetName
+                                  o.name === row.game.home_team
                                 );
                                 
                                 // 2. If no exact match, try matching team name and point value (case insensitive)
                                 if (!match) {
-                                  const teamToMatch = targetName.toLowerCase();
+                                  const teamToMatch = row.game.home_team.toLowerCase();
                                   match = outs.find(o => 
                                     o && 
                                     Math.abs(Number(o.point) - targetPoint) < 0.1 &&
@@ -1470,7 +1469,7 @@ export default function OddsTable({
                                 
                                 // 3. If still no match, try matching by team name only (as last resort)
                                 if (!match) {
-                                  const teamToMatch = targetName.toLowerCase();
+                                  const teamToMatch = row.game.home_team.toLowerCase();
                                   match = outs.find(o => 
                                     o && 
                                     o.name && 
@@ -1608,188 +1607,81 @@ export default function OddsTable({
                 {expandedRows[row.key] && row.allBooks.length > 0 && (
                   <tr className="desktop-mini-wrap">
                     <td colSpan={8}>
-                      <div className="mini-table-oddsjam">
-                        <div className="mini-table-row">
-                          {/* legend */}
-                          <div className="mini-table-header-cell mini-table-legend">
-                            <div className="mini-col-type">{marketTypeLabel(row?.mkt?.key || '')}</div>
-                            <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
-                            <div className="mini-legend-stack">
+                      <div className="mini-odds-container">
+                        <table className="mini-odds-table">
+                          <thead>
+                            <tr>
+                              <th>Sportsbook</th>
                               {mode === "props" ? (
-                                <div className="legend-team top">Odds</div>
+                                <th>Odds</th>
                               ) : (
                                 <>
-                                  <div className="legend-team top">{String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}</div>
-                                  <div className="legend-team bot">{String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}</div>
+                                  <th>{shortTeam(row.game.home_team, row.game.sport_key)}</th>
+                                  <th>{shortTeam(row.game.away_team, row.game.sport_key)}</th>
                                 </>
                               )}
-                            </div>
-                          </div>
-
-                          {/* columns */}
-                          {(() => {
-                            const toDec = (n) => {
-                              const v = Number(n || 0);
-                              if (!v) return 0;
-                              return v > 0 ? (v / 100) + 1 : (100 / Math.abs(v)) + 1;
-                            };
-                            const mkRow = String(row?.mkt?.key || '').toLowerCase();
-                            const isML = (mkRow === 'h2h' || mkRow.endsWith('moneyline'));
-                            const isTotals = mkRow.includes('total');
-                            const oPointStr = String(row.out.point ?? '');
-
-                            // Priority bookmakers to show first - limit to 3 for free users
-                            const priorityBooks = ['fanduel', 'draftkings', 'caesars'];
-                            
-                            const getBookPriority = (bookKey) => {
-                              const key = String(bookKey || '').toLowerCase();
-                              const index = priorityBooks.findIndex(priority => key.includes(priority));
-                              return index === -1 ? 999 : index; // Non-priority books get high number
-                            };
-
-                            let sortedAll = [];
-                            if (mode === "props") {
-                              // Use the pre-grouped allBooks data for player props with priority sorting
-                              sortedAll = (row.allBooks || []).slice()
+                              <th>Add Pick</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(() => {
+                              const displayBooks = [...row.allBooks]
                                 .sort((a, b) => {
                                   const aPriority = getBookPriority(a.bookmaker?.key || a.book);
                                   const bPriority = getBookPriority(b.bookmaker?.key || b.book);
-                                  
-                                  // First sort by priority (lower number = higher priority)
-                                  if (aPriority !== bPriority) {
-                                    return aPriority - bPriority;
-                                  }
-                                  
-                                  // Then by odds (higher odds = better value)
-                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
+                                  return aPriority - bPriority;
                                 })
-                                .slice(0, 8);
-                            } else {
-                              // Original logic for regular games with priority sorting
-                              const seenAll = new Set();
-                              const uniqueAll = [];
-                              row.allBooks.forEach(ob => {
-                                const k = String(ob?.bookmaker?.key || ob.book || "").toLowerCase();
-                                if (!seenAll.has(k)) { seenAll.add(k); uniqueAll.push(ob); }
-                              });
-                              
-                              sortedAll = uniqueAll.slice()
-                                .sort((a, b) => {
-                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
-                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
-                                  
-                                  // First sort by priority (lower number = higher priority)
-                                  if (aPriority !== bPriority) {
-                                    return aPriority - bPriority;
-                                  }
-                                  
-                                  // Then by odds (higher odds = better value)
-                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
-                                })
-                                .slice(0, 8);
-                            }
+                                .slice(0, 6);
 
-                            const fmt = (out) => {
-                              const n = Number(out);
-                              if (!n && n !== 0) return '';
-                              if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
-                              if (currentOddsFormat === 'decimal') { const d = toDec(n); return d ? d.toFixed(2) : ''; }
-                              const num = n > 0 ? Math.round(Math.abs(n)) : 100;
-                              const den = n > 0 ? 100 : Math.round(Math.abs(n));
-                              const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
-                              return `${num/g}/${den/g}`;
-                            };
-
-                            // Apply free trial restrictions - only show first 3 books for free users
-                            const isFreeTrial = me?.plan === 'free' || !me?.plan;
-                            const maxBooks = isFreeTrial ? 3 : 8;
-                            const displayBooks = sortedAll.slice(0, maxBooks);
-                            
-                            console.log('Mini-table sportsbook restriction:', {
-                              userPlan: me?.plan,
-                              isFreeTrial,
-                              totalBooks: sortedAll.length,
-                              maxBooks,
-                              displayedBooks: displayBooks.length
-                            });
-                            
-                            return displayBooks.map((p, i) => {
-                              if (mode === "props") {
-                                // For player props, show single odds value
-                                return (
-                                  <div key={p._rowId || i} className="mini-table-header-cell">
-                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>
-                                      {logos[p.bookmaker?.key] && (
-                                        <img 
-                                          src={logos[p.bookmaker?.key]} 
-                                          alt={cleanBookTitle(p.book)}
-                                          className="bookmaker-logo"
-                                          style={{
-                                            width: '18px',
-                                            height: '18px',
-                                            marginBottom: '4px',
-                                            objectFit: 'contain',
-                                            display: 'block',
-                                            margin: '0 auto 4px auto'
-                                          }}
-                                        />
-                                      )}
-                                      {cleanBookTitle(p.book)}
-                                    </div>
-                                    <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
-                                    <div className="mini-table-odds-cell">{fmt(p.price ?? p.odds)}</div>
-                                    <div className="mini-table-odds-cell" style={{ marginTop:6, opacity: 0.3 }}>—</div>
-                                  </div>
-                                );
-                              } else {
-                                // Fix: Check multiple possible data structures for outcomes
-                                const outs = Array.isArray(p?.market?.outcomes) ? p.market.outcomes : 
-                                            Array.isArray(p?.outcomes) ? p.outcomes : [];
-                                
-                                // Get the target point from the main row to ensure spread direction matches
-                                const targetPoint = Number(row.out.point ?? 0);
-                                
-                                const top = isML
-                                  ? outs.find(x => x && x.name === row.game.home_team)
-                                  : isTotals
-                                    ? outs.find(x => x && x.name === 'Over' && String(x.point ?? '') === oPointStr)
-                                    : outs.find(x => x && x.name === row.game.home_team && Number(x.point ?? 0) === targetPoint) ||
-                                      outs.find(x => x && x.name === row.game.home_team && Math.abs(Number(x.point ?? 0)) === Math.abs(targetPoint));
-                                const bot = isML
-                                  ? outs.find(x => x && x.name === row.game.away_team)
-                                  : isTotals
-                                    ? outs.find(x => x && x.name === 'Under' && String(x.point ?? '') === oPointStr)
-                                    : outs.find(x => x && x.name === row.game.away_team && Number(x.point ?? 0) === -targetPoint) ||
-                                      outs.find(x => x && x.name === row.game.away_team && Math.abs(Number(x.point ?? 0)) === Math.abs(targetPoint));
-                                return (
-                                  <div key={p._rowId || i} className="mini-table-header-cell">
-                                    <div className="mini-book-name" title={cleanBookTitle(p.book)}>
-                                      {logos[p.bookmaker?.key] && (
-                                        <img 
-                                          src={logos[p.bookmaker?.key]} 
-                                          alt={cleanBookTitle(p.book)}
-                                          className="bookmaker-logo"
-                                          style={{
-                                            width: '18px',
-                                            height: '18px',
-                                            marginBottom: '4px',
-                                            objectFit: 'contain',
-                                            display: 'block',
-                                            margin: '0 auto 4px auto'
-                                          }}
-                                        />
-                                      )}
-                                      {cleanBookTitle(p.book)}
-                                    </div>
-                                    <hr style={{ width:"80%", margin:"0.4em auto 0.2em auto", border:0, borderTop:"1.5px solid", borderTopColor:"color-mix(in srgb, var(--accent) 20%, transparent)" }} />
-                                    <div className="mini-table-odds-cell">{fmt(top?.price ?? top?.odds)}</div>
-                                    <div className="mini-table-odds-cell" style={{ marginTop:6 }}>{fmt(bot?.price ?? bot?.odds)}</div>
-                                  </div>
-                                );
-                              }
-                            });
-                          })()}
-                        </div>
+                              return displayBooks.map((p, i) => (
+                                <tr key={p._rowId || i}>
+                                  <td className="mini-book-cell">
+                                    {logos[p.bookmaker?.key] && (
+                                      <img 
+                                        src={logos[p.bookmaker?.key]} 
+                                        alt={cleanBookTitle(p.book)}
+                                        className="mini-book-logo"
+                                      />
+                                    )}
+                                    <span>{cleanBookTitle(p.book)}</span>
+                                  </td>
+                                  
+                                  {mode === "props" ? (
+                                    <td className="mini-odds-cell">
+                                      {formatOdds(Number(p.price ?? p.odds ?? 0))}
+                                    </td>
+                                  ) : (
+                                    <>
+                                      <td className="mini-odds-cell">
+                                        {formatOdds(Number(grab(p, true)))}
+                                      </td>
+                                      <td className="mini-odds-cell">
+                                        {formatOdds(Number(grab(p, false)))}
+                                      </td>
+                                    </>
+                                  )}
+                                  
+                                  <td className="mini-pick-col">
+                                    <button 
+                                      className="add-pick-btn"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onAddBet) {
+                                          addToBetSlip(row, p, e.target);
+                                        } else {
+                                          addToPicks(row, p, true, e.target);
+                                        }
+                                      }}
+                                      title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
+                                    >
+                                      +
+                                    </button>
+                                  </td>
+                                </tr>
+                              ));
+                            })()}
+                          </tbody>
+                        </table>
                       </div>
                     </td>
                   </tr>
