@@ -1433,23 +1433,56 @@ export default function OddsTable({
                                 return ob.price ?? ob.odds ?? '';
                               }
                               
-                              // Debug: Log the structure to understand what we're working with
-                              console.log('Mini-table grab debug:', { ob, top, isML, isTotals, isSpreads });
-                              
-                              // Try multiple data structure patterns
+                              // Get all possible outcomes
                               let outs = [];
                               if (Array.isArray(ob?.market?.outcomes)) {
                                 outs = ob.market.outcomes;
                               } else if (Array.isArray(ob?.outcomes)) {
                                 outs = ob.outcomes;
                               } else if (ob?.bookmaker && Array.isArray(ob.bookmaker.markets)) {
-                                // Find the matching market in the bookmaker data
                                 const market = ob.bookmaker.markets.find(m => m.key === row.mkt?.key);
                                 if (market && Array.isArray(market.outcomes)) {
                                   outs = market.outcomes;
                                 }
                               }
-                              
+
+                              // Special handling for spreads - we want to match the exact point spread
+                              if (isSpreads && outs.length > 0) {
+                                const targetPoint = Number(row.out.point ?? 0);
+                                const targetName = row.out.name;
+                                
+                                // 1. First try exact match on team name and point spread
+                                let match = outs.find(o => 
+                                  o && 
+                                  Math.abs(Number(o.point) - targetPoint) < 0.1 && // Allow small floating point differences
+                                  o.name === targetName
+                                );
+                                
+                                // 2. If no exact match, try matching team name and point value (case insensitive)
+                                if (!match) {
+                                  const teamToMatch = targetName.toLowerCase();
+                                  match = outs.find(o => 
+                                    o && 
+                                    Math.abs(Number(o.point) - targetPoint) < 0.1 &&
+                                    o.name.toLowerCase() === teamToMatch
+                                  );
+                                }
+                                
+                                // 3. If still no match, try matching by team name only (as last resort)
+                                if (!match) {
+                                  const teamToMatch = targetName.toLowerCase();
+                                  match = outs.find(o => 
+                                    o && 
+                                    o.name && 
+                                    o.name.toLowerCase().includes(teamToMatch)
+                                  );
+                                }
+                                
+                                // 4. If we have a match, return its price/odds
+                                if (match) {
+                                  return match.price ?? match.odds ?? '';
+                                }
+                              }
                               if (isML) {
                                 const name = top ? row.game.home_team : row.game.away_team;
                                 const f = outs.find(x => x && x.name === name);
@@ -1464,18 +1497,7 @@ export default function OddsTable({
                                 console.log('Totals result:', { name, point: oPointStr, found: f, result });
                                 return result;
                               }
-                              if (isSpreads) {
-                                const name = top ? row.game.home_team : row.game.away_team;
-                                const targetPoint = Number(row.out.point ?? 0);
-                                
-                                // For spreads, we need to match the exact point value and team
-                                // If the main row shows "Dodgers -1.5", we want to find "Dodgers -1.5" in mini table
-                                const f = outs.find(x => x && x.name === name && Number(x.point ?? 0) === targetPoint) ||
-                                          outs.find(x => x && x.name === name && Math.abs(Number(x.point ?? 0)) === Math.abs(targetPoint));
-                                const result = f ? (f.price ?? f.odds) : '';
-                                console.log('Spreads result:', { name, targetPoint, found: f, result });
-                                return result;
-                              }
+                              // Spreads handling is now done in the main grab function
                               return '';
                             };
 
