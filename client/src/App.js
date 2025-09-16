@@ -30,6 +30,7 @@ import Privacy from './pages/Privacy';
 import BillingSuccess from './pages/BillingSuccess';
 import BillingCancel from './pages/BillingCancel';
 import QuotaModal from './components/QuotaModal';
+import UsernameSetup from './components/UsernameSetup';
 import { initBrowserCompat } from "./utils/browserCompat";
 import "./App.css";
 import './styles/accessibility.css';
@@ -129,7 +130,12 @@ function AppRoutes() {
           {/* Only show footer on login page */}
           {location.pathname === "/login" && <Footer />}
           
-          {/* Username Setup Modal - Removed for now */}
+          {/* Username Setup Modal */}
+          {showUsernameSetup && (
+            <UsernameSetup 
+              onComplete={() => setShowUsernameSetup(false)} 
+            />
+          )}
           
           {/* Quota Exceeded Modal */}
           <QuotaModal 
