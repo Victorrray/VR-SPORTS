@@ -221,7 +221,7 @@ const Pricing = ({ onUpgrade }) => {
                 <div className="feature-icon">
                   <Check size={12} />
                 </div>
-                <span>Live scores for NFL, NBA, MLB, NHL</span>
+                <span>Live scores for NFL, NBA, MLB</span>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">
@@ -234,12 +234,6 @@ const Pricing = ({ onUpgrade }) => {
                   <Check size={12} />
                 </div>
                 <span>Game schedules and results history</span>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Mobile app with push notifications</span>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">
@@ -389,19 +383,19 @@ const Pricing = ({ onUpgrade }) => {
             <div className="trust-signals">
               <div className="trust-item">
                 <Star size={14} className="trust-icon" />
-                <span>4.8/5 user rating</span>
+                <span></span>
               </div>
               <div className="trust-item">
                 <span>•</span>
               </div>
               <div className="trust-item">
-                <span>5,000+ active users</span>
+                <span></span>
               </div>
               <div className="trust-item">
                 <span>•</span>
               </div>
               <div className="trust-item">
-                <span>7-day free trial</span>
+                <span></span>
               </div>
             </div>
           </div>
