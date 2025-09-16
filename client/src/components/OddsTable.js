@@ -7,6 +7,69 @@ import "./OddsTable.css";
 // Removed logos import for compliance
 const logos = {};
 
+// Helper function to get bookmaker priority for sorting
+function getBookPriority(bookmakerKey) {
+  const priorityMap = {
+    'fanduel': 1,
+    'draftkings': 2,
+    'betmgm': 3,
+    'caesars': 4,
+    'pointsbet': 5,
+    'barstool': 6,
+    'betrivers': 7,
+    'superbook': 8,
+    'wynn': 9,
+    'unibet': 10,
+    'twinspires': 11,
+    'bovada': 12,
+    'lowvig': 13,
+    'betonlineag': 14,
+    'williamhill_us': 15,
+    'sugarhouse': 16,
+    'foxbet': 17,
+    'betfair': 18,
+    'draftkings_atlantic': 19,
+    'betmgm_atlantic': 20,
+    'fanduel_atlantic': 21,
+    'betway': 22,
+    'bet365': 23,
+    'pinnacle': 24,
+    'mybookieag': 25,
+    'gtbets': 26,
+    'intertops': 27,
+    'youwager': 28,
+    'betus': 29,
+    'sportsbetting': 30,
+    'bovada_lv': 31,
+    'betnow': 32,
+    'bookmaker': 33,
+    '5dimes': 34,
+    'heritage': 35
+  };
+  return priorityMap[bookmakerKey?.toLowerCase()] || 99;
+}
+
+// Format odds with proper sign and decimal places
+function formatOdds(odds) {
+  if (odds === null || odds === undefined) return '';
+  const num = Number(odds);
+  if (isNaN(num)) return odds;
+  if (num > 0) return `+${num}`;
+  return num.toString();
+}
+
+// Helper to grab home/away odds from a bookmaker's odds object
+function grab(bookmaker, isHome) {
+  if (!bookmaker) return '';
+  if (bookmaker.price !== undefined) return bookmaker.price;
+  if (bookmaker.odds !== undefined) return bookmaker.odds;
+  if (bookmaker.outcomes && bookmaker.outcomes.length >= 2) {
+    return isHome ? bookmaker.outcomes[0].price || bookmaker.outcomes[0].odds : 
+                    bookmaker.outcomes[1].price || bookmaker.outcomes[1].odds;
+  }
+  return '';
+}
+
 /* ---------- Helpers (unchanged core math) ---------- */
 function calculateEV(odds, fairLine) {
   if (!odds || !fairLine) return null;
