@@ -7,46 +7,81 @@ import "./OddsTable.css";
 // Removed logos import for compliance
 const logos = {};
 
+// Centralized priority list for the mini-table comparison view
+const MINI_TABLE_PRIORITY_BOOKS = [
+  'fanduel',
+  'draftkings',
+  'pinnacle',
+  'betmgm',
+  'betonline',
+  'bovada'
+];
+
+const normalizeBookKey = (bookKeyOrName = '') => String(bookKeyOrName).toLowerCase();
+
+const isMiniTablePriorityBook = (bookKeyOrName = '') => {
+  const key = normalizeBookKey(bookKeyOrName);
+  return MINI_TABLE_PRIORITY_BOOKS.some(priority => key.includes(priority));
+};
+
+const getMiniTablePriorityIndex = (bookKeyOrName = '') => {
+  const key = normalizeBookKey(bookKeyOrName);
+  return MINI_TABLE_PRIORITY_BOOKS.findIndex(priority => key.includes(priority));
+};
+
 // Helper function to get bookmaker priority for sorting
 function getBookPriority(bookmakerKey) {
+  const key = normalizeBookKey(bookmakerKey);
+
+  const miniIndex = getMiniTablePriorityIndex(key);
+  if (miniIndex !== -1) return miniIndex + 1;
+
   const priorityMap = {
-    'fanduel': 1,
-    'draftkings': 2,
-    'betmgm': 3,
-    'caesars': 4,
-    'pointsbet': 5,
-    'barstool': 6,
-    'betrivers': 7,
-    'superbook': 8,
-    'wynn': 9,
-    'unibet': 10,
-    'twinspires': 11,
-    'bovada': 12,
-    'lowvig': 13,
-    'betonlineag': 14,
-    'williamhill_us': 15,
-    'sugarhouse': 16,
-    'foxbet': 17,
-    'betfair': 18,
-    'draftkings_atlantic': 19,
-    'betmgm_atlantic': 20,
-    'fanduel_atlantic': 21,
-    'betway': 22,
-    'bet365': 23,
-    'pinnacle': 24,
-    'mybookieag': 25,
-    'gtbets': 26,
-    'intertops': 27,
-    'youwager': 28,
-    'betus': 29,
-    'sportsbetting': 30,
-    'bovada_lv': 31,
-    'betnow': 32,
-    'bookmaker': 33,
-    '5dimes': 34,
-    'heritage': 35
+    'caesars': 7,
+    'williamhill_us': 8,
+    'pointsbet': 9,
+    'pointsbetus': 9,
+    'barstool': 10,
+    'espnbet': 10,
+    'betrivers': 11,
+    'superbook': 12,
+    'wynn': 13,
+    'wynnbet': 13,
+    'unibet': 14,
+    'unibet_us': 14,
+    'twinspires': 15,
+    'lowvig': 16,
+    'novig': 17,
+    'betonline': 18,
+    'betonlineag': 18,
+    'mybookieag': 19,
+    'betfair': 20,
+    'betfred_us': 21,
+    'bet365': 22,
+    'betway': 23,
+    'circasports': 24,
+    'foxbet': 25,
+    'sugarhouse': 26,
+    'draftkings_atlantic': 27,
+    'betmgm_atlantic': 28,
+    'fanduel_atlantic': 29,
+    'pinnacle': 30,
+    'mybookie': 31,
+    'gtbets': 32,
+    'intertops': 33,
+    'youwager': 34,
+    'betus': 35,
+    'sportsbetting': 36,
+    'bovada_lv': 37,
+    'betnow': 38,
+    'bookmaker': 39,
+    '5dimes': 40,
+    'heritage': 41,
+    'rebet': 42,
+    'fliff': 43
   };
-  return priorityMap[bookmakerKey?.toLowerCase()] || 99;
+
+  return priorityMap[key] || 99;
 }
 
 // Format odds with proper sign and decimal places
@@ -1438,57 +1473,56 @@ export default function OddsTable({
                             const isSpreads = mkRow.includes('spread');
                             const oPointStr = String(row.out.point ?? '');
 
-                            // Priority bookmakers to show first - limit to 3 for free users
-                            const priorityBooks = ['fanduel', 'draftkings', 'caesars'];
-                            
-                            const getBookPriority = (bookKey) => {
-                              const key = String(bookKey || '').toLowerCase();
-                              const index = priorityBooks.findIndex(priority => key.includes(priority));
-                              return index === -1 ? 999 : index; // Non-priority books get high number
-                            };
+                            // Priority bookmakers to show in the mini-table
+                            const maxMiniBooks = MINI_TABLE_PRIORITY_BOOKS.length;
 
-                            // For player props, use the allBooks data that's already grouped
-                            let cols = [];
-                            if (mode === "props") {
-                              // Use the pre-grouped allBooks data with priority sorting
-                              cols = (row.allBooks || []).slice()
-                                .sort((a, b) => {
-                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
-                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
-                                  
-                                  // First sort by priority (lower number = higher priority)
-                                  if (aPriority !== bPriority) {
-                                    return aPriority - bPriority;
-                                  }
-                                  
-                                  // Then by odds (higher odds = better value)
-                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
-                                })
-                                .slice(0, 6);
-                            } else {
-                              // Original logic for regular games with priority sorting
-                              const seen = new Set();
-                              const uniq = [];
-                              row.allBooks.forEach(ob => {
-                                const key = String(ob?.bookmaker?.key || ob.book || '').toLowerCase();
-                                if (!seen.has(key)) { seen.add(key); uniq.push(ob); }
+                            const dedupedBooks = (() => {
+                              const seenKeys = new Set();
+                              return (row.allBooks || []).filter(item => {
+                                const rawKey = item?.bookmaker?.key || item?.book || '';
+                                const key = normalizeBookKey(rawKey);
+                                if (!key || seenKeys.has(key)) return false;
+                                seenKeys.add(key);
+                                return true;
                               });
-                              
-                              cols = uniq.slice()
-                                .sort((a, b) => {
-                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
-                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
-                                  
-                                  // First sort by priority (lower number = higher priority)
-                                  if (aPriority !== bPriority) {
-                                    return aPriority - bPriority;
-                                  }
-                                  
-                                  // Then by odds (higher odds = better value)
-                                  return toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
-                                })
-                                .slice(0, 6);
-                            }
+                            })();
+
+                            const prioritizedBooks = [];
+                            const fallbackBooks = [];
+                            dedupedBooks.forEach(item => {
+                              const keySource = item?.bookmaker?.key || item?.book;
+                              if (isMiniTablePriorityBook(keySource)) {
+                                prioritizedBooks.push(item);
+                              } else {
+                                fallbackBooks.push(item);
+                              }
+                            });
+
+                            const oddsCompare = (a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
+
+                            const sortedPrioritized = prioritizedBooks.slice().sort((a, b) => {
+                              const aPriority = getMiniTablePriorityIndex(a.bookmaker?.key || a.book);
+                              const bPriority = getMiniTablePriorityIndex(b.bookmaker?.key || b.book);
+                              const safeAPriority = aPriority === -1 ? 999 : aPriority;
+                              const safeBPriority = bPriority === -1 ? 999 : bPriority;
+                              if (safeAPriority !== safeBPriority) {
+                                return safeAPriority - safeBPriority;
+                              }
+                              return oddsCompare(a, b);
+                            });
+
+                            const sortedFallback = fallbackBooks.slice().sort((a, b) => {
+                              const aPriority = getBookPriority(a.bookmaker?.key || a.book);
+                              const bPriority = getBookPriority(b.bookmaker?.key || b.book);
+                              if (aPriority !== bPriority) {
+                                return aPriority - bPriority;
+                              }
+                              return oddsCompare(a, b);
+                            });
+
+                            const combinedBooks = [...sortedPrioritized, ...sortedFallback].slice(0, maxMiniBooks);
+
+                            let cols = combinedBooks;
 
                             const grab = (ob, top) => {
                               // For player props mode, return the odds directly
@@ -1680,13 +1714,55 @@ export default function OddsTable({
                           </thead>
                           <tbody>
                             {(() => {
-                              const displayBooks = [...row.allBooks]
-                                .sort((a, b) => {
-                                  const aPriority = getBookPriority(a.bookmaker?.key || a.book);
-                                  const bPriority = getBookPriority(b.bookmaker?.key || b.book);
+                              const seenMiniBooks = new Set();
+                              const dedupedBooks = (row.allBooks || []).filter(book => {
+                                const rawKey = book?.bookmaker?.key || book?.book || '';
+                                const key = normalizeBookKey(rawKey);
+                                if (!key || seenMiniBooks.has(key)) return false;
+                                seenMiniBooks.add(key);
+                                return true;
+                              });
+
+                              const prioritizedDesktop = [];
+                              const fallbackDesktop = [];
+                              dedupedBooks.forEach(book => {
+                                const sourceKey = book?.bookmaker?.key || book?.book;
+                                if (isMiniTablePriorityBook(sourceKey)) {
+                                  prioritizedDesktop.push(book);
+                                } else {
+                                  fallbackDesktop.push(book);
+                                }
+                              });
+
+                              const toDec = (n) => {
+                                const v = Number(n || 0);
+                                if (!v) return 0;
+                                return v > 0 ? (v / 100) + 1 : (100 / Math.abs(v)) + 1;
+                              };
+                              const compareOdds = (a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
+
+                              const sortedPrioritizedDesktop = prioritizedDesktop.slice().sort((a, b) => {
+                                const aPriority = getMiniTablePriorityIndex(a.bookmaker?.key || a.book);
+                                const bPriority = getMiniTablePriorityIndex(b.bookmaker?.key || b.book);
+                                const safeAPriority = aPriority === -1 ? 999 : aPriority;
+                                const safeBPriority = bPriority === -1 ? 999 : bPriority;
+                                if (safeAPriority !== safeBPriority) {
+                                  return safeAPriority - safeBPriority;
+                                }
+                                return compareOdds(a, b);
+                              });
+
+                              const sortedFallbackDesktop = fallbackDesktop.slice().sort((a, b) => {
+                                const aPriority = getBookPriority(a.bookmaker?.key || a.book);
+                                const bPriority = getBookPriority(b.bookmaker?.key || b.book);
+                                if (aPriority !== bPriority) {
                                   return aPriority - bPriority;
-                                })
-                                .slice(0, 6);
+                                }
+                                return compareOdds(a, b);
+                              });
+
+                              const displayBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop]
+                                .slice(0, MINI_TABLE_PRIORITY_BOOKS.length);
 
                               return displayBooks.map((p, i) => (
                                 <tr key={p._rowId || i}>
