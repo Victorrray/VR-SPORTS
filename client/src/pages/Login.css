@@ -253,59 +253,66 @@
 .remember-me {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   cursor: pointer;
-  user-select: none;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
+  margin: 1.5rem 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border-color);
+  width: fit-content;
 }
 
 .remember-me:hover {
-  color: var(--text);
+  background: var(--bg-elev-2);
+  border-color: var(--accent-light);
 }
 
-.remember-checkbox {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.remember-custom-checkbox {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
-  border-radius: 4px;
+.remember-toggle {
   position: relative;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+  width: 40px;
+  height: 24px;
+  background: var(--bg-elev-3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.remember-checkbox:checked + .remember-custom-checkbox {
+.remember-toggle.checked {
   background: var(--accent);
-  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
 }
 
-.remember-checkbox:checked + .remember-custom-checkbox::after {
+.remember-toggle::after {
   content: '';
   position: absolute;
-  left: 5px;
   top: 2px;
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.remember-checkbox:focus + .remember-custom-checkbox {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+.remember-toggle.checked::after {
+  transform: translateX(16px);
+  background: white;
 }
 
 .remember-label {
-  line-height: 1.4;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.remember-me:hover .remember-label {
+  color: var(--text);
 }
 
 .terms-text {
