@@ -1511,36 +1511,28 @@ export default function OddsTable({
 
                               // Special handling for spreads - we want to match the exact point spread
                               if (isSpreads && outs.length > 0) {
-                                const targetPoint = Number(row.out.point ?? 0);
-                                
-                                // 1. First try exact match on team name and point spread
-                                let match = outs.find(o => 
-                                  o && 
-                                  Math.abs(Number(o.point) - targetPoint) < 0.1 && // Allow small floating point differences
-                                  o.name === row.game.home_team
-                                );
-                                
-                                // 2. If no exact match, try matching team name and point value (case insensitive)
+                                // Determine which team this column represents and what point to expect
+                                const teamName = top ? row.game.home_team : row.game.away_team;
+                                const rowPoint = Number(row.out.point ?? 0) || 0;
+                                // If this column is for the same team as the base row outcome,
+                                // use the same point; otherwise use the opposite sign.
+                                const expectedPoint = (row.out.name === teamName) ? rowPoint : -rowPoint;
+                                const teamLower = String(teamName).toLowerCase();
+                                const within = (a, b) => Math.abs(Number(a) - Number(b)) < 0.11; // small tolerance
+
+                                // 1) Exact match on team and point
+                                let match = outs.find(o => o && String(o.name).toLowerCase() === teamLower && within(o.point, expectedPoint));
+
+                                // 2) If not found, try matching same team with opposite point sign (books can invert sides)
                                 if (!match) {
-                                  const teamToMatch = row.game.home_team.toLowerCase();
-                                  match = outs.find(o => 
-                                    o && 
-                                    Math.abs(Number(o.point) - targetPoint) < 0.1 &&
-                                    o.name.toLowerCase() === teamToMatch
-                                  );
+                                  match = outs.find(o => o && String(o.name).toLowerCase() === teamLower && within(o.point, -expectedPoint));
                                 }
-                                
-                                // 3. If still no match, try matching by team name only (as last resort)
+
+                                // 3) If still not found, match on team only
                                 if (!match) {
-                                  const teamToMatch = row.game.home_team.toLowerCase();
-                                  match = outs.find(o => 
-                                    o && 
-                                    o.name && 
-                                    o.name.toLowerCase().includes(teamToMatch)
-                                  );
+                                  match = outs.find(o => o && String(o.name).toLowerCase() === teamLower);
                                 }
-                                
-                                // 4. If we have a match, return its price/odds
+
                                 if (match) {
                                   return match.price ?? match.odds ?? '';
                                 }
