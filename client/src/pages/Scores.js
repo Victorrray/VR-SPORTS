@@ -233,12 +233,6 @@ export default function Scores() {
           <div className="page-title">
             <Trophy className="title-icon" size={28} />
             <h1>Live Scores</h1>
-            {liveGamesCount > 0 && (
-              <div className="live-indicator-header">
-                <div className="live-dot-pulse"></div>
-                <span className="live-count">{liveGamesCount} Live</span>
-              </div>
-            )}
           </div>
           <div className="header-info">
             {/* Week pill (NFL mostly) */}
