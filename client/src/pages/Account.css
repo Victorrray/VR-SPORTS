@@ -837,32 +837,6 @@
   box-shadow: 0 8px 25px rgba(225, 48, 108, 0.3);
 }
 
-.social-link.youtube {
-  background: rgba(255, 0, 0, 0.1);
-  color: #ff0000;
-  border-color: rgba(255, 0, 0, 0.2);
-}
-
-.social-link.youtube:hover {
-  background: rgba(255, 0, 0, 0.2);
-  border-color: #ff0000;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3);
-}
-
-.social-link.discord {
-  background: rgba(114, 137, 218, 0.1);
-  color: #7289da;
-  border-color: rgba(114, 137, 218, 0.2);
-}
-
-.social-link.discord:hover {
-  background: rgba(114, 137, 218, 0.2);
-  border-color: #7289da;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(114, 137, 218, 0.3);
-}
-
 /* Mobile responsive for social links */
 @media (max-width: 768px) {
   .social-links {

@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, Youtube, MessageCircle } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle } from "lucide-react";
 import MobileBottomBar from "../components/MobileBottomBar";
 import SportMultiSelect from "../components/SportMultiSelect";
 import UsagePlanCard from "../components/UsagePlanCard";
@@ -596,7 +596,7 @@ export default function Account() {
           </p>
           <div className="social-links">
             <a 
-              href="https://twitter.com/vrodds" 
+              href="https://x.com/OddSightSeer" 
               target="_blank" 
               rel="noopener noreferrer"
               className="social-link twitter"
@@ -606,7 +606,7 @@ export default function Account() {
               <span>Twitter</span>
             </a>
             <a 
-              href="https://instagram.com/vrodds" 
+              href="https://www.instagram.com/oddsightseer/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="social-link instagram"
@@ -614,26 +614,6 @@ export default function Account() {
             >
               <Instagram size={20} />
               <span>Instagram</span>
-            </a>
-            <a 
-              href="https://youtube.com/@vrodds" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="social-link youtube"
-              aria-label="Subscribe to our YouTube channel"
-            >
-              <Youtube size={20} />
-              <span>YouTube</span>
-            </a>
-            <a 
-              href="https://discord.gg/vrodds" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="social-link discord"
-              aria-label="Join our Discord community"
-            >
-              <MessageCircle size={20} />
-              <span>Discord</span>
             </a>
           </div>
         </div>
