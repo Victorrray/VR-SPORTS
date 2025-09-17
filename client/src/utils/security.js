@@ -49,20 +49,32 @@ export const secureFetch = async (url, options = {}) => {
     try {
       const { getAccessToken, supabase } = require('../lib/supabase');
       const cached = getAccessToken?.();
-      if (cached) {
-        headers['Authorization'] = `Bearer ${cached}`;
-      } else {
-        const { data: { session } = {} } = await supabase?.auth?.getSession?.() || { data: {} };
-        if (session?.access_token) {
-          headers['Authorization'] = `Bearer ${session.access_token}`;
-          // Send user ID in header for backend authentication
-          if (session.user?.id) {
-            headers['x-user-id'] = session.user.id;
-          }
-        }
+
+      // Always attempt to resolve the current session so we can attach the user id
+      const { data: { session } = {} } = await supabase?.auth?.getSession?.() || { data: {} };
+
+      const accessToken = session?.access_token || cached;
+      if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
       }
-      
-      // Fallback: check localStorage for demo session
+
+      if (session?.user?.id) {
+        headers['x-user-id'] = session.user.id;
+      }
+
+      // Fallback: check stored session snapshots for user id (custom persistence)
+      if (!headers['x-user-id']) {
+        try {
+          const storedSession = localStorage.getItem('sb-session');
+          if (storedSession) {
+            const parsed = JSON.parse(storedSession);
+            const storedId = parsed?.user?.id;
+            if (storedId) headers['x-user-id'] = storedId;
+          }
+        } catch (_) {}
+      }
+
+      // Final fallback: demo session support when Supabase disabled
       if (!headers['x-user-id']) {
         try {
           const demoSession = localStorage.getItem('demo-auth-session');
