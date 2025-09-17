@@ -12,38 +12,53 @@ export default function UsernameSetup({ onComplete }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Reset previous errors
+    setError('');
+    
+    // Client-side validation
     if (!username.trim()) {
       setError('Username is required');
       return;
     }
     
-    if (username.length < 3) {
+    const trimmedUsername = username.trim();
+    
+    if (trimmedUsername.length < 3) {
       setError('Username must be at least 3 characters');
       return;
     }
     
-    if (username.length > 20) {
+    if (trimmedUsername.length > 20) {
       setError('Username must be less than 20 characters');
       return;
     }
     
-    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmedUsername)) {
       setError('Username can only contain letters, numbers, hyphens, and underscores');
       return;
     }
     
     setLoading(true);
-    setError('');
     
     try {
-      const result = await updateUsername(username.trim());
-      if (result.error) {
-        setError(result.error);
+      const result = await updateUsername(trimmedUsername);
+      
+      if (result?.error) {
+        // Handle specific error cases
+        if (result.error.message?.includes('already in use')) {
+          setError('This username is already taken. Please choose another one.');
+        } else if (result.error.message?.includes('unexpected')) {
+          setError('A network error occurred. Please check your connection and try again.');
+        } else {
+          setError(result.error.message || 'Failed to set username. Please try again.');
+        }
       } else {
+        // Success - call the onComplete callback
         onComplete?.();
       }
     } catch (err) {
-      setError('Failed to set username. Please try again.');
+      console.error('Username setup error:', err);
+      setError('An unexpected error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }
