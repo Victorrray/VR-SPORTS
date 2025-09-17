@@ -107,7 +107,6 @@ export default function Scores() {
   async function load(silent = false) {
     if (!silent) setLoading(true);
     setErr("");
-    setConnectionStatus('connecting');
     try {
       const url = withApiBase(`/api/scores?sport=${sport}`);
       if (process.env.NODE_ENV !== 'production') {
