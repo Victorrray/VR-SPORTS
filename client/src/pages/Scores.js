@@ -101,8 +101,6 @@ export default function Scores() {
   const [showGameModal, setShowGameModal] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [liveGamesCount, setLiveGamesCount] = useState(0);
-  const [lastUpdate, setLastUpdate] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('connected');
 
   const btnRef = useRef(null);
 
@@ -133,8 +131,6 @@ export default function Scores() {
       // Count live games using enhanced backend data
       const liveCount = (data || []).filter(g => g.live === true || g.status === 'in_progress').length;
       setLiveGamesCount(liveCount);
-      setLastUpdate(new Date());
-      setConnectionStatus('connected');
       
       // Enhanced debugging for game status
       console.log(`🔴 Found ${liveCount} live games:`, 
@@ -158,8 +154,7 @@ export default function Scores() {
       })));
     } catch (error) {
       console.error("Error loading scores:", error);
-      setConnectionStatus('error');
-      if (!silent) setErr(`Failed to load scores: ${error.message}`);
+      setErr(`Failed to load scores: ${error.message}`);
     } finally {
       if (!silent) setLoading(false);
     }
@@ -244,16 +239,6 @@ export default function Scores() {
                 </span>
               </div>
             )}
-            
-            {/* Connection status and last update */}
-            <div className="connection-status">
-              <div className={`status-dot ${connectionStatus}`}></div>
-              {lastUpdate && (
-                <span className="last-update">
-                  Updated {lastUpdate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                </span>
-              )}
-            </div>
           </div>
         </div>
 
