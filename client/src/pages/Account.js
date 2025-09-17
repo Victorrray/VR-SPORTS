@@ -254,9 +254,10 @@ export default function Account() {
       // Clear any additional local storage items
       localStorage.removeItem('userSelectedSportsbooks');
       localStorage.removeItem('pricingIntent');
-      
-      // Redirect to home page with signed out indicator
-      window.location.href = '/?signed_out=true';
+
+      // Redirect to home page with signed out indicator using client routing
+      setSignOutBusy(false);
+      navigate('/?signed_out=true', { replace: true });
       
     } catch (error) {
       console.error('🔐 Account: Sign out failed:', error);
