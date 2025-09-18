@@ -3,9 +3,12 @@
  * Fetches game results and scores from ESPN's public API endpoints
  */
 
+import { secureFetch } from '../utils/security';
+import { withApiBase } from '../config/api';
+
 const ESPN_BASE_URL = 'https://site.api.espn.com/apis/site/v2/sports';
 
-// Sport mapping for ESPN API endpoints
+// Direct ESPN sport mapping (still used for game summaries if needed)
 const SPORT_MAPPINGS = {
   'NFL': 'football/nfl',
   'NBA': 'basketball/nba',
@@ -17,6 +20,86 @@ const SPORT_MAPPINGS = {
   'MLS': 'soccer/usa.1'
 };
 
+// Backend sport mapping for our /api/scores endpoint
+const BACKEND_SPORT_KEYS = {
+  'NFL': 'americanfootball_nfl',
+  'NBA': 'basketball_nba',
+  'MLB': 'baseball_mlb',
+  'NHL': 'icehockey_nhl',
+  'NCAAF': 'americanfootball_ncaaf',
+  'NCAAB': 'basketball_ncaab',
+  'WNBA': 'basketball_wnba',
+  'MLS': 'soccer_mls'
+};
+
+const normalizeTeamKey = (name = '') => name.toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
+
+function toBackendDate(yyyymmdd) {
+  if (!yyyymmdd || yyyymmdd.length !== 8) return null;
+  return `${yyyymmdd.slice(0,4)}-${yyyymmdd.slice(4,6)}-${yyyymmdd.slice(6)}`;
+}
+
+function transformBackendScoresToEspnEvents(games = []) {
+  return games.map((game) => {
+    const homeScore = game?.scores?.home ?? game?.home_score ?? 0;
+    const awayScore = game?.scores?.away ?? game?.away_score ?? 0;
+    const completed = Boolean(game?.completed || game?.status === 'final');
+    const live = Boolean(game?.live || game?.status === 'in_progress');
+
+    const statusName = completed
+      ? 'STATUS_FINAL'
+      : live
+        ? 'STATUS_IN_PROGRESS'
+        : 'STATUS_SCHEDULED';
+    const statusState = completed
+      ? 'post'
+      : live
+        ? 'in'
+        : 'pre';
+
+    return {
+      id: game?.id,
+      date: game?.commence_time,
+      competitions: [
+        {
+          id: game?.id,
+          status: {
+            type: {
+              name: statusName,
+              state: statusState,
+              displayClock: game?.clock || '',
+              shortDetail: game?.clock || '',
+              detail: game?.clock || ''
+            }
+          },
+          competitors: [
+            {
+              homeAway: 'home',
+              score: String(homeScore ?? 0),
+              team: {
+                displayName: game?.home_team,
+                name: game?.home_team,
+                id: normalizeTeamKey(game?.home_team),
+                logos: game?.home_logo ? [{ href: game.home_logo }] : []
+              }
+            },
+            {
+              homeAway: 'away',
+              score: String(awayScore ?? 0),
+              team: {
+                displayName: game?.away_team,
+                name: game?.away_team,
+                id: normalizeTeamKey(game?.away_team),
+                logos: game?.away_logo ? [{ href: game.away_logo }] : []
+              }
+            }
+          ]
+        }
+      ]
+    };
+  });
+}
+
 /**
  * Fetch scoreboard data for a specific sport and date
  * @param {string} sport - Sport code (NFL, NBA, MLB, etc.)
@@ -25,27 +108,33 @@ const SPORT_MAPPINGS = {
  */
 export async function fetchESPNScoreboard(sport, date = null) {
   try {
-    const sportPath = SPORT_MAPPINGS[sport.toUpperCase()];
-    if (!sportPath) {
-      throw new Error(`Unsupported sport: ${sport}`);
+    const sportUpper = sport?.toUpperCase();
+    const backendKey = BACKEND_SPORT_KEYS[sportUpper];
+    if (!backendKey) {
+      throw new Error(`Unsupported sport for backend scoreboard: ${sport}`);
     }
 
-    let url = `${ESPN_BASE_URL}/${sportPath}/scoreboard`;
-    if (date) {
-      url += `?dates=${date}`;
-    }
+    const params = new URLSearchParams();
+    params.set('sport', backendKey);
+    const backendDate = toBackendDate(date);
+    if (backendDate) params.set('date', backendDate);
 
-    console.log(`Fetching ESPN scoreboard: ${url}`);
-    
-    const response = await fetch(url);
+    const url = withApiBase(`/api/scores?${params.toString()}`);
+    console.log(`Fetching scoreboard via backend: ${url}`);
+
+    const response = await secureFetch(url, { credentials: 'include' });
     if (!response.ok) {
-      throw new Error(`ESPN API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Backend scoreboard error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data;
+    const games = Array.isArray(data) ? data : [];
+
+    return {
+      events: transformBackendScoresToEspnEvents(games)
+    };
   } catch (error) {
-    console.error('Error fetching ESPN scoreboard:', error);
+    console.error('Error fetching scoreboard via backend:', error);
     throw error;
   }
 }
