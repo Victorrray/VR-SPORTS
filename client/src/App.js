@@ -38,7 +38,7 @@ import './styles/browserCompat.css';
 import './styles/responsive-mobile.css';
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, planNotice, clearPlanNotice, planInfo } = useAuth();
   const location = useLocation();
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [quotaModal, setQuotaModal] = useState({ open: false, detail: null });
@@ -105,6 +105,12 @@ function AppRoutes() {
             }
           }} />
           <main className="main-content" id="main-content" tabIndex="-1">
+            {planNotice && (
+              <div className={`plan-notice-banner ${planInfo?.plan === 'platinum' ? 'plan-notice-upgrade' : 'plan-notice-downgrade'}`}>
+                <span>{planNotice}</span>
+                <button type="button" onClick={clearPlanNotice} aria-label="Dismiss plan notice">×</button>
+              </div>
+            )}
             <AuthDebug />
             <Routes>
               <Route path="/" element={<Home />} />

@@ -1,6 +1,8 @@
 // Authentication hook with Supabase integration
 import { useState, useEffect, useContext, createContext, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
+import { secureFetch } from '../utils/security';
+import { withApiBase } from '../config/api';
 
 const AuthContext = createContext({});
 
@@ -18,6 +20,11 @@ export const AuthProvider = ({ children }) => {
   const isSupabaseEnabled = !!supabase;
   const sessionRef = useRef(null);
   const lastValidationRef = useRef(0);
+  const prevPlanRef = useRef(null);
+  const planNoticeTimeoutRef = useRef(null);
+
+  const [planInfo, setPlanInfo] = useState(null);
+  const [planNotice, setPlanNotice] = useState('');
 
   useEffect(() => {
     sessionRef.current = session;
@@ -57,6 +64,13 @@ export const AuthProvider = ({ children }) => {
     setSession(null);
     sessionRef.current = null;
     lastValidationRef.current = 0;
+    prevPlanRef.current = null;
+    setPlanInfo(null);
+    setPlanNotice('');
+    if (planNoticeTimeoutRef.current) {
+      clearTimeout(planNoticeTimeoutRef.current);
+      planNoticeTimeoutRef.current = null;
+    }
     setLoading(false);
 
     safeRemoveItem(SESSION_STORAGE_KEY);
@@ -132,6 +146,65 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, safeSetItem]);
+
+  const schedulePlanNotice = useCallback((message) => {
+    setPlanNotice(message);
+    if (planNoticeTimeoutRef.current) {
+      clearTimeout(planNoticeTimeoutRef.current);
+    }
+    planNoticeTimeoutRef.current = setTimeout(() => {
+      setPlanNotice('');
+    }, 10000);
+  }, []);
+
+  const fetchPlanStatus = useCallback(async () => {
+    if (!sessionRef.current) return null;
+
+    try {
+      const response = await secureFetch(withApiBase('/api/me/usage'), {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Plan fetch failed (${response.status})`);
+      }
+
+      const data = await response.json();
+      const nextPlan = data.plan || 'free';
+      const info = {
+        plan: nextPlan,
+        quota: data.quota ?? null,
+        used: data.used ?? null,
+        remaining: data.remaining ?? null,
+        fetchedAt: new Date().toISOString()
+      };
+
+      const previousPlan = prevPlanRef.current;
+      prevPlanRef.current = nextPlan;
+      setPlanInfo(info);
+
+      if (previousPlan && previousPlan !== nextPlan) {
+        if (nextPlan === 'platinum') {
+          schedulePlanNotice('🎉 Upgraded to Platinum – premium access unlocked.');
+        } else {
+          schedulePlanNotice('⚠️ Plan changed to Free – premium features disabled.');
+        }
+      }
+
+      return info;
+    } catch (error) {
+      console.warn('useAuth: Failed to fetch plan status', error);
+      return null;
+    }
+  }, [schedulePlanNotice]);
+
+  const clearPlanNotice = useCallback(() => {
+    setPlanNotice('');
+    if (planNoticeTimeoutRef.current) {
+      clearTimeout(planNoticeTimeoutRef.current);
+      planNoticeTimeoutRef.current = null;
+    }
+  }, []);
 
   // Initialize auth state and set up listeners
   useEffect(() => {
@@ -337,6 +410,22 @@ export const AuthProvider = ({ children }) => {
     };
   }, [clearSessionState, fetchUserProfile, isSupabaseEnabled, safeGetItem, safeSetItem, validateSession]);
 
+  useEffect(() => {
+    if (session) {
+      fetchPlanStatus();
+    } else {
+      setPlanInfo(null);
+    }
+  }, [session, fetchPlanStatus]);
+
+  useEffect(() => {
+    return () => {
+      if (planNoticeTimeoutRef.current) {
+        clearTimeout(planNoticeTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const signUp = async (email, password, metadata = {}) => {
     if (!isSupabaseEnabled) {
       throw new Error('Authentication not available - Supabase not configured');
@@ -487,7 +576,11 @@ export const AuthProvider = ({ children }) => {
     validateSession, // Export validateSession for manual validation when needed
     isAuthenticated: !!user,
     isSupabaseEnabled,
-    lastValidation: lastValidationRef.current
+    lastValidation: lastValidationRef.current,
+    planInfo,
+    planNotice,
+    clearPlanNotice,
+    refreshPlan: fetchPlanStatus
   };
 
   return (
