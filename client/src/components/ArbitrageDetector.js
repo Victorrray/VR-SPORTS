@@ -167,16 +167,31 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     const opportunities = [];
     
     games.forEach(game => {
-      if (!game.bookmakers || game.bookmakers.length < 2) return;
-      
-      game.bookmakers[0].markets?.forEach(market => {
-        if (!selectedMarkets.includes(market.key)) return;
+      if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
+
+      // Collect all market keys available across bookmakers to avoid undefined access on empty arrays
+      const marketKeys = new Set();
+      game.bookmakers.forEach(bookmaker => {
+        bookmaker?.markets?.forEach(market => {
+          if (market?.key) marketKeys.add(market.key);
+        });
+      });
+
+      marketKeys.forEach(marketKey => {
+        if (!selectedMarkets.includes(marketKey)) return;
+
+        const availableMarkets = game.bookmakers
+          .map(bookmaker => bookmaker?.markets?.find(m => m.key === marketKey))
+          .filter(Boolean);
+        if (!availableMarkets.length) return;
+
+        const market = availableMarkets[0];
         
         // Find best odds for each outcome across all bookmakers
         const outcomeOdds = {};
         
         game.bookmakers.forEach(bookmaker => {
-          const gameMarket = bookmaker.markets?.find(m => m.key === market.key);
+          const gameMarket = bookmaker?.markets?.find(m => m.key === marketKey);
           if (!gameMarket) return;
           
           gameMarket.outcomes?.forEach(outcome => {
