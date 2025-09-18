@@ -197,6 +197,22 @@ function shortTeam(name="", sportKey="") {
   
   return nickname;
 }
+
+const normalizeTeamKey = (name = '') => String(name).toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
+
+const getTeamLogoForGame = (game = {}, teamName = '') => {
+  const key = normalizeTeamKey(teamName);
+  if (!key) return '';
+  const homeKey = normalizeTeamKey(game?.home_team);
+  if (key === homeKey) {
+    return game?.home_logo || '';
+  }
+  const awayKey = normalizeTeamKey(game?.away_team);
+  if (key === awayKey) {
+    return game?.away_logo || '';
+  }
+  return '';
+};
 function formatKickoffNice(commence){
   try{
     const d = new Date(commence);
@@ -1209,6 +1225,55 @@ export default function OddsTable({
             const ev = evMap.get(row.key);
             const fair = fairDevigMap.get(row.key);
             const oddsChange = priceDelta[row.key];
+            const renderMobileTeam = () => {
+              if (mode === "props") {
+                return (
+                  <div className="mob-player-prop">
+                    <div className="mob-player-name">{row.out.name.split(' Over ')[0].split(' Under ')[0]}</div>
+                    <div className="mob-prop-type">{row.mkt.name}</div>
+                  </div>
+                );
+              }
+
+              if (String(row.mkt?.key || '').includes('total')) {
+                return null;
+              }
+
+              const originalName = row.out?.name || '';
+              if (!originalName) return null;
+
+              const logoSrc = getTeamLogoForGame(row.game, originalName);
+
+              const teamNameDisplay = (() => {
+                const baseName = (row.mkt?.key || '') === 'h2h'
+                  ? shortTeam(originalName, row.game?.sport_key)
+                  : shortTeam(originalName, row.game?.sport_key) || originalName;
+
+                const homeShort = shortTeam(row.game?.home_team, row.game?.sport_key);
+                const awayShort = shortTeam(row.game?.away_team, row.game?.sport_key);
+
+                if (homeShort === awayShort && baseName === homeShort) {
+                  const isHome = originalName === row.game?.home_team;
+                  return `${baseName} ${isHome ? '(H)' : '(A)'}`;
+                }
+
+                return baseName;
+              })();
+
+              return (
+                <div className="mob-team-row">
+                  {logoSrc ? (
+                    <img
+                      src={logoSrc}
+                      alt={`${originalName} logo`}
+                      className="mob-team-logo"
+                      loading="lazy"
+                    />
+                  ) : null}
+                  <span>{teamNameDisplay}</span>
+                </div>
+              );
+            };
 
             return (
               <React.Fragment key={row.key}>
@@ -1230,10 +1295,33 @@ export default function OddsTable({
                     </div>
                   </td>
                   <td>
-                    <div style={{ textAlign:'left', display:'flex', flexDirection:'column', gap:2 }}>
-                      <span style={{ opacity:.8, fontSize:'0.92em' }}>{formatKickoffNice(row.game?.commence_time)}</span>
-                      <span style={{ fontWeight:800 }}>{(row.game?.home_team || 'Home')} vs {(row.game?.away_team || 'Away')}</span>
-                      <span style={{ opacity:.9 }}>
+                    <div className="desktop-matchup">
+                      <span className="desktop-matchup-time">{formatKickoffNice(row.game?.commence_time)}</span>
+                      <div className="desktop-teams">
+                        <div className="desktop-team-row">
+                          {row.game?.away_logo && (
+                            <img
+                              src={row.game.away_logo}
+                              alt={`${row.game?.away_team || 'Away'} logo`}
+                              className="desktop-team-logo"
+                              loading="lazy"
+                            />
+                          )}
+                          <span>{row.game?.away_team || 'Away Team'}</span>
+                        </div>
+                        <div className="desktop-team-row">
+                          {row.game?.home_logo && (
+                            <img
+                              src={row.game.home_logo}
+                              alt={`${row.game?.home_team || 'Home'} logo`}
+                              className="desktop-team-logo"
+                              loading="lazy"
+                            />
+                          )}
+                          <span>{row.game?.home_team || 'Home Team'}</span>
+                        </div>
+                      </div>
+                      <span className="desktop-matchup-league">
                         {(() => { 
                           const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
                           return `${sport} | ${league}`; 
@@ -1315,8 +1403,28 @@ export default function OddsTable({
                       <div className="mob-top">
                         <div className="mob-top-left">
                           <div className="mob-match-title">
-                            <div className="team-line">{row.game.home_team}</div>
-                            <div className="team-line">{row.game.away_team}</div>
+                            <div className="team-line">
+                              {row.game?.away_logo ? (
+                                <img
+                                  src={row.game.away_logo}
+                                  alt={`${row.game?.away_team || 'Away'} logo`}
+                                  className="mob-team-logo"
+                                  loading="lazy"
+                                />
+                              ) : null}
+                              <span>{row.game?.away_team || 'Away Team'}</span>
+                            </div>
+                            <div className="team-line">
+                              {row.game?.home_logo ? (
+                                <img
+                                  src={row.game.home_logo}
+                                  alt={`${row.game?.home_team || 'Home'} logo`}
+                                  className="mob-team-logo"
+                                  loading="lazy"
+                                />
+                              ) : null}
+                              <span>{row.game?.home_team || 'Home Team'}</span>
+                            </div>
                           </div>
                           <div className="mob-meta">
                             {formatKickoffNice(row.game.commence_time)} • {(() => {
@@ -1347,35 +1455,15 @@ export default function OddsTable({
                       </div>
 
                       {/* Team name or Player name for props */}
-                      <div className="mob-team">
-                        {mode === "props" ? (
-                          // For player props, show only the player name and prop type (no team name)
-                          <div className="mob-player-prop">
-                            <div className="mob-player-name">{row.out.name.split(' Over ')[0].split(' Under ')[0]}</div>
-                            <div className="mob-prop-type">{row.mkt.name}</div>
+                      {(() => {
+                        const teamNode = renderMobileTeam();
+                        if (!teamNode) return null;
+                        return (
+                          <div className="mob-team">
+                            {teamNode}
                           </div>
-                        ) : (
-                          String(row.mkt?.key || '').includes('total')
-                            ? '' // No team name for totals
-                            : (() => {
-                                const teamName = (row.mkt.key || '') === 'h2h' 
-                                  ? shortTeam(row.out.name, row.game.sport_key)
-                                  : shortTeam(row.out.name, row.game.sport_key);
-                                
-                                // Check if both teams have the same short name
-                                const homeShort = shortTeam(row.game.home_team, row.game.sport_key);
-                                const awayShort = shortTeam(row.game.away_team, row.game.sport_key);
-                                
-                                if (homeShort === awayShort && teamName === homeShort) {
-                                  // Add home/away indicator when teams have same name
-                                  const isHome = row.out.name === row.game.home_team;
-                                  return `${teamName} ${isHome ? '(H)' : '(A)'}`;
-                                }
-                                
-                                return teamName;
-                              })()
-                        )}
-                      </div>
+                        );
+                      })()}
 
                       {/* Market type and line - now appears below team */}
                       <div className="mob-market-row">

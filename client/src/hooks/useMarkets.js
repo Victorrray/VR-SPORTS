@@ -10,6 +10,90 @@ import { cacheManager } from '../utils/cacheManager';
 // Global event emitter for API usage updates
 export const apiUsageEvents = new EventTarget();
 
+const SCOREBOARD_CACHE = new Map();
+const SCOREBOARD_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const normalizeTeamKey = (name = '') => {
+  return String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/gi, '')
+    .trim();
+};
+
+async function getScoreboardLogosForSport(sportKey) {
+  if (!sportKey) return new Map();
+  const cached = SCOREBOARD_CACHE.get(sportKey);
+  const now = Date.now();
+  if (cached && now - cached.timestamp < SCOREBOARD_CACHE_TTL) {
+    return cached.map;
+  }
+
+  try {
+    const response = await secureFetch(
+      withApiBase(`/api/scores?sport=${encodeURIComponent(sportKey)}`),
+      { credentials: 'include' }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Scoreboard fetch failed (${response.status})`);
+    }
+
+    const data = await response.json();
+    const teamLogoMap = new Map();
+
+    if (Array.isArray(data)) {
+      data.forEach((game) => {
+        if (game?.home_team) {
+          teamLogoMap.set(normalizeTeamKey(game.home_team), game.home_logo || '');
+        }
+        if (game?.away_team) {
+          teamLogoMap.set(normalizeTeamKey(game.away_team), game.away_logo || '');
+        }
+      });
+    }
+
+    SCOREBOARD_CACHE.set(sportKey, { timestamp: now, map: teamLogoMap });
+    return teamLogoMap;
+  } catch (error) {
+    console.warn('useMarkets: Unable to fetch scoreboard logos for', sportKey, error.message || error);
+    SCOREBOARD_CACHE.set(sportKey, { timestamp: now, map: new Map() });
+    return new Map();
+  }
+}
+
+async function enrichGamesWithScoreboardData(games = []) {
+  if (!Array.isArray(games) || games.length === 0) return games;
+
+  const uniqueSports = Array.from(
+    new Set(
+      games
+        .map((game) => game?.sport_key)
+        .filter(Boolean)
+    )
+  );
+
+  const logoMapsEntries = await Promise.all(
+    uniqueSports.map(async (sportKey) => {
+      const map = await getScoreboardLogosForSport(sportKey);
+      return [sportKey, map];
+    })
+  );
+
+  const sportLogoMaps = new Map(logoMapsEntries);
+
+  return games.map((game) => {
+    const sportMap = sportLogoMaps.get(game?.sport_key) || new Map();
+    const homeLogo = sportMap.get(normalizeTeamKey(game?.home_team)) || game?.home_logo || '';
+    const awayLogo = sportMap.get(normalizeTeamKey(game?.away_team)) || game?.away_logo || '';
+
+    return {
+      ...game,
+      home_logo: homeLogo,
+      away_logo: awayLogo,
+    };
+  });
+}
+
 // Small utility to normalize arrays from API responses
 function normalizeArray(resp) {
   if (Array.isArray(resp)) return resp;
@@ -244,16 +328,25 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
         home_team: game.home_team || 'Home Team',
         away_team: game.away_team || 'Away Team',
         sport_key: game.sport_key || 'sports',
-        sport_title: game.sport_title || 'Sport'
+        sport_title: game.sport_title || 'Sport',
+        home_logo: game.home_logo || '',
+        away_logo: game.away_logo || ''
       }));
       
       console.log('🔍 useMarkets: Normalized data:', normalizedData);
       
+      let preparedData = normalizedData;
+      try {
+        preparedData = await enrichGamesWithScoreboardData(normalizedData);
+      } catch (logoErr) {
+        console.warn('useMarkets: Failed to enrich games with logos', logoErr);
+      }
+      
       // Update state with normalized data
-      setGames(normalizedData);
+      setGames(preparedData);
       
       // Update cache
-      APICache.set(cacheKey, normalizedData, 2 * 60 * 1000); // 2 minutes cache for odds data
+      APICache.set(cacheKey, preparedData, 2 * 60 * 1000); // 2 minutes cache for odds data
       try {
         setCacheStats(cacheManager.getStats());
       } catch (_) {
@@ -262,7 +355,7 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       
       // Extract unique bookmakers with their display names
       const bookmakerMap = new Map();
-      normalizedData.forEach(game => {
+      preparedData.forEach(game => {
         game.bookmakers.forEach(bookmaker => {
           if (bookmaker && bookmaker.key) {
             bookmakerMap.set(bookmaker.key, bookmaker.title || bookmaker.key);
