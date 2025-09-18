@@ -130,6 +130,7 @@ export const AuthProvider = ({ children }) => {
       setSession(currentSession);
       setUser(currentSession.user);
       await fetchUserProfile(currentSession.user.id);
+      await fetchPlanStatus();
       lastValidationRef.current = now;
 
       safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
@@ -145,7 +146,7 @@ export const AuthProvider = ({ children }) => {
       clearSessionState();
       return null;
     }
-  }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, safeSetItem]);
+  }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, fetchPlanStatus, safeSetItem]);
 
   const schedulePlanNotice = useCallback((message) => {
     setPlanNotice(message);
@@ -273,6 +274,7 @@ export const AuthProvider = ({ children }) => {
                 setSession(freshSession);
                 setUser(freshSession.user);
                 await fetchUserProfile(freshSession.user.id);
+                await fetchPlanStatus();
 
                 safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
 
@@ -307,6 +309,7 @@ export const AuthProvider = ({ children }) => {
             setSession(freshSession);
             setUser(freshSession.user);
             await fetchUserProfile(freshSession.user.id);
+            await fetchPlanStatus();
 
             safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
 
@@ -357,6 +360,7 @@ export const AuthProvider = ({ children }) => {
             
             // Fetch user profile
             await fetchUserProfile(newSession.user.id);
+            await fetchPlanStatus();
             
             // Set up periodic session validation if not already set
             if (!validationInterval) {

@@ -820,51 +820,84 @@ export default function OddsTable({
 
         if (!candidates.length) return;
 
-        // Group by outcome name for this market
+        const marketKeyLower = String(mktKey || '').toLowerCase();
+        const isSpreadMarket = marketKeyLower.includes('spread');
+        const isTotalMarket = marketKeyLower.includes('total');
+
+        const outcomeGroupKey = (outcome) => {
+          const base = outcome?.name || '';
+          if (isSpreadMarket || isTotalMarket) {
+            const pt = outcome?.point != null ? Number(outcome.point).toFixed(2) : 'NA';
+            return `${base}@@${pt}`;
+          }
+          return base;
+        };
+
         const grouped = candidates.reduce((acc, outcome) => {
-          if (!acc[outcome.name]) acc[outcome.name] = [];
-          acc[outcome.name].push(outcome);
+          const key = outcomeGroupKey(outcome);
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(outcome);
           return acc;
         }, {});
 
-        Object.entries(grouped).forEach(([outcomeName, outcomes]) => {
-          // For the main row display, use filtered outcomes
-          const filteredOutcome = outcomes[0];
-          
-          // For mini-table, get ALL books for this outcome (not filtered)
-          const allBooksForOutcome = allMarketOutcomes.filter(o => o.name === outcomeName);
-          
+        Object.entries(grouped).forEach(([groupKey, outcomes]) => {
+          if (!outcomes.length) return;
+
+          const filteredOutcome = outcomes.reduce((best, current) => {
+            if (!best) return current;
+            const bestOdds = Number(best.price ?? best.odds ?? 0);
+            const currentOdds = Number(current.price ?? current.odds ?? 0);
+            const bestDecimal = americanToDecimal(bestOdds) || -Infinity;
+            const currentDecimal = americanToDecimal(currentOdds) || -Infinity;
+            return currentDecimal > bestDecimal ? current : best;
+          }, outcomes[0]);
+
+          const basePoint = filteredOutcome?.point != null ? Number(filteredOutcome.point) : null;
+          const tolerance = 0.051;
+
+          const matchesPoint = (entry) => {
+            if (!(isSpreadMarket || isTotalMarket)) return true;
+            if (basePoint == null) return entry?.point == null;
+            const entryPoint = entry?.point != null ? Number(entry.point) : null;
+            if (entryPoint == null) return false;
+            return Math.abs(entryPoint - basePoint) < tolerance;
+          };
+
+          const allBooksForOutcome = allMarketOutcomes.filter(o => outcomeGroupKey(o) === groupKey && matchesPoint(o));
+          if (!allBooksForOutcome.length) return;
+
           const gameRow = {
-            key: `${game.id}-${mktKey}-${outcomeName}`,
+            key: `${game.id}-${mktKey}-${groupKey}`,
             game,
             mkt: filteredOutcome.market,
             out: filteredOutcome,
             bk: filteredOutcome.bookmaker,
-            allBooks: allBooksForOutcome.map(o => ({ 
-              price: o.price, 
+            allBooks: allBooksForOutcome.map(o => ({
+              price: o.price,
               odds: o.price,
               book: o.book,
               bookmaker: o.bookmaker,
-              market: o.market // Include market data for mini-table access
+              market: o.market,
+              point: o.point
             })),
             sport: game.sport_key
           };
-          // Only add rows with valid odds and minimum 6 books with actual odds
-        const hasValidOdds = Number(filteredOutcome.price || filteredOutcome.odds || 0) !== 0;
-        const uniqueBooksWithOdds = new Set();
-        allBooksForOutcome.forEach(book => {
-          const key = String(book?.bookmaker?.key || book?.book || '').toLowerCase();
-          const odds = Number(book?.price || book?.odds || 0);
-          // Only count books that have valid, non-zero odds
-          if (key && odds !== 0) {
-            uniqueBooksWithOdds.add(key);
+
+          const hasValidOdds = Number(filteredOutcome.price || filteredOutcome.odds || 0) !== 0;
+          const uniqueBooksWithOdds = new Set();
+          allBooksForOutcome.forEach(book => {
+            const key = String(book?.bookmaker?.key || book?.book || '').toLowerCase();
+            const odds = Number(book?.price || book?.odds || 0);
+            if (key && odds !== 0) {
+              uniqueBooksWithOdds.add(key);
+            }
+          });
+          const minimumBooksRequired = (isSpreadMarket || isTotalMarket) ? 2 : 6;
+          const hasMinimumBooks = uniqueBooksWithOdds.size >= minimumBooksRequired;
+
+          if (hasValidOdds && hasMinimumBooks) {
+            gameRows.push(gameRow);
           }
-        });
-        const hasMinimumBooks = uniqueBooksWithOdds.size >= 6;
-        
-        if (hasValidOdds && hasMinimumBooks) {
-          gameRows.push(gameRow);
-        }
         });
       });
     });

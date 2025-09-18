@@ -11,6 +11,7 @@ export function useMe() {
   const [error, setError] = useState(null);
   const fetchingRef = useRef(false);
   const mountedRef = useRef(true);
+  const lastMeRef = useRef(null);
 
   const fetchMe = useCallback(async () => {
     // Prevent concurrent fetches
@@ -30,6 +31,7 @@ export function useMe() {
         const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
         if (mountedRef.current) {
           setMe(defaultData);
+          lastMeRef.current = defaultData;
         }
         return;
       }
@@ -58,11 +60,15 @@ export function useMe() {
       console.log('🔍 useMe: Response status:', response.status, 'ok:', response.ok);
       
       if (!response.ok) {
-        console.log('🔍 useMe: Response not ok, using default data');
-        // For 500 errors or auth issues, use default free plan data
-        const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+        console.log('🔍 useMe: Response not ok, keeping existing plan state');
         if (mountedRef.current) {
-          setMe(defaultData);
+          if (lastMeRef.current) {
+            setMe(lastMeRef.current);
+          } else {
+            const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+            setMe(defaultData);
+            lastMeRef.current = defaultData;
+          }
         }
         return;
       }
@@ -81,13 +87,18 @@ export function useMe() {
       
       if (mountedRef.current) {
         setMe(meData);
+        lastMeRef.current = meData;
       }
     } catch (error) {
       console.error('useMe: Error fetching user data:', error);
-      // Always provide fallback data to prevent infinite loading
-      const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
       if (mountedRef.current) {
-        setMe(defaultData);
+        if (lastMeRef.current) {
+          setMe(lastMeRef.current);
+        } else {
+          const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+          setMe(defaultData);
+          lastMeRef.current = defaultData;
+        }
         setError(error.message);
       }
     } finally {
