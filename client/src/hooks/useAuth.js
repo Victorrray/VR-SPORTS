@@ -97,57 +97,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, [isSupabaseEnabled]);
 
-  // Validate the current session
-  const validateSession = useCallback(async () => {
-    if (!isSupabaseEnabled) return null;
-    
-    try {
-      const now = Date.now();
-      const activeSession = sessionRef.current;
-      const lastValidation = lastValidationRef.current;
-      const shouldValidate = !activeSession || (now - lastValidation >= SESSION_VALIDATION_INTERVAL);
-      if (!shouldValidate) {
-        return activeSession;
-      }
-
-      console.log('🔐 useAuth: Validating session...');
-      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('🔐 useAuth: Session validation error:', error);
-        clearSessionState();
-        throw error;
-      }
-      
-      if (!currentSession?.user) {
-        console.log('🔐 useAuth: No valid session found');
-        clearSessionState();
-        lastValidationRef.current = now;
-        return null;
-      }
-      
-      sessionRef.current = currentSession;
-      setSession(currentSession);
-      setUser(currentSession.user);
-      await fetchUserProfile(currentSession.user.id);
-      await fetchPlanStatus();
-      lastValidationRef.current = now;
-
-      safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
-
-      // Only update if the user has changed
-      if (activeSession?.user?.id !== currentSession.user.id) {
-        console.log('🔐 useAuth: Session validated, user:', currentSession.user.email);
-      }
-
-      return currentSession;
-    } catch (error) {
-      console.error('🔐 useAuth: Error validating session:', error);
-      clearSessionState();
-      return null;
-    }
-  }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, fetchPlanStatus, safeSetItem]);
-
   const schedulePlanNotice = useCallback((message) => {
     setPlanNotice(message);
     if (planNoticeTimeoutRef.current) {
@@ -206,6 +155,57 @@ export const AuthProvider = ({ children }) => {
       planNoticeTimeoutRef.current = null;
     }
   }, []);
+
+  // Validate the current session
+  const validateSession = useCallback(async () => {
+    if (!isSupabaseEnabled) return null;
+    
+    try {
+      const now = Date.now();
+      const activeSession = sessionRef.current;
+      const lastValidation = lastValidationRef.current;
+      const shouldValidate = !activeSession || (now - lastValidation >= SESSION_VALIDATION_INTERVAL);
+      if (!shouldValidate) {
+        return activeSession;
+      }
+
+      console.log('🔐 useAuth: Validating session...');
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('🔐 useAuth: Session validation error:', error);
+        clearSessionState();
+        throw error;
+      }
+      
+      if (!currentSession?.user) {
+        console.log('🔐 useAuth: No valid session found');
+        clearSessionState();
+        lastValidationRef.current = now;
+        return null;
+      }
+      
+      sessionRef.current = currentSession;
+      setSession(currentSession);
+      setUser(currentSession.user);
+      await fetchUserProfile(currentSession.user.id);
+      await fetchPlanStatus();
+      lastValidationRef.current = now;
+
+      safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
+
+      // Only update if the user has changed
+      if (activeSession?.user?.id !== currentSession.user.id) {
+        console.log('🔐 useAuth: Session validated, user:', currentSession.user.email);
+      }
+
+      return currentSession;
+    } catch (error) {
+      console.error('🔐 useAuth: Error validating session:', error);
+      clearSessionState();
+      return null;
+    }
+  }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, fetchPlanStatus, safeSetItem]);
 
   // Initialize auth state and set up listeners
   useEffect(() => {
