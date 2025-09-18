@@ -1400,7 +1400,7 @@ export default function OddsTable({
                             </>
                           )}
                         </div>
-                        <div className="mob-line">{mode === "props" ? '' : ((row.mkt.key || '') === 'h2h' ? '—' : formatLine(row.out.point, row.mkt.key, 'game'))}</div>
+                        <div className="mob-line">{mode === "props" ? '' : ((row.mkt.key || '') === 'h2h' ? '' : formatLine(row.out.point, row.mkt.key, 'game'))}</div>
                       </div>
 
                       {/* Bottom row: Sportsbook name left, odds and pick button right */}
