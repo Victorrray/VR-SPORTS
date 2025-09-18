@@ -1643,7 +1643,32 @@ export default function OddsTable({
 
                             const combinedBooks = [...sortedPrioritized, ...sortedFallback].slice(0, maxMiniBooks);
 
-                            let cols = combinedBooks;
+                            const normalizeBookKeyForEntry = (entry) => normalizeBookKey(entry?.bookmaker?.key || entry?.book || '');
+
+                            const topEntry = row.bk ? {
+                              price: row.out?.price,
+                              odds: row.out?.price,
+                              book: row.bk?.title,
+                              bookmaker: row.bk,
+                              market: row.mkt,
+                              point: row.out?.point
+                            } : null;
+
+                            const orderedBooks = [];
+                            const seenBookKeys = new Set();
+
+                            const pushEntry = (entry) => {
+                              if (!entry) return;
+                              const key = normalizeBookKeyForEntry(entry);
+                              if (!key || seenBookKeys.has(key)) return;
+                              seenBookKeys.add(key);
+                              orderedBooks.push(entry);
+                            };
+
+                            pushEntry(topEntry);
+                            combinedBooks.forEach(pushEntry);
+
+                            let cols = orderedBooks;
 
                             const grab = (ob, top) => {
                               // For player props mode, return the odds directly
