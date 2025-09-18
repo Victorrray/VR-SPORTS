@@ -15,52 +15,113 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
-  const [lastValidation, setLastValidation] = useState(Date.now());
+  const [lastValidation, setLastValidation] = useState(0);
   const isSupabaseEnabled = !!supabase;
+
+  const safeGetItem = useCallback((key) => {
+    if (typeof window === 'undefined') return null;
+    try {
+      return localStorage.getItem(key);
+    } catch (err) {
+      console.warn(`🔐 useAuth: Failed to read ${key} from storage`, err);
+      return null;
+    }
+  }, []);
+
+  const safeSetItem = useCallback((key, value) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(key, value);
+    } catch (err) {
+      console.warn(`🔐 useAuth: Failed to write ${key} to storage`, err);
+    }
+  }, []);
+
+  const safeRemoveItem = useCallback((key) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.removeItem(key);
+    } catch (err) {
+      console.warn(`🔐 useAuth: Failed to remove ${key} from storage`, err);
+    }
+  }, []);
+
+  const clearSessionState = useCallback(() => {
+    setUser(null);
+    setProfile(null);
+    setSession(null);
+    setLastValidation(0);
+
+    safeRemoveItem(SESSION_STORAGE_KEY);
+    safeRemoveItem('demo-auth-session');
+  }, [safeRemoveItem]);
+
+  const fetchUserProfile = useCallback(async (userId) => {
+    if (!isSupabaseEnabled || !userId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // Not found error
+        throw error;
+      }
+
+      setProfile(data || null);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  }, [isSupabaseEnabled]);
 
   // Validate the current session
   const validateSession = useCallback(async () => {
-    if (!isSupabaseEnabled || !session) return null;
+    if (!isSupabaseEnabled) return null;
     
     try {
       const now = Date.now();
-      // Only validate if it's been more than 5 minutes since last validation
-      if (now - lastValidation < SESSION_VALIDATION_INTERVAL) {
+      const shouldValidate = !session || (now - lastValidation >= SESSION_VALIDATION_INTERVAL);
+      if (!shouldValidate) {
         return session;
       }
-      
+
       console.log('🔐 useAuth: Validating session...');
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
       
       if (error) {
         console.error('🔐 useAuth: Session validation error:', error);
+        clearSessionState();
         throw error;
       }
       
-      setLastValidation(now);
-      
       if (!currentSession?.user) {
         console.log('🔐 useAuth: No valid session found');
-        setSession(null);
-        setUser(null);
-        setProfile(null);
+        clearSessionState();
+        setLastValidation(now);
         return null;
       }
       
+      setSession(currentSession);
+      setUser(currentSession.user);
+      await fetchUserProfile(currentSession.user.id);
+      setLastValidation(now);
+
+      safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
+
       // Only update if the user has changed
-      if (currentSession.user.id !== session.user?.id) {
+      if (session?.user?.id !== currentSession.user.id) {
         console.log('🔐 useAuth: Session validated, user:', currentSession.user.email);
-        setSession(currentSession);
-        setUser(currentSession.user);
-        await fetchUserProfile(currentSession.user.id);
       }
-      
+
       return currentSession;
     } catch (error) {
       console.error('🔐 useAuth: Error validating session:', error);
+      clearSessionState();
       return null;
     }
-  }, [session, isSupabaseEnabled, lastValidation]);
+  }, [session, isSupabaseEnabled, lastValidation, clearSessionState, fetchUserProfile, safeSetItem]);
 
   // Initialize auth state and set up listeners
   useEffect(() => {
@@ -82,7 +143,7 @@ export const AuthProvider = ({ children }) => {
           
           // Check for demo session in localStorage
           try {
-            const demoSession = localStorage.getItem('demo-auth-session');
+            const demoSession = safeGetItem('demo-auth-session');
             if (demoSession) {
               const sessionData = JSON.parse(demoSession);
               console.log('🔐 useAuth: Found demo session:', sessionData.email);
@@ -108,27 +169,39 @@ export const AuthProvider = ({ children }) => {
         }
 
         // Check for stored session first
-        const storedSession = localStorage.getItem(SESSION_STORAGE_KEY);
+        const storedSession = safeGetItem(SESSION_STORAGE_KEY);
         if (storedSession) {
           try {
             const parsedSession = JSON.parse(storedSession);
             if (parsedSession?.user) {
               console.log('🔐 useAuth: Found stored session for:', parsedSession.user.email);
-              setSession(parsedSession);
-              setUser(parsedSession.user);
-              await fetchUserProfile(parsedSession.user.id);
-              
-              // Set up periodic session validation
-              validationInterval = setInterval(() => {
-                if (isMounted) validateSession();
-              }, SESSION_VALIDATION_INTERVAL);
-              
-              if (isMounted) setLoading(false);
-              return;
+
+              // Validate against Supabase to ensure the session is still active
+              const { data: { session: freshSession }, error: refreshError } = await supabase.auth.getSession();
+
+              if (refreshError || !freshSession?.user) {
+                console.log('🔐 useAuth: Stored session invalid, clearing');
+                clearSessionState();
+              } else {
+                setSession(freshSession);
+                setUser(freshSession.user);
+                await fetchUserProfile(freshSession.user.id);
+
+                safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
+
+                validationInterval = setInterval(() => {
+                  if (isMounted) validateSession();
+                }, SESSION_VALIDATION_INTERVAL);
+
+                if (isMounted) setLoading(false);
+                return;
+              }
+            } else {
+              clearSessionState();
             }
           } catch (error) {
             console.error('🔐 useAuth: Error parsing stored session:', error);
-            localStorage.removeItem(SESSION_STORAGE_KEY);
+            clearSessionState();
           }
         }
 
@@ -141,29 +214,26 @@ export const AuthProvider = ({ children }) => {
         console.log('🔐 useAuth: Session received:', !!freshSession, freshSession?.user?.email);
         
         if (isMounted) {
-          setSession(freshSession);
-          setUser(freshSession?.user || null);
-          
           if (freshSession?.user) {
             console.log('🔐 useAuth: Fetching user profile for:', freshSession.user.id);
+            setSession(freshSession);
+            setUser(freshSession.user);
             await fetchUserProfile(freshSession.user.id);
-            
-            // Store the session for persistence
-            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
-            
-            // Set up periodic session validation
+
+            safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
+
             validationInterval = setInterval(() => {
               if (isMounted) validateSession();
             }, SESSION_VALIDATION_INTERVAL);
+          } else {
+            clearSessionState();
           }
-        }
-      } catch (error) {
-        console.error('🔐 useAuth: Error getting session:', error);
-        if (isMounted) {
-          setSession(null);
-          setUser(null);
-          setProfile(null);
-        }
+      }
+    } catch (error) {
+      console.error('🔐 useAuth: Error getting session:', error);
+      if (isMounted) {
+        clearSessionState();
+      }
       } finally {
         if (isMounted) {
           console.log('🔐 useAuth: Setting loading to false');
@@ -194,7 +264,7 @@ export const AuthProvider = ({ children }) => {
             console.log('🔐 useAuth: Auth change - fetching profile for:', newSession.user.id);
             
             // Store the session for persistence
-            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
+            safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
             
             // Fetch user profile
             await fetchUserProfile(newSession.user.id);
@@ -208,8 +278,7 @@ export const AuthProvider = ({ children }) => {
           } else {
             // Clear session data on sign out
             console.log('🔐 useAuth: Clearing session data');
-            localStorage.removeItem(SESSION_STORAGE_KEY);
-            setProfile(null);
+            clearSessionState();
             
             // Clear validation interval
             if (validationInterval) {
@@ -250,27 +319,7 @@ export const AuthProvider = ({ children }) => {
       if (fallbackTimeout) clearTimeout(fallbackTimeout);
       if (validationInterval) clearInterval(validationInterval);
     };
-  }, []);
-
-  const fetchUserProfile = async (userId) => {
-    if (!isSupabaseEnabled) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // Not found error
-        throw error;
-      }
-
-      setProfile(data || null);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
-  };
+  }, [clearSessionState, fetchUserProfile, isSupabaseEnabled, safeGetItem, safeSetItem, validateSession]);
 
   const signUp = async (email, password, metadata = {}) => {
     if (!isSupabaseEnabled) {
@@ -300,7 +349,7 @@ export const AuthProvider = ({ children }) => {
       };
       
       // Store in localStorage for persistence across refreshes
-      localStorage.setItem('demo-auth-session', JSON.stringify(demoUser));
+      safeSetItem('demo-auth-session', JSON.stringify(demoUser));
       
       setUser(demoUser);
       setSession({ user: demoUser });
@@ -326,26 +375,14 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Clear all auth-related data
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-      setLastValidation(0);
-      
-      // Clear all auth-related storage
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('demo-auth-session');
+      clearSessionState();
+      safeRemoveItem('supabase.auth.token');
       
       console.log('🔐 useAuth: Successfully signed out');
     } catch (error) {
       console.error('🔐 useAuth: Error during sign out:', error);
       // Ensure all auth state is cleared even if Supabase signOut fails
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-      setLastValidation(0);
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      localStorage.removeItem('demo-auth-session');
+      clearSessionState();
     }
   };
 
