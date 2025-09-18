@@ -15,9 +15,9 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
-  const [lastValidation, setLastValidation] = useState(0);
   const isSupabaseEnabled = !!supabase;
   const sessionRef = useRef(null);
+  const lastValidationRef = useRef(0);
 
   useEffect(() => {
     sessionRef.current = session;
@@ -55,7 +55,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setProfile(null);
     setSession(null);
-    setLastValidation(0);
+    sessionRef.current = null;
+    lastValidationRef.current = 0;
+    setLoading(false);
 
     safeRemoveItem(SESSION_STORAGE_KEY);
     safeRemoveItem('demo-auth-session');
@@ -88,6 +90,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const now = Date.now();
       const activeSession = sessionRef.current;
+      const lastValidation = lastValidationRef.current;
       const shouldValidate = !activeSession || (now - lastValidation >= SESSION_VALIDATION_INTERVAL);
       if (!shouldValidate) {
         return activeSession;
@@ -105,14 +108,15 @@ export const AuthProvider = ({ children }) => {
       if (!currentSession?.user) {
         console.log('🔐 useAuth: No valid session found');
         clearSessionState();
-        setLastValidation(now);
+        lastValidationRef.current = now;
         return null;
       }
       
+      sessionRef.current = currentSession;
       setSession(currentSession);
       setUser(currentSession.user);
       await fetchUserProfile(currentSession.user.id);
-      setLastValidation(now);
+      lastValidationRef.current = now;
 
       safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
 
@@ -127,7 +131,7 @@ export const AuthProvider = ({ children }) => {
       clearSessionState();
       return null;
     }
-  }, [isSupabaseEnabled, lastValidation, clearSessionState, fetchUserProfile, safeSetItem]);
+  }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, safeSetItem]);
 
   // Initialize auth state and set up listeners
   useEffect(() => {
@@ -155,18 +159,21 @@ export const AuthProvider = ({ children }) => {
               console.log('🔐 useAuth: Found demo session:', sessionData.email);
               if (isMounted) {
                 setUser(sessionData);
+                sessionRef.current = { user: sessionData };
                 setSession({ user: sessionData });
               }
             } else if (isMounted) {
               console.log('🔐 useAuth: No demo session found');
               setUser(null);
+              sessionRef.current = null;
               setSession(null);
             }
           } catch (error) {
             console.error('🔐 useAuth: Error parsing demo session:', error);
             if (isMounted) {
-              setUser(null);
-              setSession(null);
+            setUser(null);
+            sessionRef.current = null;
+            setSession(null);
             }
           }
           
@@ -189,6 +196,7 @@ export const AuthProvider = ({ children }) => {
                 console.log('🔐 useAuth: Stored session invalid, clearing');
                 clearSessionState();
               } else {
+                sessionRef.current = freshSession;
                 setSession(freshSession);
                 setUser(freshSession.user);
                 await fetchUserProfile(freshSession.user.id);
@@ -222,6 +230,7 @@ export const AuthProvider = ({ children }) => {
         if (isMounted) {
           if (freshSession?.user) {
             console.log('🔐 useAuth: Fetching user profile for:', freshSession.user.id);
+            sessionRef.current = freshSession;
             setSession(freshSession);
             setUser(freshSession.user);
             await fetchUserProfile(freshSession.user.id);
@@ -263,6 +272,7 @@ export const AuthProvider = ({ children }) => {
           console.log('🔐 useAuth: Auth state change:', event, !!newSession);
           
           // Update session and user state
+          sessionRef.current = newSession;
           setSession(newSession);
           setUser(newSession?.user || null);
           
@@ -358,6 +368,7 @@ export const AuthProvider = ({ children }) => {
       safeSetItem('demo-auth-session', JSON.stringify(demoUser));
       
       setUser(demoUser);
+      sessionRef.current = { user: demoUser };
       setSession({ user: demoUser });
       
       console.log('🔐 useAuth: Demo login successful for:', email);
@@ -476,7 +487,7 @@ export const AuthProvider = ({ children }) => {
     validateSession, // Export validateSession for manual validation when needed
     isAuthenticated: !!user,
     isSupabaseEnabled,
-    lastValidation
+    lastValidation: lastValidationRef.current
   };
 
   return (
