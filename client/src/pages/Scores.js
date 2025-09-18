@@ -7,6 +7,7 @@ import ScoresLoadingSkeleton from '../components/ScoresLoadingSkeleton';
 import MobileBottomBar from '../components/MobileBottomBar';
 import './Scores.css';
 import { withApiBase } from '../config/api';
+import { secureFetch } from '../utils/security';
 
 function TeamInitials({ name }) {
   const initials = (name || "")
@@ -114,15 +115,7 @@ export default function Scores() {
       }
       
       // Configure fetch options for cross-origin requests
-      const fetchOptions = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Credentials set at call-site
-      };
-      
-      const r = await fetch(url, { ...fetchOptions, credentials: 'include' });
+      const r = await secureFetch(url, { method: 'GET', credentials: 'include' });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = await r.json();
       setGames(data || []);

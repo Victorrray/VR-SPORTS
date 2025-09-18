@@ -1,5 +1,5 @@
 // Authentication hook with Supabase integration
-import { useState, useEffect, useContext, createContext, useCallback } from 'react';
+import { useState, useEffect, useContext, createContext, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext({});
@@ -17,6 +17,11 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [lastValidation, setLastValidation] = useState(0);
   const isSupabaseEnabled = !!supabase;
+  const sessionRef = useRef(null);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   const safeGetItem = useCallback((key) => {
     if (typeof window === 'undefined') return null;
@@ -82,9 +87,10 @@ export const AuthProvider = ({ children }) => {
     
     try {
       const now = Date.now();
-      const shouldValidate = !session || (now - lastValidation >= SESSION_VALIDATION_INTERVAL);
+      const activeSession = sessionRef.current;
+      const shouldValidate = !activeSession || (now - lastValidation >= SESSION_VALIDATION_INTERVAL);
       if (!shouldValidate) {
-        return session;
+        return activeSession;
       }
 
       console.log('🔐 useAuth: Validating session...');
@@ -111,7 +117,7 @@ export const AuthProvider = ({ children }) => {
       safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
 
       // Only update if the user has changed
-      if (session?.user?.id !== currentSession.user.id) {
+      if (activeSession?.user?.id !== currentSession.user.id) {
         console.log('🔐 useAuth: Session validated, user:', currentSession.user.email);
       }
 
@@ -121,7 +127,7 @@ export const AuthProvider = ({ children }) => {
       clearSessionState();
       return null;
     }
-  }, [session, isSupabaseEnabled, lastValidation, clearSessionState, fetchUserProfile, safeSetItem]);
+  }, [isSupabaseEnabled, lastValidation, clearSessionState, fetchUserProfile, safeSetItem]);
 
   // Initialize auth state and set up listeners
   useEffect(() => {
