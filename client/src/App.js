@@ -133,8 +133,8 @@ function AppRoutes() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          {/* Only show footer on login page */}
-          {location.pathname === "/login" && <Footer />}
+          {/* Show footer on public landing routes */}
+          {['/', '/home', '/pricing', '/login'].includes(location.pathname) && <Footer />}
           
           {/* Username Setup Modal */}
           {showUsernameSetup && (
