@@ -12,6 +12,23 @@ const SESSION_STORAGE_KEY = 'sb-session';
 
 // Session validation timeout (5 minutes)
 const SESSION_VALIDATION_INTERVAL = 5 * 60 * 1000;
+const PLAN_MIN_INTERVAL = 30 * 1000; // rate limit plan refreshes
+const PLAN_FETCH_TIMEOUT = 7 * 1000; // abort plan calls after 7s
+const PLAN_MAX_BACKOFF = 5 * 60 * 1000; // cap exponential backoff at 5 minutes
+const PREMIUM_GRACE_MS = 15 * 60 * 1000;
+
+const PREMIUM_PLANS = new Set(['platinum', 'premium', 'vip']);
+const isPremiumPlan = (plan) => PREMIUM_PLANS.has(String(plan || '').toLowerCase());
+
+const defaultPlan = {
+  plan: 'free',
+  quota: null,
+  used: null,
+  remaining: null,
+  fetchedAt: null,
+  stale: true,
+  source: 'default'
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,11 +41,25 @@ export const AuthProvider = ({ children }) => {
   const prevPlanRef = useRef(null);
   const planNoticeTimeoutRef = useRef(null);
   const lastPlanStaleRef = useRef(false);
+  const validationIntervalRef = useRef(null);
 
   const cachedPlanInfo = loadPlanInfo();
   const [planInfo, setPlanInfo] = useState(cachedPlanInfo);
   const [planNotice, setPlanNotice] = useState('');
   const planInfoRef = useRef(cachedPlanInfo);
+
+  const initialPremiumSeen = cachedPlanInfo && isPremiumPlan(cachedPlanInfo.plan)
+    ? new Date(cachedPlanInfo.fetchedAt || Date.now()).getTime()
+    : 0;
+
+  const planFetchStateRef = useRef({
+    promise: null,
+    controller: null,
+    lastFetch: cachedPlanInfo?.fetchedAt ? new Date(cachedPlanInfo.fetchedAt).getTime() : 0,
+    backoffUntil: 0,
+    attempt: 0,
+    lastPremiumSeen: initialPremiumSeen,
+  });
 
   useEffect(() => {
     sessionRef.current = session;
@@ -79,9 +110,26 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
 
+    const fetchState = planFetchStateRef.current;
+    if (fetchState.controller) {
+      fetchState.controller.abort();
+    }
+    fetchState.promise = null;
+    fetchState.controller = null;
+    fetchState.lastFetch = 0;
+    fetchState.backoffUntil = 0;
+    fetchState.attempt = 0;
+    fetchState.lastPremiumSeen = 0;
+
     safeRemoveItem(SESSION_STORAGE_KEY);
     safeRemoveItem('demo-auth-session');
     clearPlanInfo();
+    sessionRef.current = null;
+
+    if (validationIntervalRef.current) {
+      clearInterval(validationIntervalRef.current);
+      validationIntervalRef.current = null;
+    }
   }, [safeRemoveItem]);
 
   const fetchUserProfile = useCallback(async (userId) => {
@@ -115,64 +163,155 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const fetchPlanStatus = useCallback(async ({ force = false } = {}) => {
-    if (!sessionRef.current) return null;
+    if (!sessionRef.current) return planInfoRef.current || null;
 
+    const fetchState = planFetchStateRef.current;
+    const now = Date.now();
     const existingPlan = planInfoRef.current || loadPlanInfo();
-    if (!force && existingPlan && !isPlanInfoStale(existingPlan)) {
+
+    const isHidden = typeof document !== 'undefined' && document.visibilityState === 'hidden';
+    const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+
+    if (!force && (isHidden || isOffline)) {
       return existingPlan;
     }
 
-    try {
-      const response = await secureFetch(withApiBase('/api/me/usage'), {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Plan fetch failed (${response.status})`);
-      }
-
-      const data = await response.json();
-      const nextPlan = data.plan || 'free';
-      const info = {
-        plan: nextPlan,
-        quota: data.quota ?? null,
-        used: data.used ?? null,
-        remaining: data.remaining ?? null,
-        fetchedAt: new Date().toISOString(),
-        stale: !!data.stale,
-        source: data.source || 'live'
-      };
-
-      const previousPlan = prevPlanRef.current;
-      prevPlanRef.current = nextPlan;
-      setPlanInfo(info);
-      planInfoRef.current = info;
-      savePlanInfo(info);
-
-      if (previousPlan && previousPlan !== nextPlan) {
-        if (nextPlan === 'platinum') {
-          schedulePlanNotice('🎉 Upgraded to Platinum – premium access unlocked.');
-        } else {
-          schedulePlanNotice('⚠️ Plan changed to Free – premium features disabled.');
-        }
-        lastPlanStaleRef.current = info.stale;
-      } else if (info.stale && !lastPlanStaleRef.current) {
-        schedulePlanNotice('⚠️ Using cached plan until the server reconnects.');
-        lastPlanStaleRef.current = true;
-      } else if (!info.stale) {
-        lastPlanStaleRef.current = false;
-      }
-
-      return info;
-    } catch (error) {
-      console.warn('useAuth: Failed to fetch plan status', error);
-      if (existingPlan) {
-        setPlanInfo(existingPlan);
-        planInfoRef.current = existingPlan;
-        return existingPlan;
-      }
-      return null;
+    if (!force && fetchState.promise) {
+      return fetchState.promise;
     }
+
+    if (!force && fetchState.lastFetch && now - fetchState.lastFetch < PLAN_MIN_INTERVAL) {
+      return existingPlan;
+    }
+
+    if (!force && fetchState.backoffUntil && now < fetchState.backoffUntil) {
+      return existingPlan;
+    }
+
+    if (fetchState.promise) {
+      // A force request should replace the in-flight one
+      if (force) {
+        fetchState.controller?.abort();
+      } else {
+        return fetchState.promise;
+      }
+    }
+
+    const controller = new AbortController();
+    fetchState.controller = controller;
+    const requestToken = Symbol('planFetch');
+    fetchState.currentToken = requestToken;
+
+    const doFetch = (async () => {
+      const timeoutId = setTimeout(() => controller.abort(), PLAN_FETCH_TIMEOUT);
+      try {
+        const response = await secureFetch(withApiBase('/api/me/usage'), {
+          credentials: 'include',
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Plan fetch failed (${response.status})`);
+        }
+
+        const data = await response.json();
+        const nextPlan = data.plan || 'free';
+        const info = {
+          plan: nextPlan,
+          quota: data.quota ?? null,
+          used: data.used ?? null,
+          remaining: data.remaining ?? null,
+          fetchedAt: new Date().toISOString(),
+          stale: !!data.stale,
+          source: data.source || 'live'
+        };
+
+        const previousPlan = prevPlanRef.current;
+        prevPlanRef.current = nextPlan;
+        planInfoRef.current = info;
+        setPlanInfo(info);
+        savePlanInfo(info);
+
+        fetchState.attempt = 0;
+        fetchState.backoffUntil = 0;
+        fetchState.lastFetch = Date.now();
+        if (isPremiumPlan(nextPlan)) {
+          fetchState.lastPremiumSeen = Date.now();
+        }
+
+        if (previousPlan && previousPlan !== nextPlan) {
+          if (nextPlan === 'platinum') {
+            schedulePlanNotice('🎉 Upgraded to Platinum – premium access unlocked.');
+          } else {
+            schedulePlanNotice('⚠️ Plan changed to Free – premium features disabled.');
+          }
+          lastPlanStaleRef.current = info.stale;
+        } else if (info.stale && !lastPlanStaleRef.current) {
+          schedulePlanNotice('⚠️ Using cached plan until the server reconnects.');
+          lastPlanStaleRef.current = true;
+        } else if (!info.stale) {
+          lastPlanStaleRef.current = false;
+        }
+
+        return info;
+      } catch (error) {
+        if (controller.signal.aborted) {
+          console.warn('useAuth: Plan fetch aborted');
+        } else {
+          console.warn('useAuth: Failed to fetch plan status', error);
+        }
+
+        fetchState.attempt = Math.min((fetchState.attempt || 0) + 1, 10);
+        const backoff = Math.min(PLAN_MAX_BACKOFF, Math.pow(2, fetchState.attempt) * 1000);
+        fetchState.backoffUntil = Date.now() + backoff;
+
+        const fallback = planInfoRef.current || loadPlanInfo();
+        const lastPremiumSeen = fetchState.lastPremiumSeen || 0;
+        const withinGrace = lastPremiumSeen && (Date.now() - lastPremiumSeen) < PREMIUM_GRACE_MS;
+
+        let resolvedPlan = fallback;
+        if (!resolvedPlan && withinGrace) {
+          resolvedPlan = {
+            ...defaultPlan,
+            plan: 'platinum',
+            source: 'grace',
+            stale: true,
+            fetchedAt: new Date(lastPremiumSeen).toISOString(),
+          };
+        }
+
+        if (resolvedPlan) {
+          if (isPremiumPlan(resolvedPlan.plan)) {
+            const ts = resolvedPlan.fetchedAt ? new Date(resolvedPlan.fetchedAt).getTime() : Date.now();
+            fetchState.lastPremiumSeen = Math.max(fetchState.lastPremiumSeen || 0, ts);
+          }
+          const cachedStale = {
+            ...resolvedPlan,
+            stale: true,
+            source: resolvedPlan.source || (controller.signal.aborted ? 'aborted' : 'cache'),
+          };
+          planInfoRef.current = cachedStale;
+          setPlanInfo(cachedStale);
+          fetchState.lastFetch = Date.now();
+          return cachedStale;
+        }
+
+        planInfoRef.current = defaultPlan;
+        setPlanInfo(defaultPlan);
+        fetchState.lastFetch = Date.now();
+        return defaultPlan;
+      } finally {
+        clearTimeout(timeoutId);
+        if (fetchState.currentToken === requestToken) {
+          fetchState.promise = null;
+          fetchState.controller = null;
+          fetchState.currentToken = null;
+        }
+      }
+    })();
+
+    fetchState.promise = doFetch;
+    return doFetch;
   }, [schedulePlanNotice]);
 
   const clearPlanNotice = useCallback(() => {
@@ -201,6 +340,11 @@ export const AuthProvider = ({ children }) => {
       
       if (error) {
         console.error('🔐 useAuth: Session validation error:', error);
+        if (sessionRef.current) {
+          console.warn('🔐 useAuth: Validation failed; retaining existing session.');
+          lastValidationRef.current = now;
+          return sessionRef.current;
+        }
         clearSessionState();
         throw error;
       }
@@ -216,7 +360,10 @@ export const AuthProvider = ({ children }) => {
       setSession(currentSession);
       setUser(currentSession.user);
       await fetchUserProfile(currentSession.user.id);
-      await fetchPlanStatus();
+      const currentPlan = planInfoRef.current || loadPlanInfo();
+      if (!currentPlan || isPlanInfoStale(currentPlan)) {
+        await fetchPlanStatus();
+      }
       lastValidationRef.current = now;
 
       safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
@@ -230,9 +377,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('🔐 useAuth: Error validating session:', error);
 
-      // Don't immediately clear auth state on transient errors – keep the last
-      // known-good session so the UI doesn't bounce the user out over a network
-      // hiccup. We'll retry validation on the next interval.
       if (sessionRef.current) {
         console.warn('🔐 useAuth: Keeping previous session after validation failure.');
         return sessionRef.current;
@@ -249,8 +393,6 @@ export const AuthProvider = ({ children }) => {
     let subscription;
     let fallbackTimeout;
     let settled = false;
-    let validationInterval;
-
     // Get initial session
     const getInitialSession = async () => {
       if (!isMounted) return;
@@ -314,9 +456,11 @@ export const AuthProvider = ({ children }) => {
 
                 safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
 
-                validationInterval = setInterval(() => {
-                  if (isMounted) validateSession();
-                }, SESSION_VALIDATION_INTERVAL);
+                if (!validationIntervalRef.current) {
+                  validationIntervalRef.current = setInterval(() => {
+                    if (isMounted) validateSession();
+                  }, SESSION_VALIDATION_INTERVAL);
+                }
 
                 if (isMounted) setLoading(false);
                 return;
@@ -349,9 +493,11 @@ export const AuthProvider = ({ children }) => {
 
             safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
 
-            validationInterval = setInterval(() => {
-              if (isMounted) validateSession();
-            }, SESSION_VALIDATION_INTERVAL);
+            if (!validationIntervalRef.current) {
+              validationIntervalRef.current = setInterval(() => {
+                if (isMounted) validateSession();
+              }, SESSION_VALIDATION_INTERVAL);
+            }
           } else {
             clearSessionState();
           }
@@ -399,8 +545,8 @@ export const AuthProvider = ({ children }) => {
             await fetchPlanStatus();
             
             // Set up periodic session validation if not already set
-            if (!validationInterval) {
-              validationInterval = setInterval(() => {
+            if (!validationIntervalRef.current) {
+              validationIntervalRef.current = setInterval(() => {
                 if (isMounted) validateSession();
               }, SESSION_VALIDATION_INTERVAL);
             }
@@ -408,11 +554,11 @@ export const AuthProvider = ({ children }) => {
             // Clear session data on sign out
             console.log('🔐 useAuth: Clearing session data');
             clearSessionState();
-            
+
             // Clear validation interval
-            if (validationInterval) {
-              clearInterval(validationInterval);
-              validationInterval = null;
+            if (validationIntervalRef.current) {
+              clearInterval(validationIntervalRef.current);
+              validationIntervalRef.current = null;
             }
           }
           
@@ -446,19 +592,54 @@ export const AuthProvider = ({ children }) => {
       isMounted = false;
       if (subscription) subscription.unsubscribe();
       if (fallbackTimeout) clearTimeout(fallbackTimeout);
-      if (validationInterval) clearInterval(validationInterval);
+      if (validationIntervalRef.current) {
+        clearInterval(validationIntervalRef.current);
+        validationIntervalRef.current = null;
+      }
     };
   }, [clearSessionState, fetchUserProfile, isSupabaseEnabled, safeGetItem, safeSetItem, validateSession]);
 
   useEffect(() => {
     if (session) {
-      fetchPlanStatus();
+      const currentPlan = planInfoRef.current || loadPlanInfo();
+      const shouldForce = !currentPlan || isPlanInfoStale(currentPlan);
+      fetchPlanStatus({ force: shouldForce });
     } else if (!loading) {
       setPlanInfo(null);
       planInfoRef.current = null;
       clearPlanInfo();
     }
   }, [session, loading, fetchPlanStatus]);
+
+  useEffect(() => {
+    if (!isSupabaseEnabled) return undefined;
+
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        validateSession().finally(() => fetchPlanStatus({ force: true }));
+      }
+    };
+
+    const handleOnline = () => {
+      validateSession().finally(() => fetchPlanStatus({ force: true }));
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline);
+    }
+
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', handleOnline);
+      }
+    };
+  }, [isSupabaseEnabled, fetchPlanStatus, validateSession]);
 
   useEffect(() => {
     return () => {

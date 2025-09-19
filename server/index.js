@@ -496,6 +496,57 @@ app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', requireUser, track
   }
 });
 
+app.get('/api/odds-history', requireUser, trackUsage, async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(400).json({ code: 'MISSING_ENV', message: 'Missing ODDS_API_KEY', hint: 'Set ODDS_API_KEY in backend env' });
+    }
+
+    const userId = req.__userId;
+    const profile = req.__userProfile;
+
+    const { sport, sportKey, eventId, markets, bookmakers, regions = 'us' } = req.query;
+    const resolvedSport = sport || sportKey;
+
+    if (!resolvedSport) {
+      return res.status(400).json({ error: 'missing_sport', message: 'sport parameter is required' });
+    }
+
+    if (!eventId) {
+      return res.status(400).json({ error: 'missing_event', message: 'eventId parameter is required' });
+    }
+
+    const qs = new URLSearchParams({
+      apiKey: API_KEY,
+      regions: String(regions || 'us'),
+      oddsFormat: 'american',
+    });
+
+    if (markets) {
+      qs.set('markets', Array.isArray(markets) ? markets.join(',') : String(markets));
+    }
+
+    if (bookmakers) {
+      qs.set('bookmakers', Array.isArray(bookmakers) ? bookmakers.join(',') : String(bookmakers));
+    }
+
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(resolvedSport)}/events/${encodeURIComponent(eventId)}/odds-history?${qs.toString()}`;
+
+    const response = await axiosWithRetry(upstreamUrl, {}, { tries: 2, backoffMs: 600 });
+
+    if (response.status === 200) {
+      await incrementUsage(userId, profile);
+    }
+
+    return res.status(response.status).json(response.data);
+  } catch (error) {
+    const status = error?.response?.status || 500;
+    const detail = error?.response?.data || error.message;
+    console.error('Odds history proxy error:', detail);
+    return res.status(status).json({ error: 'PROXY_FAILED', detail });
+  }
+});
+
 // Explicit Odds API proxies (Express 5-safe)
 app.get('/api/odds/v4/sports', enforceUsage, async (_req, res) => {
   try {

@@ -892,7 +892,8 @@ export default function OddsTable({
               uniqueBooksWithOdds.add(key);
             }
           });
-          const minimumBooksRequired = (isSpreadMarket || isTotalMarket) ? 2 : 6;
+          // Require fewer distinct books so the table populates even when only a handful report odds.
+          const minimumBooksRequired = (isSpreadMarket || isTotalMarket) ? 2 : 3;
           const hasMinimumBooks = uniqueBooksWithOdds.size >= minimumBooksRequired;
 
           if (hasValidOdds && hasMinimumBooks) {
