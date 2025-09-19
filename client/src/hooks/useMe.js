@@ -28,7 +28,7 @@ export function useMe() {
     try {
       if (!supabase) {
         console.log('🔍 useMe: No supabase, using default data');
-        const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+        const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0, stale: false };
         if (mountedRef.current) {
           setMe(defaultData);
           lastMeRef.current = defaultData;
@@ -65,7 +65,7 @@ export function useMe() {
           if (lastMeRef.current) {
             setMe(lastMeRef.current);
           } else {
-            const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+            const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0, stale: false };
             setMe(defaultData);
             lastMeRef.current = defaultData;
           }
@@ -76,11 +76,12 @@ export function useMe() {
       const userData = await response.json();
       console.log('🔍 useMe: User data received:', userData);
       
-      const meData = { 
-        plan: userData.plan || 'free', 
+      const meData = {
+        plan: userData.plan || 'free',
         remaining: userData.quota ? Math.max(0, userData.quota - userData.used) : 250,
         limit: userData.quota || 250,
-        calls_made: userData.used || 0
+        calls_made: userData.used || 0,
+        stale: Boolean(userData.stale)
       };
       
       console.log('🔍 useMe: Processed meData:', meData);
@@ -95,7 +96,7 @@ export function useMe() {
         if (lastMeRef.current) {
           setMe(lastMeRef.current);
         } else {
-          const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0 };
+          const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0, stale: false };
           setMe(defaultData);
           lastMeRef.current = defaultData;
         }

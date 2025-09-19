@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const lastValidationRef = useRef(0);
   const prevPlanRef = useRef(null);
   const planNoticeTimeoutRef = useRef(null);
+  const lastPlanStaleRef = useRef(false);
 
   const [planInfo, setPlanInfo] = useState(null);
   const [planNotice, setPlanNotice] = useState('');
@@ -65,6 +66,7 @@ export const AuthProvider = ({ children }) => {
     sessionRef.current = null;
     lastValidationRef.current = 0;
     prevPlanRef.current = null;
+    lastPlanStaleRef.current = false;
     setPlanInfo(null);
     setPlanNotice('');
     if (planNoticeTimeoutRef.current) {
@@ -126,7 +128,9 @@ export const AuthProvider = ({ children }) => {
         quota: data.quota ?? null,
         used: data.used ?? null,
         remaining: data.remaining ?? null,
-        fetchedAt: new Date().toISOString()
+        fetchedAt: new Date().toISOString(),
+        stale: !!data.stale,
+        source: data.source || 'live'
       };
 
       const previousPlan = prevPlanRef.current;
@@ -139,6 +143,12 @@ export const AuthProvider = ({ children }) => {
         } else {
           schedulePlanNotice('⚠️ Plan changed to Free – premium features disabled.');
         }
+        lastPlanStaleRef.current = info.stale;
+      } else if (info.stale && !lastPlanStaleRef.current) {
+        schedulePlanNotice('⚠️ Using cached plan until the server reconnects.');
+        lastPlanStaleRef.current = true;
+      } else if (!info.stale) {
+        lastPlanStaleRef.current = false;
       }
 
       return info;
