@@ -15,9 +15,9 @@
   max-width: 1100px;
   margin: 0 auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 1.2rem;
+  gap: 2rem;
   flex-wrap: wrap;
 }
 
@@ -39,9 +39,34 @@
 }
 
 .links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 24px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.linkGroup {
   display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.groupTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--text) 85%, transparent);
+  margin: 0;
+}
+
+.groupList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
 }
 
 .link {
@@ -56,6 +81,7 @@
 .meta {
   opacity: 0.75;
   font-size: 0.95em;
+  margin-left: auto;
 }
 
 /* Hide footer on mobile for non-landing pages */
@@ -76,7 +102,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 16px;
+    gap: 24px;
   }
   
   .brand {
@@ -88,23 +114,40 @@
   }
   
   .links {
-    gap: 20px;
-    justify-content: center;
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+    justify-items: center;
   }
-  
+
+  .linkGroup {
+    align-items: center;
+    gap: 10px;
+  }
+
+  .groupTitle {
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+  }
+
+  .groupList {
+    gap: 10px;
+  }
+
   .link {
     font-size: 0.95rem;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-  }
-  
-  .link:hover {
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    padding: 0;
   }
   
   .meta {
     font-size: 0.85rem;
     text-align: center;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .links {
+    grid-template-columns: 1fr;
   }
 }
