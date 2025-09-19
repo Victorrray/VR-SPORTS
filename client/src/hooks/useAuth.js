@@ -3,6 +3,7 @@ import { useState, useEffect, useContext, createContext, useCallback, useRef } f
 import { supabase } from '../lib/supabase';
 import { secureFetch } from '../utils/security';
 import { withApiBase } from '../config/api';
+import { loadPlanInfo, savePlanInfo, clearPlanInfo, isPlanInfoStale } from '../utils/planCache';
 
 const AuthContext = createContext({});
 
@@ -24,8 +25,10 @@ export const AuthProvider = ({ children }) => {
   const planNoticeTimeoutRef = useRef(null);
   const lastPlanStaleRef = useRef(false);
 
-  const [planInfo, setPlanInfo] = useState(null);
+  const cachedPlanInfo = loadPlanInfo();
+  const [planInfo, setPlanInfo] = useState(cachedPlanInfo);
   const [planNotice, setPlanNotice] = useState('');
+  const planInfoRef = useRef(cachedPlanInfo);
 
   useEffect(() => {
     sessionRef.current = session;
@@ -68,6 +71,7 @@ export const AuthProvider = ({ children }) => {
     prevPlanRef.current = null;
     lastPlanStaleRef.current = false;
     setPlanInfo(null);
+    planInfoRef.current = null;
     setPlanNotice('');
     if (planNoticeTimeoutRef.current) {
       clearTimeout(planNoticeTimeoutRef.current);
@@ -77,6 +81,7 @@ export const AuthProvider = ({ children }) => {
 
     safeRemoveItem(SESSION_STORAGE_KEY);
     safeRemoveItem('demo-auth-session');
+    clearPlanInfo();
   }, [safeRemoveItem]);
 
   const fetchUserProfile = useCallback(async (userId) => {
@@ -109,8 +114,13 @@ export const AuthProvider = ({ children }) => {
     }, 10000);
   }, []);
 
-  const fetchPlanStatus = useCallback(async () => {
+  const fetchPlanStatus = useCallback(async ({ force = false } = {}) => {
     if (!sessionRef.current) return null;
+
+    const existingPlan = planInfoRef.current || loadPlanInfo();
+    if (!force && existingPlan && !isPlanInfoStale(existingPlan)) {
+      return existingPlan;
+    }
 
     try {
       const response = await secureFetch(withApiBase('/api/me/usage'), {
@@ -136,6 +146,8 @@ export const AuthProvider = ({ children }) => {
       const previousPlan = prevPlanRef.current;
       prevPlanRef.current = nextPlan;
       setPlanInfo(info);
+      planInfoRef.current = info;
+      savePlanInfo(info);
 
       if (previousPlan && previousPlan !== nextPlan) {
         if (nextPlan === 'platinum') {
@@ -154,6 +166,11 @@ export const AuthProvider = ({ children }) => {
       return info;
     } catch (error) {
       console.warn('useAuth: Failed to fetch plan status', error);
+      if (existingPlan) {
+        setPlanInfo(existingPlan);
+        planInfoRef.current = existingPlan;
+        return existingPlan;
+      }
       return null;
     }
   }, [schedulePlanNotice]);
@@ -436,10 +453,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (session) {
       fetchPlanStatus();
-    } else {
+    } else if (!loading) {
       setPlanInfo(null);
+      planInfoRef.current = null;
+      clearPlanInfo();
     }
-  }, [session, fetchPlanStatus]);
+  }, [session, loading, fetchPlanStatus]);
 
   useEffect(() => {
     return () => {
@@ -603,7 +622,7 @@ export const AuthProvider = ({ children }) => {
     planInfo,
     planNotice,
     clearPlanNotice,
-    refreshPlan: fetchPlanStatus
+    refreshPlan: (options) => fetchPlanStatus({ force: true, ...(options || {}) })
   };
 
   return (

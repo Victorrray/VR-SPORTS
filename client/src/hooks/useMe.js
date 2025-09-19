@@ -1,156 +1,119 @@
-// Hook to fetch user plan and drive menu + gate logic
+// Hook to expose cached usage/plan information across the app
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
-import { withApiBase } from '../config/api';
-import { secureFetch } from '../utils/security';
+import { useAuth } from './useAuth';
+import { loadPlanInfo, isPlanInfoStale } from '../utils/planCache';
 import { apiUsageEvents } from './useMarkets';
 
+const DEFAULT_ME = {
+  plan: 'free',
+  remaining: 250,
+  limit: 250,
+  calls_made: 0,
+  stale: false,
+};
+
+function planInfoToUsage(info) {
+  if (!info) return DEFAULT_ME;
+
+  const quota = info.quota ?? info.limit ?? 250;
+  const used = info.used ?? info.calls_made ?? 0;
+  const remaining = info.remaining ?? (quota ? Math.max(0, quota - used) : 250);
+
+  return {
+    plan: info.plan || 'free',
+    remaining,
+    limit: quota,
+    calls_made: used,
+    stale: Boolean(info.stale),
+  };
+}
+
 export function useMe() {
-  const [me, setMe] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { planInfo, refreshPlan, loading: authLoading, session } = useAuth();
+  const initialPlan = planInfo || loadPlanInfo();
+
+  const [me, setMe] = useState(() => planInfoToUsage(initialPlan));
+  const [loading, setLoading] = useState(() => !initialPlan);
   const [error, setError] = useState(null);
-  const fetchingRef = useRef(false);
+
   const mountedRef = useRef(true);
-  const lastMeRef = useRef(null);
+  const refreshingRef = useRef(false);
 
-  const fetchMe = useCallback(async () => {
-    // Prevent concurrent fetches
-    if (fetchingRef.current) {
-      console.log('🔍 useMe: Already fetching, skipping');
-      return;
-    }
-    
-    console.log('🔍 useMe: Starting fetch');
-    fetchingRef.current = true;
-    setLoading(true);
+  const syncUsage = useCallback((info) => {
+    setMe(planInfoToUsage(info));
     setError(null);
-    
+  }, []);
+
+  const forceRefresh = useCallback(async () => {
+    if (!refreshPlan || refreshingRef.current || !session) {
+      return planInfo || loadPlanInfo();
+    }
+
+    refreshingRef.current = true;
+    setLoading(true);
+
     try {
-      if (!supabase) {
-        console.log('🔍 useMe: No supabase, using default data');
-        const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0, stale: false };
-        if (mountedRef.current) {
-          setMe(defaultData);
-          lastMeRef.current = defaultData;
-        }
-        return;
+      const result = await refreshPlan({ force: true });
+      if (result && mountedRef.current) {
+        syncUsage(result);
       }
-
-      // Simplified session check without timeout complexity
-      let hasSession = false;
-      try {
-        const { data } = await supabase.auth.getSession();
-        hasSession = !!data?.session;
-        console.log('🔍 useMe: Session check:', hasSession);
-      } catch (sessionError) {
-        console.log('🔍 useMe: Session error:', sessionError);
-        // Continue without session - API will handle demo auth
-      }
-
-      // Fetch user data with simplified error handling
-      console.log('🔍 useMe: Fetching from:', withApiBase('/api/me/usage'));
-      const response = await secureFetch(withApiBase('/api/me/usage'), {
-        credentials: 'include',
-        headers: { 
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache'
-        }
-      });
-      
-      console.log('🔍 useMe: Response status:', response.status, 'ok:', response.ok);
-      
-      if (!response.ok) {
-        console.log('🔍 useMe: Response not ok, keeping existing plan state');
-        if (mountedRef.current) {
-          if (lastMeRef.current) {
-            setMe(lastMeRef.current);
-          } else {
-            const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0, stale: false };
-            setMe(defaultData);
-            lastMeRef.current = defaultData;
-          }
-        }
-        return;
-      }
-      
-      const userData = await response.json();
-      console.log('🔍 useMe: User data received:', userData);
-      
-      const meData = {
-        plan: userData.plan || 'free',
-        remaining: userData.quota ? Math.max(0, userData.quota - userData.used) : 250,
-        limit: userData.quota || 250,
-        calls_made: userData.used || 0,
-        stale: Boolean(userData.stale)
-      };
-      
-      console.log('🔍 useMe: Processed meData:', meData);
-      
+      return result;
+    } catch (err) {
       if (mountedRef.current) {
-        setMe(meData);
-        lastMeRef.current = meData;
+        setError(err.message || 'Failed to refresh usage');
       }
-    } catch (error) {
-      console.error('useMe: Error fetching user data:', error);
-      if (mountedRef.current) {
-        if (lastMeRef.current) {
-          setMe(lastMeRef.current);
-        } else {
-          const defaultData = { plan: 'free', remaining: 250, limit: 250, calls_made: 0, stale: false };
-          setMe(defaultData);
-          lastMeRef.current = defaultData;
-        }
-        setError(error.message);
-      }
+      return null;
     } finally {
-      fetchingRef.current = false;
       if (mountedRef.current) {
         setLoading(false);
       }
+      refreshingRef.current = false;
     }
+  }, [refreshPlan, session, planInfo, syncUsage]);
+
+  useEffect(() => () => {
+    mountedRef.current = false;
   }, []);
 
   useEffect(() => {
-    let subscription = null;
-    
-    // Initial fetch
-    fetchMe();
-    
-    // Set up auth state listener only once
-    if (supabase) {
-      const { data } = supabase.auth.onAuthStateChange((event, session) => {
-        // Only refetch on meaningful auth changes
-        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-          fetchMe();
-        }
-      });
-      subscription = data.subscription;
+    if (planInfo) {
+      syncUsage(planInfo);
+      setLoading(false);
+    }
+  }, [planInfo, syncUsage]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    const current = planInfo || loadPlanInfo();
+    if (!session) {
+      setLoading(false);
+      syncUsage(current);
+      return;
     }
 
-    // Listen for API usage events to refresh counter
-    const handleApiUsage = () => {
-      // Debounce the refresh to avoid too many calls
-      setTimeout(fetchMe, 1000);
-    };
-    
-    apiUsageEvents.addEventListener('apiCallMade', handleApiUsage);
+    if (!current || isPlanInfoStale(current)) {
+      forceRefresh();
+    } else {
+      setLoading(false);
+    }
+  }, [authLoading, session, planInfo, forceRefresh, syncUsage]);
 
-    // Cleanup
-    return () => {
-      mountedRef.current = false;
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-      apiUsageEvents.removeEventListener('apiCallMade', handleApiUsage);
-    };
-  }, []); // Empty dependency array to prevent re-runs
-
-  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      mountedRef.current = false;
+    const handleUsage = () => {
+      setTimeout(() => {
+        forceRefresh();
+      }, 1000);
     };
-  }, []);
 
-  return { me, loading, error, refresh: fetchMe };
+    apiUsageEvents.addEventListener('apiCallMade', handleUsage);
+    return () => apiUsageEvents.removeEventListener('apiCallMade', handleUsage);
+  }, [forceRefresh]);
+
+  return {
+    me,
+    loading,
+    error,
+    refresh: forceRefresh,
+  };
 }
