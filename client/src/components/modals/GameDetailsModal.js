@@ -205,18 +205,20 @@ export default function GameDetailsModal({ game, isOpen, onClose }) {
                   </div>
                 </div>
                 
-                <div className="game-time">
-                  <Clock size={16} />
-                  <span>
-                    {gameDetails.actualScores ? (
-                      gameDetails.gameStatus === gameDetails.period ? 
-                        gameDetails.gameStatus : 
-                        `${gameDetails.gameStatus}${gameDetails.period ? ` - ${gameDetails.period}` : ''}`
-                    ) : (
-                      new Date(game.commence_time).toLocaleString()
-                    )}
-                  </span>
-                </div>
+                {!gameDetails.liveUpdates && (
+                  <div className="game-time">
+                    <Clock size={16} />
+                    <span>
+                      {gameDetails.actualScores ? (
+                        gameDetails.gameStatus === gameDetails.period ?
+                          gameDetails.gameStatus :
+                          `${gameDetails.gameStatus}${gameDetails.period ? ` - ${gameDetails.period}` : ''}`
+                      ) : (
+                        new Date(game.commence_time).toLocaleString()
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Betting Lines - Only if real data available */}
