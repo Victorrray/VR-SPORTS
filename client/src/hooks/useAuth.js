@@ -212,6 +212,15 @@ export const AuthProvider = ({ children }) => {
       return currentSession;
     } catch (error) {
       console.error('🔐 useAuth: Error validating session:', error);
+
+      // Don't immediately clear auth state on transient errors – keep the last
+      // known-good session so the UI doesn't bounce the user out over a network
+      // hiccup. We'll retry validation on the next interval.
+      if (sessionRef.current) {
+        console.warn('🔐 useAuth: Keeping previous session after validation failure.');
+        return sessionRef.current;
+      }
+
       clearSessionState();
       return null;
     }
@@ -332,7 +341,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('🔐 useAuth: Error getting session:', error);
-      if (isMounted) {
+      if (isMounted && !sessionRef.current) {
         clearSessionState();
       }
       } finally {
