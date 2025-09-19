@@ -1253,30 +1253,66 @@ body,
 
 @media (min-width: 1100px) {
   .odds-table-card.revamp .odds-grid {
-    font-size: 0.96em;
+    font-size: 0.95em;
+    table-layout: fixed;
   }
 
   .odds-table-card.revamp .odds-grid th,
   .odds-table-card.revamp .odds-grid td {
-    padding-top: 0.75em;
-    padding-bottom: 0.75em;
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    vertical-align: middle;
+  }
+
+  .odds-table-card.revamp .odds-grid tbody tr.odds-row:hover td {
+    background: linear-gradient(90deg, rgba(72, 109, 255, 0.1), rgba(72, 109, 255, 0.05));
+  }
+
+  .odds-table-card.revamp .odds-grid th:first-child,
+  .odds-table-card.revamp .odds-grid td:first-child {
+    width: 9%;
+    text-align: center;
   }
 
   .odds-table-card.revamp .odds-grid th:nth-child(2),
-  .odds-table-card.revamp .odds-grid td:nth-child(2),
-  .odds-table-card.revamp .odds-grid th:nth-child(3),
-  .odds-table-card.revamp .odds-grid td:nth-child(3),
-  .odds-table-card.revamp .odds-grid th:nth-child(5),
-  .odds-table-card.revamp .odds-grid td:nth-child(5) {
+  .odds-table-card.revamp .odds-grid td:nth-child(2) {
+    width: 28%;
     text-align: left;
   }
 
+  .odds-table-card.revamp .odds-grid th:nth-child(3),
+  .odds-table-card.revamp .odds-grid td:nth-child(3) {
+    width: 16%;
+    text-align: left;
+  }
+
+  .odds-table-card.revamp .odds-grid th:nth-child(4),
+  .odds-table-card.revamp .odds-grid td:nth-child(4) {
+    width: 10%;
+  }
+
+  .odds-table-card.revamp .odds-grid th:nth-child(5),
+  .odds-table-card.revamp .odds-grid td:nth-child(5) {
+    width: 13%;
+    text-align: left;
+  }
+
+  .odds-table-card.revamp .odds-grid th:nth-child(6),
+  .odds-table-card.revamp .odds-grid td:nth-child(6) {
+    width: 12%;
+  }
+
+  .odds-table-card.revamp .odds-grid th:nth-child(7),
+  .odds-table-card.revamp .odds-grid td:nth-child(7) {
+    width: 12%;
+  }
+
   .odds-table-card.revamp .desktop-matchup {
-    gap: 4px;
+    gap: 6px;
     align-items: flex-start;
   }
 
   .odds-table-card.revamp .desktop-matchup-league {
-    font-size: 0.95em;
+    font-size: 0.92em;
   }
 }
