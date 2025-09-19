@@ -836,6 +836,9 @@ body,
     width: 100%;
     max-width: 360px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
   }
   
   .mobile-odds-card::before {
@@ -1054,11 +1057,11 @@ body,
 
   /* Bottom row: Sportsbook left, odds right - iPhone 15 Pro optimized */
   .mob-bottom-row { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    gap: 12px; 
-    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
   }
   .mob-book { 
     font-weight: 600; 
@@ -1245,5 +1248,35 @@ body,
     color: rgba(61, 126, 255, 0.7);
     margin-top: 6px;
     padding: 4px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .odds-table-card.revamp .odds-grid {
+    font-size: 0.96em;
+  }
+
+  .odds-table-card.revamp .odds-grid th,
+  .odds-table-card.revamp .odds-grid td {
+    padding-top: 0.75em;
+    padding-bottom: 0.75em;
+  }
+
+  .odds-table-card.revamp .odds-grid th:nth-child(2),
+  .odds-table-card.revamp .odds-grid td:nth-child(2),
+  .odds-table-card.revamp .odds-grid th:nth-child(3),
+  .odds-table-card.revamp .odds-grid td:nth-child(3),
+  .odds-table-card.revamp .odds-grid th:nth-child(5),
+  .odds-table-card.revamp .odds-grid td:nth-child(5) {
+    text-align: left;
+  }
+
+  .odds-table-card.revamp .desktop-matchup {
+    gap: 4px;
+    align-items: flex-start;
+  }
+
+  .odds-table-card.revamp .desktop-matchup-league {
+    font-size: 0.95em;
   }
 }

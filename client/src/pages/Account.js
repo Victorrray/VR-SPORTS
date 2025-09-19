@@ -386,7 +386,6 @@ export default function Account() {
                   ) : username ? (
                     <div className="username-display">
                       <strong>@{username}</strong>
-                      <span className="permanent-note">Permanent</span>
                     </div>
                   ) : (
                     <div className="username-empty">
