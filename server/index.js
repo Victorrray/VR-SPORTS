@@ -58,6 +58,8 @@ const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes cache
 
 // In-memory cache for API responses
 const apiCache = new Map();
+const planCache = new Map();
+const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 function getCacheKey(endpoint, params) {
   return `${endpoint}_${JSON.stringify(params)}`;
@@ -169,6 +171,20 @@ async function getUserProfile(userId) {
   }
   
   return data;
+}
+
+function getCachedPlan(userId) {
+  const cached = planCache.get(userId);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > PLAN_CACHE_TTL_MS) {
+    planCache.delete(userId);
+    return null;
+  }
+  return cached.payload;
+}
+
+function setCachedPlan(userId, payload) {
+  planCache.set(userId, { payload, timestamp: Date.now() });
 }
 
 // Middleware to require authenticated user
@@ -427,17 +443,26 @@ app.get('/healthz', (_req, res) => {
 
 // Usage endpoint - get current user's quota info
 app.get('/api/me/usage', requireUser, async (req, res) => {
+  const userId = req.__userId;
+  const cached = getCachedPlan(userId);
+
   try {
-    const profile = await getUserProfile(req.__userId);
-    res.json({
+    const profile = await getUserProfile(userId);
+    const payload = {
       userId: profile.id,
       plan: profile.plan,
       used: profile.api_request_count,
-      quota: profile.plan === "platinum" ? null : FREE_QUOTA
-    });
+      quota: profile.plan === "platinum" ? null : FREE_QUOTA,
+      source: 'live'
+    };
+    setCachedPlan(userId, payload);
+    return res.json(payload);
   } catch (error) {
     console.error('me/usage error:', error);
-    res.status(500).json({ error: "USAGE_FETCH_FAILED" });
+    if (cached) {
+      return res.json({ ...cached, source: 'cache', stale: true });
+    }
+    return res.status(503).json({ error: "USAGE_FETCH_FAILED", detail: error.message });
   }
 });
 
