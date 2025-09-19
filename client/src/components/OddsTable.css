@@ -128,6 +128,7 @@ body,
   align-items: center;
   justify-content: center;
   padding: 4px;
+  flex: 0 0 46px;
 }
 
 .mini-header-pick {
@@ -135,6 +136,10 @@ body,
   color: var(--text-secondary);
   font-size: 0.85em;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 46px;
 }
 
 .ev-col-content {
@@ -1154,11 +1159,10 @@ body,
   }
   
   /* Odds columns */
-  .mini-odds-col {
-    flex: 0 0 auto;
-    min-width: 50px;
-    text-align: center;
-  }
+.mini-odds-col {
+  flex: 0 0 62px;
+  text-align: center;
+}
   
   /* Header row */
   .mini-swipe-header {
@@ -1180,33 +1184,31 @@ body,
     text-align: left;
   }
   
-  .mini-header-odds {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #8b9dc3;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 0 0 auto;
-    min-width: 50px;
-  }
+.mini-header-odds {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8b9dc3;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 62px;
+}
 
-  .mini-swipe-odds {
-    font-weight: 700;
-    font-size: 0.85em;
-    padding: 4px 6px;
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
-    color: #ffffff;
-    white-space: nowrap;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 0 0 auto;
-    min-width: 50px;
-  }
+.mini-swipe-odds {
+  font-weight: 700;
+  font-size: 0.85em;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: #ffffff;
+  white-space: nowrap;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 62px;
+}
 
   /* Hide desktop mini-table on mobile */
   .desktop-mini-wrap { display: none; }
