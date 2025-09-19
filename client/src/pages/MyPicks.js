@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Plus, Trash2, Trophy, Target, Calendar, DollarSign, AlertCircle, CheckCircle2, BarChart3, PieChart, Filter, Download, Share2, Edit3, Clock, Zap, TrendingDown, Award, Activity, RefreshCw, Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import MobileBottomBar from "../components/MobileBottomBar";
+import MobileBottomBar from "../components/layout/MobileBottomBar";
 import { autoValidateBets, manualValidateAllBets } from "../services/betValidationService";
 import "./MyPicks.css";
 

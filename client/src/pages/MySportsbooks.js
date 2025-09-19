@@ -3,8 +3,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, ArrowLeft, Save, Check, Settings, Star, TrendingUp, DollarSign } from 'lucide-react';
-import SportMultiSelect from '../components/SportMultiSelect';
-import MobileBottomBar from '../components/MobileBottomBar';
+import SportMultiSelect from '../components/betting/SportMultiSelect';
+import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { AVAILABLE_SPORTSBOOKS, getFreePlanSportsbooks } from '../constants/sportsbooks';
 import './MySportsbooks.css';
 

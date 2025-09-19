@@ -5,9 +5,9 @@ import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle } from "lucide-react";
-import MobileBottomBar from "../components/MobileBottomBar";
-import SportMultiSelect from "../components/SportMultiSelect";
-import UsagePlanCard from "../components/UsagePlanCard";
+import MobileBottomBar from "../components/layout/MobileBottomBar";
+import SportMultiSelect from "../components/betting/SportMultiSelect";
+import UsagePlanCard from "../components/billing/UsagePlanCard";
 import { AVAILABLE_SPORTSBOOKS } from '../constants/sportsbooks';
 import "./Account.css";
 

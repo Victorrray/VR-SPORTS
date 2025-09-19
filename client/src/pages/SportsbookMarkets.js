@@ -1,18 +1,18 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import MobileBottomBar from "../components/MobileBottomBar";
-import MobileFiltersSheet from "../components/MobileFiltersSheet";
-import MobileSearchModal from "../components/MobileSearchModal";
+import MobileBottomBar from "../components/layout/MobileBottomBar";
+import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
+import MobileSearchModal from "../components/modals/MobileSearchModal";
 import { useBetSlip } from "../contexts/BetSlipContext";
-import BetSlip from "../components/BetSlip";
+import BetSlip from "../components/betting/BetSlip";
 // Removed unused imports: PersonalizedDashboard, EdgeCalculator, AlertSystem
 
 // ⬇️ Adjust these paths if needed
-import SportMultiSelect from "../components/SportMultiSelect";
-import DatePicker from "../components/DatePicker";
-import OddsTable from "../components/OddsTable";
-import ArbitrageDetector from "../components/ArbitrageDetector";
+import SportMultiSelect from "../components/betting/SportMultiSelect";
+import DatePicker from "../components/common/DatePicker";
+import OddsTable from "../components/betting/OddsTable";
+import ArbitrageDetector from "../components/betting/ArbitrageDetector";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { useMarkets } from '../hooks/useMarkets';

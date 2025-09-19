@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { User, Settings, BookOpen, Check, Save, CreditCard, X } from 'lucide-react';
-import UsernameForm from '../components/UsernameForm';
+import UsernameForm from '../components/auth/UsernameForm';
 import { useAuth } from '../hooks/useAuth';
 import './Profile.css';
 

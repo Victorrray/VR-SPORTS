@@ -14,15 +14,15 @@ import {
   Play,
   ArrowRight
 } from 'lucide-react';
-import SEOHead from '../components/SEOHead';
+import SEOHead from '../components/layout/SEOHead';
 
 // Components
-import PersonalizedDashboard from '../components/PersonalizedDashboard';
-import EdgeCalculator from '../components/EdgeCalculator';
-import AlertSystem from '../components/AlertSystem';
-import MobileBottomBar from '../components/MobileBottomBar';
-import Footer from '../components/Footer';
-import Pricing from '../components/Pricing';
+import PersonalizedDashboard from '../components/dashboard/PersonalizedDashboard';
+import EdgeCalculator from '../components/betting/EdgeCalculator';
+import AlertSystem from '../components/layout/AlertSystem';
+import MobileBottomBar from '../components/layout/MobileBottomBar';
+import Footer from '../components/layout/Footer';
+import Pricing from '../components/billing/Pricing';
 
 // Hooks
 import { useMarkets } from '../hooks/useMarkets';

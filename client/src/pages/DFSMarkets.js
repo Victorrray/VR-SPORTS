@@ -1,7 +1,7 @@
 // src/pages/DFSMarkets.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import OddsTable from "../components/OddsTable";
-import SportMultiSelect from "../components/SportMultiSelect";
+import OddsTable from "../components/betting/OddsTable";
+import SportMultiSelect from "../components/betting/SportMultiSelect";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 

@@ -1,10 +1,10 @@
 // src/pages/Scores.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MessageCircle, Users, Trophy, Calendar, RefreshCw, Clock, Info, ChevronDown, Football, Basketball, Zap, Gamepad2, Target, Home } from 'lucide-react';
-import GameReactions from '../components/GameReactions';
-import GameDetailsModal from '../components/GameDetailsModal';
-import ScoresLoadingSkeleton from '../components/ScoresLoadingSkeleton';
-import MobileBottomBar from '../components/MobileBottomBar';
+import GameReactions from '../components/betting/GameReactions';
+import GameDetailsModal from '../components/modals/GameDetailsModal';
+import ScoresLoadingSkeleton from '../components/betting/ScoresLoadingSkeleton';
+import MobileBottomBar from '../components/layout/MobileBottomBar';
 import './Scores.css';
 import { withApiBase } from '../config/api';
 import { secureFetch } from '../utils/security';
