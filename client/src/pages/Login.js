@@ -9,7 +9,7 @@ import "./Login.css";
 
 export default function Login() {
   const auth = useAuth();
-  const { signInEmail, signUpEmail, signInWithProvider } = auth || {};
+  const { signIn, signUp } = auth || {};
   const location = useLocation();
   const [tab, setTab] = useState(location.pathname === '/signup' ? 'signup' : 'login');
   const [email, setEmail] = useState(() => {
@@ -43,11 +43,11 @@ export default function Login() {
 
   // Listen for auth state changes and redirect when authenticated
   useEffect(() => {
-    if (auth?.user && !auth?.loading) {
+    if (auth?.user && !auth?.authLoading) {
       console.log('User authenticated, redirecting to:', next);
       navigate(next, { replace: true });
     }
-  }, [auth?.user, auth?.loading, next, navigate]);
+  }, [auth?.user, auth?.authLoading, next, navigate]);
 
   const go = async (fn) => {
     if (!fn) {
@@ -153,7 +153,7 @@ export default function Login() {
 
         {tab === "login" ? (
           <button
-            onClick={() => go(signInEmail)}
+            onClick={() => go(signIn)}
             className="primary-btn"
           >
             <span>Log in</span>
@@ -161,7 +161,7 @@ export default function Login() {
           </button>
         ) : (
           <button
-            onClick={() => go(signUpEmail)}
+            onClick={() => go(signUp)}
             className="primary-btn"
           >
             <span>Create account</span>
