@@ -189,6 +189,10 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (!force) {
+      console.log("fetchstate.lastfetch", fetchState.lastFetch);
+      console.log("now", now);
+      console.log("existingPlan", existingPlan);
+      console.log("PLAN_MIN_INTERVAL", PLAN_MIN_INTERVAL);
       if (fetchState.promise) {
         return fetchState.promise;
       }

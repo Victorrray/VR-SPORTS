@@ -25,7 +25,7 @@ const PlanGuard = ({ children, requiresPlatinum = false }) => {
     hasPlatinum,
     requiresPlatinum,
     meData: me,
-    loading
+    planLoading
   });
   
   console.log('🔍 PlanGuard render:', { 
@@ -34,7 +34,7 @@ const PlanGuard = ({ children, requiresPlatinum = false }) => {
     userPlan, 
     hasPlatinum, 
     requiresPlatinum,
-    loading 
+    planLoading 
   });
 
   // If this component requires platinum and user doesn't have it, show PlanGate
