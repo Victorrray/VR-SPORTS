@@ -805,13 +805,40 @@ function setCachedPlan(userId, payload) {
   planCache.set(userId, { payload, timestamp: Date.now() });
 }
 
+const allowDemoUserFallback = String(process.env.ALLOW_DEMO_USER || '').toLowerCase() === 'true';
+
+function isLocalRequest(req) {
+  const host = (req.get('host') || '').toLowerCase();
+  const origin = (req.get('origin') || '').toLowerCase();
+  const ip = req.ip || '';
+  const check = (value = '') => (
+    value.startsWith('localhost') ||
+    value.startsWith('127.0.0.1') ||
+    value.endsWith('.local')
+  );
+  return check(host) || check(origin) || ip === '127.0.0.1' || ip === '::1';
+}
+
 // Middleware to require authenticated user
 function requireUser(req, res, next) {
   const isReadOnlyGet = req.method === 'GET';
-  const userId = req.user?.id || req.headers["x-user-id"] || (isReadOnlyGet ? 'demo-user' : undefined);
-  if (!userId) return res.status(401).json({ error: "UNAUTHENTICATED" });
-  req.__userId = userId;
-  next();
+  const tokenUserId = req.user?.id;
+  const headerUserId = req.headers["x-user-id"];
+
+  if (tokenUserId) {
+    if (headerUserId && headerUserId !== tokenUserId) {
+      return res.status(401).json({ error: "UNAUTHENTICATED", detail: "Header user mismatch" });
+    }
+    req.__userId = tokenUserId;
+    return next();
+  }
+
+  if (allowDemoUserFallback && isReadOnlyGet && isLocalRequest(req)) {
+    req.__userId = 'demo-user';
+    return next();
+  }
+
+  return res.status(401).json({ error: "UNAUTHENTICATED" });
 }
 
 // Enhanced axios wrapper with retry logic and quota diagnostics
@@ -1214,20 +1241,25 @@ app.get('/api/odds/v4/sports/:sportKey/odds', enforceUsage, async (req, res) => 
 // Legacy usage endpoint
 app.get('/api/usage/me', requireUser, async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'] || 'demo-user';
-    
+    const userId = req.__userId;
+    if (!userId || userId === 'demo-user') {
+      return res.status(401).json({ error: 'AUTH_REQUIRED' });
+    }
+
+    if (!supabase) {
+      return res.status(500).json({ error: 'SUPABASE_REQUIRED', detail: 'Supabase connection required for usage lookup' });
+    }
+
     // Fetch user plan from database
     let userPlan = 'free_trial'; // default
-    if (userId !== 'demo-user') {
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('plan')
-        .eq('id', userId)
-        .single();
-      
-      if (!error && user?.plan) {
-        userPlan = user.plan;
-      }
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('plan')
+      .eq('id', userId)
+      .single();
+    
+    if (!error && user?.plan) {
+      userPlan = user.plan;
     }
     
     if (userPlan === 'platinum') {
@@ -1259,7 +1291,7 @@ app.get('/api/usage/me', requireUser, async (req, res) => {
 });
 
 // Stripe: Create checkout session for Platinum subscription
-app.post('/api/billing/create-checkout-session', async (req, res) => {
+app.post('/api/billing/create-checkout-session', requireUser, async (req, res) => {
   try {
     if (!stripe) {
       return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured', hint: 'Set STRIPE_SECRET_KEY in backend env' });
@@ -1269,14 +1301,12 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
       return res.status(500).json({ code: 'MISSING_ENV', message: 'STRIPE_PRICE_PLATINUM not set', hint: 'Set STRIPE_PRICE_PLATINUM (Price ID)' });
     }
     
-    const { supabaseUserId } = req.body;
-    
-    // Require authentication
-    if (!supabaseUserId) {
-      return res.status(400).json({ code: 'AUTH_REQUIRED', message: 'Missing supabaseUserId', hint: 'Ensure frontend passes authenticated user id' });
+    const userId = req.__userId;
+    if (!userId || userId === 'demo-user') {
+      return res.status(401).json({ code: 'AUTH_REQUIRED', message: 'Authenticated user required' });
     }
-    
-    console.log(`Creating checkout session for user: ${supabaseUserId}`);
+
+    console.log(`Creating checkout session for user: ${userId}`);
     
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -1289,12 +1319,12 @@ app.post('/api/billing/create-checkout-session', async (req, res) => {
       cancel_url: `${FRONTEND_URL}/billing/cancel`,
       allow_promotion_codes: true,
       metadata: { 
-        userId: supabaseUserId, 
+        userId, 
         plan: 'platinum' 
       }
     });
     
-    console.log(`Created checkout session: ${session.id} for user: ${supabaseUserId}`);
+    console.log(`Created checkout session: ${session.id} for user: ${userId}`);
     res.json({ url: session.url });
   } catch (error) {
     console.error('Stripe checkout error:', error);
@@ -1377,9 +1407,9 @@ app.post("/api/admin/set-plan", async (req, res) => {
 });
 
 // Set user plan (for free trial)
-app.post('/api/users/plan', async (req, res) => {
+app.post('/api/users/plan', requireUser, async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
+    const userId = req.__userId;
     if (!userId || userId === 'demo-user') {
       return res.status(401).json({ error: 'auth_required' });
     }
