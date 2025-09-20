@@ -1,46 +1,32 @@
-import { useEffect, useState } from "react";
-import { Crown, Zap, TrendingUp, AlertCircle, Sparkles, BarChart3, Shield, Infinity } from "lucide-react";
+import { useEffect } from "react";
+import { Crown, Zap, TrendingUp, AlertCircle, Sparkles, BarChart3, Shield, Infinity, Clock } from "lucide-react";
 import "./UsagePlanCard.css";
 import { withApiBase } from "../../config/api";
 import { secureFetch } from "../../utils/security";
 import { useAuth } from "../../hooks/useAuth";
+import { usePlan } from "../../hooks/usePlan";
 
 export default function UsagePlanCard() {
   const { user } = useAuth();
-  const [data, setData] = useState({ plan: "free", used: 0, quota: 250 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { plan, planLoading, stale, refreshPlan } = usePlan();
 
   useEffect(() => {
-    const fetchUsage = async () => {
-      try {
-        const resp = await secureFetch(withApiBase('/api/me/usage'), {
-          credentials: 'include',
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        if (resp.ok) {
-          const json = await resp.json();
-          console.log('🔍 UsagePlanCard: Backend response:', json);
-          setData(json);
-        } else {
-          console.warn('Usage API failed:', resp.status, resp.statusText);
-          // Set default data instead of error to prevent infinite loading
-          setData({ plan: "free", used: 0, quota: 250 });
-        }
-      } catch (err) {
-        console.error('Usage fetch error:', err);
-        // Set default data instead of error to prevent infinite loading
-        setData({ plan: "free", used: 0, quota: 250 });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchUsage();
-  }, []);
+    if (!plan && !planLoading) {
+      refreshPlan({ force: true });
+    }
+  }, [plan, planLoading, refreshPlan]);
 
-  if (loading) {
+  const fallbackPlan = { plan: "free", used: 0, quota: 250, remaining: 250 };
+  const planData = plan || fallbackPlan;
+  const planId = (planData.plan || 'free').toLowerCase();
+  const used = planData.used ?? planData.calls_made ?? 0;
+  const quota = planData.quota ?? planData.limit ?? null;
+  const remaining = planData.remaining ?? (quota != null ? Math.max(0, quota - used) : null);
+  const percent = quota ? Math.min(100, Math.floor((used / quota) * 100)) : 100;
+  const isNearLimit = quota != null && used >= quota * 0.8;
+  const isOverLimit = quota != null && used >= quota;
+
+  if (planLoading && !plan) {
     return (
       <div className="rounded-2xl p-6 bg-neutral-900/60 border border-white/10">
         <div className="animate-pulse">
@@ -52,26 +38,20 @@ export default function UsagePlanCard() {
     );
   }
 
-  if (error) {
+  if (!plan && !planLoading) {
     return (
       <div className="rounded-2xl p-6 bg-neutral-900/60 border border-red-500/20">
         <div className="flex items-center gap-2 text-red-400 mb-2">
           <AlertCircle size={16} />
           <span className="text-sm">Usage data unavailable</span>
         </div>
-        <p className="text-xs text-white/60">{error}</p>
+        <p className="text-xs text-white/60">We could not load your usage information. Please try again shortly.</p>
       </div>
     );
   }
 
-  const { plan, used, quota } = data;
-  const max = quota ?? used; // platinum has no quota
-  const percent = quota ? Math.min(100, Math.floor((used / quota) * 100)) : 100;
-  const isNearLimit = quota && used >= quota * 0.8;
-  const isOverLimit = quota && used >= quota;
-
   const getPlanBadge = () => {
-    switch (plan) {
+    switch (planId) {
       case 'platinum':
         return (
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 border border-yellow-500/30">
@@ -141,7 +121,7 @@ export default function UsagePlanCard() {
               </span>
             )}
           </div>
-          <div className="stat-change">{plan === 'platinum' ? 'No limits' : `${quota - used} remaining`}</div>
+          <div className="stat-change">{planId === 'platinum' || quota === null ? 'No limits' : `${remaining} remaining`}</div>
         </div>
       </div>
 
@@ -195,8 +175,18 @@ export default function UsagePlanCard() {
         </div>
       )}
 
+      {stale && (
+        <div className="status-alert alert-warning">
+          <Clock size={18} />
+          <div>
+            <div className="alert-title">Refreshing usage</div>
+            <div className="alert-message">Latest usage will appear once the sync completes.</div>
+          </div>
+        </div>
+      )}
+
       {/* Plan Action Section */}
-      {plan !== "platinum" ? (
+      {planId !== "platinum" ? (
         <div className="plan-action">
           <div className="upgrade-content">
             <div className="upgrade-header">

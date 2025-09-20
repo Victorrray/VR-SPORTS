@@ -23,7 +23,7 @@ import MySportsbooks from './pages/MySportsbooks';
 import AuthCallback from './pages/AuthCallback';
 import LoadingBar from "./components/common/LoadingBar";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import PlanGuard from "./components/auth/PlanGuard";
+import PlanGuard from "./components/guards/PlanGuard";
 import MyPicks from './pages/MyPicks';
 import Scores from './pages/Scores';
 import Terms from './pages/Terms';

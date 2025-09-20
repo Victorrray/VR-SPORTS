@@ -1,38 +1,47 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
-import { secureFetch } from '../../utils/security';
+import { usePlan } from '../../hooks/usePlan';
 import styles from "./Navbar.module.css";
 
 const UsageMeter = () => {
   const { user } = useAuth();
-  
-  const { data: usageData, isLoading, error } = useQuery(
-    'usage',
-    async () => {
-      const response = await secureFetch('/api/me/usage');
-      if (!response.ok) throw new Error('Failed to fetch usage data');
-      return response.json();
-    },
-    {
-      refetchInterval: 30000, // Refresh every 30 seconds
-      enabled: !!user, // Only fetch if user is logged in
+  const { plan, planLoading, stale, refreshPlan } = usePlan();
+
+  useEffect(() => {
+    if (user && !plan && !planLoading) {
+      refreshPlan({ force: true });
     }
-  );
+  }, [user, plan, planLoading, refreshPlan]);
+
+  useEffect(() => {
+    if (user && stale && !planLoading) {
+      refreshPlan({ force: false });
+    }
+  }, [user, stale, planLoading, refreshPlan]);
 
   if (!user) return null;
-  if (isLoading) return <div className="usage-meter">Loading usage...</div>;
-  if (error) return <div className="usage-meter error">Error loading usage data</div>;
+  if (planLoading && !plan) return <div className="usage-meter">Loading usage...</div>;
+  if (!plan) return <div className="usage-meter error">Usage data unavailable</div>;
 
-  const { used = 0, quota = 1000, plan = 'free' } = usageData || {};
-  const percentage = Math.min(Math.round((used / quota) * 100), 100);
-  const isNearLimit = used >= quota * 0.8; // 80% or more usage
+  const planId = (plan.plan || 'free').toLowerCase();
+  const used = plan.used ?? plan.calls_made ?? 0;
+  const quota = plan.quota ?? plan.limit ?? null;
+  const isUnlimited = planId === 'platinum' || quota === null;
+  const percentage = isUnlimited ? 100 : Math.min(Math.round((used / quota) * 100), 100);
+  const isNearLimit = !isUnlimited && used >= quota * 0.8;
+  const isOverLimit = !isUnlimited && used >= quota;
+  const showUpgradeLink = planId === 'free';
 
   return (
     <div className={styles.usageMeter}>
       <div className={styles.usageHeader}>
-        <span>API Usage: {used} / {plan === 'platinum' ? '∞' : quota} requests</span>
-        {plan === 'free' && (
+        <span>
+          API Usage: {used} / {isUnlimited ? '∞' : quota} requests
+          {stale && (
+            <span style={{ marginLeft: 6, fontSize: '0.75rem', opacity: 0.7 }}>(refreshing)</span>
+          )}
+        </span>
+        {showUpgradeLink && (
           <span 
             className={styles.upgradeLink} 
             onClick={() => window.location.href = '/pricing'}
@@ -43,7 +52,7 @@ const UsageMeter = () => {
       </div>
       <div className={styles.progressBar}>
         <div 
-          className={`${styles.progressFill} ${isNearLimit ? styles.warning : ''} ${used >= quota ? styles.danger : ''}`}
+          className={`${styles.progressFill} ${isNearLimit ? styles.warning : ''} ${isOverLimit ? styles.danger : ''}`}
           style={{ width: `${percentage}%` }}
         />
       </div>

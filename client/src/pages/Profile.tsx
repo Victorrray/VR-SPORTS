@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { User, Settings, BookOpen, Check, Save, CreditCard, X } from 'lucide-react';
 import UsernameForm from '../components/auth/UsernameForm';
 import { useAuth } from '../hooks/useAuth';
+import { usePlan } from '../hooks/usePlan';
 import './Profile.css';
 
 const AVAILABLE_SPORTSBOOKS = [
@@ -51,20 +52,14 @@ const AVAILABLE_SPORTSBOOKS = [
   { key: 'foxbet', name: 'FOX Bet', popular: false }
 ];
 
-interface UserProfile {
-  plan: 'free' | 'platinum';
-  calls_made: number;
-  limit: number;
-}
-
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, profile, updateProfile, signOut } = useAuth() as any; // Temporary fix for auth context typing
+  const { plan: planInfo, planLoading } = usePlan() as any;
   const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
   const [busy, setBusy] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     // Load user's selected sportsbooks from localStorage
@@ -77,29 +72,19 @@ export default function ProfilePage() {
     }
   }, []);
 
-  useEffect(() => {
-    // Fetch user profile data for subscription info
-    const fetchUserProfile = async () => {
-      if (!user?.id) return;
-      
-      try {
-        const response = await fetch('/api/me/usage', {
-          headers: {
-            'x-user-id': user.id
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setUserProfile(data);
-        }
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-      }
-    };
-
-    fetchUserProfile();
-  }, [user]);
+  const fallbackPlan = { plan: 'free', used: 0, quota: 250, remaining: 250 };
+  const resolvedPlan = planInfo || fallbackPlan;
+  const normalizedPlanId = (resolvedPlan.plan || 'free').toLowerCase();
+  const planDisplayName = normalizedPlanId === 'platinum'
+    ? 'Platinum Plan'
+    : normalizedPlanId === 'free_trial'
+      ? 'Free Trial'
+      : 'Free Plan';
+  const usageUsed = resolvedPlan.used ?? resolvedPlan.calls_made ?? 0;
+  const usageLimit = resolvedPlan.quota ?? resolvedPlan.limit ?? null;
+  const usageSummary = normalizedPlanId === 'platinum' || usageLimit === null
+    ? 'Unlimited API access & premium features'
+    : `${usageUsed}/${usageLimit} API calls used`;
 
   const handleBookToggle = (bookKey) => {
     setSelectedBooks(prev => {
@@ -292,39 +277,36 @@ export default function ProfilePage() {
             <div className="subscription-status">
               <div className="status-info">
                 <div className="plan-badge">
-                  <span className={`plan-indicator ${userProfile?.plan || 'free'}`}>
-                    {userProfile?.plan === 'platinum' ? '💎' : '🆓'}
+                  <span className={`plan-indicator ${normalizedPlanId}`}>
+                    {normalizedPlanId === 'platinum' ? '💎' : '🆓'}
                   </span>
-                  <div className="plan-details">
-                    <span className="plan-name">
-                      {userProfile?.plan === 'platinum' ? 'Platinum Plan' : 'Free Plan'}
-                    </span>
-                    <span className="plan-desc">
-                      {userProfile?.plan === 'platinum' 
-                        ? 'Unlimited API access & premium features' 
-                        : `${userProfile?.calls_made || 0}/${userProfile?.limit || 250} API calls used`
-                      }
-                    </span>
-                  </div>
-                </div>
+              <div className="plan-details">
+                <span className="plan-name">
+                  {planDisplayName}
+                </span>
+                <span className="plan-desc">
+                  {planLoading && !planInfo ? 'Loading usage...' : usageSummary}
+                </span>
               </div>
-              
-              {userProfile?.plan === 'platinum' && (
-                <div className="subscription-actions">
-                  <button 
-                    className="security-btn cancel-btn"
-                    onClick={handleCancelSubscription}
-                  >
-                    <X size={16} />
-                    Cancel Subscription
-                  </button>
-                </div>
-              )}
-              
-              {userProfile?.plan !== 'platinum' && (
-                <div className="subscription-actions">
-                  <button 
-                    className="security-btn upgrade-btn"
+            </div>
+          </div>
+          
+          {normalizedPlanId === 'platinum' && (
+            <div className="subscription-actions">
+              <button 
+                className="security-btn cancel-btn"
+                onClick={handleCancelSubscription}
+              >
+                <X size={16} />
+                Cancel Subscription
+              </button>
+            </div>
+          )}
+          
+          {normalizedPlanId !== 'platinum' && (
+            <div className="subscription-actions">
+              <button 
+                className="security-btn upgrade-btn"
                     onClick={() => navigate('/pricing')}
                   >
                     <CreditCard size={16} />
@@ -335,12 +317,12 @@ export default function ProfilePage() {
             </div>
             
             <div className="subscription-info">
-              <p className="subscription-note">
-                {userProfile?.plan === 'platinum' 
-                  ? 'You have unlimited access to all features. Cancel anytime.' 
-                  : 'Upgrade to Platinum for unlimited API access and premium features.'
-                }
-              </p>
+          <p className="subscription-note">
+            {normalizedPlanId === 'platinum' 
+              ? 'You have unlimited access to all features. Cancel anytime.' 
+              : 'Upgrade to Platinum for unlimited API access and premium features.'
+            }
+          </p>
             </div>
           </div>
         </div>

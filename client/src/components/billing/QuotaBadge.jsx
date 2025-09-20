@@ -1,39 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { AlertCircle, Zap, Clock } from 'lucide-react';
+import { usePlan } from '../../hooks/usePlan';
 
 const QuotaBadge = () => {
-  const [usage, setUsage] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { plan, planLoading, stale, refreshPlan } = usePlan();
 
   useEffect(() => {
-    fetchUsage();
-    // Refresh usage every 30 seconds
-    const interval = setInterval(fetchUsage, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchUsage = async () => {
-    try {
-      const { withApiBase } = require('../../config/api');
-      const { secureFetch } = require('../../utils/security');
-      const response = await secureFetch(withApiBase('/api/me/usage'), { headers: { 'Accept': 'application/json' }, credentials: 'include' });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch usage');
-      }
-      
-      const data = await response.json();
-      setUsage(data);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!plan && !planLoading) {
+      refreshPlan({ force: true });
     }
-  };
+  }, [plan, planLoading, refreshPlan]);
 
-  if (loading) {
+  useEffect(() => {
+    if (stale && !planLoading) {
+      refreshPlan({ force: false });
+    }
+  }, [stale, planLoading, refreshPlan]);
+
+  if (planLoading && !plan) {
     return (
       <div style={{
         display: 'inline-flex',
@@ -52,7 +36,7 @@ const QuotaBadge = () => {
     );
   }
 
-  if (error) {
+  if (!plan) {
     return (
       <div style={{
         display: 'inline-flex',
@@ -60,19 +44,20 @@ const QuotaBadge = () => {
         gap: '6px',
         padding: '6px 12px',
         background: 'var(--card-bg)',
-        border: '1px solid var(--error)',
+        border: '1px solid var(--border-color)',
         borderRadius: '20px',
         fontSize: '12px',
-        color: 'var(--error)'
+        color: 'var(--text-secondary)'
       }}>
         <AlertCircle size={14} />
-        Usage Error
+        Usage unavailable
       </div>
     );
   }
 
-  // Platinum users don't need quota display
-  if (usage?.plan === 'platinum') {
+  const planId = (plan.plan || 'free').toLowerCase();
+
+  if (planId === 'platinum') {
     return (
       <div style={{
         display: 'inline-flex',
@@ -91,9 +76,10 @@ const QuotaBadge = () => {
     );
   }
 
-  // Free trial users
-  const { calls_made = 0, limit = 1000, remaining = 1000 } = usage || {};
-  const percentage = (calls_made / limit) * 100;
+  const used = plan.used ?? plan.calls_made ?? 0;
+  const quota = plan.quota ?? plan.limit ?? 250;
+  const remaining = plan.remaining ?? (quota != null ? Math.max(0, quota - used) : 0);
+  const percentage = quota ? (used / quota) * 100 : 0;
   
   // Determine color based on usage
   let badgeColor = 'var(--success)';
@@ -135,7 +121,10 @@ const QuotaBadge = () => {
           transition: 'height 0.3s ease'
         }} />
       </div>
-      {remaining} / {limit} calls left
+      {remaining} / {quota ?? '∞'} calls left
+      {stale && (
+        <span style={{ marginLeft: '6px', fontSize: '10px', opacity: 0.8 }}>(stale)</span>
+      )}
     </div>
   );
 };

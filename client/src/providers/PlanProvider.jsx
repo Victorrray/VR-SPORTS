@@ -1,6 +1,6 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { loadPlanInfo, savePlanInfo, clearPlanInfo, isPlanInfoStale } from '../utils/planCache';
+import { clearPlanInfo, isPlanInfoStale, loadPlanInfo, savePlanInfo } from '../utils/planCache';
 import { secureFetch } from '../utils/security';
 import { withApiBase } from '../config/api';
 
@@ -8,10 +8,9 @@ const PlanContext = createContext(null);
 
 const PLAN_TTL_MS = 30_000;
 const PREMIUM_GRACE_MS = 900_000;
-const REFRESH_DEBOUNCE_MS = 60_000;
+const POLITE_REFRESH_MS = 60_000;
 
 const PREMIUM_PLANS = new Set(['platinum', 'premium', 'vip']);
-const isPremiumPlan = (plan) => PREMIUM_PLANS.has(String(plan || '').toLowerCase());
 
 const defaultPlan = {
   plan: 'free',
@@ -20,41 +19,99 @@ const defaultPlan = {
   remaining: null,
   fetchedAt: null,
   stale: true,
-  source: 'default'
+};
+
+const toNumber = (value) => {
+  if (value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const parseTimestamp = (value) => {
+  if (!value) return 0;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : 0;
+};
+
+const isPremiumPlan = (planId) => PREMIUM_PLANS.has(String(planId || '').toLowerCase());
+
+const shapePlan = (data = {}) => {
+  const quota = toNumber(data.quota ?? data.limit);
+  const used = toNumber(data.used ?? data.calls_made);
+  let remaining = toNumber(data.remaining);
+
+  if (remaining === null && quota !== null && used !== null) {
+    remaining = Math.max(0, quota - used);
+  }
+
+  const fetchedAt = new Date().toISOString();
+
+  return {
+    ...defaultPlan,
+    ...data,
+    plan: data.plan || 'free',
+    quota,
+    limit: quota,
+    used,
+    calls_made: used,
+    remaining,
+    fetchedAt,
+    stale: Boolean(data.stale),
+  };
 };
 
 export const PlanProvider = ({ children }) => {
   const { user, authLoading } = useAuth();
-  const [plan, setPlan] = useState(() => loadPlanInfo());
-  const planRef = useRef(plan || null);
-  const [planLoading, setPlanLoading] = useState(false);
-  const [metrics, setMetrics] = useState({ lastSource: plan?.source || 'cache', lastDurationMs: null, retries: 0 });
 
+  const initialPlan = loadPlanInfo();
+  const initialLastFetchAt = parseTimestamp(initialPlan?.fetchedAt || initialPlan?.cachedAt);
+  const initialPremiumAt = isPremiumPlan(initialPlan?.plan)
+    ? parseTimestamp(initialPlan?.fetchedAt || initialPlan?.cachedAt) || Date.now()
+    : 0;
+
+  const [plan, setPlan] = useState(initialPlan || null);
+  const [planLoading, setPlanLoading] = useState(() => !initialPlan);
+  const [metrics, setMetrics] = useState({
+    lastSource: initialPlan ? 'cache' : 'live',
+    lastDurationMs: null,
+    retries: 0,
+  });
+  const [lastPremiumAt, setLastPremiumAt] = useState(initialPremiumAt);
+
+  const planRef = useRef(initialPlan || null);
   const fetchStateRef = useRef({
     promise: null,
     controller: null,
-    currentToken: null,
-    lastFetch: plan?.fetchedAt ? new Date(plan.fetchedAt).getTime() : 0,
-    lastDurationMs: null,
-    retries: 0,
-    lastPremiumSeen: plan && isPremiumPlan(plan.plan) && plan.fetchedAt ? new Date(plan.fetchedAt).getTime() : 0,
+    lastFetchAt: initialLastFetchAt,
     lastVisibilityRefresh: 0,
     lastOnlineRefresh: 0,
+    retries: 0,
   });
 
-  useEffect(() => {
-    planRef.current = plan || null;
-    if (plan && isPremiumPlan(plan.plan)) {
-      const ts = plan.fetchedAt ? new Date(plan.fetchedAt).getTime() : Date.now();
-      fetchStateRef.current.lastPremiumSeen = Math.max(fetchStateRef.current.lastPremiumSeen || 0, ts);
-    }
-  }, [plan]);
-
   const updatePlanState = useCallback((nextPlan) => {
-    planRef.current = nextPlan;
-    setPlan(nextPlan);
-    if (nextPlan) {
-      savePlanInfo(nextPlan);
+    if (!nextPlan) {
+      planRef.current = null;
+      setPlan(null);
+      clearPlanInfo();
+      return;
+    }
+
+    const shaped = {
+      ...defaultPlan,
+      ...nextPlan,
+      plan: nextPlan.plan || 'free',
+      fetchedAt: nextPlan.fetchedAt || new Date().toISOString(),
+    };
+
+    planRef.current = shaped;
+    setPlan(shaped);
+    savePlanInfo(shaped);
+
+    const fetchedTime = parseTimestamp(shaped.fetchedAt);
+    if (isPremiumPlan(shaped.plan)) {
+      setLastPremiumAt(fetchedTime || Date.now());
+    } else if (!shaped.stale) {
+      setLastPremiumAt(0);
     }
   }, []);
 
@@ -68,34 +125,27 @@ export const PlanProvider = ({ children }) => {
     const now = Date.now();
     const cachedPlan = planRef.current || loadPlanInfo();
 
-    if (!force) {
-      if (state.promise) {
-        return state.promise;
-      }
-      if (state.lastFetch && now - state.lastFetch < PLAN_TTL_MS && cachedPlan) {
-        return cachedPlan;
-      }
+    if (state.promise) {
+      return state.promise;
     }
 
-    if (state.promise) {
-      state.controller?.abort();
+    if (!force && cachedPlan && state.lastFetchAt && now - state.lastFetchAt < PLAN_TTL_MS) {
+      setPlanLoading(false);
+      setMetrics((prev) => ({ ...prev, lastSource: 'cache' }));
+      return cachedPlan;
     }
 
     const controller = new AbortController();
     state.controller = controller;
-    const requestToken = Symbol('planFetch');
-    state.currentToken = requestToken;
+    const startedAt = Date.now();
 
     setPlanLoading(true);
 
     const promise = (async () => {
-      const started = Date.now();
-      let finalPlan = cachedPlan || { ...defaultPlan };
-      let finalSource = finalPlan?.source || 'cache';
-
       try {
         const response = await secureFetch(withApiBase('/api/me/usage'), {
           credentials: 'include',
+          headers: { Accept: 'application/json' },
           signal: controller.signal,
         });
 
@@ -103,65 +153,51 @@ export const PlanProvider = ({ children }) => {
           throw new Error(`Plan fetch failed (${response.status})`);
         }
 
-        const data = await response.json();
-        finalPlan = {
-          plan: data.plan || 'free',
-          quota: data.quota ?? null,
-          used: data.used ?? null,
-          remaining: data.remaining ?? null,
-          fetchedAt: new Date().toISOString(),
-          stale: !!data.stale,
-          source: data.source || 'live'
-        };
+        const payload = await response.json();
+        const shaped = shapePlan(payload);
 
-        state.lastFetch = Date.now();
+        state.lastFetchAt = Date.now();
         state.retries = 0;
-        if (isPremiumPlan(finalPlan.plan)) {
-          state.lastPremiumSeen = state.lastFetch;
-        }
 
-        updatePlanState(finalPlan);
-        finalSource = finalPlan.source || 'live';
+        updatePlanState(shaped);
+        setMetrics({
+          lastSource: 'live',
+          lastDurationMs: Date.now() - startedAt,
+          retries: 0,
+        });
+
+        return shaped;
       } catch (error) {
         if (!controller.signal.aborted) {
           state.retries = Math.min((state.retries || 0) + 1, 10);
         }
 
-        const fallback = planRef.current || loadPlanInfo();
-        if (fallback) {
-          finalPlan = {
-            ...fallback,
-            stale: true,
-            source: fallback.source || (controller.signal.aborted ? 'aborted' : 'cache'),
-          };
-          updatePlanState(finalPlan);
-          finalSource = finalPlan.source;
-        } else {
-          finalPlan = {
-            ...defaultPlan,
-            fetchedAt: new Date().toISOString(),
-            stale: true,
-            source: controller.signal.aborted ? 'aborted' : 'default',
-          };
-          updatePlanState(finalPlan);
-          finalSource = finalPlan.source;
-        }
-      } finally {
-        if (state.currentToken === requestToken) {
-          state.promise = null;
-          state.controller = null;
-          state.currentToken = null;
-          state.lastDurationMs = Date.now() - started;
-          setMetrics({
-            lastSource: finalSource,
-            lastDurationMs: state.lastDurationMs,
-            retries: state.retries || 0,
-          });
-          setPlanLoading(false);
-        }
-      }
+        const fallback = planRef.current || cachedPlan || loadPlanInfo() || { ...defaultPlan };
+        const fallbackTimestamp = fallback.fetchedAt || fallback.cachedAt || new Date().toISOString();
 
-      return finalPlan;
+        const staleFallback = {
+          ...fallback,
+          fetchedAt: fallbackTimestamp,
+          stale: true,
+        };
+
+        updatePlanState(staleFallback);
+        setMetrics({
+          lastSource: 'cache',
+          lastDurationMs: Date.now() - startedAt,
+          retries: state.retries,
+        });
+
+        return staleFallback;
+      } finally {
+        if (fetchStateRef.current.promise === promise) {
+          fetchStateRef.current.promise = null;
+        }
+        if (fetchStateRef.current.controller === controller) {
+          fetchStateRef.current.controller = null;
+        }
+        setPlanLoading(false);
+      }
     })();
 
     state.promise = promise;
@@ -172,53 +208,63 @@ export const PlanProvider = ({ children }) => {
     if (authLoading) return;
 
     const state = fetchStateRef.current;
+
     if (!user) {
-      if (state.controller) state.controller.abort();
-      setPlan(null);
-      planRef.current = null;
-      setPlanLoading(false);
-      setMetrics({ lastSource: 'default', lastDurationMs: null, retries: 0 });
-      clearPlanInfo();
+      state.controller?.abort();
       fetchStateRef.current = {
         promise: null,
         controller: null,
-        currentToken: null,
-        lastFetch: 0,
-        lastDurationMs: null,
-        retries: 0,
-        lastPremiumSeen: 0,
+        lastFetchAt: 0,
         lastVisibilityRefresh: 0,
         lastOnlineRefresh: 0,
+        retries: 0,
       };
+      planRef.current = null;
+      setPlan(null);
+      setPlanLoading(false);
+      setMetrics({ lastSource: 'cache', lastDurationMs: null, retries: 0 });
+      setLastPremiumAt(0);
+      clearPlanInfo();
       return;
     }
 
     const cached = planRef.current || loadPlanInfo();
-    if (!cached) {
-      refreshPlan({ force: true });
-    } else if (isPlanInfoStale(cached)) {
-      refreshPlan({ force: false });
+    if (cached) {
+      planRef.current = cached;
+      setPlan(cached);
+      const cachedTs = parseTimestamp(cached.fetchedAt || cached.cachedAt);
+      state.lastFetchAt = cachedTs;
+      if (isPremiumPlan(cached.plan)) {
+        setLastPremiumAt(cachedTs || Date.now());
+      }
     }
-  }, [authLoading, refreshPlan, user]);
+
+    const needsRefresh = !cached || isPlanInfoStale(cached, PLAN_TTL_MS);
+    if (needsRefresh) {
+      refreshPlan({ force: !cached });
+    } else {
+      setPlanLoading(false);
+    }
+  }, [authLoading, refreshPlan, updatePlanState, user]);
 
   useEffect(() => {
     if (!user) return undefined;
 
     const handleVisibility = () => {
-      if (typeof document === 'undefined') return;
-      if (document.visibilityState !== 'visible') return;
+      if (typeof document === 'undefined' || document.visibilityState !== 'visible') return;
       const state = fetchStateRef.current;
       const now = Date.now();
-      if (now - (state.lastVisibilityRefresh || 0) >= REFRESH_DEBOUNCE_MS) {
+      if (now - state.lastVisibilityRefresh >= POLITE_REFRESH_MS) {
         state.lastVisibilityRefresh = now;
         refreshPlan({ force: false });
       }
     };
 
     const handleOnline = () => {
+      if (typeof window === 'undefined') return;
       const state = fetchStateRef.current;
       const now = Date.now();
-      if (now - (state.lastOnlineRefresh || 0) >= REFRESH_DEBOUNCE_MS) {
+      if (now - state.lastOnlineRefresh >= POLITE_REFRESH_MS) {
         state.lastOnlineRefresh = now;
         refreshPlan({ force: false });
       }
@@ -241,21 +287,24 @@ export const PlanProvider = ({ children }) => {
     };
   }, [refreshPlan, user]);
 
+  useEffect(() => () => {
+    const state = fetchStateRef.current;
+    state.controller?.abort();
+    state.promise = null;
+  }, []);
+
+  const stale = plan ? (Boolean(plan.stale) || isPlanInfoStale(plan, PLAN_TTL_MS)) : true;
   const now = Date.now();
-  const lastPremiumSeen = fetchStateRef.current.lastPremiumSeen || 0;
-  const isPremiumEffective = Boolean(
-    (plan && isPremiumPlan(plan.plan)) ||
-    (lastPremiumSeen && now - lastPremiumSeen < PREMIUM_GRACE_MS)
-  );
+  const isPremiumEffective = Boolean(isPremiumPlan(plan?.plan) || (lastPremiumAt && now - lastPremiumAt < PREMIUM_GRACE_MS));
 
   const contextValue = useMemo(() => ({
     plan,
     planLoading,
-    stale: Boolean(plan?.stale),
+    stale,
     isPremiumEffective,
-    metrics,
     refreshPlan,
-  }), [plan, planLoading, isPremiumEffective, metrics, refreshPlan]);
+    metrics,
+  }), [plan, planLoading, stale, isPremiumEffective, refreshPlan, metrics]);
 
   return (
     <PlanContext.Provider value={contextValue}>
