@@ -114,7 +114,7 @@ function AppRoutes() {
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
-              <Route path="/dashboard" element={user ? <Navigate to="/scores" replace /> : <Navigate to="/login" replace />} />
+              <Route path="/dashboard" element={user ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Home />} />
               <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
               <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />

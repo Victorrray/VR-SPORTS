@@ -117,9 +117,12 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
   const { quotaExceeded, quotaError, handleApiResponse } = useQuotaHandler();
   
   // Memoize the params to prevent unnecessary effect triggers
-  const paramsKey = useMemo(() => (
-    `${sports.sort().join(',')}-${regions.sort().join(',')}-${markets.sort().join(',')}`
-  ), [sports, regions, markets]);
+  const paramsKey = useMemo(() => {
+    const sportsKey = [...sports].sort().join(',');
+    const regionsKey = [...regions].sort().join(',');
+    const marketsKey = [...markets].sort().join(',');
+    return `${sportsKey}-${regionsKey}-${marketsKey}`;
+  }, [sports, regions, markets]);
   
   // Store the last successful fetch time
   const lastFetchTime = useRef(0);
@@ -142,6 +145,11 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
 
     const now = Date.now();
     const withinCooldown = now - lastFetchTime.current < COOLDOWN_MS;
+
+    if (!isRetry && activeRequest.current) {
+      console.log('🔍 useMarkets: Request already in flight');
+      return activeRequest.current;
+    }
 
     // Skip if we recently fetched (unless it's a retry)
     if (!isRetry && withinCooldown) {
@@ -181,8 +189,10 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     setError(null);
     
     // Store the current request to prevent race conditions
+    const previousFetchTs = lastFetchTime.current;
     const requestId = Symbol('requestId');
     activeRequest.current = requestId;
+    lastFetchTime.current = now;
 
     try {
       console.log(`🔍 useMarkets: Starting ${isRetry ? `retry ${retryCount.current}/` : ''}fetch with params:`, { sports, regions, markets });
@@ -397,6 +407,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     } catch (err) {
       console.error('🔍 useMarkets: Fetch error:', err);
       console.error('🔍 useMarkets: Error stack:', err.stack);
+      lastFetchTime.current = previousFetchTs;
       
       // Handle network errors with retry logic
       if (err.name === 'TypeError' && err.message.includes('Failed to fetch') && retryCount.current < MAX_RETRIES) {
