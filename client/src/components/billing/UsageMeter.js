@@ -1,23 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { usePlan } from '../../hooks/usePlan';
 import styles from "./Navbar.module.css";
 
 const UsageMeter = () => {
   const { user } = useAuth();
-  const { plan, planLoading, stale, refreshPlan } = usePlan();
-
-  useEffect(() => {
-    if (user && !plan && !planLoading) {
-      refreshPlan({ force: true });
-    }
-  }, [user, plan, planLoading, refreshPlan]);
-
-  useEffect(() => {
-    if (user && stale && !planLoading) {
-      refreshPlan({ force: false });
-    }
-  }, [user, stale, planLoading, refreshPlan]);
+  const { plan, planLoading, stale } = usePlan();
 
   if (!user) return null;
   if (planLoading && !plan) return <div className="usage-meter">Loading usage...</div>;

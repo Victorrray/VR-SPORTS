@@ -170,6 +170,7 @@ export const PlanProvider = ({ children }) => {
       } catch (error) {
         if (!controller.signal.aborted) {
           state.retries = Math.min((state.retries || 0) + 1, 10);
+          state.lastFetchAt = Date.now();
         }
 
         const fallback = planRef.current || cachedPlan || loadPlanInfo() || { ...defaultPlan };

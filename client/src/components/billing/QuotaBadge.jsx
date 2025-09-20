@@ -1,21 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AlertCircle, Zap, Clock } from 'lucide-react';
 import { usePlan } from '../../hooks/usePlan';
 
 const QuotaBadge = () => {
-  const { plan, planLoading, stale, refreshPlan } = usePlan();
-
-  useEffect(() => {
-    if (!plan && !planLoading) {
-      refreshPlan({ force: true });
-    }
-  }, [plan, planLoading, refreshPlan]);
-
-  useEffect(() => {
-    if (stale && !planLoading) {
-      refreshPlan({ force: false });
-    }
-  }, [stale, planLoading, refreshPlan]);
+  const { plan, planLoading, stale } = usePlan();
 
   if (planLoading && !plan) {
     return (

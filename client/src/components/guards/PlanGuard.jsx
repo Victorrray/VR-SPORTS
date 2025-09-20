@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { usePlan } from '../../hooks/usePlan';
@@ -8,18 +8,6 @@ import { debugLog } from '../../lib/debug';
 const PlanGuard = ({ children, requiresPlatinum = false }) => {
   const { user } = useAuth();
   const { plan, planLoading, isPremiumEffective, refreshPlan, stale } = usePlan();
-
-  useEffect(() => {
-    if (user && !plan && !planLoading) {
-      refreshPlan({ force: true });
-    }
-  }, [user, plan, planLoading, refreshPlan]);
-
-  useEffect(() => {
-    if (user && stale && !planLoading) {
-      refreshPlan({ force: false });
-    }
-  }, [user, stale, planLoading, refreshPlan]);
 
   if (!user) {
     debugLog('PLAN_GUARD', 'User not authenticated, redirecting to home');
@@ -66,4 +54,3 @@ const PlanGuard = ({ children, requiresPlatinum = false }) => {
 };
 
 export default PlanGuard;
-
