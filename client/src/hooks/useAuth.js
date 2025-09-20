@@ -362,7 +362,9 @@ export const AuthProvider = ({ children }) => {
       await fetchUserProfile(currentSession.user.id);
       const currentPlan = planInfoRef.current || loadPlanInfo();
       if (!currentPlan || isPlanInfoStale(currentPlan)) {
-        await fetchPlanStatus();
+        fetchPlanStatus().catch((err) => {
+          console.warn('useAuth: background plan refresh failed during validation', err);
+        });
       }
       lastValidationRef.current = now;
 
@@ -452,7 +454,9 @@ export const AuthProvider = ({ children }) => {
                 setSession(freshSession);
                 setUser(freshSession.user);
                 await fetchUserProfile(freshSession.user.id);
-                await fetchPlanStatus();
+                fetchPlanStatus().catch((err) => {
+                  console.warn('useAuth: background plan refresh failed (stored session)', err);
+                });
 
                 safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
 
@@ -489,7 +493,9 @@ export const AuthProvider = ({ children }) => {
             setSession(freshSession);
             setUser(freshSession.user);
             await fetchUserProfile(freshSession.user.id);
-            await fetchPlanStatus();
+            fetchPlanStatus().catch((err) => {
+              console.warn('useAuth: background plan refresh failed (fresh session)', err);
+            });
 
             safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
 
@@ -542,7 +548,9 @@ export const AuthProvider = ({ children }) => {
             
             // Fetch user profile
             await fetchUserProfile(newSession.user.id);
-            await fetchPlanStatus();
+            fetchPlanStatus().catch((err) => {
+              console.warn('useAuth: background plan refresh failed (auth state change)', err);
+            });
             
             // Set up periodic session validation if not already set
             if (!validationIntervalRef.current) {
