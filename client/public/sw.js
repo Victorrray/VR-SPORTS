@@ -6,9 +6,10 @@ const API_CACHE = 'oddssightseer-api-v1';
 // Assets to cache on install
 const STATIC_ASSETS = [
   '/',
-  '/static/css/main.css',
-  '/static/js/main.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/favicon.svg',
+  '/favicon.png',
+  '/apple-touch-icon.png'
 ];
 
 // API endpoints to cache
