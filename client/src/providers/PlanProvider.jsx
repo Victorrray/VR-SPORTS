@@ -36,6 +36,19 @@ const parseTimestamp = (value) => {
 const isPremiumPlan = (planId) => PREMIUM_PLANS.has(String(planId || '').toLowerCase());
 
 const shapePlan = (data = {}) => {
+  // Handle demo mode data structure
+  if (data.source === 'demo') {
+    return {
+      ...defaultPlan,
+      plan: data.plan || 'free',
+      quota: data.quota || 250,
+      used: data.used || 0,
+      remaining: data.remaining || 250,
+      fetchedAt: new Date().toISOString(),
+      stale: true,
+    };
+  }
+
   const quota = toNumber(data.quota ?? data.limit);
   const used = toNumber(data.used ?? data.calls_made);
   let remaining = toNumber(data.remaining);
@@ -173,23 +186,26 @@ export const PlanProvider = ({ children }) => {
           state.lastFetchAt = Date.now();
         }
 
-        const fallback = planRef.current || cachedPlan || loadPlanInfo() || { ...defaultPlan };
-        const fallbackTimestamp = fallback.fetchedAt || fallback.cachedAt || new Date().toISOString();
-
-        const staleFallback = {
-          ...fallback,
-          fetchedAt: fallbackTimestamp,
+        // Fallback to demo mode when API fails
+        const fallback = {
+          ...defaultPlan,
+          plan: 'free',
+          quota: 250,
+          used: 0,
+          remaining: 250,
+          fetchedAt: new Date().toISOString(),
           stale: true,
         };
 
-        updatePlanState(staleFallback);
+        updatePlanState(fallback);
         setMetrics({
-          lastSource: 'cache',
+          lastSource: 'demo',
           lastDurationMs: Date.now() - startedAt,
           retries: state.retries,
         });
 
-        return staleFallback;
+        console.warn('⚠️ Using demo plan due to API failure:', error.message);
+        return fallback;
       } finally {
         if (fetchStateRef.current.promise === promise) {
           fetchStateRef.current.promise = null;

@@ -751,7 +751,12 @@ async function getUserProfile(userId) {
   if (!supabase) {
     // Fallback to in-memory storage if Supabase not configured
     if (!userUsage.has(userId)) {
-      userUsage.set(userId, { api_request_count: 0, plan: 'free' });
+      userUsage.set(userId, {
+        id: userId,
+        plan: 'free',
+        api_request_count: 0,
+        created_at: new Date().toISOString()
+      });
     }
     return userUsage.get(userId);
   }
@@ -768,26 +773,26 @@ async function getUserProfile(userId) {
     return inserted;
   }
   if (error) throw error;
-  
+
   // Check if platinum subscription has expired
   if (data.plan === 'platinum' && data.subscription_end_date) {
     const now = new Date();
     const endDate = new Date(data.subscription_end_date);
-    
+
     if (now > endDate) {
       // Subscription expired, downgrade to free
       const { error: updateError } = await supabase
         .from("users")
         .update({ plan: "free" })
         .eq("id", userId);
-        
+
       if (!updateError) {
         data.plan = "free";
         console.log(`⏰ Subscription expired for user: ${userId}`);
       }
     }
   }
-  
+
   return data;
 }
 
@@ -1095,8 +1100,23 @@ app.get('/api/me/usage', requireUser, async (req, res) => {
 
   try {
     const profile = await getUserProfile(userId);
+
+    // Handle demo mode when Supabase is not configured
+    if (!supabase && userUsage.has(userId)) {
+      const userData = userUsage.get(userId);
+      const payload = {
+        id: userData.id,
+        plan: userData.plan,
+        used: userData.api_request_count,
+        quota: userData.plan === "platinum" ? null : FREE_QUOTA,
+        source: 'demo'
+      };
+      setCachedPlan(userId, payload);
+      return res.json(payload);
+    }
+
     const payload = {
-      userId: profile.id,
+      id: profile.id,
       plan: profile.plan,
       used: profile.api_request_count,
       quota: profile.plan === "platinum" ? null : FREE_QUOTA,
@@ -1454,7 +1474,26 @@ app.post('/api/billing/cancel-subscription', requireUser, async (req, res) => {
     }
 
     const userId = req.__userId;
-    
+
+    // Handle demo mode when Supabase is not configured
+    if (!supabase) {
+      // Fallback to in-memory storage
+      const userData = userUsage.get(userId);
+      if (userData && userData.plan === 'platinum') {
+        userData.plan = 'free';
+        userUsage.set(userId, userData);
+        console.log(`✅ Demo mode: Downgraded ${userId} from platinum to free`);
+        return res.json({
+          success: true,
+          message: 'Subscription cancelled successfully (demo mode)',
+          cancel_at_period_end: true,
+          current_period_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 days from now
+        });
+      } else {
+        return res.status(400).json({ error: 'No active subscription found' });
+      }
+    }
+
     // Get user's current subscription from Supabase
     const { data: user, error: userError } = await supabase
       .from('users')
@@ -1479,7 +1518,7 @@ app.post('/api/billing/cancel-subscription', requireUser, async (req, res) => {
     const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
     const { error: updateError } = await supabase
       .from('users')
-      .update({ 
+      .update({
         subscription_end_date: subscriptionEndDate.toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -1490,8 +1529,8 @@ app.post('/api/billing/cancel-subscription', requireUser, async (req, res) => {
       return res.status(500).json({ error: 'Failed to update user plan' });
     }
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'Subscription cancelled successfully',
       cancel_at_period_end: subscription.cancel_at_period_end,
       current_period_end: subscription.current_period_end
