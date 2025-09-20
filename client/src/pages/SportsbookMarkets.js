@@ -18,6 +18,30 @@ import { withApiBase } from "../config/api";
 import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
+const ENABLE_PLAYER_PROPS_V2 = (
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ENABLE_PLAYER_PROPS_V2 === 'true') ||
+  process.env.REACT_APP_ENABLE_PLAYER_PROPS_V2 === 'true'
+);
+
+const PLAYER_PROP_MARKET_KEYS = ['player_passing_yards', 'player_passing_touchdowns', 'player_rushing_yards', 'player_rushing_attempts', 'player_receiving_yards', 'player_receptions', 'player_points', 'player_assists', 'player_rebounds'];
+
+const toggleButtonStyle = (active, disabled = false) => ({
+  flex: 1,
+  background: active ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' : 'transparent',
+  border: 'none',
+  color: active ? 'white' : 'var(--text-secondary)',
+  padding: '16px 24px',
+  borderRadius: '8px',
+  fontWeight: '600',
+  fontSize: '16px',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  opacity: disabled ? 0.6 : 1
+});
 
 // Add responsive layout styles
 const arbitrageSplitViewStyles = `
@@ -320,12 +344,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("vr-odds-preset") || null;
   });
-  // Player props DISABLED - always false to eliminate broken functionality
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
   const [showArbitrage, setShowArbitrage] = useState(false);
+
+  const isPlayerPropsMode = ENABLE_PLAYER_PROPS_V2 && showPlayerProps;
+  const isArbitrageMode = showArbitrage;
+  const marketsForMode = isPlayerPropsMode ? PLAYER_PROP_MARKET_KEYS : marketKeys;
+  const regionsForMode = isPlayerPropsMode ? ["us"] : ["us", "us2", "us_exchanges"];
   
   // Check if user has platinum plan for arbitrage access
   const hasPlatinum = me?.plan === 'platinum';
@@ -512,9 +540,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     bookmakers 
   } = useMarkets(
     picked,
-    ["us", "us2", "us_exchanges"],
-    marketKeys,
-    selectedDate ? new Date(selectedDate) : null
+    regionsForMode,
+    marketsForMode
   );
 
   // Keep local book list in sync with hook results and filter for free users
@@ -815,49 +842,35 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           gap: '0'
         }}>
           <button
-            onClick={() => setShowArbitrage(false)}
-            style={{
-              flex: 1,
-              background: !showArbitrage 
-                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
-                : 'transparent',
-              border: 'none',
-              color: !showArbitrage ? 'white' : 'var(--text-secondary)',
-              padding: '16px 24px',
-              borderRadius: '8px',
-              fontWeight: '600',
-              fontSize: '16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
+            onClick={() => {
+              setShowArbitrage(false);
+              setShowPlayerProps(false);
             }}
+            style={toggleButtonStyle(!isArbitrageMode && !isPlayerPropsMode)}
           >
             📊 Game Odds
           </button>
+          {ENABLE_PLAYER_PROPS_V2 && (
+            <button
+              onClick={() => {
+                setShowPlayerProps(true);
+                setShowArbitrage(false);
+              }}
+              style={toggleButtonStyle(isPlayerPropsMode)}
+            >
+              🎯 Player Props
+            </button>
+          )}
           <button
-            onClick={() => hasPlatinum ? setShowArbitrage(true) : navigate('/pricing')}
-            style={{
-              flex: 1,
-              background: showArbitrage 
-                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
-                : 'transparent',
-              border: 'none',
-              color: showArbitrage ? 'white' : 'var(--text-secondary)',
-              padding: '16px 24px',
-              borderRadius: '8px',
-              fontWeight: '600',
-              fontSize: '16px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              opacity: hasPlatinum ? 1 : 0.6
+            onClick={() => {
+              if (hasPlatinum) {
+                setShowArbitrage(true);
+                setShowPlayerProps(false);
+              } else {
+                navigate('/pricing');
+              }
             }}
+            style={toggleButtonStyle(isArbitrageMode, !hasPlatinum)}
           >
             ⚡ Arbitrage {!hasPlatinum && '🔒'}
           </button>
@@ -868,7 +881,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           margin: '16px 0 0 0',
           opacity: 0.8
         }}>
-          {showArbitrage ? 'Find profitable arbitrage opportunities' : 'Compare odds across all major sportsbooks'}
+          {isArbitrageMode
+            ? 'Find profitable arbitrage opportunities'
+            : isPlayerPropsMode
+              ? 'Explore player props across every book you follow'
+              : 'Compare odds across all major sportsbooks'}
         </p>
       </div>
 
@@ -1017,13 +1034,34 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </div>
       )}
 
-      {showArbitrage && hasPlatinum ? (
+      {isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
           sport={picked[0] || 'americanfootball_nfl'}
           games={filteredGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
         />
+      ) : isPlayerPropsMode ? (
+        !isOverQuota ? (
+          <OddsTable
+            key={`props-${tableNonce}`}
+            games={filteredGames}
+            pageSize={15}
+            mode="props"
+            bookFilter={effectiveSelectedBooks}
+            marketFilter={PLAYER_PROP_MARKET_KEYS}
+            evMin={null}
+            loading={loading || marketsLoading}
+            error={error || marketsError}
+            oddsFormat={oddsFormat}
+            allCaps={
+              typeof window !== "undefined" && new URLSearchParams(window.location.search).get("caps") === "1"
+            }
+            onAddBet={addBet}
+            betSlipCount={bets.length}
+            onOpenBetSlip={openBetSlip}
+          />
+        ) : null
       ) : !isOverQuota ? (
         <OddsTable
           key={tableNonce}

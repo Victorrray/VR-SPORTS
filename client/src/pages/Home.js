@@ -74,10 +74,12 @@ export default function Home() {
   
   // Only fetch live odds data when actually on the home page
   const isHomePage = location.pathname === '/' || location.pathname === '/home';
+  const enableHomeMarkets = Boolean(user && isHomePage);
   const { games } = useMarkets(
-    (user && isHomePage) ? ["americanfootball_nfl", "basketball_nba", "baseball_mlb"] : [], // sports
-    (user && isHomePage) ? ["us"] : [], // regions
-    (user && isHomePage) ? ["h2h", "spreads", "totals"] : [] // markets
+    enableHomeMarkets ? ["americanfootball_nfl", "basketball_nba", "baseball_mlb"] : [],
+    enableHomeMarkets ? ["us"] : [],
+    enableHomeMarkets ? ["h2h", "spreads", "totals"] : [],
+    { enabled: enableHomeMarkets }
   );
 
   // Landing page for non-authenticated users

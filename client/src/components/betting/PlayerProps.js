@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { withApiBase } from '../../config/api';
 import { secureFetch } from '../../utils/security';
 import { useQuotaHandler } from '../../hooks/useQuotaHandler';
 import QuotaExceededModal from './QuotaExceededModal';
 
 const DEFAULT_MARKETS = [
-  "player_points","player_assists","player_rebounds",
-  "player_pass_tds","player_pass_yds","player_rush_yds",
-  "player_receptions","player_reception_yds",
+  'player_points','player_assists','player_rebounds',
+  'player_points_rebounds_assists','player_pass_tds','player_passing_yards',
+  'player_rushing_yards','player_receiving_yards','player_receptions',
 ];
 
 function useDebugFlag() {
@@ -18,35 +18,53 @@ function useDebugFlag() {
 
 export default function PlayerProps({
   eventId: rawEventId,
-  game_id, // back-compat
-  sport = "americanfootball_nfl",
+  game_id,
+  sport = 'americanfootball_nfl',
+  league,
+  eventDate,
+  commenceTime,
   markets = DEFAULT_MARKETS,
   bookmakers = []
 }) {
   const eventId = rawEventId || game_id;
+  const resolvedLeague = league || sport;
   const debug = useDebugFlag();
-  const [payload, setPayload] = useState(null);
+  const [snapshot, setSnapshot] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastUrl, setLastUrl] = useState("");
   const { quotaExceeded, quotaError, handleApiResponse } = useQuotaHandler();
+  const previousSnapshotRef = useRef(null);
+
+  const derivedDate = useMemo(() => {
+    if (eventDate && /^\d{4}-\d{2}-\d{2}$/.test(eventDate)) return eventDate;
+    if (commenceTime) {
+      const dt = new Date(commenceTime);
+      if (!Number.isNaN(dt.getTime())) {
+        return dt.toISOString().slice(0, 10);
+      }
+    }
+    return null;
+  }, [eventDate, commenceTime]);
 
   const qs = useMemo(() => {
-    const p = new URLSearchParams({
-      sport: sport,
-      eventId: eventId ?? "",
-      markets: Array.isArray(markets) ? markets.join(",") : String(markets || ""),
-    });
-    if (bookmakers && bookmakers.length > 0) {
-      p.set("bookmakers", Array.isArray(bookmakers) ? bookmakers.join(",") : String(bookmakers));
+    const params = new URLSearchParams();
+    if (resolvedLeague) params.set('league', resolvedLeague);
+    if (derivedDate) params.set('date', derivedDate);
+    if (eventId) params.set('game_id', eventId);
+    if (markets && markets.length) {
+      params.set('markets', Array.isArray(markets) ? markets.join(',') : String(markets || '').trim());
     }
-    return p.toString();
-  }, [sport, eventId, markets, bookmakers]);
+    if (bookmakers && bookmakers.length > 0) {
+      params.set('bookmakers', Array.isArray(bookmakers) ? bookmakers.join(',') : String(bookmakers));
+    }
+    return params.toString();
+  }, [resolvedLeague, derivedDate, eventId, markets, bookmakers]);
 
   useEffect(() => {
-    if (!eventId) {
-      setPayload(null);
-      setError("No eventId provided");
+    if (!resolvedLeague || !derivedDate) {
+      setSnapshot(null);
+      setError('Insufficient event metadata for props');
       return;
     }
     const base = withApiBase('');
@@ -67,11 +85,24 @@ export default function PlayerProps({
         return j;
       })
       .then((j) => {
-        if (j) setPayload(j);
+        if (!j) return;
+        const formatted = {
+          items: Array.isArray(j.items) ? j.items : [],
+          stale: !!j.stale,
+          ttl: j.ttl ?? null,
+          as_of: j.as_of || null,
+        };
+        previousSnapshotRef.current = formatted;
+        setSnapshot(formatted);
       })
-      .catch((e) => setError(e.message || "Failed to load props"))
+      .catch((e) => {
+        setError(e.message || 'Failed to load props');
+        if (previousSnapshotRef.current) {
+          setSnapshot(previousSnapshotRef.current);
+        }
+      })
       .finally(() => setLoading(false));
-  }, [qs, eventId]);
+  }, [qs, resolvedLeague, derivedDate, eventId, handleApiResponse]);
 
   // ---------- UI ----------
   const panel = (children) => (
@@ -89,40 +120,60 @@ export default function PlayerProps({
     </div>
   ) : null;
 
-  if (!eventId) return panel(<div>No event selected (missing eventId).</div>);
+  if (!resolvedLeague || !derivedDate) return panel(<div>Missing schedule data.{debugPanel}</div>);
 
-  if (loading) return panel(<div>Loading player props…{debugPanel}</div>);
+  const currentData = snapshot || previousSnapshotRef.current;
+
+  if (loading && (!currentData || currentData.items.length === 0)) {
+    return panel(<div>Loading player props…{debugPanel}</div>);
+  }
 
   if (error) return panel(<div className="text-red-400">Props error: {error}{debugPanel}</div>);
 
-  if (!payload) return panel(<div>No payload received.{debugPanel}</div>);
+  if (!currentData) return panel(<div>No props available.{debugPanel}</div>);
 
-  const { __nonEmpty, data = [], books = [] } = payload;
+  const filteredItems = useMemo(() => {
+    if (!currentData?.items) return [];
+    return currentData.items.filter((item) => !eventId || item.game_id === eventId);
+  }, [currentData, eventId]);
 
-  // Build rows
-  const rows = [];
-  for (const book of data || []) {
-    const bookName = book?.key || book?.title || "book";
-    for (const mkt of book?.markets || []) {
-      const mKey = mkt?.key;
-      for (const o of mkt?.outcomes || []) {
-        rows.push({
-          book: bookName,
-          market: mKey,
-          player: o?.description || o?.name || o?.participant || "—",
-          price: o?.price ?? o?.point ?? o?.odds ?? "—",
+  const grouped = useMemo(() => {
+    const map = new Map();
+    filteredItems.forEach((item) => {
+      const key = `${item.player}||${item.market}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          player: item.player,
+          market: item.market,
+          books: new Map(),
         });
       }
-    }
-  }
+      const group = map.get(key);
+      const bookKey = item.book || 'book';
+      if (!group.books.has(bookKey)) {
+        group.books.set(bookKey, {
+          book: bookKey,
+          label: item.book_label || bookKey,
+          outcomes: [],
+        });
+      }
+      group.books.get(bookKey).outcomes.push(item);
+    });
 
-  if (!__nonEmpty || rows.length === 0) {
+    return Array.from(map.values()).map((group) => ({
+      player: group.player,
+      market: group.market,
+      books: Array.from(group.books.values()).map((book) => ({
+        ...book,
+        outcomes: book.outcomes.sort((a, b) => a.ou.localeCompare(b.ou)),
+      })),
+    }));
+  }, [filteredItems]);
+
+  if (!grouped.length) {
     return panel(
       <div>
         <div>No player props available yet for this event.</div>
-        {Array.isArray(books) && books.length > 0 && (
-          <div className="opacity-70 mt-1">Books: {books.join(", ")}</div>
-        )}
         {debugPanel}
       </div>
     );
@@ -130,27 +181,50 @@ export default function PlayerProps({
 
   return (
     <div className="space-y-2">
-      {Array.isArray(books) && books.length > 0 && (
-        <div className="text-xs opacity-70">Showing props from: {books.join(", ")}</div>
+      {currentData.stale && (
+        <div className="text-xs text-amber-300">Using cached props (stale).</div>
       )}
-      
-      {/* Fallback renderer with payload info */}
-      {payload ? (
-        <div className="text-xs opacity-70">
-          props books: {Array.isArray(payload.data) ? payload.data.length : 0}
-          {" • "}nonEmpty: {String(payload.__nonEmpty)}
-          {" • "}rows: {rows.length}
-        </div>
-      ) : (
-        <div className="text-xs opacity-70">no payload</div>
+      {currentData.as_of && (
+        <div className="text-xs opacity-60">As of {new Date(currentData.as_of).toLocaleTimeString()}</div>
       )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        {rows.map((r, i) => (
-          <div key={i} className="rounded-xl border border-white/10 p-3">
-            <div className="text-xs opacity-70">{r.book} • {r.market}</div>
-            <div className="font-medium">{r.player}</div>
-            <div className="text-sm opacity-80">{String(r.price)}</div>
+
+      <div className="space-y-3">
+        {grouped.map((group) => (
+          <div key={`${group.player}-${group.market}`} className="rounded-xl border border-white/10 p-3">
+            <div className="text-xs opacity-70 uppercase">{group.market.replace(/_/g, ' ')}</div>
+            <div className="font-medium text-base">{group.player}</div>
+            <div className="space-y-2 mt-2">
+              {group.books.map((book) => (
+                <div key={book.book} className="bg-white/5 rounded-lg p-2">
+                  <div className="text-xs opacity-70 mb-1">{book.label}</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {book.outcomes.map((outcome, idx) => {
+                      const priceDisplay = outcome.price > 0 ? `+${outcome.price}` : outcome.price;
+                      const lineDisplay = outcome.line != null ? outcome.line : '—';
+                      const content = (
+                        <div className="flex flex-col text-sm">
+                          <span className="font-semibold">{outcome.ou}</span>
+                          <span className="opacity-80">Line: {lineDisplay}</span>
+                          <span className="opacity-80">Price: {priceDisplay}</span>
+                        </div>
+                      );
+                      if (outcome.url && outcome.link_available) {
+                        return (
+                          <a key={idx} href={outcome.url} target="_blank" rel="noreferrer" className="rounded-md border border-white/10 p-2 hover:border-purple-400 transition-colors">
+                            {content}
+                          </a>
+                        );
+                      }
+                      return (
+                        <div key={idx} className="rounded-md border border-white/10 p-2 opacity-70 cursor-not-allowed">
+                          {content}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>

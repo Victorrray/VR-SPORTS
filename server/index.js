@@ -24,6 +24,14 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ODDS_API_KEY;
 const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
+const PLAYER_PROPS_API_BASE = process.env.PLAYER_PROPS_API_BASE || null;
+const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 === 'true';
+const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 30_000);
+const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
+const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_MARKETS || 8);
+const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_BOOKS || 6);
+const PLAYER_PROPS_REQUEST_TIMEOUT = 7000;
+const PLAYER_PROPS_MAX_CACHE_ENTRIES = Number(process.env.PLAYER_PROPS_MAX_CACHE_ENTRIES || 50);
 
 
 // Stripe configuration
@@ -61,8 +69,618 @@ const apiCache = new Map();
 const planCache = new Map();
 const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+const playerPropsCache = new Map(); // key -> { payload, timestamp, stale }
+const playerPropsInFlight = new Map(); // key -> Promise
+const playerPropsMetrics = {
+  requests: 0,
+  cacheHits: 0,
+  staleHits: 0,
+  cacheMisses: 0,
+  vendorErrors: 0,
+  vendorDurations: [],
+  droppedOutcomes: 0,
+  notModifiedHits: 0,
+};
+
+const DEFAULT_BOOK_STATE = (process.env.DEFAULT_BOOK_STATE || 'nj').toLowerCase();
+
+function setPlayerPropsCacheEntry(key, entry) {
+  if (!playerPropsCache.has(key) && playerPropsCache.size >= PLAYER_PROPS_MAX_CACHE_ENTRIES) {
+    let oldestKey = null;
+    let oldestTs = Infinity;
+    for (const [cacheKey, cacheValue] of playerPropsCache.entries()) {
+      if (cacheValue.timestamp < oldestTs) {
+        oldestKey = cacheKey;
+        oldestTs = cacheValue.timestamp;
+      }
+    }
+    if (oldestKey) {
+      playerPropsCache.delete(oldestKey);
+    }
+  }
+  playerPropsCache.set(key, entry);
+}
+
+console.log('[player-props] flag:', ENABLE_PLAYER_PROPS_V2, 'default_state:', DEFAULT_BOOK_STATE);
+
 function getCacheKey(endpoint, params) {
   return `${endpoint}_${JSON.stringify(params)}`;
+}
+
+const PLAYER_PROPS_TIMEZONE = process.env.PLAYER_PROPS_TIMEZONE || 'America/New_York';
+
+const PLAYER_PROPS_MARKET_MAP = {
+  player_reception_yds: 'player_receiving_yards',
+  player_reception_yards: 'player_receiving_yards',
+  player_receptions: 'player_receptions',
+  player_receptions_alternate: 'player_receptions_alternate',
+  player_pass_yds: 'player_passing_yards',
+  player_pass_yards: 'player_passing_yards',
+  player_pass_tds: 'player_passing_touchdowns',
+  player_pass_td: 'player_passing_touchdowns',
+  player_rush_yds: 'player_rushing_yards',
+  player_rush_yards: 'player_rushing_yards',
+  player_rush_attempts: 'player_rushing_attempts',
+  player_rush_attempts_alternate: 'player_rushing_attempts_alternate',
+  player_receive_yards: 'player_receiving_yards',
+  player_receiving_yards: 'player_receiving_yards',
+  player_receiving_yards_alternate: 'player_receiving_yards_alternate',
+  player_receiving_receptions: 'player_receptions',
+  player_points: 'player_points',
+  player_points_alternate: 'player_points_alternate',
+  player_assists: 'player_assists',
+  player_assists_alternate: 'player_assists_alternate',
+  player_rebounds: 'player_rebounds',
+  player_rebounds_alternate: 'player_rebounds_alternate',
+  player_threes: 'player_three_pointers_made',
+  player_threes_alternate: 'player_three_pointers_made_alternate',
+  player_total_bases: 'player_total_bases',
+  player_total_bases_alternate: 'player_total_bases_alternate',
+  player_strikeouts: 'player_strikeouts',
+  player_strikeouts_alternate: 'player_strikeouts_alternate',
+  player_points_rebounds_assists: 'player_points_rebounds_assists',
+  player_points_rebounds_assists_alternate: 'player_points_rebounds_assists_alternate',
+  player_anytime_td: 'player_anytime_touchdown',
+  player_anytime_touchdown: 'player_anytime_touchdown',
+  player_anytime_td_alternate: 'player_anytime_touchdown_alternate',
+  player_anytime_touchdown_alternate: 'player_anytime_touchdown_alternate',
+  player_combined_tackles: 'player_combined_tackles',
+  player_combined_tackles_assists: 'player_combined_tackles',
+  player_assists_plus_points: 'player_points_assists',
+  player_points_assists: 'player_points_assists',
+  player_rush_receive_yds: 'player_rush_receive_yards',
+  player_rush_receive_yards: 'player_rush_receive_yards',
+  player_rush_receive_yds_alternate: 'player_rush_receive_yards_alternate',
+  player_rush_receive_yards_alternate: 'player_rush_receive_yards_alternate',
+  player_pass_completions: 'player_pass_completions',
+  player_pass_attempts: 'player_pass_attempts',
+  player_pass_longest_completion: 'player_pass_longest_completion',
+  player_reception_longest: 'player_reception_longest',
+  player_rush_attempts_longest: 'player_rush_longest',
+  player_rush_longest: 'player_rush_longest',
+};
+
+const DEFAULT_PLAYER_PROP_MARKETS = {
+  americanfootball_nfl: [
+    'player_passing_yards',
+    'player_rushing_yards',
+    'player_receiving_yards',
+    'player_receptions',
+    'player_passing_touchdowns',
+    'player_rushing_attempts',
+  ],
+  basketball_nba: [
+    'player_points',
+    'player_assists',
+    'player_rebounds',
+    'player_three_pointers_made',
+  ],
+  baseball_mlb: [
+    'player_total_bases',
+    'player_hits',
+    'player_home_runs',
+    'player_strikeouts',
+  ],
+};
+
+function canonicalizeMarket(marketKey = '') {
+  const key = String(marketKey || '').toLowerCase();
+  return PLAYER_PROPS_MARKET_MAP[key] || key;
+}
+
+function displayMarketName(canonicalKey) {
+  return String(canonicalKey || '')
+    .replace(/player_/g, '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function chunkArray(items = [], size = 1) {
+  if (!Array.isArray(items) || size <= 0) return [items];
+  const chunks = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function safeNumber(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string') {
+    const trimmed = value.trim().toUpperCase();
+    if (trimmed === 'EVEN') return 100;
+  }
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function resolveBookUrl(url, state) {
+  if (!url || typeof url !== 'string' || url.trim().length === 0) {
+    return { url: null, linkAvailable: false };
+  }
+
+  let resolved = url;
+  let linkAvailable = true;
+  const replacement = (state || DEFAULT_BOOK_STATE || '').toLowerCase();
+
+  if (url.includes('{state}')) {
+    if (!replacement) {
+      linkAvailable = false;
+    } else {
+      resolved = url.replace('{state}', replacement);
+    }
+  }
+
+  if (!linkAvailable) {
+    resolved = null;
+  }
+
+  return { url: resolved, linkAvailable };
+}
+
+function toISOInTimeZone(dateString, timeString, timeZone = PLAYER_PROPS_TIMEZONE) {
+  if (!dateString || !timeString) return { iso: null, hasStarted: false };
+  const [year, month, day] = dateString.split('-').map(Number);
+  const [hour, minute, second = '00'] = timeString.split(':');
+  const utcDate = new Date(Date.UTC(year, (month || 1) - 1, day || 1, Number(hour || 0), Number(minute || 0), Number(second || 0)));
+
+  const tzString = utcDate.toLocaleString('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const [monthPart, dayPart, yearPart, timePart] = tzString.replace(',', '').split(' ');
+  const [tzHour, tzMinute, tzSecond] = timePart.split(':').map(Number);
+  const tzDate = new Date(Date.UTC(
+    Number(yearPart),
+    Number(monthPart) - 1,
+    Number(dayPart),
+    tzHour,
+    tzMinute,
+    tzSecond,
+  ));
+
+  return {
+    iso: tzDate.toISOString(),
+    hasStarted: tzDate.getTime() <= Date.now(),
+  };
+}
+
+function recordPlayerPropMetric(field, value) {
+  if (!(field in playerPropsMetrics)) return;
+  if (Array.isArray(playerPropsMetrics[field])) {
+    playerPropsMetrics[field].push(value);
+    if (playerPropsMetrics[field].length > 500) {
+      playerPropsMetrics[field].shift();
+    }
+  } else if (typeof playerPropsMetrics[field] === 'number') {
+    playerPropsMetrics[field] += value;
+  }
+}
+
+function summarizePlayerPropMetrics() {
+  if (!playerPropsMetrics.vendorDurations.length) return null;
+  const sum = playerPropsMetrics.vendorDurations.reduce((acc, v) => acc + v, 0);
+  const avg = Math.round(sum / playerPropsMetrics.vendorDurations.length);
+  return { averageVendorMs: avg, samples: playerPropsMetrics.vendorDurations.length };
+}
+
+async function fetchPlayerPropsFromVendor({
+  sportKey,
+  eventId,
+  markets,
+  bookmakers,
+  regions,
+  state,
+  etag,
+  cachedSnapshot,
+}) {
+  if (!PLAYER_PROPS_API_BASE) {
+    throw new Error('PLAYER_PROPS_API_BASE is not configured');
+  }
+  if (!SPORTSGAMEODDS_API_KEY) {
+    throw new Error('SPORTSGAMEODDS_API_KEY is not configured');
+  }
+
+  const canonicalMarkets = Array.from(new Set((markets || []).map(canonicalizeMarket))).filter(Boolean);
+  const canonicalBooks = bookmakers ? Array.from(new Set(bookmakers.map((b) => String(b).toLowerCase()))) : null;
+
+  const marketsToUse = canonicalMarkets.length
+    ? canonicalMarkets
+    : (DEFAULT_PLAYER_PROP_MARKETS[sportKey] || DEFAULT_PLAYER_PROP_MARKETS.americanfootball_nfl || []);
+
+  const marketChunks = marketsToUse.length
+    ? chunkArray(marketsToUse, PLAYER_PROPS_MAX_MARKETS_PER_REQUEST || marketsToUse.length)
+    : [[]];
+  const bookChunks = canonicalBooks && canonicalBooks.length
+    ? chunkArray(canonicalBooks, PLAYER_PROPS_MAX_BOOKS_PER_REQUEST || canonicalBooks.length)
+    : [null];
+
+  const itemsMap = new Map();
+  let lastDate = cachedSnapshot?.startDate || null;
+  let lastStart = cachedSnapshot?.startTime || null;
+  let lastEtag = etag || null;
+  const vendorDurations = [];
+
+  if (Array.isArray(cachedSnapshot?.items)) {
+    cachedSnapshot.items.forEach((item) => {
+      const key = `${item.game_id}||${item.player}||${item.market}||${item.book}||${item.ou}`;
+      itemsMap.set(key, item);
+    });
+  }
+
+  for (const marketChunk of marketChunks) {
+    for (const bookChunk of bookChunks) {
+      const params = new URLSearchParams();
+      params.set('sport', sportKey);
+      params.set('eventId', eventId);
+      params.set('apiKey', SPORTSGAMEODDS_API_KEY);
+      if (regions) params.set('regions', regions);
+      if (marketChunk && marketChunk.length) params.set('markets', marketChunk.join(','));
+      if (bookChunk && bookChunk.length) params.set('bookmakers', bookChunk.join(','));
+
+      const config = {
+        timeout: PLAYER_PROPS_REQUEST_TIMEOUT,
+        params: Object.fromEntries(params),
+        headers: {
+          'X-API-Key': SPORTSGAMEODDS_API_KEY,
+        },
+      };
+
+      if (lastEtag) {
+        config.headers['If-None-Match'] = lastEtag;
+      }
+
+      const start = Date.now();
+      let response;
+      try {
+        response = await axiosWithRetry(PLAYER_PROPS_API_BASE, config, {
+          tries: PLAYER_PROPS_RETRY_ATTEMPTS + 1,
+          backoffMs: 400,
+        });
+      } catch (err) {
+        recordPlayerPropMetric('vendorErrors', 1);
+        throw err;
+      } finally {
+        vendorDurations.push(Date.now() - start);
+      }
+
+      if (response.status === 304) {
+        recordPlayerPropMetric('notModifiedHits', 1);
+        continue;
+      }
+
+      lastEtag = response.headers?.etag || lastEtag;
+
+      const payload = response.data;
+      if (!payload) {
+        continue;
+      }
+
+      const books = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload.bookmakers)
+          ? payload.bookmakers
+          : payload.bookmaker
+            ? [payload.bookmaker]
+            : [];
+
+      const metaDate = payload.date || payload.eventDate || payload.game_date;
+      const metaStart = payload.start || payload.eventStart || payload.game_time;
+      if (metaDate) lastDate = metaDate;
+      if (metaStart) lastStart = metaStart;
+
+      books.forEach((bookPayload) => {
+        const bookKey = String(bookPayload.key || bookPayload.book || bookPayload.bookmaker || '').toLowerCase();
+        const bookTitle = bookPayload.title || bookPayload.name || bookPayload.key || bookKey || 'Book';
+        if (!bookKey) return;
+
+        const marketsArray = Array.isArray(bookPayload.markets)
+          ? bookPayload.markets
+          : bookPayload.market
+            ? [bookPayload.market]
+            : [];
+
+        marketsArray.forEach((marketPayload) => {
+          const originalMarketKey = marketPayload?.key || marketPayload?.market_key;
+          const canonicalKey = canonicalizeMarket(originalMarketKey);
+          if (!canonicalKey) {
+            recordPlayerPropMetric('droppedOutcomes', 1);
+            return;
+          }
+
+          const outcomesArray = Array.isArray(marketPayload?.outcomes)
+            ? marketPayload.outcomes
+            : [];
+
+          outcomesArray.forEach((outcomePayload) => {
+            const isActive = outcomePayload?.is_active !== false;
+            const isLatest = outcomePayload?.is_latest !== false;
+            if (!isActive) {
+              recordPlayerPropMetric('droppedOutcomes', 1);
+              return;
+            }
+
+            const playerName = outcomePayload.player || outcomePayload.description || outcomePayload.participant || outcomePayload.name || 'Player';
+            const outcomeName = String(outcomePayload.name || outcomePayload.outcome || '').toLowerCase();
+            const type = outcomeName.includes('under') ? 'UNDER'
+              : outcomeName.includes('over') ? 'OVER'
+              : outcomeName.includes('yes') ? 'YES'
+              : outcomeName.includes('no') ? 'NO'
+              : outcomeName.toUpperCase();
+            const point = safeNumber(outcomePayload.point ?? outcomePayload.line ?? outcomePayload.number);
+            const price = safeNumber(outcomePayload.price ?? outcomePayload.odds ?? outcomePayload.moneyline);
+
+            if (price == null) {
+              recordPlayerPropMetric('droppedOutcomes', 1);
+              return;
+            }
+
+            const { url: resolvedUrl, linkAvailable } = resolveBookUrl(outcomePayload.url || bookPayload.url || bookPayload.link, state);
+
+            const key = `${eventId}||${playerName}||${canonicalKey}||${bookKey}||${type}`;
+
+            itemsMap.set(key, {
+              game_id: eventId,
+              player: playerName,
+              market: canonicalKey,
+              book: bookKey,
+              book_label: bookTitle,
+              ou: type,
+              line: point,
+              price,
+              url: resolvedUrl,
+              link_available: linkAvailable,
+              is_latest: isLatest,
+              is_active: isActive,
+              start_iso: null,
+              has_started: false,
+            });
+          });
+        });
+      });
+    }
+  }
+
+  const { iso, hasStarted } = toISOInTimeZone(lastDate, lastStart, PLAYER_PROPS_TIMEZONE);
+
+  const timestamp = Date.now();
+  const items = Array.from(itemsMap.values()).map((item) => ({
+    ...item,
+    start_iso: iso,
+    has_started: Boolean(hasStarted),
+  }));
+
+  vendorDurations.forEach((d) => recordPlayerPropMetric('vendorDurations', d));
+
+  return {
+    payload: {
+      sportKey,
+      eventId,
+      items,
+      start_iso: iso,
+      has_started: Boolean(hasStarted),
+    },
+    etag: lastEtag,
+    timestamp,
+    stale: false,
+    startDate: lastDate,
+    startTime: lastStart,
+  };
+}
+
+function formatPlayerPropsPayload(entry, { stale }) {
+  return {
+    league: entry.payload.league,
+    game_id: entry.payload.game_id,
+    items: entry.payload.items,
+    start_iso: entry.payload.start_iso,
+    has_started: entry.payload.has_started,
+    ttl: PLAYER_PROPS_CACHE_TTL_MS,
+    as_of: new Date(entry.timestamp).toISOString(),
+    stale,
+  };
+}
+
+async function loadPlayerProps(options) {
+  const {
+    sportKey,
+    eventId,
+    markets,
+    bookmakers,
+    regions,
+    state,
+    force = false,
+  } = options;
+
+  const cacheKey = getCacheKey('player-props', {
+    sportKey,
+    eventId,
+    markets: markets || null,
+    bookmakers: bookmakers || null,
+    regions: regions || null,
+    state,
+  });
+
+  const now = Date.now();
+  const cacheEntry = playerPropsCache.get(cacheKey);
+  const isFresh = cacheEntry && now - cacheEntry.timestamp < PLAYER_PROPS_CACHE_TTL_MS;
+
+  if (!force && isFresh) {
+    recordPlayerPropMetric('cacheHits', 1);
+    return formatPlayerPropsPayload(cacheEntry, { stale: false });
+  }
+
+  const cachedSnapshot = cacheEntry
+    ? {
+        items: cacheEntry.payload.items,
+        startDate: cacheEntry.startDate,
+        startTime: cacheEntry.startTime,
+      }
+    : null;
+
+  if (!force && cacheEntry && !playerPropsInFlight.has(cacheKey)) {
+    const background = fetchPlayerPropsFromVendor({
+      sportKey,
+      eventId,
+      markets,
+      bookmakers,
+      regions,
+      state,
+      etag: cacheEntry.etag,
+      cachedSnapshot,
+    }).then((result) => {
+      if (result?.payload) {
+        const entry = {
+          payload: {
+            league: sportKey,
+            game_id: eventId,
+            items: result.payload.items,
+            start_iso: result.payload.start_iso,
+            has_started: result.payload.has_started,
+          },
+          timestamp: result.timestamp,
+          etag: result.etag,
+          startDate: result.startDate,
+          startTime: result.startTime,
+        };
+        setPlayerPropsCacheEntry(cacheKey, entry);
+      }
+      return result;
+    }).catch((err) => {
+      console.warn('player-props background refresh failed:', err.message);
+      return null;
+    }).finally(() => playerPropsInFlight.delete(cacheKey));
+    playerPropsInFlight.set(cacheKey, background);
+    recordPlayerPropMetric('staleHits', 1);
+    return formatPlayerPropsPayload(cacheEntry, { stale: true });
+  }
+
+  if (!force && cacheEntry) {
+    recordPlayerPropMetric('staleHits', 1);
+    return formatPlayerPropsPayload(cacheEntry, { stale: true });
+  }
+
+  if (playerPropsInFlight.has(cacheKey)) {
+    const inflight = await playerPropsInFlight.get(cacheKey);
+    if (inflight?.payload) {
+      const entry = {
+        payload: {
+          league: sportKey,
+          game_id: eventId,
+          items: inflight.payload.items,
+          start_iso: inflight.payload.start_iso,
+          has_started: inflight.payload.has_started,
+        },
+        timestamp: inflight.timestamp,
+        etag: inflight.etag,
+        startDate: inflight.startDate,
+        startTime: inflight.startTime,
+      };
+      setPlayerPropsCacheEntry(cacheKey, entry);
+      return formatPlayerPropsPayload(entry, { stale: false });
+    }
+    return inflight;
+  }
+
+  recordPlayerPropMetric('cacheMisses', 1);
+
+  const fetchPromise = fetchPlayerPropsFromVendor({
+    sportKey,
+    eventId,
+    markets,
+    bookmakers,
+    regions,
+    state,
+    etag: cacheEntry?.etag,
+    cachedSnapshot,
+  }).then((result) => {
+    if (result?.payload) {
+      const entry = {
+        payload: {
+          league: sportKey,
+          game_id: eventId,
+          items: result.payload.items,
+          start_iso: result.payload.start_iso,
+          has_started: result.payload.has_started,
+        },
+        timestamp: result.timestamp,
+        etag: result.etag,
+        startDate: result.startDate,
+        startTime: result.startTime,
+      };
+      setPlayerPropsCacheEntry(cacheKey, entry);
+      return formatPlayerPropsPayload(entry, { stale: false });
+    }
+    return null;
+  }).catch((err) => {
+    console.error('player-props fetch error:', err.message);
+    if (cacheEntry) {
+      recordPlayerPropMetric('staleHits', 1);
+      return formatPlayerPropsPayload(cacheEntry, { stale: true });
+    }
+    throw err;
+  }).finally(() => playerPropsInFlight.delete(cacheKey));
+
+  playerPropsInFlight.set(cacheKey, fetchPromise);
+  return fetchPromise;
+}
+
+async function getEventIdsForLeagueDate(league, date) {
+  if (!league || !date) return [];
+  if (!API_KEY) {
+    console.warn('⚠️  Cannot resolve events without ODDS_API_KEY');
+    return [];
+  }
+
+  const cacheKey = getCacheKey('events-by-date', { league, date });
+  const cached = getCachedResponse(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(league)}/events?apiKey=${API_KEY}`;
+    const { data } = await axios.get(url, { timeout: 8000 });
+    const events = Array.isArray(data) ? data : [];
+    const filtered = events.filter((event) => {
+      const commence = event?.commence_time ? new Date(event.commence_time) : null;
+      if (!commence) return false;
+      return commence.toISOString().slice(0, 10) === date;
+    }).map((event) => event.id).filter(Boolean);
+
+    setCachedResponse(cacheKey, filtered);
+    return filtered;
+  } catch (error) {
+    console.error('Failed to load events for league/date', league, date, error.message);
+    return [];
+  }
 }
 
 function getCachedResponse(cacheKey) {
@@ -228,8 +846,10 @@ async function axiosWithRetry(url, options = {}, { tries = 2, backoffMs = 700 } 
       // Retry transient errors with exponential backoff
       if (!isLastAttempt && (status >= 500 || !status)) {
         const delay = backoffMs * Math.pow(2, attempt - 1);
-        console.warn(`Attempt ${attempt} failed (${status || 'timeout'}), retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        const jitter = Math.floor(Math.random() * 250);
+        const waitFor = delay + jitter;
+        console.warn(`Attempt ${attempt} failed (${status || 'timeout'}), retrying in ${waitFor}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitFor));
         continue;
       }
       
@@ -1112,6 +1732,105 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     console.error("odds error:", err?.response?.status, err?.response?.data || err.message);
     const status = err?.response?.status || 500;
     res.status(status).json({ error: String(err) });
+  }
+});
+
+app.get('/api/player-props', requireUser, trackUsage, async (req, res) => {
+  recordPlayerPropMetric('requests', 1);
+
+  if (!ENABLE_PLAYER_PROPS_V2) {
+    return res.status(503).json({ error: 'PLAYER_PROPS_DISABLED', message: 'Player props API is disabled. Set ENABLE_PLAYER_PROPS_V2=true to enable.' });
+  }
+
+  try {
+    const league = req.query.league;
+    const date = req.query.date;
+    const markets = req.query.markets ? String(req.query.markets).split(',').map((m) => m.trim()).filter(Boolean) : undefined;
+    const bookmakers = req.query.bookmakers ? String(req.query.bookmakers).split(',').map((b) => b.trim()).filter(Boolean) : undefined;
+    const regions = req.query.regions;
+    const state = (req.query.state || req.headers['x-user-state'] || DEFAULT_BOOK_STATE).toLowerCase();
+    const force = req.query.force === 'true';
+    const explicitGameId = req.query.game_id || req.query.gameId || null;
+
+    if (!league || !date) {
+      return res.status(400).json({ error: 'missing_parameters', message: 'league and date are required (YYYY-MM-DD)' });
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ error: 'invalid_date', message: 'date must be YYYY-MM-DD' });
+    }
+
+    const resolvedEventIds = explicitGameId
+      ? [explicitGameId]
+      : await getEventIdsForLeagueDate(league, date);
+
+    const eventIds = resolvedEventIds.slice(0, Number(req.query.limit || 10));
+
+    if (eventIds.length === 0) {
+      return res.json({ stale: false, ttl: PLAYER_PROPS_CACHE_TTL_MS, as_of: new Date().toISOString(), items: [] });
+    }
+
+    const items = [];
+    let stale = false;
+    let ttl = PLAYER_PROPS_CACHE_TTL_MS;
+    let freshest = 0;
+
+    for (const eventId of eventIds) {
+      const payload = await loadPlayerProps({
+        sportKey: league,
+        eventId,
+        markets,
+        bookmakers,
+        regions,
+        state,
+        force,
+      });
+
+      if (!payload) {
+        continue;
+      }
+
+      stale = stale || payload.stale;
+      ttl = Math.min(ttl, payload.ttl);
+      const asOfTs = payload.as_of ? Date.parse(payload.as_of) : 0;
+      if (asOfTs > freshest) {
+        freshest = asOfTs;
+      }
+
+      payload.items.forEach((item) => {
+        items.push(item);
+      });
+    }
+
+    const metrics = summarizePlayerPropMetrics();
+    console.log('[player-props] metrics', {
+      requests: playerPropsMetrics.requests,
+      cacheHits: playerPropsMetrics.cacheHits,
+      cacheMisses: playerPropsMetrics.cacheMisses,
+      staleHits: playerPropsMetrics.staleHits,
+      vendorErrors: playerPropsMetrics.vendorErrors,
+      notModified: playerPropsMetrics.notModifiedHits,
+      droppedOutcomes: playerPropsMetrics.droppedOutcomes,
+      averageVendorMs: metrics?.averageVendorMs || null,
+      samples: metrics?.samples || 0,
+    });
+
+    return res.json({
+      stale,
+      ttl,
+      as_of: freshest ? new Date(freshest).toISOString() : new Date().toISOString(),
+      items,
+    });
+  } catch (error) {
+    recordPlayerPropMetric('vendorErrors', 1);
+    console.error('player-props route error:', error.message);
+
+    const status = error?.response?.status || 500;
+    if (status >= 500) {
+      return res.status(status).json({ error: 'PLAYER_PROPS_UPSTREAM_ERROR', detail: error.message });
+    }
+
+    return res.status(status).json({ error: 'PLAYER_PROPS_ERROR', detail: error.message });
   }
 });
 

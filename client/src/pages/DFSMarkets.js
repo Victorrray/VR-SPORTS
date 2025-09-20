@@ -4,6 +4,7 @@ import OddsTable from "../components/betting/OddsTable";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
+import { secureFetch } from "../utils/security";
 
 // Only these 3 DFS apps
 const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
@@ -186,24 +187,77 @@ export default function DFSMarkets() {
         const eventsWithProps = await runLimited(CONCURRENCY, seeds, async (ev) => {
           const markets = getMarketsForSport(ev.sport_key); // include _alternate
           const base = withApiBase('');
-          const url = `${base}/api/player-props?sport=${ev.sport_key}` +
-            `&eventId=${encodeURIComponent(ev.id)}` +
-            `&regions=us&markets=${encodeURIComponent(markets)}`;
+          const eventDate = ev.commence_time ? new Date(ev.commence_time).toISOString().slice(0, 10) : null;
+          if (!eventDate) return null;
 
-          const r = await fetch(url);
-          if (!r.ok) return null;
+          const params = new URLSearchParams({
+            league: ev.sport_key,
+            date: eventDate,
+            game_id: ev.id,
+            markets,
+          });
 
-          const data = await r.json();
-          let books = [];
-          if (Array.isArray(data)) books = data;
-          else if (data?.bookmakers) books = data.bookmakers;
-          else if (data?.key && data?.markets) books = [data];
+          let response;
+          try {
+            response = await secureFetch(`${base}/api/player-props?${params.toString()}`, {
+              credentials: 'include',
+              headers: { Accept: 'application/json' },
+            });
+          } catch (err) {
+            return null;
+          }
 
-          const dfsBooks = (books || []).filter(bk =>
-            DFS_KEYS.includes((bk.key || "").toLowerCase())
-          );
+          if (!response.ok) return null;
 
+          let data;
+          try {
+            data = await response.json();
+          } catch (_) {
+            return null;
+          }
+          if (!Array.isArray(data?.items) || !data.items.length) return null;
+
+          const booksMap = new Map();
+          data.items.forEach((item) => {
+            const bookKey = (item.book || '').toLowerCase();
+            if (!bookKey) return;
+            if (!booksMap.has(bookKey)) {
+              booksMap.set(bookKey, {
+                key: bookKey,
+                title: item.book_label || bookKey,
+                markets: new Map(),
+              });
+            }
+            const bookEntry = booksMap.get(bookKey);
+            const marketKey = item.market;
+            if (!bookEntry.markets.has(marketKey)) {
+              bookEntry.markets.set(marketKey, {
+                key: marketKey,
+                outcomes: [],
+              });
+            }
+            bookEntry.markets.get(marketKey).outcomes.push({
+              name: item.ou,
+              description: item.player,
+              player: item.player,
+              price: item.price,
+              point: item.line,
+              url: item.url,
+              link_available: item.link_available,
+              is_latest: item.is_latest,
+              is_active: item.is_active,
+            });
+          });
+
+          const books = Array.from(booksMap.values()).map((book) => ({
+            key: book.key,
+            title: book.title,
+            markets: Array.from(book.markets.values()).filter((mkt) => mkt.outcomes.length > 0),
+          }));
+
+          const dfsBooks = books.filter((bk) => DFS_KEYS.includes((bk.key || '').toLowerCase()));
           if (!dfsBooks.length) return null;
+
           return { ...ev, bookmakers: dfsBooks };
         });
 

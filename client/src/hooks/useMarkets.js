@@ -104,7 +104,8 @@ function normalizeArray(resp) {
 // Cache for storing previous results to prevent unnecessary re-renders
 const marketCache = new Map();
 
-export const useMarkets = (sports = [], regions = [], markets = []) => {
+export const useMarkets = (sports = [], regions = [], markets = [], options = {}) => {
+  const { enabled = true } = options;
   const [games, setGames] = useState([]);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,11 +127,18 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
   const activeRequest = useRef(null);
   // Track retry attempts
   const retryCount = useRef(0);
+  const stableFetch = useRef(null);
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 5000; // 5 seconds between retries
 
   // Debounced fetch function with enhanced error handling and retry logic
   const fetchMarkets = useMemoizedCallback(debounce(async (isRetry = false) => {
+    if (!enabled) {
+      console.log('🔍 useMarkets: Skipping fetch - hook disabled');
+      setIsLoading(false);
+      return;
+    }
+
     const now = Date.now();
     
     // Skip if we have a recent successful fetch (unless it's a retry)
@@ -423,17 +431,27 @@ export const useMarkets = (sports = [], regions = [], markets = []) => {
       setIsLoading(false);
       activeRequest.current = null;
     }
-  }, [sports, regions, markets, paramsKey, games.length, handleApiResponse]));
+  }, [sports, regions, markets, paramsKey, games.length, handleApiResponse, enabled]));
 
 // Throttled refresh function
 const refreshMarkets = useMemo(() => throttle(() => {
+  if (!enabled) return;
   if (!isLoading) {
     fetchMarkets();
   }
-}, 5000), [fetchMarkets, isLoading]);
+}, 5000), [fetchMarkets, isLoading, enabled]);
 
 // Set up auto-refresh and initial fetch
 useEffect(() => {
+  if (!enabled) {
+    setIsLoading(false);
+    return () => {
+      if (stableFetch.current?.cancel) {
+        stableFetch.current.cancel();
+      }
+    };
+  }
+
   // Initial fetch
   fetchMarkets();
   
@@ -445,7 +463,7 @@ useEffect(() => {
     clearInterval(refreshInterval);
     activeRequest.current = null;
   };
-}, [fetchMarkets, refreshMarkets]);
+}, [enabled, fetchMarkets, refreshMarkets]);
 
 useEffect(() => {
   if (games) {
@@ -466,10 +484,14 @@ useEffect(() => {
   }
 }, [games]);
 
-// Stable reference to prevent jitter
-const stableFetch = useRef(null);
-  
 useEffect(() => {
+  if (!enabled) {
+    if (stableFetch.current?.cancel) {
+      stableFetch.current.cancel();
+    }
+    return;
+  }
+
   // Only create new debounced function if params actually changed
   const paramsKey = `${sports.join(',')}-${regions.join(',')}-${markets.join(',')}`;
   
@@ -484,7 +506,7 @@ useEffect(() => {
   }
   
   stableFetch.current();
-}, [sports, regions, markets, fetchMarkets]);
+}, [sports, regions, markets, fetchMarkets, enabled]);
 
   // Memoize the return value to prevent unnecessary re-renders
   return useMemo(() => ({

@@ -662,7 +662,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (error) throw error;
-    return data;
+    return { data, error: null };
   };
 
   const signIn = async (email, password) => {
@@ -684,7 +684,10 @@ export const AuthProvider = ({ children }) => {
       setSession({ user: demoUser });
       
       console.log('🔐 useAuth: Demo login successful for:', email);
-      return { user: demoUser, session: { user: demoUser } };
+      return {
+        data: { user: demoUser, session: { user: demoUser } },
+        error: null,
+      };
     }
     
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -693,7 +696,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (error) throw error;
-    return data;
+    return { data, error: null };
   };
 
   const signOut = async () => {
