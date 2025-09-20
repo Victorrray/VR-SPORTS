@@ -123,6 +123,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
   
   // Store the last successful fetch time
   const lastFetchTime = useRef(0);
+  const COOLDOWN_MS = 30_000;
   // Track if we have an active request
   const activeRequest = useRef(null);
   // Track retry attempts
@@ -140,11 +141,16 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     }
 
     const now = Date.now();
-    
-    // Skip if we have a recent successful fetch (unless it's a retry)
-    if (!isRetry && now - lastFetchTime.current < 5000 && activeRequest.current) {
-      console.log('🔍 useMarkets: Skipping fetch - too soon after last successful fetch');
-      return activeRequest.current;
+    const withinCooldown = now - lastFetchTime.current < COOLDOWN_MS;
+
+    // Skip if we recently fetched (unless it's a retry)
+    if (!isRetry && withinCooldown) {
+      if (activeRequest.current) {
+        console.log('🔍 useMarkets: Waiting on in-flight request');
+        return activeRequest.current;
+      }
+      console.log('🔍 useMarkets: Skipping fetch - within cooldown window');
+      return;
     }
     
     console.log('🔍 useMarkets: fetchMarkets called with:', { sports, regions, markets });
@@ -218,8 +224,8 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         
         clearTimeout(timeoutId);
         
-        console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
-        
+      console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
+
         // Handle quota exceeded before other errors
         const quotaResult = await handleApiResponse(response);
         if (quotaResult.quotaExceeded) {
@@ -431,7 +437,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       setIsLoading(false);
       activeRequest.current = null;
     }
-  }, [sports, regions, markets, paramsKey, games.length, handleApiResponse, enabled]));
+  }, [paramsKey, handleApiResponse, enabled]));
 
 // Throttled refresh function
 const refreshMarkets = useMemo(() => throttle(() => {

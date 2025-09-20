@@ -24,8 +24,19 @@ self.addEventListener('install', (event) => {
   
   event.waitUntil(
     Promise.all([
-      caches.open(STATIC_CACHE).then(cache => {
-        return cache.addAll(STATIC_ASSETS);
+      caches.open(STATIC_CACHE).then(async (cache) => {
+        try {
+          await cache.addAll(STATIC_ASSETS);
+        } catch (err) {
+          console.warn('Service Worker: bulk cache failed, retrying individually', err);
+          for (const asset of STATIC_ASSETS) {
+            try {
+              await cache.add(asset);
+            } catch (assetErr) {
+              console.warn('Service Worker: skipping asset', asset, assetErr?.message || assetErr);
+            }
+          }
+        }
       }),
       caches.open(API_CACHE)
     ]).then(() => {

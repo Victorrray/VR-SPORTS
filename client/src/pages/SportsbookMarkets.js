@@ -15,6 +15,7 @@ import OddsTable from "../components/betting/OddsTable";
 import ArbitrageDetector from "../components/betting/ArbitrageDetector";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
+import { secureFetch } from "../utils/security";
 import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
@@ -443,7 +444,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetch(withApiBase('/api/sports'));
+        const r = await secureFetch(withApiBase('/api/sports'), {
+          credentials: 'include',
+        });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const arr = await r.json();
         let normalized = (Array.isArray(arr) ? arr : [])
