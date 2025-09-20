@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { PlanProvider } from './providers/PlanProvider';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AccessibilityProvider } from './components/layout/AccessibilityProvider';
 import { BetSlipProvider } from './contexts/BetSlipContext';
@@ -38,7 +39,7 @@ import './styles/browserCompat.css';
 import './styles/responsive-mobile.css';
 
 function AppRoutes() {
-  const { user, planNotice, clearPlanNotice, planInfo } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [quotaModal, setQuotaModal] = useState({ open: false, detail: null });
@@ -105,12 +106,6 @@ function AppRoutes() {
             }
           }} />
           <main className="main-content" id="main-content" tabIndex="-1">
-            {planNotice && (
-              <div className={`plan-notice-banner ${planInfo?.plan === 'platinum' ? 'plan-notice-upgrade' : 'plan-notice-downgrade'}`}>
-                <span>{planNotice}</span>
-                <button type="button" onClick={clearPlanNotice} aria-label="Dismiss plan notice">×</button>
-              </div>
-            )}
             <AuthDebug />
             <Routes>
               <Route path="/" element={<Home />} />
@@ -177,15 +172,17 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <BetSlipProvider>
-          <AccessibilityProvider>
-            <ToastProvider>
-              <ErrorBoundary>
-                <AppRoutes />
-              </ErrorBoundary>
-            </ToastProvider>
-          </AccessibilityProvider>
-        </BetSlipProvider>
+        <PlanProvider>
+          <BetSlipProvider>
+            <AccessibilityProvider>
+              <ToastProvider>
+                <ErrorBoundary>
+                  <AppRoutes />
+                </ErrorBoundary>
+              </ToastProvider>
+            </AccessibilityProvider>
+          </BetSlipProvider>
+        </PlanProvider>
       </AuthProvider>
     </HelmetProvider>
   );

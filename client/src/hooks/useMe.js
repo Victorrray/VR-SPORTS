@@ -1,6 +1,6 @@
-// Hook to expose cached usage/plan information across the app
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
+import { usePlan } from './usePlan';
 import { loadPlanInfo, isPlanInfoStale } from '../utils/planCache';
 import { apiUsageEvents } from './useMarkets';
 
@@ -12,13 +12,11 @@ const DEFAULT_ME = {
   stale: false,
 };
 
-function planInfoToUsage(info) {
+function planToUsage(info) {
   if (!info) return DEFAULT_ME;
-
   const quota = info.quota ?? info.limit ?? 250;
   const used = info.used ?? info.calls_made ?? 0;
   const remaining = info.remaining ?? (quota ? Math.max(0, quota - used) : 250);
-
   return {
     plan: info.plan || 'free',
     remaining,
@@ -29,11 +27,12 @@ function planInfoToUsage(info) {
 }
 
 export function useMe() {
-  const { planInfo, refreshPlan, authLoading, planLoading: authPlanLoading, session } = useAuth();
-  const initialPlan = planInfo || loadPlanInfo();
+  const { session, authLoading } = useAuth();
+  const { plan, planLoading, refreshPlan } = usePlan();
+  const initialPlan = plan || loadPlanInfo();
 
-  const [me, setMe] = useState(() => planInfoToUsage(initialPlan));
-  const [localLoading, setLocalLoading] = useState(() => authPlanLoading || !initialPlan);
+  const [me, setMe] = useState(() => planToUsage(initialPlan));
+  const [loading, setLoading] = useState(() => planLoading || !initialPlan);
   const [error, setError] = useState(null);
 
   const mountedRef = useRef(true);
@@ -41,17 +40,17 @@ export function useMe() {
   const lastUsageRefreshRef = useRef(0);
 
   const syncUsage = useCallback((info) => {
-    setMe(planInfoToUsage(info));
+    setMe(planToUsage(info));
     setError(null);
   }, []);
 
-  const forceRefresh = useCallback(async ({ force = false } = {}) => {
+  const runRefresh = useCallback(async ({ force = false } = {}) => {
     if (!refreshPlan || refreshingRef.current || !session) {
-      return planInfo || loadPlanInfo();
+      return plan || loadPlanInfo();
     }
 
     refreshingRef.current = true;
-    setLocalLoading(true);
+    setLoading(true);
 
     try {
       const result = await refreshPlan({ force });
@@ -66,62 +65,59 @@ export function useMe() {
       return null;
     } finally {
       if (mountedRef.current) {
-        setLocalLoading(false);
+        setLoading(false);
       }
       refreshingRef.current = false;
     }
-  }, [refreshPlan, session, planInfo, syncUsage]);
+  }, [refreshPlan, session, plan, syncUsage]);
 
   useEffect(() => () => {
     mountedRef.current = false;
   }, []);
 
   useEffect(() => {
-    if (planInfo) {
-      syncUsage(planInfo);
-      setLocalLoading(false);
+    if (plan) {
+      syncUsage(plan);
+      setLoading(planLoading);
     }
-  }, [planInfo, syncUsage]);
+  }, [plan, planLoading, syncUsage]);
 
   useEffect(() => {
     if (authLoading) return;
 
-    const current = planInfo || loadPlanInfo();
+    const currentPlan = plan || loadPlanInfo();
     if (!session) {
-      setLocalLoading(false);
-      syncUsage(current);
+      setLoading(false);
+      syncUsage(currentPlan);
       return;
     }
 
-    if (!current) {
-      forceRefresh({ force: true });
-    } else if (isPlanInfoStale(current)) {
-      forceRefresh({ force: false });
+    if (!currentPlan) {
+      runRefresh({ force: true });
+    } else if (isPlanInfoStale(currentPlan)) {
+      runRefresh({ force: false });
     } else {
-      setLocalLoading(false);
+      setLoading(planLoading);
     }
-  }, [authLoading, session, planInfo, forceRefresh, syncUsage]);
+  }, [authLoading, session, plan, planLoading, runRefresh, syncUsage]);
 
   useEffect(() => {
     const handleUsage = () => {
       const now = Date.now();
       if (now - lastUsageRefreshRef.current >= 120000) {
         lastUsageRefreshRef.current = now;
-        forceRefresh({ force: false });
+        runRefresh({ force: false });
       }
     };
 
     apiUsageEvents.addEventListener('apiCallMade', handleUsage);
     return () => apiUsageEvents.removeEventListener('apiCallMade', handleUsage);
-  }, [forceRefresh]);
-
-  const combinedLoading = authPlanLoading || localLoading;
+  }, [runRefresh]);
 
   return {
     me,
-    loading: combinedLoading,
-    planLoading: combinedLoading,
+    loading,
     error,
-    refresh: forceRefresh,
+    refresh: runRefresh,
   };
 }

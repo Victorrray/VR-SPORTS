@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function AuthDebug() {
-  const { user, loading, isSupabaseEnabled } = useAuth();
+  const { user, authLoading, isSupabaseEnabled } = useAuth();
   
   // Only show in development
   if (process.env.NODE_ENV !== 'development') {
