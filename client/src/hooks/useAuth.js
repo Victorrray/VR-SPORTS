@@ -7,9 +7,6 @@ import { loadPlanInfo, savePlanInfo, clearPlanInfo, isPlanInfoStale } from '../u
 
 const AuthContext = createContext({});
 
-// Session storage key
-const SESSION_STORAGE_KEY = 'sb-session';
-
 // Session validation timeout (5 minutes)
 const SESSION_VALIDATION_INTERVAL = 5 * 60 * 1000;
 const PLAN_MIN_INTERVAL = 30 * 1000; // rate limit plan refreshes
@@ -33,7 +30,8 @@ const defaultPlan = {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [planLoading, setPlanLoading] = useState(!cachedPlanInfo);
   const [session, setSession] = useState(null);
   const isSupabaseEnabled = !!supabase;
   const sessionRef = useRef(null);
@@ -42,11 +40,18 @@ export const AuthProvider = ({ children }) => {
   const planNoticeTimeoutRef = useRef(null);
   const lastPlanStaleRef = useRef(false);
   const validationIntervalRef = useRef(null);
+  const pendingSignOutRef = useRef(null);
 
   const cachedPlanInfo = loadPlanInfo();
   const [planInfo, setPlanInfo] = useState(cachedPlanInfo);
   const [planNotice, setPlanNotice] = useState('');
   const planInfoRef = useRef(cachedPlanInfo);
+
+  useEffect(() => {
+    if (planInfo) {
+      setPlanLoading(false);
+    }
+  }, [planInfo]);
 
   const initialPremiumSeen = cachedPlanInfo && isPremiumPlan(cachedPlanInfo.plan)
     ? new Date(cachedPlanInfo.fetchedAt || Date.now()).getTime()
@@ -108,7 +113,12 @@ export const AuthProvider = ({ children }) => {
       clearTimeout(planNoticeTimeoutRef.current);
       planNoticeTimeoutRef.current = null;
     }
-    setLoading(false);
+    setAuthLoading(false);
+    setPlanLoading(false);
+    if (pendingSignOutRef.current) {
+      clearTimeout(pendingSignOutRef.current);
+      pendingSignOutRef.current = null;
+    }
 
     const fetchState = planFetchStateRef.current;
     if (fetchState.controller) {
@@ -121,7 +131,6 @@ export const AuthProvider = ({ children }) => {
     fetchState.attempt = 0;
     fetchState.lastPremiumSeen = 0;
 
-    safeRemoveItem(SESSION_STORAGE_KEY);
     safeRemoveItem('demo-auth-session');
     clearPlanInfo();
     sessionRef.current = null;
@@ -163,44 +172,46 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const fetchPlanStatus = useCallback(async ({ force = false } = {}) => {
-    if (!sessionRef.current) return planInfoRef.current || null;
+    if (!sessionRef.current) {
+      setPlanLoading(false);
+      return planInfoRef.current || null;
+    }
 
     const fetchState = planFetchStateRef.current;
     const now = Date.now();
     const existingPlan = planInfoRef.current || loadPlanInfo();
-
     const isHidden = typeof document !== 'undefined' && document.visibilityState === 'hidden';
     const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
 
-    if (!force && (isHidden || isOffline)) {
+    if (!force && (isHidden || isOffline) && existingPlan) {
+      setPlanLoading(false);
       return existingPlan;
     }
 
-    if (!force && fetchState.promise) {
-      return fetchState.promise;
-    }
-
-    if (!force && fetchState.lastFetch && now - fetchState.lastFetch < PLAN_MIN_INTERVAL) {
-      return existingPlan;
-    }
-
-    if (!force && fetchState.backoffUntil && now < fetchState.backoffUntil) {
-      return existingPlan;
+    if (!force) {
+      if (fetchState.promise) {
+        return fetchState.promise;
+      }
+      if (fetchState.lastFetch && now - fetchState.lastFetch < PLAN_MIN_INTERVAL && existingPlan) {
+        setPlanLoading(false);
+        return existingPlan;
+      }
+      if (fetchState.backoffUntil && now < fetchState.backoffUntil && existingPlan) {
+        setPlanLoading(false);
+        return existingPlan;
+      }
     }
 
     if (fetchState.promise) {
-      // A force request should replace the in-flight one
-      if (force) {
-        fetchState.controller?.abort();
-      } else {
-        return fetchState.promise;
-      }
+      fetchState.controller?.abort();
     }
 
     const controller = new AbortController();
     fetchState.controller = controller;
     const requestToken = Symbol('planFetch');
     fetchState.currentToken = requestToken;
+
+    setPlanLoading(true);
 
     const doFetch = (async () => {
       const timeoutId = setTimeout(() => controller.abort(), PLAN_FETCH_TIMEOUT);
@@ -296,16 +307,27 @@ export const AuthProvider = ({ children }) => {
           return cachedStale;
         }
 
-        planInfoRef.current = defaultPlan;
-        setPlanInfo(defaultPlan);
+        if (controller.signal.aborted) {
+          return { ...defaultPlan, stale: true, source: 'default' };
+        }
+
+        const defaultPlanInfo = {
+          ...defaultPlan,
+          fetchedAt: new Date().toISOString(),
+          stale: true,
+          source: 'default'
+        };
+        planInfoRef.current = defaultPlanInfo;
+        setPlanInfo(defaultPlanInfo);
         fetchState.lastFetch = Date.now();
-        return defaultPlan;
+        return defaultPlanInfo;
       } finally {
         clearTimeout(timeoutId);
         if (fetchState.currentToken === requestToken) {
           fetchState.promise = null;
           fetchState.controller = null;
           fetchState.currentToken = null;
+          setPlanLoading(false);
         }
       }
     })();
@@ -368,8 +390,6 @@ export const AuthProvider = ({ children }) => {
       }
       lastValidationRef.current = now;
 
-      safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(currentSession));
-
       // Only update if the user has changed
       if (activeSession?.user?.id !== currentSession.user.id) {
         console.log('🔐 useAuth: Session validated, user:', currentSession.user.email);
@@ -387,7 +407,7 @@ export const AuthProvider = ({ children }) => {
       clearSessionState();
       return null;
     }
-  }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, fetchPlanStatus, safeSetItem]);
+  }, [isSupabaseEnabled, clearSessionState, fetchUserProfile, fetchPlanStatus]);
 
   // Initialize auth state and set up listeners
   useEffect(() => {
@@ -431,55 +451,11 @@ export const AuthProvider = ({ children }) => {
             }
           }
           
-          if (isMounted) setLoading(false);
+          if (isMounted) setAuthLoading(false);
           return;
         }
 
-        // Check for stored session first
-        const storedSession = safeGetItem(SESSION_STORAGE_KEY);
-        if (storedSession) {
-          try {
-            const parsedSession = JSON.parse(storedSession);
-            if (parsedSession?.user) {
-              console.log('🔐 useAuth: Found stored session for:', parsedSession.user.email);
-
-              // Validate against Supabase to ensure the session is still active
-              const { data: { session: freshSession }, error: refreshError } = await supabase.auth.getSession();
-
-              if (refreshError || !freshSession?.user) {
-                console.log('🔐 useAuth: Stored session invalid, clearing');
-                clearSessionState();
-              } else {
-                sessionRef.current = freshSession;
-                setSession(freshSession);
-                setUser(freshSession.user);
-                await fetchUserProfile(freshSession.user.id);
-                fetchPlanStatus().catch((err) => {
-                  console.warn('useAuth: background plan refresh failed (stored session)', err);
-                });
-
-                safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
-
-                if (!validationIntervalRef.current) {
-                  validationIntervalRef.current = setInterval(() => {
-                    if (isMounted) validateSession();
-                  }, SESSION_VALIDATION_INTERVAL);
-                }
-
-                if (isMounted) setLoading(false);
-                return;
-              }
-            } else {
-              clearSessionState();
-            }
-          } catch (error) {
-            console.error('🔐 useAuth: Error parsing stored session:', error);
-            clearSessionState();
-          }
-        }
-
-        // If no stored session or invalid, get fresh session
-        console.log('🔐 useAuth: No valid stored session, fetching from server');
+        console.log('🔐 useAuth: Fetching Supabase session');
         const { data: { session: freshSession }, error } = await supabase.auth.getSession();
         
         if (error) throw error;
@@ -496,8 +472,6 @@ export const AuthProvider = ({ children }) => {
             fetchPlanStatus().catch((err) => {
               console.warn('useAuth: background plan refresh failed (fresh session)', err);
             });
-
-            safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(freshSession));
 
             if (!validationIntervalRef.current) {
               validationIntervalRef.current = setInterval(() => {
@@ -516,7 +490,7 @@ export const AuthProvider = ({ children }) => {
       } finally {
         if (isMounted) {
           console.log('🔐 useAuth: Setting loading to false');
-          setLoading(false);
+          setAuthLoading(false);
           if (fallbackTimeout) clearTimeout(fallbackTimeout);
           settled = true;
         }
@@ -535,44 +509,43 @@ export const AuthProvider = ({ children }) => {
           
           console.log('🔐 useAuth: Auth state change:', event, !!newSession);
           
-          // Update session and user state
+          if (pendingSignOutRef.current) {
+            clearTimeout(pendingSignOutRef.current);
+            pendingSignOutRef.current = null;
+          }
+
+          if (!newSession?.user) {
+            pendingSignOutRef.current = setTimeout(() => {
+              if (!isMounted) return;
+              console.log('🔐 useAuth: Clearing session data');
+              clearSessionState();
+              if (validationIntervalRef.current) {
+                clearInterval(validationIntervalRef.current);
+                validationIntervalRef.current = null;
+              }
+            }, 300);
+            return;
+          }
+
           sessionRef.current = newSession;
           setSession(newSession);
-          setUser(newSession?.user || null);
-          
-          if (newSession?.user) {
-            console.log('🔐 useAuth: Auth change - fetching profile for:', newSession.user.id);
-            
-            // Store the session for persistence
-            safeSetItem(SESSION_STORAGE_KEY, JSON.stringify(newSession));
-            
-            // Fetch user profile
-            await fetchUserProfile(newSession.user.id);
-            fetchPlanStatus().catch((err) => {
-              console.warn('useAuth: background plan refresh failed (auth state change)', err);
-            });
-            
-            // Set up periodic session validation if not already set
-            if (!validationIntervalRef.current) {
-              validationIntervalRef.current = setInterval(() => {
-                if (isMounted) validateSession();
-              }, SESSION_VALIDATION_INTERVAL);
-            }
-          } else {
-            // Clear session data on sign out
-            console.log('🔐 useAuth: Clearing session data');
-            clearSessionState();
+          setUser(newSession.user);
 
-            // Clear validation interval
-            if (validationIntervalRef.current) {
-              clearInterval(validationIntervalRef.current);
-              validationIntervalRef.current = null;
-            }
+          console.log('🔐 useAuth: Auth change - fetching profile for:', newSession.user.id);
+          await fetchUserProfile(newSession.user.id);
+          fetchPlanStatus().catch((err) => {
+            console.warn('useAuth: background plan refresh failed (auth state change)', err);
+          });
+
+          if (!validationIntervalRef.current) {
+            validationIntervalRef.current = setInterval(() => {
+              if (isMounted) validateSession();
+            }, SESSION_VALIDATION_INTERVAL);
           }
           
           if (!settled) {
             console.log('🔐 useAuth: Auth change - setting loading false');
-            setLoading(false);
+            setAuthLoading(false);
             if (fallbackTimeout) clearTimeout(fallbackTimeout);
             settled = true;
           }
@@ -590,7 +563,7 @@ export const AuthProvider = ({ children }) => {
     fallbackTimeout = setTimeout(() => {
       if (isMounted && !settled) {
         console.log('🔐 useAuth: Fallback timeout - forcing loading to false');
-        setLoading(false);
+        setAuthLoading(false);
         settled = true;
       }
     }, 5000);
@@ -604,32 +577,39 @@ export const AuthProvider = ({ children }) => {
         clearInterval(validationIntervalRef.current);
         validationIntervalRef.current = null;
       }
+      if (pendingSignOutRef.current) {
+        clearTimeout(pendingSignOutRef.current);
+        pendingSignOutRef.current = null;
+      }
     };
-  }, [clearSessionState, fetchUserProfile, isSupabaseEnabled, safeGetItem, safeSetItem, validateSession]);
+  }, [clearSessionState, fetchUserProfile, isSupabaseEnabled, safeGetItem, validateSession]);
 
   useEffect(() => {
     if (session) {
       const currentPlan = planInfoRef.current || loadPlanInfo();
       const shouldForce = !currentPlan || isPlanInfoStale(currentPlan);
       fetchPlanStatus({ force: shouldForce });
-    } else if (!loading) {
+    } else if (!authLoading) {
       setPlanInfo(null);
       planInfoRef.current = null;
       clearPlanInfo();
+      setPlanLoading(false);
     }
-  }, [session, loading, fetchPlanStatus]);
+  }, [session, authLoading, fetchPlanStatus]);
 
   useEffect(() => {
     if (!isSupabaseEnabled) return undefined;
 
     const handleVisibility = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        validateSession().finally(() => fetchPlanStatus({ force: true }));
+        validateSession();
+        fetchPlanStatus();
       }
     };
 
     const handleOnline = () => {
-      validateSession().finally(() => fetchPlanStatus({ force: true }));
+      validateSession();
+      fetchPlanStatus();
     };
 
     if (typeof document !== 'undefined') {
@@ -784,7 +764,9 @@ export const AuthProvider = ({ children }) => {
     user,
     profile,
     session,
-    loading,
+    loading: authLoading,
+    authLoading,
+    planLoading,
     signUp,
     signIn,
     setUsername,
@@ -814,7 +796,7 @@ export const AuthProvider = ({ children }) => {
     planInfo,
     planNotice,
     clearPlanNotice,
-    refreshPlan: (options) => fetchPlanStatus({ force: true, ...(options || {}) })
+    refreshPlan: (options) => fetchPlanStatus(options || {})
   };
 
   return (

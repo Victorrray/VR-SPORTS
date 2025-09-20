@@ -3,10 +3,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 const PrivateRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, authLoading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>

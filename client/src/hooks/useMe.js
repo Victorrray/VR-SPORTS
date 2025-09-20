@@ -29,31 +29,32 @@ function planInfoToUsage(info) {
 }
 
 export function useMe() {
-  const { planInfo, refreshPlan, loading: authLoading, session } = useAuth();
+  const { planInfo, refreshPlan, authLoading, planLoading: authPlanLoading, session } = useAuth();
   const initialPlan = planInfo || loadPlanInfo();
 
   const [me, setMe] = useState(() => planInfoToUsage(initialPlan));
-  const [loading, setLoading] = useState(() => !initialPlan);
+  const [localLoading, setLocalLoading] = useState(() => authPlanLoading || !initialPlan);
   const [error, setError] = useState(null);
 
   const mountedRef = useRef(true);
   const refreshingRef = useRef(false);
+  const lastUsageRefreshRef = useRef(0);
 
   const syncUsage = useCallback((info) => {
     setMe(planInfoToUsage(info));
     setError(null);
   }, []);
 
-  const forceRefresh = useCallback(async () => {
+  const forceRefresh = useCallback(async ({ force = false } = {}) => {
     if (!refreshPlan || refreshingRef.current || !session) {
       return planInfo || loadPlanInfo();
     }
 
     refreshingRef.current = true;
-    setLoading(true);
+    setLocalLoading(true);
 
     try {
-      const result = await refreshPlan({ force: true });
+      const result = await refreshPlan({ force });
       if (result && mountedRef.current) {
         syncUsage(result);
       }
@@ -65,7 +66,7 @@ export function useMe() {
       return null;
     } finally {
       if (mountedRef.current) {
-        setLoading(false);
+        setLocalLoading(false);
       }
       refreshingRef.current = false;
     }
@@ -78,7 +79,7 @@ export function useMe() {
   useEffect(() => {
     if (planInfo) {
       syncUsage(planInfo);
-      setLoading(false);
+      setLocalLoading(false);
     }
   }, [planInfo, syncUsage]);
 
@@ -87,32 +88,39 @@ export function useMe() {
 
     const current = planInfo || loadPlanInfo();
     if (!session) {
-      setLoading(false);
+      setLocalLoading(false);
       syncUsage(current);
       return;
     }
 
-    if (!current || isPlanInfoStale(current)) {
-      forceRefresh();
+    if (!current) {
+      forceRefresh({ force: true });
+    } else if (isPlanInfoStale(current)) {
+      forceRefresh({ force: false });
     } else {
-      setLoading(false);
+      setLocalLoading(false);
     }
   }, [authLoading, session, planInfo, forceRefresh, syncUsage]);
 
   useEffect(() => {
     const handleUsage = () => {
-      setTimeout(() => {
-        forceRefresh();
-      }, 1000);
+      const now = Date.now();
+      if (now - lastUsageRefreshRef.current >= 120000) {
+        lastUsageRefreshRef.current = now;
+        forceRefresh({ force: false });
+      }
     };
 
     apiUsageEvents.addEventListener('apiCallMade', handleUsage);
     return () => apiUsageEvents.removeEventListener('apiCallMade', handleUsage);
   }, [forceRefresh]);
 
+  const combinedLoading = authPlanLoading || localLoading;
+
   return {
     me,
-    loading,
+    loading: combinedLoading,
+    planLoading: combinedLoading,
     error,
     refresh: forceRefresh,
   };

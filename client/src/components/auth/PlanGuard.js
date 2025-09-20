@@ -7,7 +7,7 @@ import { debugLog } from '../../lib/debug';
 
 const PlanGuard = ({ children, requiresPlatinum = false }) => {
   const { user } = useAuth();
-  const { me, loading } = useMe();
+  const { me, planLoading } = useMe();
 
   // If user is not authenticated, redirect to home page
   if (!user) {
@@ -39,7 +39,7 @@ const PlanGuard = ({ children, requiresPlatinum = false }) => {
 
   // If this component requires platinum and user doesn't have it, show PlanGate
   // Don't wait for loading to complete - show PlanGate immediately if user needs upgrade
-  if (requiresPlatinum && !hasPlatinum) {
+  if (requiresPlatinum && !hasPlatinum && !planLoading) {
     return <PlanGate user={user} onPlanSelected={(plan) => {
       debugLog('PLAN_GUARD', 'Plan selected', { userId: user?.id, plan });
       // The PlanGate component handles navigation after plan selection
@@ -47,7 +47,7 @@ const PlanGuard = ({ children, requiresPlatinum = false }) => {
   }
 
   // Show loading only if we're still checking user data AND user has sufficient access
-  if (loading && (!requiresPlatinum || hasPlatinum)) {
+  if (planLoading && (!requiresPlatinum || hasPlatinum)) {
     return (
       <div className="loading-fallback">
         <div className="loading-container">
