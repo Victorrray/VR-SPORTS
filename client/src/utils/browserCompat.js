@@ -122,7 +122,7 @@ export const applyEdgeFixes = () => {
 
 // Desktop-specific fixes for authentication issues
 export const applyDesktopFixes = () => {
-  const { isChrome, isSafari, isFirefox, isEdge } = getBrowserInfo();
+  const { isChrome, isSafari, isFirefox, isEdge, isMobile } = getBrowserInfo();
 
   if (!isMobile) {
     // Fix for desktop browsers that might not handle localStorage properly

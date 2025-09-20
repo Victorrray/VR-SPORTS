@@ -1,4 +1,6 @@
 // Authentication diagnostic utility for desktop issues
+import { getBrowserInfo } from './browserCompat';
+
 export const diagnoseAuthIssues = () => {
   const diagnostics = {
     timestamp: new Date().toISOString(),
