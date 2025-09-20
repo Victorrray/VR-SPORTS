@@ -13,7 +13,7 @@ const SESSION_STORAGE_KEY = 'sb-session';
 // Session validation timeout (5 minutes)
 const SESSION_VALIDATION_INTERVAL = 5 * 60 * 1000;
 const PLAN_MIN_INTERVAL = 30 * 1000; // rate limit plan refreshes
-const PLAN_FETCH_TIMEOUT = 7 * 1000; // abort plan calls after 7s
+const PLAN_FETCH_TIMEOUT = 12 * 1000; // abort plan calls after 12s
 const PLAN_MAX_BACKOFF = 5 * 60 * 1000; // cap exponential backoff at 5 minutes
 const PREMIUM_GRACE_MS = 15 * 60 * 1000;
 
@@ -255,15 +255,15 @@ export const AuthProvider = ({ children }) => {
 
         return info;
       } catch (error) {
-        if (controller.signal.aborted) {
-          console.warn('useAuth: Plan fetch aborted');
-        } else {
+        if (!controller.signal.aborted) {
           console.warn('useAuth: Failed to fetch plan status', error);
         }
 
-        fetchState.attempt = Math.min((fetchState.attempt || 0) + 1, 10);
-        const backoff = Math.min(PLAN_MAX_BACKOFF, Math.pow(2, fetchState.attempt) * 1000);
-        fetchState.backoffUntil = Date.now() + backoff;
+        if (!controller.signal.aborted) {
+          fetchState.attempt = Math.min((fetchState.attempt || 0) + 1, 10);
+          const backoff = Math.min(PLAN_MAX_BACKOFF, Math.pow(2, fetchState.attempt) * 1000);
+          fetchState.backoffUntil = Date.now() + backoff;
+        }
 
         const fallback = planInfoRef.current || loadPlanInfo();
         const lastPremiumSeen = fetchState.lastPremiumSeen || 0;
