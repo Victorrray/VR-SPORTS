@@ -12,11 +12,19 @@ const STATIC_ASSETS = [
   '/apple-touch-icon.png'
 ];
 
-// API endpoints to cache
+// API endpoints to cache (exclude auth-related endpoints)
 const API_ENDPOINTS = [
   '/api/odds',
   '/api/sports',
   '/api/bookmakers'
+];
+
+// Auth-related endpoints that should NOT be cached
+const AUTH_ENDPOINTS = [
+  '/api/auth',
+  '/api/user',
+  '/api/profile',
+  '/api/billing'
 ];
 
 // Install event - cache static assets
@@ -88,6 +96,14 @@ self.addEventListener('fetch', (event) => {
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
+    return;
+  }
+
+  // Check if this is an auth-related endpoint that should NOT be cached
+  const isAuthEndpoint = AUTH_ENDPOINTS.some(endpoint => url.pathname.includes(endpoint));
+  if (isAuthEndpoint) {
+    // Always fetch auth endpoints from network
+    event.respondWith(fetch(request));
     return;
   }
 

@@ -1,5 +1,6 @@
 // src/lib/supabase.js
 import { createClient } from "@supabase/supabase-js";
+import { diagnoseAuthIssues } from "../utils/authDiagnostics";
 
 const isProd = process.env.NODE_ENV === 'production';
 if (!isProd) console.log('🔧 Initializing Supabase client...');
@@ -32,8 +33,8 @@ const getSupabaseConfig = () => {
 const { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY } = getSupabaseConfig();
 
 // Validate configuration
-const isConfigValid = SUPABASE_URL && SUPABASE_ANON_KEY && 
-                     SUPABASE_URL.startsWith('http') && 
+const isConfigValid = SUPABASE_URL && SUPABASE_ANON_KEY &&
+                     SUPABASE_URL.startsWith('http') &&
                      SUPABASE_ANON_KEY.startsWith('ey');
 
 if (!isConfigValid) {
@@ -48,6 +49,11 @@ if (!isConfigValid) {
   }
 }
 
+// Run diagnostics if in development
+if (!isProd && typeof window !== 'undefined') {
+  setTimeout(() => diagnoseAuthIssues(), 1000);
+}
+
 // Create Supabase client with error boundary
 let supabaseClient = null;
 let currentAccessToken = null;
@@ -55,11 +61,11 @@ let currentAccessToken = null;
 if (isConfigValid && typeof window !== 'undefined') {
   try {
     if (!isProd) {
-      console.log('🔌 Creating Supabase client with URL:', 
+      console.log('🔌 Creating Supabase client with URL:',
         SUPABASE_URL.replace(/\/\/([^:]+:)[^@]+@/, '//$1:*****@')
       );
     }
-    
+
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: true,
@@ -69,14 +75,14 @@ if (isConfigValid && typeof window !== 'undefined') {
         storage: window.localStorage,
       },
       global: {
-        headers: { 
+        headers: {
           'x-oss-app': 'odds-sight-seer',
           'Content-Type': 'application/json'
         },
       },
     });
 
-    // Test connection
+    // Test connection and setup auth state listener
     supabaseClient.auth.getSession()
       .then(({ data, error }) => {
         if (error && !isProd) {
@@ -94,14 +100,102 @@ if (isConfigValid && typeof window !== 'undefined') {
     try {
       supabaseClient.auth.onAuthStateChange((_event, session) => {
         currentAccessToken = session?.access_token || null;
+        if (!isProd) {
+          console.log('🔄 Auth state changed:', _event, session ? 'authenticated' : 'not authenticated');
+        }
       });
     } catch {}
-      
   } catch (error) {
     console.error('❌ Failed to initialize Supabase:', error);
   }
 } else if (typeof window !== 'undefined') {
   if (!isProd) console.warn('⚠️ Supabase client not initialized - invalid config or server-side rendering');
+}
+
+// Demo mode fallback for when Supabase is not configured
+const createDemoAuth = () => {
+  if (!isProd) console.log('🎭 Setting up demo authentication fallback');
+
+  return {
+    // Mock auth methods for demo mode
+    signUp: async (email, password) => {
+      const demoUser = {
+        id: 'demo-' + Date.now(),
+        email,
+        created_at: new Date().toISOString(),
+        user_metadata: { username: email.split('@')[0] }
+      };
+
+      localStorage.setItem('demo-auth-session', JSON.stringify(demoUser));
+      localStorage.setItem('sb-session', JSON.stringify({ user: demoUser }));
+
+      return { data: { user: demoUser }, error: null };
+    },
+
+    signInWithPassword: async (email, password) => {
+      const demoUser = {
+        id: 'demo-' + Date.now(),
+        email,
+        created_at: new Date().toISOString(),
+        user_metadata: { username: email.split('@')[0] }
+      };
+
+      localStorage.setItem('demo-auth-session', JSON.stringify(demoUser));
+      localStorage.setItem('sb-session', JSON.stringify({ user: demoUser }));
+
+      return { data: { user: demoUser, session: { user: demoUser } }, error: null };
+    },
+
+    signOut: async () => {
+      localStorage.removeItem('demo-auth-session');
+      localStorage.removeItem('sb-session');
+      return { error: null };
+    },
+
+    getSession: async () => {
+      const demoSession = localStorage.getItem('demo-auth-session');
+      if (demoSession) {
+        const user = JSON.parse(demoSession);
+        return {
+          data: { session: { user, access_token: 'demo-token' } },
+          error: null
+        };
+      }
+      return { data: { session: null }, error: null };
+    },
+
+    onAuthStateChange: (callback) => {
+      // Mock auth state change listener
+      const checkSession = () => {
+        const demoSession = localStorage.getItem('demo-auth-session');
+        callback('SIGNED_IN', demoSession ? { user: JSON.parse(demoSession) } : null);
+      };
+
+      checkSession(); // Initial check
+      window.addEventListener('storage', checkSession); // Listen for changes
+
+      return {
+        data: { subscription: { unsubscribe: () => window.removeEventListener('storage', checkSession) } }
+      };
+    },
+
+    updateUser: async (data) => {
+      const currentSession = localStorage.getItem('demo-auth-session');
+      if (currentSession) {
+        const user = JSON.parse(currentSession);
+        const updatedUser = { ...user, ...data };
+        localStorage.setItem('demo-auth-session', JSON.stringify(updatedUser));
+        return { data: { user: updatedUser }, error: null };
+      }
+      return { data: null, error: { message: 'No user session' } };
+    }
+  };
+};
+
+// Use demo auth if Supabase is not configured
+if (!supabaseClient && typeof window !== 'undefined') {
+  if (!isProd) console.log('🎭 Using demo authentication mode');
+  supabaseClient = createDemoAuth();
 }
 
 // Export the client
@@ -113,7 +207,7 @@ export function getAccessToken() {
 }
 
 // Helper for auth redirects
-export const OAUTH_REDIRECT_TO = 
+export const OAUTH_REDIRECT_TO =
   (typeof window !== "undefined" && `${window.location.origin}/`) || undefined;
 
 if (!isProd) console.log(supabase ? '✅ Supabase client created' : '❌ Supabase client creation failed');

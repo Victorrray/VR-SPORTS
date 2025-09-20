@@ -120,22 +120,92 @@ export const applyEdgeFixes = () => {
   }
 };
 
+// Desktop-specific fixes for authentication issues
+export const applyDesktopFixes = () => {
+  const { isChrome, isSafari, isFirefox, isEdge } = getBrowserInfo();
+
+  if (!isMobile) {
+    // Fix for desktop browsers that might not handle localStorage properly
+    if (isSafari) {
+      // Safari private browsing mode detection and workaround
+      try {
+        const testKey = '__safari_test__';
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+      } catch (e) {
+        console.warn('Safari private browsing detected - auth may not persist');
+        // Use sessionStorage as fallback for Safari private browsing
+        if (typeof Storage !== 'undefined') {
+          // Override localStorage with sessionStorage for auth data
+          const originalLocalStorage = window.localStorage;
+          window.localStorage = {
+            ...originalLocalStorage,
+            setItem: (key, value) => {
+              if (key.includes('auth') || key.includes('session') || key.includes('sb-')) {
+                sessionStorage.setItem(key, value);
+              } else {
+                originalLocalStorage.setItem(key, value);
+              }
+            },
+            getItem: (key) => {
+              if (key.includes('auth') || key.includes('session') || key.includes('sb-')) {
+                return sessionStorage.getItem(key);
+              }
+              return originalLocalStorage.getItem(key);
+            },
+            removeItem: (key) => {
+              if (key.includes('auth') || key.includes('session') || key.includes('sb-')) {
+                sessionStorage.removeItem(key);
+              } else {
+                originalLocalStorage.removeItem(key);
+              }
+            }
+          };
+        }
+      }
+    }
+
+    // Fix for Firefox enhanced tracking protection
+    if (isFirefox) {
+      document.body.classList.add('firefox-desktop-browser');
+
+      // Add specific CSS fixes for Firefox auth issues
+      const style = document.createElement('style');
+      style.textContent = `
+        .firefox-desktop-browser input[type="email"],
+        .firefox-desktop-browser input[type="password"] {
+          -moz-appearance: none;
+          border-radius: 8px;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Fix for Chrome desktop with strict cookie policies
+    if (isChrome) {
+      // Ensure cookies are handled correctly for cross-origin requests
+      document.cookie = 'auth-check=1; path=/; SameSite=Lax';
+    }
+  }
+};
+
 // Feature detection and progressive enhancement
 export const initBrowserCompat = () => {
   const browserInfo = getBrowserInfo();
-  
+
   // Add browser classes to body
   Object.keys(browserInfo).forEach(key => {
     if (browserInfo[key] === true) {
       document.body.classList.add(key.toLowerCase().replace('is', '') + '-browser');
     }
   });
-  
+
   // Apply browser-specific fixes
   applySafariFixes();
   applyFirefoxFixes();
   applyEdgeFixes();
-  
+  applyDesktopFixes();
+
   // Check for required features
   const features = {
     fetch: ensureFetch(),
@@ -144,7 +214,7 @@ export const initBrowserCompat = () => {
     intersectionObserver: hasIntersectionObserver(),
     resizeObserver: hasResizeObserver()
   };
-  
+
   // Log missing features in development
   if (process.env.NODE_ENV === 'development') {
     const missingFeatures = Object.keys(features).filter(key => !features[key]);
@@ -152,7 +222,7 @@ export const initBrowserCompat = () => {
       console.warn('Missing browser features:', missingFeatures);
     }
   }
-  
+
   return { browserInfo, features };
 };
 
@@ -215,5 +285,6 @@ export default {
   smoothScrollTo,
   applySafariFixes,
   applyFirefoxFixes,
-  applyEdgeFixes
+  applyEdgeFixes,
+  applyDesktopFixes
 };
