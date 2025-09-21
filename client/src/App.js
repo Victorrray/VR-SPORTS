@@ -15,6 +15,8 @@ import DebugPanel from './components/debug/DebugPanel';
 import Navbar from './components/layout/Navbar';
 import MobileBottomBar from './components/layout/MobileBottomBar';
 import Footer from './components/layout/Footer';
+import Home from './pages/Home';
+import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
 import Account from './pages/Account';
