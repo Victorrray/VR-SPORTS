@@ -87,6 +87,31 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setShowMobileSearch(false);
   };
 
+  // Fetch sports list for filters
+  useEffect(() => {
+    const fetchSports = async () => {
+      try {
+        const response = await secureFetch(withApiBase('/api/sports'), { credentials: 'include' });
+        if (response.ok) {
+          const sports = await response.json();
+          setSportList(sports);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch sports list:', error);
+        // Fallback sports list
+        setSportList([
+          { key: 'americanfootball_nfl', title: 'NFL' },
+          { key: 'americanfootball_ncaaf', title: 'NCAAF' },
+          { key: 'basketball_nba', title: 'NBA' },
+          { key: 'basketball_ncaab', title: 'NCAAB' },
+          { key: 'icehockey_nhl', title: 'NHL' },
+          { key: 'baseball_mlb', title: 'MLB' }
+        ]);
+      }
+    };
+    fetchSports();
+  }, []);
+
   const applyFilters = () => {
     setPicked(draftPicked && draftPicked.length ? draftPicked : ["americanfootball_nfl"]);
     setSelectedDate(draftSelectedDate || '');
@@ -303,6 +328,98 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       
       <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
         <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
+          
+          {/* Sports Filter */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Sports
+            </label>
+            <SportMultiSelect
+              sports={sportList}
+              picked={draftPicked}
+              setPicked={setDraftPicked}
+              placeholder="Select sports..."
+            />
+          </div>
+
+          {/* Date Filter */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Date
+            </label>
+            <DatePicker
+              selectedDate={draftSelectedDate}
+              onDateChange={setDraftSelectedDate}
+            />
+          </div>
+
+          {/* Markets Filter */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Markets
+            </label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {['h2h', 'spreads', 'totals'].map(market => (
+                <button
+                  key={market}
+                  onClick={() => {
+                    if (draftMarketKeys.includes(market)) {
+                      setDraftMarketKeys(draftMarketKeys.filter(m => m !== market));
+                    } else {
+                      setDraftMarketKeys([...draftMarketKeys, market]);
+                    }
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 20,
+                    border: draftMarketKeys.includes(market) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
+                    background: draftMarketKeys.includes(market) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
+                    color: draftMarketKeys.includes(market) ? '#8b5cf6' : 'var(--text-secondary)',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    textTransform: 'capitalize'
+                  }}
+                >
+                  {market === 'h2h' ? 'Moneyline' : market}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sportsbooks Filter */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Sportsbooks
+            </label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {marketBooks.slice(0, 8).map(book => (
+                <button
+                  key={book.key}
+                  onClick={() => {
+                    if (draftSelectedBooks.includes(book.key)) {
+                      setDraftSelectedBooks(draftSelectedBooks.filter(b => b !== book.key));
+                    } else {
+                      setDraftSelectedBooks([...draftSelectedBooks, book.key]);
+                    }
+                  }}
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: 16,
+                    border: draftSelectedBooks.includes(book.key) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
+                    background: draftSelectedBooks.includes(book.key) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
+                    color: draftSelectedBooks.includes(book.key) ? '#8b5cf6' : 'var(--text-secondary)',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {book.title}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Apply
