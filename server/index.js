@@ -1880,6 +1880,32 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
             });
           } else {
             console.log(`❌ No player props data returned for game ${game.id}`);
+            
+            // Try SportsGameOdds fallback if available
+            if (SPORTSGAMEODDS_API_KEY) {
+              console.log(`🔄 Trying SportsGameOdds fallback for game ${game.id}...`);
+              try {
+                const sgoResponse = await axios.get(`https://api.sportsgameodds.com/v1/odds`, {
+                  headers: { 'x-api-key': SPORTSGAMEODDS_API_KEY },
+                  params: {
+                    sport: game.sport_key,
+                    eventId: game.id,
+                    markets: playerPropMarkets.join(',')
+                  },
+                  timeout: 7000
+                });
+                
+                if (sgoResponse.data && sgoResponse.data.length > 0) {
+                  console.log(`✅ SportsGameOdds fallback returned ${sgoResponse.data.length} items`);
+                  // Transform SGO data to TheOddsAPI format and merge
+                  // This would need the transformation logic from the memory
+                } else {
+                  console.log(`❌ SportsGameOdds fallback also returned no data`);
+                }
+              } catch (sgoErr) {
+                console.error(`❌ SportsGameOdds fallback failed:`, sgoErr.message);
+              }
+            }
           }
           
         } catch (propsErr) {
@@ -1887,6 +1913,29 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
           console.error(`   Status: ${propsErr.response?.status}`);
           console.error(`   Data: ${JSON.stringify(propsErr.response?.data)}`);
           console.error(`   Message: ${propsErr.message}`);
+          
+          // Try SportsGameOdds fallback on error
+          if (SPORTSGAMEODDS_API_KEY) {
+            console.log(`🔄 Trying SportsGameOdds fallback after error for game ${game.id}...`);
+            try {
+              const sgoResponse = await axios.get(`https://api.sportsgameodds.com/v1/odds`, {
+                headers: { 'x-api-key': SPORTSGAMEODDS_API_KEY },
+                params: {
+                  sport: game.sport_key,
+                  eventId: game.id,
+                  markets: playerPropMarkets.join(',')
+                },
+                timeout: 7000
+              });
+              
+              if (sgoResponse.data && sgoResponse.data.length > 0) {
+                console.log(`✅ SportsGameOdds fallback returned ${sgoResponse.data.length} items after error`);
+                // Transform and merge SGO data
+              }
+            } catch (sgoErr) {
+              console.error(`❌ SportsGameOdds fallback also failed:`, sgoErr.message);
+            }
+          }
           // Continue with other games even if player props fail
         }
       }
