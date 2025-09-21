@@ -8,8 +8,8 @@ import { AccessibilityProvider } from './components/layout/AccessibilityProvider
 import { BetSlipProvider } from './contexts/BetSlipContext';
 import { ToastProvider } from './components/common/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
-import SkipToContent from './components/layout/SkipToContent';
-import DebugPanel from './components/debug/DebugPanel';
+import AuthDebug from './components/debug/AuthDebug';
+import { registerServiceWorker } from './utils/bundleOptimization';
 import Navbar from './components/layout/Navbar';
 import MobileBottomBar from './components/layout/MobileBottomBar';
 import Footer from './components/layout/Footer';

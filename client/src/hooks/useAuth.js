@@ -1,4 +1,6 @@
+import React, { useState, useEffect, useContext, createContext, useCallback, useRef } from 'react';
 import { DebugLogger } from '../utils/debugUtils';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
