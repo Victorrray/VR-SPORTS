@@ -15,8 +15,7 @@ import DebugPanel from './components/debug/DebugPanel';
 import Navbar from './components/layout/Navbar';
 import MobileBottomBar from './components/layout/MobileBottomBar';
 import Footer from './components/layout/Footer';
-import Home from './pages/Home';
-import DFSMarkets from './pages/DFSMarkets';
+import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
 import Account from './pages/Account';
 import UsagePlan from './pages/UsagePlan';
@@ -118,6 +117,7 @@ function AppRoutes() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
+              <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
