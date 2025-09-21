@@ -118,6 +118,7 @@ function AppRoutes() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
+              <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
@@ -136,7 +137,7 @@ function AppRoutes() {
             </Routes>
           </main>
           {/* Show footer on public landing routes */}
-          {['/', '/home', '/pricing', '/login'].includes(location.pathname) && <Footer />}
+          {['/', '/home', '/pricing', '/login', '/signup'].includes(location.pathname) && <Footer />}
           
           {/* Username Setup Modal */}
           {showUsernameSetup && (
