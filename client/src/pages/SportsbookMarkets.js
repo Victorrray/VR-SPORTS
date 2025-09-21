@@ -10,6 +10,7 @@ import SportMultiSelect from "../components/betting/SportMultiSelect";
 import DatePicker from "../components/common/DatePicker";
 import OddsTable from "../components/betting/OddsTable";
 import ArbitrageDetector from "../components/betting/ArbitrageDetector";
+import AuthRequired from "../components/auth/AuthRequired";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
@@ -239,6 +240,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </p>
       </div>
 
+      {/* Show authentication required message */}
+      {(marketsError && marketsError.includes('Authentication required')) && (
+        <AuthRequired message="Please sign in to view live odds and betting data" />
+      )}
+
       {/* Show quota exceeded message for free users */}
       {isOverQuota && (
         <div style={{
@@ -273,7 +279,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       )}
 
       {/* Main Content */}
-      {isArbitrageMode && hasPlatinum ? (
+      {(marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
           sport={picked[0] || 'americanfootball_nfl'}
           games={filteredGames}

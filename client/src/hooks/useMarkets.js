@@ -246,6 +246,14 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         }
         
         if (!response.ok) {
+          // Handle 401 Unauthorized
+          if (response.status === 401) {
+            console.warn('🔐 useMarkets: Authentication required');
+            setError('Authentication required - please log in');
+            setGames([]);
+            return;
+          }
+          
           const errorText = await response.text();
           console.error('🔴 useMarkets: API error response:', errorText);
           throw new Error(`API request failed with status ${response.status}: ${errorText.substring(0, 200)}`);

@@ -81,6 +81,15 @@ export const useCachedFetch = (url, options = {}) => {
       });
 
       if (!response.ok) {
+        // Handle 401 Unauthorized - redirect to login instead of retrying
+        if (response.status === 401) {
+          console.warn('🔐 Authentication required - redirecting to login');
+          // Don't retry 401 errors, redirect to login
+          const error = new Error(`Authentication required`);
+          error.status = 401;
+          error.shouldRedirect = true;
+          throw error;
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
@@ -110,7 +119,15 @@ export const useCachedFetch = (url, options = {}) => {
       
       console.error(`Fetch error for ${url}:`, err);
       
-      // Retry logic
+      // Don't retry authentication errors
+      if (err.status === 401 || err.shouldRedirect) {
+        console.warn('🔐 Authentication error - not retrying');
+        setError(err);
+        onError?.(err);
+        return;
+      }
+      
+      // Retry logic for other errors
       if (retryCountRef.current < retryAttempts) {
         retryCountRef.current++;
         console.log(`Retrying fetch (${retryCountRef.current}/${retryAttempts}) in ${retryDelay}ms...`);
