@@ -540,13 +540,23 @@ export default function OddsTable({
           
           console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
           bookmaker.markets.forEach(market => {
-            // Process ALL markets for DFS sites, and player prop markets for traditional books
+            // Filter markets based on mode
             const isDFSSite = ['prizepicks', 'underdog', 'sleeper'].includes(bookmaker.key?.toLowerCase());
             const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
+            const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
             
-            if (!isDFSSite && !isPlayerPropMarket) {
-              console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop`);
-              return;
+            // In props mode: only show player prop markets or DFS sites
+            // In regular mode: only show regular markets (h2h, spreads, totals)
+            if (mode === 'props') {
+              if (!isDFSSite && !isPlayerPropMarket) {
+                console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop (props mode)`);
+                return;
+              }
+            } else {
+              if (!isRegularMarket) {
+                console.log(`Skipping market ${market.key} for ${bookmaker.key} - not regular market (game mode)`);
+                return;
+              }
             }
             
             console.log(`Processing market ${market.key} for bookmaker ${bookmaker.key} with ${market.outcomes?.length || 0} outcomes`);
