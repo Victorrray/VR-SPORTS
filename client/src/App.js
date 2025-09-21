@@ -20,7 +20,6 @@ import BillingSuccess from './pages/BillingSuccess';
 import BillingCancel from './pages/BillingCancel';
 import QuotaModal from './components/modals/QuotaModal';
 import UsernameSetup from './components/auth/UsernameSetup';
-import { initBrowserCompat } from "./utils/browserCompat";
 import "./App.css";
 import './styles/accessibility.css';
 import './styles/browserCompat.css';
