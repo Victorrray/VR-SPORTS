@@ -19,7 +19,7 @@ import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
 
 const ENABLE_PLAYER_PROPS_V2 = true;
-const PLAYER_PROP_MARKET_KEYS = ['player_anytime_td', 'player_passing_yards', 'player_passing_touchdowns', 'player_rushing_yards', 'player_rushing_attempts', 'player_receiving_yards', 'player_receptions', 'player_first_td', 'player_last_td'];
+const PLAYER_PROP_MARKET_KEYS = ['player_anytime_td', 'player_pass_yds', 'player_pass_tds', 'player_rush_yds', 'player_rush_tds', 'player_reception_yds', 'player_receptions', 'player_1st_td', 'player_last_td'];
 
 const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const location = useLocation();
