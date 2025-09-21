@@ -1741,14 +1741,12 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     const marketsArray = markets.split(',');
     let allGames = [];
     
-    // Filter out player props entirely
+    // Separate player props from regular markets
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
+    const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
     
-    if (marketsArray.some(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'))) {
-      console.log('🚫 Player prop markets requested but not supported');
-      return res.status(400).json({ error: "Player prop markets are not supported" });
-    }
     console.log('Regular markets requested:', regularMarkets);
+    console.log('Player prop markets requested:', playerPropMarkets);
     
     // Step 1: Fetch regular odds (h2h, spreads, totals) only
     if (regularMarkets.length > 0) {
@@ -1805,6 +1803,97 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
         );
       });
 
+    }
+    
+    // Step 2: Fetch player props if requested and enabled
+    if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
+      console.log('🎯 Fetching player props for markets:', playerPropMarkets);
+      console.log(`🎯 Processing ${Math.min(allGames.length, 10)} games for player props`);
+      
+      // For each game, fetch individual player props using event ID
+      for (let i = 0; i < allGames.length && i < 10; i++) { // Limit to first 10 games for cost control
+        const game = allGames[i];
+        if (!game.id) {
+          console.log(`⚠️ Game ${i} missing ID, skipping player props`);
+          continue;
+        }
+        
+        console.log(`🎯 Processing game ${i+1}/10: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
+        
+        try {
+          const userProfile = req.__userProfile || { plan: 'free' };
+          const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+          const bookmakerList = allowedBookmakers.slice(0, 4).join(','); // Limit to 4 books for props
+          
+          // Use individual event endpoint for player props
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
+          console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+          
+          const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, bookmakers: bookmakerList });
+          const cachedProps = getCachedResponse(cacheKey);
+          
+          let propsResponse;
+          if (cachedProps) {
+            propsResponse = { data: cachedProps };
+            console.log(`📦 Using cached player props for game ${game.id}`);
+          } else {
+            console.log(`🌐 Making API call for player props for game ${game.id}...`);
+            const startTime = Date.now();
+            propsResponse = await axios.get(propsUrl, { timeout: 7000 });
+            const duration = Date.now() - startTime;
+            console.log(`✅ Player props API call completed in ${duration}ms, status: ${propsResponse.status}`);
+            console.log(`📊 Player props response data:`, JSON.stringify(propsResponse.data, null, 2).substring(0, 500) + '...');
+            
+            setCachedResponse(cacheKey, propsResponse.data);
+            
+            // Increment usage for player props API call
+            const userId = req.__userId;
+            const profile = req.__userProfile;
+            if (userId && profile) {
+              await incrementUsage(userId, profile);
+              console.log(`📊 Incremented usage for player props API call`);
+            }
+          }
+          
+          // Merge player props into the existing game's bookmakers
+          if (propsResponse.data && propsResponse.data.bookmakers) {
+            console.log(`🔗 Merging ${propsResponse.data.bookmakers.length} bookmakers with player props`);
+            const existingBookmakers = new Map();
+            game.bookmakers.forEach(book => {
+              existingBookmakers.set(book.key, book);
+            });
+            
+            propsResponse.data.bookmakers.forEach(propsBook => {
+              const marketCount = propsBook.markets ? propsBook.markets.length : 0;
+              console.log(`📈 Bookmaker ${propsBook.key} has ${marketCount} player prop markets`);
+              
+              if (existingBookmakers.has(propsBook.key)) {
+                // Merge markets into existing bookmaker
+                const existingBook = existingBookmakers.get(propsBook.key);
+                existingBook.markets = [...(existingBook.markets || []), ...(propsBook.markets || [])];
+                console.log(`🔗 Merged ${marketCount} player prop markets into existing ${propsBook.key}`);
+              } else {
+                // Add new bookmaker with only player props
+                game.bookmakers.push(propsBook);
+                console.log(`➕ Added new bookmaker ${propsBook.key} with ${marketCount} player prop markets`);
+              }
+            });
+          } else {
+            console.log(`❌ No player props data returned for game ${game.id}`);
+          }
+          
+        } catch (propsErr) {
+          console.error(`❌ Failed to fetch player props for game ${game.id}:`);
+          console.error(`   Status: ${propsErr.response?.status}`);
+          console.error(`   Data: ${JSON.stringify(propsErr.response?.data)}`);
+          console.error(`   Message: ${propsErr.message}`);
+          // Continue with other games even if player props fail
+        }
+      }
+      
+      console.log('🎯 Player props fetching completed');
+    } else if (playerPropMarkets.length > 0) {
+      console.log('🚫 Player props requested but ENABLE_PLAYER_PROPS_V2 is not enabled');
     }
     
     console.log(`Returning ${allGames.length} games total`);
