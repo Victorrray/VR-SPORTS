@@ -137,12 +137,23 @@ const AuthProvider = ({ children }) => {
 
       try {
         if (!isSupabaseEnabled) {
+          DebugLogger.info('AUTH', 'Checking for demo session on page refresh');
           const demoSession = safeGetItem('demo-auth-session');
+          DebugLogger.info('AUTH', 'Demo session found:', !!demoSession);
+
           if (demoSession) {
-            const sessionData = JSON.parse(demoSession);
-            sessionRef.current = { user: sessionData };
-            setSession({ user: sessionData });
-            setUser(sessionData);
+            try {
+              const sessionData = JSON.parse(demoSession);
+              DebugLogger.info('AUTH', 'Restoring demo user session:', sessionData.id);
+              sessionRef.current = { user: sessionData };
+              setSession({ user: sessionData });
+              setUser(sessionData);
+            } catch (parseError) {
+              DebugLogger.error('AUTH', 'Failed to parse demo session:', parseError);
+              safeRemoveItem('demo-auth-session');
+            }
+          } else {
+            DebugLogger.info('AUTH', 'No demo session found, user will need to sign in');
           }
           setAuthLoading(false);
           return;
@@ -265,6 +276,7 @@ const AuthProvider = ({ children }) => {
         app_metadata: {},
         user_metadata: {}
       };
+      DebugLogger.info('AUTH', 'Storing demo user session to localStorage:', demoUser.id);
       safeSetItem('demo-auth-session', JSON.stringify(demoUser));
       setUser(demoUser);
       sessionRef.current = { user: demoUser };
@@ -285,6 +297,7 @@ const AuthProvider = ({ children }) => {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
       }
+      DebugLogger.info('AUTH', 'Clearing demo session from localStorage');
       safeRemoveItem('demo-auth-session');
       clearSessionState();
     } catch (error) {
