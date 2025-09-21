@@ -1,5 +1,4 @@
-import { useState, useEffect, useContext, createContext, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { DebugLogger } from '../utils/debugUtils';
 
 const AuthContext = createContext(null);
 
@@ -269,6 +268,7 @@ const AuthProvider = ({ children }) => {
       sessionRef.current = { user: demoUser };
       setSession({ user: demoUser });
       setAuthLoading(false);
+      DebugLogger.info('AUTH', 'Demo user signed in', { userId: demoUser.id, email });
       return { data: { user: demoUser, session: { user: demoUser } }, error: null };
     }
 

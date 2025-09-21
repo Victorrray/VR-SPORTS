@@ -9,13 +9,13 @@ import { BetSlipProvider } from './contexts/BetSlipContext';
 import { ToastProvider } from './components/common/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import SkipToContent from './components/layout/SkipToContent';
-import AuthDebug from './components/debug/AuthDebug';
-import { registerServiceWorker } from './utils/bundleOptimization';
+import DebugPanel from './components/debug/DebugPanel';
 import Navbar from './components/layout/Navbar';
 import MobileBottomBar from './components/layout/MobileBottomBar';
 import Footer from './components/layout/Footer';
 import Home from './pages/Home';
 import DFSMarkets from './pages/DFSMarkets';
+import Login from './pages/Login';
 import Account from './pages/Account';
 import UsagePlan from './pages/UsagePlan';
 import MySportsbooks from './pages/MySportsbooks';
@@ -43,6 +43,7 @@ function AppRoutes() {
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [quotaModal, setQuotaModal] = useState({ open: false, detail: null });
   const [mobileSearchCallback, setMobileSearchCallback] = useState(null);
+  const [debugPanelOpen, setDebugPanelOpen] = useState(false);
 
   // Clear mobile search callback when navigating away from sportsbooks
   useEffect(() => {
@@ -61,10 +62,17 @@ function AppRoutes() {
     return () => window.removeEventListener("plangate", handleQuotaExceeded);
   }, []);
 
-  // Debug logging for callback state
+  // Debug panel keyboard shortcut
   useEffect(() => {
-    console.log('App: mobileSearchCallback changed:', mobileSearchCallback);
-  }, [mobileSearchCallback]);
+    const handleKeyPress = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        setDebugPanelOpen(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   useEffect(() => {
     if (user && !user.user_metadata?.username) {
@@ -146,6 +154,14 @@ function AppRoutes() {
           {/* Mobile bottom bar is handled by individual pages */}
         </div>
       </div>
+
+      {/* Debug Panel - only in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <DebugPanel
+          isOpen={debugPanelOpen}
+          onClose={() => setDebugPanelOpen(false)}
+        />
+      )}
     </React.Suspense>
   );
 }
