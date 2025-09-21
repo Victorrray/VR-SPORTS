@@ -291,7 +291,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     return [];
   }, [oddsData, selectedMarkets, minProfit, maxStake]);
 
-  const allOpportunities = realArbitrageOpportunities.length > 0 ? realArbitrageOpportunities : mockArbitrageData;
+  const allOpportunities = realArbitrageOpportunities.length > 0 ? realArbitrageOpportunities : (loading ? [] : mockArbitrageData);
 
   // Filter and sort opportunities
   const filteredOpportunities = useMemo(() => {
