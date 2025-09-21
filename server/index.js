@@ -1747,6 +1747,9 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     
     console.log('Regular markets requested:', regularMarkets);
     console.log('Player prop markets requested:', playerPropMarkets);
+    console.log('ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
+    console.log('API_KEY available:', !!API_KEY);
+    console.log('SPORTSGAMEODDS_API_KEY available:', !!SPORTSGAMEODDS_API_KEY);
     
     // Step 1: Fetch regular odds (h2h, spreads, totals) only
     if (regularMarkets.length > 0) {
@@ -1806,9 +1809,12 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     }
     
     // Step 2: Fetch player props if requested and enabled
+    console.log(`🔍 Player props check: playerPropMarkets.length=${playerPropMarkets.length}, ENABLE_PLAYER_PROPS_V2=${ENABLE_PLAYER_PROPS_V2}`);
+    
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
       console.log('🎯 Fetching player props for markets:', playerPropMarkets);
       console.log(`🎯 Processing ${Math.min(allGames.length, 10)} games for player props`);
+      console.log(`🎯 Total games available for props: ${allGames.length}`);
       
       // For each game, fetch individual player props using event ID
       for (let i = 0; i < allGames.length && i < 10; i++) { // Limit to first 10 games for cost control
