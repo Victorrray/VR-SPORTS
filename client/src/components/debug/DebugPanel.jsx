@@ -1,7 +1,7 @@
 // Debug component for real-time monitoring
 import React, { useState, useEffect } from 'react';
 import { Bug, Activity, AlertCircle, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
-import { DebugLogger, APIErrorTracker, UserActionTracker, NetworkMonitor } from '../utils/debugUtils';
+import { DebugLogger, APIErrorTracker, UserActionTracker, NetworkMonitor } from '../../utils/debugUtils';
 
 export default function DebugPanel({ isOpen, onClose }) {
   const [logs, setLogs] = useState([]);
