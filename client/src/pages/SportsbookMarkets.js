@@ -829,6 +829,77 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   return (
     <div className="sportsbook-markets">
+      {/* Header with Player Props Button */}
+      <div style={{
+        padding: '16px',
+        background: 'var(--card-bg)',
+        borderRadius: '12px',
+        margin: '16px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <h2 style={{
+          margin: 0,
+          color: 'var(--text)',
+          fontSize: '20px',
+          fontWeight: '600'
+        }}>
+          Sports Betting Odds
+        </h2>
+
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {ENABLE_PLAYER_PROPS_V2 && (
+            <button
+              onClick={() => {
+                setShowPlayerProps(true);
+                setShowArbitrage(false);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                background: isPlayerPropsMode
+                  ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+                  : 'linear-gradient(135deg, #10b981, #059669)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '14px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              🎯 Player Props
+            </button>
+          )}
+
+          <button
+            onClick={() => navigate('/dfs')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            📊 DFS Markets
+          </button>
+        </div>
+      </div>
+
       <div style={{ 
         marginBottom: '24px', 
         paddingTop: '20px', 
