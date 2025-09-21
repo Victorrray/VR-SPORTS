@@ -335,7 +335,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               Sports
             </label>
             <SportMultiSelect
-              sports={sportList}
+              sports={sportList || []}
               picked={draftPicked}
               setPicked={setDraftPicked}
               placeholder="Select sports..."

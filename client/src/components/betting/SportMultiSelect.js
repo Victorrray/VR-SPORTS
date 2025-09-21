@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import { Search, X, Star, TrendingUp } from "lucide-react";
 import "./SportMultiSelect.css";
 
-const allKeys = (list) => list.filter(s => s.key !== "ALL").map(s => s.key);
+const allKeys = (list) => (list || []).filter(s => s.key !== "ALL").map(s => s.key);
 
 // Categorize sportsbooks by popularity and type
 const SPORTSBOOK_CATEGORIES = {
@@ -73,12 +73,12 @@ export default function SportMultiSelect({
 
   // Categorized and filtered list
   const { categorizedList, filteredList } = useMemo(() => {
-    let filtered = list;
+    let filtered = list || [];
     
     // Apply search filter
     if (enableSearch && searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      filtered = list.filter(item => 
+      filtered = (list || []).filter(item => 
         item.title.toLowerCase().includes(term) ||
         item.key.toLowerCase().includes(term)
       );
