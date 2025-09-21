@@ -894,70 +894,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           >
             📊 DFS Markets
           </button>
-        </div>
-      </div>
-
-      <div style={{ 
-        marginBottom: '24px', 
-        paddingTop: '20px', 
-        textAlign: 'center',
-        paddingLeft: 'var(--mobile-gutter, 16px)',
-        paddingRight: 'var(--mobile-gutter, 16px)',
-        padding: '24px 16px'
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          background: 'rgba(0, 0, 0, 0.2)',
-          borderRadius: '12px',
-          padding: '4px',
-          gap: '0'
-        }}>
-          <button
-            onClick={() => {
-              setShowArbitrage(false);
-              setShowPlayerProps(false);
-            }}
-            style={toggleButtonStyle(!isArbitrageMode && !isPlayerPropsMode)}
-          >
-            📊 Game Odds
-          </button>
-          {ENABLE_PLAYER_PROPS_V2 && (
-            <button
-              onClick={() => {
-                setShowPlayerProps(true);
-                setShowArbitrage(false);
-              }}
-              style={toggleButtonStyle(isPlayerPropsMode)}
-            >
-              🎯 Player Props
-            </button>
-          )}
-          <button
-            onClick={() => {
-              if (hasPlatinum) {
-                setShowArbitrage(true);
-                setShowPlayerProps(false);
-              } else {
-                navigate('/pricing');
-              }
-            }}
-            style={toggleButtonStyle(isArbitrageMode, !hasPlatinum)}
-          >
-            ⚡ Arbitrage {!hasPlatinum && '🔒'}
-          </button>
-        </div>
-        <p style={{
-          fontSize: '14px',
-          color: 'var(--text-secondary)',
-          margin: '16px 0 0 0',
-          opacity: 0.8
-        }}>
-          {isArbitrageMode
-            ? 'Find profitable arbitrage opportunities'
-            : isPlayerPropsMode
-              ? 'Explore player props across every book you follow'
-              : 'Compare odds across all major sportsbooks'}
-        </p>
       </div>
 
       {/* Show quota exceeded message for free users */}
@@ -1154,113 +1090,112 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
       ) : null}
 
-          {/* Mobile footer nav + filter pill */}
-          <MobileBottomBar 
-            onFilterClick={() => setMobileFiltersOpen(true)} 
-            active="sportsbooks" 
-            showFilter={true}
-            style={{ display: 'flex' }}
-          />
-          <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
-            <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
-              {/* Date selector */}
-              <div style={{ marginBottom: 16 }}>
-                <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Date</h4>
-                <DatePicker
-                  value={draftSelectedDate}
-                  onChange={(val) => setDraftSelectedDate(val || '')}
-                />
-              </div>
+      {/* Mobile footer nav + filter pill */}
+      <MobileBottomBar
+        onFilterClick={() => setMobileFiltersOpen(true)}
+        active="sportsbooks"
+        showFilter={true}
+        style={{ display: 'flex' }}
+      />
+      <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
+        <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
+          {/* Date selector */}
+          <div style={{ marginBottom: 16 }}>
+            <h4 style={{ margin: '0 0 8px', fontWeight: 600 }}>Date</h4>
+            <DatePicker
+              value={draftSelectedDate}
+              onChange={(val) => setDraftSelectedDate(val || '')}
+            />
+          </div>
 
-              {/* Sports selector */}
-              <div style={{ marginBottom: 16 }}>
-                <h4 style={{ margin: '0 0 8px', fontWeight: 600, color: 'var(--text)', fontSize: '16px' }}>Sports</h4>
-                <SportMultiSelect
-                  list={sportList}
-                  selected={draftPicked}
-                  onChange={(next) => setDraftPicked(next)}
-                  usePortal
-                  leftAlign
-                  enableSearch={true}
-                  enableCategories={true}
-                  isSportsbook={false}
-                  placeholderText="Choose sports..."
-                  allLabel="All Sports"
-                />
-              </div>
+          {/* Sports selector */}
+          <div style={{ marginBottom: 16 }}>
+            <h4 style={{ margin: '0 0 8px', fontWeight: 600, color: 'var(--text)', fontSize: '16px' }}>Sports</h4>
+            <SportMultiSelect
+              list={sportList}
+              selected={draftPicked}
+              onChange={(next) => setDraftPicked(next)}
+              usePortal
+              leftAlign
+              enableSearch={true}
+              enableCategories={true}
+              isSportsbook={false}
+              placeholderText="Choose sports..."
+              allLabel="All Sports"
+            />
+          </div>
 
-              {/* Sportsbooks selector */}
-              <div style={{ marginBottom: 16 }}>
-                <h4 style={{ margin: '0 0 8px', fontWeight: 600, color: 'var(--text)', fontSize: '16px' }}>Sportsbooks</h4>
-                <SportMultiSelect
-                  list={bookList}
-                  selected={draftSelectedBooks}
-                  onChange={(next) => setDraftSelectedBooks(next)}
-                  usePortal
-                  leftAlign
-                  enableSearch={true}
-                  enableCategories={true}
-                  isSportsbook={true}
-                  placeholderText="Choose sportsbooks..."
-                  allLabel="All Sportsbooks"
-                />
-              </div>
+          {/* Sportsbooks selector */}
+          <div style={{ marginBottom: 16 }}>
+            <h4 style={{ margin: '0 0 8px', fontWeight: 600, color: 'var(--text)', fontSize: '16px' }}>Sportsbooks</h4>
+            <SportMultiSelect
+              list={bookList}
+              selected={draftSelectedBooks}
+              onChange={(next) => setDraftSelectedBooks(next)}
+              usePortal
+              leftAlign
+              enableSearch={true}
+              enableCategories={true}
+              isSportsbook={true}
+              placeholderText="Choose sportsbooks..."
+              allLabel="All Sportsbooks"
+            />
+          </div>
 
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            <button
+              onClick={applyFilters}
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                borderRadius: 8,
+                border: 'none',
+                background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: '14px'
+              }}
+            >
+              Apply
+            </button>
+            <button
+              onClick={resetDraftFilters}
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                borderRadius: 8,
+                border: '1px solid var(--border-color)',
+                background: 'transparent',
+                color: 'var(--text-secondary)',
+                fontWeight: 500,
+                fontSize: '14px'
+              }}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </MobileFiltersSheet>
 
-              {/* Actions */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                <button
-                  onClick={applyFilters}
-                  style={{
-                    flex: 1,
-                    padding: '12px 16px',
-                    borderRadius: 8,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                    color: '#fff',
-                    fontWeight: 600,
-                    fontSize: '14px'
-                  }}
-                >
-                  Apply
-                </button>
-                <button
-                  onClick={resetDraftFilters}
-                  style={{
-                    flex: 1,
-                    padding: '12px 16px',
-                    borderRadius: 8,
-                    border: '1px solid var(--border-color)',
-                    background: 'transparent',
-                    color: 'var(--text-secondary)',
-                    fontWeight: 500,
-                    fontSize: '14px'
-                  }}
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          </MobileFiltersSheet>
+      {/* BetSlip Component */}
+      <BetSlip
+        isOpen={isOpen}
+        onClose={closeBetSlip}
+        bets={bets}
+        onUpdateBet={updateBet}
+        onRemoveBet={removeBet}
+        onClearAll={clearAllBets}
+        onPlaceBets={placeBets}
+      />
 
-          {/* BetSlip Component */}
-          <BetSlip
-            isOpen={isOpen}
-            onClose={closeBetSlip}
-            bets={bets}
-            onUpdateBet={updateBet}
-            onRemoveBet={removeBet}
-            onClearAll={clearAllBets}
-            onPlaceBets={placeBets}
-          />
-
-          {/* Mobile Search Modal */}
-          <MobileSearchModal 
-            isOpen={showMobileSearch}
-            onClose={() => setShowMobileSearch(false)}
-            onSearch={handleMobileSearch}
-            currentQuery={debouncedQuery}
-          />
+      {/* Mobile Search Modal */}
+      <MobileSearchModal
+        isOpen={showMobileSearch}
+        onClose={() => setShowMobileSearch(false)}
+        onSearch={handleMobileSearch}
+        currentQuery={debouncedQuery}
+      />
     </div>
   );
 }
