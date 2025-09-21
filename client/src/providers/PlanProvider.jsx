@@ -156,6 +156,35 @@ export const PlanProvider = ({ children }) => {
 
     const promise = (async () => {
       try {
+        // Check if this is a demo user who should have platinum access
+        const isDemoUser = user.id === '54276b6c-5255-4117-be95-70c22132591c';
+
+        // If demo user, return platinum plan immediately
+        if (isDemoUser) {
+          const demoPlan = {
+            ...defaultPlan,
+            plan: 'platinum',
+            quota: null,
+            used: 0,
+            remaining: null,
+            fetchedAt: new Date().toISOString(),
+            stale: false,
+          };
+
+          state.lastFetchAt = Date.now();
+          state.retries = 0;
+
+          updatePlanState(demoPlan);
+          setMetrics({
+            lastSource: 'demo',
+            lastDurationMs: Date.now() - startedAt,
+            retries: 0,
+          });
+
+          console.log('🎯 Demo user detected, granting platinum access:', user.id);
+          return demoPlan;
+        }
+
         const response = await secureFetch(withApiBase('/api/me/usage'), {
           credentials: 'include',
           headers: { Accept: 'application/json' },
@@ -242,6 +271,34 @@ export const PlanProvider = ({ children }) => {
       setMetrics({ lastSource: 'cache', lastDurationMs: null, retries: 0 });
       setLastPremiumAt(0);
       clearPlanInfo();
+      return;
+    }
+
+    // Check if this is a demo user who should have platinum access
+    const isDemoUser = user.id === '54276b6c-5255-4117-be95-70c22132591c';
+
+    if (isDemoUser) {
+      const demoPlan = {
+        ...defaultPlan,
+        plan: 'platinum',
+        quota: null,
+        used: 0,
+        remaining: null,
+        fetchedAt: new Date().toISOString(),
+        stale: false,
+      };
+
+      console.log('🎯 Demo user detected immediately, setting platinum plan:', user.id);
+
+      // Clear any stale cache for demo users
+      clearPlanInfo();
+
+      planRef.current = demoPlan;
+      setPlan(demoPlan);
+      savePlanInfo(demoPlan);
+      setLastPremiumAt(Date.now());
+      setPlanLoading(false);
+      setMetrics({ lastSource: 'demo', lastDurationMs: 0, retries: 0 });
       return;
     }
 

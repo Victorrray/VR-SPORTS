@@ -1099,6 +1099,22 @@ app.get('/api/me/usage', requireUser, async (req, res) => {
   const cached = getCachedPlan(userId);
 
   try {
+    // Check if this is the demo user who should have platinum access
+    const isDemoUser = userId === '54276b6c-5255-4117-be95-70c22132591c';
+
+    if (isDemoUser) {
+      const demoPlan = {
+        id: userId,
+        plan: 'platinum',
+        used: 0,
+        quota: null,
+        source: 'demo'
+      };
+      setCachedPlan(userId, demoPlan);
+      console.log('🎯 Demo user detected, granting platinum access:', userId);
+      return res.json(demoPlan);
+    }
+
     const profile = await getUserProfile(userId);
 
     // Handle demo mode when Supabase is not configured

@@ -15,8 +15,7 @@ import Navbar from './components/layout/Navbar';
 import MobileBottomBar from './components/layout/MobileBottomBar';
 import Footer from './components/layout/Footer';
 import Home from './pages/Home';
-import SportsbookMarkets from './pages/SportsbookMarkets';
-import Login from './pages/Login';
+import DFSMarkets from './pages/DFSMarkets';
 import Account from './pages/Account';
 import UsagePlan from './pages/UsagePlan';
 import MySportsbooks from './pages/MySportsbooks';
@@ -109,8 +108,7 @@ function AppRoutes() {
             <AuthDebug />
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />

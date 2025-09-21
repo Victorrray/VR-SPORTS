@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle, RefreshCw } from "lucide-react";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
 import UsagePlanCard from "../components/billing/UsagePlanCard";
@@ -53,6 +53,26 @@ export default function Account() {
   const [showAllBooks, setShowAllBooks] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
   const [savingPrefs, setSavingPrefs] = useState(false);
+
+  // Debug logging for plan data
+  console.log('🔍 Account plan data:', {
+    me: me,
+    mePlan: me?.plan,
+    meLoading: loading,
+    meError: error
+  });
+
+  // Manual refresh function
+  const handleRefreshPlan = async () => {
+    console.log('🔄 Manually refreshing plan data...');
+    try {
+      await me?.refresh?.({ force: true });
+      console.log('✅ Plan refresh successful');
+    } catch (error) {
+      console.error('❌ Plan refresh failed:', error);
+      setError('Failed to refresh plan data. Please try again.');
+    }
+  };
 
   // Load profile (username) and sportsbooks
   useEffect(() => {
@@ -535,7 +555,7 @@ export default function Account() {
             
             {me?.plan === 'platinum' && (
               <div className="subscription-actions">
-                <button 
+                <button
                   className="security-btn cancel-btn"
                   onClick={handleCancelSubscription}
                 >
@@ -545,12 +565,23 @@ export default function Account() {
                     <small>Manage your subscription</small>
                   </div>
                 </button>
+                <button
+                  className="security-btn"
+                  onClick={handleRefreshPlan}
+                  style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}
+                >
+                  <RefreshCw size={16} />
+                  <div className="btn-content">
+                    <span>Refresh Plan</span>
+                    <small>Update plan status</small>
+                  </div>
+                </button>
               </div>
             )}
             
             {me?.plan !== 'platinum' && (
               <div className="subscription-actions">
-                <button 
+                <button
                   className="security-btn upgrade-btn"
                   onClick={handleUpgradeToPlatinum}
                   disabled={loading}
@@ -559,6 +590,18 @@ export default function Account() {
                   <div className="btn-content">
                     <span>{loading ? 'Creating checkout...' : 'Upgrade to Platinum'}</span>
                     <small>Unlimited access & features</small>
+                  </div>
+                </button>
+                <button
+                  className="security-btn"
+                  onClick={handleRefreshPlan}
+                  disabled={loading}
+                  style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}
+                >
+                  <RefreshCw size={16} />
+                  <div className="btn-content">
+                    <span>Refresh Plan</span>
+                    <small>Update plan status</small>
                   </div>
                 </button>
               </div>

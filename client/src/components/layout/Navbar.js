@@ -30,6 +30,7 @@ export default function Navbar({ onOpenMobileSearch }) {
   const mobileLinks = [
     { label: "Home", to: "/" },
     { label: "Odds", to: "/sportsbooks" },
+    { label: "DFS Props", to: "/dfs" },
     { label: "Picks", to: "/picks" },
     { label: "Scores", to: "/scores" },
     ...(user ? [{ label: "Profile", to: "/account" }] : [{ label: "Login", to: "/login" }]),
@@ -115,18 +116,18 @@ export default function Navbar({ onOpenMobileSearch }) {
         </Link>
         {user && (
           <Link
-            to="/picks"
-            className={`${styles.link} ${isActive("/picks") ? styles.active : ""}`}
+            to="/dfs"
+            className={`${styles.link} ${isActive("/dfs") ? styles.active : ""}`}
           >
-            Picks
+            DFS Props
           </Link>
         )}
         {user && (
           <Link
-            to="/scores"
-            className={`${styles.link} ${isActive("/scores") ? styles.active : ""}`}
+            to="/picks"
+            className={`${styles.link} ${isActive("/picks") ? styles.active : ""}`}
           >
-            Scores
+            Picks
           </Link>
         )}
 
@@ -370,18 +371,19 @@ export default function Navbar({ onOpenMobileSearch }) {
               </Link>
             ))}
             
-            {/* My Sportsbooks button for authenticated users */}
+            {/* DFS Props button for authenticated users */}
             {user && (
               <button
                 className={styles.mobileLink}
                 onClick={() => {
                   setMobileMenu(false);
-                  navigate('/my-sportsbooks');
+                  navigate('/dfs');
                 }}
               >
-                My Sportsbooks
+                DFS Props
               </button>
             )}
+            {/* My Sportsbooks button for authenticated users */}
           </div>
         </div>
       )}

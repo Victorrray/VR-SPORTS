@@ -31,7 +31,22 @@ export function useMe() {
   const { plan, planLoading, refreshPlan } = usePlan();
   const initialPlan = plan || loadPlanInfo();
 
-  const [me, setMe] = useState(() => planToUsage(initialPlan));
+  const [me, setMe] = useState(() => {
+    // Check if user is demo user and should have platinum access
+    const isDemoUser = session?.user?.id === '54276b6c-5255-4117-be95-70c22132591c';
+    if (isDemoUser) {
+      console.log('🎯 useMe: Demo user detected, setting platinum plan immediately');
+      return {
+        plan: 'platinum',
+        remaining: null,
+        limit: null,
+        calls_made: 0,
+        stale: false,
+      };
+    }
+
+    return planToUsage(initialPlan);
+  });
   const [loading, setLoading] = useState(() => planLoading || !initialPlan);
   const [error, setError] = useState(null);
 
