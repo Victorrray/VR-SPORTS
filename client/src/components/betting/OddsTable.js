@@ -599,42 +599,46 @@ export default function OddsTable({
                   const underOutcome = outcomes.find(o => o.name === 'Under');
                   
                   if (overOutcome && underOutcome && overOutcome.point !== undefined) {
-                    // Create separate rows for Over and Under
-                    [overOutcome, underOutcome].forEach(outcome => {
-                      const propKey = `${game.id}-${market.key}-${playerName}-${outcome.point}-${outcome.name}`;
-                      console.log(`Creating prop for ${playerName}: ${market.key} ${outcome.name} ${outcome.point}`);
-                      
-                      if (!propGroups.has(propKey)) {
-                        propGroups.set(propKey, {
-                          key: propKey, // Add unique key for row expansion
-                          game,
-                          mkt: { 
-                            key: market.key, 
-                            name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
-                          },
-                          out: {
-                            name: outcome.name, // This will be "Over" or "Under"
-                            description: playerName, // Player name goes in description
-                            price: outcome.price,
-                            odds: outcome.price,
-                            point: outcome.point
-                          },
-                          bk: bookmaker,
-                          sport: game.sport_key,
-                          isPlayerProp: true,
-                          allBooks: []
-                        });
-                      }
-                      
-                      const propGroup = propGroups.get(propKey);
-                      propGroup.allBooks.push({
-                        price: outcome.price,
-                        odds: outcome.price,
-                        book: bookmaker.title,
-                        bookmaker: bookmaker,
-                        market: market,
-                        outcome: outcome
+                    // Create combined Over/Under row - we'll determine which to show after collecting all books
+                    const basePropKey = `${game.id}-${market.key}-${playerName}-${overOutcome.point}`;
+                    console.log(`Creating combined prop for ${playerName}: ${market.key} ${overOutcome.point}`);
+                    
+                    if (!propGroups.has(basePropKey)) {
+                      propGroups.set(basePropKey, {
+                        key: basePropKey,
+                        game,
+                        mkt: { 
+                          key: market.key, 
+                          name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+                        },
+                        playerName: playerName,
+                        point: overOutcome.point,
+                        sport: game.sport_key,
+                        isPlayerProp: true,
+                        overBooks: [],
+                        underBooks: []
                       });
+                    }
+                    
+                    const propGroup = propGroups.get(basePropKey);
+                    
+                    // Add both Over and Under books to their respective arrays
+                    propGroup.overBooks.push({
+                      price: overOutcome.price,
+                      odds: overOutcome.price,
+                      book: bookmaker.title,
+                      bookmaker: bookmaker,
+                      market: market,
+                      outcome: overOutcome
+                    });
+                    
+                    propGroup.underBooks.push({
+                      price: underOutcome.price,
+                      odds: underOutcome.price,
+                      book: bookmaker.title,
+                      bookmaker: bookmaker,
+                      market: market,
+                      outcome: underOutcome
                     });
                   }
                 }
@@ -711,8 +715,65 @@ export default function OddsTable({
           }
         }
         
-        // Add this prop to the results
-        propsRows.push(propData);
+        // Handle combined Over/Under props - determine which side has better EV
+        if (propData.overBooks && propData.underBooks) {
+          // Calculate EV for both Over and Under
+          const calculateSideEV = (books) => {
+            if (!books || books.length === 0) return null;
+            const probs = books.map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
+            const consensusProb = median(probs);
+            if (consensusProb && consensusProb > 0 && consensusProb < 1 && books.length >= 3) {
+              const fairDec = 1 / consensusProb;
+              const bestOdds = books.reduce((best, book) => {
+                const decimal = americanToDecimal(book.price);
+                return decimal > americanToDecimal(best.price) ? book : best;
+              });
+              return calculateEV(bestOdds.price, decimalToAmerican(fairDec));
+            }
+            return null;
+          };
+          
+          const overEV = calculateSideEV(propData.overBooks);
+          const underEV = calculateSideEV(propData.underBooks);
+          
+          // Choose the side with better EV (or Over if tied/no EV)
+          const showOver = !underEV || (overEV && overEV >= (underEV || 0));
+          const chosenBooks = showOver ? propData.overBooks : propData.underBooks;
+          const otherBooks = showOver ? propData.underBooks : propData.overBooks;
+          
+          if (chosenBooks.length > 0) {
+            // Find the best odds from chosen side
+            const bestBook = chosenBooks.reduce((best, book) => {
+              const decimal = americanToDecimal(book.price);
+              return decimal > americanToDecimal(best.price) ? book : best;
+            });
+            
+            // Create the main row with the better EV side
+            const finalPropData = {
+              key: propData.key,
+              game: propData.game,
+              mkt: propData.mkt,
+              out: {
+                name: showOver ? 'Over' : 'Under',
+                description: propData.playerName,
+                price: bestBook.price,
+                odds: bestBook.price,
+                point: propData.point
+              },
+              bk: bestBook.bookmaker,
+              sport: propData.sport,
+              isPlayerProp: true,
+              allBooks: chosenBooks, // Main table shows chosen side books
+              otherSideBooks: otherBooks, // Store other side for mini-table
+              otherSideName: showOver ? 'Under' : 'Over'
+            };
+            
+            propsRows.push(finalPropData);
+          }
+        } else {
+          // Regular prop (not Over/Under pair)
+          propsRows.push(propData);
+        }
       });
       
       console.log(`Total prop groups created: ${propGroups.size}`);
@@ -973,12 +1034,28 @@ export default function OddsTable({
   const getEV = row => {
     const userOdds = Number(row?.out?.price ?? row?.out?.odds ?? 0);
     if (!userOdds) return null;
+    
+    // For player props, use consensus probability from all available books
+    if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
+      const probs = (row.allBooks || []).map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
+      const consensusProb = median(probs);
+      const uniqCnt = uniqueBookCount(row);
+      if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Lower threshold for props
+        const fairDec = 1 / consensusProb;
+        return calculateEV(userOdds, decimalToAmerican(fairDec));
+      }
+      return null;
+    }
+    
+    // For regular markets, use devig method first
     const pDevig = consensusDevigProb(row);
     const pairCnt = devigPairCount(row);
     if (pDevig && pDevig > 0 && pDevig < 1 && pairCnt > 4) {
       const fairDec = 1 / pDevig;
       return calculateEV(userOdds, decimalToAmerican(fairDec));
     }
+    
+    // Fallback to consensus method for regular markets
     const probs = (row.allBooks || []).map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
     const consensusProb = median(probs);
     const uniqCnt = uniqueBookCount(row);
@@ -1708,6 +1785,28 @@ export default function OddsTable({
                             combinedBooks.forEach(pushEntry);
 
                             let cols = orderedBooks;
+                            
+                            // For combined Over/Under props, add the other side books to mini-table
+                            if (mode === "props" && row.otherSideBooks && row.otherSideBooks.length > 0) {
+                              const otherSideEntries = row.otherSideBooks.map(book => ({
+                                price: book.price,
+                                odds: book.price,
+                                book: `${book.book} (${row.otherSideName})`,
+                                bookmaker: book.bookmaker,
+                                market: book.market,
+                                isOtherSide: true,
+                                otherSideName: row.otherSideName
+                              }));
+                              
+                              // Add other side books to the mini-table, avoiding duplicates
+                              otherSideEntries.forEach(entry => {
+                                const key = normalizeBookKeyForEntry(entry);
+                                if (key && !seenBookKeys.has(key + '-other')) {
+                                  seenBookKeys.add(key + '-other');
+                                  cols.push(entry);
+                                }
+                              });
+                            }
 
                             const grab = (ob, top) => {
                               // For player props mode, return the odds directly
