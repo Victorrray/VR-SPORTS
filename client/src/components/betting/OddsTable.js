@@ -606,6 +606,7 @@ export default function OddsTable({
                       
                       if (!propGroups.has(propKey)) {
                         propGroups.set(propKey, {
+                          key: propKey, // Add unique key for row expansion
                           game,
                           mkt: { 
                             key: market.key, 
@@ -659,6 +660,7 @@ export default function OddsTable({
               
               if (!propGroups.has(propKey)) {
                 propGroups.set(propKey, {
+                  key: propKey, // Add unique key for row expansion
                   game,
                   mkt: { 
                     key: market.key, 
