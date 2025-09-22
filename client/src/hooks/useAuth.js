@@ -4,8 +4,8 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
-// Validate session every 20 minutes instead of 5 minutes for better UX
-const SESSION_VALIDATION_INTERVAL = 20 * 60 * 1000; // 20 minutes
+// Validate session every 35 minutes for optimal UX with minimal server load
+const SESSION_VALIDATION_INTERVAL = 35 * 60 * 1000; // 35 minutes
 const SESSION_GRACE_PERIOD = 5 * 60 * 1000; // 5 minute grace period for network issues
 
 const AuthProvider = ({ children }) => {
