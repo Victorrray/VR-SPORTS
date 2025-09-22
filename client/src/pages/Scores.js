@@ -175,8 +175,14 @@ export default function Scores() {
       }
     };
     
+    // Use both click and touchend for better mobile support
     document.addEventListener('click', handleClickOutside, { passive: true });
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener('touchend', handleClickOutside, { passive: true });
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchend', handleClickOutside);
+    };
   }, [dropdownOpen]);
 
   // First load + dynamic auto refresh based on live games
