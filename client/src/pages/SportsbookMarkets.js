@@ -17,6 +17,7 @@ import { secureFetch } from "../utils/security";
 import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
+import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
 
 const ENABLE_PLAYER_PROPS_V2 = true;
 
@@ -197,6 +198,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Get football player prop markets organized for the dropdown
   const getFootballPlayerPropMarkets = () => {
     return Object.values(PLAYER_PROP_MARKETS).flat().filter(market => market.sport === 'football');
+  };
+
+  // Merge available sportsbooks with DFS apps to ensure they're always available
+  const getEnhancedSportsbookList = (marketBooks) => {
+    const marketBookKeys = new Set((marketBooks || []).map(book => book.key));
+    const dfsApps = getDFSApps();
+    
+    // Add DFS apps that aren't already in the market books
+    const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
+    const enhancedBooks = [
+      ...(marketBooks || []),
+      ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
+    ];
+    
+    return enhancedBooks;
   };
 
   return (
@@ -446,7 +462,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   Sportsbooks
                 </label>
                 <SportMultiSelect
-                  list={marketBooks || []}
+                  list={getEnhancedSportsbookList(marketBooks)}
                   selected={draftSelectedBooks || []}
                   onChange={setDraftSelectedBooks}
                   placeholderText="Select sportsbooks..."
@@ -506,7 +522,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   Sportsbooks
                 </label>
                 <SportMultiSelect
-                  list={marketBooks || []}
+                  list={getEnhancedSportsbookList(marketBooks)}
                   selected={draftSelectedBooks || []}
                   onChange={setDraftSelectedBooks}
                   placeholderText="Select sportsbooks..."

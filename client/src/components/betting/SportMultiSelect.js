@@ -1,7 +1,7 @@
 // src/components/betting/SportMultiSelect.js
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import ReactDOM from "react-dom";
-import { Search, X, Star, TrendingUp } from "lucide-react";
+import { Search, X, Star, TrendingUp, Gamepad2 } from "lucide-react";
 import "./SportMultiSelect.css";
 
 const allKeys = (list) => (list || []).filter(s => s.key !== "ALL").map(s => s.key);
@@ -12,6 +12,11 @@ const SPORTSBOOK_CATEGORIES = {
     title: "Popular Sportsbooks",
     icon: Star,
     books: ["draftkings", "fanduel", "betmgm", "caesars", "pointsbet"]
+  },
+  dfs: {
+    title: "DFS Apps",
+    icon: Gamepad2,
+    books: ["prizepicks", "underdog", "pick6", "sleeper"]
   },
   premium: {
     title: "Premium Options", 

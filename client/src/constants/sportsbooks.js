@@ -27,6 +27,12 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'betonlineag', name: 'BetOnline', popular: false },
   { key: 'mybookieag', name: 'MyBookie', popular: false },
   { key: 'rebet', name: 'Rebet', popular: false },
+  
+  // DFS Apps
+  { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true },
+  { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true },
+  { key: 'pick6', name: 'Pick6', popular: true, isDFS: true },
+  { key: 'sleeper', name: 'Sleeper', popular: false, isDFS: true },
 ];
 
 // Helper function to get sportsbook by key
@@ -64,4 +70,20 @@ export const getSportsbooksByPlan = (userPlan) => {
 // Helper function to get all sportsbook keys
 export const getAllSportsbookKeys = () => {
   return AVAILABLE_SPORTSBOOKS.map(book => book.key);
+};
+
+// Helper function to get DFS apps only
+export const getDFSApps = () => {
+  return AVAILABLE_SPORTSBOOKS.filter(book => book.isDFS);
+};
+
+// Helper function to get traditional sportsbooks only (excluding DFS)
+export const getTraditionalSportsbooks = () => {
+  return AVAILABLE_SPORTSBOOKS.filter(book => !book.isDFS);
+};
+
+// Helper function to check if a sportsbook is a DFS app
+export const isDFSApp = (key) => {
+  const book = getSportsbookByKey(key);
+  return book?.isDFS || false;
 };
