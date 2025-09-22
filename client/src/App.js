@@ -15,7 +15,8 @@ import DebugPanel from './components/debug/DebugPanel';
 import Navbar from './components/layout/Navbar';
 import MobileBottomBar from './components/layout/MobileBottomBar';
 import Footer from './components/layout/Footer';
-import Home from './pages/Home';
+import Landing from './pages/Landing';
+import Dashboard from './pages/Dashboard';
 import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
@@ -117,15 +118,15 @@ function AppRoutes() {
           <main className="main-content" id="main-content" tabIndex="-1">
             <AuthDebug />
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={user ? <Dashboard /> : <Landing />} />
+              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
               <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
-              <Route path="/dashboard" element={user ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />} />
-              <Route path="/pricing" element={<Home />} />
+              <Route path="/pricing" element={<Landing />} />
               <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
               <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />
               <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
@@ -139,7 +140,7 @@ function AppRoutes() {
             </Routes>
           </main>
           {/* Show footer only on public landing routes when not authenticated */}
-          {(['/', '/home', '/pricing', '/login', '/signup'].includes(location.pathname) && !user) && <Footer />}
+          {(['/', '/pricing', '/login', '/signup'].includes(location.pathname) && !user) && <Footer />}
           
           {/* Username Setup Modal */}
           {showUsernameSetup && (
