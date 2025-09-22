@@ -25,7 +25,7 @@ export default function Login() {
   });
   const [search] = useSearchParams();
   const navigate = useNavigate();
-  const next = search.get("next") || search.get("returnTo") || "/app";
+  const next = search.get("next") || search.get("returnTo") || "/dashboard";
   
   const DEBUG_PRICING = process.env.NODE_ENV === 'development';
 

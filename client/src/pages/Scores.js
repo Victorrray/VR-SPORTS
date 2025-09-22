@@ -104,6 +104,7 @@ export default function Scores() {
   const [liveGamesCount, setLiveGamesCount] = useState(0);
 
   const btnRef = useRef(null);
+  const intervalRef = useRef(null);
 
   async function load(silent = false) {
     if (!silent) setLoading(true);
@@ -168,11 +169,20 @@ export default function Scores() {
   useEffect(() => {
     load();
     
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
     // Use faster refresh if there are live games (15s for live, 60s for others)
     const refreshInterval = liveGamesCount > 0 ? 15000 : REFRESH_MS;
-    const t = setInterval(() => load(true), refreshInterval);
+    intervalRef.current = setInterval(() => load(true), refreshInterval);
+    
     return () => {
-      clearInterval(t);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
   }, [sport, liveGamesCount]);
 
@@ -180,6 +190,10 @@ export default function Scores() {
   useEffect(() => {
     return () => {
       // Clear any pending timeouts/intervals when component unmounts
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       setLoading(false);
     };
   }, []);

@@ -49,14 +49,21 @@ const FOCUSED_BOOKMAKERS = [
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
+  "hardrock", "espnbet", "fanatics",
+  // DFS apps for player props
+  "prizepicks", "underdog", "pick6", "prophetx",
   // US exchange books
   "prophet_exchange", "rebet",
   // International (for comparison)
   "pinnacle"
 ];
 
-// Trial user bookmaker restrictions (expanded to 8 major books for better experience)
-const TRIAL_BOOKMAKERS = ["draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", "unibet", "bovada"];
+// Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
+const TRIAL_BOOKMAKERS = [
+  "draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", 
+  "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", 
+  "prizepicks", "underdog", "pick6", "prophetx", "espnbet", "fanatics", "pinnacle"
+];
 
 // Player props completely removed
 
@@ -1829,7 +1836,7 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
         try {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-          const bookmakerList = allowedBookmakers.slice(0, 4).join(','); // Limit to 4 books for props
+          const bookmakerList = allowedBookmakers.slice(0, 19).join(','); // Limit to 19 books for props (use all trial bookmakers including DFS apps)
           
           // Use individual event endpoint for player props
           const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
