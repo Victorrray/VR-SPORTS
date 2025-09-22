@@ -19,7 +19,57 @@ import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
 
 const ENABLE_PLAYER_PROPS_V2 = true;
-const PLAYER_PROP_MARKET_KEYS = ['player_anytime_td', 'player_pass_yds', 'player_pass_tds', 'player_rush_yds', 'player_rush_tds', 'player_reception_yds', 'player_receptions', 'player_1st_td', 'player_last_td'];
+
+// Comprehensive player prop markets organized by category
+const PLAYER_PROP_MARKETS = {
+  passing: [
+    { key: 'player_pass_yds', title: 'Passing Yards', sport: 'football' },
+    { key: 'player_pass_tds', title: 'Passing TDs', sport: 'football' },
+    { key: 'player_pass_completions', title: 'Pass Completions', sport: 'football' },
+    { key: 'player_pass_attempts', title: 'Pass Attempts', sport: 'football' },
+    { key: 'player_pass_interceptions', title: 'Interceptions', sport: 'football' },
+    { key: 'player_pass_longest_completion', title: 'Longest Pass', sport: 'football' }
+  ],
+  rushing: [
+    { key: 'player_rush_yds', title: 'Rushing Yards', sport: 'football' },
+    { key: 'player_rush_tds', title: 'Rushing TDs', sport: 'football' },
+    { key: 'player_rush_attempts', title: 'Rush Attempts', sport: 'football' },
+    { key: 'player_rush_longest', title: 'Longest Rush', sport: 'football' }
+  ],
+  receiving: [
+    { key: 'player_reception_yds', title: 'Receiving Yards', sport: 'football' },
+    { key: 'player_receptions', title: 'Receptions', sport: 'football' },
+    { key: 'player_receiving_tds', title: 'Receiving TDs', sport: 'football' },
+    { key: 'player_receiving_longest', title: 'Longest Reception', sport: 'football' }
+  ],
+  touchdowns: [
+    { key: 'player_anytime_td', title: 'Anytime TD', sport: 'football' },
+    { key: 'player_1st_td', title: 'First TD', sport: 'football' },
+    { key: 'player_last_td', title: 'Last TD', sport: 'football' },
+    { key: 'player_2_plus_tds', title: '2+ TDs', sport: 'football' }
+  ],
+  basketball: [
+    { key: 'player_points', title: 'Points', sport: 'basketball' },
+    { key: 'player_rebounds', title: 'Rebounds', sport: 'basketball' },
+    { key: 'player_assists', title: 'Assists', sport: 'basketball' },
+    { key: 'player_threes', title: '3-Pointers Made', sport: 'basketball' },
+    { key: 'player_steals', title: 'Steals', sport: 'basketball' },
+    { key: 'player_blocks', title: 'Blocks', sport: 'basketball' }
+  ],
+  baseball: [
+    { key: 'batter_hits', title: 'Hits', sport: 'baseball' },
+    { key: 'batter_total_bases', title: 'Total Bases', sport: 'baseball' },
+    { key: 'batter_rbis', title: 'RBIs', sport: 'baseball' },
+    { key: 'batter_runs_scored', title: 'Runs', sport: 'baseball' },
+    { key: 'batter_home_runs', title: 'Home Runs', sport: 'baseball' },
+    { key: 'pitcher_strikeouts', title: 'Strikeouts', sport: 'baseball' },
+    { key: 'pitcher_hits_allowed', title: 'Hits Allowed', sport: 'baseball' },
+    { key: 'pitcher_earned_runs', title: 'Earned Runs', sport: 'baseball' }
+  ]
+};
+
+// Get all player prop market keys for backward compatibility
+const PLAYER_PROP_MARKET_KEYS = Object.values(PLAYER_PROP_MARKETS).flat().map(market => market.key);
 
 const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const location = useLocation();
@@ -33,6 +83,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
+  const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_rush_yds", "player_pass_yds", "player_receptions"]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -54,10 +105,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftSelectedDate, setDraftSelectedDate] = useState('');
   const [draftSelectedBooks, setDraftSelectedBooks] = useState([]);
   const [draftMarketKeys, setDraftMarketKeys] = useState(["h2h", "spreads", "totals"]);
+  const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(["player_rush_yds", "player_pass_yds", "player_receptions"]);
 
   const isPlayerPropsMode = ENABLE_PLAYER_PROPS_V2 && showPlayerProps;
   const isArbitrageMode = showArbitrage;
-  const marketsForMode = isPlayerPropsMode ? PLAYER_PROP_MARKET_KEYS : marketKeys;
+  const marketsForMode = isPlayerPropsMode ? [...marketKeys, ...selectedPlayerPropMarkets] : marketKeys;
   const regionsForMode = isPlayerPropsMode ? ["us"] : ["us", "us2", "us_exchanges"];
   
   // For player props, hardcode NFL to avoid filter issues
@@ -130,6 +182,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedDate(draftSelectedDate || '');
     setSelectedBooks(draftSelectedBooks || []);
     setMarketKeys(draftMarketKeys && draftMarketKeys.length ? draftMarketKeys : ["h2h", "spreads", "totals"]);
+    setSelectedPlayerPropMarkets(draftSelectedPlayerPropMarkets && draftSelectedPlayerPropMarkets.length ? draftSelectedPlayerPropMarkets : ["player_rush_yds", "player_pass_yds", "player_receptions"]);
     setMobileFiltersOpen(false);
   };
 
@@ -138,6 +191,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setDraftSelectedDate('');
     setDraftSelectedBooks([]);
     setDraftMarketKeys(["h2h", "spreads", "totals"]);
+    setDraftSelectedPlayerPropMarkets(["player_rush_yds", "player_pass_yds", "player_receptions"]);
+  };
+
+  // Get football player prop markets organized for the dropdown
+  const getFootballPlayerPropMarkets = () => {
+    return Object.values(PLAYER_PROP_MARKETS).flat().filter(market => market.sport === 'football');
   };
 
   return (
@@ -306,7 +365,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             pageSize={15}
             mode="props"
             bookFilter={effectiveSelectedBooks}
-            marketFilter={PLAYER_PROP_MARKET_KEYS}
+            marketFilter={selectedPlayerPropMarkets}
             evMin={null}
             loading={loading || marketsLoading}
             error={error || marketsError}
@@ -347,24 +406,56 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title={isPlayerPropsMode ? "NFL Player Props" : "Filters"}>
         <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
           
-          {/* Show message for player props mode instead of filters */}
+          {/* Player Props Mode Filters */}
           {isPlayerPropsMode ? (
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '40px 20px',
-              background: 'rgba(139, 92, 246, 0.1)',
-              borderRadius: '12px',
-              border: '1px solid rgba(139, 92, 246, 0.2)'
-            }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏈</div>
-              <h3 style={{ color: 'var(--text-primary)', margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600' }}>
-                NFL Player Props Mode
-              </h3>
-              <p style={{ color: 'var(--text-secondary)', margin: '0', fontSize: '14px', lineHeight: '1.5' }}>
-                Filters are disabled in Player Props mode.<br/>
-                Showing NFL player prop markets only for optimal performance.
-              </p>
-            </div>
+            <>
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '20px',
+                background: 'rgba(139, 92, 246, 0.1)',
+                borderRadius: '12px',
+                border: '1px solid rgba(139, 92, 246, 0.2)',
+                marginBottom: '20px'
+              }}>
+                <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏈</div>
+                <h3 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600' }}>
+                  NFL Player Props
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', margin: '0', fontSize: '12px', lineHeight: '1.4' }}>
+                  Select which player prop markets to display
+                </p>
+              </div>
+
+              {/* Player Props Market Selection */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Player Prop Markets
+                </label>
+                <SportMultiSelect
+                  list={getFootballPlayerPropMarkets()}
+                  selected={draftSelectedPlayerPropMarkets || []}
+                  onChange={setDraftSelectedPlayerPropMarkets}
+                  placeholderText="Select player props..."
+                  allLabel="All Player Props"
+                />
+              </div>
+
+              {/* Sportsbooks Filter for Player Props */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Sportsbooks
+                </label>
+                <SportMultiSelect
+                  list={marketBooks || []}
+                  selected={draftSelectedBooks || []}
+                  onChange={setDraftSelectedBooks}
+                  placeholderText="Select sportsbooks..."
+                  allLabel="All Sportsbooks"
+                  isSportsbook={true}
+                  enableCategories={true}
+                />
+              </div>
+            </>
           ) : (
             <>
               {/* Sports Filter */}
@@ -392,86 +483,49 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </div>
 
               {/* Markets Filter */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-              Markets
-            </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {['h2h', 'spreads', 'totals'].map(market => (
-                <button
-                  key={market}
-                  onClick={() => {
-                    const currentMarkets = draftMarketKeys || [];
-                    if (currentMarkets.includes(market)) {
-                      setDraftMarketKeys(currentMarkets.filter(m => m !== market));
-                    } else {
-                      setDraftMarketKeys([...currentMarkets, market]);
-                    }
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: 20,
-                    border: (draftMarketKeys || []).includes(market) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
-                    background: (draftMarketKeys || []).includes(market) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
-                    color: (draftMarketKeys || []).includes(market) ? '#8b5cf6' : 'var(--text-secondary)',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    textTransform: 'capitalize'
-                  }}
-                >
-                  {market === 'h2h' ? 'Moneyline' : market}
-                </button>
-              ))}
-            </div>
-          </div>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Markets
+                </label>
+                <SportMultiSelect
+                  list={[
+                    { key: 'h2h', title: 'Moneyline' },
+                    { key: 'spreads', title: 'Spreads' },
+                    { key: 'totals', title: 'Totals' }
+                  ]}
+                  selected={draftMarketKeys || []}
+                  onChange={setDraftMarketKeys}
+                  placeholderText="Select markets..."
+                  allLabel="All Markets"
+                />
+              </div>
 
-          {/* Sportsbooks Filter */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-              Sportsbooks
-            </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {(marketBooks || []).slice(0, 8).map(book => (
-                <button
-                  key={book.key}
-                  onClick={() => {
-                    const currentBooks = draftSelectedBooks || [];
-                    if (currentBooks.includes(book.key)) {
-                      setDraftSelectedBooks(currentBooks.filter(b => b !== book.key));
-                    } else {
-                      setDraftSelectedBooks([...currentBooks, book.key]);
-                    }
-                  }}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 16,
-                    border: (draftSelectedBooks || []).includes(book.key) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
-                    background: (draftSelectedBooks || []).includes(book.key) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
-                    color: (draftSelectedBooks || []).includes(book.key) ? '#8b5cf6' : 'var(--text-secondary)',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {book.title}
-                </button>
-              ))}
-            </div>
-          </div>
+              {/* Sportsbooks Filter */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Sportsbooks
+                </label>
+                <SportMultiSelect
+                  list={marketBooks || []}
+                  selected={draftSelectedBooks || []}
+                  onChange={setDraftSelectedBooks}
+                  placeholderText="Select sportsbooks..."
+                  allLabel="All Sportsbooks"
+                  isSportsbook={true}
+                  enableCategories={true}
+                />
+              </div>
               </>
             )}
 
-          {!isPlayerPropsMode && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
-                Apply
-              </button>
-              <button onClick={resetDraftFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '14px' }}>
-                Reset
-              </button>
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
+              Apply
+            </button>
+            <button onClick={resetDraftFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '14px' }}>
+              Reset
+            </button>
+          </div>
         </div>
       </MobileFiltersSheet>
 
