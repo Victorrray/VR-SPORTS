@@ -22,6 +22,7 @@ import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
 const ENABLE_PLAYER_PROPS_V2 = true;
 
 // Comprehensive player prop markets organized by category
+// Based on TheOddsAPI documentation and available markets
 const PLAYER_PROP_MARKETS = {
   passing: [
     { key: 'player_pass_yds', title: 'Passing Yards', sport: 'football' },
@@ -38,8 +39,8 @@ const PLAYER_PROP_MARKETS = {
     { key: 'player_rush_longest', title: 'Longest Rush', sport: 'football' }
   ],
   receiving: [
-    { key: 'player_reception_yds', title: 'Receiving Yards', sport: 'football' },
     { key: 'player_receptions', title: 'Receptions', sport: 'football' },
+    { key: 'player_receiving_yds', title: 'Receiving Yards', sport: 'football' },
     { key: 'player_receiving_tds', title: 'Receiving TDs', sport: 'football' },
     { key: 'player_receiving_longest', title: 'Longest Reception', sport: 'football' }
   ],
@@ -84,7 +85,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
-  const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_rush_yds", "player_pass_yds", "player_receptions"]);
+  const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -183,7 +184,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedDate(draftSelectedDate || '');
     setSelectedBooks(draftSelectedBooks || []);
     setMarketKeys(draftMarketKeys && draftMarketKeys.length ? draftMarketKeys : ["h2h", "spreads", "totals"]);
-    setSelectedPlayerPropMarkets(draftSelectedPlayerPropMarkets && draftSelectedPlayerPropMarkets.length ? draftSelectedPlayerPropMarkets : ["player_rush_yds", "player_pass_yds", "player_receptions"]);
+    setSelectedPlayerPropMarkets(draftSelectedPlayerPropMarkets && draftSelectedPlayerPropMarkets.length ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
     setMobileFiltersOpen(false);
   };
 
@@ -192,12 +193,58 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setDraftSelectedDate('');
     setDraftSelectedBooks([]);
     setDraftMarketKeys(["h2h", "spreads", "totals"]);
-    setDraftSelectedPlayerPropMarkets(["player_rush_yds", "player_pass_yds", "player_receptions"]);
+    setDraftSelectedPlayerPropMarkets(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   };
 
-  // Get football player prop markets organized for the dropdown
+  const resetAllFilters = () => {
+    // Reset both draft and applied states
+    const defaultSports = ["americanfootball_nfl"];
+    const defaultMarkets = ["h2h", "spreads", "totals"];
+    const defaultPlayerProps = ["player_pass_yds", "player_rush_yds", "player_receptions"];
+    
+    // Reset draft state
+    setDraftPicked(defaultSports);
+    setDraftSelectedDate('');
+    setDraftSelectedBooks([]);
+    setDraftMarketKeys(defaultMarkets);
+    setDraftSelectedPlayerPropMarkets(defaultPlayerProps);
+    
+    // Reset applied state
+    setPicked(defaultSports);
+    setSelectedDate('');
+    setSelectedBooks([]);
+    setMarketKeys(defaultMarkets);
+    setSelectedPlayerPropMarkets(defaultPlayerProps);
+  };
+
+  // Get football player prop markets organized for the dropdown with categories
   const getFootballPlayerPropMarkets = () => {
-    return Object.values(PLAYER_PROP_MARKETS).flat().filter(market => market.sport === 'football');
+    const footballCategories = ['passing', 'rushing', 'receiving', 'touchdowns'];
+    const organizedMarkets = [];
+    
+    footballCategories.forEach(category => {
+      if (PLAYER_PROP_MARKETS[category]) {
+        // Add category header (for visual organization)
+        organizedMarkets.push({
+          key: `${category}_header`,
+          title: `--- ${category.charAt(0).toUpperCase() + category.slice(1)} ---`,
+          sport: 'football',
+          isHeader: true
+        });
+        
+        // Add markets in this category
+        PLAYER_PROP_MARKETS[category]
+          .filter(market => market.sport === 'football')
+          .forEach(market => {
+            organizedMarkets.push({
+              ...market,
+              title: `${market.title}` // Clean title without category prefix
+            });
+          });
+      }
+    });
+    
+    return organizedMarkets;
   };
 
   // Merge available sportsbooks with DFS apps to ensure they're always available
@@ -425,23 +472,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           {/* Player Props Mode Filters */}
           {isPlayerPropsMode ? (
             <>
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '20px',
-                background: 'rgba(139, 92, 246, 0.1)',
-                borderRadius: '12px',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
-                marginBottom: '20px'
-              }}>
-                <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏈</div>
-                <h3 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600' }}>
-                  NFL Player Props
-                </h3>
-                <p style={{ color: 'var(--text-secondary)', margin: '0', fontSize: '12px', lineHeight: '1.4' }}>
-                  Select which player prop markets to display
-                </p>
-              </div>
-
               {/* Player Props Market Selection */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -538,7 +568,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Apply
             </button>
-            <button onClick={resetDraftFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '14px' }}>
+            <button onClick={resetAllFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '14px' }}>
               Reset
             </button>
           </div>

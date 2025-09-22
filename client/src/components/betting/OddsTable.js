@@ -470,6 +470,11 @@ export default function OddsTable({
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState(initialSort || { key: "ev", dir: "desc" });
+
+  // Reset expanded rows when games change to ensure clean state
+  useEffect(() => {
+    setExpandedRows({});
+  }, [games]);
   const [oddsFormatState, setOddsFormat] = useState(() => {
     if (typeof window === 'undefined') return 'american';
     return localStorage.getItem('oddsFormat') || 'american';
@@ -1606,7 +1611,9 @@ export default function OddsTable({
                             const oPointStr = String(row.out.point ?? '');
 
                             // Priority bookmakers to show in the mini-table
-                            const maxMiniBooks = MINI_TABLE_PRIORITY_BOOKS.length;
+                            // For player props, show ALL books for better EV calculations
+                            // For regular odds, limit to priority books for cleaner display
+                            const maxMiniBooks = mode === "props" ? 50 : MINI_TABLE_PRIORITY_BOOKS.length;
 
                             const dedupedBooks = (() => {
                               const seenKeys = new Set();
@@ -1843,6 +1850,20 @@ export default function OddsTable({
                                 </div>
                               ));
                           })()}
+                          
+                          {/* Show book count for player props */}
+                          {mode === "props" && cols.length > 0 && (
+                            <div style={{
+                              textAlign: 'center',
+                              padding: '8px',
+                              fontSize: '11px',
+                              color: 'var(--text-secondary)',
+                              borderTop: '1px solid var(--border-color)',
+                              background: 'var(--bg-secondary)'
+                            }}>
+                              Showing {cols.length} book{cols.length !== 1 ? 's' : ''} for EV calculation
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1918,8 +1939,11 @@ export default function OddsTable({
                                 return compareOdds(a, b);
                               });
 
+                              // For player props, show ALL books for better EV calculations
+                              // For regular odds, limit to priority books for cleaner display
+                              const maxDesktopBooks = mode === "props" ? 50 : MINI_TABLE_PRIORITY_BOOKS.length;
                               const displayBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop]
-                                .slice(0, MINI_TABLE_PRIORITY_BOOKS.length);
+                                .slice(0, maxDesktopBooks);
 
                               return displayBooks.map((p, i) => (
                                 <tr key={p._rowId || i}>
@@ -1969,6 +1993,23 @@ export default function OddsTable({
                               ));
                             })()}
                           </tbody>
+                          {/* Show book count for player props */}
+                          {mode === "props" && displayBooks.length > 0 && (
+                            <tfoot>
+                              <tr>
+                                <td colSpan={mode === "props" ? 2 : 3} style={{
+                                  textAlign: 'center',
+                                  padding: '8px',
+                                  fontSize: '11px',
+                                  color: 'var(--text-secondary)',
+                                  borderTop: '1px solid var(--border-color)',
+                                  background: 'var(--bg-secondary)'
+                                }}>
+                                  Showing {displayBooks.length} book{displayBooks.length !== 1 ? 's' : ''} for EV calculation
+                                </td>
+                              </tr>
+                            </tfoot>
+                          )}
                         </table>
                       </div>
                     </td>

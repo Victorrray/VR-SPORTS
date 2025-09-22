@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import { Search, X, Star, TrendingUp, Gamepad2 } from "lucide-react";
 import "./SportMultiSelect.css";
 
-const allKeys = (list) => (list || []).filter(s => s.key !== "ALL").map(s => s.key);
+const allKeys = (list) => (list || []).filter(s => s.key !== "ALL" && !s.isHeader).map(s => s.key);
 
 // Categorize sportsbooks by popularity and type
 const SPORTSBOOK_CATEGORIES = {
@@ -352,19 +352,27 @@ export default function SportMultiSelect({
               // Simple list view
               <div className="ms-simple-list">
                 {filteredList.map((item) => (
-                  <div
-                    key={item.key}
-                    className={`ms-item ${currentSelected.includes(item.key) ? "ms-selected" : ""}`}
-                    onClick={() => toggleOne(item.key)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={currentSelected.includes(item.key)}
-                      onChange={() => {}}
-                      tabIndex={-1}
-                    />
-                    <span>{item.title}</span>
-                  </div>
+                  item.isHeader ? (
+                    <div key={item.key} className="ms-header-item">
+                      <span style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '12px' }}>
+                        {item.title}
+                      </span>
+                    </div>
+                  ) : (
+                    <div
+                      key={item.key}
+                      className={`ms-item ${currentSelected.includes(item.key) ? "ms-selected" : ""}`}
+                      onClick={() => toggleOne(item.key)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={currentSelected.includes(item.key)}
+                        onChange={() => {}}
+                        tabIndex={-1}
+                      />
+                      <span>{item.title}</span>
+                    </div>
+                  )
                 ))}
               </div>
             )}
@@ -443,12 +451,25 @@ export default function SportMultiSelect({
                 ) : (
                   // Simple mobile list
                   filteredList.map((item) => (
-                    <div key={item.key} className="ms-mobile-option" onClick={() => toggleOne(item.key)}>
-                      <span className={`ms-mobile-checkbox ${currentSelected.includes(item.key) ? 'ms-checked' : ''}`}>
-                        {currentSelected.includes(item.key) ? "✓" : "○"}
-                      </span>
-                      <span className="ms-mobile-label">{item.title}</span>
-                    </div>
+                    item.isHeader ? (
+                      <div key={item.key} className="ms-mobile-header-item" style={{ 
+                        padding: '12px 16px', 
+                        fontWeight: 600, 
+                        color: 'var(--text-secondary)', 
+                        fontSize: '12px',
+                        borderBottom: '1px solid var(--border-color)',
+                        background: 'var(--bg-secondary)'
+                      }}>
+                        {item.title}
+                      </div>
+                    ) : (
+                      <div key={item.key} className="ms-mobile-option" onClick={() => toggleOne(item.key)}>
+                        <span className={`ms-mobile-checkbox ${currentSelected.includes(item.key) ? 'ms-checked' : ''}`}>
+                          {currentSelected.includes(item.key) ? "✓" : "○"}
+                        </span>
+                        <span className="ms-mobile-label">{item.title}</span>
+                      </div>
+                    )
                   ))
                 )}
               </div>
