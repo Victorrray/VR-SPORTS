@@ -224,9 +224,10 @@ export default function SportMultiSelect({
 
   const toggleOne = (key) => {
     try {
-      const newSelection = selected.includes(key)
-        ? selected.filter((k) => k !== key)
-        : [...selected, key];
+      const currentSelected = selected || [];
+      const newSelection = currentSelected.includes(key)
+        ? currentSelected.filter((k) => k !== key)
+        : [...currentSelected, key];
       onChange(newSelection);
       // Keep dropdown open for multiple selections
     } catch (error) {
@@ -235,10 +236,11 @@ export default function SportMultiSelect({
   };
 
   const keysOnly = allKeys(filteredList);
-  const allSelected = keysOnly.length > 0 && keysOnly.every((k) => selected.includes(k));
+  const currentSelected = selected || [];
+  const allSelected = keysOnly && keysOnly.length > 0 && keysOnly.every((k) => currentSelected.includes(k));
   const toggleAll = () => {
     try {
-      const newSelection = allSelected ? [] : keysOnly;
+      const newSelection = allSelected ? [] : keysOnly || [];
       onChange(newSelection);
     } catch (error) {
       console.error('Error updating all selection:', error);
@@ -255,10 +257,10 @@ export default function SportMultiSelect({
   };
 
   const label = (() => {
-    if (!selected.length) return placeholderText;
+    if (!selected || !selected.length) return placeholderText;
     if (allSelected) return allLabel;
     if (selected.length === 1) {
-      const item = list.find((s) => s.key === selected[0]);
+      const item = (list || []).find((s) => s.key === selected[0]);
       return item?.title || selected[0];
     }
     return `${selected.length} selected`;
@@ -326,12 +328,12 @@ export default function SportMultiSelect({
                     {category.items.map((item) => (
                       <div
                         key={item.key}
-                        className={`ms-item ${selected.includes(item.key) ? "ms-selected" : ""}`}
+                        className={`ms-item ${currentSelected.includes(item.key) ? "ms-selected" : ""}`}
                         onClick={() => toggleOne(item.key)}
                       >
                         <input
                           type="checkbox"
-                          checked={selected.includes(item.key)}
+                          checked={currentSelected.includes(item.key)}
                           onChange={() => {}}
                           tabIndex={-1}
                         />
@@ -347,12 +349,12 @@ export default function SportMultiSelect({
                 {filteredList.map((item) => (
                   <div
                     key={item.key}
-                    className={`ms-item ${selected.includes(item.key) ? "ms-selected" : ""}`}
+                    className={`ms-item ${currentSelected.includes(item.key) ? "ms-selected" : ""}`}
                     onClick={() => toggleOne(item.key)}
                   >
                     <input
                       type="checkbox"
-                      checked={selected.includes(item.key)}
+                      checked={currentSelected.includes(item.key)}
                       onChange={() => {}}
                       tabIndex={-1}
                     />
@@ -425,8 +427,8 @@ export default function SportMultiSelect({
                       </div>
                       {category.items.map((item) => (
                         <div key={item.key} className="ms-mobile-option" onClick={() => toggleOne(item.key)}>
-                          <span className={`ms-mobile-checkbox ${selected.includes(item.key) ? 'ms-checked' : ''}`}>
-                            {selected.includes(item.key) ? "✓" : "○"}
+                          <span className={`ms-mobile-checkbox ${currentSelected.includes(item.key) ? 'ms-checked' : ''}`}>
+                            {currentSelected.includes(item.key) ? "✓" : "○"}
                           </span>
                           <span className="ms-mobile-label">{item.title}</span>
                         </div>
@@ -437,8 +439,8 @@ export default function SportMultiSelect({
                   // Simple mobile list
                   filteredList.map((item) => (
                     <div key={item.key} className="ms-mobile-option" onClick={() => toggleOne(item.key)}>
-                      <span className={`ms-mobile-checkbox ${selected.includes(item.key) ? 'ms-checked' : ''}`}>
-                        {selected.includes(item.key) ? "✓" : "○"}
+                      <span className={`ms-mobile-checkbox ${currentSelected.includes(item.key) ? 'ms-checked' : ''}`}>
+                        {currentSelected.includes(item.key) ? "✓" : "○"}
                       </span>
                       <span className="ms-mobile-label">{item.title}</span>
                     </div>
@@ -448,7 +450,7 @@ export default function SportMultiSelect({
               
               <div className="ms-mobile-footer">
                 <button className="ms-mobile-done" onClick={() => setOpen(false)}>
-                  Done ({selected.length} selected)
+                  Done ({currentSelected.length} selected)
                 </button>
               </div>
             </div>

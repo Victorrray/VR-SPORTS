@@ -45,6 +45,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [sportList, setSportList] = useState([]);
   const [bookList, setBookList] = useState([]);
   
+  // Missing variables
+  const oddsFormat = "american";
+  const debouncedQuery = useDebounce(query, 300);
+  
   // Draft filter state
   const [draftPicked, setDraftPicked] = useState([]);
   const [draftSelectedDate, setDraftSelectedDate] = useState('');
@@ -56,10 +60,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const marketsForMode = isPlayerPropsMode ? PLAYER_PROP_MARKET_KEYS : marketKeys;
   const regionsForMode = isPlayerPropsMode ? ["us"] : ["us", "us2", "us_exchanges"];
   
+  // For player props, hardcode NFL to avoid filter issues
+  const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : picked;
+  
   const hasPlatinum = me?.plan === 'platinum';
   const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
-  const [oddsFormat] = useState('american');
-  const debouncedQuery = useDebounce(query, 300);
 
   const { 
     games: marketGames = [], 
@@ -68,7 +73,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     error: marketsError, 
     bookmakers 
   } = useMarkets(
-    picked,
+    sportsForMode,
     regionsForMode,
     marketsForMode
   );
@@ -328,38 +333,58 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       <MobileBottomBar
         onFilterClick={() => setMobileFiltersOpen(true)}
         active="sportsbooks"
-        showFilter={true}
+        onSearchClick={() => setShowMobileSearch(true)}
         style={{ display: 'flex' }}
       />
       
-      <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filters">
+      <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title={isPlayerPropsMode ? "NFL Player Props" : "Filters"}>
         <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
           
-          {/* Sports Filter */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-              Sports
-            </label>
-            <SportMultiSelect
-              sports={sportList || []}
-              picked={draftPicked}
-              setPicked={setDraftPicked}
-              placeholder="Select sports..."
-            />
-          </div>
+          {/* Show message for player props mode instead of filters */}
+          {isPlayerPropsMode ? (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '40px 20px',
+              background: 'rgba(139, 92, 246, 0.1)',
+              borderRadius: '12px',
+              border: '1px solid rgba(139, 92, 246, 0.2)'
+            }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏈</div>
+              <h3 style={{ color: 'var(--text-primary)', margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600' }}>
+                NFL Player Props Mode
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', margin: '0', fontSize: '14px', lineHeight: '1.5' }}>
+                Filters are disabled in Player Props mode.<br/>
+                Showing NFL player prop markets only for optimal performance.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Sports Filter */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Sports
+                </label>
+                <SportMultiSelect
+                  list={sportList || []}
+                  selected={draftPicked || []}
+                  onChange={setDraftPicked}
+                  placeholderText="Select sports..."
+                />
+              </div>
 
-          {/* Date Filter */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-              Date
-            </label>
-            <DatePicker
-              selectedDate={draftSelectedDate}
-              onDateChange={setDraftSelectedDate}
-            />
-          </div>
+              {/* Date Filter */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Date
+                </label>
+                <DatePicker
+                  selectedDate={draftSelectedDate}
+                  onDateChange={setDraftSelectedDate}
+                />
+              </div>
 
-          {/* Markets Filter */}
+              {/* Markets Filter */}
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
               Markets
@@ -425,15 +450,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               ))}
             </div>
           </div>
+              </>
+            )}
 
-          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
-              Apply
-            </button>
-            <button onClick={resetDraftFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '14px' }}>
-              Reset
-            </button>
-          </div>
+          {!isPlayerPropsMode && (
+            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
+                Apply
+              </button>
+              <button onClick={resetDraftFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '14px' }}>
+                Reset
+              </button>
+            </div>
+          )}
         </div>
       </MobileFiltersSheet>
 
