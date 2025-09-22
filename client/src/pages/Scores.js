@@ -171,8 +171,18 @@ export default function Scores() {
     // Use faster refresh if there are live games (15s for live, 60s for others)
     const refreshInterval = liveGamesCount > 0 ? 15000 : REFRESH_MS;
     const t = setInterval(() => load(true), refreshInterval);
-    return () => clearInterval(t);
+    return () => {
+      clearInterval(t);
+    };
   }, [sport, liveGamesCount]);
+
+  // Cleanup on unmount to prevent navigation issues
+  useEffect(() => {
+    return () => {
+      // Clear any pending timeouts/intervals when component unmounts
+      setLoading(false);
+    };
+  }, []);
 
   // Manual refresh + spin animation
   const handleRefresh = async () => {

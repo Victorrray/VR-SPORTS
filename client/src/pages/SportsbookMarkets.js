@@ -50,10 +50,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const debouncedQuery = useDebounce(query, 300);
   
   // Draft filter state
-  const [draftPicked, setDraftPicked] = useState([]);
+  const [draftPicked, setDraftPicked] = useState(["americanfootball_nfl"]);
   const [draftSelectedDate, setDraftSelectedDate] = useState('');
   const [draftSelectedBooks, setDraftSelectedBooks] = useState([]);
-  const [draftMarketKeys, setDraftMarketKeys] = useState([]);
+  const [draftMarketKeys, setDraftMarketKeys] = useState(["h2h", "spreads", "totals"]);
 
   const isPlayerPropsMode = ENABLE_PLAYER_PROPS_V2 && showPlayerProps;
   const isArbitrageMode = showArbitrage;
@@ -394,18 +394,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <button
                   key={market}
                   onClick={() => {
-                    if (draftMarketKeys.includes(market)) {
-                      setDraftMarketKeys(draftMarketKeys.filter(m => m !== market));
+                    const currentMarkets = draftMarketKeys || [];
+                    if (currentMarkets.includes(market)) {
+                      setDraftMarketKeys(currentMarkets.filter(m => m !== market));
                     } else {
-                      setDraftMarketKeys([...draftMarketKeys, market]);
+                      setDraftMarketKeys([...currentMarkets, market]);
                     }
                   }}
                   style={{
                     padding: '8px 16px',
                     borderRadius: 20,
-                    border: draftMarketKeys.includes(market) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
-                    background: draftMarketKeys.includes(market) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
-                    color: draftMarketKeys.includes(market) ? '#8b5cf6' : 'var(--text-secondary)',
+                    border: (draftMarketKeys || []).includes(market) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
+                    background: (draftMarketKeys || []).includes(market) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
+                    color: (draftMarketKeys || []).includes(market) ? '#8b5cf6' : 'var(--text-secondary)',
                     fontSize: '14px',
                     fontWeight: 500,
                     cursor: 'pointer',
@@ -424,22 +425,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               Sportsbooks
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {marketBooks.slice(0, 8).map(book => (
+              {(marketBooks || []).slice(0, 8).map(book => (
                 <button
                   key={book.key}
                   onClick={() => {
-                    if (draftSelectedBooks.includes(book.key)) {
-                      setDraftSelectedBooks(draftSelectedBooks.filter(b => b !== book.key));
+                    const currentBooks = draftSelectedBooks || [];
+                    if (currentBooks.includes(book.key)) {
+                      setDraftSelectedBooks(currentBooks.filter(b => b !== book.key));
                     } else {
-                      setDraftSelectedBooks([...draftSelectedBooks, book.key]);
+                      setDraftSelectedBooks([...currentBooks, book.key]);
                     }
                   }}
                   style={{
                     padding: '8px 12px',
                     borderRadius: 16,
-                    border: draftSelectedBooks.includes(book.key) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
-                    background: draftSelectedBooks.includes(book.key) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
-                    color: draftSelectedBooks.includes(book.key) ? '#8b5cf6' : 'var(--text-secondary)',
+                    border: (draftSelectedBooks || []).includes(book.key) ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
+                    background: (draftSelectedBooks || []).includes(book.key) ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
+                    color: (draftSelectedBooks || []).includes(book.key) ? '#8b5cf6' : 'var(--text-secondary)',
                     fontSize: '12px',
                     fontWeight: 500,
                     cursor: 'pointer'
