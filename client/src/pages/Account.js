@@ -268,22 +268,27 @@ export default function Account() {
     try {
       console.log('🔐 Account: Starting sign out...');
       
-      // Use the useAuth hook's signOut method for consistency
-      await signOut();
-      
-      // Clear any additional local storage items
+      // Clear any additional local storage items first
       localStorage.removeItem('userSelectedSportsbooks');
       localStorage.removeItem('pricingIntent');
 
-      // Redirect to home page with signed out indicator using client routing
+      // Navigate to login immediately to avoid PrivateRoute race condition
+      console.log('🔐 Account: Navigating to login page...');
+      navigate('/login?signing_out=true', { replace: true });
+      
+      // Then perform the actual sign out
+      await signOut();
+      
+      console.log('🔐 Account: Sign out completed successfully');
       setSignOutBusy(false);
-      navigate('/?signed_out=true', { replace: true });
       
     } catch (error) {
       console.error('🔐 Account: Sign out failed:', error);
       setSignOutError(error.message);
       setSignOutBusy(false);
       setSignOutProgress(null);
+      // If sign out fails, redirect to login anyway for security
+      navigate('/login?sign_out_error=true', { replace: true });
     }
   };
 

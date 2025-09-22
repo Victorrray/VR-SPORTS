@@ -10,8 +10,10 @@ module.exports = function(app) {
       logLevel: 'debug',
       onProxyReq: (proxyReq, req, res) => {
         console.log('🔄 Proxying request:', req.method, req.url, '→', proxyReq.path);
+        console.log('🔄 Original URL:', req.originalUrl);
+        console.log('🔄 Target:', 'http://localhost:10000' + req.url);
         // Ensure proper headers for local dev
-        proxyReq.setHeader('Origin', 'http://localhost:3000');
+        proxyReq.setHeader('Origin', `http://localhost:${process.env.PORT || 3000}`);
       },
       onProxyRes: (proxyRes, req, res) => {
         console.log('✅ Proxy response:', req.url, '→', proxyRes.statusCode);

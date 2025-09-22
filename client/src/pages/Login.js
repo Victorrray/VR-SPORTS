@@ -41,6 +41,21 @@ export default function Login() {
     }
   }, [search]);
 
+  // Handle sign out messages
+  useEffect(() => {
+    const signingOut = search.get("signing_out");
+    const signedOut = search.get("signed_out");
+    const signOutError = search.get("sign_out_error");
+    
+    if (signingOut) {
+      setErr("Signing you out...");
+    } else if (signedOut) {
+      setErr("You have been signed out successfully.");
+    } else if (signOutError) {
+      setErr("Sign out completed (with errors). Please sign in again.");
+    }
+  }, [search]);
+
   // Listen for auth state changes and redirect when authenticated
   useEffect(() => {
     if (auth?.user && !auth?.authLoading) {

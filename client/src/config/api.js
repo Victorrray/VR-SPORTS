@@ -30,16 +30,20 @@ export const API_BASE_URL = (() => {
 
 export function withApiBase(path) {
   const base = API_BASE_URL;
+  
+  console.log('🔍 withApiBase called with:', { path, base, NODE_ENV: process.env.NODE_ENV });
 
   // Force local development to use relative paths for proxy
   if (process.env.NODE_ENV === 'development') {
     // Ensure path starts with / for proper proxy routing
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    console.log('🔍 withApiBase (dev):', cleanPath);
+    console.log('🔍 withApiBase (dev) returning:', cleanPath);
     return cleanPath;
   }
 
   if (!base) return path; // fallback to relative for local proxy/dev
   if (path.startsWith('http')) return path;
-  return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+  const result = `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+  console.log('🔍 withApiBase (prod) returning:', result);
+  return result;
 }

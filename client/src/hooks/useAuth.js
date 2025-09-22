@@ -293,16 +293,34 @@ const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
+      console.log('🔐 useAuth: Starting sign out process...');
+      
       if (isSupabaseEnabled) {
+        console.log('🔐 useAuth: Calling supabase.auth.signOut()...');
         const { error } = await supabase.auth.signOut();
-        if (error) throw error;
+        if (error) {
+          console.error('🔐 useAuth: Supabase sign out error:', error);
+          throw error;
+        }
+        console.log('🔐 useAuth: Supabase sign out successful');
       }
+      
       DebugLogger.info('AUTH', 'Clearing demo session from localStorage');
       safeRemoveItem('demo-auth-session');
+      
+      // Clear additional auth-related items
+      safeRemoveItem('sb-session');
+      safeRemoveItem('supabase.auth.token');
+      
+      console.log('🔐 useAuth: Clearing session state...');
       clearSessionState();
+      
+      console.log('🔐 useAuth: Sign out process completed successfully');
     } catch (error) {
-      console.error('useAuth: error during sign out', error);
+      console.error('🔐 useAuth: Error during sign out:', error);
+      // Even if there's an error, clear the local state
       clearSessionState();
+      throw error; // Re-throw so the calling component can handle it
     }
   };
 
