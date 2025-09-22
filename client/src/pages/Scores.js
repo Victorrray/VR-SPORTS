@@ -155,13 +155,27 @@ export default function Scores() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
+    if (!dropdownOpen) return; // Only add listener when dropdown is open
+    
     const handleClickOutside = (event) => {
-      if (dropdownOpen && !event.target.closest('.sport-selector')) {
+      // Don't interfere with navigation elements or React Router links
+      if (event.target.closest('.mobile-bottom-bar') || 
+          event.target.closest('.mobile-nav') ||
+          event.target.closest('.mobile-tab') ||
+          event.target.closest('a[href]') || 
+          event.target.closest('button[type="button"]') ||
+          event.target.closest('[role="button"]')) {
+        console.log('Scores: Click on navigation element detected, not closing dropdown');
+        return;
+      }
+      
+      if (!event.target.closest('.sport-selector')) {
+        console.log('Scores: Closing dropdown due to outside click');
         setDropdownOpen(false);
       }
     };
     
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleClickOutside, { passive: true });
     return () => document.removeEventListener('click', handleClickOutside);
   }, [dropdownOpen]);
 

@@ -2,7 +2,7 @@
 .scores-page {
   max-width: 900px;
   margin: 2rem auto;
-  padding: 0 1rem 120px;
+  padding: 0 1rem 100px; /* Reduced bottom padding to prevent mobile bar overlap */
   min-height: 100vh;
 }
 
