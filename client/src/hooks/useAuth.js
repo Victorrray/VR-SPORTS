@@ -4,7 +4,9 @@ import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
-const SESSION_VALIDATION_INTERVAL = 5 * 60 * 1000;
+// Validate session every 20 minutes instead of 5 minutes for better UX
+const SESSION_VALIDATION_INTERVAL = 20 * 60 * 1000; // 20 minutes
+const SESSION_GRACE_PERIOD = 5 * 60 * 1000; // 5 minute grace period for network issues
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -17,6 +19,7 @@ const AuthProvider = ({ children }) => {
   const lastValidationRef = useRef(0);
   const validationIntervalRef = useRef(null);
   const pendingSignOutRef = useRef(null);
+  const validationFailuresRef = useRef(0); // Track consecutive validation failures
 
   const safeGetItem = useCallback((key) => {
     if (typeof window === 'undefined') return null;
@@ -90,27 +93,51 @@ const AuthProvider = ({ children }) => {
       const activeSession = sessionRef.current;
       const lastValidation = lastValidationRef.current;
       const shouldValidate = !activeSession || (now - lastValidation >= SESSION_VALIDATION_INTERVAL);
+      
       if (!shouldValidate) {
         return activeSession;
       }
 
+      DebugLogger.info('AUTH', 'Validating session...', { 
+        timeSinceLastValidation: now - lastValidation,
+        interval: SESSION_VALIDATION_INTERVAL 
+      });
+
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      
       if (error) {
-        console.error('useAuth: session validation error', error);
+        validationFailuresRef.current += 1;
+        console.warn('useAuth: session validation error', error, `(failure ${validationFailuresRef.current})`);
+        
+        // Only sign out after multiple consecutive failures to handle temporary network issues
+        if (validationFailuresRef.current >= 3) {
+          DebugLogger.error('AUTH', 'Multiple session validation failures, signing out user');
+          clearSessionState();
+          throw error;
+        }
+        
+        // Keep existing session during grace period
         if (sessionRef.current) {
           lastValidationRef.current = now;
+          DebugLogger.info('AUTH', 'Keeping existing session during grace period');
           return sessionRef.current;
         }
+        
         clearSessionState();
         throw error;
       }
 
+      // Reset failure count on successful validation
+      validationFailuresRef.current = 0;
+
       if (!currentSession?.user) {
+        DebugLogger.info('AUTH', 'No valid session found, clearing state');
         clearSessionState();
         lastValidationRef.current = now;
         return null;
       }
 
+      DebugLogger.info('AUTH', 'Session validation successful');
       sessionRef.current = currentSession;
       setSession(currentSession);
       setUser(currentSession.user);
@@ -372,6 +399,41 @@ const AuthProvider = ({ children }) => {
     return { data, error: null };
   };
 
+  // Reset validation failures when user actively uses the app
+  const resetValidationFailures = useCallback(() => {
+    validationFailuresRef.current = 0;
+    DebugLogger.info('AUTH', 'Validation failures reset due to user activity');
+  }, []);
+
+  // Listen for user activity to reset validation failures
+  useEffect(() => {
+    if (!isSupabaseEnabled || !user) return;
+
+    const activityEvents = ['click', 'keydown', 'scroll', 'touchstart'];
+    let activityTimeout;
+
+    const handleUserActivity = () => {
+      // Debounce activity detection
+      clearTimeout(activityTimeout);
+      activityTimeout = setTimeout(() => {
+        if (validationFailuresRef.current > 0) {
+          resetValidationFailures();
+        }
+      }, 1000);
+    };
+
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleUserActivity, { passive: true });
+    });
+
+    return () => {
+      clearTimeout(activityTimeout);
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleUserActivity);
+      });
+    };
+  }, [isSupabaseEnabled, user, resetValidationFailures]);
+
   const value = {
     user,
     profile,
@@ -385,6 +447,7 @@ const AuthProvider = ({ children }) => {
     setUsername,
     validateSession,
     refreshSession: validateSession,
+    resetValidationFailures,
     isSupabaseEnabled,
   };
 
