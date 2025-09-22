@@ -83,7 +83,9 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
 
   // Handle Done button
   const handleDone = () => {
+    console.log('DatePicker: handleDone called', { selectedDates });
     const selectedDate = selectedDates.length > 0 ? selectedDates[0] : "";
+    console.log('DatePicker: calling onChange with:', selectedDate);
     onChange(selectedDate);
     setIsOpen(false);
   };

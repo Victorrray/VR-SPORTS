@@ -186,18 +186,6 @@ export default function Scores() {
     };
   }, [sport, liveGamesCount]);
 
-  // Cleanup on unmount to prevent navigation issues
-  useEffect(() => {
-    return () => {
-      // Clear any pending timeouts/intervals when component unmounts
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      setLoading(false);
-    };
-  }, []);
-
   // Manual refresh + spin animation
   const handleRefresh = async () => {
     if (!btnRef.current) return;
