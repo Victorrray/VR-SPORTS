@@ -550,12 +550,20 @@ export default function OddsTable({
             const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
             const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
             
-            // In props mode: only show player prop markets or DFS sites
+            // In props mode: only show player prop markets or DFS sites, and respect marketFilter
             // In regular mode: only show regular markets (h2h, spreads, totals)
             if (mode === 'props') {
               if (!isDFSSite && !isPlayerPropMarket) {
                 console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop (props mode)`);
                 return;
+              }
+              
+              // Apply marketFilter for player props
+              if (marketFilter && marketFilter.length > 0 && isPlayerPropMarket) {
+                if (!marketFilter.includes(market.key)) {
+                  console.log(`Skipping market ${market.key} for ${bookmaker.key} - not in marketFilter:`, marketFilter);
+                  return;
+                }
               }
             } else {
               if (!isRegularMarket) {
@@ -591,36 +599,41 @@ export default function OddsTable({
                   const underOutcome = outcomes.find(o => o.name === 'Under');
                   
                   if (overOutcome && underOutcome && overOutcome.point !== undefined) {
-                    const propKey = `${game.id}-${market.key}-${playerName}-${overOutcome.point}`;
-                    console.log(`Creating prop for ${playerName}: ${market.key} ${overOutcome.point}`);
-                    
-                    if (!propGroups.has(propKey)) {
-                      propGroups.set(propKey, {
-                        game,
-                        mkt: { 
-                          key: market.key, 
-                          name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
-                        },
-                        out: {
-                          name: playerName,
-                          price: overOutcome.price,
-                          odds: overOutcome.price,
-                          point: overOutcome.point
-                        },
-                        bk: bookmaker,
-                        sport: game.sport_key,
-                        isPlayerProp: true,
-                        allBooks: []
+                    // Create separate rows for Over and Under
+                    [overOutcome, underOutcome].forEach(outcome => {
+                      const propKey = `${game.id}-${market.key}-${playerName}-${outcome.point}-${outcome.name}`;
+                      console.log(`Creating prop for ${playerName}: ${market.key} ${outcome.name} ${outcome.point}`);
+                      
+                      if (!propGroups.has(propKey)) {
+                        propGroups.set(propKey, {
+                          game,
+                          mkt: { 
+                            key: market.key, 
+                            name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+                          },
+                          out: {
+                            name: outcome.name, // This will be "Over" or "Under"
+                            description: playerName, // Player name goes in description
+                            price: outcome.price,
+                            odds: outcome.price,
+                            point: outcome.point
+                          },
+                          bk: bookmaker,
+                          sport: game.sport_key,
+                          isPlayerProp: true,
+                          allBooks: []
+                        });
+                      }
+                      
+                      const propGroup = propGroups.get(propKey);
+                      propGroup.allBooks.push({
+                        price: outcome.price,
+                        odds: outcome.price,
+                        book: bookmaker.title,
+                        bookmaker: bookmaker,
+                        market: market,
+                        outcome: outcome
                       });
-                    }
-                    
-                    const propGroup = propGroups.get(propKey);
-                    propGroup.allBooks.push({
-                      price: overOutcome.price,
-                      odds: overOutcome.price,
-                      book: bookmaker.title,
-                      bookmaker: bookmaker,
-                      market: market
                     });
                   }
                 }
@@ -1278,7 +1291,7 @@ export default function OddsTable({
               if (mode === "props") {
                 return (
                   <div className="mob-player-prop">
-                    <div className="mob-player-name">{row.out.name.split(' Over ')[0].split(' Under ')[0]}</div>
+                    <div className="mob-player-name">{row.out.description || row.out.name}</div>
                     <div className="mob-prop-type">{row.mkt.name}</div>
                   </div>
                 );
@@ -1381,16 +1394,22 @@ export default function OddsTable({
                   <td>
                     <div style={{ display:'flex', flexDirection:'column', gap:2, textAlign:'left' }}>
                       <span style={{ fontWeight:800 }}>
-                        {(row.mkt?.key || '') === 'h2h'
-                          ? shortTeam(row.out?.name, row.game?.sport_key)
-                          : (row.out?.name || '')}
+                        {mode === "props" 
+                          ? (row.out?.description || row.out?.name || '')
+                          : (row.mkt?.key || '') === 'h2h'
+                            ? shortTeam(row.out?.name, row.game?.sport_key)
+                            : (row.out?.name || '')}
                       </span>
                       <span style={{ opacity:.9 }}>
                         {formatMarket(row.mkt?.key || '')}
                       </span>
                     </div>
                   </td>
-                  <td>{(row.mkt?.key || '') === 'h2h' ? '' : formatLine(row.out?.point, row.mkt?.key, 'game')}</td>
+                  <td>
+                    {mode === "props" 
+                      ? `${row.out?.name || ''} ${row.out?.point || ''}`
+                      : (row.mkt?.key || '') === 'h2h' ? '' : formatLine(row.out?.point, row.mkt?.key, 'game')}
+                  </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {logos[row.bk?.key] && (
@@ -1520,8 +1539,8 @@ export default function OddsTable({
                           {mode === "props" ? (
                             // For player props, show Over/Under with line
                             <div className="mob-prop-bet">
-                              <span className={`mob-prop-side ${row.out.name.includes('Over') ? 'over' : 'under'}`}>
-                                {row.out.name.includes('Over') ? 'Over' : 'Under'} {row.out.point}
+                              <span className={`mob-prop-side ${row.out.name === 'Over' ? 'over' : 'under'}`}>
+                                {row.out.name} {row.out.point}
                               </span>
                             </div>
                           ) : (
@@ -1785,7 +1804,7 @@ export default function OddsTable({
                                           {cleanBookTitle(ob.book)}
                                         </div>
                                         <div className="mini-prop-side">
-                                          {row.out.name.includes('Over') ? 'Over' : 'Under'} {row.out.point}
+                                          {row.out.name} {row.out.point}
                                         </div>
                                       </div>
                                     ) : (
