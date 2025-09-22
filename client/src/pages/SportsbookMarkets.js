@@ -422,6 +422,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
       ) : isPlayerPropsMode ? (
         !isOverQuota ? (
+          console.log('SportsbookMarkets: selectedPlayerPropMarkets =', selectedPlayerPropMarkets),
           <OddsTable
             key={`props-${tableNonce}`}
             games={filteredGames}

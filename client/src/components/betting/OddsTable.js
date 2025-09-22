@@ -699,16 +699,32 @@ export default function OddsTable({
       // Second pass: include all props and apply sportsbook filter
       console.log(`Total prop groups collected: ${propGroups.size}`);
       propGroups.forEach((propData, propKey) => {
-        console.log(`Processing prop group: ${propKey} with ${propData.allBooks.length} books`);
+        const bookCount = propData.allBooks?.length || (propData.overBooks?.length || 0) + (propData.underBooks?.length || 0);
+        console.log(`Processing prop group: ${propKey} with ${bookCount} books`);
         
         // Apply sportsbook filter if active
         if (bookFilter && bookFilter.length > 0) {
-          const hasMatchingBook = propData.allBooks.some(book => {
-            const keyMatch = bookFilter.includes(book.bookmaker?.key);
-            const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
-            console.log('Filtering prop:', propData.out.name, 'Book:', book.bookmaker?.key, book.book, 'Match:', keyMatch || nameMatch);
-            return keyMatch || nameMatch;
-          });
+          let hasMatchingBook = false;
+          
+          // Check allBooks for regular props
+          if (propData.allBooks && propData.allBooks.length > 0) {
+            hasMatchingBook = propData.allBooks.some(book => {
+              const keyMatch = bookFilter.includes(book.bookmaker?.key);
+              const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
+              return keyMatch || nameMatch;
+            });
+          }
+          
+          // Check overBooks and underBooks for combined Over/Under props
+          if (!hasMatchingBook && (propData.overBooks || propData.underBooks)) {
+            const allCombinedBooks = [...(propData.overBooks || []), ...(propData.underBooks || [])];
+            hasMatchingBook = allCombinedBooks.some(book => {
+              const keyMatch = bookFilter.includes(book.bookmaker?.key);
+              const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
+              return keyMatch || nameMatch;
+            });
+          }
+          
           if (!hasMatchingBook) {
             console.log(`Skipping prop ${propKey} - no matching sportsbook`);
             return; // Skip this prop if no matching sportsbook
