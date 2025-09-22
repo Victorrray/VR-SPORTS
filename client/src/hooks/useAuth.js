@@ -109,7 +109,27 @@ const AuthProvider = ({ children }) => {
         validationFailuresRef.current += 1;
         console.warn('useAuth: session validation error', error, `(failure ${validationFailuresRef.current})`);
         
-        // Only sign out after multiple consecutive failures to handle temporary network issues
+        // Handle different types of errors differently
+        const isNetworkError = error.message?.includes('network') || error.message?.includes('fetch');
+        const isAuthError = error.message?.includes('invalid') || error.message?.includes('expired');
+        
+        // Immediate sign out for auth-related errors (invalid/expired tokens)
+        if (isAuthError) {
+          DebugLogger.error('AUTH', 'Authentication error detected, signing out immediately', error);
+          clearSessionState();
+          throw error;
+        }
+        
+        // More lenient handling for network errors
+        if (isNetworkError && validationFailuresRef.current < 5) {
+          DebugLogger.info('AUTH', 'Network error during validation, extending grace period');
+          if (sessionRef.current) {
+            lastValidationRef.current = now;
+            return sessionRef.current;
+          }
+        }
+        
+        // Sign out after multiple consecutive failures
         if (validationFailuresRef.current >= 3) {
           DebugLogger.error('AUTH', 'Multiple session validation failures, signing out user');
           clearSessionState();
@@ -141,9 +161,18 @@ const AuthProvider = ({ children }) => {
       sessionRef.current = currentSession;
       setSession(currentSession);
       setUser(currentSession.user);
-      await fetchUserProfile(currentSession.user.id);
+      
+      // Fetch fresh user profile and permissions
+      try {
+        await fetchUserProfile(currentSession.user.id);
+        DebugLogger.info('AUTH', 'User profile refreshed successfully');
+      } catch (profileError) {
+        console.warn('AUTH: Failed to refresh user profile', profileError);
+        // Don't sign out for profile fetch failures, just log the error
+        // User can still use the app with cached profile data
+      }
+      
       lastValidationRef.current = now;
-
       return currentSession;
     } catch (error) {
       console.error('useAuth: error validating session', error);
