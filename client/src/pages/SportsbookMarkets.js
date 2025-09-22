@@ -78,6 +78,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     marketsForMode
   );
 
+  // Update bookList when marketBooks changes
+  useEffect(() => {
+    if (marketBooks && marketBooks.length > 0) {
+      setBookList(marketBooks);
+    }
+  }, [marketBooks]);
+
   const filteredGames = useMemo(() => {
     return Array.isArray(marketGames) ? marketGames : [];
   }, [marketGames]);

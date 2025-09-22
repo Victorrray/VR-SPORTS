@@ -154,7 +154,9 @@ export const PlanProvider = ({ children }) => {
 
     setPlanLoading(true);
 
-    const promise = (async () => {
+    // Create promise variable first to avoid temporal dead zone
+    let promise;
+    promise = (async () => {
       try {
         // Check if this is a demo user who should have platinum access
         const isDemoUser = user.id === '54276b6c-5255-4117-be95-70c22132591c';

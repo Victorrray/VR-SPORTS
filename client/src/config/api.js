@@ -33,7 +33,10 @@ export function withApiBase(path) {
 
   // Force local development to use relative paths for proxy
   if (process.env.NODE_ENV === 'development') {
-    return path; // Use relative path for local proxy
+    // Ensure path starts with / for proper proxy routing
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    console.log('🔍 withApiBase (dev):', cleanPath);
+    return cleanPath;
   }
 
   if (!base) return path; // fallback to relative for local proxy/dev
