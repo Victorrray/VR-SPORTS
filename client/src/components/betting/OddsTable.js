@@ -1782,7 +1782,9 @@ export default function OddsTable({
                               return `${num/g}/${den/g}`;
                             };
 
-                            return cols.map((ob, i) => (
+                            return (
+                              <>
+                                {cols.map((ob, i) => (
                                 <div className="mini-swipe-row" key={ob._rowId || i}>
                                   <div className="mini-book-col">
                                     {mode === "props" ? (
@@ -1867,22 +1869,24 @@ export default function OddsTable({
                                     </button>
                                   </div>
                                 </div>
-                              ));
+                                ))}
+                                
+                                {/* Show book count for player props */}
+                                {mode === "props" && cols.length > 0 && (
+                                  <div style={{
+                                    textAlign: 'center',
+                                    padding: '8px',
+                                    fontSize: '11px',
+                                    color: 'var(--text-secondary)',
+                                    borderTop: '1px solid var(--border-color)',
+                                    background: 'var(--bg-secondary)'
+                                  }}>
+                                    Showing {cols.length} book{cols.length !== 1 ? 's' : ''} for EV calculation
+                                  </div>
+                                )}
+                              </>
+                            );
                           })()}
-                          
-                          {/* Show book count for player props */}
-                          {mode === "props" && cols.length > 0 && (
-                            <div style={{
-                              textAlign: 'center',
-                              padding: '8px',
-                              fontSize: '11px',
-                              color: 'var(--text-secondary)',
-                              borderTop: '1px solid var(--border-color)',
-                              background: 'var(--bg-secondary)'
-                            }}>
-                              Showing {cols.length} book{cols.length !== 1 ? 's' : ''} for EV calculation
-                            </div>
-                          )}
                         </div>
                       )}
                     </div>
@@ -1964,7 +1968,9 @@ export default function OddsTable({
                               const displayBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop]
                                 .slice(0, maxDesktopBooks);
 
-                              return displayBooks.map((p, i) => (
+                              return (
+                                <>
+                                  {displayBooks.map((p, i) => (
                                 <tr key={p._rowId || i}>
                                   <td className="mini-book-cell">
                                     {logos[p.bookmaker?.key] && (
@@ -2009,26 +2015,27 @@ export default function OddsTable({
                                     </button>
                                   </td>
                                 </tr>
-                              ));
+                                  ))}
+                                  
+                                  {/* Show book count for player props - add as last row */}
+                                  {mode === "props" && displayBooks.length > 0 && (
+                                    <tr>
+                                      <td colSpan={mode === "props" ? 2 : 3} style={{
+                                        textAlign: 'center',
+                                        padding: '8px',
+                                        fontSize: '11px',
+                                        color: 'var(--text-secondary)',
+                                        borderTop: '1px solid var(--border-color)',
+                                        background: 'var(--bg-secondary)'
+                                      }}>
+                                        Showing {displayBooks.length} book{displayBooks.length !== 1 ? 's' : ''} for EV calculation
+                                      </td>
+                                    </tr>
+                                  )}
+                                </>
+                              );
                             })()}
                           </tbody>
-                          {/* Show book count for player props */}
-                          {mode === "props" && displayBooks.length > 0 && (
-                            <tfoot>
-                              <tr>
-                                <td colSpan={mode === "props" ? 2 : 3} style={{
-                                  textAlign: 'center',
-                                  padding: '8px',
-                                  fontSize: '11px',
-                                  color: 'var(--text-secondary)',
-                                  borderTop: '1px solid var(--border-color)',
-                                  background: 'var(--bg-secondary)'
-                                }}>
-                                  Showing {displayBooks.length} book{displayBooks.length !== 1 ? 's' : ''} for EV calculation
-                                </td>
-                              </tr>
-                            </tfoot>
-                          )}
                         </table>
                       </div>
                     </td>
