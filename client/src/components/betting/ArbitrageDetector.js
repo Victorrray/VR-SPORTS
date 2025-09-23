@@ -45,122 +45,8 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     transform: (data) => data || []
   });
 
-  // Mock arbitrage opportunities for demonstration
-  const mockArbitrageData = useMemo(() => {
-    if (!oddsData || oddsData.length === 0) {
-      return [
-        {
-          id: 'arb-1',
-          game: 'Kansas City Chiefs @ Buffalo Bills',
-          market: 'h2h',
-          sport: sport,
-          commence_time: new Date(Date.now() + 86400000).toISOString(),
-          opportunities: [
-            {
-              type: 'two_way',
-              profit_percentage: 4.2,
-              profit_amount: 42.15,
-              total_stake: 1000,
-              bets: [
-                {
-                  bookmaker: 'DraftKings',
-                  selection: 'Kansas City Chiefs',
-                  odds: 180,
-                  stake: 357.14,
-                  payout: 642.86,
-                  implied_prob: 35.7
-                },
-                {
-                  bookmaker: 'FanDuel', 
-                  selection: 'Buffalo Bills',
-                  odds: -165,
-                  stake: 642.86,
-                  payout: 389.61,
-                  implied_prob: 62.3
-                }
-              ],
-              total_implied_prob: 98.0,
-              time_found: new Date(Date.now() - 300000),
-              expires_in: 1800000 // 30 minutes
-            }
-          ]
-        },
-        {
-          id: 'arb-2',
-          game: 'Los Angeles Lakers @ Golden State Warriors',
-          market: 'totals',
-          sport: 'basketball_nba',
-          commence_time: new Date(Date.now() + 172800000).toISOString(),
-          opportunities: [
-            {
-              type: 'two_way',
-              profit_percentage: 3.1,
-              profit_amount: 31.05,
-              total_stake: 1000,
-              bets: [
-                {
-                  bookmaker: 'BetMGM',
-                  selection: 'Over 225.5',
-                  odds: -108,
-                  stake: 519.23,
-                  payout: 480.77,
-                  implied_prob: 51.9
-                },
-                {
-                  bookmaker: 'Caesars',
-                  selection: 'Under 225.5', 
-                  odds: -105,
-                  stake: 480.77,
-                  payout: 457.88,
-                  implied_prob: 48.1
-                }
-              ],
-              total_implied_prob: 100.0,
-              time_found: new Date(Date.now() - 600000),
-              expires_in: 2700000 // 45 minutes
-            }
-          ]
-        },
-        {
-          id: 'arb-3',
-          game: 'Green Bay Packers @ Chicago Bears',
-          market: 'spreads',
-          sport: sport,
-          commence_time: new Date(Date.now() + 259200000).toISOString(),
-          opportunities: [
-            {
-              type: 'two_way',
-              profit_percentage: 2.8,
-              profit_amount: 28.42,
-              total_stake: 1000,
-              bets: [
-                {
-                  bookmaker: 'PointsBet',
-                  selection: 'Green Bay Packers -3.5',
-                  odds: 105,
-                  stake: 487.80,
-                  payout: 512.19,
-                  implied_prob: 48.8
-                },
-                {
-                  bookmaker: 'WynnBET',
-                  selection: 'Chicago Bears +3.5',
-                  odds: -102,
-                  stake: 512.20,
-                  payout: 502.16,
-                  implied_prob: 50.5
-                }
-              ],
-              total_implied_prob: 99.3,
-              time_found: new Date(Date.now() - 900000),
-              expires_in: 3600000 // 1 hour
-            }
-          ]
-        }
-      ];
-    }
-    return [];
-  }, [oddsData, sport]);
+  // Use real games data passed from parent component instead of fetching separately
+  const realGamesData = games && games.length > 0 ? games : oddsData;
 
   // Calculate arbitrage opportunities from real data
   const calculateArbitrage = (games) => {
@@ -169,51 +55,57 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     games.forEach(game => {
       if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
 
-      // Collect all market keys available across bookmakers to avoid undefined access on empty arrays
+      // Only process games that haven't started yet
+      const gameTime = new Date(game.commence_time);
+      const now = new Date();
+      if (gameTime <= now) return; // Skip games that have already started
+
+      // Collect all market keys available across bookmakers
       const marketKeys = new Set();
       game.bookmakers.forEach(bookmaker => {
+        if (bookFilter.length > 0 && !bookFilter.includes(bookmaker.key)) return; // Apply book filter
         bookmaker?.markets?.forEach(market => {
-          if (market?.key) marketKeys.add(market.key);
+          if (market?.key && selectedMarkets.includes(market.key)) {
+            marketKeys.add(market.key);
+          }
         });
       });
 
       marketKeys.forEach(marketKey => {
-        if (!selectedMarkets.includes(marketKey)) return;
-
-        const availableMarkets = game.bookmakers
-          .map(bookmaker => bookmaker?.markets?.find(m => m.key === marketKey))
-          .filter(Boolean);
-        if (!availableMarkets.length) return;
-
-        const market = availableMarkets[0];
-        
         // Find best odds for each outcome across all bookmakers
         const outcomeOdds = {};
         
         game.bookmakers.forEach(bookmaker => {
-          const gameMarket = bookmaker?.markets?.find(m => m.key === marketKey);
-          if (!gameMarket) return;
+          if (bookFilter.length > 0 && !bookFilter.includes(bookmaker.key)) return; // Apply book filter
           
-          gameMarket.outcomes?.forEach(outcome => {
+          const gameMarket = bookmaker?.markets?.find(m => m.key === marketKey);
+          if (!gameMarket || !gameMarket.outcomes) return;
+          
+          gameMarket.outcomes.forEach(outcome => {
+            if (!outcome.name || typeof outcome.price !== 'number') return;
+            
             const key = outcome.name;
-            if (!outcomeOdds[key] || outcome.price > outcomeOdds[key].price) {
+            // For arbitrage, we want the BEST odds for each outcome (highest positive, least negative)
+            if (!outcomeOdds[key] || 
+                (outcome.price > 0 && outcome.price > outcomeOdds[key].price) ||
+                (outcome.price < 0 && Math.abs(outcome.price) < Math.abs(outcomeOdds[key].price))) {
               outcomeOdds[key] = {
                 ...outcome,
-                bookmaker: bookmaker.title
+                bookmaker: bookmaker.title || bookmaker.key
               };
             }
           });
         });
         
-        // Calculate arbitrage for two-way markets
+        // Calculate arbitrage for two-way markets (moneyline, totals, spreads)
         const outcomes = Object.values(outcomeOdds);
         if (outcomes.length === 2) {
-          const arb = calculateTwoWayArbitrage(outcomes, game, market);
+          const arb = calculateTwoWayArbitrage(outcomes, game, { key: marketKey });
           if (arb && arb.profit_percentage >= minProfit) {
             opportunities.push({
-              id: `${game.id}-${market.key}`,
+              id: `${game.id}-${marketKey}-${Date.now()}`,
               game: `${game.away_team} @ ${game.home_team}`,
-              market: market.key,
+              market: marketKey,
               sport: game.sport_key,
               commence_time: game.commence_time,
               opportunities: [arb]
@@ -223,6 +115,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
       });
     });
     
+    console.log('🎯 Found', opportunities.length, 'real arbitrage opportunities');
     return opportunities;
   };
 
@@ -285,13 +178,15 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
   };
 
   const realArbitrageOpportunities = useMemo(() => {
-    if (oddsData && oddsData.length > 0) {
-      return calculateArbitrage(oddsData);
+    if (realGamesData && realGamesData.length > 0) {
+      console.log('🎯 Calculating arbitrage from real data:', realGamesData.length, 'games');
+      return calculateArbitrage(realGamesData);
     }
     return [];
-  }, [oddsData, selectedMarkets, minProfit, maxStake]);
+  }, [realGamesData, selectedMarkets, minProfit, maxStake]);
 
-  const allOpportunities = realArbitrageOpportunities.length > 0 ? realArbitrageOpportunities : (loading ? [] : mockArbitrageData);
+  // Only use real arbitrage opportunities - no mock data
+  const allOpportunities = realArbitrageOpportunities;
 
   // Filter and sort opportunities
   const filteredOpportunities = useMemo(() => {
@@ -422,6 +317,59 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
 
   return (
     <div className={`arbitrage-detector ${compact ? 'compact' : ''}`}>
+      {!compact && (
+        <div className="arbitrage-controls">
+          <div className="controls-header">
+            <h3>🎯 Real-Time Arbitrage Scanner</h3>
+            <p>Analyzing live odds from {realGamesData?.length || 0} games across multiple sportsbooks</p>
+          </div>
+          <div className="controls-grid">
+            <div className="control-group">
+              <label>Minimum Profit %</label>
+              <input
+                type="number"
+                min="0.1"
+                max="10"
+                step="0.1"
+                value={minProfit}
+                onChange={(e) => setMinProfit(Number(e.target.value))}
+              />
+            </div>
+            <div className="control-group">
+              <label>Max Stake</label>
+              <input
+                type="number"
+                min="100"
+                max={getUserBankroll()}
+                step="100"
+                value={maxStake}
+                onChange={(e) => setMaxStake(Number(e.target.value))}
+              />
+            </div>
+            <div className="control-group">
+              <label>Markets</label>
+              <select 
+                multiple 
+                value={selectedMarkets}
+                onChange={(e) => setSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
+              >
+                <option value="h2h">Moneyline</option>
+                <option value="spreads">Point Spread</option>
+                <option value="totals">Over/Under</option>
+              </select>
+            </div>
+            <div className="control-group">
+              <label>Sort By</label>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                <option value="profit">Profit %</option>
+                <option value="amount">Profit Amount</option>
+                <option value="time">Time Found</option>
+                <option value="expires">Expires Soon</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={`opportunities-list ${compact ? 'compact' : ''}`}>
         {loading && filteredOpportunities.length === 0 ? (
@@ -432,8 +380,14 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
         ) : filteredOpportunities.length === 0 ? (
           <div className="empty-state">
             <Target className="empty-icon" />
-            <h3>{compact ? 'No Opportunities' : 'No Arbitrage Opportunities Found'}</h3>
-            {!compact && <p>Try adjusting your filters or check back later.</p>}
+            <h3>{compact ? 'No Opportunities' : 'No Real Arbitrage Opportunities Found'}</h3>
+            {!compact && (
+              <div>
+                <p>Scanning live odds from {realGamesData?.length || 0} games across multiple sportsbooks.</p>
+                <p>Try lowering the minimum profit threshold or check back as odds update.</p>
+                {realGamesData?.length === 0 && <p>No games data available. Please check your sports selection.</p>}
+              </div>
+            )}
           </div>
         ) : (
           filteredOpportunities.map((opportunity, index) => (
