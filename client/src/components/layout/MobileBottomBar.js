@@ -18,17 +18,17 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
 
   const tabs = [
     { 
-      key: "home", 
-      label: "Home", 
-      icon: Home, 
-      href: "/",
-      badge: null
-    },
-    { 
       key: "sportsbooks", 
       label: "Odds", 
       icon: TrendingUp, 
       href: "/sportsbooks",
+      badge: null
+    },
+    { 
+      key: "home", 
+      label: "Home", 
+      icon: Home, 
+      href: "/",
       badge: null
     },
     { 
@@ -38,19 +38,21 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
       href: "/picks",
       badge: null
     },
-    { 
-      key: "scores", 
-      label: "Scores", 
-      icon: Activity, 
-      href: "/scores",
-      isLive: true
-    },
-    { 
-      key: "profile", 
-      label: "Profile", 
-      icon: User, 
-      href: "/account" 
-    },
+    // Temporarily removed - will add back later
+    // { 
+    //   key: "scores", 
+    //   label: "Scores", 
+    //   icon: Activity, 
+    //   href: "/scores",
+    //   isLive: true
+    // },
+    // Removed profile button
+    // { 
+    //   key: "profile", 
+    //   label: "Profile", 
+    //   icon: User, 
+    //   href: "/account" 
+    // },
   ];
 
   return (
