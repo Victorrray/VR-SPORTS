@@ -354,9 +354,17 @@ export default function SportMultiSelect({
                 {filteredList.map((item) => (
                   item.isHeader ? (
                     <div key={item.key} className="ms-header-item">
-                      <span style={{ fontWeight: 600, color: 'var(--text-secondary)', fontSize: '12px' }}>
-                        {item.title}
-                      </span>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        fontWeight: 600, 
+                        color: 'var(--text-secondary)', 
+                        fontSize: '12px' 
+                      }}>
+                        {item.icon && <item.icon size={14} />}
+                        <span>{item.title}</span>
+                      </div>
                     </div>
                   ) : (
                     <div
@@ -458,9 +466,13 @@ export default function SportMultiSelect({
                         color: 'var(--text-secondary)', 
                         fontSize: '12px',
                         borderBottom: '1px solid var(--border-color)',
-                        background: 'var(--bg-secondary)'
+                        background: 'var(--bg-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
                       }}>
-                        {item.title}
+                        {item.icon && <item.icon size={14} />}
+                        <span>{item.title}</span>
                       </div>
                     ) : (
                       <div key={item.key} className="ms-mobile-option" onClick={() => toggleOne(item.key)}>

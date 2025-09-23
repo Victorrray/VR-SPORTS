@@ -1,6 +1,7 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Target, Zap, Users, Trophy } from "lucide-react";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
 import MobileSearchModal from "../components/modals/MobileSearchModal";
@@ -95,6 +96,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [error, setError] = useState(null);
   const [minEV, setMinEV] = useState("");
   const [tableNonce, setTableNonce] = useState(0);
+  const [playerPropsProcessing, setPlayerPropsProcessing] = useState(false);
   const [sportList, setSportList] = useState([]);
   const [bookList, setBookList] = useState([]);
   
@@ -138,6 +140,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       setBookList(marketBooks);
     }
   }, [marketBooks]);
+
+  // Handle player props processing state
+  useEffect(() => {
+    if (isPlayerPropsMode && (marketsLoading || (filteredGames.length > 0 && !playerPropsProcessing))) {
+      setPlayerPropsProcessing(true);
+      // Give a small delay to show loading, then let OddsTable processing complete
+      const timer = setTimeout(() => {
+        setPlayerPropsProcessing(false);
+      }, 1500); // Show loading for 1.5 seconds to cover processing time
+      return () => clearTimeout(timer);
+    } else if (!isPlayerPropsMode) {
+      setPlayerPropsProcessing(false);
+    }
+  }, [isPlayerPropsMode, marketsLoading, filteredGames.length]);
 
   const filteredGames = useMemo(() => {
     return Array.isArray(marketGames) ? marketGames : [];
@@ -217,6 +233,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedPlayerPropMarkets(defaultPlayerProps);
   };
 
+  // Player prop categories with icons
+  const PLAYER_PROP_CATEGORIES = {
+    passing: {
+      title: "Passing",
+      icon: Target,
+    },
+    rushing: {
+      title: "Rushing", 
+      icon: Zap,
+    },
+    receiving: {
+      title: "Receiving",
+      icon: Users,
+    },
+    touchdowns: {
+      title: "Touchdowns",
+      icon: Trophy,
+    }
+  };
+
   // Get football player prop markets organized for the dropdown with categories
   const getFootballPlayerPropMarkets = () => {
     const footballCategories = ['passing', 'rushing', 'receiving', 'touchdowns'];
@@ -224,12 +260,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     footballCategories.forEach(category => {
       if (PLAYER_PROP_MARKETS[category]) {
+        const categoryInfo = PLAYER_PROP_CATEGORIES[category];
         // Add category header (for visual organization)
         organizedMarkets.push({
           key: `${category}_header`,
-          title: `--- ${category.charAt(0).toUpperCase() + category.slice(1)} ---`,
+          title: categoryInfo.title,
           sport: 'football',
-          isHeader: true
+          isHeader: true,
+          icon: categoryInfo.icon
         });
         
         // Add markets in this category
@@ -431,7 +469,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             bookFilter={effectiveSelectedBooks}
             marketFilter={selectedPlayerPropMarkets}
             evMin={null}
-            loading={loading || marketsLoading}
+            loading={loading || marketsLoading || playerPropsProcessing}
             error={error || marketsError}
             oddsFormat={oddsFormat}
             allCaps={false}

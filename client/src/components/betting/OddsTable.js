@@ -1226,8 +1226,15 @@ export default function OddsTable({
   if (loading) return (
     <div className="odds-table-loading">
       <div className="loading-spinner"></div>
-      <div className="loading-text">Refreshing odds data...</div>
-      <div className="loading-subtext">Getting the latest odds from all sportsbooks</div>
+      <div className="loading-text">
+        {mode === "props" ? "Loading player props..." : "Refreshing odds data..."}
+      </div>
+      <div className="loading-subtext">
+        {mode === "props" 
+          ? "Processing player prop data from DFS sites and sportsbooks" 
+          : "Getting the latest odds from all sportsbooks"
+        }
+      </div>
       <style jsx>{`
         .odds-table-loading {
           display: flex;
