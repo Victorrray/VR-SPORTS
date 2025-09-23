@@ -125,6 +125,25 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // For player props, hardcode NFL to avoid filter issues
   const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : picked;
   
+  console.log('🎯 Markets hook params:', {
+    sportsForMode,
+    picked,
+    isPlayerPropsMode,
+    selectedDate,
+    marketsForMode,
+    marketGamesCount: marketGames?.length || 0
+  });
+  
+  // Debug: Log games by sport
+  if (marketGames?.length > 0) {
+    const gamesBySport = marketGames.reduce((acc, game) => {
+      const sport = game.sport_key || 'unknown';
+      acc[sport] = (acc[sport] || 0) + 1;
+      return acc;
+    }, {});
+    console.log('📊 Games by sport:', gamesBySport);
+  }
+  
   const hasPlatinum = me?.plan === 'platinum';
   const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
 
@@ -241,10 +260,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   const applyFilters = () => {
     // Apply draft filters to actual state
-    setPicked(Array.isArray(draftPicked) && draftPicked.length > 0 ? draftPicked : ["americanfootball_nfl"]);
-    setSelectedDate(draftSelectedDate || '');
-    setSelectedBooks(Array.isArray(draftSelectedBooks) ? draftSelectedBooks : []);
-    setMarketKeys(Array.isArray(draftMarketKeys) && draftMarketKeys.length > 0 ? draftMarketKeys : ["h2h", "spreads", "totals"]);
+    const newPicked = Array.isArray(draftPicked) && draftPicked.length > 0 ? draftPicked : ["americanfootball_nfl"];
+    const newDate = draftSelectedDate || '';
+    const newBooks = Array.isArray(draftSelectedBooks) ? draftSelectedBooks : [];
+    const newMarkets = Array.isArray(draftMarketKeys) && draftMarketKeys.length > 0 ? draftMarketKeys : ["h2h", "spreads", "totals"];
+    
+    console.log('🏈 Applying filters:', {
+      sports: newPicked,
+      date: newDate,
+      books: newBooks,
+      markets: newMarkets,
+      playerPropsMode: showPlayerProps
+    });
+    
+    setPicked(newPicked);
+    setSelectedDate(newDate);
+    setSelectedBooks(newBooks);
+    setMarketKeys(newMarkets);
     setSelectedPlayerPropMarkets(Array.isArray(draftSelectedPlayerPropMarkets) && draftSelectedPlayerPropMarkets.length > 0 ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
     setMobileFiltersOpen(false);
   };
@@ -347,6 +379,48 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   return (
     <div className="sportsbook-markets">
+      {/* Debug Section - Remove after fixing */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          background: '#1a1a2e',
+          border: '2px solid #8b5cf6',
+          borderRadius: '8px',
+          padding: '12px',
+          margin: '16px',
+          fontSize: '12px',
+          fontFamily: 'monospace'
+        }}>
+          <div style={{ color: '#8b5cf6', fontWeight: 'bold', marginBottom: '8px' }}>🐛 Debug Info:</div>
+          <div style={{ color: '#fff' }}>Sports Selected: {JSON.stringify(picked)}</div>
+          <div style={{ color: '#fff' }}>Date Filter: {selectedDate || 'None'}</div>
+          <div style={{ color: '#fff' }}>Games Found: {marketGames?.length || 0}</div>
+          <div style={{ color: '#fff' }}>Player Props Mode: {showPlayerProps ? 'Yes' : 'No'}</div>
+          <button 
+            onClick={() => {
+              console.log('🔍 Full Debug Info:', {
+                picked, selectedDate, marketGames, showPlayerProps, 
+                sportsForMode: isPlayerPropsMode ? ["americanfootball_nfl"] : picked
+              });
+              // Quick test: Force MLB selection
+              setPicked(['baseball_mlb']);
+              setSelectedDate('');
+            }}
+            style={{
+              background: '#22c55e',
+              color: 'white',
+              border: 'none',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '10px',
+              marginTop: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            🏈→⚾ Force MLB Test
+          </button>
+        </div>
+      )}
+      
       {/* Collapsible Navigation Dropdown */}
       <div style={{
         marginBottom: "24px",
