@@ -109,12 +109,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const oddsFormat = "american";
   const debouncedQuery = useDebounce(query, 300);
   
-  // Draft filter state
-  const [draftPicked, setDraftPicked] = useState(["americanfootball_nfl"]);
-  const [draftSelectedDate, setDraftSelectedDate] = useState('');
-  const [draftSelectedBooks, setDraftSelectedBooks] = useState([]);
-  const [draftMarketKeys, setDraftMarketKeys] = useState(["h2h", "spreads", "totals"]);
-  const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(["player_rush_yds", "player_pass_yds", "player_receptions"]);
+  // Draft filter state - initialize with current applied state
+  const [draftPicked, setDraftPicked] = useState(picked);
+  const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate);
+  const [draftSelectedBooks, setDraftSelectedBooks] = useState(selectedBooks);
+  const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
+  const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(selectedPlayerPropMarkets);
 
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
@@ -152,18 +152,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return Array.isArray(marketGames) ? marketGames : [];
   }, [marketGames]);
 
-  // Handle player props processing state
+  // Simplified player props loading state - only show loading when actually switching modes
   useEffect(() => {
-    if (isPlayerPropsMode && marketsLoading) {
+    if (isPlayerPropsMode && !filteredGames.length && marketsLoading) {
       setPlayerPropsProcessing(true);
-    } else if (!isPlayerPropsMode) {
+    } else {
       setPlayerPropsProcessing(false);
-    } else if (isPlayerPropsMode && !marketsLoading && filteredGames.length > 0) {
-      // Only show loading briefly when switching to player props mode
-      const timer = setTimeout(() => {
-        setPlayerPropsProcessing(false);
-      }, 500); // Shorter delay to reduce flashing
-      return () => clearTimeout(timer);
     }
   }, [isPlayerPropsMode, marketsLoading, filteredGames.length]);
 
@@ -233,12 +227,24 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     fetchSports();
   }, []);
 
+  // Sync draft state with applied state when filters open
+  useEffect(() => {
+    if (mobileFiltersOpen) {
+      setDraftPicked(picked);
+      setDraftSelectedDate(selectedDate);
+      setDraftSelectedBooks(selectedBooks);
+      setDraftMarketKeys(marketKeys);
+      setDraftSelectedPlayerPropMarkets(selectedPlayerPropMarkets);
+    }
+  }, [mobileFiltersOpen, picked, selectedDate, selectedBooks, marketKeys, selectedPlayerPropMarkets]);
+
   const applyFilters = () => {
-    setPicked(draftPicked && draftPicked.length ? draftPicked : ["americanfootball_nfl"]);
+    // Apply draft filters to actual state
+    setPicked(Array.isArray(draftPicked) && draftPicked.length > 0 ? draftPicked : ["americanfootball_nfl"]);
     setSelectedDate(draftSelectedDate || '');
-    setSelectedBooks(draftSelectedBooks || []);
-    setMarketKeys(draftMarketKeys && draftMarketKeys.length ? draftMarketKeys : ["h2h", "spreads", "totals"]);
-    setSelectedPlayerPropMarkets(draftSelectedPlayerPropMarkets && draftSelectedPlayerPropMarkets.length ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
+    setSelectedBooks(Array.isArray(draftSelectedBooks) ? draftSelectedBooks : []);
+    setMarketKeys(Array.isArray(draftMarketKeys) && draftMarketKeys.length > 0 ? draftMarketKeys : ["h2h", "spreads", "totals"]);
+    setSelectedPlayerPropMarkets(Array.isArray(draftSelectedPlayerPropMarkets) && draftSelectedPlayerPropMarkets.length > 0 ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
     setMobileFiltersOpen(false);
   };
 
@@ -791,7 +797,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             bookFilter={effectiveSelectedBooks}
             marketFilter={selectedPlayerPropMarkets}
             evMin={null}
-            loading={loading || marketsLoading || playerPropsProcessing}
+            loading={marketsLoading && (!filteredGames || filteredGames.length === 0)}
             error={error || marketsError}
             oddsFormat={oddsFormat}
             allCaps={false}
@@ -809,7 +815,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           bookFilter={effectiveSelectedBooks}
           marketFilter={marketKeys}
           evMin={minEV === "" ? null : Number(minEV)}
-          loading={loading || marketsLoading}
+          loading={marketsLoading && (!filteredGames || filteredGames.length === 0)}
           error={error || marketsError}
           oddsFormat={oddsFormat}
           allCaps={false}

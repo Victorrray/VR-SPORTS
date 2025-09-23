@@ -4,7 +4,11 @@ import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton"
 import { useMe } from "../../hooks/useMe";
 import "./OddsTable.css";
 
-// Removed logos import for compliance
+// Import team logo utilities
+import { resolveTeamLogo } from "../../utils/logoResolver";
+import { getTeamLogos } from "../../constants/teamLogos";
+
+// Sportsbook logos removed for compliance, but team logos are available
 const logos = {};
 
 // Centralized priority list for the mini-table comparison view
@@ -203,15 +207,63 @@ const normalizeTeamKey = (name = '') => String(name).toLowerCase().replace(/[^a-
 const getTeamLogoForGame = (game = {}, teamName = '') => {
   const key = normalizeTeamKey(teamName);
   if (!key) return '';
+  
   const homeKey = normalizeTeamKey(game?.home_team);
-  if (key === homeKey) {
-    return game?.home_logo || '';
-  }
   const awayKey = normalizeTeamKey(game?.away_team);
-  if (key === awayKey) {
-    return game?.away_logo || '';
+  
+  let logoUrl = '';
+  let isHomeTeam = false;
+  
+  // Check if this is home or away team and get API logo
+  if (key === homeKey) {
+    logoUrl = game?.home_logo || '';
+    isHomeTeam = true;
+  } else if (key === awayKey) {
+    logoUrl = game?.away_logo || '';
+    isHomeTeam = false;
   }
-  return '';
+  
+  // Debug logging to see what logos we're getting from API
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🏈 Logo check for ${teamName}:`, {
+      game_id: game?.id,
+      sport: game?.sport_key,
+      home_team: game?.home_team,
+      away_team: game?.away_team,
+      home_logo: game?.home_logo,
+      away_logo: game?.away_logo,
+      resolved_logo: logoUrl,
+      isHomeTeam
+    });
+  }
+  
+  // If API didn't provide logo, try logo resolution utilities
+  if (!logoUrl) {
+    // Extract league from sport_key (e.g., "americanfootball_nfl" -> "nfl")
+    const league = game?.sport_key?.split('_').pop() || '';
+    
+    // Try logo resolver first
+    logoUrl = resolveTeamLogo({
+      league: league,
+      teamName: teamName,
+      apiLogo: null
+    });
+    
+    // If that fails, try the team logos constants
+    if (!logoUrl || logoUrl.includes('unknown')) {
+      const teamLogos = getTeamLogos(league, game?.home_team, game?.away_team);
+      logoUrl = isHomeTeam ? teamLogos.home : teamLogos.away;
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🏈 Fallback logo for ${teamName}:`, {
+        league,
+        fallback_logo: logoUrl
+      });
+    }
+  }
+  
+  return logoUrl || '';
 };
 function formatKickoffNice(commence){
   try{
@@ -1438,6 +1490,7 @@ export default function OddsTable({
                       alt={`${originalName} logo`}
                       className="mob-team-logo"
                       loading="lazy"
+                      onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : null}
                   <span>{teamNameDisplay}</span>
@@ -1469,25 +1522,33 @@ export default function OddsTable({
                       <span className="desktop-matchup-time">{formatKickoffNice(row.game?.commence_time)}</span>
                       <div className="desktop-teams">
                         <div className="desktop-team-row">
-                          {row.game?.away_logo && (
-                            <img
-                              src={row.game.away_logo}
-                              alt={`${row.game?.away_team || 'Away'} logo`}
-                              className="desktop-team-logo"
-                              loading="lazy"
-                            />
-                          )}
+                          {(() => {
+                            const awayLogo = getTeamLogoForGame(row.game, row.game?.away_team);
+                            return awayLogo ? (
+                              <img
+                                src={awayLogo}
+                                alt={`${row.game?.away_team || 'Away'} logo`}
+                                className="desktop-team-logo"
+                                loading="lazy"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                            ) : null;
+                          })()}
                           <span>{row.game?.away_team || 'Away Team'}</span>
                         </div>
                         <div className="desktop-team-row">
-                          {row.game?.home_logo && (
-                            <img
-                              src={row.game.home_logo}
-                              alt={`${row.game?.home_team || 'Home'} logo`}
-                              className="desktop-team-logo"
-                              loading="lazy"
-                            />
-                          )}
+                          {(() => {
+                            const homeLogo = getTeamLogoForGame(row.game, row.game?.home_team);
+                            return homeLogo ? (
+                              <img
+                                src={homeLogo}
+                                alt={`${row.game?.home_team || 'Home'} logo`}
+                                className="desktop-team-logo"
+                                loading="lazy"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                            ) : null;
+                          })()}
                           <span>{row.game?.home_team || 'Home Team'}</span>
                         </div>
                       </div>
@@ -1580,25 +1641,33 @@ export default function OddsTable({
                         <div className="mob-top-left">
                           <div className="mob-match-title">
                             <div className="team-line">
-                              {row.game?.away_logo ? (
-                                <img
-                                  src={row.game.away_logo}
-                                  alt={`${row.game?.away_team || 'Away'} logo`}
-                                  className="mob-team-logo"
-                                  loading="lazy"
-                                />
-                              ) : null}
+                              {(() => {
+                                const awayLogo = getTeamLogoForGame(row.game, row.game?.away_team);
+                                return awayLogo ? (
+                                  <img
+                                    src={awayLogo}
+                                    alt={`${row.game?.away_team || 'Away'} logo`}
+                                    className="mob-team-logo"
+                                    loading="lazy"
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                  />
+                                ) : null;
+                              })()}
                               <span>{row.game?.away_team || 'Away Team'}</span>
                             </div>
                             <div className="team-line">
-                              {row.game?.home_logo ? (
-                                <img
-                                  src={row.game.home_logo}
-                                  alt={`${row.game?.home_team || 'Home'} logo`}
-                                  className="mob-team-logo"
-                                  loading="lazy"
-                                />
-                              ) : null}
+                              {(() => {
+                                const homeLogo = getTeamLogoForGame(row.game, row.game?.home_team);
+                                return homeLogo ? (
+                                  <img
+                                    src={homeLogo}
+                                    alt={`${row.game?.home_team || 'Home'} logo`}
+                                    className="mob-team-logo"
+                                    loading="lazy"
+                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                  />
+                                ) : null;
+                              })()}
                               <span>{row.game?.home_team || 'Home Team'}</span>
                             </div>
                           </div>
