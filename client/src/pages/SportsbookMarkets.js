@@ -154,17 +154,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Handle player props processing state
   useEffect(() => {
-    if (isPlayerPropsMode && (marketsLoading || (filteredGames.length > 0 && !playerPropsProcessing))) {
+    if (isPlayerPropsMode && marketsLoading) {
       setPlayerPropsProcessing(true);
-      // Give a small delay to show loading, then let OddsTable processing complete
-      const timer = setTimeout(() => {
-        setPlayerPropsProcessing(false);
-      }, 800); // Reduced loading time for better UX
-      return () => clearTimeout(timer);
     } else if (!isPlayerPropsMode) {
       setPlayerPropsProcessing(false);
+    } else if (isPlayerPropsMode && !marketsLoading && filteredGames.length > 0) {
+      // Only show loading briefly when switching to player props mode
+      const timer = setTimeout(() => {
+        setPlayerPropsProcessing(false);
+      }, 500); // Shorter delay to reduce flashing
+      return () => clearTimeout(timer);
     }
-  }, [isPlayerPropsMode, marketsLoading, filteredGames.length, playerPropsProcessing]);
+  }, [isPlayerPropsMode, marketsLoading, filteredGames.length]);
 
   // Player props prefetching and caching optimization
   useEffect(() => {
@@ -194,16 +195,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
   }, [isPlayerPropsMode, picked, selectedDate, filteredGames.length]);
 
-  // Optimize player props processing with reduced loading time
-  useEffect(() => {
-    if (isPlayerPropsMode && playerPropsProcessing) {
-      // Reduce loading time for better UX
-      const timer = setTimeout(() => {
-        setPlayerPropsProcessing(false);
-      }, 800); // Reduced from 1500ms to 800ms
-      return () => clearTimeout(timer);
-    }
-  }, [isPlayerPropsMode, playerPropsProcessing]);
+  // Removed redundant loading effect to prevent flashing
 
   const effectiveSelectedBooks = useMemo(() => {
     return (selectedBooks && selectedBooks.length)
