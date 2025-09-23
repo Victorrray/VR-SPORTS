@@ -515,6 +515,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   selected={draftPicked || []}
                   onChange={setDraftPicked}
                   placeholderText="Select sports..."
+                  allLabel="All Sports"
+                  enableCategories={true}
                 />
               </div>
 
@@ -524,8 +526,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   Date
                 </label>
                 <DatePicker
-                  selectedDate={draftSelectedDate}
-                  onDateChange={setDraftSelectedDate}
+                  value={draftSelectedDate}
+                  onChange={setDraftSelectedDate}
                 />
               </div>
 
