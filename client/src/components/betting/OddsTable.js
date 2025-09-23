@@ -731,7 +731,7 @@ export default function OddsTable({
           }
         }
         
-        // Handle combined Over/Under props - determine which side has better EV
+        // Handle combined Over/Under props - create a unified row showing both sides
         if (propData.overBooks && propData.underBooks) {
           // Calculate EV for both Over and Under
           const calculateSideEV = (books) => {
@@ -752,19 +752,23 @@ export default function OddsTable({
           const overEV = calculateSideEV(propData.overBooks);
           const underEV = calculateSideEV(propData.underBooks);
           
-          // Choose the side with better EV (or Over if tied/no EV)
-          const showOver = !underEV || (overEV && overEV >= (underEV || 0));
-          const chosenBooks = showOver ? propData.overBooks : propData.underBooks;
-          const otherBooks = showOver ? propData.underBooks : propData.overBooks;
+          // Find best odds for each side
+          const bestOverBook = propData.overBooks.length > 0 ? propData.overBooks.reduce((best, book) => {
+            const decimal = americanToDecimal(book.price);
+            return decimal > americanToDecimal(best.price) ? book : best;
+          }) : null;
           
-          if (chosenBooks.length > 0) {
-            // Find the best odds from chosen side
-            const bestBook = chosenBooks.reduce((best, book) => {
-              const decimal = americanToDecimal(book.price);
-              return decimal > americanToDecimal(best.price) ? book : best;
-            });
-            
-            // Create the main row with the better EV side
+          const bestUnderBook = propData.underBooks.length > 0 ? propData.underBooks.reduce((best, book) => {
+            const decimal = americanToDecimal(book.price);
+            return decimal > americanToDecimal(best.price) ? book : best;
+          }) : null;
+          
+          // Choose the side with better EV for the main display
+          const showOver = !underEV || (overEV && overEV >= (underEV || 0));
+          const primaryBook = showOver ? bestOverBook : bestUnderBook;
+          
+          if (primaryBook) {
+            // Create the main row with both sides data
             const finalPropData = {
               key: propData.key,
               game: propData.game,
@@ -772,15 +776,17 @@ export default function OddsTable({
               out: {
                 name: showOver ? 'Over' : 'Under',
                 description: propData.playerName,
-                price: bestBook.price,
-                odds: bestBook.price,
+                price: primaryBook.price,
+                odds: primaryBook.price,
                 point: propData.point
               },
-              bk: bestBook.bookmaker,
+              bk: primaryBook.bookmaker,
               sport: propData.sport,
               isPlayerProp: true,
-              allBooks: chosenBooks, // Main table shows chosen side books
-              otherSideBooks: otherBooks, // Store other side for mini-table
+              isCombinedProp: true, // Flag to indicate this has both sides
+              overBooks: propData.overBooks,
+              underBooks: propData.underBooks,
+              allBooks: [...propData.overBooks, ...propData.underBooks], // Combined for mini-table
               otherSideName: showOver ? 'Under' : 'Over'
             };
             
@@ -1704,7 +1710,14 @@ export default function OddsTable({
                           <div className="mini-swipe-header">
                             <div className="mini-header-book">Book</div>
                             {mode === "props" ? (
-                              <div className="mini-header-odds mini-props-header">Odds</div>
+                              row.isCombinedProp ? (
+                                <>
+                                  <div className="mini-header-odds">Over</div>
+                                  <div className="mini-header-odds">Under</div>
+                                </>
+                              ) : (
+                                <div className="mini-header-odds mini-props-header">Odds</div>
+                              )
                             ) : (
                               <>
                                 <div className="mini-header-odds">
@@ -1738,7 +1751,29 @@ export default function OddsTable({
 
                             const dedupedBooks = (() => {
                               const seenKeys = new Set();
-                              return (row.allBooks || []).filter(item => {
+                              let booksToProcess = row.allBooks || [];
+                              
+                              // For combined props, ensure we get all unique bookmakers from both sides
+                              if (mode === "props" && row.isCombinedProp) {
+                                const allBookmakers = new Map();
+                                
+                                // Collect all unique bookmakers from both Over and Under
+                                [...(row.overBooks || []), ...(row.underBooks || [])].forEach(book => {
+                                  const key = normalizeBookKey(book.bookmaker?.key);
+                                  if (key && !allBookmakers.has(key)) {
+                                    allBookmakers.set(key, {
+                                      bookmaker: book.bookmaker,
+                                      book: book.book || book.bookmaker?.title,
+                                      price: book.price || book.odds, // Use first found price as placeholder
+                                      odds: book.odds || book.price
+                                    });
+                                  }
+                                });
+                                
+                                booksToProcess = Array.from(allBookmakers.values());
+                              }
+                              
+                              return booksToProcess.filter(item => {
                                 const rawKey = item?.bookmaker?.key || item?.book || '';
                                 const key = normalizeBookKey(rawKey);
                                 if (!key || seenKeys.has(key)) return false;
@@ -1953,14 +1988,43 @@ export default function OddsTable({
                                     )}
                                   </div>
                                   {mode === "props" ? (
-                                    // For props, show single odds column
-                                    <>
-                                      <div className="mini-odds-col">
-                                        <div className="mini-swipe-odds">
-                                          {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
+                                    // For props, show appropriate columns based on type
+                                    row.isCombinedProp ? (
+                                      // Combined Over/Under props - show both columns
+                                      <>
+                                        <div className="mini-odds-col">
+                                          <div className="mini-swipe-odds">
+                                            {(() => {
+                                              // Find Over odds for this bookmaker
+                                              const overBook = row.overBooks?.find(book => 
+                                                normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key)
+                                              );
+                                              return overBook ? formatOdds(Number(overBook.price ?? overBook.odds ?? 0)) : '-';
+                                            })()}
+                                          </div>
                                         </div>
-                                      </div>
-                                    </>
+                                        <div className="mini-odds-col">
+                                          <div className="mini-swipe-odds">
+                                            {(() => {
+                                              // Find Under odds for this bookmaker
+                                              const underBook = row.underBooks?.find(book => 
+                                                normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key)
+                                              );
+                                              return underBook ? formatOdds(Number(underBook.price ?? underBook.odds ?? 0)) : '-';
+                                            })()}
+                                          </div>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      // Regular props - show single odds column
+                                      <>
+                                        <div className="mini-odds-col">
+                                          <div className="mini-swipe-odds">
+                                            {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
+                                          </div>
+                                        </div>
+                                      </>
+                                    )
                                   ) : (
                                     // For regular games, show two odds columns
                                     <>
