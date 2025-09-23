@@ -1,3 +1,5 @@
+import { optimizedStorage } from './storageOptimizer';
+
 const CACHE_KEY = 'oss-plan-info';
 export const PLAN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -14,13 +16,11 @@ function safeParse(value) {
 
 export function loadPlanInfo() {
   if (!isBrowser) return null;
-  const raw = window.localStorage.getItem(CACHE_KEY);
-  if (!raw) return null;
+  
+  const cached = optimizedStorage.get(CACHE_KEY);
+  if (!cached) return null;
 
-  const parsed = safeParse(raw);
-  if (!parsed) return null;
-
-  return parsed;
+  return cached;
 }
 
 export function savePlanInfo(info) {
@@ -31,7 +31,10 @@ export function savePlanInfo(info) {
   };
 
   try {
-    window.localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+    optimizedStorage.set(CACHE_KEY, payload, { 
+      priority: 'normal', 
+      ttl: PLAN_CACHE_TTL 
+    });
   } catch (err) {
     console.warn('planCache: failed to persist plan info', err);
   }
@@ -40,7 +43,7 @@ export function savePlanInfo(info) {
 export function clearPlanInfo() {
   if (!isBrowser) return;
   try {
-    window.localStorage.removeItem(CACHE_KEY);
+    optimizedStorage.remove(CACHE_KEY);
   } catch (err) {
     console.warn('planCache: failed to clear plan info', err);
   }

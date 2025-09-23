@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ArrowLeft, Save, Check, Settings, Star, TrendingUp, DollarSign } from 'lucide-react';
+import { ArrowLeft, Save, Check, AlertCircle } from 'lucide-react';
+import { optimizedStorage } from '../utils/storageOptimizer';
 import SportMultiSelect from '../components/betting/SportMultiSelect';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { AVAILABLE_SPORTSBOOKS, getFreePlanSportsbooks } from '../constants/sportsbooks';
@@ -24,10 +24,10 @@ export default function MySportsbooks() {
       return;
     }
 
-    // Load user's selected sportsbooks from localStorage
-    const saved = localStorage.getItem('userSelectedSportsbooks');
+    // Load user's selected sportsbooks from optimized storage
+    const saved = optimizedStorage.get('userSelectedSportsbooks');
     if (saved) {
-      setSelectedBooks(JSON.parse(saved));
+      setSelectedBooks(saved);
     } else {
       // Default to free plan sportsbooks for free users, popular for platinum
       const defaultBooks = me?.plan === 'platinum' 
@@ -36,8 +36,8 @@ export default function MySportsbooks() {
       setSelectedBooks(defaultBooks);
     }
 
-    // Load user's bankroll from localStorage
-    const savedBankroll = localStorage.getItem('userBankroll');
+    // Load user's bankroll from optimized storage
+    const savedBankroll = optimizedStorage.get('userBankroll');
     if (savedBankroll) {
       setBankroll(Number(savedBankroll));
     }
@@ -46,8 +46,8 @@ export default function MySportsbooks() {
   const handleSavePreferences = () => {
     setSavingPrefs(true);
     try {
-      localStorage.setItem('userSelectedSportsbooks', JSON.stringify(selectedBooks));
-      localStorage.setItem('userBankroll', bankroll.toString());
+      optimizedStorage.set('userSelectedSportsbooks', selectedBooks, { priority: 'high' });
+      optimizedStorage.set('userBankroll', bankroll, { priority: 'high' });
       setSaveStatus('Preferences saved successfully!');
       setTimeout(() => {
         setSaveStatus('');

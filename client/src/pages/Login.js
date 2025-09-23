@@ -1,10 +1,11 @@
 // src/pages/Login.js
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
-import { savePricingIntent } from "../lib/intent";
-import { debugLog, debugIntentPersistence } from "../lib/debug";
-import { Mail, Lock, ArrowRight, Chrome } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { optimizedStorage } from "../utils/storageOptimizer";
 import "./Login.css";
 
 export default function Login() {
@@ -14,14 +15,14 @@ export default function Login() {
   const [tab, setTab] = useState(location.pathname === '/signup' ? 'signup' : 'login');
   const [email, setEmail] = useState(() => {
     if (typeof window === "undefined") return "";
-    const remembered = localStorage.getItem('vr-odds-remember-me') === 'true';
-    return remembered ? (localStorage.getItem('vr-odds-remembered-email') || "") : "";
+    const remembered = optimizedStorage.get('vr-odds-remember-me', false);
+    return remembered ? optimizedStorage.get('vr-odds-remembered-email', '') : "";
   });
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
   const [rememberMe, setRememberMe] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem('vr-odds-remember-me') === 'true';
+    return optimizedStorage.get('vr-odds-remember-me', false);
   });
   const [search] = useSearchParams();
   const navigate = useNavigate();
@@ -77,9 +78,9 @@ export default function Login() {
     try {
       // Handle Remember Me functionality by storing preference
       if (rememberMe) {
-        localStorage.setItem('vr-odds-remember-me', 'true');
+        optimizedStorage.set('vr-odds-remember-me', true, { priority: 'high' });
       } else {
-        localStorage.removeItem('vr-odds-remember-me');
+        optimizedStorage.remove('vr-odds-remember-me');
       }
       
       const { data, error } = await fn(email, pw);
@@ -92,7 +93,7 @@ export default function Login() {
         
         // If Remember Me is checked, store user email for next time
         if (rememberMe) {
-          localStorage.setItem('vr-odds-remembered-email', email);
+          optimizedStorage.set('vr-odds-remembered-email', email, { priority: 'high' });
         }
         
         // Small delay to ensure auth state is updated

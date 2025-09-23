@@ -4,9 +4,10 @@
  */
 
 import { autoValidateBets } from './betValidationService.js';
+import { optimizedStorage } from '../utils/storageOptimizer';
 
-const USER_STATS_KEY = "oss_user_stats_v1";
-const PICKS_KEY = "oss_my_picks_v1";
+const USER_STATS_KEY = 'oss-user-stats';
+const PICKS_KEY = 'oss-my-picks_v1';
 
 /**
  * Get current user statistics
@@ -14,9 +15,9 @@ const PICKS_KEY = "oss_my_picks_v1";
  */
 export function getUserStats() {
   try {
-    const raw = localStorage.getItem(USER_STATS_KEY);
-    if (raw) {
-      return JSON.parse(raw);
+    const stats = optimizedStorage.get(USER_STATS_KEY);
+    if (stats) {
+      return stats;
     }
   } catch (error) {
     console.error('Error loading user stats:', error);
@@ -49,10 +50,8 @@ export function getUserStats() {
  */
 export function calculateUserStats() {
   try {
-    const raw = localStorage.getItem(PICKS_KEY);
-    if (!raw) return getUserStats();
-
-    const picks = JSON.parse(raw);
+    const picks = optimizedStorage.get(PICKS_KEY);
+    if (!picks) return getUserStats();
     
     const totalBets = picks.length;
     const wonBets = picks.filter(p => p.status === 'won').length;
@@ -207,7 +206,7 @@ export function updateUserStats() {
   const stats = calculateUserStats();
   
   try {
-    localStorage.setItem(USER_STATS_KEY, JSON.stringify(stats));
+    optimizedStorage.set(USER_STATS_KEY, stats, { priority: 'normal', ttl: 24 * 60 * 60 * 1000 }); // 24 hours
     console.log('User stats updated:', stats);
     
     // Dispatch event for components to update

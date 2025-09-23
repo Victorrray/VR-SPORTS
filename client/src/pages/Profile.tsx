@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { User, Settings, BookOpen, Check, Save, CreditCard, X } from 'lucide-react';
-import UsernameForm from '../components/auth/UsernameForm';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Save, Check, AlertCircle, LogOut, User, Settings, CreditCard, Trash2, BookOpen, X } from 'lucide-react';
+import { optimizedStorage } from '../utils/storageOptimizer';
+import UsernameForm from '../components/auth/UsernameForm';
 import { usePlan } from '../hooks/usePlan';
 import './Profile.css';
 
@@ -62,10 +62,10 @@ export default function ProfilePage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    // Load user's selected sportsbooks from localStorage
-    const saved = localStorage.getItem('userSelectedSportsbooks');
+    // Load user's selected sportsbooks from optimized storage
+    const saved = optimizedStorage.get('userSelectedSportsbooks');
     if (saved) {
-      setSelectedBooks(JSON.parse(saved));
+      setSelectedBooks(saved);
     } else {
       // Default to popular sportsbooks
       setSelectedBooks(['draftkings', 'fanduel', 'betmgm', 'caesars', 'betrivers', 'espnbet']);
@@ -97,7 +97,7 @@ export default function ProfilePage() {
   };
 
   const handleSave = () => {
-    localStorage.setItem('userSelectedSportsbooks', JSON.stringify(selectedBooks));
+    optimizedStorage.set('userSelectedSportsbooks', selectedBooks, { priority: 'high' });
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus(''), 2000);
   };
@@ -115,8 +115,8 @@ export default function ProfilePage() {
       await signOut();
       
       // Clear any additional local storage items
-      localStorage.removeItem('userSelectedSportsbooks');
-      localStorage.removeItem('pricingIntent');
+      optimizedStorage.remove('userSelectedSportsbooks');
+      optimizedStorage.remove('pricingIntent');
       
       // Navigate to home page
       navigate('/', { replace: true });
