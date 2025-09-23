@@ -141,6 +141,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
   }, [marketBooks]);
 
+  const filteredGames = useMemo(() => {
+    return Array.isArray(marketGames) ? marketGames : [];
+  }, [marketGames]);
+
   // Handle player props processing state
   useEffect(() => {
     if (isPlayerPropsMode && (marketsLoading || (filteredGames.length > 0 && !playerPropsProcessing))) {
@@ -153,11 +157,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     } else if (!isPlayerPropsMode) {
       setPlayerPropsProcessing(false);
     }
-  }, [isPlayerPropsMode, marketsLoading, filteredGames.length]);
-
-  const filteredGames = useMemo(() => {
-    return Array.isArray(marketGames) ? marketGames : [];
-  }, [marketGames]);
+  }, [isPlayerPropsMode, marketsLoading, filteredGames.length, playerPropsProcessing]);
 
   const effectiveSelectedBooks = useMemo(() => {
     return (selectedBooks && selectedBooks.length)
