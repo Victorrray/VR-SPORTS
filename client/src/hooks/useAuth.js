@@ -69,6 +69,7 @@ const AuthProvider = ({ children }) => {
     if (!isSupabaseEnabled || !userId) return;
 
     try {
+      DebugLogger.info('AUTH', 'Fetching user profile for ID:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -76,12 +77,20 @@ const AuthProvider = ({ children }) => {
         .single();
 
       if (error && error.code !== 'PGRST116') {
+        DebugLogger.error('AUTH', 'Profile fetch error:', error);
         throw error;
       }
 
-      setProfile(data || null);
+      if (data) {
+        DebugLogger.info('AUTH', 'Profile fetched successfully:', data.username || data.email);
+        setProfile(data);
+      } else {
+        DebugLogger.warn('AUTH', 'No profile data found, profile may not exist yet');
+        setProfile(null);
+      }
     } catch (error) {
-      console.error('useAuth: failed to fetch profile', error);
+      DebugLogger.error('AUTH', 'Failed to fetch profile:', error);
+      throw error; // Re-throw so calling code can handle it
     }
   }, [isSupabaseEnabled]);
 
@@ -222,7 +231,26 @@ const AuthProvider = ({ children }) => {
           sessionRef.current = freshSession;
           setSession(freshSession);
           setUser(freshSession.user);
-          await fetchUserProfile(freshSession.user.id);
+          
+          // Try to fetch user profile, but don't fail session restoration if it fails
+          try {
+            await fetchUserProfile(freshSession.user.id);
+            DebugLogger.info('AUTH', 'Session restored with profile data');
+          } catch (profileError) {
+            console.warn('AUTH: Profile fetch failed during session restoration', profileError);
+            // Set a basic profile with user metadata as fallback
+            const fallbackProfile = {
+              id: freshSession.user.id,
+              username: freshSession.user.user_metadata?.username || 
+                       freshSession.user.email?.split('@')[0] || 
+                       'User',
+              email: freshSession.user.email,
+              plan: 'free', // Default plan
+              created_at: freshSession.user.created_at
+            };
+            setProfile(fallbackProfile);
+            DebugLogger.info('AUTH', 'Using fallback profile data');
+          }
 
           if (!validationIntervalRef.current) {
             validationIntervalRef.current = setInterval(() => {

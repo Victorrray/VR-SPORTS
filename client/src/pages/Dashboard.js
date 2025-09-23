@@ -13,7 +13,7 @@ import { useMe } from '../hooks/useMe';
 
 // Dashboard Component for authenticated users
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { me } = useMe();
   const location = useLocation();
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
@@ -62,7 +62,7 @@ export default function Dashboard() {
             fontWeight: '700',
             margin: '0'
           }}>
-            {me?.username || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
+            {profile?.username || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
           </h1>
         </div>
 
