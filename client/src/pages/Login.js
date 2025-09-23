@@ -43,11 +43,12 @@ export default function Login() {
     }
   }, [search]);
 
-  // Handle sign out messages
+  // Handle sign out and authentication messages
   useEffect(() => {
     const signingOut = search.get("signing_out");
     const signedOut = search.get("signed_out");
     const signOutError = search.get("sign_out_error");
+    const authRequired = search.get("auth_required");
     
     if (signingOut) {
       setErr("Signing you out...");
@@ -55,6 +56,8 @@ export default function Login() {
       setErr("You have been signed out successfully.");
     } else if (signOutError) {
       setErr("Sign out completed (with errors). Please sign in again.");
+    } else if (authRequired) {
+      setErr("Your session has expired. Please sign in again to continue.");
     }
   }, [search]);
 

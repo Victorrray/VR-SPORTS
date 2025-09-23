@@ -1,9 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { oddsCacheManager } from '../utils/cacheManager';
 import { withApiBase } from '../config/api';
 
+// Global authentication failure tracking
+let lastAuthFailure = 0;
+const AUTH_RETRY_COOLDOWN = 30000; // 30 seconds between auth retries
+
 // Enhanced fetch hook with intelligent caching
 export const useCachedFetch = (url, options = {}) => {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -57,6 +63,17 @@ export const useCachedFetch = (url, options = {}) => {
       }
     }
 
+    // Check if we're in authentication cooldown period
+    const now = Date.now();
+    if (now - lastAuthFailure < AUTH_RETRY_COOLDOWN) {
+      console.warn('🔐 Skipping API call - authentication cooldown active');
+      const cooldownError = new Error('Authentication cooldown active');
+      cooldownError.inCooldown = true;
+      setError(cooldownError);
+      setLoading(false);
+      return;
+    }
+
     // Cancel previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -81,10 +98,29 @@ export const useCachedFetch = (url, options = {}) => {
       });
 
       if (!response.ok) {
-        // Handle 401 Unauthorized - redirect to login instead of retrying
+        // Handle 401 Unauthorized - redirect to login with cooldown
         if (response.status === 401) {
+          const now = Date.now();
+          
+          // Check if we're within the cooldown period
+          if (now - lastAuthFailure < AUTH_RETRY_COOLDOWN) {
+            console.warn('🔐 Authentication failed recently, skipping redirect (cooldown active)');
+            const error = new Error(`Authentication required (cooldown active)`);
+            error.status = 401;
+            error.inCooldown = true;
+            throw error;
+          }
+          
+          // Update last failure time
+          lastAuthFailure = now;
+          
           console.warn('🔐 Authentication required - redirecting to login');
-          // Don't retry 401 errors, redirect to login
+          
+          // Redirect to login page
+          setTimeout(() => {
+            navigate('/login?auth_required=true', { replace: true });
+          }, 100); // Small delay to ensure state updates complete
+          
           const error = new Error(`Authentication required`);
           error.status = 401;
           error.shouldRedirect = true;
@@ -120,8 +156,12 @@ export const useCachedFetch = (url, options = {}) => {
       console.error(`Fetch error for ${url}:`, err);
       
       // Don't retry authentication errors
-      if (err.status === 401 || err.shouldRedirect) {
-        console.warn('🔐 Authentication error - not retrying');
+      if (err.status === 401 || err.shouldRedirect || err.inCooldown) {
+        if (err.inCooldown) {
+          console.warn('🔐 Authentication error - in cooldown period, not retrying');
+        } else {
+          console.warn('🔐 Authentication error - not retrying');
+        }
         setError(err);
         onError?.(err);
         return;

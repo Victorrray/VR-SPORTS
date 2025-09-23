@@ -8,9 +8,17 @@ import {
 } from 'lucide-react';
 import './ArbitrageDetector.css';
 
-const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilter = [], compact = false }) => {
+const ArbitrageDetector = ({ 
+  sport = 'americanfootball_nfl', 
+  games = [], 
+  bookFilter = [], 
+  compact = false,
+  minProfit: propMinProfit,
+  maxStake: propMaxStake,
+  selectedMarkets: propSelectedMarkets,
+  sortBy: propSortBy
+}) => {
   const { user, profile } = useAuth();
-  const [minProfit, setMinProfit] = useState(2); // Minimum 2% profit
   
   // Get user's bankroll from localStorage, default to 1000 if not set
   const getUserBankroll = () => {
@@ -18,21 +26,31 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     return saved ? Number(saved) : 1000;
   };
   
-  const [maxStake, setMaxStake] = useState(getUserBankroll());
-  const [selectedMarkets, setSelectedMarkets] = useState(['h2h', 'spreads', 'totals']);
-  const [sortBy, setSortBy] = useState('profit');
+  // Use props if provided, otherwise use internal state
+  const [internalMinProfit, setInternalMinProfit] = useState(2);
+  const [internalMaxStake, setInternalMaxStake] = useState(getUserBankroll());
+  const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals']);
+  const [internalSortBy, setInternalSortBy] = useState('profit');
+  
+  // Use props or internal state
+  const minProfit = propMinProfit !== undefined ? propMinProfit : internalMinProfit;
+  const maxStake = propMaxStake !== undefined ? propMaxStake : internalMaxStake;
+  const selectedMarkets = propSelectedMarkets !== undefined ? propSelectedMarkets : internalSelectedMarkets;
+  const sortBy = propSortBy !== undefined ? propSortBy : internalSortBy;
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Update maxStake when bankroll changes in localStorage
+  // Update internal maxStake when bankroll changes in localStorage (only if not using props)
   useEffect(() => {
-    const handleStorageChange = () => {
-      const newBankroll = getUserBankroll();
-      setMaxStake(newBankroll);
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+    if (propMaxStake === undefined) {
+      const handleStorageChange = () => {
+        const newBankroll = getUserBankroll();
+        setInternalMaxStake(newBankroll);
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
+  }, [propMaxStake]);
 
   // Fetch odds data for arbitrage analysis
   const { data: oddsData, loading, refresh, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
@@ -359,9 +377,12 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     alert(`Arbitrage opportunity added to bet slip!\nProfit: ${opportunity.profit_percentage.toFixed(2)}%`);
   };
 
+  // Check if we should show controls (only when not using props and not compact)
+  const showControls = !compact && propMinProfit === undefined && propMaxStake === undefined && propSelectedMarkets === undefined && propSortBy === undefined;
+
   return (
     <div className={`arbitrage-detector ${compact ? 'compact' : ''}`}>
-      {!compact && (
+      {showControls && (
         <div className="arbitrage-controls">
           <div className="controls-header">
             <h3>🎯 Real-Time Arbitrage Scanner</h3>
@@ -376,7 +397,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
                 max="10"
                 step="0.1"
                 value={minProfit}
-                onChange={(e) => setMinProfit(Number(e.target.value))}
+                onChange={(e) => setInternalMinProfit(Number(e.target.value))}
               />
             </div>
             <div className="control-group">
@@ -387,7 +408,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
                 max={getUserBankroll()}
                 step="100"
                 value={maxStake}
-                onChange={(e) => setMaxStake(Number(e.target.value))}
+                onChange={(e) => setInternalMaxStake(Number(e.target.value))}
               />
             </div>
             <div className="control-group">
@@ -395,7 +416,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
               <select 
                 multiple 
                 value={selectedMarkets}
-                onChange={(e) => setSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
+                onChange={(e) => setInternalSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
               >
                 <option value="h2h">Moneyline</option>
                 <option value="spreads">Point Spread</option>
@@ -404,7 +425,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
             </div>
             <div className="control-group">
               <label>Sort By</label>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <select value={sortBy} onChange={(e) => setInternalSortBy(e.target.value)}>
                 <option value="profit">Profit %</option>
                 <option value="amount">Profit Amount</option>
                 <option value="time">Time Found</option>

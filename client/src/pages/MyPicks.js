@@ -214,6 +214,26 @@ export default function MyPicks() {
     localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
   };
 
+  const markBetAsWon = (pickId) => {
+    const updatedPicks = picks.map(pick => 
+      pick.id === pickId 
+        ? { ...pick, status: 'won', validatedAt: new Date().toISOString() }
+        : pick
+    );
+    setPicks(updatedPicks);
+    localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
+  };
+
+  const markBetAsLost = (pickId) => {
+    const updatedPicks = picks.map(pick => 
+      pick.id === pickId 
+        ? { ...pick, status: 'lost', validatedAt: new Date().toISOString() }
+        : pick
+    );
+    setPicks(updatedPicks);
+    localStorage.setItem('oss_my_picks_v1', JSON.stringify(updatedPicks));
+  };
+
   // Calculate analytics
   const analytics = useMemo(() => {
     const settled = picks.filter(p => p.status === 'won' || p.status === 'lost');
@@ -503,6 +523,24 @@ export default function MyPicks() {
                       </span>
                     </div>
                     <div className="pick-actions">
+                      {(!p.status || p.status === 'pending') && (
+                        <>
+                          <button 
+                            onClick={() => markBetAsWon(p.id)} 
+                            className="manual-btn won-btn"
+                            title="Mark as Won"
+                          >
+                            <CheckCircle2 size={14} />
+                          </button>
+                          <button 
+                            onClick={() => markBetAsLost(p.id)} 
+                            className="manual-btn lost-btn"
+                            title="Mark as Lost"
+                          >
+                            <AlertCircle size={14} />
+                          </button>
+                        </>
+                      )}
                       <button onClick={() => removePick(p.id)} className="remove-btn">
                         <Trash2 size={14} />
                       </button>

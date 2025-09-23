@@ -115,6 +115,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftSelectedBooks, setDraftSelectedBooks] = useState(selectedBooks);
   const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
   const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(selectedPlayerPropMarkets);
+  
+  // Arbitrage-specific filter states
+  const [draftMinProfit, setDraftMinProfit] = useState(2);
+  const [draftMaxStake, setDraftMaxStake] = useState(100);
+  const [draftArbitrageSortBy, setDraftArbitrageSortBy] = useState('profit');
 
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
@@ -172,14 +177,46 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return Array.isArray(marketGames) ? marketGames : [];
   }, [marketGames]);
 
-  // Simplified player props loading state - only show loading when actually switching modes
+  // Enhanced player props loading state - show loading until props are populated
   useEffect(() => {
-    if (isPlayerPropsMode && !filteredGames.length && marketsLoading) {
-      setPlayerPropsProcessing(true);
+    if (isPlayerPropsMode) {
+      // Show loading if we're in props mode and either:
+      // 1. Markets are still loading, OR
+      // 2. We have games but no props data yet (games without player prop markets)
+      const hasPropsData = filteredGames.some(game => 
+        game.bookmakers?.some(book => 
+          book.markets?.some(market => 
+            selectedPlayerPropMarkets.includes(market.key)
+          )
+        )
+      );
+      
+      const shouldShowLoading = marketsLoading || (!hasPropsData && filteredGames.length > 0);
+      setPlayerPropsProcessing(shouldShowLoading);
+      
+      console.log('🎯 Player Props Loading State:', {
+        isPlayerPropsMode,
+        marketsLoading,
+        filteredGamesCount: filteredGames.length,
+        hasPropsData,
+        shouldShowLoading
+      });
     } else {
       setPlayerPropsProcessing(false);
     }
-  }, [isPlayerPropsMode, marketsLoading, filteredGames.length]);
+  }, [isPlayerPropsMode, marketsLoading, filteredGames, selectedPlayerPropMarkets]);
+
+  // Immediate loading feedback when switching to Player Props
+  useEffect(() => {
+    if (isPlayerPropsMode) {
+      // Show loading immediately when switching to props mode
+      setPlayerPropsProcessing(true);
+      console.log('🎯 Switched to Player Props mode - showing loading');
+      
+      // Force refresh the table to trigger immediate data fetch
+      setTableNonce(prev => prev + 1);
+    }
+  }, [isPlayerPropsMode]);
 
   // Player props prefetching and caching optimization
   useEffect(() => {
@@ -199,12 +236,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             customTTL: 10000 // 10 seconds for live player props
           });
         } catch (error) {
-          console.warn('Player props prefetch failed:', error);
+          console.warn('Failed to prefetch player props:', error);
         }
       };
 
       // Debounce prefetching to avoid excessive requests
-      const timeoutId = setTimeout(prefetchPlayerProps, 500);
+      const timeoutId = setTimeout(prefetchPlayerProps, 300);
       return () => clearTimeout(timeoutId);
     }
   }, [isPlayerPropsMode, picked, selectedDate, filteredGames.length]);
@@ -256,6 +293,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       setDraftSelectedBooks([...selectedBooks]);
       setDraftMarketKeys([...marketKeys]);
       setDraftSelectedPlayerPropMarkets([...selectedPlayerPropMarkets]);
+      // Arbitrage states don't need syncing as they're internal to the component
     }
   }, [mobileFiltersOpen]); // Only depend on modal open state
 
@@ -795,6 +833,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           games={filteredGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
+          minProfit={draftMinProfit}
+          maxStake={draftMaxStake}
+          selectedMarkets={draftMarketKeys}
+          sortBy={draftArbitrageSortBy}
         />
       ) : isArbitrageMode && !hasPlatinum ? (
         <div style={{
@@ -874,7 +916,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             bookFilter={effectiveSelectedBooks}
             marketFilter={selectedPlayerPropMarkets}
             evMin={null}
-            loading={marketsLoading && (!filteredGames || filteredGames.length === 0)}
+            loading={playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
             error={error || marketsError}
             oddsFormat={oddsFormat}
             allCaps={false}
@@ -914,7 +956,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
           
           {/* Player Props Mode Filters */}
-          {isPlayerPropsMode ? (
+          {showPlayerProps ? (
             <>
               {/* Player Props Market Selection */}
               <div style={{ marginBottom: 20 }}>
@@ -931,6 +973,112 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </div>
 
               {/* Sportsbooks Filter for Player Props */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Sportsbooks
+                </label>
+                <SportMultiSelect
+                  list={enhancedSportsbookList}
+                  selected={draftSelectedBooks || []}
+                  onChange={setDraftSelectedBooks}
+                  placeholderText="Select sportsbooks..."
+                  allLabel="All Sportsbooks"
+                  isSportsbook={true}
+                  enableCategories={true}
+                />
+              </div>
+            </>
+          ) : showArbitrage ? (
+            <>
+              {/* Arbitrage-specific filters */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Minimum Profit %
+                </label>
+                <input
+                  type="number"
+                  min="0.1"
+                  max="50"
+                  step="0.1"
+                  value={draftMinProfit}
+                  onChange={(e) => setDraftMinProfit(Number(e.target.value))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--input-bg)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Max Stake
+                </label>
+                <input
+                  type="number"
+                  min="10"
+                  max="10000"
+                  step="10"
+                  value={draftMaxStake}
+                  onChange={(e) => setDraftMaxStake(Number(e.target.value))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--input-bg)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Markets
+                </label>
+                <SportMultiSelect
+                  list={[
+                    { key: 'h2h', title: 'Moneyline' },
+                    { key: 'spreads', title: 'Point Spread' },
+                    { key: 'totals', title: 'Over/Under' }
+                  ]}
+                  selected={draftMarketKeys || []}
+                  onChange={setDraftMarketKeys}
+                  placeholderText="Select markets..."
+                  allLabel="All Markets"
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Sort By
+                </label>
+                <select
+                  value={draftArbitrageSortBy}
+                  onChange={(e) => setDraftArbitrageSortBy(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--input-bg)',
+                    color: 'var(--text-primary)',
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="profit">Profit %</option>
+                  <option value="amount">Profit Amount</option>
+                  <option value="time">Time Found</option>
+                  <option value="sport">Sport</option>
+                </select>
+              </div>
+
+              {/* Sportsbooks Filter for Arbitrage */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
                   Sportsbooks
