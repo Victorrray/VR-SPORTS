@@ -39,17 +39,17 @@ class StorageOptimizer {
   setItem(key, value, options = {}) {
     const { ttl, priority = 'normal', compress = true } = options;
     
-    try {
-      const data = {
-        value,
-        timestamp: Date.now(),
-        ttl: ttl || null,
-        priority,
-        accessCount: 0
-      };
+    const data = {
+      value,
+      timestamp: Date.now(),
+      ttl: ttl || null,
+      priority,
+      accessCount: 0
+    };
 
-      const serialized = compress ? this.compress(data) : JSON.stringify(data);
-      
+    const serialized = compress ? this.compress(data) : JSON.stringify(data);
+    
+    try {
       // Check storage space before storing
       if (this.shouldCleanup()) {
         this.cleanup();

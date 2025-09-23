@@ -1,8 +1,8 @@
 // src/pages/Login.js
 import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Mail, Lock, ArrowRight } from "lucide-react";
 import { optimizedStorage } from "../utils/storageOptimizer";
 import "./Login.css";
 
@@ -34,9 +34,12 @@ export default function Login() {
     const returnTo = search.get("returnTo");
     
     if (intent && returnTo) {
-      debugLog('LOGIN', 'Saving intent to localStorage', { intent, returnTo });
-      debugIntentPersistence('save', intent, returnTo);
-      savePricingIntent(intent, returnTo);
+      // Save pricing intent to localStorage for post-auth redirect
+      try {
+        optimizedStorage.set('pricingIntent', { intent, returnTo }, { priority: 'high', ttl: 30 * 60 * 1000 }); // 30 minutes
+      } catch (error) {
+        console.warn('Failed to save pricing intent:', error);
+      }
     }
   }, [search]);
 

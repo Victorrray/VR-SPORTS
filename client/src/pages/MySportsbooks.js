@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Check, AlertCircle, BookOpen, DollarSign, Star, TrendingUp, Settings } from 'lucide-react';
 import { optimizedStorage } from '../utils/storageOptimizer';
 import SportMultiSelect from '../components/betting/SportMultiSelect';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
