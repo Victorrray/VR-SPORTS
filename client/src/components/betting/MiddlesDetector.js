@@ -5,7 +5,7 @@ import {
   TrendingUp, Calculator, DollarSign, Clock, 
   AlertTriangle, Target, Zap, Filter, RefreshCw, Activity
 } from 'lucide-react';
-import './ArbitrageDetector.css'; // Reuse the same styles
+import './MiddlesDetector.css'; // Enhanced middle-specific styles
 
 const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilter = [], compact = false }) => {
   const { user, profile } = useAuth();

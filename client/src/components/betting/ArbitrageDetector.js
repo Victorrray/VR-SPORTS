@@ -156,7 +156,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
       bets: [
         {
           bookmaker: outcome1.bookmaker,
-          selection: outcome1.name,
+          selection: formatBetSelection(outcome1, market.key),
           odds: outcome1.price,
           stake: stake1,
           payout: payout1,
@@ -164,7 +164,7 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
         },
         {
           bookmaker: outcome2.bookmaker,
-          selection: outcome2.name,
+          selection: formatBetSelection(outcome2, market.key),
           odds: outcome2.price,
           stake: stake2,
           payout: payout2,
@@ -231,6 +231,50 @@ const ArbitrageDetector = ({ sport = 'americanfootball_nfl', games = [], bookFil
     const minutes = Math.floor(expiresIn / 60000);
     const seconds = Math.floor((expiresIn % 60000) / 1000);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const formatBetSelection = (outcome, marketKey) => {
+    if (!outcome || !outcome.name) return 'Unknown';
+    
+    // Debug logging to help verify data structure
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🎯 Formatting bet selection:', {
+        marketKey,
+        outcomeName: outcome.name,
+        outcomePoint: outcome.point,
+        fullOutcome: outcome
+      });
+    }
+    
+    // For spreads and totals, include the point/line information
+    if (marketKey === 'spreads') {
+      // For spreads, the point is usually in the outcome.point field or embedded in the name
+      if (outcome.point !== undefined && outcome.point !== null) {
+        const point = parseFloat(outcome.point);
+        const sign = point > 0 ? '+' : '';
+        return `${outcome.name} ${sign}${point}`;
+      } else {
+        // Try to extract point from name if not in separate field
+        const pointMatch = outcome.name.match(/([+-]?\d+\.?\d*)/);
+        if (pointMatch) {
+          return outcome.name; // Already includes the point
+        }
+      }
+    } else if (marketKey === 'totals') {
+      // For totals, include the total line
+      if (outcome.point !== undefined && outcome.point !== null) {
+        return `${outcome.name} ${outcome.point}`;
+      } else {
+        // Try to extract total from name
+        const totalMatch = outcome.name.match(/(\d+\.?\d*)/);
+        if (totalMatch) {
+          return outcome.name; // Already includes the total
+        }
+      }
+    }
+    
+    // For moneyline or when no point info is available, just return the name
+    return outcome.name;
   };
 
   const getMarketLabel = (market) => {

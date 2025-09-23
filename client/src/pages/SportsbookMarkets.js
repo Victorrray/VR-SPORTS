@@ -227,16 +227,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     fetchSports();
   }, []);
 
-  // Sync draft state with applied state when filters open
+  // Sync draft state with applied state only when filters modal opens
   useEffect(() => {
     if (mobileFiltersOpen) {
-      setDraftPicked(picked);
+      // Only sync when modal opens, not on every state change
+      setDraftPicked([...picked]);
       setDraftSelectedDate(selectedDate);
-      setDraftSelectedBooks(selectedBooks);
-      setDraftMarketKeys(marketKeys);
-      setDraftSelectedPlayerPropMarkets(selectedPlayerPropMarkets);
+      setDraftSelectedBooks([...selectedBooks]);
+      setDraftMarketKeys([...marketKeys]);
+      setDraftSelectedPlayerPropMarkets([...selectedPlayerPropMarkets]);
     }
-  }, [mobileFiltersOpen, picked, selectedDate, selectedBooks, marketKeys, selectedPlayerPropMarkets]);
+  }, [mobileFiltersOpen]); // Only depend on modal open state
 
   const applyFilters = () => {
     // Apply draft filters to actual state
@@ -297,8 +298,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
   };
 
-  // Get football player prop markets organized for the dropdown with categories
-  const getFootballPlayerPropMarkets = () => {
+  // Memoized football player prop markets for better performance
+  const footballPlayerPropMarkets = useMemo(() => {
     const footballCategories = ['passing', 'rushing', 'receiving', 'touchdowns'];
     const organizedMarkets = [];
     
@@ -327,10 +328,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     });
     
     return organizedMarkets;
-  };
+  }, []); // Empty dependency array since PLAYER_PROP_MARKETS is static
 
-  // Merge available sportsbooks with DFS apps to ensure they're always available
-  const getEnhancedSportsbookList = (marketBooks) => {
+  // Memoized enhanced sportsbook list to prevent unnecessary recalculations
+  const enhancedSportsbookList = useMemo(() => {
     const marketBookKeys = new Set((marketBooks || []).map(book => book.key));
     const dfsApps = getDFSApps();
     
@@ -342,7 +343,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     ];
     
     return enhancedBooks;
-  };
+  }, [marketBooks]);
 
   return (
     <div className="sportsbook-markets">
@@ -350,9 +351,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       <div style={{
         marginBottom: "24px",
         paddingTop: "20px",
-        paddingLeft: "var(--mobile-gutter, 16px)",
-        paddingRight: "var(--mobile-gutter, 16px)",
-        padding: "24px 16px"
+        maxWidth: "1200px", // Match odds table max width
+        margin: "0 auto 24px auto", // Center align like odds table
+        paddingLeft: "16px",
+        paddingRight: "16px"
       }}>
         {/* Current Selection Header */}
         <button
@@ -845,7 +847,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   Player Prop Markets
                 </label>
                 <SportMultiSelect
-                  list={getFootballPlayerPropMarkets()}
+                  list={footballPlayerPropMarkets}
                   selected={draftSelectedPlayerPropMarkets || []}
                   onChange={setDraftSelectedPlayerPropMarkets}
                   placeholderText="Select player props..."
@@ -859,7 +861,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   Sportsbooks
                 </label>
                 <SportMultiSelect
-                  list={getEnhancedSportsbookList(marketBooks)}
+                  list={enhancedSportsbookList}
                   selected={draftSelectedBooks || []}
                   onChange={setDraftSelectedBooks}
                   placeholderText="Select sportsbooks..."
@@ -903,7 +905,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   Sportsbooks
                 </label>
                 <SportMultiSelect
-                  list={getEnhancedSportsbookList(marketBooks)}
+                  list={enhancedSportsbookList}
                   selected={draftSelectedBooks || []}
                   onChange={setDraftSelectedBooks}
                   placeholderText="Select sportsbooks..."
