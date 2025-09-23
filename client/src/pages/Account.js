@@ -272,9 +272,9 @@ export default function Account() {
       localStorage.removeItem('userSelectedSportsbooks');
       localStorage.removeItem('pricingIntent');
 
-      // Navigate to login immediately to avoid PrivateRoute race condition
-      console.log('🔐 Account: Navigating to login page...');
-      navigate('/login?signing_out=true', { replace: true });
+      // Navigate to landing page immediately to avoid PrivateRoute race condition
+      console.log('🔐 Account: Navigating to landing page...');
+      navigate('/?signed_out=true', { replace: true });
       
       // Then perform the actual sign out
       await signOut();

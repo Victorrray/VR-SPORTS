@@ -118,8 +118,8 @@ export default function ProfilePage() {
       optimizedStorage.remove('userSelectedSportsbooks');
       optimizedStorage.remove('pricingIntent');
       
-      // Navigate to home page
-      navigate('/', { replace: true });
+      // Navigate to landing page
+      navigate('/?signed_out=true', { replace: true });
       
     } catch (error) {
       console.error('Sign out error:', error);

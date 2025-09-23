@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { 
   Target, 
@@ -46,6 +46,22 @@ const QUICK_ACTIONS = [
 // Landing Page Component for non-authenticated users
 export default function Landing() {
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showSignOutMessage, setShowSignOutMessage] = useState(false);
+
+  useEffect(() => {
+    const signedOut = searchParams.get('signed_out');
+    if (signedOut) {
+      setShowSignOutMessage(true);
+      // Clear the URL parameter after showing the message
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('signed_out');
+      setSearchParams(newParams, { replace: true });
+      
+      // Hide the message after 5 seconds
+      setTimeout(() => setShowSignOutMessage(false), 5000);
+    }
+  }, [searchParams, setSearchParams]);
 
   return (
     <div className="home-page">
@@ -60,6 +76,27 @@ export default function Landing() {
         <meta name="twitter:title" content="OddSightSeer - Smart Sports Betting Odds Comparison" />
         <meta name="twitter:description" content="Compare live sports betting odds across major sportsbooks and find the best lines with real-time analytics." />
       </Helmet>
+      
+      {/* Sign Out Success Message */}
+      {showSignOutMessage && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+          color: 'white',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
+          zIndex: 1000,
+          fontSize: '14px',
+          fontWeight: '600',
+          animation: 'slideDown 0.3s ease-out'
+        }}>
+          ✅ You have been signed out successfully
+        </div>
+      )}
       
       {/* Hero Section */}
       <section className="hero-section">

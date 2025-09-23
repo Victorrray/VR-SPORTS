@@ -125,6 +125,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // For player props, hardcode NFL to avoid filter issues
   const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : picked;
   
+  const hasPlatinum = me?.plan === 'platinum';
+  const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
+
+  const { 
+    games: marketGames = [], 
+    books: marketBooks = [], 
+    isLoading: marketsLoading, 
+    error: marketsError, 
+    bookmakers 
+  } = useMarkets(
+    sportsForMode,
+    regionsForMode,
+    marketsForMode,
+    { date: selectedDate }
+  );
+
+  // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {
     sportsForMode,
     picked,
@@ -143,22 +160,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }, {});
     console.log('📊 Games by sport:', gamesBySport);
   }
-  
-  const hasPlatinum = me?.plan === 'platinum';
-  const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
-
-  const { 
-    games: marketGames = [], 
-    books: marketBooks = [], 
-    isLoading: marketsLoading, 
-    error: marketsError, 
-    bookmakers 
-  } = useMarkets(
-    sportsForMode,
-    regionsForMode,
-    marketsForMode,
-    { date: selectedDate }
-  );
 
   // Update bookList when marketBooks changes
   useEffect(() => {
