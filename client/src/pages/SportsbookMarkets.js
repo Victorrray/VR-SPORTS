@@ -302,21 +302,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   return (
     <div className="sportsbook-markets">
-      {/* Three Button Toggle */}
+      {/* Card-Style Navigation */}
       <div style={{
-        marginBottom: "24px",
+        marginBottom: "32px",
         paddingTop: "20px",
-        textAlign: "center",
         paddingLeft: "var(--mobile-gutter, 16px)",
         paddingRight: "var(--mobile-gutter, 16px)",
         padding: "24px 16px"
       }}>
         <div style={{
-          display: "flex",
-          background: "rgba(0, 0, 0, 0.2)",
-          borderRadius: "12px",
-          padding: "4px",
-          gap: "0"
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: "16px",
+          maxWidth: "600px",
+          margin: "0 auto"
         }}>
           <button
             onClick={() => {
@@ -324,83 +323,210 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               setShowPlayerProps(false);
             }}
             style={{
-              flex: 1,
-              background: (!isArbitrageMode && !isPlayerPropsMode) ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" : "transparent",
-              border: "none",
-              color: (!isArbitrageMode && !isPlayerPropsMode) ? "white" : "var(--text-secondary)",
-              padding: "16px 24px",
-              borderRadius: "8px",
-              fontWeight: "600",
-              fontSize: "16px",
+              background: (!isArbitrageMode && !isPlayerPropsMode) 
+                ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
+                : "var(--card-bg)",
+              border: (!isArbitrageMode && !isPlayerPropsMode) 
+                ? "2px solid transparent" 
+                : "2px solid var(--border-color)",
+              borderRadius: "16px",
+              padding: "20px 16px",
               cursor: "pointer",
-              transition: "all 0.2s ease",
+              transition: "all 0.3s ease",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
-              gap: "8px"
+              gap: "8px",
+              minHeight: "100px",
+              position: "relative",
+              overflow: "hidden"
             }}
-          >
-            📊 Game Odds
-          </button>
-          {ENABLE_PLAYER_PROPS_V2 && (
-            <button
-              onClick={() => {
-                setShowPlayerProps(true);
-                setShowArbitrage(false);
-              }}
-              style={{
-                flex: 1,
-                background: isPlayerPropsMode ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" : "transparent",
-                border: "none",
-                color: isPlayerPropsMode ? "white" : "var(--text-secondary)",
-                padding: "16px 24px",
-                borderRadius: "8px",
-                fontWeight: "600",
-                fontSize: "16px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px"
-              }}
-            >
-              🎯 Player Props
-            </button>
-          )}
-          <button
-            onClick={() => {
-              if (hasPlatinum) {
-                setShowArbitrage(true);
-                setShowPlayerProps(false);
-              } else {
-                navigate("/pricing");
+            onMouseEnter={(e) => {
+              if (!(!isArbitrageMode && !isPlayerPropsMode)) {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 8px 25px rgba(139, 92, 246, 0.3)";
+                e.target.style.borderColor = "var(--accent)";
               }
             }}
-            style={{
-              flex: 1,
-              background: isArbitrageMode ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" : "transparent",
-              border: "none",
-              color: isArbitrageMode ? "white" : "var(--text-secondary)",
-              padding: "16px 24px",
-              borderRadius: "8px",
-              fontWeight: "600",
-              fontSize: "16px",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              opacity: !hasPlatinum ? 0.6 : 1
+            onMouseLeave={(e) => {
+              if (!(!isArbitrageMode && !isPlayerPropsMode)) {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "none";
+                e.target.style.borderColor = "var(--border-color)";
+              }
             }}
           >
-            ⚡ Arbitrage {!hasPlatinum && "🔒"}
+            <div style={{
+              fontSize: "24px",
+              marginBottom: "4px"
+            }}>📊</div>
+            <div style={{
+              fontWeight: "600",
+              fontSize: "16px",
+              color: (!isArbitrageMode && !isPlayerPropsMode) ? "white" : "var(--text-primary)",
+              textAlign: "center"
+            }}>Game Odds</div>
+            <div style={{
+              fontSize: "12px",
+              color: (!isArbitrageMode && !isPlayerPropsMode) ? "rgba(255,255,255,0.8)" : "var(--text-secondary)",
+              textAlign: "center",
+              lineHeight: "1.3"
+            }}>Live markets</div>
+            {(!isArbitrageMode && !isPlayerPropsMode) && (
+              <div style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "#10b981"
+              }} />
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              setShowArbitrage(false);
+              setShowPlayerProps(true);
+            }}
+            style={{
+              background: isPlayerPropsMode 
+                ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
+                : "var(--card-bg)",
+              border: isPlayerPropsMode 
+                ? "2px solid transparent" 
+                : "2px solid var(--border-color)",
+              borderRadius: "16px",
+              padding: "20px 16px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "8px",
+              minHeight: "100px",
+              position: "relative",
+              overflow: "hidden"
+            }}
+            onMouseEnter={(e) => {
+              if (!isPlayerPropsMode) {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 8px 25px rgba(139, 92, 246, 0.3)";
+                e.target.style.borderColor = "var(--accent)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isPlayerPropsMode) {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "none";
+                e.target.style.borderColor = "var(--border-color)";
+              }
+            }}
+          >
+            <div style={{
+              fontSize: "24px",
+              marginBottom: "4px"
+            }}>🎯</div>
+            <div style={{
+              fontWeight: "600",
+              fontSize: "16px",
+              color: isPlayerPropsMode ? "white" : "var(--text-primary)",
+              textAlign: "center"
+            }}>Player Props</div>
+            <div style={{
+              fontSize: "12px",
+              color: isPlayerPropsMode ? "rgba(255,255,255,0.8)" : "var(--text-secondary)",
+              textAlign: "center",
+              lineHeight: "1.3"
+            }}>DFS opportunities</div>
+            {isPlayerPropsMode && (
+              <div style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "#10b981"
+              }} />
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              setShowPlayerProps(false);
+              setShowArbitrage(true);
+            }}
+            style={{
+              background: isArbitrageMode 
+                ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
+                : "var(--card-bg)",
+              border: isArbitrageMode 
+                ? "2px solid transparent" 
+                : "2px solid var(--border-color)",
+              borderRadius: "16px",
+              padding: "20px 16px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "8px",
+              minHeight: "100px",
+              position: "relative",
+              overflow: "hidden"
+            }}
+            onMouseEnter={(e) => {
+              if (!isArbitrageMode) {
+                e.target.style.transform = "translateY(-2px)";
+                e.target.style.boxShadow = "0 8px 25px rgba(139, 92, 246, 0.3)";
+                e.target.style.borderColor = "var(--accent)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isArbitrageMode) {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "none";
+                e.target.style.borderColor = "var(--border-color)";
+              }
+            }}
+          >
+            <div style={{
+              fontSize: "24px",
+              marginBottom: "4px"
+            }}>⚡</div>
+            <div style={{
+              fontWeight: "600",
+              fontSize: "16px",
+              color: isArbitrageMode ? "white" : "var(--text-primary)",
+              textAlign: "center"
+            }}>Arbitrage</div>
+            <div style={{
+              fontSize: "12px",
+              color: isArbitrageMode ? "rgba(255,255,255,0.8)" : "var(--text-secondary)",
+              textAlign: "center",
+              lineHeight: "1.3"
+            }}>Find edges</div>
+            {isArbitrageMode && (
+              <div style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "#10b981"
+              }} />
+            )}
           </button>
         </div>
+        
+        {/* Description text */}
         <p style={{
-          fontSize: "14px",
+          textAlign: "center",
           color: "var(--text-secondary)",
+          fontSize: "14px",
           margin: "16px 0 0 0",
           opacity: 0.8
         }}>
