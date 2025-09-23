@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Check, AlertCircle } from 'lucide-react';
 import { optimizedStorage } from '../utils/storageOptimizer';

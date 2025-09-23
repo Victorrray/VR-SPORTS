@@ -1,8 +1,6 @@
 // src/pages/Login.js
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { optimizedStorage } from "../utils/storageOptimizer";
