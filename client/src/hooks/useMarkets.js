@@ -105,7 +105,7 @@ function normalizeArray(resp) {
 const marketCache = new Map();
 
 export const useMarkets = (sports = [], regions = [], markets = [], options = {}) => {
-  const { enabled = true } = options;
+  const { enabled = true, date = null } = options;
   const [games, setGames] = useState([]);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -121,8 +121,9 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     const sportsKey = [...sports].sort().join(',');
     const regionsKey = [...regions].sort().join(',');
     const marketsKey = [...markets].sort().join(',');
-    return `${sportsKey}-${regionsKey}-${marketsKey}`;
-  }, [sports, regions, markets]);
+    const dateKey = date || 'all';
+    return `${sportsKey}-${regionsKey}-${marketsKey}-${dateKey}`;
+  }, [sports, regions, markets, date]);
   
   // Store the last successful fetch time
   const lastFetchTime = useRef(0);
@@ -209,6 +210,12 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         dateFormat: 'iso',
         _t: Date.now() // Cache buster
       });
+
+      // Add date parameter if provided
+      if (date && date.trim()) {
+        params.append('date', date);
+        console.log('🔍 useMarkets: Adding date filter:', date);
+      }
 
       // Build path with centralized API base handling
       const fullUrl = withApiBase(`/api/odds?${params.toString()}`);

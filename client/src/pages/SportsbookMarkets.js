@@ -13,6 +13,7 @@ import SportMultiSelect from "../components/betting/SportMultiSelect";
 import DatePicker from "../components/common/DatePicker";
 import OddsTable from "../components/betting/OddsTable";
 import ArbitrageDetector from "../components/betting/ArbitrageDetector";
+import MiddlesDetector from "../components/betting/MiddlesDetector";
 import AuthRequired from "../components/auth/AuthRequired";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
@@ -91,6 +92,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
+  const [showMiddles, setShowMiddles] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
@@ -114,8 +116,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftMarketKeys, setDraftMarketKeys] = useState(["h2h", "spreads", "totals"]);
   const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(["player_rush_yds", "player_pass_yds", "player_receptions"]);
 
-  const isPlayerPropsMode = ENABLE_PLAYER_PROPS_V2 && showPlayerProps;
+  const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
+  const isMiddlesMode = showMiddles;
   const marketsForMode = isPlayerPropsMode ? [...marketKeys, ...selectedPlayerPropMarkets] : marketKeys;
   const regionsForMode = isPlayerPropsMode ? ["us"] : ["us", "us2", "us_exchanges"];
   
@@ -134,7 +137,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   } = useMarkets(
     sportsForMode,
     regionsForMode,
-    marketsForMode
+    marketsForMode,
+    { date: selectedDate }
   );
 
   // Update bookList when marketBooks changes
@@ -379,7 +383,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{ fontSize: "20px" }}>
-              {isArbitrageMode ? "⚡" : isPlayerPropsMode ? "🎯" : "📊"}
+              {isArbitrageMode ? "⚡" : isPlayerPropsMode ? "🎯" : isMiddlesMode ? "🎪" : "📊"}
             </div>
             <div>
               <div style={{
@@ -388,7 +392,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 color: "#ffffff",
                 textAlign: "left"
               }}>
-                {isArbitrageMode ? "Arbitrage" : isPlayerPropsMode ? "Player Props" : "Game Odds"}
+                {isArbitrageMode ? "Arbitrage" : isPlayerPropsMode ? "Player Props" : isMiddlesMode ? "Middles" : "Game Odds"}
               </div>
               <div style={{
                 fontSize: "12px",
@@ -400,7 +404,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   ? "Find profitable arbitrage opportunities"
                   : isPlayerPropsMode
                     ? "Explore player props across every book you follow"
-                    : "Compare odds across all major sportsbooks"}
+                    : isMiddlesMode
+                      ? "Find middle betting opportunities between different lines"
+                      : "Compare odds across all major sportsbooks"}
               </div>
             </div>
           </div>
@@ -427,11 +433,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               onClick={() => {
                 setShowArbitrage(false);
                 setShowPlayerProps(false);
+                setShowMiddles(false);
                 setNavigationExpanded(false);
               }}
               style={{
                 width: "100%",
-                background: (!isArbitrageMode && !isPlayerPropsMode) 
+                background: (!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) 
                   ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
                   : "transparent",
                 border: "none",
@@ -444,12 +451,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 borderBottom: "1px solid var(--border-color)"
               }}
               onMouseEnter={(e) => {
-                if (!(!isArbitrageMode && !isPlayerPropsMode)) {
+                if (!(!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode)) {
                   e.target.style.background = "rgba(139, 92, 246, 0.1)";
                 }
               }}
               onMouseLeave={(e) => {
-                if (!(!isArbitrageMode && !isPlayerPropsMode)) {
+                if (!(!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode)) {
                   e.target.style.background = "transparent";
                 }
               }}
@@ -459,19 +466,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <div style={{
                   fontWeight: "600",
                   fontSize: "15px",
-                  color: (!isArbitrageMode && !isPlayerPropsMode) ? "white" : "#ffffff"
+                  color: (!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) ? "white" : "#ffffff"
                 }}>
                   Game Odds
                 </div>
                 <div style={{
                   fontSize: "12px",
-                  color: (!isArbitrageMode && !isPlayerPropsMode) ? "rgba(255,255,255,0.8)" : "rgba(255, 255, 255, 0.7)",
+                  color: (!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) ? "rgba(255,255,255,0.8)" : "rgba(255, 255, 255, 0.7)",
                   marginTop: "2px"
                 }}>
                   Live markets
                 </div>
               </div>
-              {(!isArbitrageMode && !isPlayerPropsMode) && (
+              {(!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) && (
                 <div style={{
                   marginLeft: "auto",
                   width: "8px",
@@ -487,6 +494,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               onClick={() => {
                 setShowArbitrage(false);
                 setShowPlayerProps(true);
+                setShowMiddles(false);
                 setNavigationExpanded(false);
                 // Immediate loading state for better perceived performance
                 setPlayerPropsProcessing(true);
@@ -549,6 +557,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               onClick={() => {
                 setShowPlayerProps(false);
                 setShowArbitrage(true);
+                setShowMiddles(false);
                 setNavigationExpanded(false);
               }}
               style={{
@@ -593,6 +602,66 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </div>
               </div>
               {isArbitrageMode && (
+                <div style={{
+                  marginLeft: "auto",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#10b981"
+                }} />
+              )}
+            </button>
+
+            {/* Middles Option */}
+            <button
+              onClick={() => {
+                setShowPlayerProps(false);
+                setShowArbitrage(false);
+                setShowMiddles(true);
+                setNavigationExpanded(false);
+              }}
+              style={{
+                width: "100%",
+                background: isMiddlesMode 
+                  ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
+                  : "transparent",
+                border: "none",
+                padding: "16px 20px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px"
+              }}
+              onMouseEnter={(e) => {
+                if (!isMiddlesMode) {
+                  e.target.style.background = "rgba(139, 92, 246, 0.1)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isMiddlesMode) {
+                  e.target.style.background = "transparent";
+                }
+              }}
+            >
+              <div style={{ fontSize: "20px" }}>🎪</div>
+              <div style={{ textAlign: "left" }}>
+                <div style={{
+                  fontWeight: "600",
+                  fontSize: "15px",
+                  color: isMiddlesMode ? "white" : "#ffffff"
+                }}>
+                  Middles
+                </div>
+                <div style={{
+                  fontSize: "12px",
+                  color: isMiddlesMode ? "rgba(255,255,255,0.8)" : "rgba(255, 255, 255, 0.7)",
+                  marginTop: "2px"
+                }}>
+                  Middle betting opportunities
+                </div>
+              </div>
+              {isMiddlesMode && (
                 <div style={{
                   marginLeft: "auto",
                   width: "8px",
@@ -652,6 +721,73 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           bookFilter={effectiveSelectedBooks}
           compact={false}
         />
+      ) : isArbitrageMode && !hasPlatinum ? (
+        <div style={{
+          background: 'var(--card-bg)',
+          border: '2px solid #ef4444',
+          borderRadius: '12px',
+          padding: '32px',
+          margin: '20px 0',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ color: '#ef4444', margin: '0 0 12px 0' }}>
+            ⚡ Arbitrage Detection - Premium Feature
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
+            Unlock real-time arbitrage opportunities across multiple sportsbooks. Find guaranteed profit opportunities with advanced algorithms.
+          </p>
+          <button
+            onClick={() => navigate('/pricing')}
+            style={{
+              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              color: 'white',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            Upgrade to Platinum
+          </button>
+        </div>
+      ) : isMiddlesMode && hasPlatinum ? (
+        <MiddlesDetector 
+          sport={picked[0] || 'americanfootball_nfl'}
+          games={filteredGames}
+          bookFilter={effectiveSelectedBooks}
+          compact={false}
+        />
+      ) : isMiddlesMode && !hasPlatinum ? (
+        <div style={{
+          background: 'var(--card-bg)',
+          border: '2px solid #ef4444',
+          borderRadius: '12px',
+          padding: '32px',
+          margin: '20px 0',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ color: '#ef4444', margin: '0 0 12px 0' }}>
+            🎪 Middle Betting - Premium Feature
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
+            Discover middle betting opportunities where you can win both bets when the result lands between different lines. Advanced strategy for experienced bettors.
+          </p>
+          <button
+            onClick={() => navigate('/pricing')}
+            style={{
+              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              color: 'white',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            Upgrade to Platinum
+          </button>
+        </div>
       ) : isPlayerPropsMode ? (
         !isOverQuota ? (
           console.log('SportsbookMarkets: selectedPlayerPropMarkets =', selectedPlayerPropMarkets),
@@ -737,6 +873,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </>
           ) : (
             <>
+              {/* Date Filter */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Date
+                </label>
+                <DatePicker
+                  value={draftSelectedDate}
+                  onChange={setDraftSelectedDate}
+                />
+              </div>
+
               {/* Sports Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -752,14 +899,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 />
               </div>
 
-              {/* Date Filter */}
+              {/* Sportsbooks Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Date
+                  Sportsbooks
                 </label>
-                <DatePicker
-                  value={draftSelectedDate}
-                  onChange={setDraftSelectedDate}
+                <SportMultiSelect
+                  list={getEnhancedSportsbookList(marketBooks)}
+                  selected={draftSelectedBooks || []}
+                  onChange={setDraftSelectedBooks}
+                  placeholderText="Select sportsbooks..."
+                  allLabel="All Sportsbooks"
+                  isSportsbook={true}
+                  enableCategories={true}
                 />
               </div>
 
@@ -778,22 +930,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   onChange={setDraftMarketKeys}
                   placeholderText="Select markets..."
                   allLabel="All Markets"
-                />
-              </div>
-
-              {/* Sportsbooks Filter */}
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Sportsbooks
-                </label>
-                <SportMultiSelect
-                  list={getEnhancedSportsbookList(marketBooks)}
-                  selected={draftSelectedBooks || []}
-                  onChange={setDraftSelectedBooks}
-                  placeholderText="Select sportsbooks..."
-                  allLabel="All Sportsbooks"
-                  isSportsbook={true}
-                  enableCategories={true}
                 />
               </div>
               </>
