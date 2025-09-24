@@ -1,7 +1,7 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp } from "lucide-react";
+import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield } from 'lucide-react';
 import { optimizedStorage } from "../utils/storageOptimizer";
 import { smartCache } from "../utils/enhancedCache";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
@@ -34,25 +34,63 @@ const PLAYER_PROP_MARKETS = {
     { key: 'player_pass_completions', title: 'Pass Completions', sport: 'football' },
     { key: 'player_pass_attempts', title: 'Pass Attempts', sport: 'football' },
     { key: 'player_pass_interceptions', title: 'Interceptions', sport: 'football' },
-    { key: 'player_pass_longest_completion', title: 'Longest Pass', sport: 'football' }
+    { key: 'player_pass_longest_completion', title: 'Longest Pass', sport: 'football' },
+    // Alternate passing props
+    { key: 'player_pass_yds_alternate', title: 'Alternate Pass Yards', sport: 'football' },
+    { key: 'player_pass_tds_alternate', title: 'Alternate Pass TDs', sport: 'football' },
+    { key: 'player_pass_completions_alternate', title: 'Alternate Pass Completions', sport: 'football' },
+    { key: 'player_pass_attempts_alternate', title: 'Alternate Pass Attempts', sport: 'football' },
+    { key: 'player_pass_interceptions_alternate', title: 'Alternate Pass Interceptions', sport: 'football' },
+    { key: 'player_pass_longest_completion_alternate', title: 'Alternate Longest Pass', sport: 'football' }
   ],
   rushing: [
     { key: 'player_rush_yds', title: 'Rushing Yards', sport: 'football' },
     { key: 'player_rush_tds', title: 'Rushing TDs', sport: 'football' },
     { key: 'player_rush_attempts', title: 'Rush Attempts', sport: 'football' },
-    { key: 'player_rush_longest', title: 'Longest Rush', sport: 'football' }
+    { key: 'player_rush_longest', title: 'Longest Rush', sport: 'football' },
+    // Alternate rushing props
+    { key: 'player_rush_yds_alternate', title: 'Alternate Rush Yards', sport: 'football' },
+    { key: 'player_rush_tds_alternate', title: 'Alternate Rush TDs', sport: 'football' },
+    { key: 'player_rush_attempts_alternate', title: 'Alternate Rush Attempts', sport: 'football' },
+    { key: 'player_rush_longest_alternate', title: 'Alternate Longest Rush', sport: 'football' }
   ],
   receiving: [
     { key: 'player_receptions', title: 'Receptions', sport: 'football' },
     { key: 'player_receiving_yds', title: 'Receiving Yards', sport: 'football' },
     { key: 'player_receiving_tds', title: 'Receiving TDs', sport: 'football' },
-    { key: 'player_receiving_longest', title: 'Longest Reception', sport: 'football' }
+    { key: 'player_receiving_longest', title: 'Longest Reception', sport: 'football' },
+    // Alternate receiving props
+    { key: 'player_receptions_alternate', title: 'Alternate Receptions', sport: 'football' },
+    { key: 'player_reception_yds_alternate', title: 'Alternate Reception Yards', sport: 'football' },
+    { key: 'player_reception_tds_alternate', title: 'Alternate Reception TDs', sport: 'football' },
+    { key: 'player_reception_longest_alternate', title: 'Alternate Longest Reception', sport: 'football' }
   ],
   touchdowns: [
     { key: 'player_anytime_td', title: 'Anytime TD', sport: 'football' },
     { key: 'player_1st_td', title: 'First TD', sport: 'football' },
     { key: 'player_last_td', title: 'Last TD', sport: 'football' },
     { key: 'player_2_plus_tds', title: '2+ TDs', sport: 'football' }
+  ],
+  // Combination props (Pass + Rush, Rush + Reception, etc.)
+  combination: [
+    { key: 'player_pass_rush_yds_alternate', title: 'Alternate Pass + Rush Yards', sport: 'football' },
+    { key: 'player_pass_rush_reception_tds_alternate', title: 'Alternate Pass + Rush + Reception TDs', sport: 'football' },
+    { key: 'player_pass_rush_reception_yds_alternate', title: 'Alternate Pass + Rush + Reception Yards', sport: 'football' },
+    { key: 'player_rush_reception_tds_alternate', title: 'Alternate Rush + Reception TDs', sport: 'football' },
+    { key: 'player_rush_reception_yds_alternate', title: 'Alternate Rush + Reception Yards', sport: 'football' }
+  ],
+  // Defense and special teams
+  defense: [
+    { key: 'player_sacks_alternate', title: 'Alternate Sacks', sport: 'football' },
+    { key: 'player_solo_tackles_alternate', title: 'Alternate Solo Tackles', sport: 'football' },
+    { key: 'player_tackles_assists_alternate', title: 'Alternate Tackles + Assists', sport: 'football' },
+    { key: 'player_assists_alternate', title: 'Alternate Assists', sport: 'football' }
+  ],
+  // Kicking props
+  kicking: [
+    { key: 'player_field_goals_alternate', title: 'Alternate Field Goals', sport: 'football' },
+    { key: 'player_kicking_points_alternate', title: 'Alternate Kicking Points', sport: 'football' },
+    { key: 'player_pats_alternate', title: 'Alternate Points After Touchdown', sport: 'football' }
   ],
   basketball: [
     { key: 'player_points', title: 'Points', sport: 'basketball' },
@@ -62,15 +100,77 @@ const PLAYER_PROP_MARKETS = {
     { key: 'player_steals', title: 'Steals', sport: 'basketball' },
     { key: 'player_blocks', title: 'Blocks', sport: 'basketball' }
   ],
-  baseball: [
+  // Baseball - Batting props
+  batting: [
     { key: 'batter_hits', title: 'Hits', sport: 'baseball' },
     { key: 'batter_total_bases', title: 'Total Bases', sport: 'baseball' },
     { key: 'batter_rbis', title: 'RBIs', sport: 'baseball' },
-    { key: 'batter_runs_scored', title: 'Runs', sport: 'baseball' },
+    { key: 'batter_runs_scored', title: 'Runs Scored', sport: 'baseball' },
     { key: 'batter_home_runs', title: 'Home Runs', sport: 'baseball' },
+    { key: 'batter_first_home_run', title: 'First Home Run', sport: 'baseball' },
+    { key: 'batter_hits_runs_rbis', title: 'Hits + Runs + RBIs', sport: 'baseball' },
+    { key: 'batter_singles', title: 'Singles', sport: 'baseball' },
+    { key: 'batter_doubles', title: 'Doubles', sport: 'baseball' },
+    { key: 'batter_triples', title: 'Triples', sport: 'baseball' },
+    { key: 'batter_walks', title: 'Walks', sport: 'baseball' },
+    { key: 'batter_strikeouts', title: 'Strikeouts', sport: 'baseball' },
+    { key: 'batter_stolen_bases', title: 'Stolen Bases', sport: 'baseball' },
+    // Alternate batting props
+    { key: 'batter_total_bases_alternate', title: 'Alternate Total Bases', sport: 'baseball' },
+    { key: 'batter_home_runs_alternate', title: 'Alternate Home Runs', sport: 'baseball' },
+    { key: 'batter_hits_alternate', title: 'Alternate Hits', sport: 'baseball' },
+    { key: 'batter_rbis_alternate', title: 'Alternate RBIs', sport: 'baseball' },
+    { key: 'batter_walks_alternate', title: 'Alternate Walks', sport: 'baseball' },
+    { key: 'batter_strikeouts_alternate', title: 'Alternate Strikeouts', sport: 'baseball' },
+    { key: 'batter_runs_scored_alternate', title: 'Alternate Runs Scored', sport: 'baseball' },
+    { key: 'batter_singles_alternate', title: 'Alternate Singles', sport: 'baseball' },
+    { key: 'batter_doubles_alternate', title: 'Alternate Doubles', sport: 'baseball' },
+    { key: 'batter_triples_alternate', title: 'Alternate Triples', sport: 'baseball' }
+  ],
+  // Baseball - Pitching props
+  pitching: [
     { key: 'pitcher_strikeouts', title: 'Strikeouts', sport: 'baseball' },
+    { key: 'pitcher_record_a_win', title: 'Record a Win', sport: 'baseball' },
     { key: 'pitcher_hits_allowed', title: 'Hits Allowed', sport: 'baseball' },
-    { key: 'pitcher_earned_runs', title: 'Earned Runs', sport: 'baseball' }
+    { key: 'pitcher_walks', title: 'Walks Allowed', sport: 'baseball' },
+    { key: 'pitcher_earned_runs', title: 'Earned Runs', sport: 'baseball' },
+    { key: 'pitcher_outs', title: 'Outs', sport: 'baseball' },
+    // Alternate pitching props
+    { key: 'pitcher_hits_allowed_alternate', title: 'Alternate Hits Allowed', sport: 'baseball' },
+    { key: 'pitcher_walks_alternate', title: 'Alternate Walks Allowed', sport: 'baseball' },
+    { key: 'pitcher_strikeouts_alternate', title: 'Alternate Strikeouts', sport: 'baseball' }
+  ],
+  // Hockey - Player props
+  hockey: [
+    { key: 'player_points', title: 'Points', sport: 'hockey' },
+    { key: 'player_power_play_points', title: 'Power Play Points', sport: 'hockey' },
+    { key: 'player_assists', title: 'Assists', sport: 'hockey' },
+    { key: 'player_blocked_shots', title: 'Blocked Shots', sport: 'hockey' },
+    { key: 'player_shots_on_goal', title: 'Shots on Goal', sport: 'hockey' },
+    { key: 'player_goals', title: 'Goals', sport: 'hockey' },
+    { key: 'player_total_saves', title: 'Total Saves', sport: 'hockey' },
+    { key: 'player_goal_scorer_first', title: 'First Goal Scorer', sport: 'hockey' },
+    { key: 'player_goal_scorer_last', title: 'Last Goal Scorer', sport: 'hockey' },
+    { key: 'player_goal_scorer_anytime', title: 'Anytime Goal Scorer', sport: 'hockey' },
+    // Alternate hockey props
+    { key: 'player_points_alternate', title: 'Alternate Points', sport: 'hockey' },
+    { key: 'player_assists_alternate', title: 'Alternate Assists', sport: 'hockey' },
+    { key: 'player_power_play_points_alternate', title: 'Alternate Power Play Points', sport: 'hockey' },
+    { key: 'player_goals_alternate', title: 'Alternate Goals', sport: 'hockey' },
+    { key: 'player_shots_on_goal_alternate', title: 'Alternate Shots on Goal', sport: 'hockey' },
+    { key: 'player_blocked_shots_alternate', title: 'Alternate Blocked Shots', sport: 'hockey' },
+    { key: 'player_total_saves_alternate', title: 'Alternate Total Saves', sport: 'hockey' }
+  ],
+  // Soccer - Player props
+  soccerPlayers: [
+    { key: 'player_goal_scorer_anytime', title: 'Anytime Goal Scorer', sport: 'soccer' },
+    { key: 'player_first_goal_scorer', title: 'First Goal Scorer', sport: 'soccer' },
+    { key: 'player_last_goal_scorer', title: 'Last Goal Scorer', sport: 'soccer' },
+    { key: 'player_to_receive_card', title: 'To Receive a Card', sport: 'soccer' },
+    { key: 'player_to_receive_red_card', title: 'To Receive a Red Card', sport: 'soccer' },
+    { key: 'player_shots_on_target', title: 'Shots on Target', sport: 'soccer' },
+    { key: 'player_shots', title: 'Shots', sport: 'soccer' },
+    { key: 'player_assists', title: 'Assists', sport: 'soccer' }
   ]
 };
 
@@ -561,12 +661,97 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     touchdowns: {
       title: "Touchdowns",
       icon: Trophy,
+    },
+    combination: {
+      title: "Combination",
+      icon: TrendingUp,
+    },
+    defense: {
+      title: "Defense",
+      icon: Shield,
+    },
+    kicking: {
+      title: "Kicking",
+      icon: Target,
+    },
+    // Baseball categories
+    batting: {
+      title: "Batting",
+      icon: Target,
+    },
+    pitching: {
+      title: "Pitching",
+      icon: Zap,
+    },
+    // Hockey categories
+    hockey: {
+      title: "Hockey",
+      icon: Target,
+    },
+    // Soccer categories
+    soccerPlayers: {
+      title: "Soccer Players",
+      icon: Target,
     }
+  };
+
+  // Function to get player prop markets based on selected sports
+  const getPlayerPropMarketsBySport = (selectedSports) => {
+    if (!selectedSports || selectedSports.length === 0) {
+      return footballPlayerPropMarkets; // Default to football
+    }
+
+    const organizedMarkets = [];
+    const sportCategories = new Map();
+
+    // Determine which categories to include based on selected sports
+    selectedSports.forEach(sport => {
+      if (sport.includes('football')) {
+        sportCategories.set('football', ['passing', 'rushing', 'receiving', 'touchdowns', 'combination', 'defense', 'kicking']);
+      } else if (sport.includes('baseball')) {
+        sportCategories.set('baseball', ['batting', 'pitching']);
+      } else if (sport.includes('hockey')) {
+        sportCategories.set('hockey', ['hockey']);
+      } else if (sport.includes('soccer')) {
+        sportCategories.set('soccer', ['soccerPlayers']);
+      } else if (sport.includes('basketball')) {
+        sportCategories.set('basketball', ['basketball']);
+      }
+    });
+
+    // Build organized markets for each sport
+    sportCategories.forEach((categories, sportType) => {
+      categories.forEach(category => {
+        if (PLAYER_PROP_MARKETS[category]) {
+          const categoryInfo = PLAYER_PROP_CATEGORIES[category];
+          // Add category header
+          organizedMarkets.push({
+            key: `${category}_header`,
+            title: categoryInfo.title,
+            sport: sportType,
+            isHeader: true,
+            icon: categoryInfo.icon
+          });
+          
+          // Add markets for this category
+          PLAYER_PROP_MARKETS[category]
+            .filter(market => market.sport === sportType)
+            .forEach(market => {
+              organizedMarkets.push({
+                ...market,
+                title: `${market.title}`
+              });
+            });
+        }
+      });
+    });
+
+    return organizedMarkets.length > 0 ? organizedMarkets : footballPlayerPropMarkets;
   };
 
   // Memoized football player prop markets for better performance
   const footballPlayerPropMarkets = useMemo(() => {
-    const footballCategories = ['passing', 'rushing', 'receiving', 'touchdowns'];
+    const footballCategories = ['passing', 'rushing', 'receiving', 'touchdowns', 'combination', 'defense', 'kicking'];
     const organizedMarkets = [];
     
     footballCategories.forEach(category => {
@@ -1157,7 +1342,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   🎯 Player Prop Markets
                 </label>
                 <SportMultiSelect
-                  list={footballPlayerPropMarkets}
+                  list={getPlayerPropMarketsBySport(draftPicked)}
                   selected={draftSelectedPlayerPropMarkets || []}
                   onChange={setDraftSelectedPlayerPropMarkets}
                   placeholderText="Select player props..."
