@@ -8,6 +8,30 @@ import "./OddsTable.css";
 import { resolveTeamLogo } from "../../utils/logoResolver";
 import { getTeamLogos } from "../../constants/teamLogos";
 
+// Helper function to explain "Yes" bets for better UX
+const getYesBetExplanation = (marketKey, outcomeName) => {
+  if (outcomeName !== 'Yes') return null;
+  
+  const explanations = {
+    'player_anytime_touchdown': 'Player will score a touchdown at any point during the game',
+    'player_anytime_td': 'Player will score a touchdown at any point during the game',
+    'anytime_td': 'Player will score a touchdown at any point during the game',
+    'first_touchdown': 'This player will score the FIRST touchdown of the game',
+    'first_td': 'This player will score the FIRST touchdown of the game',
+    '1st_td': 'This player will score the FIRST touchdown of the game',
+    'player_first_touchdown': 'This player will score the FIRST touchdown of the game'
+  };
+  
+  const key = marketKey.toLowerCase();
+  for (const [pattern, explanation] of Object.entries(explanations)) {
+    if (key.includes(pattern)) {
+      return explanation;
+    }
+  }
+  
+  return 'Yes - this event will happen';
+};
+
 // Sportsbook logos removed for compliance, but team logos are available
 const logos = {};
 
@@ -772,7 +796,8 @@ export default function OddsTable({
             hasMatchingBook = propData.allBooks.some(book => {
               const keyMatch = bookFilter.includes(book.bookmaker?.key);
               const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
-              console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch, 'nameMatch:', nameMatch);
+              const isPrizePicks = book.bookmaker?.key === 'prizepicks' || book.book?.toLowerCase().includes('prizepicks');
+              console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch, 'nameMatch:', nameMatch, 'isPrizePicks:', isPrizePicks);
               return keyMatch || nameMatch;
             });
           }
@@ -1576,7 +1601,10 @@ export default function OddsTable({
                   </td>
                   <td>
                     <div style={{ display:'flex', flexDirection:'column', gap:2, textAlign:'left' }}>
-                      <span style={{ fontWeight:800 }}>
+                      <span 
+                        style={{ fontWeight:800 }}
+                        title={mode === "props" ? getYesBetExplanation(row.mkt?.key, row.out?.name) : null}
+                      >
                         {mode === "props" 
                           ? (row.out?.description || row.out?.name || '')
                           : (row.mkt?.key || '') === 'h2h'
@@ -1730,7 +1758,10 @@ export default function OddsTable({
                           {mode === "props" ? (
                             // For player props, show Over/Under with line
                             <div className="mob-prop-bet">
-                              <span className={`mob-prop-side ${row.out.name === 'Over' ? 'over' : 'under'}`}>
+                              <span 
+                                className={`mob-prop-side ${row.out.name === 'Over' ? 'over' : 'under'}`}
+                                title={getYesBetExplanation(row.mkt?.key, row.out?.name)}
+                              >
                                 {row.out.name} {row.out.point}
                               </span>
                             </div>

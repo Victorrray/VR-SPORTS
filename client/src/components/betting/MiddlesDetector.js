@@ -1,6 +1,7 @@
 // Middles Detection System - Find middle betting opportunities
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { bankrollManager } from '../../utils/bankrollManager';
 import { 
   TrendingUp, Calculator, DollarSign, Clock, 
   AlertTriangle, Target, Zap, Filter, RefreshCw, Activity
@@ -12,25 +13,16 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
   const [minMiddleGap, setMinMiddleGap] = useState(3); // Minimum 3 point gap for totals/spreads
   const [minProbability, setMinProbability] = useState(15); // Minimum 15% chance of hitting middle
   
-  // Get user's bankroll from localStorage, default to 1000 if not set
-  const getUserBankroll = () => {
-    const saved = localStorage.getItem('userBankroll');
-    return saved ? Number(saved) : 1000;
-  };
-  
-  const [maxStake, setMaxStake] = useState(getUserBankroll());
-  const [selectedMarkets, setSelectedMarkets] = useState(['spreads', 'totals']);
+  const [maxStake, setMaxStake] = useState(bankrollManager.getBankroll());
+  const [selectedMarkets, setSelectedMarkets] = useState(['spreads', 'totals', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals']);
   const [sortBy, setSortBy] = useState('probability');
 
-  // Update maxStake when bankroll changes in localStorage
+  // Update maxStake when bankroll changes
   useEffect(() => {
-    const handleStorageChange = () => {
-      const newBankroll = getUserBankroll();
+    const cleanup = bankrollManager.onBankrollChange((newBankroll) => {
       setMaxStake(newBankroll);
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    });
+    return cleanup;
   }, []);
 
   // Calculate middle opportunities from real data

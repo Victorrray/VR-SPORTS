@@ -98,7 +98,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [query, setQuery] = useState("");
   const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks());
   const [selectedDate, setSelectedDate] = useState("");
-  const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
+  const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]); // Will be auto-updated by useEffect
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
@@ -111,6 +111,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [minEV, setMinEV] = useState("");
   const [tableNonce, setTableNonce] = useState(0);
   const [playerPropsProcessing, setPlayerPropsProcessing] = useState(false);
+  const [filtersLoading, setFiltersLoading] = useState(false);
   const [navigationExpanded, setNavigationExpanded] = useState(false);
   const [sportList, setSportList] = useState([]);
   const [bookList, setBookList] = useState([]);
@@ -176,6 +177,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     };
   }, []);
 
+  // Initialize markets for default sports on component mount
+  useEffect(() => {
+    const initialMarkets = getAutoSelectedMarkets(picked);
+    setMarketKeys(initialMarkets);
+    setDraftMarketKeys(initialMarkets);
+    console.log('🎯 Initial auto-selected markets:', initialMarkets);
+  }, []); // Run only once on mount
+
   // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {
     sportsForMode,
@@ -207,6 +216,31 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const filteredGames = useMemo(() => {
     return Array.isArray(marketGames) ? marketGames : [];
   }, [marketGames]);
+
+  // Clear filters loading when data is ready
+  useEffect(() => {
+    if (!marketsLoading && filteredGames.length > 0) {
+      setFiltersLoading(false);
+    }
+  }, [marketsLoading, filteredGames.length]);
+
+  // Auto-select all relevant markets when sports change (draft state)
+  useEffect(() => {
+    if (draftPicked && draftPicked.length > 0) {
+      const autoSelectedMarkets = getAutoSelectedMarkets(draftPicked);
+      setDraftMarketKeys(autoSelectedMarkets);
+      console.log('🎯 Auto-selected draft markets for sports:', draftPicked, '→', autoSelectedMarkets);
+    }
+  }, [draftPicked]);
+
+  // Auto-select all relevant markets when applied sports change
+  useEffect(() => {
+    if (picked && picked.length > 0) {
+      const autoSelectedMarkets = getAutoSelectedMarkets(picked);
+      setMarketKeys(autoSelectedMarkets);
+      console.log('🎯 Auto-selected applied markets for sports:', picked, '→', autoSelectedMarkets);
+    }
+  }, [picked]);
 
   // Enhanced player props loading state - show loading until props are populated
   useEffect(() => {
@@ -246,6 +280,24 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       
       // Force refresh the table to trigger immediate data fetch
       setTableNonce(prev => prev + 1);
+      
+      // Extended timeout for player props since they take longer to load
+      setTimeout(() => {
+        if (isPlayerPropsMode) {
+          console.log('🎯 Player Props timeout - checking if data loaded');
+          const hasPropsData = filteredGames.some(game => 
+            game.bookmakers?.some(book => 
+              book.markets?.some(market => 
+                selectedPlayerPropMarkets.includes(market.key)
+              )
+            )
+          );
+          if (!hasPropsData && !marketsLoading) {
+            console.log('🎯 No props data after timeout, keeping loading state');
+            setPlayerPropsProcessing(true);
+          }
+        }
+      }, 3000); // 3 second timeout for player props
     }
   }, [isPlayerPropsMode]);
 
@@ -338,6 +390,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   }, [mobileFiltersOpen]); // Only depend on modal open state
 
   const applyFilters = () => {
+    // Show loading immediately when filters are applied
+    setFiltersLoading(true);
+    
     // Apply draft filters to actual state
     const newPicked = Array.isArray(draftPicked) && draftPicked.length > 0 ? draftPicked : ["americanfootball_nfl"];
     const newDate = draftSelectedDate || '';
@@ -358,20 +413,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setMarketKeys(newMarkets);
     setSelectedPlayerPropMarkets(Array.isArray(draftSelectedPlayerPropMarkets) && draftSelectedPlayerPropMarkets.length > 0 ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
     setMobileFiltersOpen(false);
+
+    // Clear loading after a short delay to allow state updates to propagate
+    setTimeout(() => {
+      setFiltersLoading(false);
+    }, 1000);
   };
 
   const resetDraftFilters = () => {
-    setDraftPicked(["americanfootball_nfl"]);
+    const defaultSports = ["americanfootball_nfl"];
+    setDraftPicked(defaultSports);
     setDraftSelectedDate('');
     setDraftSelectedBooks(getUserSelectedSportsbooks()); // Reset to user's saved sportsbooks
-    setDraftMarketKeys(["h2h", "spreads", "totals"]);
+    setDraftMarketKeys(getAutoSelectedMarkets(defaultSports)); // Auto-select markets for default sport
     setDraftSelectedPlayerPropMarkets(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   };
 
   const resetAllFilters = () => {
     // Reset both draft and applied states
     const defaultSports = ["americanfootball_nfl"];
-    const defaultMarkets = ["h2h", "spreads", "totals"];
+    const defaultMarkets = getAutoSelectedMarkets(defaultSports); // Auto-select markets for default sport
     const defaultPlayerProps = ["player_pass_yds", "player_rush_yds", "player_receptions"];
     const defaultSportsbooks = getUserSelectedSportsbooks(); // Use user's saved sportsbooks
     
@@ -388,6 +449,99 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedBooks(defaultSportsbooks);
     setMarketKeys(defaultMarkets);
     setSelectedPlayerPropMarkets(defaultPlayerProps);
+  };
+
+  // Markets organized by sport for better UX and relevance
+  const MARKETS_BY_SPORT = {
+    // American Football (NFL, NCAAF)
+    americanfootball: [
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets' },
+      { key: 'spreads', title: 'Spreads', description: 'Point spreads' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total points' },
+      { key: 'alternate_spreads', title: 'Alternate Spreads', description: 'All available point spreads' },
+      { key: 'alternate_totals', title: 'Alternate Totals', description: 'All available totals' },
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under' },
+      { key: 'alternate_team_totals', title: 'Alternate Team Totals', description: 'All team total options' }
+    ],
+    // Basketball (NBA, NCAAB)
+    basketball: [
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets' },
+      { key: 'spreads', title: 'Spreads', description: 'Point spreads' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total points' },
+      { key: 'alternate_spreads', title: 'Alternate Spreads', description: 'All available point spreads' },
+      { key: 'alternate_totals', title: 'Alternate Totals', description: 'All available totals' },
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under' },
+      { key: 'alternate_team_totals', title: 'Alternate Team Totals', description: 'All team total options' }
+    ],
+    // Baseball (MLB)
+    baseball: [
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets' },
+      { key: 'spreads', title: 'Run Line', description: 'Run line spreads' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total runs' },
+      { key: 'alternate_spreads', title: 'Alternate Run Lines', description: 'All available run lines' },
+      { key: 'alternate_totals', title: 'Alternate Totals', description: 'All available run totals' },
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific run totals' }
+    ],
+    // Hockey (NHL)
+    hockey: [
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets' },
+      { key: 'spreads', title: 'Puck Line', description: 'Puck line spreads' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total goals' },
+      { key: 'alternate_spreads', title: 'Alternate Puck Lines', description: 'All available puck lines' },
+      { key: 'alternate_totals', title: 'Alternate Totals', description: 'All available goal totals' },
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals' }
+    ],
+    // Soccer (EPL, MLS, etc.)
+    soccer: [
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets' },
+      { key: 'h2h_3_way', title: '3-Way Moneyline', description: 'Win/Draw/Loss including ties' },
+      { key: 'draw_no_bet', title: 'Draw No Bet', description: 'Win/Loss excluding draws' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total goals' },
+      { key: 'alternate_totals', title: 'Alternate Totals', description: 'All available goal totals' },
+      { key: 'btts', title: 'Both Teams to Score', description: 'Yes/No both teams score' },
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals' }
+    ],
+    // Default/All Sports
+    default: [
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets' },
+      { key: 'spreads', title: 'Spreads', description: 'Point/goal spreads' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under totals' },
+      { key: 'alternate_spreads', title: 'Alternate Spreads', description: 'All available spreads' },
+      { key: 'alternate_totals', title: 'Alternate Totals', description: 'All available totals' }
+    ]
+  };
+
+  // Function to get relevant markets based on selected sports
+  const getRelevantMarkets = (selectedSports) => {
+    if (!selectedSports || selectedSports.length === 0) {
+      return MARKETS_BY_SPORT.default;
+    }
+
+    // If multiple sports selected, combine all relevant markets
+    const allMarkets = new Map();
+    
+    selectedSports.forEach(sport => {
+      let sportCategory = 'default';
+      
+      if (sport.includes('football')) sportCategory = 'americanfootball';
+      else if (sport.includes('basketball')) sportCategory = 'basketball';
+      else if (sport.includes('baseball')) sportCategory = 'baseball';
+      else if (sport.includes('hockey')) sportCategory = 'hockey';
+      else if (sport.includes('soccer')) sportCategory = 'soccer';
+      
+      const markets = MARKETS_BY_SPORT[sportCategory] || MARKETS_BY_SPORT.default;
+      markets.forEach(market => {
+        allMarkets.set(market.key, market);
+      });
+    });
+
+    return Array.from(allMarkets.values());
+  };
+
+  // Function to auto-select all relevant markets for selected sports
+  const getAutoSelectedMarkets = (selectedSports) => {
+    const relevantMarkets = getRelevantMarkets(selectedSports);
+    return relevantMarkets.map(market => market.key);
   };
 
   // Player prop categories with icons
@@ -955,7 +1109,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             bookFilter={effectiveSelectedBooks}
             marketFilter={selectedPlayerPropMarkets}
             evMin={null}
-            loading={playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
+            loading={filtersLoading || playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
             error={error || marketsError}
             oddsFormat={oddsFormat}
             allCaps={false}
@@ -973,7 +1127,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           bookFilter={effectiveSelectedBooks}
           marketFilter={marketKeys}
           evMin={minEV === "" ? null : Number(minEV)}
-          loading={marketsLoading && (!filteredGames || filteredGames.length === 0)}
+          loading={filtersLoading || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
           error={error || marketsError}
           oddsFormat={oddsFormat}
           allCaps={false}
@@ -1186,11 +1340,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   📊 Markets
                 </label>
                 <SportMultiSelect
-                  list={[
-                    { key: 'h2h', title: 'Moneyline' },
-                    { key: 'spreads', title: 'Spreads' },
-                    { key: 'totals', title: 'Totals' }
-                  ]}
+                  list={getRelevantMarkets(draftPicked)}
                   selected={draftMarketKeys || []}
                   onChange={setDraftMarketKeys}
                   placeholderText="Select markets..."

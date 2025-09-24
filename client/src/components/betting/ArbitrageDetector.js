@@ -24,7 +24,7 @@ const ArbitrageDetector = ({
   // Use props if provided, otherwise use internal state
   const [internalMinProfit, setInternalMinProfit] = useState(2);
   const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
-  const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals']);
+  const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
   const [internalSortBy, setInternalSortBy] = useState('profit');
   
   // Use props or internal state
