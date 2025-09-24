@@ -11,7 +11,7 @@ import { cacheManager } from '../utils/cacheManager';
 export const apiUsageEvents = new EventTarget();
 
 const SCOREBOARD_CACHE = new Map();
-const SCOREBOARD_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const SCOREBOARD_CACHE_TTL = 15 * 60 * 1000; // 15 minutes - longer cache for logos
 
 const normalizeTeamKey = (name = '') => {
   return String(name)
@@ -25,8 +25,10 @@ async function getScoreboardLogosForSport(sportKey) {
   const cached = SCOREBOARD_CACHE.get(sportKey);
   const now = Date.now();
   if (cached && now - cached.timestamp < SCOREBOARD_CACHE_TTL) {
+    console.log(`📦 Logo cache HIT for ${sportKey}`);
     return cached.map;
   }
+  console.log(`🔄 Logo cache MISS for ${sportKey}, fetching...`);
 
   try {
     const response = await secureFetch(
@@ -53,6 +55,7 @@ async function getScoreboardLogosForSport(sportKey) {
     }
 
     SCOREBOARD_CACHE.set(sportKey, { timestamp: now, map: teamLogoMap });
+    console.log(`✅ Cached ${teamLogoMap.size} team logos for ${sportKey}`);
     return teamLogoMap;
   } catch (error) {
     console.warn('useMarkets: Unable to fetch scoreboard logos for', sportKey, error.message || error);
@@ -71,6 +74,8 @@ async function enrichGamesWithScoreboardData(games = []) {
         .filter(Boolean)
     )
   );
+  
+  console.log(`🎯 Enriching ${games.length} games for ${uniqueSports.length} sports:`, uniqueSports);
 
   const logoMapsEntries = await Promise.all(
     uniqueSports.map(async (sportKey) => {
@@ -127,7 +132,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
   
   // Store the last successful fetch time
   const lastFetchTime = useRef(0);
-  const COOLDOWN_MS = 30_000;
+  const COOLDOWN_MS = 10_000; // Reduced from 30s to 10s for faster sports switching
   // Track if we have an active request
   const activeRequest = useRef(null);
   // Track retry attempts
@@ -175,10 +180,11 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     const cacheKey = `markets-${paramsKey}`;
     const cachedData = APICache.get(cacheKey);
     
-    // Only update from cache if we don't have any data yet AND cache has data
-    if (cachedData && cachedData.length > 0 && games.length === 0) {
+    // Always use cached data if available for faster sports switching
+    if (cachedData && cachedData.length > 0) {
       console.log('🔍 useMarkets: Using cached data, length:', cachedData.length);
       setGames(cachedData);
+      setIsLoading(false);
       return;
     }
     
@@ -538,7 +544,7 @@ useEffect(() => {
       stableFetch.current.cancel();
     }
     
-    const debouncedFn = debounce(fetchMarkets, 500);
+    const debouncedFn = debounce(fetchMarkets, 150); // Reduced from 500ms to 150ms for faster sports switching
     debouncedFn.paramsKey = paramsKey;
     stableFetch.current = debouncedFn;
   }
