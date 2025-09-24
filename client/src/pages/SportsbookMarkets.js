@@ -700,7 +700,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Function to auto-select all relevant markets for selected sports
   const getAutoSelectedMarkets = (selectedSports) => {
     const relevantMarkets = getRelevantMarkets(selectedSports);
-    return relevantMarkets.map(market => market.key);
+    // Filter out header items and only return actual market keys
+    return relevantMarkets
+      .filter(market => !market.isHeader)
+      .map(market => market.key);
   };
 
   // Player prop categories with icons
@@ -843,17 +846,24 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Memoized enhanced sportsbook list to prevent unnecessary recalculations
   const enhancedSportsbookList = useMemo(() => {
     const marketBookKeys = new Set((marketBooks || []).map(book => book.key));
-    const dfsApps = getDFSApps();
     
-    // Add DFS apps that aren't already in the market books
-    const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
-    const enhancedBooks = [
-      ...(marketBooks || []),
-      ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
-    ];
+    // Only include DFS apps in Player Props mode
+    if (showPlayerProps) {
+      const dfsApps = getDFSApps();
+      const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
+      const enhancedBooks = [
+        ...(marketBooks || []),
+        ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
+      ];
+      return enhancedBooks;
+    }
     
-    return enhancedBooks;
-  }, [marketBooks]);
+    // For Game Odds mode, only return traditional sportsbooks (no DFS apps)
+    return (marketBooks || []).filter(book => {
+      const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'sleeper', 'prophetx', 'draftkings_pick6'];
+      return !dfsAppKeys.includes(book.key);
+    });
+  }, [marketBooks, showPlayerProps]);
 
   return (
     <div className="sportsbook-markets">
