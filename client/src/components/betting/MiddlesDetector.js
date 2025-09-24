@@ -150,7 +150,7 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
         const decimal1 = lowerLine.overOdds > 0 ? (lowerLine.overOdds / 100) + 1 : (100 / Math.abs(lowerLine.overOdds)) + 1;
         const decimal2 = higherLine.underOdds > 0 ? (higherLine.underOdds / 100) + 1 : (100 / Math.abs(higherLine.underOdds)) + 1;
         
-        const totalStake = Math.min(maxStake, getUserBankroll() * 0.1); // Max 10% of bankroll
+        const totalStake = Math.min(maxStake, bankrollManager.getBankroll() * 0.1); // Max 10% of bankroll
         const stake1 = totalStake * 0.5; // Equal stakes for simplicity
         const stake2 = totalStake * 0.5;
         
@@ -202,7 +202,7 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
         const decimal1 = line1.odds1 > 0 ? (line1.odds1 / 100) + 1 : (100 / Math.abs(line1.odds1)) + 1;
         const decimal2 = line2.odds2 > 0 ? (line2.odds2 / 100) + 1 : (100 / Math.abs(line2.odds2)) + 1;
         
-        const totalStake = Math.min(maxStake, getUserBankroll() * 0.1);
+        const totalStake = Math.min(maxStake, bankrollManager.getBankroll() * 0.1);
         const stake1 = totalStake * 0.5;
         const stake2 = totalStake * 0.5;
         
@@ -423,7 +423,7 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
               <input
                 type="number"
                 min="100"
-                max={getUserBankroll()}
+                max={bankrollManager.getBankroll()}
                 step="100"
                 value={maxStake}
                 onChange={(e) => setMaxStake(Number(e.target.value))}
