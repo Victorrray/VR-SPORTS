@@ -1110,10 +1110,8 @@ app.get('/api/me/usage', requireUser, async (req, res) => {
   const cached = getCachedPlan(userId);
 
   try {
-    // Check if this is the demo user who should have platinum access
-    const isDemoUser = userId === '54276b6c-5255-4117-be95-70c22132591c';
-
-    if (isDemoUser) {
+    // Removed demo user logic - all users get real authentication
+    if (false) {
       const demoPlan = {
         id: userId,
         plan: 'platinum',

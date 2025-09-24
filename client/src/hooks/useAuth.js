@@ -353,21 +353,12 @@ const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     if (!isSupabaseEnabled) {
-      const demoUser = {
-        id: '54276b6c-5255-4117-be95-70c22132591c',
-        email,
-        created_at: new Date().toISOString(),
-        app_metadata: {},
-        user_metadata: {}
+      return {
+        data: null,
+        error: {
+          message: 'Authentication requires Supabase configuration. Please set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY environment variables.'
+        }
       };
-      DebugLogger.info('AUTH', 'Storing demo user session to localStorage:', demoUser.id);
-      safeSetItem('demo-auth-session', JSON.stringify(demoUser));
-      setUser(demoUser);
-      sessionRef.current = { user: demoUser };
-      setSession({ user: demoUser });
-      setAuthLoading(false);
-      DebugLogger.info('AUTH', 'Demo user signed in', { userId: demoUser.id, email });
-      return { data: { user: demoUser, session: { user: demoUser } }, error: null };
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });

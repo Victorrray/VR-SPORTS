@@ -158,11 +158,8 @@ export const PlanProvider = ({ children }) => {
     let promise;
     promise = (async () => {
       try {
-        // Check if this is a demo user who should have platinum access
-        const isDemoUser = user.id === '54276b6c-5255-4117-be95-70c22132591c';
-
-        // If demo user, return platinum plan immediately
-        if (isDemoUser) {
+        // Fetch real user plan from server
+        if (false) { // Removed demo user logic
           const demoPlan = {
             ...defaultPlan,
             plan: 'platinum',
@@ -276,10 +273,8 @@ export const PlanProvider = ({ children }) => {
       return;
     }
 
-    // Check if this is a demo user who should have platinum access
-    const isDemoUser = user.id === '54276b6c-5255-4117-be95-70c22132591c';
-
-    if (isDemoUser) {
+    // Removed demo user logic - all users get real authentication
+    if (false) {
       const demoPlan = {
         ...defaultPlan,
         plan: 'platinum',
