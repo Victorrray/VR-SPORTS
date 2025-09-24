@@ -18,6 +18,7 @@ import AuthRequired from "../components/auth/AuthRequired";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
+import { optimizedStorage } from "../utils/storageOptimizer";
 import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
@@ -84,9 +85,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const { me } = useMe();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
   
+  // Get user's saved sportsbook selections
+  const getUserSelectedSportsbooks = () => {
+    const saved = optimizedStorage.get('userSelectedSportsbooks');
+    if (saved && Array.isArray(saved) && saved.length > 0) {
+      return saved;
+    }
+    // Default to popular sportsbooks if nothing saved
+    return ['draftkings', 'fanduel', 'betmgm', 'caesars'];
+  };
+  
   const [picked, setPicked] = useState(["americanfootball_nfl", "americanfootball_ncaaf"]);
   const [query, setQuery] = useState("");
-  const [selectedBooks, setSelectedBooks] = useState([]);
+  const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks());
   const [selectedDate, setSelectedDate] = useState("");
   const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]);
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_pass_yds", "player_rush_yds", "player_receptions"]);
@@ -112,7 +123,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Draft filter state - initialize with current applied state
   const [draftPicked, setDraftPicked] = useState(picked);
   const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate);
-  const [draftSelectedBooks, setDraftSelectedBooks] = useState(selectedBooks);
+  const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks());
   const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
   const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(selectedPlayerPropMarkets);
   
@@ -146,6 +157,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     { date: selectedDate }
   );
 
+  // Listen for changes to user's sportsbook selections
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newSelectedBooks = getUserSelectedSportsbooks();
+      setSelectedBooks(newSelectedBooks);
+      setDraftSelectedBooks(newSelectedBooks);
+    };
+
+    // Listen for storage changes (when user updates selections in MySportsbooks)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events from optimizedStorage
+    window.addEventListener('userSelectedSportsbooksChanged', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('userSelectedSportsbooksChanged', handleStorageChange);
+    };
+  }, []);
+
   // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {
     sportsForMode,
@@ -153,7 +184,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     isPlayerPropsMode,
     selectedDate,
     marketsForMode,
-    marketGamesCount: marketGames?.length || 0
+    marketGamesCount: marketGames?.length || 0,
+    selectedBooks: selectedBooks
   });
   
   // Debug: Log games by sport
@@ -332,7 +364,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const resetDraftFilters = () => {
     setDraftPicked(["americanfootball_nfl"]);
     setDraftSelectedDate('');
-    setDraftSelectedBooks([]);
+    setDraftSelectedBooks(getUserSelectedSportsbooks()); // Reset to user's saved sportsbooks
     setDraftMarketKeys(["h2h", "spreads", "totals"]);
     setDraftSelectedPlayerPropMarkets(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   };
@@ -342,18 +374,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const defaultSports = ["americanfootball_nfl"];
     const defaultMarkets = ["h2h", "spreads", "totals"];
     const defaultPlayerProps = ["player_pass_yds", "player_rush_yds", "player_receptions"];
+    const defaultSportsbooks = getUserSelectedSportsbooks(); // Use user's saved sportsbooks
     
     // Reset draft state
     setDraftPicked(defaultSports);
     setDraftSelectedDate('');
-    setDraftSelectedBooks([]);
+    setDraftSelectedBooks(defaultSportsbooks);
     setDraftMarketKeys(defaultMarkets);
     setDraftSelectedPlayerPropMarkets(defaultPlayerProps);
     
     // Reset applied state
     setPicked(defaultSports);
     setSelectedDate('');
-    setSelectedBooks([]);
+    setSelectedBooks(defaultSportsbooks);
     setMarketKeys(defaultMarkets);
     setSelectedPlayerPropMarkets(defaultPlayerProps);
   };
@@ -484,7 +517,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           style={{
             width: "100%",
             background: "var(--card-bg)",
-            border: "2px solid var(--border-color)",
+            border: "none",
             borderRadius: "12px",
             padding: "16px 20px",
             cursor: "pointer",
@@ -495,11 +528,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             marginBottom: navigationExpanded ? "12px" : "0"
           }}
           onMouseEnter={(e) => {
-            e.target.style.borderColor = "var(--accent)";
             e.target.style.boxShadow = "0 4px 12px rgba(139, 92, 246, 0.15)";
           }}
           onMouseLeave={(e) => {
-            e.target.style.borderColor = "var(--border-color)";
             e.target.style.boxShadow = "none";
           }}
         >
@@ -545,7 +576,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         {navigationExpanded && (
           <div style={{
             background: "var(--card-bg)",
-            border: "2px solid var(--border-color)",
+            border: "none",
             borderRadius: "12px",
             overflow: "hidden",
             boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)"
@@ -970,7 +1001,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Player Props Market Selection */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Player Prop Markets
+                  🎯 Player Prop Markets
                 </label>
                 <SportMultiSelect
                   list={footballPlayerPropMarkets}
@@ -984,7 +1015,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Sportsbooks Filter for Player Props */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Sportsbooks
+                  🏪 Sportsbooks
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
@@ -994,6 +1025,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
+                  showDFSApps={true}
                 />
               </div>
             </>
@@ -1002,7 +1034,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Arbitrage-specific filters */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Minimum Profit %
+                  💰 Minimum Profit %
                 </label>
                 <input
                   type="number"
@@ -1025,7 +1057,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Max Stake
+                  💵 Max Stake
                 </label>
                 <input
                   type="number"
@@ -1048,7 +1080,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Markets
+                  📊 Markets
                 </label>
                 <SportMultiSelect
                   list={[
@@ -1065,7 +1097,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Sort By
+                  🔄 Sort By
                 </label>
                 <select
                   value={draftArbitrageSortBy}
@@ -1090,7 +1122,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Sportsbooks Filter for Arbitrage */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Sportsbooks
+                  🏪 Sportsbooks
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
@@ -1100,6 +1132,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
+                  showDFSApps={false}
                 />
               </div>
             </>
@@ -1108,7 +1141,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Date Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Date
+                  📅 Date
                 </label>
                 <DatePicker
                   value={draftSelectedDate}
@@ -1119,7 +1152,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Sports Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Sports
+                  🏈 Sports
                 </label>
                 <SportMultiSelect
                   list={sportList || []}
@@ -1134,7 +1167,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               {/* Sportsbooks Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Sportsbooks
+                  🏪 Sportsbooks
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
@@ -1144,13 +1177,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
+                  showDFSApps={false}
                 />
               </div>
 
               {/* Markets Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  Markets
+                  📊 Markets
                 </label>
                 <SportMultiSelect
                   list={[
@@ -1171,7 +1205,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Apply
             </button>
-            <button onClick={resetAllFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '14px' }}>
+            <button onClick={resetAllFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6b7280, #4b5563)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Reset
             </button>
           </div>

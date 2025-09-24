@@ -63,6 +63,7 @@ export default function SportMultiSelect({
   enableSearch = false,
   enableCategories = false,
   isSportsbook = false,
+  showDFSApps = true, // New prop to control DFS apps visibility
 }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -103,6 +104,9 @@ export default function SportMultiSelect({
     Object.entries(categories).forEach(([key, category]) => {
       if (key === 'regional' || key === 'other') return; // Handle these last
       
+      // Skip DFS category if showDFSApps is false
+      if (key === 'dfs' && !showDFSApps) return;
+      
       const categoryItems = filtered.filter(item => {
         const itemKeys = isSportsbook ? category.books : category.sports;
         const matches = itemKeys.includes(item.key);
@@ -129,7 +133,7 @@ export default function SportMultiSelect({
     }
 
     return { categorizedList: categorized, filteredList: filtered };
-  }, [list, searchTerm, enableSearch, enableCategories, isSportsbook]);
+  }, [list, searchTerm, enableSearch, enableCategories, isSportsbook, showDFSApps]);
 
   // Close on outside click
   useEffect(() => {

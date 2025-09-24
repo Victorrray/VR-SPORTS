@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useCachedFetch } from '../../hooks/useCachedFetch';
+import { bankrollManager } from '../../utils/bankrollManager';
 import { 
   TrendingUp, Calculator, DollarSign, Clock, 
   AlertTriangle, Target, Zap, Filter, RefreshCw 
@@ -20,15 +21,9 @@ const ArbitrageDetector = ({
 }) => {
   const { user, profile } = useAuth();
   
-  // Get user's bankroll from localStorage, default to 1000 if not set
-  const getUserBankroll = () => {
-    const saved = localStorage.getItem('userBankroll');
-    return saved ? Number(saved) : 1000;
-  };
-  
   // Use props if provided, otherwise use internal state
   const [internalMinProfit, setInternalMinProfit] = useState(2);
-  const [internalMaxStake, setInternalMaxStake] = useState(getUserBankroll());
+  const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
   const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals']);
   const [internalSortBy, setInternalSortBy] = useState('profit');
   
@@ -39,16 +34,13 @@ const ArbitrageDetector = ({
   const sortBy = propSortBy !== undefined ? propSortBy : internalSortBy;
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Update internal maxStake when bankroll changes in localStorage (only if not using props)
+  // Update internal maxStake when bankroll changes (only if not using props)
   useEffect(() => {
     if (propMaxStake === undefined) {
-      const handleStorageChange = () => {
-        const newBankroll = getUserBankroll();
+      const cleanup = bankrollManager.onBankrollChange((newBankroll) => {
         setInternalMaxStake(newBankroll);
-      };
-      
-      window.addEventListener('storage', handleStorageChange);
-      return () => window.removeEventListener('storage', handleStorageChange);
+      });
+      return cleanup;
     }
   }, [propMaxStake]);
 
@@ -198,7 +190,7 @@ const ArbitrageDetector = ({
     if (totalProb >= 1) return null;
     
     // Calculate optimal stakes with bankroll constraint
-    const userBankroll = getUserBankroll();
+    const userBankroll = bankrollManager.getBankroll();
     const effectiveMaxStake = Math.min(maxStake, userBankroll);
   
     const stake1 = (prob1 / totalProb) * effectiveMaxStake;
@@ -406,7 +398,7 @@ const ArbitrageDetector = ({
               <input
                 type="number"
                 min="100"
-                max={getUserBankroll()}
+                max={bankrollManager.getBankroll()}
                 step="100"
                 value={maxStake}
                 onChange={(e) => setInternalMaxStake(Number(e.target.value))}

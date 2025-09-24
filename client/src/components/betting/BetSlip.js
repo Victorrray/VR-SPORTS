@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Plus, Minus, Calculator, TrendingUp, AlertCircle, CheckCircle2, Zap, Target, DollarSign, Trophy, Share2, Download, Trash2, Copy, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { bankrollManager } from '../../utils/bankrollManager';
 import './BetSlip.css';
 
 const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClearAll, onPlaceBets }) => {
@@ -10,17 +11,12 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
   const [betType, setBetType] = useState('single'); // 'single', 'parlay', 'round-robin'
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [quickBetAmount, setQuickBetAmount] = useState(25);
-  // Get user's bankroll from localStorage, sync with My Sportsbooks setting
-  const getUserBankroll = () => {
-    const saved = localStorage.getItem('userBankroll');
-    return saved ? Number(saved) : 1000;
-  };
-  
-  const [bankroll, setBankroll] = useState(getUserBankroll());
+  // Get user's bankroll using bankroll manager
+  const [bankroll, setBankroll] = useState(bankrollManager.getBankroll());
   const [riskTolerance, setRiskTolerance] = useState('moderate'); // 'conservative', 'moderate', 'aggressive'
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [pendingSettings, setPendingSettings] = useState({
-    bankroll: getUserBankroll(),
+    bankroll: bankrollManager.getBankroll(),
     riskTolerance: 'moderate',
     autoCalculate: true
   });
@@ -34,7 +30,7 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
       const saved = localStorage.getItem('betslip_settings');
       if (saved) {
         const settings = JSON.parse(saved);
-        const loadedBankroll = settings.bankroll || getUserBankroll();
+        const loadedBankroll = settings.bankroll || bankrollManager.getBankroll();
         const loadedRisk = settings.riskTolerance || 'moderate';
         const loadedAuto = settings.autoCalculate !== false;
         
@@ -53,15 +49,13 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
       console.warn('Failed to load bet slip settings:', e);
     }
     
-    // Listen for bankroll changes from My Sportsbooks
-    const handleStorageChange = () => {
-      const newBankroll = getUserBankroll();
+    // Listen for bankroll changes from My Sportsbooks using bankroll manager
+    const cleanup = bankrollManager.onBankrollChange((newBankroll) => {
       setBankroll(newBankroll);
       setPendingSettings(prev => ({ ...prev, bankroll: newBankroll }));
-    };
+    });
     
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return cleanup;
   }, []);
 
   // Save settings when they change

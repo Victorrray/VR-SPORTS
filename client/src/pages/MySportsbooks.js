@@ -4,6 +4,7 @@ import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Check, AlertCircle, BookOpen, DollarSign, Star, TrendingUp, Settings } from 'lucide-react';
 import { optimizedStorage } from '../utils/storageOptimizer';
+import { bankrollManager } from '../utils/bankrollManager';
 import SportMultiSelect from '../components/betting/SportMultiSelect';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { AVAILABLE_SPORTSBOOKS, getFreePlanSportsbooks } from '../constants/sportsbooks';
@@ -16,7 +17,7 @@ export default function MySportsbooks() {
   const [selectedBooks, setSelectedBooks] = useState([]);
   const [saveStatus, setSaveStatus] = useState('');
   const [savingPrefs, setSavingPrefs] = useState(false);
-  const [bankroll, setBankroll] = useState(1000);
+  const [bankroll, setBankroll] = useState(bankrollManager.getBankroll());
   const [showBankrollModal, setShowBankrollModal] = useState(false);
 
   useEffect(() => {
@@ -37,18 +38,21 @@ export default function MySportsbooks() {
       setSelectedBooks(defaultBooks);
     }
 
-    // Load user's bankroll from optimized storage
-    const savedBankroll = optimizedStorage.get('userBankroll');
-    if (savedBankroll) {
-      setBankroll(Number(savedBankroll));
-    }
+    // Load user's bankroll using bankroll manager
+    setBankroll(bankrollManager.getBankroll());
   }, [user, navigate]);
 
   const handleSavePreferences = () => {
     setSavingPrefs(true);
     try {
       optimizedStorage.set('userSelectedSportsbooks', selectedBooks, { priority: 'high' });
-      optimizedStorage.set('userBankroll', bankroll, { priority: 'high' });
+      bankrollManager.setBankroll(bankroll); // Use bankroll manager to notify other components
+      
+      // Dispatch custom event to notify other components about sportsbook changes
+      window.dispatchEvent(new CustomEvent('userSelectedSportsbooksChanged', {
+        detail: { sportsbooks: selectedBooks }
+      }));
+      
       setSaveStatus('Preferences saved successfully!');
       setTimeout(() => {
         setSaveStatus('');
@@ -74,8 +78,14 @@ export default function MySportsbooks() {
   };
 
   const handleBankrollModalSave = (newValue) => {
-    setBankroll(newValue);
-    setShowBankrollModal(false);
+    const validation = bankrollManager.validateBankroll(newValue);
+    if (validation.valid) {
+      setBankroll(validation.amount);
+      setShowBankrollModal(false);
+    } else {
+      console.error('Invalid bankroll:', validation.error);
+      // You could show an error message here
+    }
   };
 
   const BankrollModal = () => {

@@ -541,7 +541,6 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
                 <div className="bet-selection">
                   <div className="market-info">
                     <div className="market-type">{bet.marketDetail}</div>
-                    <div className="team-name">{bet.selectedTeam}</div>
                   </div>
                   <div className={`edge-badge ${bet.confidence.toLowerCase()}`}>
                     +{bet.edge}% EV
