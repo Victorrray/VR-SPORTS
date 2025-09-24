@@ -1735,6 +1735,7 @@ app.get("/api/events", enforceUsage, async (req, res) => {
 app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
   try {
     const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american" } = req.query;
+    console.log('🔍 /api/odds called with:', { sports, regions, markets, userId: req.__userId });
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
     
     // If no API key, return error instead of mock data
@@ -1960,7 +1961,10 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
       console.log('🚫 Player props requested but ENABLE_PLAYER_PROPS_V2 is not enabled');
     }
     
-    console.log(`Returning ${allGames.length} games total`);
+    console.log(`🔍 Final response - returning ${allGames.length} games total`);
+    console.log('🔍 User profile:', req.__userProfile?.plan || 'unknown');
+    console.log('🔍 Regular markets fetched:', regularMarkets);
+    console.log('🔍 Player prop markets requested:', playerPropMarkets);
     
     // Usage already incremented per external API call above
     // No need to increment again here
