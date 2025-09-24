@@ -429,6 +429,8 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   };
 
   const handlePlaceBet = (bet) => {
+    console.log('🎯 Place Bet clicked:', bet);
+    
     const betSlipBet = {
       id: `${bet.game.id}_${bet.market}_${Date.now()}`,
       gameId: bet.game.id,
@@ -445,7 +447,10 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       stake: 0 // User will set this in bet slip
     };
     
+    console.log('🎯 Adding bet to slip:', betSlipBet);
     addBet(betSlipBet);
+    
+    console.log('🎯 Opening bet slip...');
     openBetSlip();
   };
 

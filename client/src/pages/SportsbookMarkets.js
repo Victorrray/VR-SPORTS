@@ -243,6 +243,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   
   const hasPlatinum = me?.plan === 'platinum';
   const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
+  
+  // Debug logging for arbitrage access
+  console.log('🔍 Arbitrage Debug:', {
+    isArbitrageMode,
+    hasPlatinum,
+    userPlan: me?.plan,
+    userId: user?.id,
+    me: me
+  });
 
   const { 
     games: marketGames = [], 
@@ -314,8 +323,44 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   }, [marketBooks]);
 
   const filteredGames = useMemo(() => {
-    return Array.isArray(marketGames) ? marketGames : [];
-  }, [marketGames]);
+    if (!Array.isArray(marketGames)) return [];
+    
+    // If no date filter is selected, return all games
+    if (!selectedDate || selectedDate === "") {
+      console.log('🗓️ No date filter - showing all games:', marketGames.length);
+      return marketGames;
+    }
+    
+    // Filter for live games only
+    if (selectedDate === "live") {
+      const liveGames = marketGames.filter(game => {
+        const isLive = game.commence_time && new Date(game.commence_time) <= new Date();
+        return isLive;
+      });
+      console.log('🔴 Live games filter - showing:', liveGames.length, 'of', marketGames.length);
+      return liveGames;
+    }
+    
+    // Filter for specific date (Today or future dates)
+    // For "Today" and future dates, only show games that HAVEN'T started yet
+    const selectedDateObj = new Date(selectedDate + 'T00:00:00');
+    const nextDay = new Date(selectedDateObj);
+    nextDay.setDate(selectedDateObj.getDate() + 1);
+    const now = new Date();
+    
+    const dateFilteredGames = marketGames.filter(game => {
+      if (!game.commence_time) return false;
+      
+      const gameTime = new Date(game.commence_time);
+      const isOnSelectedDate = gameTime >= selectedDateObj && gameTime < nextDay;
+      const hasNotStarted = gameTime > now; // Only show games that haven't started
+      
+      return isOnSelectedDate && hasNotStarted;
+    });
+    
+    console.log(`🗓️ Date filter (${selectedDate}) - showing:`, dateFilteredGames.length, 'upcoming games of', marketGames.length, 'total');
+    return dateFilteredGames;
+  }, [marketGames, selectedDate]);
 
   // Clear filters loading when data is ready
   useEffect(() => {
@@ -1114,7 +1159,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
             {/* Arbitrage Option */}
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔍 Arbitrage button clicked - setting arbitrage mode');
                 setShowPlayerProps(false);
                 setShowArbitrage(true);
                 setShowMiddles(false);
@@ -1274,6 +1322,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       )}
 
       {/* Main Content */}
+      {console.log('🔍 Rendering condition check:', {
+        marketsError: marketsError,
+        authRequired: marketsError && marketsError.includes('Authentication required'),
+        isArbitrageMode,
+        hasPlatinum,
+        condition1: isArbitrageMode && hasPlatinum,
+        condition2: isArbitrageMode && !hasPlatinum
+      })}
       {(marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
           sport={picked[0] || 'americanfootball_nfl'}

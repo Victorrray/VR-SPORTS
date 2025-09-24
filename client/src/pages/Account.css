@@ -2,7 +2,7 @@
 .account-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 1rem 1rem;
   background: var(--bg-body);
   min-height: 100vh;
   color: var(--text);
@@ -671,7 +671,7 @@
   text-align: center;
   padding: 16px;
   margin-top: 24px;
-  margin-bottom: 80px; /* Space for mobile bottom bar */
+  margin-bottom: 20px; /* Reduced space for better layout */
   border-top: 1px solid var(--border-color);
 }
 
@@ -688,6 +688,10 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
     text-align: center;
+  }
+  
+  .user-info-grid .field-value {
+    text-align: left;
   }
   
   .user-details-section {

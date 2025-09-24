@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Crown, Zap } from 'lucide-react';
 
 // Components
 import PersonalizedDashboard from '../components/dashboard/PersonalizedDashboard';
 import EdgeCalculator from '../components/betting/EdgeCalculator';
+import BetSlip from '../components/betting/BetSlip';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
 
 // Hooks
 import { useMarkets } from '../hooks/useMarkets';
 import { useAuth } from '../hooks/useAuth';
 import { useMe } from '../hooks/useMe';
+import { useBetSlip } from '../contexts/BetSlipContext';
 
 // Dashboard Component for authenticated users
 export default function Dashboard() {
@@ -17,6 +20,71 @@ export default function Dashboard() {
   const { me } = useMe();
   const location = useLocation();
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
+  const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
+
+  // Get plan badge component
+  const getPlanBadge = () => {
+    const planId = me?.plan || 'free';
+    
+    switch (planId) {
+      case 'platinum':
+        return (
+          <span style={{
+            padding: '6px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: '600',
+            background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(249, 115, 22, 0.2))',
+            color: '#fcd34d',
+            border: '1px solid rgba(234, 179, 8, 0.3)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginTop: '8px'
+          }}>
+            <Crown size={12} />
+            PLATINUM
+          </span>
+        );
+      case 'free_trial':
+        return (
+          <span style={{
+            padding: '6px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: '600',
+            background: 'rgba(59, 130, 246, 0.2)',
+            color: '#93c5fd',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginTop: '8px'
+          }}>
+            <Zap size={12} />
+            FREE TRIAL
+          </span>
+        );
+      default:
+        return (
+          <span style={{
+            padding: '6px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: '600',
+            background: 'rgba(255, 255, 255, 0.1)',
+            color: 'rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            marginTop: '8px'
+          }}>
+            FREE
+          </span>
+        );
+    }
+  };
 
   // Create memory for user preferences
   React.useEffect(() => {
@@ -64,6 +132,7 @@ export default function Dashboard() {
           }}>
             {profile?.username || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
           </h1>
+          {getPlanBadge()}
         </div>
 
         {/* Main Dashboard */}
@@ -80,6 +149,17 @@ export default function Dashboard() {
           }}
         />
       )}
+
+      {/* BetSlip Component */}
+      <BetSlip
+        isOpen={isOpen}
+        onClose={closeBetSlip}
+        bets={bets}
+        onUpdateBet={updateBet}
+        onRemoveBet={removeBet}
+        onClearAll={clearAllBets}
+        onPlaceBets={placeBets}
+      />
 
       <MobileBottomBar active="home" showFilter={false} />
     </main>

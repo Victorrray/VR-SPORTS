@@ -45,7 +45,17 @@ export function useMe() {
       };
     }
 
-    return planToUsage(initialPlan);
+    // TEMPORARY: Give all users Platinum access for arbitrage testing
+    console.log('🎯 useMe: TEMPORARY - Giving all users Platinum access for arbitrage testing');
+    return {
+      plan: 'platinum',
+      remaining: null,
+      limit: null,
+      calls_made: 0,
+      stale: false,
+    };
+
+    // return planToUsage(initialPlan);
   });
   const [loading, setLoading] = useState(() => planLoading || !initialPlan);
   const [error, setError] = useState(null);

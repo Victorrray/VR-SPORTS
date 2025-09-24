@@ -390,48 +390,65 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
   return (
     <div className={`arbitrage-detector ${compact ? 'compact' : ''}`}>
       {!compact && (
-        <div className="arbitrage-controls">
-          <div className="controls-header">
-            <h3>🎪 Real-Time Middle Scanner</h3>
-            <p>Analyzing {games?.length || 0} games for middle betting opportunities</p>
+        <div className="middle-scanner-panel">
+          <div className="scanner-header">
+            <div className="scanner-title">
+              <span className="scanner-icon">🎪</span>
+              <span>Real-Time Middle Scanner</span>
+            </div>
+            <p className="scanner-subtitle">Analyzing {games?.length || 0} games for middle betting opportunities</p>
           </div>
-          <div className="controls-grid">
-            <div className="control-group">
-              <label>Minimum Gap (Points)</label>
+          
+          <div className="scanner-controls">
+            <div className="control-field">
+              <label className="control-label">MINIMUM GAP (POINTS)</label>
               <input
                 type="number"
+                className="control-input"
                 min="1"
                 max="20"
                 step="0.5"
                 value={minMiddleGap}
                 onChange={(e) => setMinMiddleGap(Number(e.target.value))}
+                placeholder="3"
               />
             </div>
-            <div className="control-group">
-              <label>Min Probability %</label>
+            
+            <div className="control-field">
+              <label className="control-label">MIN PROBABILITY %</label>
               <input
                 type="number"
+                className="control-input"
                 min="5"
                 max="50"
                 step="1"
                 value={minProbability}
                 onChange={(e) => setMinProbability(Number(e.target.value))}
+                placeholder="15"
               />
             </div>
-            <div className="control-group">
-              <label>Max Stake</label>
+            
+            <div className="control-field">
+              <label className="control-label">MAX STAKE</label>
               <input
                 type="number"
+                className="control-input"
                 min="100"
                 max={bankrollManager.getBankroll()}
                 step="100"
                 value={maxStake}
                 onChange={(e) => setMaxStake(Number(e.target.value))}
+                placeholder="1000"
               />
             </div>
-            <div className="control-group">
-              <label>Sort By</label>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            
+            <div className="control-field">
+              <label className="control-label">SORT BY</label>
+              <select 
+                className="control-select"
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+              >
                 <option value="probability">Probability</option>
                 <option value="profit">Max Profit</option>
                 <option value="gap">Gap Size</option>
