@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useCachedFetch } from '../../hooks/useCachedFetch';
 import { bankrollManager } from '../../utils/bankrollManager';
+import SportMultiSelect from './SportMultiSelect';
 import { 
   TrendingUp, Calculator, DollarSign, Clock, 
   AlertTriangle, Target, Zap, Filter, RefreshCw 
@@ -26,6 +27,26 @@ const ArbitrageDetector = ({
   const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
   const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
   const [internalSortBy, setInternalSortBy] = useState('profit');
+  const [internalSelectedSports, setInternalSelectedSports] = useState([sport]);
+  
+  // Draft state for filters (before applying)
+  const [draftMinProfit, setDraftMinProfit] = useState(2);
+  const [draftMaxStake, setDraftMaxStake] = useState(bankrollManager.getBankroll());
+  const [draftSelectedMarkets, setDraftSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
+  const [draftSortBy, setDraftSortBy] = useState('profit');
+  const [draftSelectedSports, setDraftSelectedSports] = useState([sport]);
+  
+  // Sports list for selection
+  const sportsList = [
+    { key: 'americanfootball_nfl', title: 'NFL' },
+    { key: 'americanfootball_ncaaf', title: 'NCAAF' },
+    { key: 'basketball_nba', title: 'NBA' },
+    { key: 'basketball_ncaab', title: 'NCAAB' },
+    { key: 'baseball_mlb', title: 'MLB' },
+    { key: 'icehockey_nhl', title: 'NHL' },
+    { key: 'soccer_epl', title: 'EPL' },
+    { key: 'soccer_uefa_champs_league', title: 'Champions League' }
+  ];
   
   // Use props or internal state
   const minProfit = propMinProfit !== undefined ? propMinProfit : internalMinProfit;
@@ -34,11 +55,51 @@ const ArbitrageDetector = ({
   const sortBy = propSortBy !== undefined ? propSortBy : internalSortBy;
   const [autoRefresh, setAutoRefresh] = useState(true);
 
+  // Apply filters function
+  const applyFilters = () => {
+    if (propMinProfit === undefined) setInternalMinProfit(draftMinProfit);
+    if (propMaxStake === undefined) setInternalMaxStake(draftMaxStake);
+    if (propSelectedMarkets === undefined) setInternalSelectedMarkets([...draftSelectedMarkets]);
+    if (propSortBy === undefined) setInternalSortBy(draftSortBy);
+    setInternalSelectedSports([...draftSelectedSports]);
+  };
+
+  // Reset filters function
+  const resetFilters = () => {
+    const defaultMinProfit = 2;
+    const defaultMaxStake = bankrollManager.getBankroll();
+    const defaultMarkets = ['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals'];
+    const defaultSortBy = 'profit';
+    const defaultSports = [sport];
+    
+    setDraftMinProfit(defaultMinProfit);
+    setDraftMaxStake(defaultMaxStake);
+    setDraftSelectedMarkets([...defaultMarkets]);
+    setDraftSortBy(defaultSortBy);
+    setDraftSelectedSports([...defaultSports]);
+    
+    if (propMinProfit === undefined) setInternalMinProfit(defaultMinProfit);
+    if (propMaxStake === undefined) setInternalMaxStake(defaultMaxStake);
+    if (propSelectedMarkets === undefined) setInternalSelectedMarkets([...defaultMarkets]);
+    if (propSortBy === undefined) setInternalSortBy(defaultSortBy);
+    setInternalSelectedSports([...defaultSports]);
+  };
+
+  // Initialize draft state with current values
+  useEffect(() => {
+    setDraftMinProfit(minProfit);
+    setDraftMaxStake(maxStake);
+    setDraftSelectedMarkets([...selectedMarkets]);
+    setDraftSortBy(sortBy);
+    setDraftSelectedSports([...internalSelectedSports]);
+  }, [minProfit, maxStake, selectedMarkets, sortBy, internalSelectedSports]);
+
   // Update internal maxStake when bankroll changes (only if not using props)
   useEffect(() => {
     if (propMaxStake === undefined) {
       const cleanup = bankrollManager.onBankrollChange((newBankroll) => {
         setInternalMaxStake(newBankroll);
+        setDraftMaxStake(newBankroll);
       });
       return cleanup;
     }
@@ -47,7 +108,7 @@ const ArbitrageDetector = ({
   // Fetch odds data for arbitrage analysis
   const { data: oddsData, loading, refresh, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
     params: { 
-      sports: sport,
+      sports: internalSelectedSports.join(','),
       markets: selectedMarkets.join(','),
       regions: 'us,uk,eu,au'
     },
@@ -383,14 +444,22 @@ const ArbitrageDetector = ({
           </div>
           <div className="controls-grid">
             <div className="control-group">
+              <label>🏈 Sports</label>
+              <SportMultiSelect
+                list={sportsList}
+                selected={draftSelectedSports}
+                onChange={setDraftSelectedSports}
+              />
+            </div>
+            <div className="control-group">
               <label>Minimum Profit %</label>
               <input
                 type="number"
                 min="0.1"
                 max="10"
                 step="0.1"
-                value={minProfit}
-                onChange={(e) => setInternalMinProfit(Number(e.target.value))}
+                value={draftMinProfit}
+                onChange={(e) => setDraftMinProfit(Number(e.target.value))}
               />
             </div>
             <div className="control-group">
@@ -400,16 +469,16 @@ const ArbitrageDetector = ({
                 min="100"
                 max={bankrollManager.getBankroll()}
                 step="100"
-                value={maxStake}
-                onChange={(e) => setInternalMaxStake(Number(e.target.value))}
+                value={draftMaxStake}
+                onChange={(e) => setDraftMaxStake(Number(e.target.value))}
               />
             </div>
             <div className="control-group">
               <label>Markets</label>
               <select 
                 multiple 
-                value={selectedMarkets}
-                onChange={(e) => setInternalSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
+                value={draftSelectedMarkets}
+                onChange={(e) => setDraftSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
               >
                 <option value="h2h">Moneyline</option>
                 <option value="spreads">Point Spread</option>
@@ -418,12 +487,48 @@ const ArbitrageDetector = ({
             </div>
             <div className="control-group">
               <label>Sort By</label>
-              <select value={sortBy} onChange={(e) => setInternalSortBy(e.target.value)}>
+              <select value={draftSortBy} onChange={(e) => setDraftSortBy(e.target.value)}>
                 <option value="profit">Profit %</option>
                 <option value="amount">Profit Amount</option>
                 <option value="time">Time Found</option>
                 <option value="expires">Expires Soon</option>
               </select>
+            </div>
+            
+            {/* Apply and Reset Buttons */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <button 
+                onClick={applyFilters} 
+                style={{ 
+                  flex: 1, 
+                  padding: '12px 16px', 
+                  borderRadius: 8, 
+                  border: 'none', 
+                  background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', 
+                  color: '#fff', 
+                  fontWeight: 600, 
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Apply
+              </button>
+              <button 
+                onClick={resetFilters} 
+                style={{ 
+                  flex: 1, 
+                  padding: '12px 16px', 
+                  borderRadius: 8, 
+                  border: 'none', 
+                  background: 'linear-gradient(135deg, #6b7280, #4b5563)', 
+                  color: '#fff', 
+                  fontWeight: 600, 
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Reset
+              </button>
             </div>
           </div>
         </div>

@@ -280,9 +280,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Also listen for custom events from optimizedStorage
     window.addEventListener('userSelectedSportsbooksChanged', handleStorageChange);
     
+    // Listen for mobile search event from Navbar
+    const handleOpenMobileSearch = () => {
+      console.log('📱 Received openMobileSearch event');
+      setShowMobileSearch(true);
+    };
+    
+    window.addEventListener('openMobileSearch', handleOpenMobileSearch);
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('userSelectedSportsbooksChanged', handleStorageChange);
+      window.removeEventListener('openMobileSearch', handleOpenMobileSearch);
     };
   }, []);
 
@@ -293,6 +302,29 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setDraftMarketKeys(initialMarkets);
     console.log('🎯 Initial auto-selected markets:', initialMarkets);
   }, []); // Run only once on mount
+
+  // Auto-update player prop markets when sport changes
+  useEffect(() => {
+    if (isPlayerPropsMode && picked && picked.length > 0) {
+      const sportBasedMarkets = getPlayerPropMarketsBySport(picked);
+      
+      // Get the first 3 non-header markets as default selection
+      const defaultMarkets = sportBasedMarkets
+        .filter(market => !market.isHeader)
+        .slice(0, 3)
+        .map(market => market.key);
+      
+      if (defaultMarkets.length > 0) {
+        console.log('🎯 Auto-updating player prop markets for sport change:', {
+          sports: picked,
+          newMarkets: defaultMarkets
+        });
+        
+        setSelectedPlayerPropMarkets(defaultMarkets);
+        setDraftSelectedPlayerPropMarkets(defaultMarkets);
+      }
+    }
+  }, [picked, isPlayerPropsMode]); // Run when sport or player props mode changes
 
   // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {

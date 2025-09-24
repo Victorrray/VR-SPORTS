@@ -210,7 +210,9 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
             // Set selected team and market detail based on market type
             if (marketKey === 'h2h') {
               selectedTeam = firstOdds.outcome;
-              marketDetail = `${firstOdds.outcome} to Win`;
+              // Extract team name (last word) for more compact display
+              const teamName = firstOdds.outcome.split(' ').pop();
+              marketDetail = `${teamName} Moneyline`;
             } else if (marketKey === 'spreads') {
               selectedTeam = firstOdds.outcome;
               const spread = firstOdds.point > 0 ? `+${firstOdds.point}` : firstOdds.point;

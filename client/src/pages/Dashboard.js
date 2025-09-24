@@ -40,7 +40,7 @@ export default function Dashboard() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px',
-            marginTop: '8px'
+            marginBottom: '0px'
           }}>
             <Crown size={12} />
             PLATINUM
@@ -59,7 +59,7 @@ export default function Dashboard() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px',
-            marginTop: '8px'
+            marginBottom: '0px'
           }}>
             <Zap size={12} />
             FREE TRIAL
@@ -78,7 +78,7 @@ export default function Dashboard() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '4px',
-            marginTop: '8px'
+            marginBottom: '0px'
           }}>
             FREE
           </span>
@@ -124,15 +124,16 @@ export default function Dashboard() {
           textAlign: 'center',
           marginBottom: '16px'
         }}>
+          {getPlanBadge()}
           <h1 style={{
             color: 'var(--text-primary)',
             fontSize: '28px',
             fontWeight: '700',
-            margin: '0'
+            margin: '0',
+            marginTop: '12px'
           }}>
             {profile?.username || user?.user_metadata?.username || user?.email?.split('@')[0] || 'User'}'s Dashboard
           </h1>
-          {getPlanBadge()}
         </div>
 
         {/* Main Dashboard */}
