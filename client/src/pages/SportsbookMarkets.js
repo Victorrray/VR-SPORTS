@@ -1405,6 +1405,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           {/* Player Props Mode Filters */}
           {showPlayerProps ? (
             <>
+              {/* Sports Selection for Player Props */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  🏈 Sports
+                </label>
+                <SportMultiSelect
+                  list={sportList || []}
+                  selected={draftPicked || []}
+                  onChange={setDraftPicked}
+                  placeholderText="Select sports..."
+                  allLabel="All Sports"
+                  enableCategories={true}
+                />
+              </div>
+
               {/* Player Props Market Selection */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
