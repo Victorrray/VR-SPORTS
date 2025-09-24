@@ -175,11 +175,17 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     const cacheKey = `markets-${paramsKey}`;
     const cachedData = APICache.get(cacheKey);
     
-    // Only update from cache if we don't have any data yet
-    if (cachedData && games.length === 0) {
+    // Only update from cache if we don't have any data yet AND cache has data
+    if (cachedData && cachedData.length > 0 && games.length === 0) {
       console.log('🔍 useMarkets: Using cached data, length:', cachedData.length);
       setGames(cachedData);
       return;
+    }
+    
+    // If cached data is empty, clear it and fetch fresh data
+    if (cachedData && cachedData.length === 0) {
+      console.log('🔍 useMarkets: Clearing empty cache and fetching fresh data');
+      APICache.delete(cacheKey);
     }
     
     // Only show loading if we don't have cached data

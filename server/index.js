@@ -1024,6 +1024,14 @@ try {
 async function trackUsage(req, res, next) {
   try {
     const userId = req.__userId;
+    
+    // If no user ID (unauthenticated), allow limited access
+    if (!userId) {
+      console.log('🔧 Unauthenticated request - allowing limited access');
+      req.__userProfile = { plan: 'free', api_request_count: 0 };
+      return next();
+    }
+    
     const profile = await getUserProfile(userId);
 
     // Enforce quota for non-platinum users
@@ -1731,8 +1739,8 @@ app.get("/api/events", enforceUsage, async (req, res) => {
   }
 });
 
-// odds endpoint (unified for multiple sports)
-app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
+// odds endpoint (unified for multiple sports) - temporarily allow unauthenticated access
+app.get("/api/odds", trackUsage, async (req, res) => {
   try {
     const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american" } = req.query;
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
