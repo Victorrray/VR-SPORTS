@@ -18,7 +18,6 @@ import AuthRequired from "../components/auth/AuthRequired";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
-import { optimizedStorage } from "../utils/storageOptimizer";
 import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
