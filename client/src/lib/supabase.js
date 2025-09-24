@@ -38,15 +38,15 @@ const isConfigValid = SUPABASE_URL && SUPABASE_ANON_KEY &&
                      SUPABASE_ANON_KEY.startsWith('ey');
 
 if (!isConfigValid) {
-  if (!isProd) {
-    console.error('❌ Invalid Supabase configuration:', {
-      hasUrl: !!SUPABASE_URL,
-      hasAnonKey: !!SUPABASE_ANON_KEY,
-      urlStartsWithHttp: SUPABASE_URL?.startsWith('http'),
-      keyStartsWithEy: SUPABASE_ANON_KEY?.startsWith('ey')
-    });
-    console.warn('⚠️ Running in demo mode with no database connectivity');
-  }
+  console.error('❌ Invalid Supabase configuration:', {
+    hasUrl: !!SUPABASE_URL,
+    hasAnonKey: !!SUPABASE_ANON_KEY,
+    urlStartsWithHttp: SUPABASE_URL?.startsWith('http'),
+    keyStartsWithEy: SUPABASE_ANON_KEY?.startsWith('ey'),
+    actualUrl: SUPABASE_URL ? SUPABASE_URL.substring(0, 30) + '...' : 'undefined',
+    actualKeyPrefix: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 10) + '...' : 'undefined'
+  });
+  console.warn('⚠️ Running in demo mode with no database connectivity');
 }
 
 // Run diagnostics if in development
