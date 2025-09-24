@@ -169,6 +169,274 @@
   margin-bottom: 2rem;
 }
 
+/* Subscription Management Section */
+.subscription-management {
+  margin-bottom: 2rem;
+}
+
+.subscription-card {
+  background: var(--bg-elev);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  box-shadow: var(--card-shadow);
+}
+
+.subscription-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.subscription-icon {
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subscription-info h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.subscription-info p {
+  margin: 0.25rem 0 0 0;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.subscription-details {
+  margin-bottom: 1.5rem;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.detail-item svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.subscription-status {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.status-badge.active {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.subscription-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.cancel-subscription-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-subscription-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.cancel-subscription-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Cancel Confirmation Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.cancel-modal {
+  background: var(--bg-elev);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.modal-content p {
+  margin: 0 0 1.5rem 0;
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.cancel-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.cancel-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.cancel-info svg {
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.cancel-info span {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.cancel-info.warning {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.cancel-info.warning svg {
+  color: #ef4444;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 1rem;
+}
+
+.modal-btn.secondary {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.modal-btn.secondary:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.modal-btn.danger {
+  background: #ef4444;
+  color: white;
+}
+
+.modal-btn.danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.modal-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .upgrade-section {
   margin-bottom: 2rem;
 }
@@ -270,7 +538,26 @@
   }
   
   .current-plan-card,
-  .upgrade-card {
+  .upgrade-card,
+  .subscription-card {
+    padding: 1.5rem;
+  }
+  
+  .detail-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .modal-btn {
+    width: 100%;
+  }
+  
+  .cancel-modal {
     padding: 1.5rem;
   }
 }

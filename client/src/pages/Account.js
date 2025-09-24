@@ -570,17 +570,6 @@ export default function Account() {
                     <small>Manage your subscription</small>
                   </div>
                 </button>
-                <button
-                  className="security-btn"
-                  onClick={handleRefreshPlan}
-                  style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}
-                >
-                  <RefreshCw size={16} />
-                  <div className="btn-content">
-                    <span>Refresh Plan</span>
-                    <small>Update plan status</small>
-                  </div>
-                </button>
               </div>
             )}
             
@@ -595,18 +584,6 @@ export default function Account() {
                   <div className="btn-content">
                     <span>{loading ? 'Creating checkout...' : 'Upgrade to Platinum'}</span>
                     <small>Unlimited access & features</small>
-                  </div>
-                </button>
-                <button
-                  className="security-btn"
-                  onClick={handleRefreshPlan}
-                  disabled={loading}
-                  style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.3)' }}
-                >
-                  <RefreshCw size={16} />
-                  <div className="btn-content">
-                    <span>Refresh Plan</span>
-                    <small>Update plan status</small>
                   </div>
                 </button>
               </div>
