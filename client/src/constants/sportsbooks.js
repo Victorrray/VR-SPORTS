@@ -33,12 +33,22 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'rebet', name: 'Rebet', popular: false },
   { key: 'pinnacle', name: 'Pinnacle', popular: true },
   
-  // DFS Apps
+  // DFS Apps (expanded for player props)
   { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true },
   { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true },
-  { key: 'pick6', name: 'Pick6', popular: true, isDFS: true },
+  { key: 'pick6', name: 'Pick 6', popular: true, isDFS: true },
   { key: 'prophetx', name: 'ProphetX', popular: true, isDFS: true },
-  { key: 'sleeper', name: 'Sleeper', popular: false, isDFS: true },
+  { key: 'draftkings_pick6', name: 'Pick 6', popular: true, isDFS: true },
+  
+  // Additional Sportsbooks for expanded coverage
+  { key: 'wynnbet', name: 'WynnBET', popular: true },
+  { key: 'superbook', name: 'SuperBook', popular: true },
+  { key: 'twinspires', name: 'TwinSpires', popular: true },
+  { key: 'betfred_us', name: 'Betfred US', popular: true },
+  { key: 'circasports', name: 'Circa Sports', popular: true },
+  { key: 'lowvig', name: 'LowVig', popular: true },
+  { key: 'barstool', name: 'ESPN BET (Barstool)', popular: true },
+  { key: 'foxbet', name: 'FOX Bet', popular: true },
 ];
 
 // Helper function to get sportsbook by key

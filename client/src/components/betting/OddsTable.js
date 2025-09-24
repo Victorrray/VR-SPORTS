@@ -758,11 +758,21 @@ export default function OddsTable({
         if (bookFilter && bookFilter.length > 0) {
           let hasMatchingBook = false;
           
+          // Debug logging for sportsbook filtering
+          console.log(`🎯 Filtering prop ${propKey} with bookFilter:`, bookFilter);
+          
           // Check allBooks for regular props
           if (propData.allBooks && propData.allBooks.length > 0) {
+            console.log(`🎯 Available books for ${propKey}:`, propData.allBooks.map(b => ({
+              key: b.bookmaker?.key,
+              book: b.book,
+              bookmaker: b.bookmaker
+            })));
+            
             hasMatchingBook = propData.allBooks.some(book => {
               const keyMatch = bookFilter.includes(book.bookmaker?.key);
               const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
+              console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch, 'nameMatch:', nameMatch);
               return keyMatch || nameMatch;
             });
           }
@@ -770,9 +780,16 @@ export default function OddsTable({
           // Check overBooks and underBooks for combined Over/Under props
           if (!hasMatchingBook && (propData.overBooks || propData.underBooks)) {
             const allCombinedBooks = [...(propData.overBooks || []), ...(propData.underBooks || [])];
+            console.log(`🎯 Combined books for ${propKey}:`, allCombinedBooks.map(b => ({
+              key: b.bookmaker?.key,
+              book: b.book,
+              bookmaker: b.bookmaker
+            })));
+            
             hasMatchingBook = allCombinedBooks.some(book => {
               const keyMatch = bookFilter.includes(book.bookmaker?.key);
               const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
+              console.log(`🎯 Checking combined book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch, 'nameMatch:', nameMatch);
               return keyMatch || nameMatch;
             });
           }
@@ -1301,9 +1318,6 @@ export default function OddsTable({
           justify-content: center;
           padding: 4rem 2rem;
           text-align: center;
-          background: var(--card-bg);
-          border-radius: 12px;
-          border: 1px solid var(--border-color);
           margin: 1rem 0;
         }
         
@@ -1725,7 +1739,6 @@ export default function OddsTable({
                               {String(row.mkt?.key).includes('total') ? (
                                 <div className="mob-total-stack">
                                   <div className="mob-total-market">TOTAL</div>
-                                  <div className="mob-total-side">{(row.out.name || '').toUpperCase()}</div>
                                 </div>
                               ) : (
                                 formatMarket(row.mkt?.key || '')

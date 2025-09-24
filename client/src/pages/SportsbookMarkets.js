@@ -249,10 +249,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Removed redundant loading effect to prevent flashing
 
   const effectiveSelectedBooks = useMemo(() => {
-    return (selectedBooks && selectedBooks.length)
+    const result = (selectedBooks && selectedBooks.length)
       ? selectedBooks
       : (Array.isArray(marketBooks) ? marketBooks.map(b => b.key) : []);
-  }, [selectedBooks, marketBooks]);
+    
+    // Debug logging for Player Props mode
+    if (isPlayerPropsMode) {
+      console.log('🎯 Player Props - effectiveSelectedBooks:', result);
+      console.log('🎯 Player Props - selectedBooks:', selectedBooks);
+      console.log('🎯 Player Props - marketBooks:', marketBooks);
+    }
+    
+    return result;
+  }, [selectedBooks, marketBooks, isPlayerPropsMode]);
 
   const handleMobileSearch = (searchTerm) => {
     setQuery(searchTerm);

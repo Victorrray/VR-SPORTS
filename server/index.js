@@ -29,7 +29,7 @@ const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 === 'true';
 const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 30_000);
 const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
 const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_MARKETS || 8);
-const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_BOOKS || 6);
+const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_BOOKS || 10);
 const PLAYER_PROPS_REQUEST_TIMEOUT = 7000;
 const PLAYER_PROPS_MAX_CACHE_ENTRIES = Number(process.env.PLAYER_PROPS_MAX_CACHE_ENTRIES || 50);
 
@@ -49,11 +49,12 @@ const FOCUSED_BOOKMAKERS = [
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
-  "hardrock", "espnbet", "fanatics",
-  // DFS apps for player props
-  "prizepicks", "underdog", "pick6", "prophetx",
+  "hardrock", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
+  "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
+  // DFS apps for player props (expanded list)
+  "prizepicks", "underdog", "pick6", "prophetx", "draftkings_pick6",
   // US exchange books
-  "prophet_exchange", "rebet",
+  "prophet_exchange", "rebet", "betopenly",
   // International (for comparison)
   "pinnacle"
 ];
@@ -61,13 +62,16 @@ const FOCUSED_BOOKMAKERS = [
 // Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
 const TRIAL_BOOKMAKERS = [
   "draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", 
-  "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", 
-  "prizepicks", "underdog", "pick6", "prophetx", "espnbet", "fanatics", "pinnacle"
+  "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
+  "superbook", "twinspires", "betfred_us", "circasports", "lowvig", "barstool",
+  // All DFS apps for player props
+  "prizepicks", "underdog", "pick6", "prophetx", "draftkings_pick6",
+  "espnbet", "fanatics", "pinnacle", "betopenly", "rebet"
 ];
 
 // Player props completely removed
 
-const MAX_BOOKMAKERS = 16; // Increased to accommodate all US, US2, and exchange books
+const MAX_BOOKMAKERS = 20; // Increased to accommodate more sportsbooks and DFS apps for player props
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes cache
 // Player props functionality removed
 

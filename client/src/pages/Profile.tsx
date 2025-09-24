@@ -31,7 +31,7 @@ const AVAILABLE_SPORTSBOOKS = [
   { key: 'windcreek', name: 'Wind Creek (Betfred PA)', popular: false },
   
   // US DFS Sites (Player Props)
-  { key: 'draftkings_pick6', name: 'DraftKings Pick6', popular: false, type: 'dfs' },
+  { key: 'draftkings_pick6', name: 'Pick 6', popular: false, type: 'dfs' },
   { key: 'prizepicks', name: 'PrizePicks', popular: false, type: 'dfs' },
   { key: 'underdog', name: 'Underdog Fantasy', popular: false, type: 'dfs' },
   
