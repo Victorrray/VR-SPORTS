@@ -149,9 +149,11 @@ export default function UsagePlan() {
         </div>
       </div>
 
-      <div className="usage-section">
-        <UsagePlanCard />
-      </div>
+      {!isPlatinum && (
+        <div className="usage-section">
+          <UsagePlanCard />
+        </div>
+      )}
 
       {isPlatinum && (
         <div className="subscription-management">
