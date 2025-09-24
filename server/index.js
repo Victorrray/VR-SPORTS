@@ -1755,6 +1755,13 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
     const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
     
+    // Filter out unsupported markets from TheOddsAPI
+    const supportedMarkets = ['h2h', 'spreads', 'totals'];
+    const filteredRegularMarkets = regularMarkets.filter(m => supportedMarkets.includes(m));
+    
+    console.log('Original regular markets:', regularMarkets);
+    console.log('Filtered to supported markets:', filteredRegularMarkets);
+    
     console.log('Regular markets requested:', regularMarkets);
     console.log('Player prop markets requested:', playerPropMarkets);
     console.log('ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
@@ -1762,8 +1769,8 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     console.log('SPORTSGAMEODDS_API_KEY available:', !!SPORTSGAMEODDS_API_KEY);
     
     // Step 1: Fetch regular odds (h2h, spreads, totals) only
-    if (regularMarkets.length > 0) {
-      const marketsToFetch = regularMarkets;
+    if (filteredRegularMarkets.length > 0) {
+      const marketsToFetch = filteredRegularMarkets;
       
       // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
       for (const sport of sportsArray) {
@@ -1963,7 +1970,8 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
     
     console.log(`🔍 Final response - returning ${allGames.length} games total`);
     console.log('🔍 User profile:', req.__userProfile?.plan || 'unknown');
-    console.log('🔍 Regular markets fetched:', regularMarkets);
+    console.log('🔍 Regular markets requested:', regularMarkets);
+    console.log('🔍 Filtered markets used:', filteredRegularMarkets);
     console.log('🔍 Player prop markets requested:', playerPropMarkets);
     
     // Usage already incremented per external API call above
