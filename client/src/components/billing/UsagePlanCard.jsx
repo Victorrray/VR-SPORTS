@@ -16,6 +16,11 @@ export default function UsagePlanCard() {
     }
   }, [plan, planLoading, refreshPlan]);
 
+  // Don't render for guest users (no plan)
+  if (!plan || plan.plan === null || plan.plan === 'null') {
+    return null;
+  }
+
   const fallbackPlan = { plan: "free", used: 0, quota: 250, remaining: 250 };
   const planData = plan || fallbackPlan;
   const planId = (planData.plan || 'free').toLowerCase();
