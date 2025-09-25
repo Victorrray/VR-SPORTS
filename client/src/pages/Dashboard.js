@@ -77,7 +77,7 @@ export default function Dashboard() {
             gap: '4px',
             marginBottom: '0px'
           }}>
-            NO PLAN
+            GUEST
           </span>
         );
     }
