@@ -194,6 +194,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Default selections by mode
     if (mode === 'props') {
+      // Only include bookmakers that actually support player props
       return ['prizepicks', 'underdog', 'pick6', 'novig']; // Default DFS apps + NoVig for player props
     }
     // Default to popular sportsbooks if nothing saved for game mode
@@ -988,14 +989,44 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const enhancedSportsbookList = useMemo(() => {
     const marketBookKeys = new Set((marketBooks || []).map(book => book.key));
     
-    // Only include DFS apps in Player Props mode
+    // Only include bookmakers that actually offer player props data
     if (showPlayerProps) {
-      const dfsApps = getDFSApps();
+      // Bookmakers known to provide player props data based on The Odds API documentation
+      // Player props coverage is mainly limited to US sports and US bookmakers
+      const playerPropsBookmakers = [
+        // Major US Sportsbooks (confirmed player props support)
+        'draftkings', 'fanduel', 'betmgm', 'caesars', 'pointsbet', 'betrivers',
+        'unibet', 'wynnbet', 'superbook', 'twinspires', 'betfred_us', 'espnbet',
+        'fanatics', 'hardrock', 'fliff', 'novig', 'circasports', 'lowvig',
+        // DFS Apps (player props focused)
+        'prizepicks', 'underdog', 'pick6', 'prophetx',
+        // Additional US books that may support player props
+        'bovada', 'mybookie', 'betonline'
+      ];
+      
+      // Filter marketBooks to only include player props supporting bookmakers
+      const filteredMarketBooks = (marketBooks || []).filter(book => 
+        playerPropsBookmakers.includes(book.key)
+      );
+      
+      // Add missing DFS apps that support player props
+      const dfsApps = getDFSApps().filter(dfs => 
+        playerPropsBookmakers.includes(dfs.key)
+      );
       const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
+      
       const enhancedBooks = [
-        ...(marketBooks || []),
+        ...filteredMarketBooks,
         ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
       ];
+      
+      console.log('🎯 Player Props Bookmakers Filter:', {
+        totalAvailable: marketBooks?.length || 0,
+        playerPropsSupported: enhancedBooks.length,
+        filteredOut: (marketBooks?.length || 0) - filteredMarketBooks.length,
+        supportedBooks: enhancedBooks.map(b => b.key)
+      });
+      
       return enhancedBooks;
     }
     

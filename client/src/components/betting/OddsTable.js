@@ -134,9 +134,26 @@ function grab(bookmaker, isHome) {
 }
 
 /* ---------- Helpers (unchanged core math) ---------- */
-function calculateEV(odds, fairLine) {
+function calculateEV(odds, fairLine, bookmakerKey = null) {
   if (!odds || !fairLine) return null;
   const toDec = o => (o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1);
+  
+  // Special EV calculation for DFS apps
+  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmakerKey);
+  
+  if (isDFSApp) {
+    // DFS apps typically pay even money (+100) or close to it
+    // We compare their effective payout against market consensus
+    const dfsPayoutOdds = +100; // Even money payout for DFS
+    const dfsDec = toDec(dfsPayoutOdds);
+    const fairDec = toDec(fairLine);
+    
+    // For DFS: +EV when market odds are worse than -100 (more negative)
+    // Example: If market is -140, DFS +100 is +EV
+    return ((dfsDec / fairDec) - 1) * 100;
+  }
+  
+  // Standard EV calculation for traditional sportsbooks
   const userDec = toDec(odds);
   const fairDec = toDec(fairLine);
   return ((userDec / fairDec) - 1) * 100;
@@ -827,34 +844,74 @@ export default function OddsTable({
         
         // Handle combined Over/Under props - create a unified row showing both sides
         if (propData.overBooks && propData.underBooks) {
-          // Calculate EV for both Over and Under
-          const calculateSideEV = (books) => {
+          // Calculate EV for both Over and Under with line shopping consideration
+          const calculateSideEV = (books, isOver = true) => {
             if (!books || books.length === 0) return null;
             const probs = books.map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
             const consensusProb = median(probs);
             if (consensusProb && consensusProb > 0 && consensusProb < 1 && books.length >= 3) {
               const fairDec = 1 / consensusProb;
-              const bestOdds = books.reduce((best, book) => {
-                const decimal = americanToDecimal(book.price);
-                return decimal > americanToDecimal(best.price) ? book : best;
+              
+              // Find best line + odds combination (same logic as above)
+              const bestBook = books.reduce((best, book) => {
+                const bestLine = parseFloat(best.point || best.line || 0);
+                const bookLine = parseFloat(book.point || book.line || 0);
+                
+                // For OVER: prefer lower lines, for UNDER: prefer higher lines
+                const lineIsBetter = isOver ? (bookLine < bestLine) : (bookLine > bestLine);
+                const lineIsWorse = isOver ? (bookLine > bestLine) : (bookLine < bestLine);
+                
+                if (lineIsBetter) return book;
+                if (lineIsWorse) return best;
+                
+                // Same line: prefer better odds
+                const bestDecimal = americanToDecimal(best.price);
+                const bookDecimal = americanToDecimal(book.price);
+                return bookDecimal > bestDecimal ? book : best;
               });
-              return calculateEV(bestOdds.price, decimalToAmerican(fairDec));
+              
+              const bookmakerKey = bestBook.bookmaker?.key || bestBook.book?.toLowerCase();
+              return calculateEV(bestBook.price, decimalToAmerican(fairDec), bookmakerKey);
             }
             return null;
           };
           
-          const overEV = calculateSideEV(propData.overBooks);
-          const underEV = calculateSideEV(propData.underBooks);
+          const overEV = calculateSideEV(propData.overBooks, true);
+          const underEV = calculateSideEV(propData.underBooks, false);
           
-          // Find best odds for each side
+          // Find best line + odds combination for each side
           const bestOverBook = propData.overBooks.length > 0 ? propData.overBooks.reduce((best, book) => {
-            const decimal = americanToDecimal(book.price);
-            return decimal > americanToDecimal(best.price) ? book : best;
+            const bestLine = parseFloat(best.point || best.line || 0);
+            const bookLine = parseFloat(book.point || book.line || 0);
+            
+            // For OVER: prefer lower lines (easier to hit)
+            if (bookLine < bestLine) {
+              console.log(`🎯 Line Shopping OVER: Found better line ${bookLine} vs ${bestLine} at ${book.bookmaker?.key || book.book}`);
+              return book;
+            }
+            if (bookLine > bestLine) return best;
+            
+            // Same line: prefer better odds
+            const bestDecimal = americanToDecimal(best.price);
+            const bookDecimal = americanToDecimal(book.price);
+            return bookDecimal > bestDecimal ? book : best;
           }) : null;
           
           const bestUnderBook = propData.underBooks.length > 0 ? propData.underBooks.reduce((best, book) => {
-            const decimal = americanToDecimal(book.price);
-            return decimal > americanToDecimal(best.price) ? book : best;
+            const bestLine = parseFloat(best.point || best.line || 0);
+            const bookLine = parseFloat(book.point || book.line || 0);
+            
+            // For UNDER: prefer higher lines (easier to hit)
+            if (bookLine > bestLine) {
+              console.log(`🎯 Line Shopping UNDER: Found better line ${bookLine} vs ${bestLine} at ${book.bookmaker?.key || book.book}`);
+              return book;
+            }
+            if (bookLine < bestLine) return best;
+            
+            // Same line: prefer better odds
+            const bestDecimal = americanToDecimal(best.price);
+            const bookDecimal = americanToDecimal(book.price);
+            return bookDecimal > bestDecimal ? book : best;
           }) : null;
           
           // Choose the side with better EV for the main display
@@ -1151,6 +1208,9 @@ export default function OddsTable({
     const userOdds = Number(row?.out?.price ?? row?.out?.odds ?? 0);
     if (!userOdds) return null;
     
+    // Get bookmaker key for DFS-specific EV calculation
+    const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
+    
     // For player props, use consensus probability from all available books
     if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
       const probs = (row.allBooks || []).map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
@@ -1158,7 +1218,7 @@ export default function OddsTable({
       const uniqCnt = uniqueBookCount(row);
       if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Lower threshold for props
         const fairDec = 1 / consensusProb;
-        return calculateEV(userOdds, decimalToAmerican(fairDec));
+        return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
       }
       return null;
     }
@@ -1168,7 +1228,7 @@ export default function OddsTable({
     const pairCnt = devigPairCount(row);
     if (pDevig && pDevig > 0 && pDevig < 1 && pairCnt > 4) {
       const fairDec = 1 / pDevig;
-      return calculateEV(userOdds, decimalToAmerican(fairDec));
+      return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
     
     // Fallback to consensus method for regular markets
@@ -1177,7 +1237,7 @@ export default function OddsTable({
     const uniqCnt = uniqueBookCount(row);
     if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt > 4) {
       const fairDec = 1 / consensusProb;
-      return calculateEV(userOdds, decimalToAmerican(fairDec));
+      return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
     return null;
   };
