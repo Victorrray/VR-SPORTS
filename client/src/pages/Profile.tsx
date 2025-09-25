@@ -74,17 +74,15 @@ export default function ProfilePage() {
 
   const fallbackPlan = { plan: 'free', used: 0, quota: 250, remaining: 250 };
   const resolvedPlan = planInfo || fallbackPlan;
-  const normalizedPlanId = (resolvedPlan.plan || 'free').toLowerCase();
-  const planDisplayName = normalizedPlanId === 'platinum'
-    ? 'Platinum Plan'
-    : normalizedPlanId === 'free_trial'
-      ? 'Free Trial'
-      : 'Free Plan';
+  const normalizedPlanId = (resolvedPlan.plan || null);
+  const planDisplayName = (normalizedPlanId === 'gold' || normalizedPlanId === 'platinum')
+    ? 'Gold Plan'
+    : 'No Active Plan';
   const usageUsed = resolvedPlan.used ?? resolvedPlan.calls_made ?? 0;
   const usageLimit = resolvedPlan.quota ?? resolvedPlan.limit ?? null;
-  const usageSummary = normalizedPlanId === 'platinum' || usageLimit === null
-    ? 'Unlimited API access & premium features'
-    : `${usageUsed}/${usageLimit} API calls used`;
+  const usageSummary = (normalizedPlanId === 'gold' || normalizedPlanId === 'platinum')
+    ? 'Full access to live odds and game data'
+    : 'Subscribe to Gold plan for $10/month';
 
   const handleBookToggle = (bookKey) => {
     setSelectedBooks(prev => {

@@ -10,7 +10,7 @@ const PLAN_TTL_MS = 30_000;
 const PREMIUM_GRACE_MS = 900_000;
 const POLITE_REFRESH_MS = 60_000;
 
-const PREMIUM_PLANS = new Set(['gold', 'platinum', 'premium', 'vip']);
+const PREMIUM_PLANS = new Set(['gold', 'platinum']);
 
 const defaultPlan = {
   plan: null, // No plan by default - requires Gold subscription

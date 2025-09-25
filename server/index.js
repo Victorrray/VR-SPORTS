@@ -1049,17 +1049,17 @@ async function checkPlanAccess(req, res, next) {
     const userId = req.__userId;
     const profile = await getUserProfile(userId);
 
-    // Only Gold plan (and grandfathered users) get access
+    // Gold or Platinum plan (and grandfathered users) get access
     if (profile.plan === 'gold' || profile.plan === 'platinum' || profile.grandfathered) {
       req.__userProfile = profile;
       return next();
     }
 
-    // No valid plan - require Gold subscription
+    // No valid plan - require subscription
     return res.status(402).json({
       error: "SUBSCRIPTION_REQUIRED",
       code: "SUBSCRIPTION_REQUIRED",
-      message: "Gold subscription required. Upgrade for $10/month to access live odds and betting data."
+      message: "Subscription required. Choose Gold ($10/month) or Platinum ($25/month) to access live odds and betting data."
     });
 
   } catch (error) {
@@ -1389,7 +1389,7 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       allow_promotion_codes: true,
       metadata: { 
         userId, 
-        plan: 'gold' 
+        plan: 'gold'  // Default to gold, will be updated based on price_id
       }
     });
     
@@ -1623,8 +1623,9 @@ app.post('/api/billing/webhook',
           const { error } = await supabase
             .from('users')
             .update({ 
-              plan: 'platinum',
-              subscription_end_date: subscriptionEndDate.toISOString()
+              plan: 'gold',
+              subscription_end_date: subscriptionEndDate.toISOString(),
+              grandfathered: false  // Paying users are not grandfathered
             })
             .eq('id', userId);
             
@@ -1633,7 +1634,7 @@ app.post('/api/billing/webhook',
             throw error;
           }
           
-          console.log(`✅ Plan set to platinum via webhook: ${userId}, expires: ${subscriptionEndDate}`);
+          console.log(`✅ Plan set to gold via webhook: ${userId}, expires: ${subscriptionEndDate}`);
         } else {
           console.error(`Failed to update plan in Supabase for user ${userId}`);
         }
@@ -1653,22 +1654,22 @@ app.post('/api/billing/webhook',
           if (!findError && users && users.length > 0) {
             const userId = users[0].id;
             
-            // If subscription is canceled or deleted, downgrade to free
+            // If subscription is canceled or deleted, remove plan access
             if (subscription.status === 'canceled' || subscription.status === 'unpaid' || event.type === 'customer.subscription.deleted') {
               const { error } = await supabase
                 .from('users')
                 .update({ 
-                  plan: 'free',
+                  plan: null,  // No plan access (must resubscribe)
                   subscription_end_date: null
                 })
                 .eq('id', userId);
                 
               if (error) {
-                console.error('Failed to downgrade user plan in Supabase:', error);
+                console.error('Failed to remove user plan in Supabase:', error);
                 throw error;
               }
               
-              console.log(`✅ Plan downgraded to free via webhook: ${userId}`);
+              console.log(`✅ Plan access removed via webhook: ${userId}`);
             }
           }
         }

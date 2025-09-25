@@ -67,8 +67,8 @@ const NewPricing = () => {
         </header>
 
         {/* Pricing Grid */}
-        <div className="pricing-grid" style={{justifyContent: 'center'}}>
-          {/* Single Gold Plan - Centered */}
+        <div className="pricing-grid">
+          {/* Two-Tier System: Gold + Platinum */}
 
           {/* Gold Plan */}
           <div className="pricing-card" style={{
@@ -135,6 +135,96 @@ const NewPricing = () => {
               ) : (
                 <>
                   Start Winning Now
+                  <ArrowRight size={18} style={{ marginLeft: '0.5rem' }} />
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Platinum Plan */}
+          <div className="pricing-card" style={{
+            border: '2px solid #8b5cf6',
+            boxShadow: '0 0 0 1px #8b5cf6'
+          }}>
+            <div className="card-header">
+              <span className="card-badge badge-premium" style={{background: '#8b5cf6', color: '#fff'}}>Premium</span>
+              <h2 className="card-title">Platinum</h2>
+              <p className="card-subtitle">For professional bettors</p>
+              
+              <div className="price-display">
+                <div className="price-amount">
+                  <span className="price-currency">$</span>
+                  <span>25</span>
+                </div>
+                <div className="price-period">per month, cancel anytime</div>
+              </div>
+              
+              <div className="value-metrics">
+                <div className="value-metric">
+                  <div className="metric-value">25+</div>
+                  <div className="metric-label">Sportsbooks</div>
+                </div>
+                <div className="value-metric">
+                  <div className="metric-value">24/7</div>
+                  <div className="metric-label">Live Updates</div>
+                </div>
+                <div className="value-metric">
+                  <div className="metric-value">5.8%</div>
+                  <div className="metric-label">Avg Edge</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="features-list">
+              <div className="feature-item">
+                <CheckCircle size={16} className="feature-icon" style={{ color: '#8b5cf6' }} />
+                <span>Everything in Gold, plus:</span>
+              </div>
+              <div className="feature-item">
+                <CheckCircle size={16} className="feature-icon" style={{ color: '#8b5cf6' }} />
+                <span>Player props & arbitrage</span>
+              </div>
+              <div className="feature-item">
+                <CheckCircle size={16} className="feature-icon" style={{ color: '#8b5cf6' }} />
+                <span>Expected value (+EV) finder</span>
+              </div>
+              <div className="feature-item">
+                <CheckCircle size={16} className="feature-icon" style={{ color: '#8b5cf6' }} />
+                <span>Middle betting opportunities</span>
+              </div>
+              <div className="feature-item">
+                <CheckCircle size={16} className="feature-icon" style={{ color: '#8b5cf6' }} />
+                <span>Advanced analytics</span>
+              </div>
+              <div className="feature-item">
+                <CheckCircle size={16} className="feature-icon" style={{ color: '#8b5cf6' }} />
+                <span>Priority support</span>
+              </div>
+            </div>
+            
+            <button 
+              className="button button-primary"
+              onClick={handleUpgrade}
+              disabled={loading}
+              style={{background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'}}
+            >
+              {loading ? (
+                <>
+                  <span className="loading-spinner" style={{
+                    display: 'inline-block',
+                    width: '1rem',
+                    height: '1rem',
+                    border: '2px solid currentColor',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    marginRight: '0.5rem',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Upgrade to Platinum
                   <ArrowRight size={18} style={{ marginLeft: '0.5rem' }} />
                 </>
               )}

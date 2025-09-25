@@ -18,51 +18,31 @@ import { useBetSlip } from '../contexts/BetSlipContext';
 export default function Dashboard() {
   const { user, profile } = useAuth();
   const { me } = useMe();
-  const location = useLocation();
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
 
   // Get plan badge component
   const getPlanBadge = () => {
-    const planId = me?.plan || 'free';
+    const planId = me?.plan || null;
     
     switch (planId) {
-      case 'platinum':
+      case 'gold':
+      case 'platinum': // Grandfathered users
         return (
           <span style={{
             padding: '6px 12px',
             borderRadius: '20px',
             fontSize: '12px',
             fontWeight: '600',
-            background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(249, 115, 22, 0.2))',
-            color: '#fcd34d',
-            border: '1px solid rgba(234, 179, 8, 0.3)',
-            display: 'inline-flex',
+            background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+            color: '#000',
+            border: '1px solid rgba(255, 215, 0, 0.3)',
+            display: 'flex',
             alignItems: 'center',
-            gap: '4px',
-            marginBottom: '0px'
+            gap: '4px'
           }}>
             <Crown size={12} />
-            PLATINUM
-          </span>
-        );
-      case 'free_trial':
-        return (
-          <span style={{
-            padding: '6px 12px',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: '600',
-            background: 'rgba(59, 130, 246, 0.2)',
-            color: '#93c5fd',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            marginBottom: '0px'
-          }}>
-            <Zap size={12} />
-            FREE TRIAL
+            GOLD
           </span>
         );
       default:
@@ -80,7 +60,7 @@ export default function Dashboard() {
             gap: '4px',
             marginBottom: '0px'
           }}>
-            FREE
+            NO PLAN
           </span>
         );
     }
