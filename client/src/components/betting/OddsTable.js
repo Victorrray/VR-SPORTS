@@ -138,8 +138,8 @@ function calculateEV(odds, fairLine, bookmakerKey = null) {
   if (!odds || !fairLine) return null;
   const toDec = o => (o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1);
   
-  // Special EV calculation for DFS apps
-  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmakerKey);
+  // Special EV calculation for DFS apps and Fliff
+  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx', 'fliff'].includes(bookmakerKey);
   
   if (isDFSApp) {
     // DFS apps typically pay even money (+100) or close to it
@@ -1211,31 +1211,42 @@ export default function OddsTable({
     // Get bookmaker key for DFS-specific EV calculation
     const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
     
+    // IMPORTANT: For fair line calculation, we use ALL books, not just filtered books
+    // This ensures we have enough data to calculate an accurate fair line
+    const allBooks = row.allBooks || [];
+    
+    // Only proceed if we have enough books for a meaningful consensus
+    if (allBooks.length < 2) return null;
+    
     // For player props, use consensus probability from all available books
     if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
-      const probs = (row.allBooks || []).map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
+      const probs = allBooks.map(b => americanToProb(b.price ?? b.odds))
+        .filter(p => typeof p === "number" && p > 0 && p < 1);
       const consensusProb = median(probs);
-      const uniqCnt = uniqueBookCount(row);
-      if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Lower threshold for props
+      const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
+      
+      if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 2) { // Lower threshold for props
         const fairDec = 1 / consensusProb;
         return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
       }
       return null;
     }
     
-    // For regular markets, use devig method first
+    // Use devig method if available
     const pDevig = consensusDevigProb(row);
     const pairCnt = devigPairCount(row);
-    if (pDevig && pDevig > 0 && pDevig < 1 && pairCnt > 4) {
+    if (pDevig && pDevig > 0 && pDevig < 1 && pairCnt > 2) { // Lower threshold
       const fairDec = 1 / pDevig;
       return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
     
-    // Fallback to consensus method for regular markets
-    const probs = (row.allBooks || []).map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
+    // Fallback to consensus method for regular markets using all books
+    const probs = allBooks.map(b => americanToProb(b.price ?? b.odds))
+      .filter(p => typeof p === "number" && p > 0 && p < 1);
     const consensusProb = median(probs);
-    const uniqCnt = uniqueBookCount(row);
-    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt > 4) {
+    const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
+    
+    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Lower threshold
       const fairDec = 1 / consensusProb;
       return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
@@ -1361,6 +1372,30 @@ export default function OddsTable({
       setPage(totalPages);
     }
   }, [page, totalPages]);
+
+  // Debug logging for Fliff bets
+  useEffect(() => {
+    // Log EV values for Fliff bets
+    if (bookFilter && bookFilter.includes('fliff')) {
+      const fliffRows = allRows.filter(row => 
+        (row?.out?.bookmaker?.key === 'fliff' || row?.out?.book?.toLowerCase() === 'fliff')
+      );
+      
+      console.log(`🎯 Found ${fliffRows.length} Fliff bets`);
+      
+      fliffRows.forEach(row => {
+        const ev = getEV(row);
+        console.log(`🎯 Fliff bet: ${row.game?.home_team} vs ${row.game?.away_team} - ${row.mkt?.key} - EV: ${ev?.toFixed(2)}%`);
+      });
+      
+      const positiveEVFliffRows = fliffRows.filter(row => {
+        const ev = getEV(row);
+        return ev != null && ev > 0;
+      });
+      
+      console.log(`🎯 Found ${positiveEVFliffRows.length} +EV Fliff bets`);
+    }
+  }, [allRows, bookFilter, evMap]);
 
   useEffect(() => {
     // Skip price change animations for player props mode to prevent glitter effect
