@@ -1077,9 +1077,17 @@ async function checkPlanAccess(req, res, next) {
     const userId = req.__userId;
     const profile = await getUserProfile(userId);
 
-    // Gold or Platinum plan (and grandfathered users) get access
+    // Gold or Platinum plan (and grandfathered users) get full access
     if (profile.plan === 'gold' || profile.plan === 'platinum' || profile.grandfathered) {
       req.__userProfile = profile;
+      return next();
+    }
+
+    // TEMPORARY: Allow new users (plan = NULL) limited access to set username and basic functionality
+    if (profile.plan === null) {
+      console.log(`🆕 Allowing temporary access for new user: ${userId}`);
+      req.__userProfile = profile;
+      req.__limitedAccess = true; // Flag for limited access
       return next();
     }
 
