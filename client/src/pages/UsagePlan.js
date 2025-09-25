@@ -37,12 +37,12 @@ export default function UsagePlan() {
 
   console.log('🔍 UsagePlan: Loading complete, rendering main content');
 
-  const isPlatinum = me?.plan === 'platinum';
+  const hasGoldPlan = me?.plan === 'gold' || me?.plan === 'platinum';
 
-  // Mock subscription data - replace with real data from your backend
+  // Subscription data for Gold plan
   const subscriptionData = {
     renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-    amount: '$29.99',
+    amount: '$10.00',
     status: 'active'
   };
 
@@ -81,11 +81,11 @@ export default function UsagePlan() {
         </button>
         <div className="header-content">
           <div className="header-icon">
-            {isPlatinum ? <Crown size={24} /> : <Zap size={24} />}
+            {hasGoldPlan ? <Crown size={24} /> : <Zap size={24} />}
           </div>
           <div className="header-text">
-            <h1>Usage & Plan</h1>
-            <p>Manage your subscription and monitor API usage</p>
+            <h1>Subscription Plan</h1>
+            <p>Manage your Gold subscription</p>
           </div>
         </div>
       </div>

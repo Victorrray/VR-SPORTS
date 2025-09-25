@@ -47,7 +47,7 @@ function filterValidMarkets(markets) {
 }
 
 // Stripe configuration
-const STRIPE_PRICE_PLATINUM = process.env.STRIPE_PRICE_PLATINUM;
+const STRIPE_PRICE_GOLD = process.env.STRIPE_PRICE_GOLD || process.env.STRIPE_PRICE_PLATINUM; // Backward compatibility
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const FRONTEND_URL = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
@@ -751,11 +751,13 @@ function clampBookmakers(bookmakers = []) {
 }
 
 // Helper function to filter bookmakers based on user plan
-function getBookmakersForPlan(userPlan) {
-  if (userPlan === 'platinum') {
-    return FOCUSED_BOOKMAKERS; // Full access to all bookmakers
+function getBookmakersForPlan(plan) {
+  // Gold plan (and grandfathered platinum) get full access
+  if (plan === 'gold' || plan === 'platinum') {
+    return FOCUSED_BOOKMAKERS;
   }
-  return TRIAL_BOOKMAKERS; // Trial users get only 3 major books
+  // Legacy free/trial users (should not exist after migration)
+  return TRIAL_BOOKMAKERS;
 }
 
 // Helper function to build event odds URLs consistently
@@ -795,10 +797,10 @@ async function getUserProfile(userId) {
 
   const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
   if (error && error.code === "PGRST116") {
-    // User doesn't exist, create them
+    // User doesn't exist, create them with no plan (requires Gold subscription)
     const { data: inserted, error: insertErr } = await supabase
       .from("users")
-      .insert({ id: userId, plan: "free", api_request_count: 0 })
+      .insert({ id: userId, plan: null, api_request_count: 0 })
       .select("*")
       .single();
     if (insertErr) throw insertErr;
@@ -806,21 +808,21 @@ async function getUserProfile(userId) {
   }
   if (error) throw error;
 
-  // Check if platinum subscription has expired
-  if (data.plan === 'platinum' && data.subscription_end_date) {
+  // Check if Gold/Platinum subscription has expired
+  if ((data.plan === 'gold' || data.plan === 'platinum') && data.subscription_end_date && !data.grandfathered) {
     const now = new Date();
     const endDate = new Date(data.subscription_end_date);
 
     if (now > endDate) {
-      // Subscription expired, downgrade to free
+      // Subscription expired, remove plan (requires new subscription)
       const { error: updateError } = await supabase
         .from("users")
-        .update({ plan: "free" })
+        .update({ plan: null })
         .eq("id", userId);
 
       if (!updateError) {
-        data.plan = "free";
-        console.log(`⏰ Subscription expired for user: ${userId}`);
+        data.plan = null;
+        console.log(`⏰ Gold subscription expired for user: ${userId}`);
       }
     }
   }
@@ -1042,31 +1044,32 @@ try {
 }
 
 // Usage tracking middleware for Odds API proxy
-async function trackUsage(req, res, next) {
+async function checkPlanAccess(req, res, next) {
   try {
     const userId = req.__userId;
     const profile = await getUserProfile(userId);
 
-    // Enforce quota for non-platinum users
-    if (profile.plan !== "platinum" && profile.api_request_count >= FREE_QUOTA) {
-      return res.status(402).json({
-        error: "QUOTA_EXCEEDED",
-        code: "QUOTA_EXCEEDED",
-        used: profile.api_request_count,
-        quota: FREE_QUOTA,
-        message: "You've reached the free 250 request limit. Upgrade to continue."
-      });
+    // Only Gold plan (and grandfathered users) get access
+    if (profile.plan === 'gold' || profile.plan === 'platinum' || profile.grandfathered) {
+      req.__userProfile = profile;
+      return next();
     }
 
-    // Store profile for later use
-    req.__userProfile = profile;
-    next();
+    // No valid plan - require Gold subscription
+    return res.status(402).json({
+      error: "SUBSCRIPTION_REQUIRED",
+      code: "SUBSCRIPTION_REQUIRED",
+      message: "Gold subscription required. Upgrade for $10/month to access live odds and betting data."
+    });
+
   } catch (error) {
-    console.error('Usage tracking error:', error);
-    // In production, allow request to continue instead of failing
-    // This prevents 500 errors when Supabase is misconfigured
-    req.__userProfile = { plan: 'free', api_request_count: 0 };
-    next();
+    console.error('Plan access check error:', error);
+    // In production, deny access on error for security
+    return res.status(500).json({
+      error: "PLAN_CHECK_FAILED",
+      code: "PLAN_CHECK_FAILED", 
+      message: "Unable to verify subscription status. Please try again."
+    });
   }
 }
 
@@ -1117,7 +1120,7 @@ app.get('/healthz', (_req, res) => {
     ok: true,
     env: process.env.NODE_ENV || 'development',
     hasStripe: !!process.env.STRIPE_SECRET_KEY,
-    hasStripePrice: !!process.env.STRIPE_PRICE_PLATINUM,
+    hasStripePrice: !!(process.env.STRIPE_PRICE_GOLD || process.env.STRIPE_PRICE_PLATINUM),
     hasStripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET,
     hasSupabase: !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
     frontendUrl: process.env.FRONTEND_URL || null,
@@ -1181,7 +1184,7 @@ app.get('/api/me/usage', requireUser, async (req, res) => {
 
 // Odds API proxy with usage tracking
 // Proxy only explicit Odds API endpoints to avoid path-to-regexp wildcards
-app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', requireUser, trackUsage, async (req, res) => {
+app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', requireUser, checkPlanAccess, async (req, res) => {
   try {
     const userId = req.__userId;
     const profile = req.__userProfile;
@@ -1209,7 +1212,7 @@ app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', requireUser, track
   }
 });
 
-app.get('/api/odds-history', requireUser, trackUsage, async (req, res) => {
+app.get('/api/odds-history', requireUser, checkPlanAccess, async (req, res) => {
   try {
     if (!API_KEY) {
       return res.status(400).json({ code: 'MISSING_ENV', message: 'Missing ODDS_API_KEY', hint: 'Set ODDS_API_KEY in backend env' });
@@ -1363,8 +1366,8 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured', hint: 'Set STRIPE_SECRET_KEY in backend env' });
     }
     
-    if (!STRIPE_PRICE_PLATINUM) {
-      return res.status(500).json({ code: 'MISSING_ENV', message: 'STRIPE_PRICE_PLATINUM not set', hint: 'Set STRIPE_PRICE_PLATINUM (Price ID)' });
+    if (!STRIPE_PRICE_GOLD) {
+      return res.status(500).json({ code: 'MISSING_ENV', message: 'STRIPE_PRICE_GOLD not set', hint: 'Set STRIPE_PRICE_GOLD (Price ID)' });
     }
     
     const userId = req.__userId;
@@ -1378,7 +1381,7 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{
-        price: STRIPE_PRICE_PLATINUM,
+        price: STRIPE_PRICE_GOLD,
         quantity: 1,
       }],
       success_url: `${FRONTEND_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -1386,7 +1389,7 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       allow_promotion_codes: true,
       metadata: { 
         userId, 
-        plan: 'platinum' 
+        plan: 'gold' 
       }
     });
     
@@ -1680,7 +1683,7 @@ app.post('/api/billing/webhook',
 );
 
 // sports list (Odds API) - CACHED to reduce API calls
-app.get("/api/sports", requireUser, trackUsage, async (_req, res) => {
+app.get("/api/sports", requireUser, checkPlanAccess, async (_req, res) => {
   try {
     // If no API key, return fallback sports list
     if (!API_KEY) {
@@ -1753,7 +1756,7 @@ app.get("/api/events", enforceUsage, async (req, res) => {
 });
 
 // odds endpoint (unified for multiple sports)
-app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
+app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
   try {
     const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american" } = req.query;
     console.log('🔍 /api/odds called with:', { sports, regions, markets, userId: req.__userId });
@@ -2016,7 +2019,7 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
   }
 });
 
-app.get('/api/player-props', requireUser, trackUsage, async (req, res) => {
+app.get('/api/player-props', requireUser, checkPlanAccess, async (req, res) => {
   recordPlayerPropMetric('requests', 1);
 
   if (!ENABLE_PLAYER_PROPS_V2) {

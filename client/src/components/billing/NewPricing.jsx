@@ -39,23 +39,17 @@ const NewPricing = () => {
     }
   };
 
-  const features = {
-    free: [
-      'Live scores for NFL, NBA, MLB',
-      'Basic team stats',
-      'Game schedules',
-      '24-hour delay on premium features'
-    ],
-    premium: [
-      'Live odds from 15+ sportsbooks',
-      'Expected value (+EV) bet finder',
-      'Player props & live betting',
-      'Arbitrage opportunities',
-      'Advanced filtering',
-      'Priority support',
-      'No ads, no limits'
-    ]
-  };
+  const goldFeatures = [
+    'Live odds from 15+ sportsbooks',
+    'All major sports (NFL, NBA, MLB, NHL, etc.)',
+    'Game lines (Moneyline, Spreads, Totals)',
+    'Real-time odds updates',
+    'Advanced filtering & search',
+    'Historical odds data',
+    'Mobile-optimized interface',
+    'Priority support',
+    'No ads, no usage limits'
+  ];
 
   return (
     <section className="pricing-section">
@@ -73,54 +67,23 @@ const NewPricing = () => {
         </header>
 
         {/* Pricing Grid */}
-        <div className="pricing-grid">
-          {/* Free Plan */}
-          <div className="pricing-card">
-            <div className="card-header">
-              <span className="card-badge badge-free">Free Forever</span>
-              <h2 className="card-title">Starter</h2>
-              <p className="card-subtitle">Perfect for casual bettors</p>
-              
-              <div className="price-display">
-                <div className="price-amount">
-                  <span className="price-currency">$</span>
-                  <span>0</span>
-                </div>
-                <div className="price-period">No credit card required</div>
-              </div>
-            </div>
-            
-            <div className="features-list">
-              {features.free.map((feature, index) => (
-                <div key={index} className="feature-item">
-                  <CheckCircle size={16} className="feature-icon" />
-                  <span>{feature}</span>
-                </div>
-              ))}
-            </div>
-            
-            <button 
-              className="button button-secondary"
-              onClick={() => navigate('/login')}
-            >
-              Get Started Free
-            </button>
-          </div>
+        <div className="pricing-grid" style={{justifyContent: 'center'}}>
+          {/* Single Gold Plan - Centered */}
 
-          {/* Premium Plan */}
+          {/* Gold Plan */}
           <div className="pricing-card" style={{
-            border: '2px solid var(--primary)',
-            boxShadow: '0 0 0 1px var(--primary)'
+            border: '2px solid #FFD700',
+            boxShadow: '0 0 0 1px #FFD700'
           }}>
             <div className="card-header">
-              <span className="card-badge badge-premium">Most Popular</span>
-              <h2 className="card-title">Premium</h2>
+              <span className="card-badge badge-premium" style={{background: '#FFD700', color: '#000'}}>Most Popular</span>
+              <h2 className="card-title">Gold</h2>
               <p className="card-subtitle">For serious bettors</p>
               
               <div className="price-display">
                 <div className="price-amount">
                   <span className="price-currency">$</span>
-                  <span>25</span>
+                  <span>10</span>
                 </div>
                 <div className="price-period">per month, cancel anytime</div>
               </div>
@@ -142,9 +105,9 @@ const NewPricing = () => {
             </div>
             
             <div className="features-list">
-              {features.premium.map((feature, index) => (
+              {goldFeatures.map((feature, index) => (
                 <div key={index} className="feature-item">
-                  <CheckCircle size={16} className="feature-icon" style={{ color: 'var(--primary-light)' }} />
+                  <CheckCircle size={16} className="feature-icon" style={{ color: '#FFD700' }} />
                   <span>{feature}</span>
                 </div>
               ))}

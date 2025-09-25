@@ -541,24 +541,24 @@ export default function Account() {
           <div className="subscription-status">
             <div className="status-info">
               <div className="plan-badge">
-                <span className={`plan-indicator ${me?.plan || 'free'}`}>
-                  {me?.plan === 'platinum' ? '💎' : '🆓'}
+                <span className={`plan-indicator ${me?.plan || 'none'}`}>
+                  {(me?.plan === 'gold' || me?.plan === 'platinum') ? '🥇' : '❌'}
                 </span>
                 <div className="plan-details">
                   <span className="plan-name">
-                    {me?.plan === 'platinum' ? 'Platinum Plan' : 'Free Plan'}
+                    {(me?.plan === 'gold' || me?.plan === 'platinum') ? 'Gold Plan' : 'No Active Plan'}
                   </span>
                   <span className="plan-desc">
-                    {me?.plan === 'platinum' 
-                      ? 'Unlimited API access & premium features' 
-                      : `${me?.calls_made || 0}/${me?.limit || 250} API calls used`
+                    {(me?.plan === 'gold' || me?.plan === 'platinum')
+                      ? 'Full access to live odds and game data' 
+                      : 'Subscribe to Gold plan for $10/month'
                     }
                   </span>
                 </div>
               </div>
             </div>
             
-            {me?.plan === 'platinum' && (
+            {(me?.plan === 'gold' || me?.plan === 'platinum') && (
               <div className="subscription-actions">
                 <button
                   className="security-btn cancel-btn"

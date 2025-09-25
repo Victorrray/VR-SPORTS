@@ -1221,7 +1221,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               )}
             </button>
 
-            {/* Player Props Option */}
+            {/* Player Props Option - Hidden for Gold users */}
+            {me?.plan !== 'gold' && (
             <button
               onClick={() => {
                 setShowArbitrage(false);
@@ -1283,8 +1284,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 }} />
               )}
             </button>
+            )}
 
-            {/* Arbitrage Option */}
+            {/* Arbitrage Option - Hidden for Gold users */}
+            {me?.plan !== 'gold' && (
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -1346,8 +1349,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 }} />
               )}
             </button>
+            )}
 
-            {/* Middles Option */}
+            {/* Middles Option - Hidden for Gold users */}
+            {me?.plan !== 'gold' && (
             <button
               onClick={() => {
                 setShowPlayerProps(false);
@@ -1406,6 +1411,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 }} />
               )}
             </button>
+            )}
           </div>
         )}
       </div>
@@ -1415,26 +1421,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         <AuthRequired message="Please sign in to view live odds and betting data" />
       )}
 
-      {/* Show quota exceeded message for free users */}
-      {isOverQuota && (
+      {/* Show subscription required message for users without Gold plan */}
+      {me && !me.plan && (
         <div style={{
-          background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
+          background: 'rgba(255, 215, 0, 0.1)',
+          border: '1px solid rgba(255, 215, 0, 0.3)',
           borderRadius: '12px',
           padding: '24px',
           margin: '24px 16px',
           textAlign: 'center'
         }}>
-          <h3 style={{ color: '#ef4444', margin: '0 0 12px 0' }}>
-            🚫 API Quota Exceeded
+          <h3 style={{ color: '#FFD700', margin: '0 0 12px 0' }}>
+            🥇 Gold Subscription Required
           </h3>
           <p style={{ color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
-            You've reached your monthly limit of {me?.limit || 250} API calls. Upgrade to Platinum for unlimited access.
+            Subscribe to Gold plan for just $10/month to access live odds and game data.
           </p>
           <button
             onClick={() => navigate('/pricing')}
             style={{
-              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+              background: 'linear-gradient(135deg, #FFD700, #FFA500)',
               color: 'white',
               border: 'none',
               padding: '12px 24px',
@@ -1443,7 +1449,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               cursor: 'pointer'
             }}
           >
-            Upgrade to Platinum
+            Upgrade to Gold
           </button>
         </div>
       )}
