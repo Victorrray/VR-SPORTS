@@ -33,6 +33,18 @@ const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_B
 const PLAYER_PROPS_REQUEST_TIMEOUT = 12000;
 const PLAYER_PROPS_MAX_CACHE_ENTRIES = Number(process.env.PLAYER_PROPS_MAX_CACHE_ENTRIES || 50);
 
+// Known invalid markets that should be filtered out
+const INVALID_PLAYER_PROP_MARKETS = [
+  'player_2_plus_tds',
+  'player_receiving_yds',
+  'player_receiving_tds', 
+  'player_receiving_longest'
+];
+
+// Function to filter out invalid markets
+function filterValidMarkets(markets) {
+  return markets.filter(market => !INVALID_PLAYER_PROP_MARKETS.includes(market));
+}
 
 // Stripe configuration
 const STRIPE_PRICE_PLATINUM = process.env.STRIPE_PRICE_PLATINUM;
@@ -322,9 +334,17 @@ async function fetchPlayerPropsFromVendor({
   const canonicalMarkets = Array.from(new Set((markets || []).map(canonicalizeMarket))).filter(Boolean);
   const canonicalBooks = bookmakers ? Array.from(new Set(bookmakers.map((b) => String(b).toLowerCase()))) : null;
 
-  const marketsToUse = canonicalMarkets.length
+  const rawMarketsToUse = canonicalMarkets.length
     ? canonicalMarkets
     : (DEFAULT_PLAYER_PROP_MARKETS[sportKey] || DEFAULT_PLAYER_PROP_MARKETS.americanfootball_nfl || []);
+
+  // Filter out invalid markets before processing
+  const marketsToUse = filterValidMarkets(rawMarketsToUse);
+  
+  if (rawMarketsToUse.length !== marketsToUse.length) {
+    const filteredOut = rawMarketsToUse.filter(m => !marketsToUse.includes(m));
+    console.log(`🚫 Filtered out invalid markets: ${filteredOut.join(', ')}`);
+  }
 
   const marketChunks = marketsToUse.length
     ? chunkArray(marketsToUse, PLAYER_PROPS_MAX_MARKETS_PER_REQUEST || marketsToUse.length)

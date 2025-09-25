@@ -56,9 +56,9 @@ const PLAYER_PROP_MARKETS = {
   ],
   receiving: [
     { key: 'player_receptions', title: 'Receptions', sport: 'football' },
-    { key: 'player_receiving_yds', title: 'Receiving Yards', sport: 'football' },
-    { key: 'player_receiving_tds', title: 'Receiving TDs', sport: 'football' },
-    { key: 'player_receiving_longest', title: 'Longest Reception', sport: 'football' },
+    { key: 'player_reception_yds', title: 'Receiving Yards', sport: 'football' },
+    { key: 'player_reception_tds', title: 'Receiving TDs', sport: 'football' },
+    { key: 'player_reception_longest', title: 'Longest Reception', sport: 'football' },
     // Alternate receiving props
     { key: 'player_receptions_alternate', title: 'Alternate Receptions', sport: 'football' },
     { key: 'player_reception_yds_alternate', title: 'Alternate Reception Yards', sport: 'football' },
@@ -68,8 +68,8 @@ const PLAYER_PROP_MARKETS = {
   touchdowns: [
     { key: 'player_anytime_td', title: 'Anytime TD', sport: 'football' },
     { key: 'player_1st_td', title: 'First TD', sport: 'football' },
-    { key: 'player_last_td', title: 'Last TD', sport: 'football' },
-    { key: 'player_2_plus_tds', title: '2+ TDs', sport: 'football' }
+    { key: 'player_last_td', title: 'Last TD', sport: 'football' }
+    // Note: player_2_plus_tds is not supported by the API
   ],
   // Combination props (Pass + Rush, Rush + Reception, etc.)
   combination: [
