@@ -8,6 +8,7 @@ import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Sett
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
 import { AVAILABLE_SPORTSBOOKS } from '../constants/sportsbooks';
+import { withApiBase } from '../config/api';
 import "./Account.css";
 
 function initialsFromEmail(email = "") {
@@ -302,7 +303,7 @@ export default function Account() {
     setError('');
     
     try {
-      const response = await fetch('/api/billing/create-checkout-session', {
+      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,12 +314,29 @@ export default function Account() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
+        let errorMessage = 'Failed to create checkout session';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (jsonError) {
+          // If JSON parsing fails, use the response status
+          errorMessage = `Server error (${response.status}): ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
 
-      const { url } = await response.json();
-      window.location.href = url;
+      let responseData;
+      try {
+        responseData = await response.json();
+      } catch (jsonError) {
+        throw new Error('Server returned invalid response. Please try again.');
+      }
+
+      if (!responseData.url) {
+        throw new Error('No checkout URL received from server');
+      }
+
+      window.location.href = responseData.url;
     } catch (error) {
       console.error('Upgrade error:', error);
       setError(error.message);
@@ -590,6 +608,19 @@ export default function Account() {
           </div>
           
           <div className="subscription-info">
+            {error && (
+              <div className="error-message" style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                padding: '12px',
+                marginBottom: '16px',
+                color: '#ef4444'
+              }}>
+                <AlertCircle size={16} style={{ display: 'inline', marginRight: '8px' }} />
+                {error}
+              </div>
+            )}
             <p className="subscription-note">
               {me?.plan === 'platinum' 
                 ? 'You have unlimited access to all features. Cancel anytime.' 

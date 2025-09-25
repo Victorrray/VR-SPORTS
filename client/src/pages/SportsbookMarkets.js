@@ -247,9 +247,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const marketsForMode = isPlayerPropsMode ? [...marketKeys, ...selectedPlayerPropMarkets] : marketKeys;
   const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
-  // For player props, hardcode NFL to avoid filter issues
-  // For regular mode, limit to single sport to prevent overload
-  const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : (picked.length > 0 ? [picked[0]] : picked);
+  // For player props, use selected sports or default to NFL if none selected
+  // For regular mode, use all selected sports (no longer limiting to single sport)
+  const sportsForMode = isPlayerPropsMode 
+    ? (picked.length > 0 ? picked : ["americanfootball_nfl"]) 
+    : picked;
   
   const hasPlatinum = me?.plan === 'platinum';
   const hasGoldOrBetter = me?.plan === 'gold' || me?.plan === 'platinum';
@@ -1060,7 +1062,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             onClick={() => {
               console.log('🔍 Full Debug Info:', {
                 picked, selectedDate, marketGames, showPlayerProps, 
-                sportsForMode: isPlayerPropsMode ? ["americanfootball_nfl"] : picked
+                sportsForMode: isPlayerPropsMode ? (picked.length > 0 ? picked : ["americanfootball_nfl"]) : picked
               });
               // Quick test: Force MLB selection
               setPicked(['baseball_mlb']);
