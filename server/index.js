@@ -795,64 +795,67 @@ async function getUserProfile(userId) {
     return userUsage.get(userId);
   }
 
-  const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
-  if (error && error.code === "PGRST116") {
-    // User doesn't exist - this should not happen if database triggers are working
-    // The unified trigger should create users automatically on auth.users insert
-    console.error(`❌ User ${userId} not found in users table - database trigger may not be working`);
-    
-    // Try to create manually as fallback, but log this as an issue
-    try {
+  try {
+    // First, try to get existing user
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error && error.code === "PGRST116") {
+      // User doesn't exist, create them
+      console.log(`🆕 Creating new user: ${userId}`);
+      
+      // Create user with all required fields
+      const newUser = {
+        id: userId,
+        plan: null, // New users must subscribe
+        api_request_count: 0,
+        grandfathered: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const { data: inserted, error: insertErr } = await supabase
         .from("users")
-        .insert({ 
-          id: userId, 
-          plan: null, 
-          api_request_count: 0,
-          grandfathered: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
+        .insert(newUser)
         .select("*")
         .single();
-      
+
       if (insertErr) {
-        console.error('❌ Failed to create user manually:', insertErr);
-        throw new Error(`Database error creating user: ${insertErr.message}`);
+        console.error('❌ Failed to create user:', insertErr);
+        
+        // Check if it's a constraint violation
+        if (insertErr.code === '23514') {
+          console.error('❌ Plan constraint violation - database constraint too restrictive');
+          throw new Error('Database constraint error: Plan constraint prevents NULL values. Please run the database fix.');
+        }
+        
+        // Check if it's a missing column error
+        if (insertErr.code === '42703') {
+          console.error('❌ Missing column error:', insertErr.message);
+          throw new Error('Database schema error: Missing required columns. Please run the database fix.');
+        }
+        
+        throw new Error(`Database error creating user: ${insertErr.message} (Code: ${insertErr.code})`);
       }
-      
-      console.log(`✅ Created user ${userId} manually (trigger should have done this)`);
+
+      console.log(`✅ Successfully created user: ${userId}`);
       return inserted;
-    } catch (createError) {
-      console.error('❌ Manual user creation failed:', createError);
-      throw new Error(`Database error saving new user: ${createError.message}`);
     }
-  }
-  if (error) {
-    console.error('❌ Database error fetching user:', error);
-    throw new Error(`Database error: ${error.message}`);
-  }
 
-  // Check if Gold/Platinum subscription has expired
-  if ((data.plan === 'gold' || data.plan === 'platinum') && data.subscription_end_date && !data.grandfathered) {
-    const now = new Date();
-    const endDate = new Date(data.subscription_end_date);
-
-    if (now > endDate) {
-      // Subscription expired, remove plan (requires new subscription)
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ plan: null })
-        .eq("id", userId);
-
-      if (!updateError) {
-        data.plan = null;
-        console.log(`⏰ Gold subscription expired for user: ${userId}`);
-      }
+    if (error) {
+      console.error('❌ Database error fetching user:', error);
+      throw new Error(`Database error: ${error.message} (Code: ${error.code})`);
     }
-  }
 
-  return data;
+    return data;
+
+  } catch (error) {
+    console.error('❌ getUserProfile error:', error);
+    throw error;
+  }
 }
 
 function getCachedPlan(userId) {
