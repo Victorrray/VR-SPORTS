@@ -244,7 +244,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
   const isMiddlesMode = showMiddles;
-  const marketsForMode = isPlayerPropsMode ? [...marketKeys, ...selectedPlayerPropMarkets] : marketKeys;
+  // Use only player prop markets in player props mode, regular markets otherwise
+  const marketsForMode = isPlayerPropsMode ? selectedPlayerPropMarkets : marketKeys;
   const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
   // For player props, use selected sports or default to NFL if none selected
@@ -266,6 +267,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     me: me
   });
 
+  // Function to get all compatible markets for the selected sports
+  const getAllCompatibleMarkets = (sports) => {
+    // Core markets that work across all sports
+    const coreMarkets = ['h2h', 'spreads', 'totals'];
+    
+    // If no sports selected or in player props mode, return default
+    if (!sports || sports.length === 0) {
+      return coreMarkets;
+    }
+    
+    // For player props mode, return the selected player prop markets
+    if (isPlayerPropsMode) {
+      return selectedPlayerPropMarkets;
+    }
+    
+    // For regular mode with selected markets, use those
+    if (marketKeys && marketKeys.length > 0) {
+      return marketKeys;
+    }
+    
+    // Fallback to core markets
+    return coreMarkets;
+  };
+
   const { 
     games: marketGames = [], 
     books: marketBooks = [], 
@@ -275,7 +300,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   } = useMarkets(
     sportsForMode,
     regionsForMode,
-    marketsForMode,
+    getAllCompatibleMarkets(sportsForMode),
     { date: selectedDate }
   );
 
@@ -463,9 +488,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Auto-select all relevant markets when applied sports change
   useEffect(() => {
     if (picked && picked.length > 0) {
+      // Get all relevant markets for the selected sports
       const autoSelectedMarkets = getAutoSelectedMarkets(picked);
-      setMarketKeys(autoSelectedMarkets);
-      console.log('🎯 Auto-selected applied markets for sports:', picked, '→', autoSelectedMarkets);
+      
+      // If we already have some markets selected, merge them with the auto-selected ones
+      // to ensure we don't lose any markets when adding new sports
+      if (marketKeys && marketKeys.length > 0) {
+        // Create a Set to avoid duplicates
+        const combinedMarkets = new Set([...marketKeys, ...autoSelectedMarkets]);
+        setMarketKeys(Array.from(combinedMarkets));
+        console.log('🎯 Combined markets for sports:', picked, '→', Array.from(combinedMarkets));
+      } else {
+        // If no markets are selected yet, use the auto-selected ones
+        setMarketKeys(autoSelectedMarkets);
+        console.log('🎯 Auto-selected markets for sports:', picked, '→', autoSelectedMarkets);
+      }
     }
   }, [picked]);
 
@@ -823,6 +860,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
     // If multiple sports selected, combine all relevant markets
     const allMarkets = new Map();
+    
+    // Always include default markets for better compatibility
+    MARKETS_BY_SPORT.default.forEach(market => {
+      allMarkets.set(market.key, market);
+    });
     
     selectedSports.forEach(sport => {
       let sportCategory = 'default';
