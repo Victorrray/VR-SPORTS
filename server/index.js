@@ -58,13 +58,13 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
+  // DFS apps for player props (prioritized for slice limit)
+  "prizepicks", "underdog", "prophetx", "pick6",
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
   "hardrock", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
   "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
-  // DFS apps for player props (expanded list)
-  "prizepicks", "underdog", "prophetx", "pick6",
   // US exchange books
   "prophet_exchange", "rebet", "betopenly",
   // International (for comparison)
@@ -73,11 +73,12 @@ const FOCUSED_BOOKMAKERS = [
 
 // Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
 const TRIAL_BOOKMAKERS = [
+  // DFS apps for player props (prioritized for slice limit)
+  "prizepicks", "underdog", "prophetx", "pick6",
+  // Major sportsbooks
   "draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", 
   "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
   "superbook", "twinspires", "betfred_us", "circasports", "lowvig", "barstool",
-  // All DFS apps for player props
-  "prizepicks", "underdog", "prophetx", "pick6",
   "espnbet", "fanatics", "pinnacle", "betopenly", "rebet"
 ];
 
@@ -1867,6 +1868,15 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
           const bookmakerList = allowedBookmakers.slice(0, 19).join(','); // Limit to 19 books for props (use all trial bookmakers including DFS apps)
+          
+          // Debug logging for DFS apps
+          console.log('🎯 Player Props Bookmaker Debug:', {
+            userPlan: userProfile.plan,
+            totalBookmakers: allowedBookmakers.length,
+            first19: allowedBookmakers.slice(0, 19),
+            dfsAppsIncluded: allowedBookmakers.slice(0, 19).filter(b => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(b)),
+            bookmakerListForAPI: bookmakerList
+          });
           
           // Use individual event endpoint for player props
           // Include both us and us_dfs regions to get traditional sportsbooks AND DFS apps
