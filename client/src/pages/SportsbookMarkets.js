@@ -304,6 +304,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     { date: selectedDate }
   );
 
+  // Initialize mode from URL parameters
+  useEffect(() => {
+    // Check for mode parameter in URL
+    const searchParams = new URLSearchParams(location.search);
+    const mode = searchParams.get('mode');
+    
+    if (mode === 'arbitrage') {
+      console.log('🔍 Initializing arbitrage mode from URL parameter');
+      setShowPlayerProps(false);
+      setShowArbitrage(true);
+      setShowMiddles(false);
+    } else if (mode === 'props') {
+      console.log('🎯 Initializing player props mode from URL parameter');
+      setShowPlayerProps(true);
+      setShowArbitrage(false);
+      setShowMiddles(false);
+    } else if (mode === 'middles') {
+      console.log('🎪 Initializing middles mode from URL parameter');
+      setShowPlayerProps(false);
+      setShowArbitrage(false);
+      setShowMiddles(true);
+    }
+  }, [location.search]); // Only run when URL parameters change
+
   // Listen for changes to user's sportsbook selections
   useEffect(() => {
     const handleStorageChange = () => {
@@ -1056,8 +1080,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         // DFS Apps (player props focused)
         'prizepicks', 'underdog', 'pick6', 'prophetx',
         // Additional US books that may support player props
-        'bovada', 'mybookie', 'betonline'
+        'bovada', 'mybookie', 'betonline', 'mybookieag', 'betonlineag',
+        // International books that might have player props
+        'pinnacle', 'williamhill_us', 'unibet_us', 'foxbet', 'barstool',
+        // Additional books to ensure all user selections are included
+        'pointsbetus', 'rebet', 'sleeper',
+        // Include any other sportsbook keys that might be in user selections
+        'bet365', 'betus', 'betway', 'sportsbetting_ag', 'bookmaker', 'gtbets',
+        'betamerica', 'betfair', 'betfred', 'betmgm_us', 'betrivers_us', 'bwin',
+        'coral', 'ladbrokes', 'marathonbet', 'matchbook', 'paddypower', 'skybet',
+        'sport888', 'sportsinteraction', 'sugarhouse', 'tipico_us', 'twinspires_us',
+        'unibet_eu', 'unibet_uk', 'unibet_au', 'williamhill', 'williamhill_uk',
+        'williamhill_eu', 'williamhill_au', 'wynn', 'betparx', 'betmgm_ontario',
+        'draftkings_ontario', 'fanduel_ontario'
       ];
+      
+      // Log the expanded list
+      console.log('🎯 Expanded Player Props Bookmakers List:', playerPropsBookmakers.length, 'sportsbooks included');
       
       // Filter marketBooks to only include player props supporting bookmakers
       const filteredMarketBooks = (marketBooks || []).filter(book => 
@@ -1075,11 +1114,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
       ];
       
+      // Find which books are being filtered out
+      const filteredOutBooks = (marketBooks || []).filter(book => 
+        !playerPropsBookmakers.includes(book.key)
+      );
+      
       console.log('🎯 Player Props Bookmakers Filter:', {
         totalAvailable: marketBooks?.length || 0,
         playerPropsSupported: enhancedBooks.length,
         filteredOut: (marketBooks?.length || 0) - filteredMarketBooks.length,
-        supportedBooks: enhancedBooks.map(b => b.key)
+        supportedBooks: enhancedBooks.map(b => b.key),
+        filteredOutBooks: filteredOutBooks.map(b => `${b.key} (${b.title})`)
       });
       
       return enhancedBooks;
@@ -1217,11 +1262,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           }}>
             {/* Game Odds Option */}
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('📈 Game Odds button clicked - setting game odds mode');
+                
+                // Update all mode states at once to avoid race conditions
                 setShowArbitrage(false);
                 setShowPlayerProps(false);
                 setShowMiddles(false);
                 setNavigationExpanded(false);
+                
+                // Force a re-render by updating the table nonce
+                setTableNonce(prev => prev + 1);
+                
+                // Update URL with mode parameter for persistence
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.delete('mode'); // Default mode is game odds, so remove parameter
+                
+                // Use replace state to avoid breaking browser history
+                window.history.replaceState(
+                  null, 
+                  '', 
+                  searchParams.toString() ? `${location.pathname}?${searchParams.toString()}` : location.pathname
+                );
               }}
               style={{
                 width: "100%",
@@ -1279,17 +1343,34 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             {/* Player Props Option - Hidden for Gold users */}
             {me?.plan !== 'gold' && (
             <button
-              onClick={() => {
-                setShowArbitrage(false);
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🎯 Player Props button clicked - setting player props mode');
+                
+                // Update all mode states at once to avoid race conditions
                 setShowPlayerProps(true);
+                setShowArbitrage(false);
                 setShowMiddles(false);
                 setNavigationExpanded(false);
-                // Immediate loading state for better perceived performance
-                setPlayerPropsProcessing(true);
+                
+                // Force a re-render by updating the table nonce
+                setTableNonce(prev => prev + 1);
+                
+                // Update URL with mode parameter for persistence
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('mode', 'props');
+                
+                // Use replace state to avoid breaking browser history
+                window.history.replaceState(
+                  null, 
+                  '', 
+                  `${location.pathname}?${searchParams.toString()}`
+                );
               }}
               style={{
                 width: "100%",
-                background: isPlayerPropsMode 
+                background: isPlayerPropsMode
                   ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
                   : "transparent",
                 border: "none",
@@ -1348,10 +1429,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('🔍 Arbitrage button clicked - setting arbitrage mode');
+                
+                // Update all mode states at once to avoid race conditions
                 setShowPlayerProps(false);
                 setShowArbitrage(true);
                 setShowMiddles(false);
                 setNavigationExpanded(false);
+                
+                // Force a re-render by updating the table nonce
+                setTableNonce(prev => prev + 1);
+                
+                // Update URL with mode parameter for persistence
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('mode', 'arbitrage');
+                
+                // Use replace state to avoid breaking browser history
+                window.history.replaceState(
+                  null, 
+                  '', 
+                  `${location.pathname}?${searchParams.toString()}`
+                );
               }}
               style={{
                 width: "100%",
@@ -1409,11 +1506,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             {/* Middles Option - Hidden for Gold users */}
             {me?.plan !== 'gold' && (
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🎪 Middles button clicked - setting middles mode');
+                
+                // Update all mode states at once to avoid race conditions
                 setShowPlayerProps(false);
                 setShowArbitrage(false);
                 setShowMiddles(true);
                 setNavigationExpanded(false);
+                
+                // Force a re-render by updating the table nonce
+                setTableNonce(prev => prev + 1);
+                
+                // Update URL with mode parameter for persistence
+                const searchParams = new URLSearchParams(location.search);
+                searchParams.set('mode', 'middles');
+                
+                // Use replace state to avoid breaking browser history
+                window.history.replaceState(
+                  null, 
+                  '', 
+                  `${location.pathname}?${searchParams.toString()}`
+                );
               }}
               style={{
                 width: "100%",
