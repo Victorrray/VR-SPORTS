@@ -221,35 +221,6 @@ export default function Navbar({ onOpenMobileSearch }) {
               <button 
                 onClick={() => {
                   setProfileMenuOpen(false);
-                  navigate('/usage-plan');
-                }}
-                style={{
-                  padding: '16px 20px',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid #374151',
-                  color: '#ffffff',
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  background: 'transparent',
-                  border: 'none',
-                  width: '100%',
-                  textAlign: 'left',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#3b82f6';
-                  e.target.style.color = '#ffffff';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = '#ffffff';
-                }}
-              >
-                Usage & Plan
-              </button>
-              <button 
-                onClick={() => {
-                  setProfileMenuOpen(false);
                   navigate('/my-sportsbooks');
                 }}
                 style={{
