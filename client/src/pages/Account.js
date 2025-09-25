@@ -393,11 +393,16 @@ export default function Account() {
           <div className="user-info-grid">
             <div className="user-avatar-section">
               <div className="avatar">{initialsFromEmail(email)}</div>
-              <div className={`status-badge ${me?.plan === 'platinum' ? 'platinum' : 'free-trial'}`}>
+              <div className={`status-badge ${me?.plan === 'platinum' ? 'platinum' : me?.plan === 'gold' ? 'gold' : 'free-trial'}`}>
                 {me?.plan === 'platinum' ? (
                   <>
                     <Crown size={12} />
                     <span>Platinum</span>
+                  </>
+                ) : me?.plan === 'gold' ? (
+                  <>
+                    <Crown size={12} />
+                    <span>Gold</span>
                   </>
                 ) : (
                   <>

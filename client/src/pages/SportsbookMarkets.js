@@ -635,12 +635,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         console.warn('Failed to fetch sports list:', error);
         // Fallback sports list
         setSportList([
-          { key: 'americanfootball_nfl', title: 'NFL' },
-          { key: 'americanfootball_ncaaf', title: 'NCAAF' },
-          { key: 'basketball_nba', title: 'NBA' },
-          { key: 'basketball_ncaab', title: 'NCAAB' },
-          { key: 'icehockey_nhl', title: 'NHL' },
-          { key: 'baseball_mlb', title: 'MLB' }
+          // Major US Sports
+          { key: 'americanfootball_nfl', title: 'NFL', group: "Major US Sports" },
+          { key: 'americanfootball_ncaaf', title: 'NCAAF', group: "Major US Sports" },
+          { key: 'basketball_nba', title: 'NBA', group: "Major US Sports" },
+          { key: 'basketball_ncaab', title: 'NCAAB', group: "Major US Sports" },
+          { key: 'icehockey_nhl', title: 'NHL', group: "Major US Sports" },
+          { key: 'baseball_mlb', title: 'MLB', group: "Major US Sports" },
+          
+          // Soccer
+          { key: 'soccer_epl', title: 'EPL', group: "Soccer" },
+          { key: 'soccer_uefa_champs_league', title: 'Champions League', group: "Soccer" },
+          { key: 'soccer_mls', title: 'MLS', group: "Soccer" },
+          
+          // Combat Sports
+          { key: 'mma_mixed_martial_arts', title: 'MMA', group: "Combat Sports" },
+          { key: 'boxing_boxing', title: 'Boxing', group: "Combat Sports" }
         ]);
       }
     };

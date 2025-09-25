@@ -1725,37 +1725,90 @@ app.get("/api/sports", requireUser, checkPlanAccess, async (_req, res) => {
     // If no API key, return fallback sports list
     if (!API_KEY) {
       const fallbackSports = [
-        { key: "americanfootball_nfl", title: "NFL", active: true },
-        { key: "americanfootball_ncaaf", title: "NCAAF", active: true },
-        { key: "basketball_nba", title: "NBA", active: true },
-        { key: "basketball_ncaab", title: "NCAAB", active: true },
-        { key: "baseball_mlb", title: "MLB", active: true },
-        { key: "icehockey_nhl", title: "NHL", active: true },
-        { key: "soccer_epl", title: "EPL", active: true },
-        { key: "soccer_uefa_champs_league", title: "UCL", active: true },
-        { key: "mma_mixed_martial_arts", title: "MMA", active: true },
-        { key: "boxing_boxing", title: "Boxing", active: true }
+        // Major US Sports
+        { key: "americanfootball_nfl", title: "NFL", active: true, group: "Major US Sports" },
+        { key: "americanfootball_ncaaf", title: "NCAAF", active: true, group: "Major US Sports" },
+        { key: "basketball_nba", title: "NBA", active: true, group: "Major US Sports" },
+        { key: "basketball_ncaab", title: "NCAAB", active: true, group: "Major US Sports" },
+        { key: "baseball_mlb", title: "MLB", active: true, group: "Major US Sports" },
+        { key: "icehockey_nhl", title: "NHL", active: true, group: "Major US Sports" },
+        
+        // Soccer
+        { key: "soccer_epl", title: "EPL", active: true, group: "Soccer" },
+        { key: "soccer_uefa_champs_league", title: "Champions League", active: true, group: "Soccer" },
+        { key: "soccer_mls", title: "MLS", active: true, group: "Soccer" },
+        
+        // Combat Sports
+        { key: "mma_mixed_martial_arts", title: "MMA", active: true, group: "Combat Sports" },
+        { key: "boxing_boxing", title: "Boxing", active: true, group: "Combat Sports" }
       ];
       console.log('🧪 Returning fallback sports list - API key not configured');
       return res.json(fallbackSports);
     }
     
+    // Filter function to remove championship winners and other unwanted sports
+    const filterSportsList = (sportsList) => {
+      // List of sports to exclude
+      const excludedSports = [
+        'americanfootball_ncaaf_championship_winner',
+        'americanfootball_nfl_super_bowl_winner',
+        'baseball_mlb_world_series_winner',
+        'basketball_nba_championship_winner',
+        'basketball_ncaab_championship_winner',
+        'icehockey_nhl_championship_winner',
+        'soccer_uefa_champs_league_winner',
+        'soccer_epl_winner',
+        'soccer_fifa_world_cup_winner',
+        'soccer_uefa_europa_league_winner'
+      ];
+      
+      // List of less popular leagues to exclude
+      const lessPopularLeagues = [
+        'australianrules_afl',
+        'baseball_kbo',
+        'baseball_npb',
+        'baseball_mlb_preseason',
+        'baseball_milb',
+        'basketball_euroleague',
+        'basketball_nba_preseason',
+        'cricket_',
+        'cricket_test_match',
+        'rugbyleague_',
+        'rugbyunion_'
+      ];
+      
+      return sportsList.filter(sport => {
+        // Exclude championship winners
+        if (excludedSports.includes(sport.key)) {
+          return false;
+        }
+        
+        // Exclude less popular leagues
+        if (lessPopularLeagues.some(league => sport.key.startsWith(league))) {
+          return false;
+        }
+        
+        return true;
+      });
+    };
+
     // Check cache first - sports list rarely changes
     const cacheKey = getCacheKey('sports', {});
     const cachedSports = getCachedResponse(cacheKey);
     
     if (cachedSports) {
       console.log('📦 Using cached sports list');
-      return res.json(cachedSports);
+      return res.json(filterSportsList(cachedSports));
     }
     
     console.log('🌐 API call for sports list');
     const url = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
     const r = await axios.get(url);
     
-    // Cache for longer since sports list is stable
-    setCachedResponse(cacheKey, r.data);
-    res.json(r.data);
+    // Filter and cache the sports list
+    const filteredSports = filterSportsList(r.data);
+    setCachedResponse(cacheKey, filteredSports);
+    res.json(filteredSports);
   } catch (err) {
     console.error("sports error:", err?.response?.status, err?.response?.data || err.message);
     res.status(500).json({ error: String(err) });
