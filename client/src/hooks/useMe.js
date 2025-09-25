@@ -45,17 +45,8 @@ export function useMe() {
       };
     }
 
-    // TEMPORARY: Give all users Platinum access for arbitrage testing
-    console.log('🎯 useMe: TEMPORARY - Giving all users Platinum access for arbitrage testing');
-    return {
-      plan: 'platinum',
-      remaining: null,
-      limit: null,
-      calls_made: 0,
-      stale: false,
-    };
-
-    // return planToUsage(initialPlan);
+    // Return actual plan data for real users
+    return planToUsage(initialPlan);
   });
   const [loading, setLoading] = useState(() => planLoading || !initialPlan);
   const [error, setError] = useState(null);

@@ -3,7 +3,6 @@ import { useAuth } from '../hooks/useAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { Crown, Zap, TrendingUp, Shield, Check, ArrowLeft, Calendar, CreditCard, X, AlertTriangle } from 'lucide-react';
-import UsagePlanCard from '../components/billing/UsagePlanCard';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { withApiBase } from '../config/api';
 import { secureFetch } from '../utils/security';
@@ -152,11 +151,6 @@ export default function UsagePlan() {
         </div>
       </div>
 
-      {!isPlatinum && (
-        <div className="usage-section">
-          <UsagePlanCard />
-        </div>
-      )}
 
       {isPlatinum && (
         <div className="subscription-management">
