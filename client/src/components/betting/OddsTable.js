@@ -138,8 +138,8 @@ function calculateEV(odds, fairLine, bookmakerKey = null) {
   if (!odds || !fairLine) return null;
   const toDec = o => (o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1);
   
-  // Special EV calculation for DFS apps and Fliff
-  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx', 'fliff'].includes(bookmakerKey);
+  // Special EV calculation for DFS apps only
+  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmakerKey);
   
   if (isDFSApp) {
     // DFS apps typically pay even money (+100) or close to it
