@@ -91,6 +91,7 @@ export default function Dashboard() {
   }, [user?.user_metadata?.username, user?.email]);
   
   // Only fetch live odds data when actually on the dashboard page
+  const location = useLocation();
   const isDashboardPage = location.pathname === '/' || location.pathname === '/dashboard';
   const enableDashboardMarkets = Boolean(user && isDashboardPage);
   const { games } = useMarkets(

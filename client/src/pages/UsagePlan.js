@@ -18,6 +18,9 @@ export default function UsagePlan() {
 
   console.log('🔍 UsagePlan: Component render', { user: !!user, me, loading });
 
+  // Define isPlatinum based on user plan
+  const isPlatinum = me?.plan === 'platinum';
+
   if (!user) {
     navigate('/login');
     return null;
