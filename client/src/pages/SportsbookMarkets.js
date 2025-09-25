@@ -303,25 +303,35 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     console.log('🎯 Initial auto-selected markets:', initialMarkets);
   }, []); // Run only once on mount
 
-  // Auto-update player prop markets when sport changes
+  // Auto-update player prop markets when sport changes (only if current selection is inappropriate)
   useEffect(() => {
     if (isPlayerPropsMode && picked && picked.length > 0) {
       const sportBasedMarkets = getPlayerPropMarketsBySport(picked);
-      
-      // Get the first 3 non-header markets as default selection
-      const defaultMarkets = sportBasedMarkets
+      const availableMarketKeys = sportBasedMarkets
         .filter(market => !market.isHeader)
-        .slice(0, 3)
         .map(market => market.key);
       
-      if (defaultMarkets.length > 0) {
-        console.log('🎯 Auto-updating player prop markets for sport change:', {
-          sports: picked,
-          newMarkets: defaultMarkets
-        });
+      // Check if current selection contains markets that don't exist for the current sport
+      const hasInvalidMarkets = selectedPlayerPropMarkets.some(market => 
+        !availableMarketKeys.includes(market)
+      );
+      
+      // Only auto-update if current selection is empty or contains invalid markets
+      if (selectedPlayerPropMarkets.length === 0 || hasInvalidMarkets) {
+        // Get the first 3 non-header markets as default selection (only when auto-updating)
+        const defaultMarkets = availableMarketKeys.slice(0, 3);
         
-        setSelectedPlayerPropMarkets(defaultMarkets);
-        setDraftSelectedPlayerPropMarkets(defaultMarkets);
+        if (defaultMarkets.length > 0) {
+          console.log('🎯 Auto-updating player prop markets for sport change:', {
+            sports: picked,
+            reason: selectedPlayerPropMarkets.length === 0 ? 'empty selection' : 'invalid markets',
+            invalidMarkets: hasInvalidMarkets ? selectedPlayerPropMarkets.filter(m => !availableMarketKeys.includes(m)) : [],
+            newMarkets: defaultMarkets
+          });
+          
+          setSelectedPlayerPropMarkets(defaultMarkets);
+          setDraftSelectedPlayerPropMarkets(defaultMarkets);
+        }
       }
     }
   }, [picked, isPlayerPropsMode]); // Run when sport or player props mode changes
