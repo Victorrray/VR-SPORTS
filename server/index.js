@@ -797,16 +797,41 @@ async function getUserProfile(userId) {
 
   const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
   if (error && error.code === "PGRST116") {
-    // User doesn't exist, create them with no plan (requires Gold subscription)
-    const { data: inserted, error: insertErr } = await supabase
-      .from("users")
-      .insert({ id: userId, plan: null, api_request_count: 0 })
-      .select("*")
-      .single();
-    if (insertErr) throw insertErr;
-    return inserted;
+    // User doesn't exist - this should not happen if database triggers are working
+    // The unified trigger should create users automatically on auth.users insert
+    console.error(`❌ User ${userId} not found in users table - database trigger may not be working`);
+    
+    // Try to create manually as fallback, but log this as an issue
+    try {
+      const { data: inserted, error: insertErr } = await supabase
+        .from("users")
+        .insert({ 
+          id: userId, 
+          plan: null, 
+          api_request_count: 0,
+          grandfathered: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select("*")
+        .single();
+      
+      if (insertErr) {
+        console.error('❌ Failed to create user manually:', insertErr);
+        throw new Error(`Database error creating user: ${insertErr.message}`);
+      }
+      
+      console.log(`✅ Created user ${userId} manually (trigger should have done this)`);
+      return inserted;
+    } catch (createError) {
+      console.error('❌ Manual user creation failed:', createError);
+      throw new Error(`Database error saving new user: ${createError.message}`);
+    }
   }
-  if (error) throw error;
+  if (error) {
+    console.error('❌ Database error fetching user:', error);
+    throw new Error(`Database error: ${error.message}`);
+  }
 
   // Check if Gold/Platinum subscription has expired
   if ((data.plan === 'gold' || data.plan === 'platinum') && data.subscription_end_date && !data.grandfathered) {

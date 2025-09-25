@@ -27,7 +27,6 @@ export default function Dashboard() {
     
     switch (planId) {
       case 'gold':
-      case 'platinum': // Grandfathered users
         return (
           <span style={{
             padding: '6px 12px',
@@ -43,6 +42,24 @@ export default function Dashboard() {
           }}>
             <Crown size={12} />
             GOLD
+          </span>
+        );
+      case 'platinum':
+        return (
+          <span style={{
+            padding: '6px 12px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: '600',
+            background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+            color: '#fff',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            <Crown size={12} />
+            PLATINUM
           </span>
         );
       default:

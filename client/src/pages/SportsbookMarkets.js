@@ -252,7 +252,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : (picked.length > 0 ? [picked[0]] : picked);
   
   const hasPlatinum = me?.plan === 'platinum';
-  const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
+  const hasGoldOrBetter = me?.plan === 'gold' || me?.plan === 'platinum';
+  const isOverQuota = !hasGoldOrBetter && me?.calls_made >= (me?.limit || 250);
   
   // Debug logging for arbitrage access
   console.log('🔍 Arbitrage Debug:', {
