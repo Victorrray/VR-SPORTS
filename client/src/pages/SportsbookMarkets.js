@@ -206,7 +206,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
   const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
   const [selectedDate, setSelectedDate] = useState("");
-  const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]); // Will be auto-updated by useEffect
+  const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals", "team_totals"]); // Added team_totals to default selection
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);

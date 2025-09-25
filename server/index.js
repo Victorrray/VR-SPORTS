@@ -78,15 +78,22 @@ const TRIAL_BOOKMAKERS = [
   // Major sportsbooks
   "draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", 
   "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
-  "superbook", "twinspires", "betfred_us", "circasports", "lowvig", "barstool",
   "espnbet", "fanatics", "pinnacle", "betopenly", "rebet"
 ];
 
 // Player props completely removed
 
 const MAX_BOOKMAKERS = 20; // Increased to accommodate more sportsbooks and DFS apps for player props
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes cache
-// Player props functionality removed
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const ALTERNATE_MARKETS_CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes for alternate markets
+
+// List of alternate markets that change less frequently
+const ALTERNATE_MARKETS = [
+  'alternate_spreads',
+  'alternate_totals',
+  'team_totals',
+  'alternate_team_totals'
+];
 
 // In-memory cache for API responses
 const apiCache = new Map();
@@ -717,19 +724,31 @@ async function getEventIdsForLeagueDate(league, date) {
 
 function getCachedResponse(cacheKey) {
   const cached = apiCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION_MS) {
-    console.log(`📦 Cache HIT for ${cacheKey}`);
+  if (!cached) {
+    console.log(` Cache MISS for ${cacheKey}`);
+    return null;
+  }
+  
+  // Determine if this is an alternate markets cache key
+  const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
+  const cacheDuration = isAlternateMarket ? ALTERNATE_MARKETS_CACHE_DURATION_MS : CACHE_DURATION_MS;
+  
+  if (Date.now() - cached.timestamp < cacheDuration) {
+    console.log(` Cache HIT for ${cacheKey}${isAlternateMarket ? ' (alternate market)' : ''}`);
     return cached.data;
   }
-  if (cached) {
-    apiCache.delete(cacheKey); // Remove expired cache
-  }
+  
+  console.log(` Cache EXPIRED for ${cacheKey}`);
+  apiCache.delete(cacheKey); // Remove expired cache
   return null;
 }
 
 function setCachedResponse(cacheKey, data) {
+  // Check if this is an alternate market for logging purposes
+  const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
+  
   apiCache.set(cacheKey, { data, timestamp: Date.now() });
-  console.log(`💾 Cached response for ${cacheKey}`);
+  console.log(`💾 Cached response for ${cacheKey}${isAlternateMarket ? ' (alternate market with extended TTL)' : ''}`);
 }
 
 // Helper function to get current monthly window (UTC)
@@ -1894,18 +1913,95 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
           const bookmakerList = allowedBookmakers.join(',');
           const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
-          // Check cache first to avoid redundant API calls
+          // Split markets into regular and alternate for optimized caching
+          const regularMarkets = marketsToFetch.filter(market => !ALTERNATE_MARKETS.includes(market));
+          const alternateMarkets = marketsToFetch.filter(market => ALTERNATE_MARKETS.includes(market));
+          
+          // Check if we need to fetch both types of markets
+          const needsRegularMarkets = regularMarkets.length > 0;
+          const needsAlternateMarkets = alternateMarkets.length > 0;
+          
+          // Create separate cache keys for regular and alternate markets
+          const regularCacheKey = needsRegularMarkets ? 
+            getCacheKey('odds', { sport, regions, markets: regularMarkets, bookmakers: bookmakerList }) : null;
+          const alternateCacheKey = needsAlternateMarkets ? 
+            getCacheKey('odds_alternate', { sport, regions, markets: alternateMarkets, bookmakers: bookmakerList }) : null;
+          
+          // Check cache for both types
+          const cachedRegularData = needsRegularMarkets ? getCachedResponse(regularCacheKey) : null;
+          const cachedAlternateData = needsAlternateMarkets ? getCachedResponse(alternateCacheKey) : null;
+          
+          // Determine if we can use cached data for everything
+          const canUseAllCached = 
+            (!needsRegularMarkets || cachedRegularData) && 
+            (!needsAlternateMarkets || cachedAlternateData);
+          
+          // For backward compatibility, create a combined cache key
           const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsToFetch, bookmakers: bookmakerList });
           const cachedData = getCachedResponse(cacheKey);
           
-          let response;
-          if (cachedData) {
-            response = { data: cachedData };
-            console.log(`📦 Using cached data for ${sport}`);
+          let responseData;
+          
+          // If we can use all cached data, combine it
+          if (canUseAllCached) {
+            // Combine cached data from both sources
+            responseData = [];
+            
+            if (cachedRegularData) {
+              console.log(`📦 Using cached regular markets data for ${sport}`);
+              responseData = [...responseData, ...cachedRegularData];
+            }
+            
+            if (cachedAlternateData) {
+              console.log(`📦 Using cached alternate markets data for ${sport} (extended TTL)`);
+              responseData = [...responseData, ...cachedAlternateData];
+            }
+            
+            // For backward compatibility
+            if (cachedData) {
+              console.log(`📦 Using combined cached data for ${sport}`);
+              responseData = cachedData;
+            }
           } else {
+            // Need to make an API call
             console.log(`🌐 API call for ${sport}:`, url);
-            response = await axios.get(url);
-            setCachedResponse(cacheKey, response.data);
+            const response = await axios.get(url);
+            responseData = response.data;
+            
+            // Cache the data with split strategy
+            if (needsRegularMarkets && needsAlternateMarkets) {
+              // Split the response data by market type
+              const regularData = responseData.map(game => ({
+                ...game,
+                bookmakers: game.bookmakers.map(bookmaker => ({
+                  ...bookmaker,
+                  markets: bookmaker.markets.filter(market => !ALTERNATE_MARKETS.includes(market.key))
+                })).filter(bookmaker => bookmaker.markets.length > 0)
+              })).filter(game => game.bookmakers.length > 0);
+              
+              const alternateData = responseData.map(game => ({
+                ...game,
+                bookmakers: game.bookmakers.map(bookmaker => ({
+                  ...bookmaker,
+                  markets: bookmaker.markets.filter(market => ALTERNATE_MARKETS.includes(market.key))
+                })).filter(bookmaker => bookmaker.markets.length > 0)
+              })).filter(game => game.bookmakers.length > 0);
+              
+              // Cache both separately
+              if (regularData.length > 0) {
+                setCachedResponse(regularCacheKey, regularData);
+              }
+              
+              if (alternateData.length > 0) {
+                setCachedResponse(alternateCacheKey, alternateData);
+              }
+              
+              // Also cache the combined data for backward compatibility
+              setCachedResponse(cacheKey, responseData);
+            } else {
+              // Just cache everything in one go
+              setCachedResponse(cacheKey, responseData);
+            }
             
             // Increment usage for each actual external API call made
             const userId = req.__userId;
@@ -1915,7 +2011,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
               console.log(`📊 Incremented usage for ${sport} API call`);
             }
           }
-          const sportGames = response.data || [];
+          const sportGames = responseData || [];
           console.log(`Got ${sportGames.length} games for ${sport}`);
           
           allGames.push(...sportGames);
