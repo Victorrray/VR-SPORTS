@@ -7,7 +7,7 @@ import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
 
 // Only these 3 DFS apps
-const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
+const DFS_KEYS = ["prizepicks", "underdog", "draftkings_pick6"];
 
 const MARKET_MAP = {
   // Basketball

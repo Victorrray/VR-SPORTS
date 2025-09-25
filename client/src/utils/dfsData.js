@@ -7,47 +7,7 @@ const DFS_ENDPOINTS = {
   sleeper: 'https://api.sleeper.app/projections/nfl'
 };
 
-// Mock accurate data structure for testing
-const MOCK_DFS_DATA = {
-  prizepicks: {
-    'jalen-hurts-pass-yds': {
-      player: 'Jalen Hurts',
-      stat: 'Pass Yds',
-      line: 299.5,
-      over_odds: 100,
-      under_odds: 100,
-      game: 'PHI @ DAL',
-      date: '2024-09-04'
-    },
-    'dak-prescott-pass-yds': {
-      player: 'Dak Prescott',
-      stat: 'Pass Yds',
-      line: 275.5,
-      over_odds: 100,
-      under_odds: 100,
-      game: 'PHI @ DAL',
-      date: '2024-09-04'
-    },
-    'ceedee-lamb-rec-yds': {
-      player: 'CeeDee Lamb',
-      stat: 'Rec Yds',
-      line: 89.5,
-      over_odds: 100,
-      under_odds: 100,
-      game: 'PHI @ DAL',
-      date: '2024-09-04'
-    },
-    'aj-brown-rec-yds': {
-      player: 'A.J. Brown',
-      stat: 'Rec Yds',
-      line: 72.5,
-      over_odds: 100,
-      under_odds: 100,
-      game: 'PHI @ DAL',
-      date: '2024-09-04'
-    }
-  }
-};
+// DFS Data Integration - No mock data, real API integration only
 
 export async function fetchDFSData(site, sport = 'nfl') {
   try {
@@ -63,6 +23,13 @@ export async function fetchDFSData(site, sport = 'nfl') {
     console.warn(`Failed to fetch ${site} data:`, error);
     return {};
   }
+}
+
+export async function fetchDFSData(sites = ['prizepicks', 'underdog', 'draftkings_pick6']) {
+  console.log('🎯 DFS data fetching disabled - DFS apps should get data through main API');
+  // DFS apps should receive data through The Odds API if supported
+  // Return empty object to avoid mock data
+  return {};
 }
 
 export function normalizeDFSData(rawData, site) {

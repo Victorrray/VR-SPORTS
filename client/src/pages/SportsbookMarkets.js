@@ -236,7 +236,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const isArbitrageMode = showArbitrage;
   const isMiddlesMode = showMiddles;
   const marketsForMode = isPlayerPropsMode ? [...marketKeys, ...selectedPlayerPropMarkets] : marketKeys;
-  const regionsForMode = isPlayerPropsMode ? ["us"] : ["us", "us2", "us_exchanges"];
+  const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
   // For player props, hardcode NFL to avoid filter issues
   const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : picked;
@@ -973,7 +973,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // For Game Odds mode, only return traditional sportsbooks (no DFS apps)
     return (marketBooks || []).filter(book => {
-      const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'sleeper', 'prophetx', 'draftkings_pick6'];
+      const dfsAppKeys = ['prizepicks', 'underdog', 'sleeper', 'prophetx', 'draftkings_pick6'];
       return !dfsAppKeys.includes(book.key);
     });
   }, [marketBooks, showPlayerProps]);

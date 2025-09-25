@@ -64,7 +64,7 @@ const FOCUSED_BOOKMAKERS = [
   "hardrock", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
   "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
   // DFS apps for player props (expanded list)
-  "prizepicks", "underdog", "pick6", "prophetx", "draftkings_pick6",
+  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
   // US exchange books
   "prophet_exchange", "rebet", "betopenly",
   // International (for comparison)
@@ -77,7 +77,7 @@ const TRIAL_BOOKMAKERS = [
   "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
   "superbook", "twinspires", "betfred_us", "circasports", "lowvig", "barstool",
   // All DFS apps for player props
-  "prizepicks", "underdog", "pick6", "prophetx", "draftkings_pick6",
+  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
   "espnbet", "fanatics", "pinnacle", "betopenly", "rebet"
 ];
 
@@ -1869,7 +1869,8 @@ app.get("/api/odds", requireUser, trackUsage, async (req, res) => {
           const bookmakerList = allowedBookmakers.slice(0, 19).join(','); // Limit to 19 books for props (use all trial bookmakers including DFS apps)
           
           // Use individual event endpoint for player props
-          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
+          // Include both us and us_dfs regions to get traditional sportsbooks AND DFS apps
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
           const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, bookmakers: bookmakerList });
