@@ -96,7 +96,7 @@
   background: linear-gradient(135deg, var(--bg-elev) 0%, rgba(255, 215, 0, 0.05) 100%);
 }
 
-.current-plan-card.free-trial {
+.current-plan-card.guest {
   border-color: rgba(139, 92, 246, 0.3);
   background: linear-gradient(135deg, var(--bg-elev) 0%, rgba(139, 92, 246, 0.05) 100%);
 }
@@ -121,7 +121,7 @@
   color: #FFD700;
 }
 
-.free-trial .plan-icon {
+.guest .plan-icon {
   background: rgba(139, 92, 246, 0.15);
   color: var(--accent);
 }

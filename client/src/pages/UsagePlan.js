@@ -93,17 +93,17 @@ export default function UsagePlan() {
       </div>
 
       <div className="plan-overview">
-        <div className={`current-plan-card ${isPlatinum ? 'platinum' : 'free-trial'}`}>
+        <div className={`current-plan-card ${isPlatinum ? 'platinum' : 'guest'}`}>
           <div className="plan-header">
             <div className="plan-icon">
               {isPlatinum ? <Crown size={20} /> : <Zap size={20} />}
             </div>
             <div className="plan-info">
-              <h3>{isPlatinum ? 'Platinum Plan' : 'Free Trial'}</h3>
+              <h3>{isPlatinum ? 'Platinum Plan' : 'Guest Access'}</h3>
               <p className="plan-description">
                 {isPlatinum 
                   ? 'Unlimited access to all premium features'
-                  : 'Limited access with basic features'
+                  : 'Limited access - subscribe for full features'
                 }
               </p>
             </div>
