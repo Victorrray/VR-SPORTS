@@ -239,7 +239,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
   // For player props, hardcode NFL to avoid filter issues
-  const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : picked;
+  // For regular mode, limit to single sport to prevent overload
+  const sportsForMode = isPlayerPropsMode ? ["americanfootball_nfl"] : (picked.length > 0 ? [picked[0]] : picked);
   
   const hasPlatinum = me?.plan === 'platinum';
   const isOverQuota = me?.plan !== 'platinum' && me?.calls_made >= (me?.limit || 250);
@@ -309,7 +310,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       'player_receiving_yds': 'player_reception_yds',
       'player_receiving_tds': 'player_reception_tds', 
       'player_receiving_longest': 'player_reception_longest',
-      'player_2_plus_tds': null // Remove this market as it's not supported
+      'player_2_plus_tds': null, // Remove this market as it's not supported
+      'draftkings_pick6': 'pick6' // Migrate old DFS key to new one
     };
     
     return markets
@@ -549,12 +551,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       ? selectedBooks
       : (Array.isArray(marketBooks) ? marketBooks.map(b => b.key) : []);
     
-    // Debug logging for Player Props mode
-    if (isPlayerPropsMode) {
-      console.log('🎯 Player Props - effectiveSelectedBooks:', result);
-      console.log('🎯 Player Props - selectedBooks:', selectedBooks);
-      console.log('🎯 Player Props - marketBooks:', marketBooks);
-    }
+    // Debug logging for filtering issues
+    console.log('🎯 Bookmaker Filtering Debug:', {
+      mode: isPlayerPropsMode ? 'Player Props' : 'Game Odds',
+      selectedBooks: selectedBooks,
+      selectedBooksLength: selectedBooks?.length || 0,
+      marketBooks: marketBooks?.map(b => b.key) || [],
+      effectiveSelectedBooks: result,
+      effectiveLength: result.length
+    });
     
     return result;
   }, [selectedBooks, marketBooks, isPlayerPropsMode]);
@@ -973,7 +978,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // For Game Odds mode, only return traditional sportsbooks (no DFS apps)
     return (marketBooks || []).filter(book => {
-      const dfsAppKeys = ['prizepicks', 'underdog', 'sleeper', 'prophetx', 'draftkings_pick6'];
+      const dfsAppKeys = ['prizepicks', 'underdog', 'sleeper', 'prophetx', 'pick6'];
       return !dfsAppKeys.includes(book.key);
     });
   }, [marketBooks, showPlayerProps]);

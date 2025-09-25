@@ -16,7 +16,7 @@ const SPORTSBOOK_CATEGORIES = {
   dfs: {
     title: "DFS Apps",
     icon: Gamepad2,
-    books: ["prizepicks", "underdog", "draftkings_pick6", "sleeper"]
+    books: ["prizepicks", "underdog", "pick6", "sleeper"]
   },
   premium: {
     title: "Premium Options", 

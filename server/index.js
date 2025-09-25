@@ -64,7 +64,7 @@ const FOCUSED_BOOKMAKERS = [
   "hardrock", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
   "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
   // DFS apps for player props (expanded list)
-  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
+  "prizepicks", "underdog", "prophetx", "pick6",
   // US exchange books
   "prophet_exchange", "rebet", "betopenly",
   // International (for comparison)
@@ -77,7 +77,7 @@ const TRIAL_BOOKMAKERS = [
   "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
   "superbook", "twinspires", "betfred_us", "circasports", "lowvig", "barstool",
   // All DFS apps for player props
-  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
+  "prizepicks", "underdog", "prophetx", "pick6",
   "espnbet", "fanatics", "pinnacle", "betopenly", "rebet"
 ];
 
