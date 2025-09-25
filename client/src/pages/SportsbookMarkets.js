@@ -184,19 +184,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const { me } = useMe();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
   
-  // Get user's saved sportsbook selections
-  const getUserSelectedSportsbooks = () => {
-    const saved = optimizedStorage.get('userSelectedSportsbooks');
+  // Get user's saved sportsbook selections by mode
+  const getUserSelectedSportsbooks = (mode = 'game') => {
+    const storageKey = mode === 'props' ? 'userSelectedSportsbooks_props' : 'userSelectedSportsbooks';
+    const saved = optimizedStorage.get(storageKey);
     if (saved && Array.isArray(saved) && saved.length > 0) {
       return saved;
     }
-    // Default to popular sportsbooks if nothing saved
+    
+    // Default selections by mode
+    if (mode === 'props') {
+      return ['prizepicks', 'underdog', 'pick6', 'novig']; // Default DFS apps + NoVig for player props
+    }
+    // Default to popular sportsbooks if nothing saved for game mode
     return ['draftkings', 'fanduel', 'betmgm', 'caesars'];
   };
   
   const [picked, setPicked] = useState(["americanfootball_nfl", "americanfootball_ncaaf"]);
   const [query, setQuery] = useState("");
-  const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks());
+  const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
+  const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
   const [selectedDate, setSelectedDate] = useState("");
   const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals"]); // Will be auto-updated by useEffect
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_pass_yds", "player_rush_yds", "player_receptions"]);
@@ -223,7 +230,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Draft filter state - initialize with current applied state
   const [draftPicked, setDraftPicked] = useState(picked);
   const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate);
-  const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks());
+  const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
+  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
   const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
   const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(selectedPlayerPropMarkets);
   
@@ -547,22 +555,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Removed redundant loading effect to prevent flashing
 
   const effectiveSelectedBooks = useMemo(() => {
-    const result = (selectedBooks && selectedBooks.length)
-      ? selectedBooks
+    // Use mode-specific sportsbook selection
+    const currentSelectedBooks = isPlayerPropsMode ? selectedPlayerPropsBooks : selectedBooks;
+    const result = (currentSelectedBooks && currentSelectedBooks.length)
+      ? currentSelectedBooks
       : (Array.isArray(marketBooks) ? marketBooks.map(b => b.key) : []);
     
     // Debug logging for filtering issues
     console.log('🎯 Bookmaker Filtering Debug:', {
       mode: isPlayerPropsMode ? 'Player Props' : 'Game Odds',
       selectedBooks: selectedBooks,
-      selectedBooksLength: selectedBooks?.length || 0,
+      selectedPlayerPropsBooks: selectedPlayerPropsBooks,
+      currentSelectedBooks: currentSelectedBooks,
+      selectedBooksLength: currentSelectedBooks?.length || 0,
       marketBooks: marketBooks?.map(b => b.key) || [],
       effectiveSelectedBooks: result,
       effectiveLength: result.length
     });
     
     return result;
-  }, [selectedBooks, marketBooks, isPlayerPropsMode]);
+  }, [selectedBooks, selectedPlayerPropsBooks, marketBooks, isPlayerPropsMode]);
 
   const handleMobileSearch = (searchTerm) => {
     setQuery(searchTerm);
@@ -615,12 +627,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const newPicked = Array.isArray(draftPicked) && draftPicked.length > 0 ? draftPicked : ["americanfootball_nfl"];
     const newDate = draftSelectedDate || '';
     const newBooks = Array.isArray(draftSelectedBooks) ? draftSelectedBooks : [];
+    const newPlayerPropsBooks = Array.isArray(draftSelectedPlayerPropsBooks) ? draftSelectedPlayerPropsBooks : [];
     const newMarkets = Array.isArray(draftMarketKeys) && draftMarketKeys.length > 0 ? draftMarketKeys : ["h2h", "spreads", "totals"];
     
     console.log('🏈 Applying filters:', {
       sports: newPicked,
       date: newDate,
       books: newBooks,
+      playerPropsBooks: newPlayerPropsBooks,
       markets: newMarkets,
       playerPropsMode: showPlayerProps
     });
@@ -628,7 +642,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setPicked(newPicked);
     setSelectedDate(newDate);
     setSelectedBooks(newBooks);
+    setSelectedPlayerPropsBooks(newPlayerPropsBooks);
     setMarketKeys(newMarkets);
+    
+    // Save mode-specific sportsbook selections to localStorage
+    optimizedStorage.set('userSelectedSportsbooks', newBooks);
+    optimizedStorage.set('userSelectedSportsbooks_props', newPlayerPropsBooks);
     setSelectedPlayerPropMarkets(Array.isArray(draftSelectedPlayerPropMarkets) && draftSelectedPlayerPropMarkets.length > 0 ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
     setMobileFiltersOpen(false);
 
@@ -642,7 +661,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const defaultSports = ["americanfootball_nfl"];
     setDraftPicked(defaultSports);
     setDraftSelectedDate('');
-    setDraftSelectedBooks(getUserSelectedSportsbooks()); // Reset to user's saved sportsbooks
+    setDraftSelectedBooks(getUserSelectedSportsbooks('game')); // Reset to user's saved sportsbooks for game mode
+    setDraftSelectedPlayerPropsBooks(getUserSelectedSportsbooks('props')); // Reset to user's saved sportsbooks for props mode
     setDraftMarketKeys(getAutoSelectedMarkets(defaultSports)); // Auto-select markets for default sport
     setDraftSelectedPlayerPropMarkets(["player_pass_yds", "player_rush_yds", "player_receptions"]);
   };
@@ -652,12 +672,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const defaultSports = ["americanfootball_nfl"];
     const defaultMarkets = getAutoSelectedMarkets(defaultSports); // Auto-select markets for default sport
     const defaultPlayerProps = ["player_pass_yds", "player_rush_yds", "player_receptions"];
-    const defaultSportsbooks = getUserSelectedSportsbooks(); // Use user's saved sportsbooks
+    const defaultSportsbooks = getUserSelectedSportsbooks('game'); // Use user's saved sportsbooks for game mode
+    const defaultPlayerPropsSportsbooks = getUserSelectedSportsbooks('props'); // Use user's saved sportsbooks for props mode
     
     // Reset draft state
     setDraftPicked(defaultSports);
     setDraftSelectedDate('');
     setDraftSelectedBooks(defaultSportsbooks);
+    setDraftSelectedPlayerPropsBooks(defaultPlayerPropsSportsbooks);
     setDraftMarketKeys(defaultMarkets);
     setDraftSelectedPlayerPropMarkets(defaultPlayerProps);
     
@@ -665,6 +687,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setPicked(defaultSports);
     setSelectedDate('');
     setSelectedBooks(defaultSportsbooks);
+    setSelectedPlayerPropsBooks(defaultPlayerPropsSportsbooks);
     setMarketKeys(defaultMarkets);
     setSelectedPlayerPropMarkets(defaultPlayerProps);
   };
@@ -1570,8 +1593,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
-                  selected={draftSelectedBooks || []}
-                  onChange={setDraftSelectedBooks}
+                  selected={draftSelectedPlayerPropsBooks || []}
+                  onChange={setDraftSelectedPlayerPropsBooks}
                   placeholderText="Select sportsbooks..."
                   allLabel="All Sportsbooks"
                   isSportsbook={true}

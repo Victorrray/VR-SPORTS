@@ -1292,7 +1292,15 @@ export default function OddsTable({
   const totalPages = Math.ceil(rows.length / pageSize);
   const paginatedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page, pageSize]);
 
-  useEffect(() => setPage(1), [games, mode, pageSize, bookFilter, marketFilter, evOnlyPositive, evMin]);
+  // Reset page only when fundamental data changes, not when filters change
+  useEffect(() => setPage(1), [games, mode, pageSize]);
+  
+  // Reset page only if current page exceeds total pages after filtering
+  useEffect(() => {
+    if (page > totalPages && totalPages > 0) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   useEffect(() => {
     // Skip price change animations for player props mode to prevent glitter effect
