@@ -303,6 +303,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     console.log('🎯 Initial auto-selected markets:', initialMarkets);
   }, []); // Run only once on mount
 
+  // Migration function to fix old invalid market names
+  const migrateInvalidMarkets = (markets) => {
+    const marketMigrations = {
+      'player_receiving_yds': 'player_reception_yds',
+      'player_receiving_tds': 'player_reception_tds', 
+      'player_receiving_longest': 'player_reception_longest',
+      'player_2_plus_tds': null // Remove this market as it's not supported
+    };
+    
+    return markets
+      .map(market => marketMigrations[market] || market)
+      .filter(market => market !== null);
+  };
+
   // Auto-update player prop markets when sport changes (only if current selection is inappropriate)
   useEffect(() => {
     if (isPlayerPropsMode && picked && picked.length > 0) {
@@ -311,30 +325,42 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         .filter(market => !market.isHeader)
         .map(market => market.key);
       
+      // First, migrate any old invalid market names in current selection
+      const migratedMarkets = migrateInvalidMarkets(selectedPlayerPropMarkets);
+      
       // Check if current selection contains markets that don't exist for the current sport
-      const hasInvalidMarkets = selectedPlayerPropMarkets.some(market => 
+      const hasInvalidMarkets = migratedMarkets.some(market => 
         !availableMarketKeys.includes(market)
       );
       
-      // Only auto-update if current selection is empty or contains invalid markets
-      if (selectedPlayerPropMarkets.length === 0 || hasInvalidMarkets) {
-        // Get the first 3 non-header markets as default selection (only when auto-updating)
-        const defaultMarkets = availableMarketKeys.slice(0, 3);
+      // If we migrated markets or have invalid markets, update the selection
+      if (migratedMarkets.length !== selectedPlayerPropMarkets.length || 
+          JSON.stringify(migratedMarkets) !== JSON.stringify(selectedPlayerPropMarkets) ||
+          hasInvalidMarkets) {
         
-        if (defaultMarkets.length > 0) {
-          console.log('🎯 Auto-updating player prop markets for sport change:', {
+        let marketsToUse = migratedMarkets;
+        
+        // If still have invalid markets or empty selection, use defaults
+        if (marketsToUse.length === 0 || hasInvalidMarkets) {
+          marketsToUse = availableMarketKeys.slice(0, 3);
+        }
+        
+        if (marketsToUse.length > 0) {
+          console.log('🎯 Migrating/updating player prop markets:', {
             sports: picked,
-            reason: selectedPlayerPropMarkets.length === 0 ? 'empty selection' : 'invalid markets',
-            invalidMarkets: hasInvalidMarkets ? selectedPlayerPropMarkets.filter(m => !availableMarketKeys.includes(m)) : [],
-            newMarkets: defaultMarkets
+            oldMarkets: selectedPlayerPropMarkets,
+            migratedMarkets: migratedMarkets,
+            finalMarkets: marketsToUse,
+            reason: migratedMarkets.length !== selectedPlayerPropMarkets.length ? 'migration' : 
+                   hasInvalidMarkets ? 'invalid markets' : 'empty selection'
           });
           
-          setSelectedPlayerPropMarkets(defaultMarkets);
-          setDraftSelectedPlayerPropMarkets(defaultMarkets);
+          setSelectedPlayerPropMarkets(marketsToUse);
+          setDraftSelectedPlayerPropMarkets(marketsToUse);
         }
       }
     }
-  }, [picked, isPlayerPropsMode]); // Run when sport or player props mode changes
+  }, [picked, isPlayerPropsMode, selectedPlayerPropMarkets]); // Run when sport, mode, or markets change
 
   // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {
