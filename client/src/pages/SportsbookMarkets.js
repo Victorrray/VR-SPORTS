@@ -618,9 +618,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const effectiveSelectedBooks = useMemo(() => {
     // Use mode-specific sportsbook selection
     const currentSelectedBooks = isPlayerPropsMode ? selectedPlayerPropsBooks : selectedBooks;
-    const result = (currentSelectedBooks && currentSelectedBooks.length)
-      ? currentSelectedBooks
-      : (Array.isArray(marketBooks) ? marketBooks.map(b => b.key) : []);
+    
+    // If no books are explicitly selected, return an EMPTY ARRAY to signal "show all books"
+    // This is better than returning all marketBooks keys because:
+    // 1. It's more efficient (no filtering needed)
+    // 2. It will include ALL books, even ones not in the current data
+    // 3. It's consistent with how the OddsTable component expects "show all" to work
+    const result = (currentSelectedBooks && currentSelectedBooks.length) 
+      ? currentSelectedBooks 
+      : [];
     
     // Debug logging for filtering issues
     console.log('🎯 Bookmaker Filtering Debug:', {
@@ -630,8 +636,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       currentSelectedBooks: currentSelectedBooks,
       selectedBooksLength: currentSelectedBooks?.length || 0,
       marketBooks: marketBooks?.map(b => b.key) || [],
-      effectiveSelectedBooks: result,
-      effectiveLength: result.length
+      effectiveSelectedBooks: result.length ? result : 'ALL BOOKS (empty filter)',
+      effectiveLength: result.length,
+      isShowingAllBooks: result.length === 0
     });
     
     return result;
@@ -1068,30 +1075,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const dfsApps = getDFSApps();
     const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
     
-    // For both Game Odds and Player Props modes, include all sportsbooks
-    // but handle DFS apps differently based on mode
+    // For both Game Odds and Player Props modes, include all sportsbooks AND DFS apps
+    const enhancedBooks = [
+      ...(marketBooks || []),
+      ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
+    ];
+    
+    // Log different messages based on mode
     if (showPlayerProps) {
-      // For Player Props mode, include all sportsbooks AND DFS apps
-      const enhancedBooks = [
-        ...(marketBooks || []),
-        ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
-      ];
-      
       console.log('🎯 Player Props Sportsbooks:', {
         totalAvailable: enhancedBooks.length,
         regularBooks: marketBooks?.length || 0,
         dfsApps: missingDFSApps.length,
         allBooks: enhancedBooks.map(b => b.key)
       });
-      
-      return enhancedBooks;
+    } else {
+      console.log('📈 Game Odds Sportsbooks:', {
+        totalAvailable: enhancedBooks.length,
+        regularBooks: marketBooks?.length || 0,
+        dfsApps: missingDFSApps.length,
+        allBooks: enhancedBooks.map(b => b.key)
+      });
     }
     
-    // For Game Odds mode, only return traditional sportsbooks (no DFS apps)
-    return (marketBooks || []).filter(book => {
-      const dfsAppKeys = ['prizepicks', 'underdog', 'sleeper', 'prophetx', 'pick6'];
-      return !dfsAppKeys.includes(book.key);
-    });
+    return enhancedBooks;
   }, [marketBooks, showPlayerProps]);
 
   return (
@@ -1871,7 +1878,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
-                  showDFSApps={false}
+                  showDFSApps={true}
                 />
               </div>
             </>
@@ -1916,7 +1923,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
-                  showDFSApps={false}
+                  showDFSApps={true}
                 />
               </div>
 

@@ -562,7 +562,13 @@ export default function OddsTable({
   };
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(1);
+  // Always default to sorting by highest EV (desc) unless explicitly overridden
   const [sort, setSort] = useState(initialSort || { key: "ev", dir: "desc" });
+  
+  // Log sorting information for debugging
+  useEffect(() => {
+    console.log(`🎯 OddsTable sorting by: ${sort.key} (${sort.dir === 'desc' ? 'highest to lowest' : 'lowest to highest'})`);
+  }, [sort]);
 
   // Reset expanded rows when games change to ensure clean state
   useEffect(() => {
@@ -595,6 +601,45 @@ export default function OddsTable({
   };
 
   const toggleRow = key => setExpandedRows(exp => ({ ...exp, [key]: !exp[key] }));
+
+  // Add debug logging for input data
+  useEffect(() => {
+    if (games && games.length > 0) {
+      // Log sports and bookmakers in the data
+      const sportCounts = {};
+      const bookmakerCounts = {};
+      const marketCounts = {};
+      
+      games.forEach(game => {
+        // Count sports
+        const sport = game.sport_key || 'unknown';
+        sportCounts[sport] = (sportCounts[sport] || 0) + 1;
+        
+        // Count bookmakers
+        if (game.bookmakers && Array.isArray(game.bookmakers)) {
+          game.bookmakers.forEach(bk => {
+            const key = bk.key || 'unknown';
+            bookmakerCounts[key] = (bookmakerCounts[key] || 0) + 1;
+            
+            // Count markets
+            if (bk.markets && Array.isArray(bk.markets)) {
+              bk.markets.forEach(mkt => {
+                const mktKey = mkt.key || 'unknown';
+                marketCounts[mktKey] = (marketCounts[mktKey] || 0) + 1;
+              });
+            }
+          });
+        }
+      });
+      
+      console.log(`🎯 OddsTable received ${games.length} games with:`);
+      console.log('- Sports:', sportCounts);
+      console.log('- Bookmakers:', bookmakerCounts);
+      console.log('- Markets:', marketCounts);
+      console.log('- BookFilter:', bookFilter && bookFilter.length ? bookFilter : 'ALL BOOKS');
+      console.log('- MarketFilter:', marketFilter && marketFilter.length ? marketFilter : 'ALL MARKETS');
+    }
+  }, [games, bookFilter, marketFilter]);
 
   /* ---------- Build rows (game mode) ---------- */
   const allRows = useMemo(() => {
@@ -1076,10 +1121,22 @@ export default function OddsTable({
         });
         if (!allMarketOutcomes.length) return;
 
+        // Enhanced logging for debugging bookFilter issues
+        console.log(`🎯 Processing market ${marketKey} with ${allMarketOutcomes.length} outcomes. BookFilter:`, 
+          bookFilter && bookFilter.length ? bookFilter : 'ALL BOOKS (no filter)');
+        
         const candidates = allMarketOutcomes.filter(o => {
           // If no bookFilter specified, include all bookmakers
-          if (!bookFilter || !bookFilter.length) return true;
-          return bookFilter.includes(o.bookmaker.key);
+          if (!bookFilter || !bookFilter.length) {
+            console.log(`🎯 Including all bookmakers for market ${marketKey}`);
+            return true;
+          }
+          
+          const isIncluded = bookFilter.includes(o.bookmaker.key);
+          if (!isIncluded) {
+            console.log(`🎯 Filtering out bookmaker ${o.bookmaker.key} for market ${marketKey}`);
+          }
+          return isIncluded;
         });
 
         if (!candidates.length) return;
