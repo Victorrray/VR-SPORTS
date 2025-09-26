@@ -192,8 +192,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       return saved;
     }
     
-    // Use the same default selections for both game mode and props mode
-    // Default to popular sportsbooks if nothing saved
+    // Different default selections for game mode and props mode
+    if (mode === 'props') {
+      // Include both traditional sportsbooks and DFS apps for player props
+      return ['draftkings', 'fanduel', 'betmgm', 'caesars', 'prizepicks', 'underdog', 'pick6'];
+    }
+    
+    // Default to popular sportsbooks for game odds
     return ['draftkings', 'fanduel', 'betmgm', 'caesars'];
   };
   
@@ -203,7 +208,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
   const [selectedDate, setSelectedDate] = useState("");
   const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals", "team_totals"]); // Added team_totals to default selection
-  const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState(["player_pass_yds", "player_rush_yds", "player_receptions"]);
+  // Include a mix of NFL, NCAA football, and NCAA basketball relevant markets by default
+  const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState([
+    // Football markets (NFL and NCAAF)
+    "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
+    // Basketball markets (NBA and NCAAB)
+    "player_points", "player_rebounds", "player_assists"
+  ]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
   const [showMiddles, setShowMiddles] = useState(false);
@@ -247,11 +258,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     : ["h2h", "spreads", "totals", "team_totals", "alternate_spreads", "alternate_totals", "alternate_team_totals"]; // Include all regular markets
   const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
-  // For player props, use selected sports or default to NFL if none selected
+  // For player props, use selected sports or default to NFL and NCAAF if none selected
   // For regular mode, use all selected sports (no longer limiting to single sport)
   const sportsForMode = isPlayerPropsMode 
-    ? (picked.length > 0 ? picked : ["americanfootball_nfl"]) 
+    ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf"]) 
     : picked;
+    
+  // Log the sports being used for the current mode
+  console.log(`🎯 Sports for ${isPlayerPropsMode ? 'Player Props' : 'Game Odds'} mode:`, sportsForMode);
   
   const hasPlatinum = me?.plan === 'platinum';
   const hasGoldOrBetter = me?.plan === 'gold' || me?.plan === 'platinum';
@@ -532,18 +546,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Enhanced player props loading state - show loading until props are populated
   useEffect(() => {
     if (isPlayerPropsMode) {
-      // Show loading if we're in props mode and either:
-      // 1. Markets are still loading, OR
-      // 2. We have games but no props data yet (games without player prop markets)
+      // Check if we have any player prop markets in the data
+      // We're now checking for ANY markets, not just the selected ones
       const hasPropsData = filteredGames.some(game => 
         game.bookmakers?.some(book => 
           book.markets?.some(market => 
-            selectedPlayerPropMarkets.includes(market.key)
+            market.key.startsWith('player_') // Any player prop market
           )
         )
       );
       
-      const shouldShowLoading = marketsLoading || (!hasPropsData && filteredGames.length > 0);
+      // Only show loading if we're actively fetching data and have no games yet
+      const shouldShowLoading = marketsLoading && (!filteredGames.length || !hasPropsData);
       setPlayerPropsProcessing(shouldShowLoading);
       
       console.log('🎯 Player Props Loading State:', {
@@ -556,7 +570,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     } else {
       setPlayerPropsProcessing(false);
     }
-  }, [isPlayerPropsMode, marketsLoading, filteredGames, selectedPlayerPropMarkets]);
+  }, [isPlayerPropsMode, marketsLoading, filteredGames]);
 
   // Immediate loading feedback when switching to Player Props
   useEffect(() => {
@@ -572,19 +586,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       setTimeout(() => {
         if (isPlayerPropsMode) {
           console.log('🎯 Player Props timeout - checking if data loaded');
+          // Check for ANY player prop markets, not just selected ones
           const hasPropsData = filteredGames.some(game => 
             game.bookmakers?.some(book => 
               book.markets?.some(market => 
-                selectedPlayerPropMarkets.includes(market.key)
+                market.key.startsWith('player_') // Any player prop market
               )
             )
           );
-          if (!hasPropsData && !marketsLoading) {
-            console.log('🎯 No props data after timeout, keeping loading state');
-            setPlayerPropsProcessing(true);
+          
+          // If we have games but no player props data, and we're not actively loading,
+          // force the loading state to false to show whatever data we have
+          if (filteredGames.length > 0 && !hasPropsData && !marketsLoading) {
+            console.log('🎯 Games found but no props data after timeout, showing available data');
+            setPlayerPropsProcessing(false);
           }
         }
-      }, 3000); // 3 second timeout for player props
+      }, 2000); // Reduced timeout to 2 seconds
     }
   }, [isPlayerPropsMode]);
 
@@ -750,9 +768,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   const resetAllFilters = () => {
     // Reset both draft and applied states
-    const defaultSports = ["americanfootball_nfl"];
+    // Include both NFL and NCAAF as default sports
+    const defaultSports = ["americanfootball_nfl", "americanfootball_ncaaf"];
     const defaultMarkets = getAutoSelectedMarkets(defaultSports); // Auto-select markets for default sport
-    const defaultPlayerProps = ["player_pass_yds", "player_rush_yds", "player_receptions"];
+    // Include a mix of NFL, NCAA football, and NCAA basketball relevant markets
+    const defaultPlayerProps = [
+      // Football markets (NFL and NCAAF)
+      "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
+      // Basketball markets (NBA and NCAAB)
+      "player_points", "player_rebounds", "player_assists"
+    ];
     const defaultSportsbooks = getUserSelectedSportsbooks('game'); // Use user's saved sportsbooks for game mode
     const defaultPlayerPropsSportsbooks = getUserSelectedSportsbooks('props'); // Use user's saved sportsbooks for props mode
     
@@ -995,16 +1020,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
     // Determine which categories to include based on selected sports
     selectedSports.forEach(sport => {
-      if (sport.includes('football')) {
+      // Handle football sports (both NFL and NCAA)
+      if (sport.includes('football') || sport === 'americanfootball_nfl' || sport === 'americanfootball_ncaaf') {
         sportCategories.set('football', ['passing', 'rushing', 'receiving', 'touchdowns', 'combination', 'defense', 'kicking']);
-      } else if (sport.includes('baseball')) {
+        console.log(`🏈 Adding football player prop categories for sport: ${sport}`);
+      } 
+      // Handle baseball sports
+      else if (sport.includes('baseball') || sport === 'baseball_mlb') {
         sportCategories.set('baseball', ['batting', 'pitching']);
-      } else if (sport.includes('hockey')) {
+        console.log(`⚾ Adding baseball player prop categories for sport: ${sport}`);
+      } 
+      // Handle hockey sports
+      else if (sport.includes('hockey') || sport === 'icehockey_nhl') {
         sportCategories.set('hockey', ['hockey']);
-      } else if (sport.includes('soccer')) {
+        console.log(`🏒 Adding hockey player prop categories for sport: ${sport}`);
+      } 
+      // Handle soccer sports
+      else if (sport.includes('soccer')) {
         sportCategories.set('soccer', ['soccerPlayers']);
-      } else if (sport.includes('basketball')) {
+        console.log(`⚽ Adding soccer player prop categories for sport: ${sport}`);
+      } 
+      // Handle basketball sports (both NBA and NCAA)
+      else if (sport.includes('basketball') || sport === 'basketball_nba' || sport === 'basketball_ncaab') {
         sportCategories.set('basketball', ['basketball']);
+        console.log(`🏀 Adding basketball player prop categories for sport: ${sport}`);
       }
     });
 
@@ -1864,7 +1903,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
-                  showDFSApps={true}
+                  showDFSApps={false} /* Hide DFS apps in game odds mode */
                 />
               </div>
             </>
@@ -1909,7 +1948,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
-                  showDFSApps={true}
+                  showDFSApps={false} /* Hide DFS apps in game odds mode */
                 />
               </div>
 
