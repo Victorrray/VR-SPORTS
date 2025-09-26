@@ -240,8 +240,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftPicked, setDraftPicked] = useState(picked);
   const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate);
   const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
-  // Always use empty array for player props books to show ALL books
-  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState([]);
+  // Initialize with user's saved selection or empty array to show ALL books
+  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState(selectedPlayerPropsBooks);
   const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
   const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(selectedPlayerPropMarkets);
   
@@ -729,8 +729,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const newPicked = Array.isArray(draftPicked) && draftPicked.length > 0 ? draftPicked : ["americanfootball_nfl"];
     const newDate = draftSelectedDate || '';
     const newBooks = Array.isArray(draftSelectedBooks) ? draftSelectedBooks : [];
-    // Always use empty array for player props books to show ALL books
-    const newPlayerPropsBooks = [];
+    // For player props mode, respect the user's selection if they've made one
+    // Otherwise use empty array to show ALL books
+    const newPlayerPropsBooks = Array.isArray(draftSelectedPlayerPropsBooks) && draftSelectedPlayerPropsBooks.length > 0 
+      ? draftSelectedPlayerPropsBooks 
+      : [];
     const newMarkets = Array.isArray(draftMarketKeys) && draftMarketKeys.length > 0 ? draftMarketKeys : ["h2h", "spreads", "totals"];
     
     console.log('🏈 Applying filters:', {
@@ -783,8 +786,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       "player_points", "player_rebounds", "player_assists"
     ];
     const defaultSportsbooks = getUserSelectedSportsbooks('game'); // Use user's saved sportsbooks for game mode
-    // Always use empty array for player props books to show ALL books
-    const defaultPlayerPropsSportsbooks = [];
+    // Use user's saved sportsbooks for props mode or empty array to show ALL books
+    const defaultPlayerPropsSportsbooks = getUserSelectedSportsbooks('props');
     
     // Reset draft state
     setDraftPicked(defaultSports);
@@ -1732,7 +1735,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             pageSize={15}
             mode="props"
             bookFilter={effectiveSelectedBooks}
-            marketFilter={[]} // Empty array to show ALL player prop markets
+            marketFilter={selectedPlayerPropMarkets} // Use selected player prop markets
             evMin={null}
             loading={filtersLoading || playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
             error={error || marketsError}

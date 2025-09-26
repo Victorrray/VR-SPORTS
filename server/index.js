@@ -2075,6 +2075,16 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       console.log(`🎯 Processing ${Math.min(allGames.length, 10)} games for player props`);
       console.log(`🎯 Total games available for props: ${allGames.length}`);
       
+      // Sort games to prioritize NCAA games if they're requested
+      if (sportsArray.includes('americanfootball_ncaaf') || sportsArray.includes('basketball_ncaab')) {
+        console.log('🎓 NCAA sports requested, prioritizing NCAA games for player props');
+        allGames.sort((a, b) => {
+          const aIsNCAA = a.sport_key === 'americanfootball_ncaaf' || a.sport_key === 'basketball_ncaab';
+          const bIsNCAA = b.sport_key === 'americanfootball_ncaaf' || b.sport_key === 'basketball_ncaab';
+          return bIsNCAA - aIsNCAA; // Sort NCAA games first
+        });
+      }
+      
       // For each game, fetch individual player props using event ID
       for (let i = 0; i < allGames.length && i < 10; i++) { // Limit to first 10 games for cost control
         const game = allGames[i];
