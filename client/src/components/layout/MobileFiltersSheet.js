@@ -3,7 +3,7 @@ import { X, Filter } from "lucide-react";
 import "./MobileFiltersSheet.css";
 
 // Animation duration in ms - should match CSS animation duration
-const ANIMATION_DURATION = 300;
+const ANIMATION_DURATION = 500;
 
 export default function MobileFiltersSheet({ open, onClose, title = "Filters", children }) {
   const sheetRef = useRef(null);

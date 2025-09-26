@@ -6,11 +6,11 @@
   -webkit-backdrop-filter: var(--backdrop-blur-light);
   z-index: 2000;
   display: none;
-  animation: backdropFadeIn 0.3s ease;
+  animation: backdropFadeIn 0.5s ease;
 }
 
 .mfs-backdrop.closing {
-  animation: backdropFadeOut 0.3s ease forwards;
+  animation: backdropFadeOut 0.5s ease forwards;
 }
 
 @keyframes backdropFadeIn {
@@ -37,13 +37,13 @@
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
   overflow: visible;
-  animation: sheetSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: sheetSlideUp 0.5s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .mfs-sheet.closing {
-  animation: sheetSlideDown 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  animation: sheetSlideDown 0.5s cubic-bezier(0.32, 0.72, 0, 1) forwards;
   pointer-events: none; /* Prevent interactions during closing animation */
 }
 
