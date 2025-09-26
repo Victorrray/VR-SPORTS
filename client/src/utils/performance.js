@@ -126,6 +126,10 @@ export class APICache {
     this.cache.clear();
   }
   
+  static delete(key) {
+    return this.cache.delete(key);
+  }
+  
   static size() {
     return this.cache.size;
   }

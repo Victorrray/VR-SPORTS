@@ -192,10 +192,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       return saved;
     }
     
-    // Different default selections for game mode and props mode
+    // For player props mode, return an empty array to show ALL available sportsbooks
+    // This ensures users see all possible sportsbooks in the player props mode
     if (mode === 'props') {
-      // Include both traditional sportsbooks and DFS apps for player props
-      return ['draftkings', 'fanduel', 'betmgm', 'caesars', 'prizepicks', 'underdog', 'pick6'];
+      // Return empty array to show ALL sportsbooks (no filtering)
+      return [];
     }
     
     // Default to popular sportsbooks for game odds
