@@ -13,9 +13,9 @@
 
 .mobile-bottom-bar {
   position: fixed;
-  left: 50%; 
+  left: 0;
+  right: 0; 
   bottom: 0;
-  transform: translateX(-50%);
   z-index: 1000;
   display: none;
   box-sizing: border-box;
@@ -23,10 +23,11 @@
   padding-left: 16px;
   padding-right: 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
-  width: calc(100vw - 32px);
-  max-width: 393px;
+  width: 100%;
   pointer-events: auto;
-  position: relative; /* For absolute positioning of children */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .mobile-bottom-bar .filter-pill,
@@ -109,7 +110,7 @@
   box-shadow: var(--mobile-shadow);
   position: relative;
   overflow: hidden;
-  margin: 0 auto;
+  width: calc(100% - 32px);
   max-width: 360px;
 }
 
@@ -269,11 +270,8 @@
 
 @media (max-width: 720px) {
   .mobile-bottom-bar { 
-    display: block; 
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100vw - 32px);
-    max-width: 393px;
+    display: flex !important; 
+    width: 100%;
   }
   .mobile-bottom-spacer {
     display: block;

@@ -1,7 +1,7 @@
 .section-menu-container {
-  position: absolute;
-  left: 75%; /* Position at 75% of the bottom nav width */
-  bottom: 16px; /* Position above the tabs but inside the nav bar */
+  position: fixed;
+  left: 75%;
+  bottom: 80px; /* Position above the bottom nav bar */
   transform: translateX(-50%);
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
@@ -145,8 +145,8 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 90px; /* Position higher above the bottom bar on mobile */
-    margin-left: 120px; /* Adjust right alignment for smaller screens */
+    bottom: 80px; /* Position above the bottom bar on mobile */
+    left: 75%;
     display: block !important; /* Force display on mobile */
   }
   
@@ -166,8 +166,8 @@
 
 @media (max-width: 380px) {
   .section-menu-container {
-    margin-left: 100px; /* Further adjust for very small screens */
-    bottom: 90px; /* Maintain consistent height on smaller screens */
+    left: 75%;
+    bottom: 80px; /* Maintain consistent height on smaller screens */
   }
   
   .section-button {

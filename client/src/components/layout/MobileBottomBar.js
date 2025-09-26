@@ -59,17 +59,19 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
 
   return (
     <>
+      {/* Filter and Section buttons positioned above the bottom bar */}
+      {showFilter && (
+        <>
+          <FilterMenu onClick={onFilterClick} isOpen={false} />
+          <SectionMenu 
+            currentSection={currentSection || 'game'} 
+            onSectionChange={onSectionChange}
+            hasPlatinum={hasPlatinum}
+          />
+        </>
+      )}
+      
       <div className="mobile-bottom-bar">
-        {showFilter && (
-          <>
-            <FilterMenu onClick={onFilterClick} isOpen={false} />
-            <SectionMenu 
-              currentSection={currentSection || 'game'} 
-              onSectionChange={onSectionChange}
-              hasPlatinum={hasPlatinum}
-            />
-          </>
-        )}
         <nav className="mobile-nav">
           {tabs.map((t) => {
             const IconComponent = t.icon;
