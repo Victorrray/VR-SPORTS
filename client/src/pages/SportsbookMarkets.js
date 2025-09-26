@@ -1190,15 +1190,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   return (
     <div className="sportsbook-markets">
-      {/* Left-aligned Filter Menu */}
+      {/* Left-aligned Filter Menu - Force display */}
       <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
       
-      {/* Right-aligned Section Menu */}
+      {/* Right-aligned Section Menu - Force display */}
       <SectionMenu 
         currentSection={getCurrentSectionId()} 
         onSectionChange={handleSectionChange}
         hasPlatinum={hasPlatinum}
       />
+      
+      {/* Debug info for filter visibility */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ position: 'fixed', top: 10, left: 10, background: 'rgba(0,0,0,0.7)', padding: '5px', color: 'white', fontSize: '10px', zIndex: 9999 }}>
+          Filter menus should be visible
+        </div>
+      )}
       
       {/* Debug Section - Remove after fixing */}
       {process.env.NODE_ENV === 'development' && (

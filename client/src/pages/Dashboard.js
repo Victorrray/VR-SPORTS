@@ -60,7 +60,7 @@ export default function Dashboard() {
             gap: '6px',
             boxShadow: '0 2px 8px rgba(124, 58, 237, 0.4)'
           }}>
-            <Crown size={16} />
+            <Crown size={16} style={{ color: 'white' }} />
             PLATINUM
           </span>
         );

@@ -1,10 +1,12 @@
 .section-menu-container {
   position: fixed;
   left: 50%;
-  bottom: 80px;
+  bottom: 88px; /* Position directly above the bottom navigation bar */
   transform: translateX(-50%);
   margin-left: 140px; /* Shift to the right to align with the right side of the bottom bar */
-  z-index: 100;
+  z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
+  display: block !important; /* Force display */
+  pointer-events: auto !important; /* Ensure clickability */
 }
 
 .section-button {
@@ -134,14 +136,16 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 70px; /* Position closer to the bottom bar on mobile */
+    bottom: 78px; /* Position closer to the bottom bar on mobile */
     margin-left: 120px; /* Adjust right alignment for smaller screens */
+    display: block !important; /* Force display on mobile */
   }
   
   .section-button {
     padding: 8px 14px;
     font-size: 13px;
     min-height: 40px;
+    display: flex !important; /* Force display on mobile */
   }
   
   .section-dropdown {
@@ -153,6 +157,7 @@
 @media (max-width: 380px) {
   .section-menu-container {
     margin-left: 100px; /* Further adjust for very small screens */
+    bottom: 76px;
   }
   
   .section-button {
