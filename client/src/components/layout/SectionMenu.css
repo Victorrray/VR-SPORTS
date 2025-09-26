@@ -1,7 +1,7 @@
 .section-menu-container {
   position: fixed;
   left: 75%;
-  bottom: 80px; /* Position above the bottom nav bar */
+  bottom: 110px; /* Increased padding above the bottom nav bar */
   transform: translateX(-50%);
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
@@ -145,7 +145,7 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 80px; /* Position above the bottom bar on mobile */
+    bottom: 110px; /* Increased padding above the bottom bar on mobile */
     left: 75%;
     display: block !important; /* Force display on mobile */
   }
@@ -167,7 +167,7 @@
 @media (max-width: 380px) {
   .section-menu-container {
     left: 75%;
-    bottom: 80px; /* Maintain consistent height on smaller screens */
+    bottom: 110px; /* Maintain consistent height on smaller screens */
   }
   
   .section-button {
