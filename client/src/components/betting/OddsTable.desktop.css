@@ -1,0 +1,221 @@
+/* Desktop-specific enhancements for OddsTable */
+
+@media (min-width: 769px) {
+  /* Table container */
+  .odds-table-container {
+    margin-bottom: 32px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Table header */
+  .odds-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--bg-elev-1);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .odds-table-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .odds-table-title-icon {
+    color: var(--accent);
+  }
+
+  .odds-table-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  /* Table layout */
+  .odds-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .odds-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-elev-1);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+  }
+
+  .odds-table th:first-child {
+    padding-left: 24px;
+  }
+
+  .odds-table th:last-child {
+    padding-right: 24px;
+  }
+
+  /* Table rows */
+  .odds-row {
+    transition: background-color 0.2s ease;
+  }
+
+  .odds-row:hover {
+    background-color: var(--bg-hover);
+  }
+
+  .odds-row td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+  }
+
+  .odds-row td:first-child {
+    padding-left: 24px;
+  }
+
+  .odds-row td:last-child {
+    padding-right: 24px;
+  }
+
+  /* Match column */
+  .match-column {
+    width: 30%;
+  }
+
+  /* Team display */
+  .team-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .team-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .team-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .team-name {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .team-league {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* Game info */
+  .game-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .game-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Odds value styling */
+  .odds-value {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--bg-elev-1);
+    display: inline-block;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .odds-value:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+  }
+
+  .odds-value.positive {
+    color: var(--success);
+  }
+
+  .odds-value.negative {
+    color: var(--danger);
+  }
+
+  /* Best odds indicator */
+  .best-odds {
+    position: relative;
+  }
+
+  .best-odds::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+  }
+
+  /* EV indicator */
+  .ev-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+
+  .ev-positive {
+    color: var(--success);
+  }
+
+  .ev-negative {
+    color: var(--danger);
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+
+  .empty-state-icon {
+    margin-bottom: 16px;
+    color: var(--accent);
+    opacity: 0.5;
+  }
+
+  .empty-state-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .empty-state-message {
+    font-size: 14px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}

@@ -24,7 +24,9 @@ import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
 import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
+import DesktopHeader from '../components/layout/DesktopHeader';
 import './SportsbookMarkets.css';
+import './SportsbookMarkets.desktop.css';
 
 const ENABLE_PLAYER_PROPS_V2 = true;
 
@@ -1190,6 +1192,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   return (
     <div className="sportsbook-markets">
+      {/* Desktop Header */}
+      <DesktopHeader
+        onFilterClick={() => setMobileFiltersOpen(true)}
+        currentSection={getCurrentSectionId()}
+        onSectionChange={handleSectionChange}
+        hasPlatinum={hasPlatinum}
+      />
       
       {/* Debug Section - Remove after fixing */}
       {process.env.NODE_ENV === 'development' && (

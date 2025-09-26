@@ -3,6 +3,7 @@ import { Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
 import { useMe } from "../../hooks/useMe";
 import "./OddsTable.css";
+import "./OddsTable.desktop.css";
 
 // Import team logo utilities
 import { resolveTeamLogo } from "../../utils/logoResolver";

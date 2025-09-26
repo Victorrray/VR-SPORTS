@@ -1,0 +1,90 @@
+/* Desktop Header Component Styles */
+
+.desktop-header {
+  display: none; /* Hidden by default, shown in desktop media query */
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.desktop-filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.desktop-filter-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.desktop-filter-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.desktop-filter-button:active {
+  transform: translateY(0);
+}
+
+.desktop-section-selector {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.desktop-section-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+}
+
+.desktop-section-option:hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.desktop-section-option.active {
+  background: var(--accent);
+  color: white;
+}
+
+.section-icon {
+  opacity: 0.8;
+}
+
+.desktop-section-option.active .section-icon {
+  opacity: 1;
+}
+
+/* Show desktop header on larger screens */
+@media (min-width: 769px) {
+  .desktop-header {
+    display: flex;
+  }
+}

@@ -1,0 +1,226 @@
+/* Desktop-specific styles for SportsbookMarkets */
+
+/* Desktop layout for the odds page */
+@media (min-width: 769px) {
+  .sportsbook-markets {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Header section with filters and controls */
+  .desktop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+  }
+
+  .desktop-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .desktop-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  /* Hide mobile-specific elements */
+  .mobile-bottom-bar,
+  .filter-menu-container,
+  .section-menu-container {
+    display: none !important;
+  }
+
+  /* Desktop filter button */
+  .desktop-filter-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .desktop-filter-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  }
+
+  /* Section selector */
+  .desktop-section-selector {
+    display: flex;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 4px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+
+  .desktop-section-option {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+  }
+
+  .desktop-section-option.active {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Table improvements */
+  .odds-table-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+  }
+
+  .odds-header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .odds-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .odds-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-elev-1);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .odds-row {
+    transition: background-color 0.2s ease;
+  }
+
+  .odds-row:hover {
+    background-color: var(--bg-hover);
+  }
+
+  .odds-cell {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  /* EV column styling */
+  .ev-column {
+    width: 80px;
+    text-align: center;
+  }
+
+  /* Team column styling */
+  .team-column {
+    width: 30%;
+  }
+
+  /* Line column styling */
+  .line-column {
+    width: 15%;
+  }
+
+  /* Book column styling */
+  .book-column {
+    width: 15%;
+  }
+
+  /* Odds column styling */
+  .odds-column {
+    width: 15%;
+  }
+
+  /* De-vig column styling */
+  .devig-column {
+    width: 15%;
+  }
+
+  /* Team display with logo */
+  .team-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .team-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .team-name {
+    font-weight: 600;
+  }
+
+  /* Odds value styling */
+  .odds-value {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--bg-elev-1);
+    display: inline-block;
+  }
+
+  .odds-value.positive {
+    color: var(--success);
+  }
+
+  .odds-value.negative {
+    color: var(--danger);
+  }
+
+  /* Pagination controls */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .pagination-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border-color);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .pagination-button:hover {
+    background: var(--bg-hover);
+  }
+
+  .pagination-button.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+}
