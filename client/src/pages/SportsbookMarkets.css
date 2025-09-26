@@ -1,0 +1,12 @@
+.sportsbook-markets {
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .sportsbook-markets {
+    padding-bottom: 120px; /* Extra space for mobile bottom bar */
+  }
+}

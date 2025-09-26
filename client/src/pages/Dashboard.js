@@ -29,52 +29,55 @@ export default function Dashboard() {
       case 'gold':
         return (
           <span style={{
-            padding: '6px 12px',
+            padding: '8px 16px',
             borderRadius: '20px',
-            fontSize: '12px',
+            fontSize: '14px',
             fontWeight: '600',
             background: 'linear-gradient(135deg, #FFD700, #FFA500)',
             color: '#000',
-            border: '1px solid rgba(255, 215, 0, 0.3)',
+            border: 'none',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: '6px',
+            boxShadow: '0 2px 8px rgba(255, 165, 0, 0.4)'
           }}>
-            <Crown size={12} />
+            <Crown size={16} />
             GOLD
           </span>
         );
       case 'platinum':
         return (
           <span style={{
-            padding: '6px 12px',
+            padding: '8px 16px',
             borderRadius: '20px',
-            fontSize: '12px',
+            fontSize: '14px',
             fontWeight: '600',
             background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
             color: '#fff',
-            border: '1px solid rgba(139, 92, 246, 0.3)',
+            border: 'none',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: '6px',
+            boxShadow: '0 2px 8px rgba(124, 58, 237, 0.4)'
           }}>
-            <Crown size={12} />
+            <Crown size={16} />
             PLATINUM
           </span>
         );
       default:
         return (
           <span style={{
-            padding: '6px 12px',
+            padding: '8px 16px',
             borderRadius: '20px',
-            fontSize: '12px',
+            fontSize: '14px',
             fontWeight: '600',
             background: 'rgba(255, 255, 255, 0.1)',
             color: 'rgba(255, 255, 255, 0.8)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            display: 'inline-flex',
+            border: 'none',
+            display: 'flex',
             alignItems: 'center',
-            gap: '4px',
+            gap: '6px',
+            boxShadow: '0 2px 8px rgba(255, 255, 255, 0.1)',
             marginBottom: '0px'
           }}>
             GUEST

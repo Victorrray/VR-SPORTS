@@ -7,6 +7,8 @@ import { smartCache } from "../utils/enhancedCache";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
 import MobileSearchModal from "../components/modals/MobileSearchModal";
+import FilterMenu from "../components/layout/FilterMenu";
+import SectionMenu from "../components/layout/SectionMenu";
 import { useBetSlip } from "../contexts/BetSlipContext";
 import BetSlip from "../components/betting/BetSlip";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
@@ -22,6 +24,7 @@ import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/useAuth';
 import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
+import './SportsbookMarkets.css';
 
 const ENABLE_PLAYER_PROPS_V2 = true;
 
@@ -1149,8 +1152,54 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return enhancedBooks;
   }, [marketBooks, showPlayerProps]);
 
+  // Helper function to get current section ID
+  const getCurrentSectionId = () => {
+    if (showPlayerProps) return 'props';
+    if (showArbitrage) return 'arbitrage';
+    if (showMiddles) return 'middles';
+    return 'game';
+  };
+
+  // Handle section change from SectionMenu
+  const handleSectionChange = (sectionId) => {
+    console.log(`Changing section to: ${sectionId}`);
+    
+    // Update all mode states based on the selected section
+    setShowPlayerProps(sectionId === 'props');
+    setShowArbitrage(sectionId === 'arbitrage');
+    setShowMiddles(sectionId === 'middles');
+    
+    // Force a re-render by updating the table nonce
+    setTableNonce(prev => prev + 1);
+    
+    // Update URL with mode parameter for persistence
+    const searchParams = new URLSearchParams(location.search);
+    if (sectionId === 'game') {
+      searchParams.delete('mode'); // Default mode is game odds, so remove parameter
+    } else {
+      searchParams.set('mode', sectionId);
+    }
+    
+    // Use replace state to avoid breaking browser history
+    window.history.replaceState(
+      null, 
+      '', 
+      searchParams.toString() ? `${location.pathname}?${searchParams.toString()}` : location.pathname
+    );
+  };
+
   return (
     <div className="sportsbook-markets">
+      {/* Left-aligned Filter Menu */}
+      <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
+      
+      {/* Right-aligned Section Menu */}
+      <SectionMenu 
+        currentSection={getCurrentSectionId()} 
+        onSectionChange={handleSectionChange}
+        hasPlatinum={hasPlatinum}
+      />
+      
       {/* Debug Section - Remove after fixing */}
       {process.env.NODE_ENV === 'development' && (
         <div style={{
@@ -1193,411 +1242,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </div>
       )}
       
-      {/* Collapsible Navigation Dropdown */}
-      <div style={{
-        marginBottom: "24px",
-        paddingTop: "20px",
-        maxWidth: "1200px", // Match odds table max width
-        margin: "0 auto 24px auto", // Center align like odds table
-        paddingLeft: "16px",
-        paddingRight: "16px"
-      }}>
-        {/* Current Selection Header */}
-        <button
-          onClick={() => setNavigationExpanded(!navigationExpanded)}
-          style={{
-            width: "100%",
-            background: "var(--card-bg)",
-            border: "none",
-            borderRadius: "12px",
-            padding: "16px 20px",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: navigationExpanded ? "12px" : "0"
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.boxShadow = "0 4px 12px rgba(139, 92, 246, 0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.boxShadow = "none";
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ fontSize: "20px" }}>
-              {isArbitrageMode ? "⚡" : isPlayerPropsMode ? "🎯" : isMiddlesMode ? "🎪" : "📊"}
-            </div>
-            <div>
-              <div style={{
-                fontWeight: "600",
-                fontSize: "16px",
-                color: "#ffffff",
-                textAlign: "left"
-              }}>
-                {isArbitrageMode ? "Arbitrage" : isPlayerPropsMode ? "Player Props" : isMiddlesMode ? "Middles" : "Game Odds"}
-              </div>
-              <div style={{
-                fontSize: "12px",
-                color: "rgba(255, 255, 255, 0.7)",
-                textAlign: "left",
-                marginTop: "2px"
-              }}>
-                {isArbitrageMode
-                  ? "Find profitable arbitrage opportunities"
-                  : isPlayerPropsMode
-                    ? "Explore player props across every book you follow"
-                    : isMiddlesMode
-                      ? "Find middle betting opportunities between different lines"
-                      : "Compare odds across all major sportsbooks"}
-              </div>
-            </div>
-          </div>
-          <div style={{
-            color: "var(--text-secondary)",
-            transition: "transform 0.2s ease",
-            transform: navigationExpanded ? "rotate(180deg)" : "rotate(0deg)"
-          }}>
-            <ChevronDown size={20} />
-          </div>
-        </button>
-
-        {/* Dropdown Options */}
-        {navigationExpanded && (
-          <div style={{
-            background: "var(--card-bg)",
-            border: "none",
-            borderRadius: "12px",
-            overflow: "hidden",
-            boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)"
-          }}>
-            {/* Game Odds Option */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('📈 Game Odds button clicked - setting game odds mode');
-                
-                // Update all mode states at once to avoid race conditions
-                setShowArbitrage(false);
-                setShowPlayerProps(false);
-                setShowMiddles(false);
-                setNavigationExpanded(false);
-                
-                // Force a re-render by updating the table nonce
-                setTableNonce(prev => prev + 1);
-                
-                // Update URL with mode parameter for persistence
-                const searchParams = new URLSearchParams(location.search);
-                searchParams.delete('mode'); // Default mode is game odds, so remove parameter
-                
-                // Use replace state to avoid breaking browser history
-                window.history.replaceState(
-                  null, 
-                  '', 
-                  searchParams.toString() ? `${location.pathname}?${searchParams.toString()}` : location.pathname
-                );
-              }}
-              style={{
-                width: "100%",
-                background: (!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) 
-                  ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
-                  : "transparent",
-                border: "none",
-                padding: "16px 20px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                borderBottom: "1px solid var(--border-color)"
-              }}
-              onMouseEnter={(e) => {
-                if (!(!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode)) {
-                  e.target.style.background = "rgba(139, 92, 246, 0.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!(!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode)) {
-                  e.target.style.background = "transparent";
-                }
-              }}
-            >
-              <div style={{ fontSize: "20px" }}>📊</div>
-              <div style={{ textAlign: "left" }}>
-                <div style={{
-                  fontWeight: "600",
-                  fontSize: "15px",
-                  color: (!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) ? "white" : "#ffffff"
-                }}>
-                  Game Odds
-                </div>
-                <div style={{
-                  fontSize: "12px",
-                  color: (!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) ? "rgba(255,255,255,0.8)" : "rgba(255, 255, 255, 0.7)",
-                  marginTop: "2px"
-                }}>
-                  Live markets
-                </div>
-              </div>
-              {(!isArbitrageMode && !isPlayerPropsMode && !isMiddlesMode) && (
-                <div style={{
-                  marginLeft: "auto",
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#10b981"
-                }} />
-              )}
-            </button>
-
-            {/* Player Props Option - Hidden for Gold users */}
-            {me?.plan !== 'gold' && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🎯 Player Props button clicked - setting player props mode');
-                
-                // Update all mode states at once to avoid race conditions
-                setShowPlayerProps(true);
-                setShowArbitrage(false);
-                setShowMiddles(false);
-                setNavigationExpanded(false);
-                
-                // Force a re-render by updating the table nonce
-                setTableNonce(prev => prev + 1);
-                
-                // Update URL with mode parameter for persistence
-                const searchParams = new URLSearchParams(location.search);
-                searchParams.set('mode', 'props');
-                
-                // Use replace state to avoid breaking browser history
-                window.history.replaceState(
-                  null, 
-                  '', 
-                  `${location.pathname}?${searchParams.toString()}`
-                );
-              }}
-              style={{
-                width: "100%",
-                background: isPlayerPropsMode
-                  ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
-                  : "transparent",
-                border: "none",
-                padding: "16px 20px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                borderBottom: "1px solid var(--border-color)"
-              }}
-              onMouseEnter={(e) => {
-                if (!isPlayerPropsMode) {
-                  e.target.style.background = "rgba(139, 92, 246, 0.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isPlayerPropsMode) {
-                  e.target.style.background = "transparent";
-                }
-              }}
-            >
-              <div style={{ fontSize: "20px" }}>🎯</div>
-              <div style={{ textAlign: "left" }}>
-                <div style={{
-                  fontWeight: "600",
-                  fontSize: "15px",
-                  color: isPlayerPropsMode ? "white" : "#ffffff"
-                }}>
-                  Player Props
-                </div>
-                <div style={{
-                  fontSize: "12px",
-                  color: isPlayerPropsMode ? "rgba(255,255,255,0.8)" : "rgba(255, 255, 255, 0.7)",
-                  marginTop: "2px"
-                }}>
-                  DFS opportunities
-                </div>
-              </div>
-              {isPlayerPropsMode && (
-                <div style={{
-                  marginLeft: "auto",
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#10b981"
-                }} />
-              )}
-            </button>
-            )}
-
-            {/* Arbitrage Option - Hidden for Gold users */}
-            {me?.plan !== 'gold' && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🔍 Arbitrage button clicked - setting arbitrage mode');
-                
-                // Update all mode states at once to avoid race conditions
-                setShowPlayerProps(false);
-                setShowArbitrage(true);
-                setShowMiddles(false);
-                setNavigationExpanded(false);
-                
-                // Force a re-render by updating the table nonce
-                setTableNonce(prev => prev + 1);
-                
-                // Update URL with mode parameter for persistence
-                const searchParams = new URLSearchParams(location.search);
-                searchParams.set('mode', 'arbitrage');
-                
-                // Use replace state to avoid breaking browser history
-                window.history.replaceState(
-                  null, 
-                  '', 
-                  `${location.pathname}?${searchParams.toString()}`
-                );
-              }}
-              style={{
-                width: "100%",
-                background: isArbitrageMode 
-                  ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
-                  : "transparent",
-                border: "none",
-                padding: "16px 20px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px"
-              }}
-              onMouseEnter={(e) => {
-                if (!isArbitrageMode) {
-                  e.target.style.background = "rgba(139, 92, 246, 0.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isArbitrageMode) {
-                  e.target.style.background = "transparent";
-                }
-              }}
-            >
-              <div style={{ fontSize: "20px" }}>⚡</div>
-              <div style={{ textAlign: "left" }}>
-                <div style={{
-                  fontWeight: "600",
-                  fontSize: "15px",
-                  color: isArbitrageMode ? "white" : "#ffffff"
-                }}>
-                  Arbitrage
-                </div>
-                <div style={{
-                  fontSize: "12px",
-                  color: isArbitrageMode ? "rgba(255,255,255,0.8)" : "rgba(255, 255, 255, 0.7)",
-                  marginTop: "2px"
-                }}>
-                  Find edges
-                </div>
-              </div>
-              {isArbitrageMode && (
-                <div style={{
-                  marginLeft: "auto",
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#10b981"
-                }} />
-              )}
-            </button>
-            )}
-
-            {/* Middles Option - Hidden for Gold users */}
-            {me?.plan !== 'gold' && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🎪 Middles button clicked - setting middles mode');
-                
-                // Update all mode states at once to avoid race conditions
-                setShowPlayerProps(false);
-                setShowArbitrage(false);
-                setShowMiddles(true);
-                setNavigationExpanded(false);
-                
-                // Force a re-render by updating the table nonce
-                setTableNonce(prev => prev + 1);
-                
-                // Update URL with mode parameter for persistence
-                const searchParams = new URLSearchParams(location.search);
-                searchParams.set('mode', 'middles');
-                
-                // Use replace state to avoid breaking browser history
-                window.history.replaceState(
-                  null, 
-                  '', 
-                  `${location.pathname}?${searchParams.toString()}`
-                );
-              }}
-              style={{
-                width: "100%",
-                background: isMiddlesMode 
-                  ? "linear-gradient(135deg, #8b5cf6, #7c3aed)" 
-                  : "transparent",
-                border: "none",
-                padding: "16px 20px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px"
-              }}
-              onMouseEnter={(e) => {
-                if (!isMiddlesMode) {
-                  e.target.style.background = "rgba(139, 92, 246, 0.1)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isMiddlesMode) {
-                  e.target.style.background = "transparent";
-                }
-              }}
-            >
-              <div style={{ fontSize: "20px" }}>🎪</div>
-              <div style={{ textAlign: "left" }}>
-                <div style={{
-                  fontWeight: "600",
-                  fontSize: "15px",
-                  color: isMiddlesMode ? "white" : "#ffffff"
-                }}>
-                  Middles
-                </div>
-                <div style={{
-                  fontSize: "12px",
-                  color: isMiddlesMode ? "rgba(255,255,255,0.8)" : "rgba(255, 255, 255, 0.7)",
-                  marginTop: "2px"
-                }}>
-                  Middle betting opportunities
-                </div>
-              </div>
-              {isMiddlesMode && (
-                <div style={{
-                  marginLeft: "auto",
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  background: "#10b981"
-                }} />
-              )}
-            </button>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Spacer for the fixed menus */}
+      <div style={{ height: "60px" }} />
 
       {/* Show authentication required message */}
       {(marketsError && marketsError.includes('Authentication required')) && (
