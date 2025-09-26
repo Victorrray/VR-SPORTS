@@ -16,7 +16,7 @@ export default function FilterMenu({ onClick, isOpen }) {
         aria-label="Open filters"
         aria-expanded={isOpen}
       >
-        <Filter size={16} className="filter-icon" />
+        <Filter size={20} className="filter-icon" />
         <span className="filter-text">Filters</span>
       </button>
     </div>

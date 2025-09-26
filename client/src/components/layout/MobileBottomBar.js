@@ -58,20 +58,7 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
   return (
     <>
       <div className="mobile-bottom-bar">
-        {showFilter && (
-          <button
-            className="filter-pill"
-            type="button"
-            onClick={onFilterClick}
-            aria-label="Open filters"
-          >
-            <Filter size={16} className="filter-icon" />
-            <span className="filter-text">Filters</span>
-            <div className="filter-pulse" />
-          </button>
-        )}
-        
-
+        {/* Filter pill removed - now using the FilterMenu component */}
         <nav className="mobile-nav">
           {tabs.map((t) => {
             const IconComponent = t.icon;

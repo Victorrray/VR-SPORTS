@@ -1,7 +1,9 @@
 .section-menu-container {
   position: fixed;
-  right: 16px;
-  top: 80px;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+  margin-left: 140px; /* Shift to the right to align with the right side of the bottom bar */
   z-index: 100;
 }
 
@@ -132,6 +134,33 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    display: none; /* Hide on mobile since we use the navigation dropdown */
+    bottom: 70px; /* Position closer to the bottom bar on mobile */
+    margin-left: 120px; /* Adjust right alignment for smaller screens */
+  }
+  
+  .section-button {
+    padding: 8px 14px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+  
+  .section-dropdown {
+    right: 0;
+    width: 250px;
+  }
+}
+
+@media (max-width: 380px) {
+  .section-menu-container {
+    margin-left: 100px; /* Further adjust for very small screens */
+  }
+  
+  .section-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .section-dropdown {
+    width: 220px;
   }
 }
