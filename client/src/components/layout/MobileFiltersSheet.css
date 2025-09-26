@@ -9,9 +9,18 @@
   animation: backdropFadeIn 0.3s ease;
 }
 
+.mfs-backdrop.closing {
+  animation: backdropFadeOut 0.3s ease forwards;
+}
+
 @keyframes backdropFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes backdropFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 .mfs-sheet {
   position: absolute;
@@ -33,9 +42,19 @@
   animation: sheetSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+.mfs-sheet.closing {
+  animation: sheetSlideDown 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  pointer-events: none; /* Prevent interactions during closing animation */
+}
+
 @keyframes sheetSlideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}
+
+@keyframes sheetSlideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
 }
 
 .mfs-sheet::before {
@@ -366,11 +385,23 @@
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .mfs-sheet,
+  .mfs-sheet.closing,
+  .mfs-backdrop,
+  .mfs-backdrop.closing,
   .mfs-close,
   .mfs-grabber,
   .mfs-content .filter-option {
     transition: none;
     animation: none;
+  }
+  
+  /* For users who prefer reduced motion, we'll use opacity instead */
+  .mfs-backdrop.closing {
+    opacity: 0;
+  }
+  
+  .mfs-sheet.closing {
+    opacity: 0;
   }
 }
 

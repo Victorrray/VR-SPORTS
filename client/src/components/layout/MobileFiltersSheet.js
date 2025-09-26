@@ -2,18 +2,41 @@ import React, { useRef, useState, useEffect } from "react";
 import { X, Filter } from "lucide-react";
 import "./MobileFiltersSheet.css";
 
+// Animation duration in ms - should match CSS animation duration
+const ANIMATION_DURATION = 300;
+
 export default function MobileFiltersSheet({ open, onClose, title = "Filters", children }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const [dy, setDy] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const threshold = 90; // pixels to trigger close
 
+  // Handle open/close animations
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
+    if (open) {
+      setIsVisible(true);
+      setIsClosing(false);
+    } else if (isVisible) {
+      // Start closing animation
+      setIsClosing(true);
+      // After animation completes, hide the component
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+      }, ANIMATION_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [open, isVisible]);
+  
+  // Handle escape key
+  useEffect(() => {
+    if (!isVisible) return;
+    const onKey = (e) => { if (e.key === 'Escape') handleClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [isVisible]);
 
   const onTouchStart = (e) => {
     startY.current = e.touches[0].clientY;
@@ -38,18 +61,29 @@ export default function MobileFiltersSheet({ open, onClose, title = "Filters", c
       }
     });
     
-    // Small delay to allow dropdowns to close
+    // Start closing animation
+    setIsClosing(true);
+    
+    // Call onClose after animation completes
     setTimeout(() => {
       onClose();
-    }, 100);
+    }, ANIMATION_DURATION);
   };
 
-  if (!open) return null;
+  // Don't render anything if not visible
+  if (!isVisible && !open) return null;
+  
   return (
-    <div className="mfs-backdrop" role="dialog" aria-modal="true" aria-label={title} onClick={(e)=>{ if (e.target === e.currentTarget) onClose?.(); }}>
+    <div 
+      className={`mfs-backdrop ${isClosing ? 'closing' : ''}`} 
+      role="dialog" 
+      aria-modal="true" 
+      aria-label={title} 
+      onClick={(e)=>{ if (e.target === e.currentTarget) handleClose(); }}
+    >
       <div
         ref={sheetRef}
-        className="mfs-sheet"
+        className={`mfs-sheet ${isClosing ? 'closing' : ''}`}
         style={{ transform: dy ? `translateY(${dy}px)` : undefined }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -61,7 +95,7 @@ export default function MobileFiltersSheet({ open, onClose, title = "Filters", c
             <Filter size={20} className="mfs-title-icon" />
             <span className="mfs-title">{title}</span>
           </div>
-          <button className="mfs-close" onClick={onClose} aria-label="Close filters">
+          <button className="mfs-close" onClick={handleClose} aria-label="Close filters">
             <X size={20} />
           </button>
         </div>

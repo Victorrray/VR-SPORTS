@@ -1,9 +1,9 @@
 .section-menu-container {
   position: fixed;
   left: 50%;
-  bottom: 88px; /* Position directly above the bottom navigation bar */
+  bottom: 72px; /* Position directly above the bottom navigation bar */
   transform: translateX(-50%);
-  margin-left: 140px; /* Shift to the right to align with the right side of the bottom bar */
+  margin-left: 120px; /* Shift to the right to align with the right side of the bottom bar */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
@@ -13,18 +13,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 24px;
+  border-radius: 30px;
   border: none;
-  background: linear-gradient(135deg, #0f0b1a, #1a1025);
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   min-height: 44px;
-  padding: 10px 16px;
+  padding: 10px 20px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  min-width: 140px;
 }
 
 .section-button:hover {
@@ -43,6 +44,15 @@
   gap: 8px;
 }
 
+.section-icon {
+  color: white;
+  margin-right: 4px;
+}
+
+.section-name {
+  margin-right: 4px;
+}
+
 .section-emoji {
   font-size: 16px;
 }
@@ -57,19 +67,19 @@
 
 .section-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  bottom: calc(100% + 8px); /* Position above the button instead of below */
   right: 0;
   width: 280px;
   background: linear-gradient(135deg, #0f0b1a, #1a1025);
   border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.2s ease;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3); /* Shadow direction adjusted */
+  animation: fadeInUp 0.2s ease; /* New animation for upward opening */
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -136,7 +146,7 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 78px; /* Position closer to the bottom bar on mobile */
+    bottom: 72px; /* Position directly above the bottom bar on mobile */
     margin-left: 120px; /* Adjust right alignment for smaller screens */
     display: block !important; /* Force display on mobile */
   }
@@ -151,13 +161,14 @@
   .section-dropdown {
     right: 0;
     width: 250px;
+    bottom: calc(100% + 8px); /* Ensure it opens upward on mobile */
   }
 }
 
 @media (max-width: 380px) {
   .section-menu-container {
     margin-left: 100px; /* Further adjust for very small screens */
-    bottom: 76px;
+    bottom: 70px;
   }
   
   .section-button {

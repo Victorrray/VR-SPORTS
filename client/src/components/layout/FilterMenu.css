@@ -1,9 +1,9 @@
 .filter-menu-container {
   position: fixed;
   left: 50%;
-  bottom: 88px; /* Position directly above the bottom navigation bar */
+  bottom: 72px; /* Position directly above the bottom navigation bar */
   transform: translateX(-50%);
-  margin-left: -140px; /* Shift to the left to align with the left side of the bottom bar */
+  margin-left: -120px; /* Shift to the left to align with the left side of the bottom bar */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
@@ -50,7 +50,7 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .filter-menu-container {
-    bottom: 78px; /* Position closer to the bottom bar on mobile */
+    bottom: 72px; /* Position directly above the bottom bar on mobile */
     margin-left: -120px; /* Adjust left alignment for smaller screens */
     display: block !important; /* Force display on mobile */
   }
@@ -66,11 +66,12 @@
 @media (max-width: 380px) {
   .filter-menu-container {
     margin-left: -100px; /* Further adjust for very small screens */
-    bottom: 76px;
+    bottom: 70px;
   }
   
   .filter-button {
     padding: 6px 12px;
     font-size: 12px;
+    min-width: 100px;
   }
 }
