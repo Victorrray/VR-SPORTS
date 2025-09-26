@@ -240,8 +240,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
   const isMiddlesMode = showMiddles;
-  // Use only player prop markets in player props mode, regular markets otherwise
-  const marketsForMode = isPlayerPropsMode ? selectedPlayerPropMarkets : marketKeys;
+  // TEMPORARY CHANGE: For regular odds mode, include ALL markets
+  // For player props mode, use all available player prop markets
+  const marketsForMode = isPlayerPropsMode 
+    ? PLAYER_PROP_MARKET_KEYS // Use all available player prop markets
+    : ["h2h", "spreads", "totals", "team_totals", "alternate_spreads", "alternate_totals", "alternate_team_totals"]; // Include all regular markets
   const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
   // For player props, use selected sports or default to NFL if none selected
@@ -1685,7 +1688,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             pageSize={15}
             mode="props"
             bookFilter={effectiveSelectedBooks}
-            marketFilter={selectedPlayerPropMarkets}
+            marketFilter={[]} // Empty array to show ALL player prop markets
             evMin={null}
             loading={filtersLoading || playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
             error={error || marketsError}
@@ -1703,7 +1706,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           pageSize={15}
           mode="game"
           bookFilter={effectiveSelectedBooks}
-          marketFilter={marketKeys}
+          marketFilter={[]} // Empty array to show ALL markets
           evMin={minEV === "" ? null : Number(minEV)}
           loading={filtersLoading || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
           error={error || marketsError}
@@ -1826,23 +1829,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  📊 Markets
-                </label>
-                <SportMultiSelect
-                  list={[
-                    { key: 'h2h', title: 'Moneyline' },
-                    { key: 'spreads', title: 'Point Spread' },
-                    { key: 'totals', title: 'Over/Under' }
-                  ]}
-                  selected={draftMarketKeys || []}
-                  onChange={setDraftMarketKeys}
-                  placeholderText="Select markets..."
-                  allLabel="All Markets"
-                />
-              </div>
-
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
                   🔄 Sort By
                 </label>
                 <select
@@ -1927,19 +1913,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 />
               </div>
 
-              {/* Markets Filter */}
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  📊 Markets
-                </label>
-                <SportMultiSelect
-                  list={getRelevantMarkets(draftPicked)}
-                  selected={draftMarketKeys || []}
-                  onChange={setDraftMarketKeys}
-                  placeholderText="Select markets..."
-                  allLabel="All Markets"
-                />
-              </div>
+              {/* Markets Filter - TEMPORARILY HIDDEN */}
+              {/* All markets are automatically selected */}
+              {false && (
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                    📊 Markets
+                  </label>
+                  <SportMultiSelect
+                    list={getRelevantMarkets(draftPicked)}
+                    selected={draftMarketKeys || []}
+                    onChange={setDraftMarketKeys}
+                    placeholderText="Select markets..."
+                    allLabel="All Markets"
+                  />
+                </div>
+              )}
               </>
             )}
 
