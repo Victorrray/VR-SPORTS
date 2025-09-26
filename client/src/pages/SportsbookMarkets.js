@@ -731,9 +731,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const newBooks = Array.isArray(draftSelectedBooks) ? draftSelectedBooks : [];
     // For player props mode, respect the user's selection if they've made one
     // Otherwise use empty array to show ALL books
-    const newPlayerPropsBooks = Array.isArray(draftSelectedPlayerPropsBooks) && draftSelectedPlayerPropsBooks.length > 0 
-      ? draftSelectedPlayerPropsBooks 
-      : [];
+    const newPlayerPropsBooks = Array.isArray(draftSelectedPlayerPropsBooks) ? draftSelectedPlayerPropsBooks : [];
     const newMarkets = Array.isArray(draftMarketKeys) && draftMarketKeys.length > 0 ? draftMarketKeys : ["h2h", "spreads", "totals"];
     
     console.log('🏈 Applying filters:', {

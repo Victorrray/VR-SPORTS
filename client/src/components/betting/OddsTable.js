@@ -856,11 +856,10 @@ export default function OddsTable({
             })));
             
             hasMatchingBook = propData.allBooks.some(book => {
-              const keyMatch = bookFilter.includes(book.bookmaker?.key);
-              const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
-              const isPrizePicks = book.bookmaker?.key === 'prizepicks' || book.book?.toLowerCase().includes('prizepicks');
-              console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch, 'nameMatch:', nameMatch, 'isPrizePicks:', isPrizePicks);
-              return keyMatch || nameMatch;
+              // Strict bookmaker key matching only
+              const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
+              console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
+              return keyMatch; // Only use key matching, not name matching
             });
           }
           
@@ -874,10 +873,10 @@ export default function OddsTable({
             })));
             
             hasMatchingBook = allCombinedBooks.some(book => {
-              const keyMatch = bookFilter.includes(book.bookmaker?.key);
-              const nameMatch = bookFilter.includes(book.book?.toLowerCase().replace(/\s+/g, ''));
-              console.log(`🎯 Checking combined book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch, 'nameMatch:', nameMatch);
-              return keyMatch || nameMatch;
+              // Strict bookmaker key matching only
+              const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
+              console.log(`🎯 Checking combined book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
+              return keyMatch; // Only use key matching, not name matching
             });
           }
           
@@ -1132,10 +1131,12 @@ export default function OddsTable({
             return true;
           }
           
+          // Strict bookmaker key matching
           const isIncluded = bookFilter.includes(o.bookmaker.key);
-          if (!isIncluded) {
-            console.log(`🎯 Filtering out bookmaker ${o.bookmaker.key} for market ${mktKey}`);
-          }
+          
+          // Enhanced logging for bookmaker filtering
+          console.log(`🎯 Bookmaker ${o.bookmaker.key} for market ${mktKey}: ${isIncluded ? 'INCLUDED' : 'FILTERED OUT'}`);
+          
           return isIncluded;
         });
 
