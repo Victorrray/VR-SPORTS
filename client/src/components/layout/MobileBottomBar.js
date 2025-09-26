@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Home, TrendingUp, BarChart3, User, Filter, Activity } from "lucide-react";
+import FilterMenu from "./FilterMenu";
+import SectionMenu from "./SectionMenu";
 import "./MobileBottomBar.css";
 
-export default function MobileBottomBar({ onFilterClick, active = "sportsbooks", showFilter = true }) {
+export default function MobileBottomBar({ onFilterClick, active = "sportsbooks", showFilter = true, currentSection, onSectionChange, hasPlatinum }) {
   const [hasNotifications, setHasNotifications] = useState(true);
   const [activeCount, setActiveCount] = useState(0);
 
@@ -58,7 +60,16 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
   return (
     <>
       <div className="mobile-bottom-bar">
-        {/* Filter pill removed - now using the FilterMenu component */}
+        {showFilter && (
+          <>
+            <FilterMenu onClick={onFilterClick} isOpen={false} />
+            <SectionMenu 
+              currentSection={currentSection || 'game'} 
+              onSectionChange={onSectionChange}
+              hasPlatinum={hasPlatinum}
+            />
+          </>
+        )}
         <nav className="mobile-nav">
           {tabs.map((t) => {
             const IconComponent = t.icon;

@@ -26,6 +26,7 @@
   width: calc(100vw - 32px);
   max-width: 393px;
   pointer-events: auto;
+  position: relative; /* For absolute positioning of children */
 }
 
 .mobile-bottom-bar .filter-pill,

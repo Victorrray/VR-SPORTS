@@ -1190,22 +1190,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   return (
     <div className="sportsbook-markets">
-      {/* Left-aligned Filter Menu - Force display */}
-      <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
-      
-      {/* Right-aligned Section Menu - Force display */}
-      <SectionMenu 
-        currentSection={getCurrentSectionId()} 
-        onSectionChange={handleSectionChange}
-        hasPlatinum={hasPlatinum}
-      />
-      
-      {/* Debug info for filter visibility */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{ position: 'fixed', top: 10, left: 10, background: 'rgba(0,0,0,0.7)', padding: '5px', color: 'white', fontSize: '10px', zIndex: 9999 }}>
-          Filter menus should be visible
-        </div>
-      )}
       
       {/* Debug Section - Remove after fixing */}
       {process.env.NODE_ENV === 'development' && (
@@ -1421,12 +1405,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         onFilterClick={() => setMobileFiltersOpen(true)}
         active="sportsbooks"
         onSearchClick={() => setShowMobileSearch(true)}
-        style={{ display: 'flex' }}
+        currentSection={getCurrentSectionId()}
+        onSectionChange={handleSectionChange}
+        hasPlatinum={hasPlatinum}
       />
       
       <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title={isPlayerPropsMode ? "NFL Player Props" : "Filters"}>
         <div className="filter-stack" style={{ maxWidth: 680, margin: "0 auto" }}>
-          
           {/* Player Props Mode Filters */}
           {showPlayerProps ? (
             <>

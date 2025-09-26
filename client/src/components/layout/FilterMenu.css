@@ -1,9 +1,8 @@
 .filter-menu-container {
-  position: fixed;
-  left: 50%;
-  bottom: 90px; /* Position higher above the bottom navigation bar */
+  position: absolute;
+  left: 25%; /* Position at 25% of the bottom nav width */
+  bottom: 16px; /* Position above the tabs but inside the nav bar */
   transform: translateX(-50%);
-  margin-left: -120px; /* Shift to the left to align with the left side of the bottom bar */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
