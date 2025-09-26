@@ -1,11 +1,13 @@
 .filter-menu-container {
   position: fixed;
-  left: 25%;
-  bottom: 110px; /* Increased padding above the bottom nav bar */
+  left: 50%;
+  bottom: 90px; /* Position above the bottom nav bar */
   transform: translateX(-50%);
+  margin-left: -80px; /* Shift to align with the left side of the nav bar */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
+  max-width: 140px; /* Match the width of the bottom nav bar sections */
 }
 
 .filter-button {
@@ -18,14 +20,14 @@
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   min-height: 44px;
-  padding: 10px 24px;
+  padding: 10px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-  width: auto;
-  min-width: 120px;
+  width: 100%;
+  max-width: 140px;
 }
 
 .filter-button:hover {
@@ -49,9 +51,11 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .filter-menu-container {
-    bottom: 110px; /* Increased padding above the bottom bar on mobile */
-    left: 25%;
+    bottom: 90px; /* Position above the bottom bar on mobile */
+    left: 50%;
+    margin-left: -80px; /* Maintain alignment with bottom nav */
     display: block !important; /* Force display on mobile */
+    width: 120px;
   }
   
   .filter-button {
@@ -59,18 +63,19 @@
     font-size: 13px;
     min-height: 40px;
     display: flex !important; /* Force display on mobile */
+    width: 100%;
   }
 }
 
 @media (max-width: 380px) {
   .filter-menu-container {
-    left: 25%;
-    bottom: 110px; /* Maintain consistent height on smaller screens */
+    margin-left: -70px; /* Adjust for smaller screens */
+    bottom: 90px;
+    width: 110px;
   }
   
   .filter-button {
     padding: 6px 12px;
     font-size: 12px;
-    min-width: 100px;
   }
 }

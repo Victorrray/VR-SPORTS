@@ -1,11 +1,13 @@
 .section-menu-container {
   position: fixed;
-  left: 75%;
-  bottom: 110px; /* Increased padding above the bottom nav bar */
+  left: 50%;
+  bottom: 90px; /* Position above the bottom nav bar */
   transform: translateX(-50%);
+  margin-left: 80px; /* Shift to align with the right side of the nav bar */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
+  max-width: 140px; /* Match the width of the bottom nav bar sections */
 }
 
 .section-button {
@@ -18,13 +20,14 @@
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: white;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   min-height: 44px;
-  padding: 10px 20px;
+  padding: 10px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  min-width: 140px;
+  width: 100%;
+  max-width: 140px;
 }
 
 .section-button:hover {
@@ -145,9 +148,11 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 110px; /* Increased padding above the bottom bar on mobile */
-    left: 75%;
+    bottom: 90px; /* Position above the bottom bar on mobile */
+    left: 50%;
+    margin-left: 80px; /* Maintain alignment with bottom nav */
     display: block !important; /* Force display on mobile */
+    width: 120px;
   }
   
   .section-button {
@@ -155,6 +160,7 @@
     font-size: 13px;
     min-height: 40px;
     display: flex !important; /* Force display on mobile */
+    width: 100%;
   }
   
   .section-dropdown {
@@ -166,8 +172,9 @@
 
 @media (max-width: 380px) {
   .section-menu-container {
-    left: 75%;
-    bottom: 110px; /* Maintain consistent height on smaller screens */
+    margin-left: 70px; /* Adjust for smaller screens */
+    bottom: 90px;
+    width: 110px;
   }
   
   .section-button {
