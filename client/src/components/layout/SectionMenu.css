@@ -1,7 +1,7 @@
 .section-menu-container {
   position: fixed;
   left: 50%;
-  bottom: 90px; /* Position above the bottom nav bar */
+  bottom: 120px; /* Significantly increased padding above the bottom nav bar */
   transform: translateX(-50%);
   margin-left: 80px; /* Shift to align with the right side of the nav bar */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
@@ -25,7 +25,7 @@
   padding: 10px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 140px;
 }
@@ -148,7 +148,7 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 90px; /* Position above the bottom bar on mobile */
+    bottom: 120px; /* Significantly increased padding above the bottom bar on mobile */
     left: 50%;
     margin-left: 80px; /* Maintain alignment with bottom nav */
     display: block !important; /* Force display on mobile */
@@ -173,7 +173,7 @@
 @media (max-width: 380px) {
   .section-menu-container {
     margin-left: 70px; /* Adjust for smaller screens */
-    bottom: 90px;
+    bottom: 120px; /* Maintain increased padding on smaller screens */
     width: 110px;
   }
   
