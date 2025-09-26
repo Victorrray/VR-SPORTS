@@ -30,7 +30,7 @@ const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS |
 const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
 const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_MARKETS || 15);
 const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_BOOKS || 15);
-const PLAYER_PROPS_REQUEST_TIMEOUT = 12000;
+const PLAYER_PROPS_REQUEST_TIMEOUT = Number(process.env.PLAYER_PROPS_REQUEST_TIMEOUT || 15000); // 15 seconds
 const PLAYER_PROPS_MAX_CACHE_ENTRIES = Number(process.env.PLAYER_PROPS_MAX_CACHE_ENTRIES || 50);
 
 // Known invalid markets that should be filtered out
@@ -2040,6 +2040,38 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
     
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
       console.log('🎯 Fetching player props for markets:', playerPropMarkets);
+      
+      // If no games were found in the regular API call, fetch games specifically for player props
+      if (allGames.length === 0) {
+        console.log('🎯 No games found in regular API call, fetching games specifically for player props');
+        
+        try {
+          // Fetch games for the requested sports
+          for (const sport of sportsArray) {
+            const userProfile = req.__userProfile || { plan: 'free' };
+            const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+            const bookmakerList = allowedBookmakers.join(',');
+            
+            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
+            console.log(`🌐 Fetching games for player props: ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+            
+            try {
+              const response = await axios.get(url);
+              if (response.data && Array.isArray(response.data)) {
+                console.log(`🎯 Found ${response.data.length} games for sport ${sport}`);
+                allGames.push(...response.data);
+              }
+            } catch (sportError) {
+              console.error(`🚫 Error fetching games for sport ${sport}:`, sportError.message);
+            }
+          }
+          
+          console.log(`🎯 Total games found for player props: ${allGames.length}`);
+        } catch (error) {
+          console.error('🚫 Error fetching games for player props:', error.message);
+        }
+      }
+      
       console.log(`🎯 Processing ${Math.min(allGames.length, 10)} games for player props`);
       console.log(`🎯 Total games available for props: ${allGames.length}`);
       
@@ -2082,7 +2114,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           } else {
             console.log(`🌐 Making API call for player props for game ${game.id}...`);
             const startTime = Date.now();
-            propsResponse = await axios.get(propsUrl, { timeout: 7000 });
+            propsResponse = await axios.get(propsUrl, { timeout: PLAYER_PROPS_REQUEST_TIMEOUT });
             const duration = Date.now() - startTime;
             console.log(`✅ Player props API call completed in ${duration}ms, status: ${propsResponse.status}`);
             console.log(`📊 Player props response data:`, JSON.stringify(propsResponse.data, null, 2).substring(0, 500) + '...');
@@ -2135,7 +2167,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
                     eventId: game.id,
                     markets: playerPropMarkets.join(',')
                   },
-                  timeout: 7000
+                  timeout: PLAYER_PROPS_REQUEST_TIMEOUT
                 });
                 
                 if (sgoResponse.data && sgoResponse.data.length > 0) {
@@ -2168,7 +2200,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
                   eventId: game.id,
                   markets: playerPropMarkets.join(',')
                 },
-                timeout: 7000
+                timeout: PLAYER_PROPS_REQUEST_TIMEOUT
               });
               
               if (sgoResponse.data && sgoResponse.data.length > 0) {
