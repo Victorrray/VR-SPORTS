@@ -4,34 +4,17 @@ import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton"
 import { useMe } from "../../hooks/useMe";
 import "./OddsTable.css";
 import "./OddsTable.desktop.css";
+import "./OddsTable.soccer.css";
 
 // Import team logo utilities
 import { resolveTeamLogo } from "../../utils/logoResolver";
 import { getTeamLogos } from "../../constants/teamLogos";
 
-// Helper function to explain "Yes" bets for better UX
-const getYesBetExplanation = (marketKey, outcomeName) => {
-  if (outcomeName !== 'Yes') return null;
-  
-  const explanations = {
-    'player_anytime_touchdown': 'Player will score a touchdown at any point during the game',
-    'player_anytime_td': 'Player will score a touchdown at any point during the game',
-    'anytime_td': 'Player will score a touchdown at any point during the game',
-    'first_touchdown': 'This player will score the FIRST touchdown of the game',
-    'first_td': 'This player will score the FIRST touchdown of the game',
-    '1st_td': 'This player will score the FIRST touchdown of the game',
-    'player_first_touchdown': 'This player will score the FIRST touchdown of the game'
-  };
-  
-  const key = marketKey.toLowerCase();
-  for (const [pattern, explanation] of Object.entries(explanations)) {
-    if (key.includes(pattern)) {
-      return explanation;
-    }
-  }
-  
-  return 'Yes - this event will happen';
-};
+// Import player prop utilities
+import { extractPlayerName, formatMarketName, getYesNoExplanation } from "../../utils/playerPropUtils";
+
+// Use the imported utility function
+const getYesBetExplanation = getYesNoExplanation;
 
 // Sportsbook logos removed for compliance, but team logos are available
 const logos = {};
@@ -191,7 +174,13 @@ function formatMarket(key="") {
   if (k === "h2h") return "MONEYLINE";
   if (k.includes("spread")) return "SPREAD";
   if (k.includes("total")) return "TOTAL";
-  return key.replace("player_", "").toUpperCase();
+  
+  // Use our utility function for player props
+  if (k.startsWith('player_') || k.startsWith('batter_') || k.startsWith('pitcher_')) {
+    return formatMarketName(key);
+  }
+  
+  return key.toUpperCase();
 }
 function marketTypeLabel(key="") {
   const k = String(key).toLowerCase();
@@ -725,7 +714,8 @@ export default function OddsTable({
               // Group Over/Under pairs by player (description field)
               const playerGroups = {};
               market.outcomes.forEach(outcome => {
-                const playerName = outcome.description || outcome.name;
+                // Use the utility function to extract player name
+                const playerName = extractPlayerName(outcome, market.key, game.sport_key);
                 if (!playerGroups[playerName]) {
                   playerGroups[playerName] = [];
                 }
@@ -748,7 +738,7 @@ export default function OddsTable({
                         game,
                         mkt: { 
                           key: market.key, 
-                          name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+                          name: formatMarketName(market.key)
                         },
                         playerName: playerName,
                         point: overOutcome.point,
@@ -807,7 +797,7 @@ export default function OddsTable({
                   game,
                   mkt: { 
                     key: market.key, 
-                    name: market.key.replace('player_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) 
+                    name: formatMarketName(market.key)
                   },
                   out: { 
                     name: outcome.name, 
@@ -1651,9 +1641,32 @@ export default function OddsTable({
             const renderMobileTeam = () => {
               if (mode === "props") {
                 return (
-                  <div className="mob-player-prop">
-                    <div className="mob-player-name">{row.out.description || row.out.name}</div>
-                    <div className="mob-prop-type">{row.mkt.name}</div>
+                  <div 
+                    className="mob-player-prop" 
+                    data-sport={row.game?.sport_key?.split('_')[0] || ''}
+                  >
+                    <div className="mob-player-name">
+                      {/* For soccer props and other props where player name might be in different fields */}
+                      {row.playerName || row.out.description || 
+                       (row.game?.sport_key?.includes('soccer') && row.out.name !== 'Yes' && row.out.name !== 'No' && 
+                        row.out.name !== 'Over' && row.out.name !== 'Under' ? row.out.name : null) || 
+                       'Player'}
+                      
+                      {/* Add Yes/No indicator for goal scorer markets */}
+                      {row.game?.sport_key?.includes('soccer') && 
+                       (row.out.name === 'Yes' || row.out.name === 'No') && 
+                       row.mkt?.key?.includes('goal_scorer') && (
+                        <span className={`yes-no-prop ${row.out.name.toLowerCase()}`}>
+                          {row.out.name}
+                        </span>
+                      )}
+                    </div>
+                    <div 
+                      className="mob-prop-type"
+                      data-market={row.mkt?.key?.replace(/player_|_/g, '_').toUpperCase()}
+                    >
+                      {row.mkt.name}
+                    </div>
                   </div>
                 );
               }
