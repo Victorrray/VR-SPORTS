@@ -1122,19 +1122,19 @@ export default function OddsTable({
         if (!allMarketOutcomes.length) return;
 
         // Enhanced logging for debugging bookFilter issues
-        console.log(`🎯 Processing market ${marketKey} with ${allMarketOutcomes.length} outcomes. BookFilter:`, 
+        console.log(`🎯 Processing market ${mktKey} with ${allMarketOutcomes.length} outcomes. BookFilter:`, 
           bookFilter && bookFilter.length ? bookFilter : 'ALL BOOKS (no filter)');
         
         const candidates = allMarketOutcomes.filter(o => {
           // If no bookFilter specified, include all bookmakers
           if (!bookFilter || !bookFilter.length) {
-            console.log(`🎯 Including all bookmakers for market ${marketKey}`);
+            console.log(`🎯 Including all bookmakers for market ${mktKey}`);
             return true;
           }
           
           const isIncluded = bookFilter.includes(o.bookmaker.key);
           if (!isIncluded) {
-            console.log(`🎯 Filtering out bookmaker ${o.bookmaker.key} for market ${marketKey}`);
+            console.log(`🎯 Filtering out bookmaker ${o.bookmaker.key} for market ${mktKey}`);
           }
           return isIncluded;
         });
