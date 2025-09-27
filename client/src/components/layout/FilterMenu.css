@@ -1,7 +1,7 @@
 .filter-menu-container {
   position: fixed;
-  left: 3%; /* Moved closer to the left edge */
-  bottom: 175px; /* Moved 25px higher */
+  left: 20%; /* Moved more toward the center from the left */
+  bottom: 135px; /* Keep the vertical position */
   transform: none; /* No transform needed */
   margin-left: 0px; /* No margin shift needed */
   z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
@@ -51,8 +51,8 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .filter-menu-container {
-    bottom: 175px; /* Moved 25px higher */
-    left: 3%; /* Moved closer to the left edge */
+    bottom: 135px; /* Keep the vertical position */
+    left: 20%; /* Moved more toward the center from the left */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
     display: block !important; /* Force display on mobile */
@@ -70,8 +70,8 @@
 
 @media (max-width: 380px) {
   .filter-menu-container {
-    bottom: 175px; /* Moved 25px higher */
-    left: 2%; /* Moved even closer to the left edge on small screens */
+    bottom: 135px; /* Keep the vertical position */
+    left: 15%; /* Moved more toward the center for small screens */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
     width: 110px;

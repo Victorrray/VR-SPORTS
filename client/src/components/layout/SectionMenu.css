@@ -1,7 +1,7 @@
 .section-menu-container {
   position: fixed;
-  right: 3%; /* Positioned from the right edge */
-  bottom: 175px; /* Moved 25px higher */
+  right: 20%; /* Moved more toward the center from the right */
+  bottom: 135px; /* Keep the vertical position */
   transform: none; /* No transform needed */
   margin-right: 0; /* No margin shift needed */
   z-index: 1011; /* Match z-index with filter button */
@@ -148,8 +148,8 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 175px; /* Moved 25px higher */
-    right: 3%; /* Positioned from the right edge */
+    bottom: 135px; /* Keep the vertical position */
+    right: 20%; /* Moved more toward the center from the right */
     left: auto; /* Reset left positioning */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
@@ -174,8 +174,8 @@
 
 @media (max-width: 380px) {
   .section-menu-container {
-    bottom: 175px; /* Moved 25px higher */
-    right: 2%; /* Moved even closer to the right edge on small screens */
+    bottom: 135px; /* Keep the vertical position */
+    right: 15%; /* Moved more toward the center for small screens */
     left: auto; /* Reset left positioning */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
