@@ -1369,8 +1369,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
       ) : null}
 
-      {/* Mobile filter button - positioned on the right */}
+      {/* Mobile filter button - positioned on the left */}
       <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
+      
+      {/* Section menu button - positioned on the right */}
+      <SectionMenu 
+        currentSection={getCurrentSectionId()} 
+        onSectionChange={handleSectionChange} 
+        hasPlatinum={hasPlatinum} 
+      />
       
       {/* Mobile footer nav */}
       <MobileBottomBar
