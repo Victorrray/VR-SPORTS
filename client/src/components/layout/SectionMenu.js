@@ -65,13 +65,8 @@ export default function SectionMenu({
         aria-haspopup="true"
       >
         <div className="section-button-content">
-          {currentSectionData.icon && <currentSectionData.icon size={18} className="section-icon" />}
+          {currentSectionData.icon && <currentSectionData.icon size={20} className="section-icon" />}
           <span className="section-name">{currentSectionData.name}</span>
-          {isOpen ? (
-            <ChevronUp size={16} className="section-chevron" />
-          ) : (
-            <ChevronDown size={16} className="section-chevron" />
-          )}
         </div>
       </button>
 

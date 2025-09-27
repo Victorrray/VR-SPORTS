@@ -14,10 +14,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   border-radius: 30px;
   border: none;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border: none;
   color: white;
   font-weight: 600;
   font-size: 14px;
@@ -25,15 +26,14 @@
   padding: 10px 16px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
   width: 100%;
   max-width: 140px;
 }
 
 .section-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.2);
-  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
 
 .section-button:active {
@@ -43,16 +43,18 @@
 .section-button-content {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
 }
 
 .section-icon {
   color: white;
-  margin-right: 4px;
+  opacity: 0.9;
 }
 
 .section-name {
-  margin-right: 4px;
+  white-space: nowrap;
 }
 
 .section-emoji {
