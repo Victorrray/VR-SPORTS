@@ -8,7 +8,6 @@ import MobileBottomBar from "../components/layout/MobileBottomBar";
 import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
 import MobileSearchModal from "../components/modals/MobileSearchModal";
 import FilterMenu from "../components/layout/FilterMenu";
-import GameOddsSelector from "../components/layout/GameOddsSelector";
 import SectionMenu from "../components/layout/SectionMenu";
 import { useBetSlip } from "../contexts/BetSlipContext";
 import BetSlip from "../components/betting/BetSlip";
@@ -1410,22 +1409,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
       ) : null}
 
-      {/* Mobile filter button */}
+      {/* Mobile filter button - positioned on the right */}
       <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
-      
-      {/* Game Odds selector */}
-      <GameOddsSelector 
-        onClick={() => {
-          // Toggle between game odds and player props
-          if (showPlayerProps) {
-            handleSectionChange('game');
-          } else {
-            handleSectionChange('props');
-          }
-        }} 
-        currentValue={showPlayerProps ? "Player Props" : (showArbitrage ? "Arbitrage" : (showMiddles ? "Middles" : "Game Odds"))}
-        ev={showPlayerProps ? "" : "3.26%"}
-      />
       
       {/* Mobile footer nav */}
       <MobileBottomBar
