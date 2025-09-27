@@ -1200,47 +1200,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         hasPlatinum={hasPlatinum}
       />
       
-      {/* Debug Section - Remove after fixing */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{
-          background: '#1a1a2e',
-          border: '2px solid #8b5cf6',
-          borderRadius: '8px',
-          padding: '12px',
-          margin: '16px',
-          fontSize: '12px',
-          fontFamily: 'monospace'
-        }}>
-          <div style={{ color: '#8b5cf6', fontWeight: 'bold', marginBottom: '8px' }}>🐛 Debug Info:</div>
-          <div style={{ color: '#fff' }}>Sports Selected: {JSON.stringify(picked)}</div>
-          <div style={{ color: '#fff' }}>Date Filter: {selectedDate || 'None'}</div>
-          <div style={{ color: '#fff' }}>Games Found: {marketGames?.length || 0}</div>
-          <div style={{ color: '#fff' }}>Player Props Mode: {showPlayerProps ? 'Yes' : 'No'}</div>
-          <button 
-            onClick={() => {
-              console.log('🔍 Full Debug Info:', {
-                picked, selectedDate, marketGames, showPlayerProps, 
-                sportsForMode: isPlayerPropsMode ? (picked.length > 0 ? picked : ["americanfootball_nfl"]) : picked
-              });
-              // Quick test: Force MLB selection
-              setPicked(['baseball_mlb']);
-              setSelectedDate('');
-            }}
-            style={{
-              background: '#22c55e',
-              color: 'white',
-              border: 'none',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '10px',
-              marginTop: '8px',
-              cursor: 'pointer'
-            }}
-          >
-            🏈→⚾ Force MLB Test
-          </button>
-        </div>
-      )}
+      {/* Debug info removed as requested */}
       
       {/* Spacer for the fixed menus */}
       <div style={{ height: "60px" }} />
