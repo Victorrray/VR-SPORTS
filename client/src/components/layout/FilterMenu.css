@@ -1,9 +1,9 @@
 .filter-menu-container {
   position: fixed;
-  left: 50%;
-  bottom: 120px; /* Significantly increased padding above the bottom nav bar */
-  transform: translateX(-50%);
-  margin-left: -80px; /* Shift to align with the left side of the nav bar */
+  left: 16px; /* Position from the left edge instead of center */
+  bottom: 80px; /* Reduced padding above the bottom nav bar */
+  transform: none; /* Remove the transform */
+  margin-left: 0; /* Remove the margin shift */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
@@ -51,9 +51,9 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .filter-menu-container {
-    bottom: 120px; /* Significantly increased padding above the bottom bar on mobile */
-    left: 50%;
-    margin-left: -80px; /* Maintain alignment with bottom nav */
+    bottom: 80px; /* Reduced padding above the bottom bar on mobile */
+    left: 16px; /* Position from the left edge */
+    margin-left: 0; /* Remove margin shift */
     display: block !important; /* Force display on mobile */
     width: 120px;
   }
@@ -69,8 +69,9 @@
 
 @media (max-width: 380px) {
   .filter-menu-container {
-    margin-left: -70px; /* Adjust for smaller screens */
-    bottom: 120px; /* Maintain increased padding on smaller screens */
+    margin-left: 0; /* Remove margin shift */
+    bottom: 80px; /* Reduced padding on smaller screens */
+    left: 12px; /* Slightly adjust left position for smaller screens */
     width: 110px;
   }
   

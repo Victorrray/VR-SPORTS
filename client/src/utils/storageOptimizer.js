@@ -174,6 +174,7 @@ class StorageOptimizer {
       'vr-odds-remember-me',
       'vr-odds-remembered-email',
       'userSelectedSportsbooks',
+      'userSelectedSportsbooks_props',
       'userBankroll'
     ];
 
@@ -250,7 +251,7 @@ class StorageOptimizer {
 export const StorageCategories = {
   // Critical data that should never be cleaned up
   CRITICAL: {
-    keys: ['vr-odds-remember-me', 'vr-odds-remembered-email', 'userSelectedSportsbooks', 'userBankroll'],
+    keys: ['vr-odds-remember-me', 'vr-odds-remembered-email', 'userSelectedSportsbooks', 'userSelectedSportsbooks_props', 'userBankroll'],
     priority: 'high',
     ttl: null
   },
@@ -322,3 +323,8 @@ export const optimizedStorage = {
 };
 
 export default storageOptimizer;
+
+// Make optimizedStorage available globally
+if (typeof window !== 'undefined') {
+  window.optimizedStorage = optimizedStorage;
+}

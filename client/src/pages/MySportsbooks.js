@@ -26,27 +26,59 @@ export default function MySportsbooks() {
       return;
     }
 
-    // Load user's selected sportsbooks from optimized storage
-    const saved = optimizedStorage.get('userSelectedSportsbooks');
-    if (saved) {
+    // Load user's selected sportsbooks from both localStorage and optimizedStorage
+    let saved;
+    
+    try {
+      // Try localStorage first
+      saved = JSON.parse(localStorage.getItem('userSelectedSportsbooks'));
+      console.log('Loaded from localStorage:', saved);
+    } catch (e) {
+      console.warn('Error loading from localStorage:', e);
+    }
+    
+    // If not found in localStorage, try optimizedStorage
+    if (!saved || !Array.isArray(saved)) {
+      saved = optimizedStorage.get('userSelectedSportsbooks');
+      console.log('Loaded from optimizedStorage:', saved);
+    }
+    
+    // Validate the loaded data
+    if (saved && Array.isArray(saved) && saved.length > 0) {
+      console.log('Setting selected books:', saved);
       setSelectedBooks(saved);
     } else {
       // Default to free plan sportsbooks for free users, popular for platinum
       const defaultBooks = me?.plan === 'platinum' 
         ? ['draftkings', 'fanduel', 'betmgm', 'caesars']
         : ['draftkings', 'fanduel', 'caesars'];
+      console.log('Using default books:', defaultBooks);
       setSelectedBooks(defaultBooks);
     }
 
     // Load user's bankroll using bankroll manager
-    setBankroll(bankrollManager.getBankroll());
+    const loadedBankroll = bankrollManager.getBankroll();
+    console.log('Loaded bankroll:', loadedBankroll);
+    setBankroll(loadedBankroll);
   }, [user, navigate]);
 
   const handleSavePreferences = () => {
     setSavingPrefs(true);
     try {
+      // Save to both localStorage and optimizedStorage for redundancy
+      localStorage.setItem('userSelectedSportsbooks', JSON.stringify(selectedBooks));
       optimizedStorage.set('userSelectedSportsbooks', selectedBooks, { priority: 'high' });
-      bankrollManager.setBankroll(bankroll); // Use bankroll manager to notify other components
+      
+      // Save bankroll using bankroll manager
+      bankrollManager.setBankroll(bankroll); 
+      
+      // Double-check that bankroll was saved correctly
+      const savedBankroll = localStorage.getItem('userBankroll');
+      console.log('Verified saved bankroll:', savedBankroll);
+      
+      // Double-check that sportsbooks were saved correctly
+      const savedBooks = localStorage.getItem('userSelectedSportsbooks');
+      console.log('Verified saved sportsbooks:', savedBooks);
       
       // Dispatch custom event to notify other components about sportsbook changes
       window.dispatchEvent(new CustomEvent('userSelectedSportsbooksChanged', {
@@ -81,6 +113,15 @@ export default function MySportsbooks() {
     const validation = bankrollManager.validateBankroll(newValue);
     if (validation.valid) {
       setBankroll(validation.amount);
+      
+      // Immediately save the bankroll when changed via modal
+      try {
+        bankrollManager.setBankroll(validation.amount);
+        console.log('Bankroll saved via modal:', validation.amount);
+      } catch (error) {
+        console.error('Failed to save bankroll from modal:', error);
+      }
+      
       setShowBankrollModal(false);
     } else {
       console.error('Invalid bankroll:', validation.error);
@@ -203,15 +244,31 @@ export default function MySportsbooks() {
           </div>
           <div className="bankroll-input-group">
             <label htmlFor="bankroll-input">Total Bankroll ($)</label>
-            <input
-              id="bankroll-input"
-              type="text"
-              value={`$${bankroll.toLocaleString()}`}
-              onClick={handleBankrollClick}
-              readOnly
-              placeholder="Enter your bankroll"
-              className="bankroll-input"
-            />
+            <div className="bankroll-input-with-button">
+              <input
+                id="bankroll-input"
+                type="text"
+                value={`$${bankroll.toLocaleString()}`}
+                onClick={handleBankrollClick}
+                readOnly
+                placeholder="Enter your bankroll"
+                className="bankroll-input"
+              />
+              <button 
+                className="bankroll-save-button"
+                onClick={() => {
+                  try {
+                    bankrollManager.setBankroll(bankroll);
+                    alert('Bankroll saved successfully!');
+                  } catch (error) {
+                    console.error('Failed to save bankroll:', error);
+                    alert('Error saving bankroll');
+                  }
+                }}
+              >
+                <Save size={16} />
+              </button>
+            </div>
           </div>
         </div>
       </div>

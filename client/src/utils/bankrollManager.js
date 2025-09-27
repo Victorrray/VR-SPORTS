@@ -10,7 +10,22 @@ export const bankrollManager = {
   getBankroll: () => {
     try {
       const saved = localStorage.getItem(BANKROLL_STORAGE_KEY);
-      return saved ? Number(saved) : DEFAULT_BANKROLL;
+      
+      // Debug logging to help diagnose issues
+      console.log('Retrieving bankroll:', { 
+        saved, 
+        type: typeof saved,
+        parsed: saved ? Number(saved) : null,
+        default: DEFAULT_BANKROLL 
+      });
+      
+      // Ensure we have a valid number
+      const parsedValue = saved ? Number(saved) : null;
+      if (saved && !isNaN(parsedValue)) {
+        return parsedValue;
+      } else {
+        return DEFAULT_BANKROLL;
+      }
     } catch (error) {
       console.warn('Failed to get bankroll from storage:', error);
       return DEFAULT_BANKROLL;
@@ -25,7 +40,24 @@ export const bankrollManager = {
         throw new Error('Invalid bankroll amount');
       }
       
+      // Debug logging to help diagnose issues
+      console.log('Setting bankroll:', { 
+        amount, 
+        numericAmount,
+        stringValue: numericAmount.toString() 
+      });
+      
+      // Store as string to ensure consistency
       localStorage.setItem(BANKROLL_STORAGE_KEY, numericAmount.toString());
+      
+      // Also store in optimizedStorage for redundancy
+      try {
+        if (window.optimizedStorage && typeof window.optimizedStorage.set === 'function') {
+          window.optimizedStorage.set(BANKROLL_STORAGE_KEY, numericAmount, { priority: 'high' });
+        }
+      } catch (e) {
+        console.warn('Failed to set bankroll in optimizedStorage:', e);
+      }
       
       // Dispatch custom event to notify all components
       window.dispatchEvent(new CustomEvent('bankrollChanged', {
