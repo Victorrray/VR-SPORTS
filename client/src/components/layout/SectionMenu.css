@@ -1,9 +1,9 @@
 .section-menu-container {
   position: fixed;
-  right: 16px; /* Position from the right edge */
-  bottom: 80px; /* Position above the mobile nav bar */
-  transform: none; /* Remove the transform */
-  margin-right: 0; /* Remove the margin shift */
+  left: 50%; /* Center horizontally */
+  bottom: 120px; /* Position well above the mobile nav bar */
+  transform: translateX(-50%); /* Center adjustment */
+  margin-left: 80px; /* Shift to the right side */
   z-index: 1001; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
@@ -148,9 +148,10 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 80px; /* Position above the mobile nav bar */
-    right: 16px; /* Position from the right edge */
-    margin-right: 0; /* Remove margin shift */
+    bottom: 120px; /* Position well above the mobile nav bar */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Center adjustment */
+    margin-left: 80px; /* Shift to the right side */
     display: block !important; /* Force display on mobile */
     width: 120px;
   }
@@ -172,9 +173,10 @@
 
 @media (max-width: 380px) {
   .section-menu-container {
-    margin-right: 0; /* Remove margin shift */
-    bottom: 80px; /* Position above the mobile nav bar */
-    right: 12px; /* Slightly adjust right position for smaller screens */
+    bottom: 120px; /* Position well above the mobile nav bar */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Center adjustment */
+    margin-left: 70px; /* Shift to the right side for smaller screens */
     width: 110px;
   }
   
