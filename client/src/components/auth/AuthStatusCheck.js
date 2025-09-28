@@ -38,12 +38,47 @@ const AuthStatusCheck = ({ onRetry }) => {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      console.log('Attempting to sign out user...');
+      
+      // Use the enhanced sign out with force option
+      try {
+        await signOut({ 
+          force: true, 
+          scope: 'global', 
+          clearStorage: true 
+        });
+        console.log('Sign out successful');
+      } catch (error) {
+        console.error('Sign out failed despite force option:', error);
+      }
+      
+      // Clear any local storage items that might contain auth state
+      try {
+        console.log('Clearing local storage items...');
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('userSelectedSportsbooks');
+        localStorage.removeItem('pricingIntent');
+        // Add any other auth-related items here
+        
+        // Clear session storage as well
+        sessionStorage.clear();
+      } catch (storageError) {
+        console.error('Error clearing storage:', storageError);
+      }
+      
+      // Always navigate to login page, even if the above steps fail
+      console.log('Navigating to login page...');
       navigate('/login?auth_reset=true');
+      
+      // Force page reload as a last resort to clear any in-memory state
+      setTimeout(() => {
+        console.log('Forcing page reload...');
+        window.location.href = '/login?auth_reset=true&force=true';
+      }, 100);
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Force navigation even if sign out fails
-      navigate('/login?auth_error=true');
+      console.error('Error in sign out process:', error);
+      // Force navigation even if everything fails
+      window.location.href = '/login?auth_error=true';
     }
   };
 

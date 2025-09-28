@@ -366,27 +366,78 @@ const AuthProvider = ({ children }) => {
     return { data, error: null };
   };
 
-  const signOut = async () => {
+  const signOut = async (options = {}) => {
     try {
       console.log('🔐 useAuth: Starting sign out process...');
       
+      // Default options
+      const { force = false, scope = 'local', clearStorage = true } = options;
+      
+      // First attempt: standard sign out
       if (isSupabaseEnabled) {
-        console.log('🔐 useAuth: Calling supabase.auth.signOut()...');
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error('🔐 useAuth: Supabase sign out error:', error);
-          throw error;
+        try {
+          console.log('🔐 useAuth: Calling supabase.auth.signOut()...');
+          const { error } = await supabase.auth.signOut({ scope });
+          if (error) {
+            console.error('🔐 useAuth: Supabase sign out error:', error);
+            // Don't throw here, we'll try force sign out if enabled
+            if (!force) throw error;
+          } else {
+            console.log('🔐 useAuth: Supabase sign out successful');
+          }
+        } catch (signOutError) {
+          console.error('🔐 useAuth: Standard sign out failed:', signOutError);
+          
+          // Second attempt: force sign out if enabled
+          if (force) {
+            try {
+              console.log('🔐 useAuth: Attempting force sign out...');
+              await supabase.auth.signOut({ scope: 'global' });
+              console.log('🔐 useAuth: Force sign out successful');
+            } catch (forceError) {
+              console.error('🔐 useAuth: Force sign out also failed:', forceError);
+              // Continue with storage clearing even if both sign out attempts fail
+            }
+          } else {
+            throw signOutError; // Re-throw if force is not enabled
+          }
         }
-        console.log('🔐 useAuth: Supabase sign out successful');
       }
       
-      DebugLogger.info('AUTH', 'Clearing demo session from localStorage');
-      safeRemoveItem('demo-auth-session');
+      // Clear storage regardless of sign out success if clearStorage is true
+      if (clearStorage) {
+        console.log('🔐 useAuth: Clearing auth storage...');
+        
+        // Clear all known auth-related items
+        DebugLogger.info('AUTH', 'Clearing auth data from localStorage');
+        safeRemoveItem('demo-auth-session');
+        safeRemoveItem('sb-session');
+        safeRemoveItem('supabase.auth.token');
+        safeRemoveItem('supabase.auth.refreshToken');
+        safeRemoveItem('userSelectedSportsbooks');
+        safeRemoveItem('pricingIntent');
+        
+        // Try to clear any other supabase items
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('supabase.') || key.startsWith('sb-'))) {
+              safeRemoveItem(key);
+            }
+          }
+        } catch (storageError) {
+          console.warn('🔐 useAuth: Error clearing localStorage items:', storageError);
+        }
+        
+        // Also clear session storage
+        try {
+          sessionStorage.clear();
+        } catch (sessionError) {
+          console.warn('🔐 useAuth: Error clearing sessionStorage:', sessionError);
+        }
+      }
       
-      // Clear additional auth-related items
-      safeRemoveItem('sb-session');
-      safeRemoveItem('supabase.auth.token');
-      
+      // Always clear the session state in memory
       console.log('🔐 useAuth: Clearing session state...');
       clearSessionState();
       

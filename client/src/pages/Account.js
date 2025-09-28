@@ -268,27 +268,39 @@ export default function Account() {
     try {
       console.log('🔐 Account: Starting sign out...');
       
-      // Clear any additional local storage items first
-      localStorage.removeItem('userSelectedSportsbooks');
-      localStorage.removeItem('pricingIntent');
-
       // Navigate to landing page immediately to avoid PrivateRoute race condition
       console.log('🔐 Account: Navigating to landing page...');
       navigate('/?signed_out=true', { replace: true });
       
-      // Then perform the actual sign out
-      await signOut();
+      // Use the enhanced sign out with force option
+      try {
+        await signOut({ 
+          force: true, 
+          scope: 'global', 
+          clearStorage: true 
+        });
+        console.log('🔐 Account: Sign out completed successfully');
+      } catch (error) {
+        console.error('🔐 Account: Sign out failed despite force option:', error);
+        // Navigate to login page even if sign out fails
+        navigate('/login?sign_out_error=true', { replace: true });
+      }
       
-      console.log('🔐 Account: Sign out completed successfully');
+      // Force page reload as a last resort to clear any in-memory state
+      setTimeout(() => {
+        console.log('🔐 Account: Forcing page reload...');
+        window.location.href = '/?signed_out=true&force=true';
+      }, 100);
+      
       setSignOutBusy(false);
-      
     } catch (error) {
-      console.error('🔐 Account: Sign out failed:', error);
+      console.error('🔐 Account: Sign out process failed:', error);
       setSignOutError(error.message);
       setSignOutBusy(false);
       setSignOutProgress(null);
-      // If sign out fails, redirect to login anyway for security
-      navigate('/login?sign_out_error=true', { replace: true });
+      
+      // If everything fails, force reload to login page
+      window.location.href = '/login?sign_out_error=true&force=true';
     }
   };
 
