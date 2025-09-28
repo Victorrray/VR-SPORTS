@@ -917,12 +917,17 @@ export default function OddsTable({
             
             // Original processing for other formats
             market.outcomes?.forEach(outcome => {
-              const propKey = `${game.id}-${market.key}-${outcome.name}-${outcome.point || 'no-point'}`;
+              // Extract player name for grouping
+              const playerName = extractPlayerName(outcome, market.key, game.sport_key);
+              
+              // Group by player + market type (ignore specific point values and Over/Under)
+              // This allows different lines for the same player/market to be grouped together
+              const propKey = `${game.id}-${market.key}-${playerName}`;
               
               // Log detailed prop creation for debugging
               if (isDFSSite) {
                 console.log(`Creating prop key: ${propKey} for ${bookmaker.key}`);
-                console.log(`Outcome details:`, {
+                console.log(`Player: ${playerName}, Outcome details:`, {
                   name: outcome.name,
                   point: outcome.point,
                   price: outcome.price,
@@ -947,9 +952,12 @@ export default function OddsTable({
                   bk: bookmaker,
                   sport: game.sport_key,
                   isPlayerProp: true,
+                  playerName: playerName, // Store player name for display
                   allBooks: [],
                   selectedBooks: [],
-                  nonSelectedBooks: []
+                  nonSelectedBooks: [],
+                  // Track different lines for the same player/market
+                  lines: new Map() // Map of point values to book arrays
                 });
               }
               
@@ -959,8 +967,19 @@ export default function OddsTable({
                 odds: outcome.price,
                 book: bookmaker.title,
                 bookmaker: bookmaker,
-                market: market
+                market: market,
+                point: outcome.point || null,
+                outcomeName: outcome.name, // Over/Under
+                line: `${outcome.name} ${outcome.point || ''}`.trim() // "Over 13", "Under 12", etc.
               };
+              
+              // Track this line in the lines map
+              const propGroup = propGroups.get(propKey);
+              const lineKey = `${outcome.name} ${outcome.point || ''}`.trim();
+              if (!propGroup.lines.has(lineKey)) {
+                propGroup.lines.set(lineKey, []);
+              }
+              propGroup.lines.get(lineKey).push(bookData);
               
               propGroups.get(propKey).allBooks.push(bookData);
               

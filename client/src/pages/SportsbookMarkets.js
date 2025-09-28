@@ -498,10 +498,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const filteredGames = useMemo(() => {
     if (!Array.isArray(marketGames)) return [];
     
-    // If no date filter is selected OR we're in player props mode, return all games
-    // This ensures player props always show all available games regardless of date
-    if (!selectedDate || selectedDate === "" || isPlayerPropsMode) {
-      console.log('🗓️ No date filter or player props mode - showing all games:', marketGames.length);
+    // If no date filter is selected, return all games
+    if (!selectedDate || selectedDate === "") {
+      console.log('🗓️ No date filter - showing all games:', marketGames.length);
       return marketGames;
     }
     
@@ -1494,6 +1493,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   placeholderText="Select sports..."
                   allLabel="All Sports"
                   enableCategories={true}
+                />
+              </div>
+
+              {/* Date Filter for Player Props */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  📅 Date
+                </label>
+                <DatePicker
+                  value={draftSelectedDate}
+                  onChange={setDraftSelectedDate}
                 />
               </div>
 
