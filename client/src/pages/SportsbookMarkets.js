@@ -373,8 +373,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     window.addEventListener('openMobileSearch', handleOpenMobileSearch);
     
+    // Handle reset filters event from OddsTable
+    const handleResetFilters = () => {
+      console.log('🔄 Resetting all filters to defaults');
+      // Reset to default values
+      setPicked(["americanfootball_nfl"]);
+      setSelectedDate('');
+      setSelectedBooks([]);
+      setSelectedPlayerPropsBooks([]);
+      setMarketKeys(["h2h", "spreads", "totals"]);
+      setSelectedPlayerPropMarkets(["player_pass_yds", "player_rush_yds", "player_receptions"]);
+      setMinEV("");
+      
+      // Force refresh data
+      setTableNonce(prev => prev + 1);
+    };
+    
+    window.addEventListener('resetOddsFilters', handleResetFilters);
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('resetOddsFilters', handleResetFilters);
       window.removeEventListener('userSelectedSportsbooksChanged', handleStorageChange);
       window.removeEventListener('openMobileSearch', handleOpenMobileSearch);
     };

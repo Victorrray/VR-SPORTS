@@ -1639,22 +1639,37 @@ export default function OddsTable({
   );
   if (!allRows.length && !loading) {
     // Show a helpful message when no bets are available
+    const isDFSOnly = bookFilter && bookFilter.length > 0 && 
+      bookFilter.every(book => ['prizepicks', 'underdog', 'pick6'].includes(book));
+      
     return (
-      <div className="odds-table-card revamp">
-        <div style={{
-          padding: '40px 20px',
-          textAlign: 'center',
-          borderRadius: '12px',
-          margin: '20px 0'
-        }}>
-          <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px' }}>
-            No Bets Available
+      <div className="odds-table-card revamp no-bets-container">
+        <div className="no-bets-content">
+          {/* Icon based on filter type */}
+          <div className="no-bets-icon">
+            {isDFSOnly ? (
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+            ) : (
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12h8"></path>
+                <path d="M12 8v8"></path>
+              </svg>
+            )}
+          </div>
+          
+          <h3 className="no-bets-title">
+            {isDFSOnly ? 'No DFS App Bets Found' : 'No Bets Available'}
           </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>
+          
+          <p className="no-bets-message">
             {bookFilter && bookFilter.length > 0 ? (
               // Check if filtering for DFS apps only
-              bookFilter.every(book => ['prizepicks', 'underdog', 'pick6'].includes(book)) ? (
-                <>No DFS app bets found.<br />The API may not be returning data for DFS apps at this time.<br />Try selecting traditional sportsbooks instead.</>
+              isDFSOnly ? (
+                <>The API may not be returning data for DFS apps at this time.<br />Try selecting traditional sportsbooks instead.</>
               ) : (
                 <>No bets found for the selected sportsbooks.<br />Try selecting different sportsbooks or markets.</>
               )
@@ -1662,21 +1677,186 @@ export default function OddsTable({
               <>No bets available at this time.<br />Try selecting different sports or markets.</>
             )}
           </p>
-          <div style={{ 
-            marginTop: '20px',
-            padding: '12px 16px',
-            background: 'rgba(0, 0, 0, 0.1)',
-            borderRadius: '8px',
-            display: 'inline-block',
-            fontSize: '14px',
-            color: 'var(--text-secondary)'
-          }}>
-            <div>Selected books: {bookFilter && bookFilter.length > 0 ? bookFilter.join(', ') : 'All books'}</div>
-            <div>Mode: {mode}</div>
-            <div>Total games: {games?.length || 0}</div>
-            <div>Markets: {marketFilter && marketFilter.length > 0 ? marketFilter.join(', ') : 'All markets'}</div>
+          
+          <div className="no-bets-details">
+            <div className="details-row">
+              <span className="details-label">Selected books:</span>
+              <span className="details-value">{bookFilter && bookFilter.length > 0 ? bookFilter.join(', ') : 'All books'}</span>
+            </div>
+            <div className="details-row">
+              <span className="details-label">Mode:</span>
+              <span className="details-value">{mode}</span>
+            </div>
+            <div className="details-row">
+              <span className="details-label">Total games:</span>
+              <span className="details-value">{games?.length || 0}</span>
+            </div>
+            <div className="details-row">
+              <span className="details-label">Markets:</span>
+              <span className="details-value">{marketFilter && marketFilter.length > 0 ? marketFilter.join(', ') : 'All markets'}</span>
+            </div>
+          </div>
+          
+          {/* Action buttons */}
+          <div className="no-bets-actions">
+            <button 
+              className="action-button primary"
+              onClick={() => window.location.reload()}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              Refresh Data
+            </button>
+            <button 
+              className="action-button secondary"
+              onClick={() => {
+                // Reset filters - this would need to be implemented via a callback prop
+                if (window.dispatchEvent) {
+                  window.dispatchEvent(new CustomEvent('resetOddsFilters'));
+                }
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 3h6l6 18h6"></path>
+                <path d="M14 3h7v7"></path>
+                <path d="M21 3l-9 9"></path>
+              </svg>
+              Reset Filters
+            </button>
           </div>
         </div>
+        
+        {/* Add CSS styles */}
+        <style jsx>{`
+          .no-bets-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            background: rgba(139, 92, 246, 0.03);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+            margin: 20px 0;
+            overflow: hidden;
+          }
+          
+          .no-bets-content {
+            max-width: 500px;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          
+          .no-bets-icon {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite ease-in-out;
+          }
+          
+          .no-bets-title {
+            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 16px;
+          }
+          
+          .no-bets-message {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 16px;
+            line-height: 1.5;
+          }
+          
+          .no-bets-details {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+          }
+          
+          .details-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+          }
+          
+          .details-row:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+          }
+          
+          .details-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+          }
+          
+          .details-value {
+            color: var(--text-primary);
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          
+          .no-bets-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+          }
+          
+          .action-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+          }
+          
+          .action-button.primary {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+          }
+          
+          .action-button.secondary {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+          }
+          
+          .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          }
+          
+          @keyframes pulse {
+            0% { opacity: 0.6; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.6; transform: scale(0.98); }
+          }
+          
+          @media (max-width: 640px) {
+            .no-bets-actions {
+              flex-direction: column;
+            }
+            
+            .action-button {
+              width: 100%;
+              justify-content: center;
+            }
+          }
+        `}</style>
       </div>
     );
   }
