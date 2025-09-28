@@ -1,0 +1,120 @@
+/* Enhanced Loading Spinner Styles */
+.enhanced-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  width: 100%;
+  text-align: center;
+  gap: 20px;
+}
+
+.enhanced-loading.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+}
+
+/* Spinner container with glow effect */
+.spinner-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+/* Main spinner */
+.spinner {
+  border: 3px solid transparent;
+  border-top: 3px solid #8b5cf6;
+  border-right: 3px solid #8b5cf6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  position: relative;
+  z-index: 2;
+}
+
+/* Spinner sizes */
+.spinner.small {
+  width: 30px;
+  height: 30px;
+}
+
+.spinner.medium {
+  width: 50px;
+  height: 50px;
+  border-width: 4px;
+}
+
+.spinner.large {
+  width: 80px;
+  height: 80px;
+  border-width: 5px;
+}
+
+/* Pulse effect behind spinner */
+.spinner-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.2);
+  animation: pulse 1.5s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Text styling */
+.spinner-text h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.spinner-text p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+/* Type variations */
+.enhanced-loading.player-props .spinner {
+  border-top-color: #10b981;
+  border-right-color: #10b981;
+}
+
+.enhanced-loading.player-props .spinner-pulse {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: spin 2s linear infinite;
+  }
+  
+  .spinner-pulse {
+    animation: none;
+    opacity: 0.3;
+  }
+}

@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useMe } from '../../hooks/useMe';
+import EnhancedLoadingSpinner from '../common/EnhancedLoadingSpinner';
+import { TrendingUp, TrendingDown } from "lucide-react";
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
-import { useMe } from "../../hooks/useMe";
 import "./OddsTable.css";
 import "./OddsTable.desktop.css";
 import "./OddsTable.soccer.css";
@@ -1476,78 +1477,15 @@ export default function OddsTable({
 
   /* ---------- Render ---------- */
   if (loading) return (
-    <div className="odds-table-loading">
-      <div className="loading-spinner"></div>
-      <div className="loading-text">
-        {mode === "props" ? "Loading player props..." : "Refreshing odds data..."}
-      </div>
-      <div className="loading-subtext">
-        {mode === "props" 
-          ? "Processing player prop data from DFS sites and sportsbooks" 
-          : "Getting the latest odds from all sportsbooks"
-        }
-      </div>
-      <style jsx>{`
-        .odds-table-loading {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 4rem 2rem;
-          text-align: center;
-          margin: 1rem 0;
-        }
-        
-        .loading-spinner {
-          width: 40px;
-          height: 40px;
-          border: 3px solid var(--border-color);
-          border-top: 3px solid var(--accent);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin-bottom: 1.5rem;
-        }
-        
-        .loading-text {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--text-primary);
-          margin-bottom: 0.5rem;
-        }
-        
-        .loading-subtext {
-          font-size: 0.9rem;
-          color: var(--text-secondary);
-          opacity: 0.7;
-        }
-        
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        .mob-total-stack {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          line-height: 1.2;
-          text-align: left;
-        }
-        
-        .mob-total-market {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-        
-        .mob-total-side {
-          font-size: 0.7rem;
-          font-weight: 600;
-          color: var(--text-secondary);
-          margin-top: 1px;
-        }
-      `}</style>
-    </div>
+    <EnhancedLoadingSpinner
+      message={mode === "props" ? "Loading player props..." : "Refreshing odds data..."}
+      subMessage={mode === "props" 
+        ? "Processing player prop data from DFS sites and sportsbooks" 
+        : "Getting the latest odds from all sportsbooks"
+      }
+      size="large"
+      type={mode === "props" ? "player-props" : "default"}
+    />
   );
   if (!allRows.length && !loading) return null;
 
@@ -1845,7 +1783,7 @@ export default function OddsTable({
                 </tr>
 
                 {/* ----- Mobile card (click to expand) ----- */}
-                <tr className="mobile-card-row" aria-hidden={false}>
+                <tr className="mobile-card-row" aria-hidden="false">
                   <td colSpan={8}>
                     <div
                       className={`mobile-odds-card as-button ${expandedRows[row.key] ? 'expanded' : ''}`}

@@ -592,10 +592,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       // Force refresh the table to trigger immediate data fetch
       setTableNonce(prev => prev + 1);
       
-      // Extended timeout for player props since they take longer to load
-      setTimeout(() => {
+      // Always show loading for at least 2 seconds when switching to player props mode
+      // This ensures users see the loading indicator even if data loads quickly
+      const minLoadingTimer = setTimeout(() => {
         if (isPlayerPropsMode) {
-          console.log('🎯 Player Props timeout - checking if data loaded');
+          console.log('🎯 Player Props minimum loading time completed');
           // Check for ANY player prop markets, not just selected ones
           const hasPropsData = filteredGames.some(game => 
             game.bookmakers?.some(book => 
@@ -605,16 +606,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             )
           );
           
-          // If we have games but no player props data, and we're not actively loading,
-          // force the loading state to false to show whatever data we have
-          if (filteredGames.length > 0 && !hasPropsData && !marketsLoading) {
-            console.log('🎯 Games found but no props data after timeout, showing available data');
+          // Only stop loading if we have data or if we're not actively fetching
+          if ((filteredGames.length > 0 && hasPropsData) || !marketsLoading) {
+            console.log('🎯 Minimum loading time passed, showing available data');
             setPlayerPropsProcessing(false);
+          } else {
+            console.log('🎯 Still loading player props data after minimum time');
           }
         }
-      }, 2000); // Reduced timeout to 2 seconds
+      }, 2000); // Minimum 2 second loading time for better UX
+      
+      return () => clearTimeout(minLoadingTimer);
     }
-  }, [isPlayerPropsMode]);
+  }, [isPlayerPropsMode, filteredGames, marketsLoading]);
 
   // Player props prefetching and caching optimization
   useEffect(() => {
