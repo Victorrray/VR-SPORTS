@@ -42,7 +42,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true },
   
   // Additional Sportsbooks for expanded coverage
-  { key: 'wynnbet', name: 'WynnBET', popular: true },
+  // wynnbet already defined above
   { key: 'superbook', name: 'SuperBook', popular: true },
   { key: 'twinspires', name: 'TwinSpires', popular: true },
   { key: 'betfred_us', name: 'Betfred US', popular: true },

@@ -2274,7 +2274,7 @@ export default function OddsTable({
                     </div>
                   </td>
                   <td>{fair != null ? (Number(fair) > 0 ? `+${fair}` : `${fair}`) : ''}</td>
-                  <td aria-hidden="true"></td>
+                  <td aria-hidden={true}></td>
                 </tr>
 
                 {/* ----- Mobile card (click to expand) ----- */}
