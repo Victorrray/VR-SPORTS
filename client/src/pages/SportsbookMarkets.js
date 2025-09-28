@@ -1376,8 +1376,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           betSlipCount={bets.length}
           onOpenBetSlip={openBetSlip}
         />
-      )
-      }
+      ) : null}
 
       {/* Mobile filter button - positioned on the left */}
       <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
