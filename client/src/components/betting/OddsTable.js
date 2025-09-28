@@ -633,6 +633,25 @@ export default function OddsTable({
 
   /* ---------- Build rows (game mode) ---------- */
   const allRows = useMemo(() => {
+    // Debug: Check if we have any DFS app data
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+    let dfsAppCount = 0;
+    
+    if (games && games.length > 0) {
+      games.forEach(game => {
+        if (game.bookmakers) {
+          game.bookmakers.forEach(bookmaker => {
+            if (dfsApps.includes(bookmaker.key?.toLowerCase())) {
+              dfsAppCount++;
+              console.log(`🎯 Found DFS app ${bookmaker.key} for game ${game.home_team} vs ${game.away_team} with ${bookmaker.markets?.length || 0} markets`);
+            }
+          });
+        }
+      });
+    }
+    
+    console.log(`🎯 Total DFS app bookmakers found: ${dfsAppCount}`);
+
     try {
       if (mode === "props") {
         const propsRows = [];
@@ -674,7 +693,7 @@ export default function OddsTable({
           console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
           bookmaker.markets.forEach(market => {
             // Filter markets based on mode
-            const isDFSSite = ['prizepicks', 'underdog', 'sleeper'].includes(bookmaker.key?.toLowerCase());
+            const isDFSSite = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmaker.key?.toLowerCase());
             const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
             const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
             
@@ -1410,9 +1429,21 @@ export default function OddsTable({
       });
     }
     
-    // Apply EV filter if specified
+    // Apply EV filter if specified, but always show DFS app bets
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
+        // Check if this is a DFS app - always show DFS app bets regardless of EV
+        const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+        const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
+        const isDFSApp = dfsApps.includes(bookmakerKey);
+        
+        // If it's a DFS app, always show it
+        if (isDFSApp) {
+          console.log(`🎯 Always showing DFS app bet: ${bookmakerKey} for ${row.game?.home_team} vs ${row.game?.away_team}`);
+          return true;
+        }
+        
+        // For non-DFS apps, apply normal EV filtering
         const ev = evMap.get(row.key);
         if (ev == null || Number.isNaN(ev)) return false;
         if (evOnlyPositive && ev <= 0) return false;
