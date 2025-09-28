@@ -37,7 +37,9 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true },
   { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true },
   { key: 'pick6', name: 'DK Pick6', popular: true, isDFS: true },
-  { key: 'prophetx', name: 'ProphetX', popular: true, isDFS: true },
+  
+  // Exchange Books
+  { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true },
   
   // Additional Sportsbooks for expanded coverage
   { key: 'wynnbet', name: 'WynnBET', popular: true },

@@ -124,7 +124,7 @@ function calculateEV(odds, fairLine, bookmakerKey = null) {
   const toDec = o => (o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1);
   
   // Special EV calculation for DFS apps only
-  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmakerKey);
+  const isDFSApp = ['prizepicks', 'underdog', 'pick6'].includes(bookmakerKey);
   
   if (isDFSApp) {
     // DFS apps use fixed -137 odds for player props
@@ -634,7 +634,7 @@ export default function OddsTable({
   /* ---------- Build rows (game mode) ---------- */
   const allRows = useMemo(() => {
     // Debug: Check if we have any DFS app data
-    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+    const dfsApps = ['prizepicks', 'underdog', 'pick6'];
     let dfsAppCount = 0;
     let dfsMarketCount = 0;
     let dfsOutcomeCount = 0;
@@ -719,7 +719,7 @@ export default function OddsTable({
           console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
           bookmaker.markets.forEach(market => {
             // Filter markets based on mode
-            const isDFSSite = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmaker.key?.toLowerCase());
+            const isDFSSite = ['prizepicks', 'underdog', 'pick6'].includes(bookmaker.key?.toLowerCase());
             const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
             const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
             
@@ -907,7 +907,7 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+            const dfsApps = ['prizepicks', 'underdog', 'pick6'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = propData.allBooks.some(book => {
@@ -934,7 +934,7 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+            const dfsApps = ['prizepicks', 'underdog', 'pick6'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = allCombinedBooks.some(book => {
@@ -1203,7 +1203,7 @@ export default function OddsTable({
           }
           
           // Check if we're filtering for DFS apps only
-          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+          const dfsApps = ['prizepicks', 'underdog', 'pick6'];
           const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
           
           // If we're filtering for DFS apps only and this is a DFS app, include it
@@ -1351,7 +1351,7 @@ export default function OddsTable({
     const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
     
     // Check if this is a DFS app
-    const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmakerKey);
+    const isDFSApp = ['prizepicks', 'underdog', 'pick6'].includes(bookmakerKey);
     
     // For DFS apps, we want to prioritize them in EV sorting
     if (isDFSApp && mode === 'props') {
@@ -1445,7 +1445,7 @@ export default function OddsTable({
     let r = allRows;
     
     // Check if we're filtering for DFS apps only
-    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+    const dfsApps = ['prizepicks', 'underdog', 'pick6'];
     const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
     
     // If filtering for DFS apps only, strictly filter to only show DFS apps
@@ -1485,7 +1485,7 @@ export default function OddsTable({
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
         // Check if this is a DFS app - always show DFS app bets regardless of EV
-        const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+        const dfsApps = ['prizepicks', 'underdog', 'pick6'];
         const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
         const isDFSApp = dfsApps.includes(bookmakerKey);
         
@@ -1653,7 +1653,7 @@ export default function OddsTable({
           <p style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>
             {bookFilter && bookFilter.length > 0 ? (
               // Check if filtering for DFS apps only
-              bookFilter.every(book => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(book)) ? (
+              bookFilter.every(book => ['prizepicks', 'underdog', 'pick6'].includes(book)) ? (
                 <>No DFS app bets found.<br />The API may not be returning data for DFS apps at this time.<br />Try selecting traditional sportsbooks instead.</>
               ) : (
                 <>No bets found for the selected sportsbooks.<br />Try selecting different sportsbooks or markets.</>
