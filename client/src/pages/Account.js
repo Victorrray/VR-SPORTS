@@ -524,6 +524,14 @@ export default function Account() {
         <div className="card-header">
           <Shield size={20} />
           <h2>Security & Access</h2>
+          <div className="emergency-icon-container" title="Emergency Sign Out">
+            <AlertOctagon 
+              size={16} 
+              color="#ef4444" 
+              className="emergency-icon"
+              onClick={() => document.getElementById('emergency-signout-modal').showModal()}
+            />
+          </div>
         </div>
         
         <div className="security-actions">
@@ -564,14 +572,23 @@ export default function Account() {
             </div>
           </button>
           
-          {/* Emergency Sign Out option */}
-          <div className="emergency-signout-container">
-            <div className="emergency-header">
-              <AlertOctagon size={14} color="#ef4444" />
-              <span>Having trouble signing out?</span>
+          {/* Emergency Sign Out Modal */}
+          <dialog id="emergency-signout-modal" className="emergency-modal">
+            <div className="emergency-modal-content">
+              <div className="emergency-header">
+                <AlertOctagon size={20} color="#ef4444" />
+                <h3>Emergency Sign Out</h3>
+              </div>
+              <p>Use this option only if normal sign out doesn't work.</p>
+              <EmergencySignOut />
+              <button 
+                className="emergency-modal-close" 
+                onClick={() => document.getElementById('emergency-signout-modal').close()}
+              >
+                Cancel
+              </button>
             </div>
-            <EmergencySignOut />
-          </div>
+          </dialog>
         </div>
       </section>
 

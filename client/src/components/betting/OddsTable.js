@@ -446,6 +446,10 @@ export default function OddsTable({
   // Get user plan information for free trial restrictions
   const { me } = useMe();
   
+  // State for minimum loading time
+  const [minLoadingComplete, setMinLoadingComplete] = useState(false);
+  const minLoadingTimeRef = useRef(null);
+  
   // Bet Slip functionality
   const addToBetSlip = (row, book, buttonElement) => {
     if (!onAddBet) return;
@@ -1625,19 +1629,49 @@ export default function OddsTable({
     }
   }, [allRows, mode]);
 
-  /* ---------- Render ---------- */
-  if (loading) return (
-    <EnhancedLoadingSpinner
-      message={mode === "props" ? "Loading player props..." : "Refreshing odds data..."}
-      subMessage={mode === "props" 
-        ? "Processing player prop data from DFS sites and sportsbooks" 
-        : "Getting the latest odds from all sportsbooks"
+  /* ---------- Minimum loading time effect ---------- */
+  useEffect(() => {
+    // Clear any existing timer
+    if (minLoadingTimeRef.current) {
+      clearTimeout(minLoadingTimeRef.current);
+    }
+    
+    // Reset min loading state when loading starts
+    if (loading) {
+      setMinLoadingComplete(false);
+      
+      // Set a 30-second timer before allowing the no-bets message to show
+      minLoadingTimeRef.current = setTimeout(() => {
+        console.log('🎯 Minimum loading time (30s) completed');
+        setMinLoadingComplete(true);
+      }, 30000); // 30 seconds
+    }
+    
+    return () => {
+      if (minLoadingTimeRef.current) {
+        clearTimeout(minLoadingTimeRef.current);
       }
-      size="large"
-      type={mode === "props" ? "player-props" : "default"}
-    />
-  );
-  if (!allRows.length && !loading) {
+    };
+  }, [loading]);
+  
+  /* ---------- Render ---------- */
+  // Show loading spinner if loading OR if we haven't met the minimum loading time yet
+  if (loading || (!minLoadingComplete && !allRows.length)) {
+    return (
+      <EnhancedLoadingSpinner
+        message={mode === "props" ? "Loading player props..." : "Refreshing odds data..."}
+        subMessage={mode === "props" 
+          ? "Processing player prop data from DFS sites and sportsbooks" 
+          : "Getting the latest odds from all sportsbooks"
+        }
+        size="large"
+        type={mode === "props" ? "player-props" : "default"}
+      />
+    );
+  }
+  
+  // Show no bets message only after loading is complete AND minimum loading time has passed
+  if (!allRows.length && minLoadingComplete) {
     // Show a helpful message when no bets are available
     const isDFSOnly = bookFilter && bookFilter.length > 0 && 
       bookFilter.every(book => ['prizepicks', 'underdog', 'pick6'].includes(book));

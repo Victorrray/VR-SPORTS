@@ -1,22 +1,87 @@
-.emergency-signout-container {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
+/* Emergency icon in the corner */
+.card-header {
+  position: relative;
+}
+
+.emergency-icon-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+  padding: 8px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.emergency-icon-container:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.emergency-icon {
+  filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.3));
+}
+
+/* Emergency modal */
+.emergency-modal {
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.emergency-modal::backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.emergency-modal-content {
+  padding: 24px;
 }
 
 .emergency-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 16px;
   color: #ef4444;
-  font-size: 14px;
-  font-style: italic;
 }
 
-/* Add this to Account.css */
+.emergency-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.emergency-modal-content p {
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.emergency-modal-close {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.emergency-modal-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Security actions layout */
 .security-actions {
   display: flex;
   flex-direction: column;
