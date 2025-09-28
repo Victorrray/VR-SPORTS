@@ -9,6 +9,7 @@ import {
   AlertTriangle, Target, Zap, Filter, RefreshCw 
 } from 'lucide-react';
 import './ArbitrageDetector.css';
+import '../betting/FormControls.css';
 
 const ArbitrageDetector = ({ 
   sport = 'americanfootball_nfl', 
@@ -460,6 +461,7 @@ const ArbitrageDetector = ({
                 step="0.1"
                 value={draftMinProfit}
                 onChange={(e) => setDraftMinProfit(Number(e.target.value))}
+                className="form-control"
               />
             </div>
             <div className="control-group">
@@ -468,17 +470,18 @@ const ArbitrageDetector = ({
                 type="number"
                 min="100"
                 max={bankrollManager.getBankroll()}
-                step="100"
+                step="10"
                 value={draftMaxStake}
                 onChange={(e) => setDraftMaxStake(Number(e.target.value))}
+                className="form-control"
               />
             </div>
             <div className="control-group">
               <label>Markets</label>
               <select 
-                multiple 
                 value={draftSelectedMarkets}
                 onChange={(e) => setDraftSelectedMarkets(Array.from(e.target.selectedOptions, option => option.value))}
+                className="form-control"
               >
                 <option value="h2h">Moneyline</option>
                 <option value="spreads">Point Spread</option>
@@ -487,7 +490,7 @@ const ArbitrageDetector = ({
             </div>
             <div className="control-group">
               <label>Sort By</label>
-              <select value={draftSortBy} onChange={(e) => setDraftSortBy(e.target.value)}>
+              <select value={draftSortBy} onChange={(e) => setDraftSortBy(e.target.value)} className="form-control">
                 <option value="profit">Profit %</option>
                 <option value="amount">Profit Amount</option>
                 <option value="time">Time Found</option>
