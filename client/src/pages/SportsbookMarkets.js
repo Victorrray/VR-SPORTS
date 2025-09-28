@@ -274,7 +274,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Log the sports being used for the current mode
   console.log(`🎯 Sports for ${isPlayerPropsMode ? 'Player Props' : 'Game Odds'} mode:`, sportsForMode);
   
-  const hasPlatinum = true; // Temporarily set to true to show all options
+  const hasPlatinum = true; // TESTING MODE: Always set to true to enable all features
   const hasGoldOrBetter = me?.plan === 'gold' || me?.plan === 'platinum';
   const isOverQuota = !hasGoldOrBetter && me?.calls_made >= (me?.limit || 250);
   

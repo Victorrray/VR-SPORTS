@@ -32,6 +32,18 @@ export function useMe() {
   const initialPlan = plan || loadPlanInfo();
 
   const [me, setMe] = useState(() => {
+    // TEMPORARY TESTING MODE: Always provide platinum access
+    console.log('🎯 useMe: TESTING MODE - Setting platinum plan for all users');
+    return {
+      plan: 'platinum',
+      remaining: null,
+      limit: null,
+      calls_made: 0,
+      stale: false,
+    };
+    
+    // Original code (commented out during testing)
+    /*
     // Temporary: Check if user is demo user and should have platinum access
     const isDemoUser = session?.user?.id === '54276b6c-5255-4117-be95-70c22132591c';
     if (isDemoUser) {
@@ -47,6 +59,7 @@ export function useMe() {
 
     // Return actual plan data for real users
     return planToUsage(initialPlan);
+    */
   });
   const [loading, setLoading] = useState(() => planLoading || !initialPlan);
   const [error, setError] = useState(null);
