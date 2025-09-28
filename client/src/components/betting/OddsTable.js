@@ -1725,7 +1725,7 @@ export default function OddsTable({
       
       // Count DFS app rows before filtering
       const dfsRowsBefore = r.filter(row => {
-        const bookmakerKey = (row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
+        const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         return dfsApps.some(app => bookmakerKey.includes(app));
       }).length;
       
@@ -1733,19 +1733,20 @@ export default function OddsTable({
       
       // Log all DFS app rows for debugging
       r.forEach(row => {
-        const bookmakerKey = (row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
+        const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         if (dfsApps.some(app => bookmakerKey.includes(app))) {
           console.log(`🎯 DFS app row found: ${bookmakerKey} - ${row.game?.home_team} vs ${row.game?.away_team} - ${row.mkt?.key} - ${row.out?.name}`);
         }
       });
       
       r = r.filter(row => {
-        const bookmakerKey = (row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
+        // For player props, bookmaker info is in row.bk, for game odds it's in row.out.bookmaker
+        const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         const isDFSApp = dfsApps.some(app => bookmakerKey.includes(app));
         if (!isDFSApp) {
-          console.log(`🎯 Excluding non-DFS app: ${bookmakerKey}`);
+          console.log(`🎯 Excluding non-DFS app: "${bookmakerKey}" (from ${row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || 'unknown'})`);
         } else {
-          console.log(`🎯 Including DFS app: ${bookmakerKey}`);
+          console.log(`🎯 Including DFS app: "${bookmakerKey}"`);
         }
         return isDFSApp;
       });
@@ -1758,7 +1759,7 @@ export default function OddsTable({
       r = r.filter(row => {
         // Check if this is a DFS app - always show DFS app bets regardless of EV
         const dfsApps = ['prizepicks', 'underdog', 'pick6'];
-        const bookmakerKey = (row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
+        const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         const isDFSApp = dfsApps.some(app => bookmakerKey.includes(app));
         
         // If it's a DFS app, always show it
