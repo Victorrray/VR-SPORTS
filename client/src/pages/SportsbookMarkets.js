@@ -9,6 +9,7 @@ import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
 import MobileSearchModal from "../components/modals/MobileSearchModal";
 import FilterMenu from "../components/layout/FilterMenu";
 import SectionMenu from "../components/layout/SectionMenu";
+import "../components/betting/FormControls.css"; // Import form controls styling
 import { useBetSlip } from "../contexts/BetSlipContext";
 import BetSlip from "../components/betting/BetSlip";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
@@ -1454,15 +1455,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   step="0.1"
                   value={draftMinProfit}
                   onChange={(e) => setDraftMinProfit(Number(e.target.value))}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--input-bg)',
-                    color: 'var(--text-primary)',
-                    fontSize: '14px'
-                  }}
+                  className="form-control"
                 />
               </div>
 
@@ -1477,15 +1470,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   step="10"
                   value={draftMaxStake}
                   onChange={(e) => setDraftMaxStake(Number(e.target.value))}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--input-bg)',
-                    color: 'var(--text-primary)',
-                    fontSize: '14px'
-                  }}
+                  className="form-control"
                 />
               </div>
 
@@ -1496,15 +1481,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <select
                   value={draftArbitrageSortBy}
                   onChange={(e) => setDraftArbitrageSortBy(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--input-bg)',
-                    color: 'var(--text-primary)',
-                    fontSize: '14px'
-                  }}
+                  className="form-control"
                 >
                   <option value="profit">Profit %</option>
                   <option value="amount">Profit Amount</option>
