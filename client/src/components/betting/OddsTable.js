@@ -127,14 +127,13 @@ function calculateEV(odds, fairLine, bookmakerKey = null) {
   const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmakerKey);
   
   if (isDFSApp) {
-    // DFS apps typically pay even money (+100) or close to it
-    // We compare their effective payout against market consensus
-    const dfsPayoutOdds = +100; // Even money payout for DFS
-    const dfsDec = toDec(dfsPayoutOdds);
+    // DFS apps use fixed -137 odds for player props
+    const dfsOdds = -137; // Fixed odds for DFS apps
+    const dfsDec = toDec(dfsOdds);
     const fairDec = toDec(fairLine);
     
-    // For DFS: +EV when market odds are worse than -100 (more negative)
-    // Example: If market is -140, DFS +100 is +EV
+    // Calculate EV using the fixed -137 odds
+    // Higher EV means better value compared to market consensus
     return ((dfsDec / fairDec) - 1) * 100;
   }
   
@@ -685,6 +684,15 @@ export default function OddsTable({
               if (!isDFSSite && !isPlayerPropMarket) {
                 console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop (props mode)`);
                 return;
+              }
+              
+              // For DFS sites, ensure we're using fixed -137 odds
+              if (isDFSSite) {
+                console.log(`Processing DFS site ${bookmaker.key} with fixed -137 odds`);
+                // Force -137 odds for all DFS app outcomes
+                market.outcomes.forEach(outcome => {
+                  outcome.price = -137;
+                });
               }
               
               // Apply marketFilter for player props
@@ -1260,6 +1268,16 @@ export default function OddsTable({
     
     // Get bookmaker key for DFS-specific EV calculation
     const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
+    
+    // Check if this is a DFS app
+    const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookmakerKey);
+    
+    // For DFS apps, we want to prioritize them in EV sorting
+    if (isDFSApp && mode === 'props') {
+      console.log(`Calculating EV for DFS app ${bookmakerKey} with fixed -137 odds`);
+      // Force the odds to be -137 for EV calculation
+      return calculateEV(-137, fairDevigMap.get(row.key), bookmakerKey);
+    }
     
     // IMPORTANT: For fair line calculation, we use ALL books, not just filtered books
     // This ensures we have enough data to calculate an accurate fair line
