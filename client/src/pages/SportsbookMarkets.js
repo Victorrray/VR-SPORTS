@@ -18,6 +18,7 @@ import OddsTable from "../components/betting/OddsTable";
 import ArbitrageDetector from "../components/betting/ArbitrageDetector";
 import MiddlesDetector from "../components/betting/MiddlesDetector";
 import AuthRequired from "../components/auth/AuthRequired";
+import ApiErrorDisplay from "../components/common/ApiErrorDisplay";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
@@ -1253,7 +1254,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         condition1: isArbitrageMode && hasPlatinum,
         condition2: isArbitrageMode && !hasPlatinum
       })}
-      {(marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
+      
+      {/* Show API error display for connection issues */}
+      {marketsError && !marketsError.includes('Authentication required') ? (
+        <ApiErrorDisplay 
+          error={marketsError} 
+          onRetry={() => window.location.reload()} 
+        />
+      ) : (marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
           sport={picked[0] || 'americanfootball_nfl'}
           games={filteredGames}
@@ -1368,7 +1376,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           betSlipCount={bets.length}
           onOpenBetSlip={openBetSlip}
         />
-      ) : null}
+      )
+      }
 
       {/* Mobile filter button - positioned on the left */}
       <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
