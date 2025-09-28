@@ -4,14 +4,14 @@ module.exports = function(app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://localhost:10000',
+      target: 'http://localhost:3000',
       changeOrigin: true,
       secure: false,
       logLevel: 'debug',
       onProxyReq: (proxyReq, req, res) => {
         console.log('🔄 Proxying request:', req.method, req.url, '→', proxyReq.path);
         console.log('🔄 Original URL:', req.originalUrl);
-        console.log('🔄 Target:', 'http://localhost:10000' + req.url);
+        console.log('🔄 Target:', 'http://localhost:3000' + req.url);
         // Ensure proper headers for local dev
         proxyReq.setHeader('Origin', `http://localhost:${process.env.PORT || 3000}`);
       },
