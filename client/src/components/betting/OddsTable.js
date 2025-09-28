@@ -1392,6 +1392,25 @@ export default function OddsTable({
 
   let rows = useMemo(() => {
     let r = allRows;
+    
+    // Check if we're filtering for DFS apps only
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+    const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
+    
+    // If filtering for DFS apps only, strictly filter to only show DFS apps
+    if (filteringForDFSOnly) {
+      console.log('🎯 DFS-only filtering active - strictly showing only DFS apps');
+      r = r.filter(row => {
+        const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
+        const isDFSApp = dfsApps.includes(bookmakerKey);
+        if (!isDFSApp) {
+          console.log(`🎯 Excluding non-DFS app: ${bookmakerKey}`);
+        }
+        return isDFSApp;
+      });
+    }
+    
+    // Apply EV filter if specified
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
         const ev = evMap.get(row.key);
