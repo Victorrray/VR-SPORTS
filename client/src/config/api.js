@@ -3,9 +3,10 @@ const viteEnv = typeof import.meta !== 'undefined' ? import.meta.env : {};
 
 // Environment variable resolution with better fallbacks
 export const API_BASE_URL = (() => {
-  // Development: Use proxy for local development
+  // Development: Use production API directly since local backend is not available
   if (process.env.NODE_ENV === 'development') {
-    return ''; // Use relative paths for proxy
+    console.log('🔍 Using production API URL in development mode');
+    return 'https://odds-backend-4e9q.onrender.com';
   }
 
   // Production: Try environment variables in order of preference
@@ -33,12 +34,12 @@ export function withApiBase(path) {
   
   console.log('🔍 withApiBase called with:', { path, base, NODE_ENV: process.env.NODE_ENV });
 
-  // Force local development to use relative paths for proxy
+  // Use production URL in development mode since local backend is not available
   if (process.env.NODE_ENV === 'development') {
-    // Ensure path starts with / for proper proxy routing
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    console.log('🔍 withApiBase (dev) returning:', cleanPath);
-    return cleanPath;
+    const result = `${base}${cleanPath}`;
+    console.log('🔍 withApiBase (dev) returning:', result);
+    return result;
   }
 
   if (!base) return path; // fallback to relative for local proxy/dev
