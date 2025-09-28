@@ -1585,7 +1585,49 @@ export default function OddsTable({
       type={mode === "props" ? "player-props" : "default"}
     />
   );
-  if (!allRows.length && !loading) return null;
+  if (!allRows.length && !loading) {
+    // Show a helpful message when no bets are available
+    return (
+      <div className="odds-table-card revamp">
+        <div style={{
+          padding: '40px 20px',
+          textAlign: 'center',
+          borderRadius: '12px',
+          margin: '20px 0'
+        }}>
+          <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px', fontSize: '18px' }}>
+            No Bets Available
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            {bookFilter && bookFilter.length > 0 ? (
+              // Check if filtering for DFS apps only
+              bookFilter.every(book => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(book)) ? (
+                <>No DFS app bets found.<br />The API may not be returning data for DFS apps at this time.<br />Try selecting traditional sportsbooks instead.</>
+              ) : (
+                <>No bets found for the selected sportsbooks.<br />Try selecting different sportsbooks or markets.</>
+              )
+            ) : (
+              <>No bets available at this time.<br />Try selecting different sports or markets.</>
+            )}
+          </p>
+          <div style={{ 
+            marginTop: '20px',
+            padding: '12px 16px',
+            background: 'rgba(0, 0, 0, 0.1)',
+            borderRadius: '8px',
+            display: 'inline-block',
+            fontSize: '14px',
+            color: 'var(--text-secondary)'
+          }}>
+            <div>Selected books: {bookFilter && bookFilter.length > 0 ? bookFilter.join(', ') : 'All books'}</div>
+            <div>Mode: {mode}</div>
+            <div>Total games: {games?.length || 0}</div>
+            <div>Markets: {marketFilter && marketFilter.length > 0 ? marketFilter.join(', ') : 'All markets'}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`odds-table-card revamp${allCaps ? ' all-caps' : ''}`}>
