@@ -708,10 +708,42 @@ export default function OddsTable({
         
         // First pass: collect all props and group them
         console.log('Processing games for props mode. Total games:', games?.length);
+        console.log('🔍 PROPS DEBUG: bookFilter =', bookFilter);
+        console.log('🔍 PROPS DEBUG: marketFilter =', marketFilter);
+        
+        // Check if we're filtering for DFS apps only
+        const propsDfsApps = ['prizepicks', 'underdog', 'pick6'];
+        const propsFilteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => propsDfsApps.includes(book));
+        console.log('🔍 PROPS DEBUG: propsFilteringForDFSOnly =', propsFilteringForDFSOnly);
       
       // Log what markets we're looking for
       console.log('Looking for player prop markets containing: player_, batter_, pitcher_');
-      console.log('Looking for DFS sites:', ['prizepicks', 'underdog', 'sleeper']);
+      console.log('Looking for DFS sites:', ['prizepicks', 'underdog', 'pick6']);
+      
+      // Special handling for DFS apps in props mode
+      if (propsFilteringForDFSOnly) {
+        console.log('🔍 PROPS DEBUG: Special handling for DFS-only filtering in props mode');
+        
+        // Force create some player prop rows for DFS apps if none are found
+        let hasDFSPlayerProps = false;
+        
+        // Check if we have any DFS apps with player props
+        games?.forEach(game => {
+          if (game.bookmakers) {
+            game.bookmakers.forEach(bookmaker => {
+              if (propsDfsApps.some(app => (bookmaker.key || '').toLowerCase().includes(app))) {
+                console.log(`🔍 PROPS DEBUG: Found DFS app ${bookmaker.key} for game ${game.home_team} vs ${game.away_team}`);
+                if (bookmaker.markets && bookmaker.markets.some(m => m._isDFSProcessed)) {
+                  hasDFSPlayerProps = true;
+                  console.log(`🔍 PROPS DEBUG: Found processed DFS markets for ${bookmaker.key}`);
+                }
+              }
+            });
+          }
+        });
+        
+        console.log('🔍 PROPS DEBUG: hasDFSPlayerProps =', hasDFSPlayerProps);
+      }
       
       // Debug: Log raw games data to see what's actually being received
       games?.forEach((game, idx) => {
@@ -801,7 +833,11 @@ export default function OddsTable({
                     
                     if (syntheticOutcomes.length > 0) {
                       console.log(`🔍 DFS DEBUG: Created ${syntheticOutcomes.length} synthetic outcomes`);
+                      console.log(`🔍 DFS DEBUG: Synthetic outcomes:`, syntheticOutcomes);
                       market.outcomes = syntheticOutcomes;
+                      
+                      // Add a special flag to this market to ensure it's processed
+                      market._isDFSProcessed = true;
                     }
                   }
                   
@@ -1758,6 +1794,18 @@ export default function OddsTable({
       />
     );
   }
+  
+  // Debug the rows before showing no bets message
+  console.log('🔍 FINAL DEBUG: Mode =', mode);
+  console.log('🔍 FINAL DEBUG: bookFilter =', bookFilter);
+  console.log('🔍 FINAL DEBUG: marketFilter =', marketFilter);
+  console.log('🔍 FINAL DEBUG: allRows.length =', allRows.length);
+  console.log('🔍 FINAL DEBUG: minLoadingComplete =', minLoadingComplete);
+  
+  // Check if we're filtering for DFS apps only
+  const finalDfsApps = ['prizepicks', 'underdog', 'pick6'];
+  const finalFilteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => finalDfsApps.includes(book));
+  console.log('🔍 FINAL DEBUG: finalFilteringForDFSOnly =', finalFilteringForDFSOnly);
   
   // Show no bets message only after loading is complete AND minimum loading time has passed
   if (!allRows.length && minLoadingComplete) {
