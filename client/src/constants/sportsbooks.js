@@ -36,7 +36,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   // DFS Apps (expanded for player props)
   { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true },
   { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true },
-  { key: 'pick6', name: 'DraftKings Pick6', popular: true, isDFS: true },
+  { key: 'pick6', name: 'DK Pick6', popular: true, isDFS: true },
   { key: 'prophetx', name: 'ProphetX', popular: true, isDFS: true },
   
   // Additional Sportsbooks for expanded coverage
