@@ -1054,18 +1054,33 @@ export default function OddsTable({
                   bk: bookmaker,
                   sport: game.sport_key,
                   isPlayerProp: true,
-                  allBooks: []
+                  allBooks: [],
+                  selectedBooks: [],
+                  nonSelectedBooks: []
                 });
               }
               
               // Add this bookmaker's odds to the group
-              propGroups.get(propKey).allBooks.push({
+              const bookData = {
                 price: outcome.price, 
                 odds: outcome.price,
                 book: bookmaker.title,
                 bookmaker: bookmaker,
                 market: market
-              });
+              };
+              
+              propGroups.get(propKey).allBooks.push(bookData);
+              
+              // Also categorize as selected or non-selected for mini table filtering
+              const isSelected = !bookFilter || !bookFilter.length || bookFilter.includes(bookmaker.key);
+              if (!propGroups.get(propKey).selectedBooks) propGroups.get(propKey).selectedBooks = [];
+              if (!propGroups.get(propKey).nonSelectedBooks) propGroups.get(propKey).nonSelectedBooks = [];
+              
+              if (isSelected) {
+                propGroups.get(propKey).selectedBooks.push(bookData);
+              } else {
+                propGroups.get(propKey).nonSelectedBooks.push(bookData);
+              }
             });
           });
         });
@@ -1239,6 +1254,8 @@ export default function OddsTable({
               overBooks: propData.overBooks,
               underBooks: propData.underBooks,
               allBooks: [...propData.overBooks, ...propData.underBooks], // Combined for mini-table
+              selectedBooks: propData.selectedBooks || [],
+              nonSelectedBooks: propData.nonSelectedBooks || [],
               otherSideName: showOver ? 'Under' : 'Over'
             };
             
@@ -1455,6 +1472,30 @@ export default function OddsTable({
           const allBooksForOutcome = allMarketOutcomes.filter(o => outcomeGroupKey(o) === groupKey && matchesPoint(o));
           if (!allBooksForOutcome.length) return;
 
+          // Separate selected bookmakers from non-selected ones for mini table
+          const selectedBooks = [];
+          const nonSelectedBooks = [];
+          
+          allBooksForOutcome.forEach(o => {
+            const bookData = {
+              price: o.price,
+              odds: o.price,
+              book: o.book,
+              bookmaker: o.bookmaker,
+              market: o.market,
+              point: o.point
+            };
+            
+            // Check if this bookmaker is in the filter
+            const isSelected = !bookFilter || !bookFilter.length || bookFilter.includes(o.bookmaker.key);
+            
+            if (isSelected) {
+              selectedBooks.push(bookData);
+            } else {
+              nonSelectedBooks.push(bookData);
+            }
+          });
+
           const gameRow = {
             key: `${game.id}-${mktKey}-${groupKey}`,
             game,
@@ -1469,6 +1510,9 @@ export default function OddsTable({
               market: o.market,
               point: o.point
             })),
+            // Add separate arrays for filtering
+            selectedBooks: selectedBooks,
+            nonSelectedBooks: nonSelectedBooks,
             sport: game.sport_key
           };
 
@@ -2583,7 +2627,16 @@ export default function OddsTable({
 
                             const dedupedBooks = (() => {
                               const seenKeys = new Set();
-                              let booksToProcess = row.allBooks || [];
+                              // For player props with active bookFilter, show non-selected books in mini table
+                              // Otherwise show all books
+                              let booksToProcess = (mode === "props" && bookFilter && bookFilter.length > 0) 
+                                ? row.nonSelectedBooks || [] 
+                                : row.allBooks || [];
+                              
+                              console.log(`🎯 Mini table for ${row.key}: Using ${booksToProcess.length} books (${mode === "props" && bookFilter && bookFilter.length > 0 ? 'non-selected' : 'all'} books)`);
+                              if (mode === "props" && bookFilter && bookFilter.length > 0) {
+                                console.log(`🎯 Selected books: ${row.selectedBooks?.length || 0}, Non-selected books: ${row.nonSelectedBooks?.length || 0}`);
+                              }
                               
                               // For combined props, ensure we get all unique bookmakers from both sides
                               if (mode === "props" && row.isCombinedProp) {
@@ -2914,7 +2967,9 @@ export default function OddsTable({
                 </tr>
 
                 {/* Desktop/Tablet mini-table (hide on mobile via CSS) */}
-                {expandedRows[row.key] && row.allBooks.length > 0 && (
+                {expandedRows[row.key] && ((mode === "props" && bookFilter && bookFilter.length > 0) 
+                  ? (row.nonSelectedBooks && row.nonSelectedBooks.length > 0)
+                  : (row.allBooks && row.allBooks.length > 0)) && (
                   <tr className="desktop-mini-wrap">
                     <td colSpan={8}>
                       <div className="mini-odds-container">
