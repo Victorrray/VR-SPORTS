@@ -2155,7 +2155,7 @@ export default function OddsTable({
                 </tr>
 
                 {/* ----- Mobile card (click to expand) ----- */}
-                <tr className="mobile-card-row" aria-hidden="false">
+                <tr className="mobile-card-row" aria-hidden={false}>
                   <td colSpan={8}>
                     <div
                       className={`mobile-odds-card as-button ${expandedRows[row.key] ? 'expanded' : ''}`}

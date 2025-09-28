@@ -109,6 +109,21 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.auth-status-emergency {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  text-align: center;
+}
+
+.auth-status-emergency p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
 @media (max-width: 640px) {
   .auth-status-check {
     padding: 20px 16px;

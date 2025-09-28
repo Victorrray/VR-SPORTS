@@ -5,6 +5,7 @@ import { AlertTriangle, LogIn, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useMe } from '../../hooks/useMe';
 import { supabase } from '../../lib/supabase';
+import EmergencySignOut from './EmergencySignOut';
 import './AuthStatusCheck.css';
 
 /**
@@ -154,6 +155,12 @@ const AuthStatusCheck = ({ onRetry }) => {
             <span>Retry</span>
           </button>
         )}
+        
+        {/* Emergency Sign Out option as a last resort */}
+        <div className="auth-status-emergency">
+          <p>If the above options don't work:</p>
+          <EmergencySignOut />
+        </div>
       </div>
     </div>
   );

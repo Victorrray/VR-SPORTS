@@ -4,12 +4,14 @@ import { useAuth } from "../hooks/useAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle, RefreshCw } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle, RefreshCw, AlertOctagon } from "lucide-react";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
 import { AVAILABLE_SPORTSBOOKS } from '../constants/sportsbooks';
+import EmergencySignOut from '../components/auth/EmergencySignOut';
 import { withApiBase } from '../config/api';
 import "./Account.css";
+import "../components/auth/emergency-signout.css";
 
 function initialsFromEmail(email = "") {
   const name = (email || "").split("@")[0] || "U";
@@ -549,8 +551,7 @@ export default function Account() {
                 {signOutBusy 
                   ? (signOutProgress 
                       ? `${signOutProgress.step}... (${signOutProgress.current}/${signOutProgress.total})`
-                      : 'Signing out...'
-                    )
+                      : 'Signing out...')
                   : 'Sign Out'
                 }
               </span>
@@ -562,6 +563,15 @@ export default function Account() {
               </small>
             </div>
           </button>
+          
+          {/* Emergency Sign Out option */}
+          <div className="emergency-signout-container">
+            <div className="emergency-header">
+              <AlertOctagon size={14} color="#ef4444" />
+              <span>Having trouble signing out?</span>
+            </div>
+            <EmergencySignOut />
+          </div>
         </div>
       </section>
 
