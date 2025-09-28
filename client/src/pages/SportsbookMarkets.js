@@ -1204,8 +1204,52 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       
       {/* Debug info removed as requested */}
       
-      {/* Spacer for the fixed menus */}
-      <div style={{ height: "60px" }} />
+      {/* Dynamic header based on current section */}
+      <div style={{ 
+        height: "60px", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center",
+        background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))",
+        borderBottom: "1px solid rgba(139, 92, 246, 0.1)",
+        marginBottom: "20px",
+        padding: "0 20px"
+      }}>
+        <h1 style={{ 
+          margin: 0, 
+          fontSize: "24px", 
+          fontWeight: "700", 
+          color: "var(--text-primary)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px"
+        }}>
+          {getCurrentSectionId() === 'props' && (
+            <>
+              <Target size={24} color="#a78bfa" />
+              Player Props
+            </>
+          )}
+          {getCurrentSectionId() === 'arbitrage' && (
+            <>
+              <Zap size={24} color="#a78bfa" />
+              Arbitrage Opportunities
+            </>
+          )}
+          {getCurrentSectionId() === 'middles' && (
+            <>
+              <Activity size={24} color="#a78bfa" />
+              Middle Betting
+            </>
+          )}
+          {getCurrentSectionId() === 'game' && (
+            <>
+              <BarChart3 size={24} color="#a78bfa" />
+              Game Odds
+            </>
+          )}
+        </h1>
+      </div>
 
       {/* Show authentication required message */}
       {(marketsError && marketsError.includes('Authentication required')) && (
