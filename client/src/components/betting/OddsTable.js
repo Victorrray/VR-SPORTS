@@ -636,6 +636,9 @@ export default function OddsTable({
     // Debug: Check if we have any DFS app data
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
     let dfsAppCount = 0;
+    let dfsMarketCount = 0;
+    let dfsOutcomeCount = 0;
+    let dfsAppGames = new Set();
     
     if (games && games.length > 0) {
       games.forEach(game => {
@@ -643,14 +646,37 @@ export default function OddsTable({
           game.bookmakers.forEach(bookmaker => {
             if (dfsApps.includes(bookmaker.key?.toLowerCase())) {
               dfsAppCount++;
+              dfsAppGames.add(game.id);
+              
+              // Count markets and outcomes
+              if (bookmaker.markets && bookmaker.markets.length > 0) {
+                bookmaker.markets.forEach(market => {
+                  dfsMarketCount++;
+                  if (market.outcomes && market.outcomes.length > 0) {
+                    dfsOutcomeCount += market.outcomes.length;
+                  }
+                });
+              }
+              
               console.log(`🎯 Found DFS app ${bookmaker.key} for game ${game.home_team} vs ${game.away_team} with ${bookmaker.markets?.length || 0} markets`);
+              
+              // Log first few markets to see what's available
+              if (bookmaker.markets && bookmaker.markets.length > 0) {
+                console.log(`🎯 Sample markets for ${bookmaker.key}:`, 
+                  bookmaker.markets.slice(0, 3).map(m => ({ 
+                    key: m.key, 
+                    outcomes: m.outcomes?.length || 0,
+                    sample: m.outcomes?.[0]?.name
+                  }))
+                );
+              }
             }
           });
         }
       });
     }
     
-    console.log(`🎯 Total DFS app bookmakers found: ${dfsAppCount}`);
+    console.log(`🎯 DFS app summary: ${dfsAppCount} bookmakers across ${dfsAppGames.size} games with ${dfsMarketCount} markets and ${dfsOutcomeCount} outcomes`);
 
     try {
       if (mode === "props") {
@@ -707,11 +733,17 @@ export default function OddsTable({
               
               // For DFS sites, ensure we're using fixed -137 odds
               if (isDFSSite) {
-                console.log(`Processing DFS site ${bookmaker.key} with fixed -137 odds`);
+                console.log(`Processing DFS site ${bookmaker.key} with fixed -137 odds for market ${market.key}`);
                 // Force -137 odds for all DFS app outcomes
-                market.outcomes.forEach(outcome => {
-                  outcome.price = -137;
-                });
+                if (market.outcomes && market.outcomes.length > 0) {
+                  console.log(`DFS site ${bookmaker.key} has ${market.outcomes.length} outcomes for market ${market.key}`);
+                  market.outcomes.forEach(outcome => {
+                    console.log(`Setting -137 odds for ${outcome.name} in ${market.key}`);
+                    outcome.price = -137;
+                  });
+                } else {
+                  console.log(`WARNING: DFS site ${bookmaker.key} has no outcomes for market ${market.key}`);
+                }
               }
               
               // Apply marketFilter for player props
@@ -1419,6 +1451,24 @@ export default function OddsTable({
     // If filtering for DFS apps only, strictly filter to only show DFS apps
     if (filteringForDFSOnly) {
       console.log('🎯 DFS-only filtering active - strictly showing only DFS apps');
+      console.log('🎯 Before filtering: ' + r.length + ' rows');
+      
+      // Count DFS app rows before filtering
+      const dfsRowsBefore = r.filter(row => {
+        const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
+        return dfsApps.includes(bookmakerKey);
+      }).length;
+      
+      console.log('🎯 DFS app rows before filtering: ' + dfsRowsBefore);
+      
+      // Log all DFS app rows for debugging
+      r.forEach(row => {
+        const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
+        if (dfsApps.includes(bookmakerKey)) {
+          console.log(`🎯 DFS app row found: ${bookmakerKey} - ${row.game?.home_team} vs ${row.game?.away_team} - ${row.mkt?.key} - ${row.out?.name}`);
+        }
+      });
+      
       r = r.filter(row => {
         const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
         const isDFSApp = dfsApps.includes(bookmakerKey);
@@ -1427,6 +1477,8 @@ export default function OddsTable({
         }
         return isDFSApp;
       });
+      
+      console.log('🎯 After filtering: ' + r.length + ' rows');
     }
     
     // Apply EV filter if specified, but always show DFS app bets
