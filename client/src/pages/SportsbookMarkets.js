@@ -1,7 +1,7 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star } from 'lucide-react';
+import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star, Activity } from 'lucide-react';
 import { optimizedStorage } from "../utils/storageOptimizer";
 import { smartCache } from "../utils/enhancedCache";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
