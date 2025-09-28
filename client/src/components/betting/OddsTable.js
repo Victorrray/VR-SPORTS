@@ -1152,10 +1152,11 @@ export default function OddsTable({
                 return true;
               }
               
-              // Strict bookmaker key matching only for non-DFS filtering
+              // STRICT EXACT MATCHING: Only include the exact bookmaker key that was selected
+              // This matches the game odds filtering logic
               const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
               console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
-              return keyMatch; // Only use key matching, not name matching
+              return keyMatch; // Only use exact key matching
             });
           }
           
@@ -1179,10 +1180,11 @@ export default function OddsTable({
                 return true;
               }
               
-              // Strict bookmaker key matching only for non-DFS filtering
+              // STRICT EXACT MATCHING: Only include the exact bookmaker key that was selected
+              // This matches the game odds filtering logic
               const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
               console.log(`🎯 Checking combined book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
-              return keyMatch; // Only use key matching, not name matching
+              return keyMatch; // Only use exact key matching
             });
           }
           
