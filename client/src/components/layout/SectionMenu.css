@@ -114,6 +114,28 @@
   background: linear-gradient(135deg, #8b5cf6, #7c3aed);
 }
 
+.section-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.section-option.disabled:hover {
+  background: transparent !important;
+}
+
+.section-option.disabled .section-option-name {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.section-option.disabled .section-option-description {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.section-option.disabled .section-option-emoji {
+  opacity: 0.4;
+}
+
 .section-option-emoji {
   font-size: 20px;
   margin-right: 12px;

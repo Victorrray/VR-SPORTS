@@ -965,14 +965,21 @@ export default function OddsTable({
               propGroups.get(propKey).allBooks.push(bookData);
               
               // Also categorize as selected or non-selected for mini table filtering
-              const isSelected = !bookFilter || !bookFilter.length || bookFilter.includes(bookmaker.key);
+              const bookKey = bookmaker.key?.toLowerCase() || '';
+              const normalizedFilter = bookFilter ? bookFilter.map(f => f.toLowerCase()) : [];
+              const isSelected = !bookFilter || !bookFilter.length || normalizedFilter.includes(bookKey);
+              
+              console.log(`🎯 CATEGORIZING: ${bookKey} - Selected: ${isSelected} (Filter: ${JSON.stringify(normalizedFilter)})`);
+              
               if (!propGroups.get(propKey).selectedBooks) propGroups.get(propKey).selectedBooks = [];
               if (!propGroups.get(propKey).nonSelectedBooks) propGroups.get(propKey).nonSelectedBooks = [];
               
               if (isSelected) {
                 propGroups.get(propKey).selectedBooks.push(bookData);
+                console.log(`🎯 Added ${bookKey} to selectedBooks`);
               } else {
                 propGroups.get(propKey).nonSelectedBooks.push(bookData);
+                console.log(`🎯 Added ${bookKey} to nonSelectedBooks`);
               }
             });
           });
@@ -1415,8 +1422,12 @@ export default function OddsTable({
               point: o.point
             };
             
-            // Check if this bookmaker is in the filter
-            const isSelected = !bookFilter || !bookFilter.length || bookFilter.includes(o.bookmaker.key);
+            // Check if this bookmaker is in the filter (case-insensitive)
+            const bookKey = o.bookmaker.key?.toLowerCase() || '';
+            const normalizedFilter = bookFilter ? bookFilter.map(f => f.toLowerCase()) : [];
+            const isSelected = !bookFilter || !bookFilter.length || normalizedFilter.includes(bookKey);
+            
+            console.log(`🎯 GAME CATEGORIZING: ${bookKey} - Selected: ${isSelected} (Filter: ${JSON.stringify(normalizedFilter)})`);
             
             if (isSelected) {
               selectedBooks.push(bookData);

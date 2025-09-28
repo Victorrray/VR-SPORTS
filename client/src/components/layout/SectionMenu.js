@@ -32,18 +32,20 @@ export default function SectionMenu({
     { 
       id: "arbitrage", 
       name: "Arbitrage", 
-      description: "Find profitable arbitrage opportunities",
+      description: "Find profitable arbitrage opportunities (Coming Soon)",
       icon: Zap,
       emoji: "⚡",
-      requiresPlatinum: true
+      requiresPlatinum: true,
+      disabled: true
     },
     { 
       id: "middles", 
       name: "Middles", 
-      description: "Find middle betting opportunities between different lines",
+      description: "Find middle betting opportunities between different lines (Coming Soon)",
       icon: Activity,
       emoji: "🎪",
-      requiresPlatinum: true
+      requiresPlatinum: true,
+      disabled: true
     }
   ];
 
@@ -77,13 +79,19 @@ export default function SectionMenu({
             if (section.requiresPlatinum && !hasPlatinum) return null;
             
             const isActive = section.id === currentSection;
+            const isDisabled = section.disabled;
             
             return (
               <button
                 key={section.id}
-                className={`section-option ${isActive ? 'active' : ''}`}
-                onClick={() => handleSectionChange(section.id)}
+                className={`section-option ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
+                onClick={() => !isDisabled && handleSectionChange(section.id)}
                 aria-current={isActive}
+                disabled={isDisabled}
+                style={{
+                  opacity: isDisabled ? 0.5 : 1,
+                  cursor: isDisabled ? 'not-allowed' : 'pointer'
+                }}
               >
                 <span className="section-option-emoji">{section.emoji}</span>
                 <div className="section-option-text">
