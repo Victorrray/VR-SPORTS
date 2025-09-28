@@ -908,9 +908,9 @@ export default function OddsTable({
                     console.log(`Setting -137 odds for ${outcome.name} in ${market.key}`);
                     outcome.price = -137;
                     
-                    // Add debug info to outcome name to verify it's being processed
+                    // Keep original name for clean display
                     outcome._originalName = outcome.name;
-                    outcome.name = `${outcome.name} (DFS)`;
+                    // Don't modify the name - keep it clean (e.g., just "Over" instead of "Over (DFS)")
                   });
                 } else {
                   console.log(`WARNING: DFS site ${bookmaker.key} has no outcomes for market ${market.key}`);
@@ -2691,9 +2691,21 @@ export default function OddsTable({
                                 ? row.nonSelectedBooks || [] 
                                 : row.allBooks || [];
                               
+                              // Fallback: if no non-selected books but we have all books, show all books for comparison
+                              if (mode === "props" && bookFilter && bookFilter.length > 0 && booksToProcess.length === 0 && row.allBooks && row.allBooks.length > 0) {
+                                console.log(`🎯 FALLBACK: No non-selected books found, showing all books for comparison`);
+                                booksToProcess = row.allBooks;
+                              }
+                              
                               console.log(`🎯 Mini table for ${row.key}: Using ${booksToProcess.length} books (${mode === "props" && bookFilter && bookFilter.length > 0 ? 'non-selected' : 'all'} books)`);
                               if (mode === "props" && bookFilter && bookFilter.length > 0) {
                                 console.log(`🎯 Selected books: ${row.selectedBooks?.length || 0}, Non-selected books: ${row.nonSelectedBooks?.length || 0}`);
+                                console.log(`🎯 All books available: ${row.allBooks?.length || 0}`);
+                                console.log(`🎯 BookFilter:`, bookFilter);
+                                if (row.nonSelectedBooks?.length === 0 && row.allBooks?.length > 0) {
+                                  console.log(`🎯 WARNING: No non-selected books found, but ${row.allBooks.length} total books available`);
+                                  console.log(`🎯 All books:`, row.allBooks.map(b => b.bookmaker?.key || b.book));
+                                }
                               }
                               
                               // For combined props, ensure we get all unique bookmakers from both sides
