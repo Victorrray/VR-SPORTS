@@ -9,7 +9,7 @@ import "./SectionMenu.css";
 export default function SectionMenu({ 
   currentSection = "game", 
   onSectionChange,
-  hasPlatinum = false
+  hasPlatinum = true // Temporarily set to true to show all options
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
