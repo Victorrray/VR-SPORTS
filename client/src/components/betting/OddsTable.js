@@ -981,6 +981,7 @@ export default function OddsTable({
               }
               propGroup.lines.get(lineKey).push(bookData);
               
+              // Add to allBooks (will deduplicate later)
               propGroups.get(propKey).allBooks.push(bookData);
               
               // Also categorize as selected or non-selected for mini table filtering
@@ -993,18 +994,42 @@ export default function OddsTable({
               if (!propGroups.get(propKey).selectedBooks) propGroups.get(propKey).selectedBooks = [];
               if (!propGroups.get(propKey).nonSelectedBooks) propGroups.get(propKey).nonSelectedBooks = [];
               
-              if (isSelected) {
+              // Check if this bookmaker is already in the appropriate array to avoid duplicates
+              const existingSelectedBook = propGroups.get(propKey).selectedBooks.find(b => b.bookmaker?.key === bookmaker.key);
+              const existingNonSelectedBook = propGroups.get(propKey).nonSelectedBooks.find(b => b.bookmaker?.key === bookmaker.key);
+              
+              if (isSelected && !existingSelectedBook) {
                 propGroups.get(propKey).selectedBooks.push(bookData);
                 console.log(`🎯 Added ${bookKey} to selectedBooks`);
-              } else {
+              } else if (!isSelected && !existingNonSelectedBook) {
                 propGroups.get(propKey).nonSelectedBooks.push(bookData);
                 console.log(`🎯 Added ${bookKey} to nonSelectedBooks`);
+              } else {
+                console.log(`🎯 Skipping duplicate ${bookKey} (already categorized)`);
               }
             });
           });
         });
       });
       
+      // Deduplicate allBooks arrays before processing
+      propGroups.forEach((propData, propKey) => {
+        if (propData.allBooks && propData.allBooks.length > 0) {
+          // Deduplicate by bookmaker key, keeping the first occurrence
+          const seenBookmakers = new Set();
+          propData.allBooks = propData.allBooks.filter(book => {
+            const bookKey = book.bookmaker?.key;
+            if (seenBookmakers.has(bookKey)) {
+              console.log(`🎯 Removing duplicate ${bookKey} from allBooks for ${propKey}`);
+              return false;
+            }
+            seenBookmakers.add(bookKey);
+            return true;
+          });
+          console.log(`🎯 Deduplicated allBooks for ${propKey}: ${propData.allBooks.length} unique books`);
+        }
+      });
+
       // Second pass: include all props and apply sportsbook filter
       console.log(`Total prop groups collected: ${propGroups.size}`);
       propGroups.forEach((propData, propKey) => {
