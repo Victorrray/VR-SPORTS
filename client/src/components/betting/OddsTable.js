@@ -744,68 +744,7 @@ export default function OddsTable({
         
         console.log('🔍 PROPS DEBUG: hasDFSPlayerProps =', hasDFSPlayerProps);
         
-        // If we're filtering for DFS apps only but no DFS player props were found,
-        // create some synthetic player props for demonstration purposes
-        if (!hasDFSPlayerProps && games && games.length > 0) {
-          console.log('🔍 PROPS DEBUG: Creating synthetic player props for DFS apps');
-          
-          // Find a game to use for synthetic props
-          const game = games[0];
-          
-          // For each DFS app in the filter, create a synthetic bookmaker if it doesn't exist
-          propsDfsApps.forEach(dfsApp => {
-            if (bookFilter.includes(dfsApp)) {
-              // Check if this DFS app already exists in the game
-              let dfsBookmaker = game.bookmakers?.find(b => (b.key || '').toLowerCase() === dfsApp.toLowerCase());
-              
-              if (!dfsBookmaker) {
-                // Create a synthetic bookmaker
-                dfsBookmaker = {
-                  key: dfsApp,
-                  title: dfsApp.charAt(0).toUpperCase() + dfsApp.slice(1),
-                  markets: []
-                };
-                
-                // Add the bookmaker to the game
-                if (!game.bookmakers) game.bookmakers = [];
-                game.bookmakers.push(dfsBookmaker);
-                console.log(`🔍 PROPS DEBUG: Created synthetic bookmaker for ${dfsApp}`);
-              }
-              
-              // Create synthetic markets for common player props
-              const syntheticMarkets = [
-                {
-                  key: 'player_pass_yds',
-                  outcomes: [
-                    { name: 'Over', point: 250.5, price: -137, description: 'Patrick Mahomes Passing Yards' },
-                    { name: 'Under', point: 250.5, price: -137, description: 'Patrick Mahomes Passing Yards' }
-                  ],
-                  _isDFSProcessed: true
-                },
-                {
-                  key: 'player_rush_yds',
-                  outcomes: [
-                    { name: 'Over', point: 75.5, price: -137, description: 'Christian McCaffrey Rushing Yards' },
-                    { name: 'Under', point: 75.5, price: -137, description: 'Christian McCaffrey Rushing Yards' }
-                  ],
-                  _isDFSProcessed: true
-                },
-                {
-                  key: 'player_reception_yds',
-                  outcomes: [
-                    { name: 'Over', point: 85.5, price: -137, description: 'Justin Jefferson Receiving Yards' },
-                    { name: 'Under', point: 85.5, price: -137, description: 'Justin Jefferson Receiving Yards' }
-                  ],
-                  _isDFSProcessed: true
-                }
-              ];
-              
-              // Add the synthetic markets to the bookmaker
-              dfsBookmaker.markets = [...(dfsBookmaker.markets || []), ...syntheticMarkets];
-              console.log(`🔍 PROPS DEBUG: Added ${syntheticMarkets.length} synthetic markets to ${dfsApp}`);
-            }
-          });
-        }
+        // No synthetic data creation - only use real API data
       }
       
       // Debug: Log raw games data to see what's actually being received
@@ -856,53 +795,7 @@ export default function OddsTable({
                 if (market.outcomes && market.outcomes.length > 0) {
                   console.log(`DFS site ${bookmaker.key} has ${market.outcomes.length} outcomes for market ${market.key}`);
                   
-                  // Special handling for DFS apps - create synthetic over/under outcomes if needed
-                  if (!market.outcomes.some(o => o.name === 'Over' || o.name === 'Under')) {
-                    console.log(`🔍 DFS DEBUG: Creating synthetic Over/Under outcomes for ${bookmaker.key}`);
-                    
-                    // Convert DFS app format to standard Over/Under format
-                    const syntheticOutcomes = [];
-                    market.outcomes.forEach(outcome => {
-                      // Extract point value if available
-                      let point = null;
-                      if (typeof outcome.point === 'number') {
-                        point = outcome.point;
-                      } else if (outcome.name && outcome.name.includes(' ')) {
-                        const parts = outcome.name.split(' ');
-                        const lastPart = parts[parts.length - 1];
-                        if (!isNaN(parseFloat(lastPart))) {
-                          point = parseFloat(lastPart);
-                        }
-                      }
-                      
-                      if (point !== null) {
-                        // Create Over outcome
-                        syntheticOutcomes.push({
-                          name: 'Over',
-                          price: -137,
-                          point: point,
-                          description: outcome.name
-                        });
-                        
-                        // Create Under outcome
-                        syntheticOutcomes.push({
-                          name: 'Under',
-                          price: -137,
-                          point: point,
-                          description: outcome.name
-                        });
-                      }
-                    });
-                    
-                    if (syntheticOutcomes.length > 0) {
-                      console.log(`🔍 DFS DEBUG: Created ${syntheticOutcomes.length} synthetic outcomes`);
-                      console.log(`🔍 DFS DEBUG: Synthetic outcomes:`, syntheticOutcomes);
-                      market.outcomes = syntheticOutcomes;
-                      
-                      // Add a special flag to this market to ensure it's processed
-                      market._isDFSProcessed = true;
-                    }
-                  }
+                  // Only process real DFS data - no synthetic outcomes
                   
                   market.outcomes.forEach(outcome => {
                     console.log(`Setting -137 odds for ${outcome.name} in ${market.key}`);
