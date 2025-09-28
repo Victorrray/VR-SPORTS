@@ -644,26 +644,26 @@ export default function OddsTable({
       let dfsMarketCount = 0;
       let dfsOutcomeCount = 0;
       let dfsAppGames = new Set();
-      
-      console.log('🔍 DFS DEBUG: Starting allRows calculation with bookFilter:', bookFilter);
-      console.log('🔍 DFS DEBUG: Mode:', mode);
-      console.log('🔍 DFS DEBUG: Market filter:', marketFilter);
-      console.log('🔍 DFS DEBUG: Games count:', games?.length || 0);
-      
-      // Check if games is empty or undefined
-      if (!games || games.length === 0) {
-        console.log('🔍 DFS DEBUG: No games data available!');
-        return [];
-      }
     
-      if (games && games.length > 0) {
-        games.forEach(game => {
-          if (game.bookmakers) {
-            game.bookmakers.forEach(bookmaker => {
-              const bookmakerKeyLower = bookmaker.key?.toLowerCase() || '';
-              if (dfsApps.some(app => bookmakerKeyLower.includes(app))) {
-                dfsAppCount++;
-                dfsAppGames.add(game.id);
+    console.log('🔍 DFS DEBUG: Starting allRows calculation with bookFilter:', bookFilter);
+    console.log('🔍 DFS DEBUG: Mode:', mode);
+    console.log('🔍 DFS DEBUG: Market filter:', marketFilter);
+    console.log('🔍 DFS DEBUG: Games count:', games?.length || 0);
+    
+    // Check if games is empty or undefined
+    if (!games || games.length === 0) {
+      console.log('🔍 DFS DEBUG: No games data available!');
+      return [];
+    }
+    
+    if (games && games.length > 0) {
+      games.forEach(game => {
+        if (game.bookmakers) {
+          game.bookmakers.forEach(bookmaker => {
+            const bookmakerKeyLower = bookmaker.key?.toLowerCase() || '';
+            if (dfsApps.some(app => bookmakerKeyLower.includes(app))) {
+              dfsAppCount++;
+              dfsAppGames.add(game.id);
               
               console.log(`🔍 DFS DEBUG: Found DFS app ${bookmaker.key} for game ${game.home_team} vs ${game.away_team}`);
               
@@ -1118,31 +1118,34 @@ export default function OddsTable({
                       market: market
                     });
                   });
-          });
-        });
-      });
-    }
+                });
+              });
+            });
+          }
+        }
+      }
       
-      // Second pass: include all props and apply sportsbook filter
-      console.log(`Total prop groups collected: ${propGroups.size}`);
-      propGroups.forEach((propData, propKey) => {
-        const bookCount = propData.allBooks?.length || (propData.overBooks?.length || 0) + (propData.underBooks?.length || 0);
-        console.log(`Processing prop group: ${propKey} with ${bookCount} books`);
-        
-        // Apply sportsbook filter if active
-        if (bookFilter && bookFilter.length > 0) {
-          let hasMatchingBook = false;
+      try {
+        // Second pass: include all props and apply sportsbook filter
+        console.log(`Total prop groups collected: ${propGroups.size}`);
+        propGroups.forEach((propData, propKey) => {
+          const bookCount = propData.allBooks?.length || (propData.overBooks?.length || 0) + (propData.underBooks?.length || 0);
+          console.log(`Processing prop group: ${propKey} with ${bookCount} books`);
           
-          // Debug logging for sportsbook filtering
-          console.log(`🎯 Filtering prop ${propKey} with bookFilter:`, bookFilter);
+          // Apply sportsbook filter if active
+          if (bookFilter && bookFilter.length > 0) {
+            let hasMatchingBook = false;
+            
+            // Debug logging for sportsbook filtering
+            console.log(`🎯 Filtering prop ${propKey} with bookFilter:`, bookFilter);
           
-          // Check allBooks for regular props
-          if (propData.allBooks && propData.allBooks.length > 0) {
-            console.log(`🎯 Available books for ${propKey}:`, propData.allBooks.map(b => ({
-              key: b.bookmaker?.key,
-              book: b.book,
-              bookmaker: b.bookmaker
-            })));
+            // Check allBooks for regular props
+            if (propData.allBooks && propData.allBooks.length > 0) {
+              console.log(`🎯 Available books for ${propKey}:`, propData.allBooks.map(b => ({
+                key: b.bookmaker?.key,
+                book: b.book,
+                bookmaker: b.bookmaker
+              })));
             
             // Check if we're filtering for DFS apps only
             const dfsApps = ['prizepicks', 'underdog', 'pick6'];
@@ -1347,7 +1350,14 @@ export default function OddsTable({
         }
       }
       
+      } catch (error) {
+        console.error('Error in second pass of player props processing:', error);
+      }
+      
       return propsRows;
+    } catch (error) {
+      console.error('Error processing player props data:', error);
+      return [];
     }
 
     // Regular game mode processing
@@ -1584,11 +1594,11 @@ export default function OddsTable({
     });
     
     return gameRows;
-    } catch (error) {
-      console.error('Error processing games data:', error);
-      return [];
-    }
-  }, [games, mode, marketFilter, bookFilter]);
+  } catch (error) {
+    console.error('Error processing game data:', error);
+    return [];
+  }
+}, [games, mode, marketFilter, bookFilter]);
 
   // Price change detection for flash animations
   const prevPriceRef = useRef({});

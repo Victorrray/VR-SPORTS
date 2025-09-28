@@ -1,0 +1,14 @@
+The structure around line 1120 seems to be:
+
+1. outcome.forEach (line 1119)
+2. market.outcomes.forEach (line 1120)
+3. bookmaker.markets.forEach (line 1121)
+4. game.bookmakers.forEach (line 1122)
+5. games.forEach (line 1123)
+
+The closing braces are:
+1. if (game.bookmakers) { (line 1123)
+2. if (games && games.length > 0) { (line 1124)
+3. try { (line 1125)
+
+But we've removed the try block, so we need to adjust the structure.
