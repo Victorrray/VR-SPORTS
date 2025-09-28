@@ -394,7 +394,7 @@ export default function MySportsbooks() {
         </div>
       </div>
 
-      <MobileBottomBar />
+      <MobileBottomBar showFilter={false} />
     </div>
   );
 }
