@@ -1112,16 +1112,30 @@ export default function OddsTable({
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = propData.allBooks.some(book => {
-              // If filtering for DFS apps only and this is a DFS app, include it
-              if (filteringForDFSOnly && book.bookmaker?.key && dfsApps.includes(book.bookmaker.key)) {
-                console.log(`🎯 Including DFS app ${book.bookmaker.key} for prop ${propKey}`);
+              const bookKey = book.bookmaker?.key?.toLowerCase() || '';
+              const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+              
+              console.log(`🎯 Checking book: "${bookKey}" vs normalized filter:`, normalizedFilter);
+              
+              // Check if this bookmaker key is in the filter (case-insensitive)
+              const keyMatch = normalizedFilter.includes(bookKey);
+              
+              // Also check for DFS apps with partial matching
+              const isDFSMatch = dfsApps.some(app => bookKey.includes(app));
+              const filteringForDFS = normalizedFilter.some(f => dfsApps.includes(f));
+              
+              if (keyMatch) {
+                console.log(`🎯 ✅ MATCH: ${bookKey} found in filter`);
                 return true;
               }
               
-              // Strict bookmaker key matching only for non-DFS filtering
-              const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
-              console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
-              return keyMatch; // Only use key matching, not name matching
+              if (filteringForDFS && isDFSMatch) {
+                console.log(`🎯 ✅ DFS MATCH: ${bookKey} matches DFS filter`);
+                return true;
+              }
+              
+              console.log(`🎯 ❌ NO MATCH: ${bookKey} not in filter`);
+              return false;
             });
           }
           
@@ -1139,16 +1153,30 @@ export default function OddsTable({
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = allCombinedBooks.some(book => {
-              // If filtering for DFS apps only and this is a DFS app, include it
-              if (filteringForDFSOnly && book.bookmaker?.key && dfsApps.includes(book.bookmaker.key)) {
-                console.log(`🎯 Including DFS app ${book.bookmaker.key} for combined prop ${propKey}`);
+              const bookKey = book.bookmaker?.key?.toLowerCase() || '';
+              const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+              
+              console.log(`🎯 Checking combined book: "${bookKey}" vs normalized filter:`, normalizedFilter);
+              
+              // Check if this bookmaker key is in the filter (case-insensitive)
+              const keyMatch = normalizedFilter.includes(bookKey);
+              
+              // Also check for DFS apps with partial matching
+              const isDFSMatch = dfsApps.some(app => bookKey.includes(app));
+              const filteringForDFS = normalizedFilter.some(f => dfsApps.includes(f));
+              
+              if (keyMatch) {
+                console.log(`🎯 ✅ COMBINED MATCH: ${bookKey} found in filter`);
                 return true;
               }
               
-              // Strict bookmaker key matching only for non-DFS filtering
-              const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
-              console.log(`🎯 Checking combined book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
-              return keyMatch; // Only use key matching, not name matching
+              if (filteringForDFS && isDFSMatch) {
+                console.log(`🎯 ✅ COMBINED DFS MATCH: ${bookKey} matches DFS filter`);
+                return true;
+              }
+              
+              console.log(`🎯 ❌ COMBINED NO MATCH: ${bookKey} not in filter`);
+              return false;
             });
           }
           
@@ -1405,23 +1433,31 @@ export default function OddsTable({
             return true;
           }
           
-          // Check if we're filtering for DFS apps only
-          const dfsApps = ['prizepicks', 'underdog', 'pick6'];
-          const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
+          const bookKey = o.bookmaker?.key?.toLowerCase() || '';
+          const normalizedFilter = bookFilter.map(f => f.toLowerCase());
           
-          // If we're filtering for DFS apps only and this is a DFS app, include it
-          if (filteringForDFSOnly && dfsApps.includes(o.bookmaker.key)) {
-            console.log(`🎯 Including DFS app ${o.bookmaker.key} for market ${mktKey}`);
+          console.log(`🎯 Game odds - Checking book: "${bookKey}" vs normalized filter:`, normalizedFilter);
+          
+          // Check if this bookmaker key is in the filter (case-insensitive)
+          const keyMatch = normalizedFilter.includes(bookKey);
+          
+          // Also check for DFS apps with partial matching
+          const dfsApps = ['prizepicks', 'underdog', 'pick6'];
+          const isDFSMatch = dfsApps.some(app => bookKey.includes(app));
+          const filteringForDFS = normalizedFilter.some(f => dfsApps.includes(f));
+          
+          if (keyMatch) {
+            console.log(`🎯 ✅ GAME ODDS MATCH: ${bookKey} found in filter for market ${mktKey}`);
             return true;
           }
           
-          // Strict bookmaker key matching for non-DFS filtering
-          const isIncluded = bookFilter.includes(o.bookmaker.key);
+          if (filteringForDFS && isDFSMatch) {
+            console.log(`🎯 ✅ GAME ODDS DFS MATCH: ${bookKey} matches DFS filter for market ${mktKey}`);
+            return true;
+          }
           
-          // Enhanced logging for bookmaker filtering
-          console.log(`🎯 Bookmaker ${o.bookmaker.key} for market ${mktKey}: ${isIncluded ? 'INCLUDED' : 'FILTERED OUT'}`);
-          
-          return isIncluded;
+          console.log(`🎯 ❌ GAME ODDS NO MATCH: ${bookKey} not in filter for market ${mktKey}`);
+          return false;
         });
 
         if (!candidates.length) return;
@@ -1868,15 +1904,23 @@ export default function OddsTable({
       clearTimeout(minLoadingTimeRef.current);
     }
     
-    // Reset min loading state when loading starts
+    // Adaptive loading state management
     if (loading) {
       setMinLoadingComplete(false);
       
-      // Set a 30-second timer before allowing the no-bets message to show
+      // Set a 30-second timer as maximum wait time
       minLoadingTimeRef.current = setTimeout(() => {
-        console.log('🎯 Minimum loading time (30s) completed');
+        console.log('🎯 Maximum loading time (30s) reached');
         setMinLoadingComplete(true);
-      }, 30000); // 30 seconds
+      }, 30000); // 30 seconds maximum
+    } else {
+      // Loading finished - clear the timer and allow immediate display
+      if (minLoadingTimeRef.current) {
+        clearTimeout(minLoadingTimeRef.current);
+        minLoadingTimeRef.current = null;
+      }
+      setMinLoadingComplete(true);
+      console.log('🎯 Loading completed - data ready for display');
     }
     
     return () => {
@@ -1885,10 +1929,23 @@ export default function OddsTable({
       }
     };
   }, [loading]);
+
+  // Additional effect: If data loads quickly, immediately allow display
+  useEffect(() => {
+    if (!loading && allRows.length > 0 && !minLoadingComplete) {
+      console.log('🎯 Data loaded quickly - showing results immediately');
+      if (minLoadingTimeRef.current) {
+        clearTimeout(minLoadingTimeRef.current);
+        minLoadingTimeRef.current = null;
+      }
+      setMinLoadingComplete(true);
+    }
+  }, [loading, allRows.length, minLoadingComplete]);
   
   /* ---------- Render ---------- */
-  // Show loading spinner if loading OR if we haven't met the minimum loading time yet
-  if (loading || (!minLoadingComplete && !allRows.length)) {
+  // Show loading spinner if actively loading OR if we have no data and haven't reached minimum display time
+  // This allows immediate display when data loads quickly
+  if (loading || (!allRows.length && !minLoadingComplete)) {
     return (
       <EnhancedLoadingSpinner
         message={mode === "props" ? "Loading player props..." : "Refreshing odds data..."}
