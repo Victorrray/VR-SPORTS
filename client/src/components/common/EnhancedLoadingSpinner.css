@@ -32,13 +32,14 @@
 
 /* Main spinner */
 .spinner {
-  border: 3px solid transparent;
+  border: 3px solid rgba(139, 92, 246, 0.1);
   border-top: 3px solid #8b5cf6;
   border-right: 3px solid #8b5cf6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   position: relative;
   z-index: 2;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
 }
 
 /* Spinner sizes */
@@ -65,9 +66,10 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.25);
   animation: pulse 1.5s ease-in-out infinite;
   z-index: 1;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
 /* Text styling */
@@ -87,12 +89,34 @@
 
 /* Type variations */
 .enhanced-loading.player-props .spinner {
+  border: 3px solid rgba(16, 185, 129, 0.1);
   border-top-color: #10b981;
   border-right-color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
 }
 
 .enhanced-loading.player-props .spinner-pulse {
-  background: rgba(16, 185, 129, 0.2);
+  background: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+/* Odds Table specific styling - extra vibrant purple */
+.enhanced-loading.odds-table .spinner {
+  border: 4px solid rgba(139, 92, 246, 0.15);
+  border-top: 4px solid #a78bfa;
+  border-right: 4px solid #8b5cf6;
+  border-bottom: 4px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.6), inset 0 0 10px rgba(139, 92, 246, 0.2);
+}
+
+.enhanced-loading.odds-table .spinner-pulse {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(167, 139, 250, 0.2));
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.7);
+}
+
+.enhanced-loading.odds-table .spinner-text h3 {
+  color: #a78bfa;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 /* Animations */
@@ -103,7 +127,7 @@
 
 @keyframes pulse {
   0% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.2); opacity: 0.4; }
+  50% { transform: scale(1.3); opacity: 0.4; }
   100% { transform: scale(1); opacity: 0.6; }
 }
 

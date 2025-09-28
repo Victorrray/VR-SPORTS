@@ -1665,7 +1665,7 @@ export default function OddsTable({
           : "Getting the latest odds from all sportsbooks"
         }
         size="large"
-        type={mode === "props" ? "player-props" : "default"}
+        type={mode === "props" ? "player-props" : "odds-table"}
       />
     );
   }
