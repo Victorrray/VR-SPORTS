@@ -644,6 +644,10 @@ export default function OddsTable({
     let dfsOutcomeCount = 0;
     let dfsAppGames = new Set();
     
+    console.log('🔍 DFS DEBUG: Starting allRows calculation with bookFilter:', bookFilter);
+    console.log('🔍 DFS DEBUG: Mode:', mode);
+    console.log('🔍 DFS DEBUG: Market filter:', marketFilter);
+    
     if (games && games.length > 0) {
       games.forEach(game => {
         if (game.bookmakers) {
@@ -744,6 +748,10 @@ export default function OddsTable({
                   market.outcomes.forEach(outcome => {
                     console.log(`Setting -137 odds for ${outcome.name} in ${market.key}`);
                     outcome.price = -137;
+                    
+                    // Add debug info to outcome name to verify it's being processed
+                    outcome._originalName = outcome.name;
+                    outcome.name = `${outcome.name} (DFS)`;
                   });
                 } else {
                   console.log(`WARNING: DFS site ${bookmaker.key} has no outcomes for market ${market.key}`);
@@ -752,6 +760,13 @@ export default function OddsTable({
               
               // Apply marketFilter for player props
               if (marketFilter && marketFilter.length > 0 && isPlayerPropMarket) {
+                // Special debug for DFS apps
+                if (isDFSSite) {
+                  console.log(`🔍 DFS MARKET FILTER CHECK: market ${market.key} for ${bookmaker.key}`);
+                  console.log(`🔍 DFS MARKET FILTER CHECK: marketFilter =`, marketFilter);
+                  console.log(`🔍 DFS MARKET FILTER CHECK: includes? =`, marketFilter.includes(market.key));
+                }
+                
                 if (!marketFilter.includes(market.key)) {
                   console.log(`Skipping market ${market.key} for ${bookmaker.key} - not in marketFilter:`, marketFilter);
                   return;
@@ -1451,6 +1466,10 @@ export default function OddsTable({
     // Check if we're filtering for DFS apps only
     const dfsApps = ['prizepicks', 'underdog', 'pick6'];
     const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
+    
+    console.log('🔍 DFS FILTER DEBUG: bookFilter =', bookFilter);
+    console.log('🔍 DFS FILTER DEBUG: filteringForDFSOnly =', filteringForDFSOnly);
+    console.log('🔍 DFS FILTER DEBUG: Number of rows before filtering:', r.length);
     
     // If filtering for DFS apps only, strictly filter to only show DFS apps
     if (filteringForDFSOnly) {

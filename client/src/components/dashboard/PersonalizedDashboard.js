@@ -81,7 +81,20 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     }
 
     // Get user's selected sportsbooks from localStorage - expanded defaults for better free trial experience
-    const userSelectedBooks = JSON.parse(localStorage.getItem('userSelectedSportsbooks') || '["draftkings", "fanduel", "betmgm", "caesars", "betrivers", "pointsbet", "unibet", "bovada"]');
+    let userSelectedBooks;
+    try {
+      const storedBooks = localStorage.getItem('userSelectedSportsbooks');
+      userSelectedBooks = storedBooks ? JSON.parse(storedBooks) : ["draftkings", "fanduel", "betmgm", "caesars", "betrivers", "pointsbet", "unibet", "bovada"];
+      
+      // Ensure userSelectedBooks is always an array
+      if (!Array.isArray(userSelectedBooks)) {
+        console.error('userSelectedBooks is not an array:', userSelectedBooks);
+        userSelectedBooks = ["draftkings", "fanduel", "betmgm", "caesars"]; // Fallback to default
+      }
+    } catch (error) {
+      console.error('Error parsing userSelectedBooks from localStorage:', error);
+      userSelectedBooks = ["draftkings", "fanduel", "betmgm", "caesars"]; // Fallback to default
+    }
     console.log('User selected sportsbooks:', userSelectedBooks);
 
     const todayDate = new Date().toISOString().split('T')[0];
@@ -175,7 +188,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
         
         // Filter to only user's selected bookmakers
         const userBookmakers = game.bookmakers.filter(book => 
-          userSelectedBooks.includes(book.key)
+          Array.isArray(userSelectedBooks) && userSelectedBooks.includes(book.key)
         );
         
         userBookmakers.forEach(book => {
@@ -236,7 +249,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       
       // First, find best odds among user's selected books
       const userBookmakers = game.bookmakers.filter(book => 
-        userSelectedBooks.includes(book.key)
+        Array.isArray(userSelectedBooks) && userSelectedBooks.includes(book.key)
       );
       
       userBookmakers.forEach(book => {
@@ -289,7 +302,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
       
       // Only recommend bets from user's selected sportsbooks
       const bestBookKey = allBooks.find(book => book.name === actualBestBookmaker)?.bookmaker?.key;
-      if (!bestBookKey || !userSelectedBooks.includes(bestBookKey)) {
+      if (!bestBookKey || !Array.isArray(userSelectedBooks) || !userSelectedBooks.includes(bestBookKey)) {
         console.log('🔍 DEBUG: Filtering out bet - not from user selected sportsbook', {
           bestBookmaker: actualBestBookmaker,
           bestBookKey,
