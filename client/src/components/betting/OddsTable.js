@@ -2639,8 +2639,27 @@ export default function OddsTable({
                                 ? row.nonSelectedBooks || [] 
                                 : row.allBooks || [];
                               
-                              // Fallback: if no non-selected books but we have all books, show all books for comparison
-                              if (mode === "props" && bookFilter && bookFilter.length > 0 && booksToProcess.length === 0 && row.allBooks && row.allBooks.length > 0) {
+                              // Special case: If filtering for DFS apps only, show traditional sportsbooks for comparison
+                              const isDFSOnlyFilter = bookFilter && bookFilter.length > 0 && 
+                                bookFilter.every(book => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(book.toLowerCase()));
+                              
+                              if (mode === "props" && isDFSOnlyFilter && row.allBooks && row.allBooks.length > 0) {
+                                // Filter to show only traditional sportsbooks (non-DFS) for comparison
+                                const traditionalBooks = row.allBooks.filter(book => {
+                                  const bookKey = book.bookmaker?.key?.toLowerCase() || '';
+                                  return !['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookKey);
+                                });
+                                
+                                if (traditionalBooks.length > 0) {
+                                  console.log(`🎯 DFS FILTER: Showing ${traditionalBooks.length} traditional sportsbooks for comparison`);
+                                  booksToProcess = traditionalBooks;
+                                } else {
+                                  console.log(`🎯 DFS FILTER: No traditional sportsbooks found, showing all books`);
+                                  booksToProcess = row.allBooks;
+                                }
+                              }
+                              // Regular fallback: if no non-selected books but we have all books, show all books for comparison
+                              else if (mode === "props" && bookFilter && bookFilter.length > 0 && booksToProcess.length === 0 && row.allBooks && row.allBooks.length > 0) {
                                 console.log(`🎯 FALLBACK: No non-selected books found, showing all books for comparison`);
                                 booksToProcess = row.allBooks;
                               }
