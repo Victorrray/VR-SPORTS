@@ -637,32 +637,33 @@ export default function OddsTable({
 
   /* ---------- Build rows (game mode) ---------- */
   const allRows = useMemo(() => {
-    // Debug: Check if we have any DFS app data
-    const dfsApps = ['prizepicks', 'underdog', 'pick6'];
-    let dfsAppCount = 0;
-    let dfsMarketCount = 0;
-    let dfsOutcomeCount = 0;
-    let dfsAppGames = new Set();
+    try {
+      // Debug: Check if we have any DFS app data
+      const dfsApps = ['prizepicks', 'underdog', 'pick6'];
+      let dfsAppCount = 0;
+      let dfsMarketCount = 0;
+      let dfsOutcomeCount = 0;
+      let dfsAppGames = new Set();
+      
+      console.log('🔍 DFS DEBUG: Starting allRows calculation with bookFilter:', bookFilter);
+      console.log('🔍 DFS DEBUG: Mode:', mode);
+      console.log('🔍 DFS DEBUG: Market filter:', marketFilter);
+      console.log('🔍 DFS DEBUG: Games count:', games?.length || 0);
+      
+      // Check if games is empty or undefined
+      if (!games || games.length === 0) {
+        console.log('🔍 DFS DEBUG: No games data available!');
+        return [];
+      }
     
-    console.log('🔍 DFS DEBUG: Starting allRows calculation with bookFilter:', bookFilter);
-    console.log('🔍 DFS DEBUG: Mode:', mode);
-    console.log('🔍 DFS DEBUG: Market filter:', marketFilter);
-    console.log('🔍 DFS DEBUG: Games count:', games?.length || 0);
-    
-    // Check if games is empty or undefined
-    if (!games || games.length === 0) {
-      console.log('🔍 DFS DEBUG: No games data available!');
-      return [];
-    }
-    
-    if (games && games.length > 0) {
-      games.forEach(game => {
-        if (game.bookmakers) {
-          game.bookmakers.forEach(bookmaker => {
-            const bookmakerKeyLower = bookmaker.key?.toLowerCase() || '';
-            if (dfsApps.some(app => bookmakerKeyLower.includes(app))) {
-              dfsAppCount++;
-              dfsAppGames.add(game.id);
+      if (games && games.length > 0) {
+        games.forEach(game => {
+          if (game.bookmakers) {
+            game.bookmakers.forEach(bookmaker => {
+              const bookmakerKeyLower = bookmaker.key?.toLowerCase() || '';
+              if (dfsApps.some(app => bookmakerKeyLower.includes(app))) {
+                dfsAppCount++;
+                dfsAppGames.add(game.id);
               
               console.log(`🔍 DFS DEBUG: Found DFS app ${bookmaker.key} for game ${game.home_team} vs ${game.away_team}`);
               
@@ -799,326 +800,328 @@ export default function OddsTable({
         });
       });
       
-      
-      games?.forEach(game => {
-        if (!game.bookmakers) {
-          console.log('Game has no bookmakers:', game.id);
-          return;
-        }
-        
-        console.log(`Game ${game.id} (${game.home_team} vs ${game.away_team}) has ${game.bookmakers.length} bookmakers`);
-        game.bookmakers.forEach(bookmaker => {
-          if (!bookmaker.markets) {
-            console.log(`Bookmaker ${bookmaker.key} has no markets`);
+      // Process each game for player props
+      if (games && games.length > 0) {
+        games.forEach(game => {
+          if (!game.bookmakers) {
+            console.log('Game has no bookmakers:', game.id);
             return;
           }
           
-          console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
-          bookmaker.markets.forEach(market => {
-            // Filter markets based on mode
-            const isDFSSite = ['prizepicks', 'underdog', 'pick6'].includes(bookmaker.key?.toLowerCase());
-            const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
-            const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
-            
-            // In props mode: only show player prop markets or DFS sites, and respect marketFilter
-            // In regular mode: only show regular markets (h2h, spreads, totals)
-            if (mode === 'props') {
-              if (!isDFSSite && !isPlayerPropMarket) {
-                console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop (props mode)`);
-                return;
-              }
-              
-              // For DFS sites, ensure we're using fixed -137 odds
-              if (isDFSSite) {
-                console.log(`Processing DFS site ${bookmaker.key} with fixed -137 odds for market ${market.key}`);
-                // Force -137 odds for all DFS app outcomes
-                if (market.outcomes && market.outcomes.length > 0) {
-                  console.log(`DFS site ${bookmaker.key} has ${market.outcomes.length} outcomes for market ${market.key}`);
-                  
-                  // Special handling for DFS apps - create synthetic over/under outcomes if needed
-                  if (!market.outcomes.some(o => o.name === 'Over' || o.name === 'Under')) {
-                    console.log(`🔍 DFS DEBUG: Creating synthetic Over/Under outcomes for ${bookmaker.key}`);
-                    
-                    // Convert DFS app format to standard Over/Under format
-                    const syntheticOutcomes = [];
-                    market.outcomes.forEach(outcome => {
-                      // Extract point value if available
-                      let point = null;
-                      if (typeof outcome.point === 'number') {
-                        point = outcome.point;
-                      } else if (outcome.name && outcome.name.includes(' ')) {
-                        const parts = outcome.name.split(' ');
-                        const lastPart = parts[parts.length - 1];
-                        if (!isNaN(parseFloat(lastPart))) {
-                          point = parseFloat(lastPart);
-                        }
-                      }
-                      
-                      if (point !== null) {
-                        // Create Over outcome
-                        syntheticOutcomes.push({
-                          name: 'Over',
-                          price: -137,
-                          point: point,
-                          description: outcome.name
-                        });
-                        
-                        // Create Under outcome
-                        syntheticOutcomes.push({
-                          name: 'Under',
-                          price: -137,
-                          point: point,
-                          description: outcome.name
-                        });
-                      }
-                    });
-                    
-                    if (syntheticOutcomes.length > 0) {
-                      console.log(`🔍 DFS DEBUG: Created ${syntheticOutcomes.length} synthetic outcomes`);
-                      console.log(`🔍 DFS DEBUG: Synthetic outcomes:`, syntheticOutcomes);
-                      market.outcomes = syntheticOutcomes;
-                      
-                      // Add a special flag to this market to ensure it's processed
-                      market._isDFSProcessed = true;
-                    }
-                  }
-                  
-                  market.outcomes.forEach(outcome => {
-                    console.log(`Setting -137 odds for ${outcome.name} in ${market.key}`);
-                    outcome.price = -137;
-                    
-                    // Add debug info to outcome name to verify it's being processed
-                    outcome._originalName = outcome.name;
-                    outcome.name = `${outcome.name} (DFS)`;
-                  });
-                } else {
-                  console.log(`WARNING: DFS site ${bookmaker.key} has no outcomes for market ${market.key}`);
-                }
-              }
-              
-              // Apply marketFilter for player props
-              if (marketFilter && marketFilter.length > 0 && isPlayerPropMarket) {
-                // Special debug for DFS apps
-                if (isDFSSite) {
-                  console.log(`🔍 DFS MARKET FILTER CHECK: market ${market.key} for ${bookmaker.key}`);
-                  console.log(`🔍 DFS MARKET FILTER CHECK: marketFilter =`, marketFilter);
-                  console.log(`🔍 DFS MARKET FILTER CHECK: includes? =`, marketFilter.includes(market.key));
-                  
-                  // ALWAYS show DFS apps regardless of market filter
-                  console.log(`🔍 DFS MARKET FILTER BYPASS: Allowing DFS app ${bookmaker.key} regardless of market filter`);
-                  // Continue processing this market for DFS apps
-                } else if (!marketFilter.includes(market.key)) {
-                  // Only apply market filter to non-DFS apps
-                  console.log(`Skipping market ${market.key} for ${bookmaker.key} - not in marketFilter:`, marketFilter);
-                  return;
-                }
-              }
-            } else {
-              if (!isRegularMarket) {
-                console.log(`Skipping market ${market.key} for ${bookmaker.key} - not regular market (game mode)`);
-                return;
-              }
-            }
-            
-            console.log(`Processing market ${market.key} for bookmaker ${bookmaker.key} with ${market.outcomes?.length || 0} outcomes`);
-            
-            if (!market.outcomes || !Array.isArray(market.outcomes)) {
-              console.log(`Market ${market.key} has no outcomes`);
+          console.log(`Game ${game.id} (${game.home_team} vs ${game.away_team}) has ${game.bookmakers.length} bookmakers`);
+          game.bookmakers.forEach(bookmaker => {
+            if (!bookmaker.markets) {
+              console.log(`Bookmaker ${bookmaker.key} has no markets`);
               return;
             }
             
-            // Handle TheOddsAPI player props format (Over/Under with description)
-            if (isPlayerPropMarket) {
-              // Check if this is a DFS app
-              const isDFSApp = propsDfsApps.some(app => (bookmaker.key || '').toLowerCase().includes(app));
+            console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
+            bookmaker.markets.forEach(market => {
+              // Filter markets based on mode
+              const isDFSSite = ['prizepicks', 'underdog', 'pick6'].includes(bookmaker.key?.toLowerCase());
+              const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
+              const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
+            
+              // In props mode: only show player prop markets or DFS sites, and respect marketFilter
+              // In regular mode: only show regular markets (h2h, spreads, totals)
+              if (mode === 'props') {
+                if (!isDFSSite && !isPlayerPropMarket) {
+                  console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop (props mode)`);
+                  return;
+                }
               
-              if (isDFSApp) {
-                console.log(`🔍 DFS PROCESSING: Processing DFS app ${bookmaker.key} market ${market.key}`);
-                console.log(`🔍 DFS PROCESSING: Outcomes format:`, market.outcomes?.map(o => ({
-                  name: o.name,
-                  point: o.point,
-                  price: o.price,
-                  description: o.description
-                })));
-                
-                // Check if this market has the expected Over/Under format
-                const hasOverUnder = market.outcomes?.some(o => o.name === 'Over' || o.name === 'Under');
-                console.log(`🔍 DFS PROCESSING: Has Over/Under format: ${hasOverUnder}`);
-                
-                // If not in Over/Under format, try to convert it
-                if (!hasOverUnder && market.outcomes && market.outcomes.length > 0) {
-                  console.log(`🔍 DFS PROCESSING: Converting DFS app format to Over/Under format`);
-                  
-                  // Try to extract point values and create synthetic Over/Under outcomes
-                  const syntheticOutcomes = [];
-                  market.outcomes.forEach(outcome => {
-                    // Extract point value if available
-                    let point = null;
-                    let playerName = '';
+                // For DFS sites, ensure we're using fixed -137 odds
+                if (isDFSSite) {
+                  console.log(`Processing DFS site ${bookmaker.key} with fixed -137 odds for market ${market.key}`);
+                  // Force -137 odds for all DFS app outcomes
+                  if (market.outcomes && market.outcomes.length > 0) {
+                    console.log(`DFS site ${bookmaker.key} has ${market.outcomes.length} outcomes for market ${market.key}`);
                     
-                    if (typeof outcome.point === 'number') {
-                      point = outcome.point;
-                    } else if (outcome.name && outcome.name.includes(' ')) {
-                      // Try to parse point from name
-                      const parts = outcome.name.split(' ');
-                      const lastPart = parts[parts.length - 1];
-                      if (!isNaN(parseFloat(lastPart))) {
-                        point = parseFloat(lastPart);
-                        playerName = parts.slice(0, -1).join(' ');
+                    // Special handling for DFS apps - create synthetic over/under outcomes if needed
+                    if (!market.outcomes.some(o => o.name === 'Over' || o.name === 'Under')) {
+                      console.log(`🔍 DFS DEBUG: Creating synthetic Over/Under outcomes for ${bookmaker.key}`);
+                      
+                      // Convert DFS app format to standard Over/Under format
+                      const syntheticOutcomes = [];
+                      market.outcomes.forEach(outcome => {
+                        // Extract point value if available
+                        let point = null;
+                        if (typeof outcome.point === 'number') {
+                          point = outcome.point;
+                        } else if (outcome.name && outcome.name.includes(' ')) {
+                          const parts = outcome.name.split(' ');
+                          const lastPart = parts[parts.length - 1];
+                          if (!isNaN(parseFloat(lastPart))) {
+                            point = parseFloat(lastPart);
+                          }
+                        }
+                        
+                        if (point !== null) {
+                          // Create Over outcome
+                          syntheticOutcomes.push({
+                            name: 'Over',
+                            price: -137,
+                            point: point,
+                            description: outcome.name
+                          });
+                          
+                          // Create Under outcome
+                          syntheticOutcomes.push({
+                            name: 'Under',
+                            price: -137,
+                            point: point,
+                            description: outcome.name
+                          });
+                        }
+                      });
+                      
+                      if (syntheticOutcomes.length > 0) {
+                        console.log(`🔍 DFS DEBUG: Created ${syntheticOutcomes.length} synthetic outcomes`);
+                        console.log(`🔍 DFS DEBUG: Synthetic outcomes:`, syntheticOutcomes);
+                        market.outcomes = syntheticOutcomes;
+                        
+                        // Add a special flag to this market to ensure it's processed
+                        market._isDFSProcessed = true;
                       }
                     }
                     
-                    if (outcome.description) {
-                      playerName = outcome.description;
-                    }
-                    
-                    if (point !== null) {
-                      // Create Over/Under outcomes
-                      syntheticOutcomes.push({
-                        name: 'Over',
-                        price: outcome.price || -137,
-                        point: point,
-                        description: playerName || outcome.name
-                      });
+                    market.outcomes.forEach(outcome => {
+                      console.log(`Setting -137 odds for ${outcome.name} in ${market.key}`);
+                      outcome.price = -137;
                       
-                      syntheticOutcomes.push({
-                        name: 'Under',
-                        price: outcome.price || -137,
-                        point: point,
-                        description: playerName || outcome.name
-                      });
+                      // Add debug info to outcome name to verify it's being processed
+                      outcome._originalName = outcome.name;
+                      outcome.name = `${outcome.name} (DFS)`;
+                    });
+                    } else {
+                      console.log(`WARNING: DFS site ${bookmaker.key} has no outcomes for market ${market.key}`);
                     }
-                  });
+                  }
                   
-                  if (syntheticOutcomes.length > 0) {
-                    console.log(`🔍 DFS PROCESSING: Created ${syntheticOutcomes.length} synthetic outcomes`);
-                    market.outcomes = syntheticOutcomes;
-                    market._isDFSProcessed = true;
+                  // Apply marketFilter for player props
+                  if (marketFilter && marketFilter.length > 0 && isPlayerPropMarket) {
+                    // Special debug for DFS apps
+                    if (isDFSSite) {
+                      console.log(`🔍 DFS MARKET FILTER CHECK: market ${market.key} for ${bookmaker.key}`);
+                      console.log(`🔍 DFS MARKET FILTER CHECK: marketFilter =`, marketFilter);
+                      console.log(`🔍 DFS MARKET FILTER CHECK: includes? =`, marketFilter.includes(market.key));
+                      
+                      // ALWAYS show DFS apps regardless of market filter
+                      console.log(`🔍 DFS MARKET FILTER BYPASS: Allowing DFS app ${bookmaker.key} regardless of market filter`);
+                      // Continue processing this market for DFS apps
+                    } else if (!marketFilter.includes(market.key)) {
+                      // Only apply market filter to non-DFS apps
+                      console.log(`Skipping market ${market.key} for ${bookmaker.key} - not in marketFilter:`, marketFilter);
+                      return;
+                    }
+                  }
+                } else {
+                  if (!isRegularMarket) {
+                    console.log(`Skipping market ${market.key} for ${bookmaker.key} - not regular market (game mode)`);
+                    return;
                   }
                 }
-              }
+                
+                console.log(`Processing market ${market.key} for bookmaker ${bookmaker.key} with ${market.outcomes?.length || 0} outcomes`);
+            
+                if (!market.outcomes || !Array.isArray(market.outcomes)) {
+                  console.log(`Market ${market.key} has no outcomes`);
+                  return;
+                }
+                
+                // Handle TheOddsAPI player props format (Over/Under with description)
+                if (isPlayerPropMarket) {
+                  // Check if this is a DFS app
+                  const isDFSApp = propsDfsApps.some(app => (bookmaker.key || '').toLowerCase().includes(app));
               
-              if (market.outcomes.some(o => o.name === 'Over' || o.name === 'Under')) {
-                console.log(`Processing TheOddsAPI format for ${market.key}`);
-                console.log(`🔍 DFS DEBUG: Processing outcomes for ${bookmaker.key} - ${market.key}:`, market.outcomes);
+                  if (isDFSApp) {
+                    console.log(`🔍 DFS PROCESSING: Processing DFS app ${bookmaker.key} market ${market.key}`);
+                    console.log(`🔍 DFS PROCESSING: Outcomes format:`, market.outcomes?.map(o => ({
+                      name: o.name,
+                      point: o.point,
+                      price: o.price,
+                      description: o.description
+                    })));
                 
-                // Group Over/Under pairs by player (description field)
-                const playerGroups = {};
-                market.outcomes.forEach(outcome => {
-                  // Use the utility function to extract player name
-                  const playerName = extractPlayerName(outcome, market.key, game.sport_key);
-                  if (!playerGroups[playerName]) {
-                    playerGroups[playerName] = [];
-                  }
-                  playerGroups[playerName].push(outcome);
-                });
-                
-                console.log(`🔍 DFS DEBUG: Player groups for ${market.key}:`, playerGroups);
-                
-                Object.entries(playerGroups).forEach(([playerName, outcomes]) => {
-                  console.log(`🔍 DFS DEBUG: Processing player ${playerName} with ${outcomes.length} outcomes`);
-                  if (outcomes.length >= 2) { // Need both Over and Under
-                    const overOutcome = outcomes.find(o => o.name === 'Over');
-                    const underOutcome = outcomes.find(o => o.name === 'Under');
-                    console.log(`🔍 DFS DEBUG: Found over/under outcomes:`, { over: overOutcome, under: underOutcome });
+                    // Check if this market has the expected Over/Under format
+                    const hasOverUnder = market.outcomes?.some(o => o.name === 'Over' || o.name === 'Under');
+                    console.log(`🔍 DFS PROCESSING: Has Over/Under format: ${hasOverUnder}`);
+                    
+                    // If not in Over/Under format, try to convert it
+                    if (!hasOverUnder && market.outcomes && market.outcomes.length > 0) {
+                      console.log(`🔍 DFS PROCESSING: Converting DFS app format to Over/Under format`);
                   
-                    if (overOutcome && underOutcome && overOutcome.point !== undefined) {
-                      // Create combined Over/Under row - we'll determine which to show after collecting all books
-                      const basePropKey = `${game.id}-${market.key}-${playerName}-${overOutcome.point}`;
-                      console.log(`Creating combined prop for ${playerName}: ${market.key} ${overOutcome.point}`);
+                      // Try to extract point values and create synthetic Over/Under outcomes
+                      const syntheticOutcomes = [];
+                      market.outcomes.forEach(outcome => {
+                        // Extract point value if available
+                        let point = null;
+                        let playerName = '';
+                        
+                        if (typeof outcome.point === 'number') {
+                          point = outcome.point;
+                        } else if (outcome.name && outcome.name.includes(' ')) {
+                          // Try to parse point from name
+                          const parts = outcome.name.split(' ');
+                          const lastPart = parts[parts.length - 1];
+                          if (!isNaN(parseFloat(lastPart))) {
+                            point = parseFloat(lastPart);
+                            playerName = parts.slice(0, -1).join(' ');
+                          }
+                        }
+                        
+                        if (outcome.description) {
+                          playerName = outcome.description;
+                        }
+                    
+                        if (point !== null) {
+                          // Create Over/Under outcomes
+                          syntheticOutcomes.push({
+                            name: 'Over',
+                            price: outcome.price || -137,
+                            point: point,
+                            description: playerName || outcome.name
+                          });
+                          
+                          syntheticOutcomes.push({
+                            name: 'Under',
+                            price: outcome.price || -137,
+                            point: point,
+                            description: playerName || outcome.name
+                          });
+                        }
+                      });
                       
-                      if (!propGroups.has(basePropKey)) {
-                        propGroups.set(basePropKey, {
-                          key: basePropKey,
-                          game,
-                          mkt: { 
-                            key: market.key, 
-                            name: formatMarketName(market.key)
-                          },
-                          playerName: playerName,
-                          point: overOutcome.point,
-                          sport: game.sport_key,
-                          isPlayerProp: true,
-                          overBooks: [],
-                          underBooks: []
-                        });
+                      if (syntheticOutcomes.length > 0) {
+                        console.log(`🔍 DFS PROCESSING: Created ${syntheticOutcomes.length} synthetic outcomes`);
+                        market.outcomes = syntheticOutcomes;
+                        market._isDFSProcessed = true;
                       }
-                      
-                      const propGroup = propGroups.get(basePropKey);
-                      
-                      // Add both Over and Under books to their respective arrays
-                      propGroup.overBooks.push({
-                        price: overOutcome.price,
-                        odds: overOutcome.price,
-                        book: bookmaker.title,
-                        bookmaker: bookmaker,
-                        market: market,
-                        outcome: overOutcome
-                      });
-                      
-                      propGroup.underBooks.push({
-                        price: underOutcome.price,
-                        odds: underOutcome.price,
-                        book: bookmaker.title,
-                        bookmaker: bookmaker,
-                        market: market,
-                        outcome: underOutcome
-                      });
                     }
                   }
-                });
+              
+                  if (market.outcomes.some(o => o.name === 'Over' || o.name === 'Under')) {
+                    console.log(`Processing TheOddsAPI format for ${market.key}`);
+                    console.log(`🔍 DFS DEBUG: Processing outcomes for ${bookmaker.key} - ${market.key}:`, market.outcomes);
+                    
+                    // Group Over/Under pairs by player (description field)
+                    const playerGroups = {};
+                    market.outcomes.forEach(outcome => {
+                      // Use the utility function to extract player name
+                      const playerName = extractPlayerName(outcome, market.key, game.sport_key);
+                      if (!playerGroups[playerName]) {
+                        playerGroups[playerName] = [];
+                      }
+                      playerGroups[playerName].push(outcome);
+                    });
+                    
+                    console.log(`🔍 DFS DEBUG: Player groups for ${market.key}:`, playerGroups);
+                    
+                    Object.entries(playerGroups).forEach(([playerName, outcomes]) => {
+                      console.log(`🔍 DFS DEBUG: Processing player ${playerName} with ${outcomes.length} outcomes`);
+                      if (outcomes.length >= 2) { // Need both Over and Under
+                        const overOutcome = outcomes.find(o => o.name === 'Over');
+                        const underOutcome = outcomes.find(o => o.name === 'Under');
+                        console.log(`🔍 DFS DEBUG: Found over/under outcomes:`, { over: overOutcome, under: underOutcome });
+                      
+                        if (overOutcome && underOutcome && overOutcome.point !== undefined) {
+                          // Create combined Over/Under row - we'll determine which to show after collecting all books
+                          const basePropKey = `${game.id}-${market.key}-${playerName}-${overOutcome.point}`;
+                          console.log(`Creating combined prop for ${playerName}: ${market.key} ${overOutcome.point}`);
+                          
+                          if (!propGroups.has(basePropKey)) {
+                            propGroups.set(basePropKey, {
+                              key: basePropKey,
+                              game,
+                              mkt: { 
+                                key: market.key, 
+                                name: formatMarketName(market.key)
+                              },
+                              playerName: playerName,
+                              point: overOutcome.point,
+                              sport: game.sport_key,
+                              isPlayerProp: true,
+                              overBooks: [],
+                              underBooks: []
+                            });
+                          }
+                      
+                          const propGroup = propGroups.get(basePropKey);
+                          
+                          // Add both Over and Under books to their respective arrays
+                          propGroup.overBooks.push({
+                            price: overOutcome.price,
+                            odds: overOutcome.price,
+                            book: bookmaker.title,
+                            bookmaker: bookmaker,
+                            market: market,
+                            outcome: overOutcome
+                          });
+                          
+                          propGroup.underBooks.push({
+                            price: underOutcome.price,
+                            odds: underOutcome.price,
+                            book: bookmaker.title,
+                            bookmaker: bookmaker,
+                            market: market,
+                            outcome: underOutcome
+                          });
+                        }
+                      }
+                    });
+                    
+                    return; // Skip the old processing for this market
+                  }
                 
-                return; // Skip the old processing for this market
-              }
-            
-            // Original processing for other formats
-            market.outcomes?.forEach(outcome => {
-              const propKey = `${game.id}-${market.key}-${outcome.name}-${outcome.point || 'no-point'}`;
+                  // Original processing for other formats
+                  market.outcomes?.forEach(outcome => {
+                    const propKey = `${game.id}-${market.key}-${outcome.name}-${outcome.point || 'no-point'}`;
+                    
+                    // Log detailed prop creation for debugging
+                    if (isDFSSite) {
+                      console.log(`Creating prop key: ${propKey} for ${bookmaker.key}`);
+                      console.log(`Outcome details:`, {
+                        name: outcome.name,
+                        point: outcome.point,
+                        price: outcome.price,
+                        marketKey: market.key
+                      });
+                    }
               
-              // Log detailed prop creation for debugging
-              if (isDFSSite) {
-                console.log(`Creating prop key: ${propKey} for ${bookmaker.key}`);
-                console.log(`Outcome details:`, {
-                  name: outcome.name,
-                  point: outcome.point,
-                  price: outcome.price,
-                  marketKey: market.key
-                });
-              }
+                    if (!propGroups.has(propKey)) {
+                      propGroups.set(propKey, {
+                        key: propKey, // Add unique key for row expansion
+                        game,
+                        mkt: { 
+                          key: market.key, 
+                          name: formatMarketName(market.key)
+                        },
+                        out: { 
+                          name: outcome.name, 
+                          price: outcome.price, 
+                          odds: outcome.price, 
+                          point: outcome.point || null 
+                        },
+                        bk: bookmaker,
+                        sport: game.sport_key,
+                        isPlayerProp: true,
+                        allBooks: []
+                      });
+                    }
               
-              if (!propGroups.has(propKey)) {
-                propGroups.set(propKey, {
-                  key: propKey, // Add unique key for row expansion
-                  game,
-                  mkt: { 
-                    key: market.key, 
-                    name: formatMarketName(market.key)
-                  },
-                  out: { 
-                    name: outcome.name, 
-                    price: outcome.price, 
-                    odds: outcome.price, 
-                    point: outcome.point || null 
-                  },
-                  bk: bookmaker,
-                  sport: game.sport_key,
-                  isPlayerProp: true,
-                  allBooks: []
-                });
-              }
-              
-              // Add this bookmaker's odds to the group
-              propGroups.get(propKey).allBooks.push({
-                price: outcome.price, 
-                odds: outcome.price,
-                book: bookmaker.title,
-                bookmaker: bookmaker,
-                market: market
-              });
-            });
+                    // Add this bookmaker's odds to the group
+                    propGroups.get(propKey).allBooks.push({
+                      price: outcome.price, 
+                      odds: outcome.price,
+                      book: bookmaker.title,
+                      bookmaker: bookmaker,
+                      market: market
+                    });
+                  });
           });
         });
       });
+    }
       
       // Second pass: include all props and apply sportsbook filter
       console.log(`Total prop groups collected: ${propGroups.size}`);
