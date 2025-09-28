@@ -89,15 +89,20 @@
 
 /* Type variations */
 .enhanced-loading.player-props .spinner {
-  border: 3px solid rgba(16, 185, 129, 0.1);
-  border-top-color: #10b981;
-  border-right-color: #10b981;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+  border: 3px solid rgba(139, 92, 246, 0.1);
+  border-top-color: #a78bfa;
+  border-right-color: #8b5cf6;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
 }
 
 .enhanced-loading.player-props .spinner-pulse {
-  background: rgba(16, 185, 129, 0.25);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+  background: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+.enhanced-loading.player-props .spinner-text h3 {
+  color: #a78bfa;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
 }
 
 /* Odds Table specific styling - extra vibrant purple */
