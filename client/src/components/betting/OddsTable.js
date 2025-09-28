@@ -855,8 +855,18 @@ export default function OddsTable({
               bookmaker: b.bookmaker
             })));
             
+            // Check if we're filtering for DFS apps only
+            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+            const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
+            
             hasMatchingBook = propData.allBooks.some(book => {
-              // Strict bookmaker key matching only
+              // If filtering for DFS apps only and this is a DFS app, include it
+              if (filteringForDFSOnly && book.bookmaker?.key && dfsApps.includes(book.bookmaker.key)) {
+                console.log(`🎯 Including DFS app ${book.bookmaker.key} for prop ${propKey}`);
+                return true;
+              }
+              
+              // Strict bookmaker key matching only for non-DFS filtering
               const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
               console.log(`🎯 Checking book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
               return keyMatch; // Only use key matching, not name matching
@@ -872,8 +882,18 @@ export default function OddsTable({
               bookmaker: b.bookmaker
             })));
             
+            // Check if we're filtering for DFS apps only
+            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+            const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
+            
             hasMatchingBook = allCombinedBooks.some(book => {
-              // Strict bookmaker key matching only
+              // If filtering for DFS apps only and this is a DFS app, include it
+              if (filteringForDFSOnly && book.bookmaker?.key && dfsApps.includes(book.bookmaker.key)) {
+                console.log(`🎯 Including DFS app ${book.bookmaker.key} for combined prop ${propKey}`);
+                return true;
+              }
+              
+              // Strict bookmaker key matching only for non-DFS filtering
               const keyMatch = book.bookmaker?.key && bookFilter.includes(book.bookmaker.key);
               console.log(`🎯 Checking combined book: ${book.bookmaker?.key} vs filter:`, bookFilter, 'keyMatch:', keyMatch);
               return keyMatch; // Only use key matching, not name matching
@@ -1131,7 +1151,17 @@ export default function OddsTable({
             return true;
           }
           
-          // Strict bookmaker key matching
+          // Check if we're filtering for DFS apps only
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'prophetx'];
+          const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
+          
+          // If we're filtering for DFS apps only and this is a DFS app, include it
+          if (filteringForDFSOnly && dfsApps.includes(o.bookmaker.key)) {
+            console.log(`🎯 Including DFS app ${o.bookmaker.key} for market ${mktKey}`);
+            return true;
+          }
+          
+          // Strict bookmaker key matching for non-DFS filtering
           const isIncluded = bookFilter.includes(o.bookmaker.key);
           
           // Enhanced logging for bookmaker filtering
