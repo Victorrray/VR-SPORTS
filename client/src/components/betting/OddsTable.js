@@ -1638,7 +1638,7 @@ export default function OddsTable({
     const allBooks = row.allBooks || [];
     
     // Only proceed if we have enough books for a meaningful consensus
-    if (allBooks.length < 2) return null;
+    if (allBooks.length < 4) return null;
     
     // For player props, use consensus probability from all available books
     if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
@@ -1647,7 +1647,7 @@ export default function OddsTable({
       const consensusProb = median(probs);
       const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
       
-      if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 2) { // Lower threshold for props
+      if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 4) { // Minimum 4 books for reliable EV
         const fairDec = 1 / consensusProb;
         return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
       }
@@ -1657,7 +1657,7 @@ export default function OddsTable({
     // Use devig method if available
     const pDevig = consensusDevigProb(row);
     const pairCnt = devigPairCount(row);
-    if (pDevig && pDevig > 0 && pDevig < 1 && pairCnt > 2) { // Lower threshold
+    if (pDevig && pDevig > 0 && pDevig < 1 && pairCnt >= 4) { // Minimum 4 books for reliable EV
       const fairDec = 1 / pDevig;
       return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
@@ -1668,7 +1668,7 @@ export default function OddsTable({
     const consensusProb = median(probs);
     const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
     
-    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Lower threshold
+    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 4) { // Minimum 4 books for reliable EV
       const fairDec = 1 / consensusProb;
       return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
@@ -1751,13 +1751,13 @@ export default function OddsTable({
       r = r.filter(row => {
         // For player props, bookmaker info is in row.bk, for game odds it's in row.out.bookmaker
         const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
-        const isDFSApp = dfsApps.some(app => bookmakerKey.includes(app));
-        if (!isDFSApp) {
-          console.log(`🎯 Excluding non-DFS app: "${bookmakerKey}" (from ${row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || 'unknown'})`);
+        const isSelectedDFSApp = bookFilter.some(selectedBook => bookmakerKey.includes(selectedBook.toLowerCase()));
+        if (!isSelectedDFSApp) {
+          console.log(`🎯 Excluding non-selected DFS app: "${bookmakerKey}" (not in filter: ${bookFilter})`);
         } else {
-          console.log(`🎯 Including DFS app: "${bookmakerKey}"`);
+          console.log(`🎯 Including selected DFS app: "${bookmakerKey}" (matches filter: ${bookFilter})`);
         }
-        return isDFSApp;
+        return isSelectedDFSApp;
       });
       
       console.log('🎯 After filtering: ' + r.length + ' rows');
