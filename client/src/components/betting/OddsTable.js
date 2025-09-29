@@ -1841,7 +1841,7 @@ export default function OddsTable({
     });
     
     return r.slice().sort((a, b) => (sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b)));
-  }, [allRows, evOnlyPositive, evMin, sort.dir, sorter, evMap]);
+  }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap]);
 
   const totalPages = Math.ceil(rows.length / pageSize);
   const paginatedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page, pageSize]);
@@ -2703,13 +2703,13 @@ export default function OddsTable({
                               
                               // Special case: If filtering for DFS apps only, show traditional sportsbooks for comparison
                               const isDFSOnlyFilter = bookFilter && bookFilter.length > 0 && 
-                                bookFilter.every(book => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(book.toLowerCase()));
+                                bookFilter.every(book => ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'prophetx'].includes(book.toLowerCase()));
                               
                               if (mode === "props" && isDFSOnlyFilter && row.allBooks && row.allBooks.length > 0) {
                                 // Filter to show only traditional sportsbooks (non-DFS) for comparison
                                 const traditionalBooks = row.allBooks.filter(book => {
                                   const bookKey = book.bookmaker?.key?.toLowerCase() || '';
-                                  return !['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(bookKey);
+                                  return !['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'prophetx'].includes(bookKey);
                                 });
                                 
                                 if (traditionalBooks.length > 0) {
