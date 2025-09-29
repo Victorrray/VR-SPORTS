@@ -505,9 +505,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         
         let marketsToUse = migratedMarkets;
         
-        // If still have invalid markets or empty selection, use defaults
+        // If still have invalid markets or empty selection, use ALL available markets
         if (marketsToUse.length === 0 || hasInvalidMarkets) {
-          marketsToUse = availableMarketKeys.slice(0, 3);
+          marketsToUse = availableMarketKeys; // Select ALL available markets instead of just first 3
         }
         
         if (marketsToUse.length > 0) {
@@ -526,6 +526,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       }
     }
   }, [picked, isPlayerPropsMode, selectedPlayerPropMarkets]); // Run when sport, mode, or markets change
+
+  // Auto-select ALL player prop markets when entering player props mode or changing sports
+  useEffect(() => {
+    if (isPlayerPropsMode && picked && picked.length > 0) {
+      const sportBasedMarkets = getPlayerPropMarketsBySport(picked);
+      const availableMarketKeys = sportBasedMarkets
+        .filter(market => !market.isHeader)
+        .map(market => market.key);
+      
+      // Always select ALL available markets for the selected sports
+      if (availableMarketKeys.length > 0) {
+        console.log('🎯 Auto-selecting ALL player prop markets for sports:', picked, '→', availableMarketKeys);
+        setSelectedPlayerPropMarkets(availableMarketKeys);
+        setDraftSelectedPlayerPropMarkets(availableMarketKeys);
+      }
+    }
+  }, [picked, isPlayerPropsMode]); // Run when sport or mode changes
 
   // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {

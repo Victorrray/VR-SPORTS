@@ -2697,11 +2697,11 @@ export default function OddsTable({
                                   console.log(`🎯 DFS FILTER: Showing ${traditionalBooks.length} traditional sportsbooks for comparison`);
                                   booksToProcess = traditionalBooks;
                                 } else {
-                                  console.log(`🎯 DFS FILTER: No traditional sportsbooks found, showing all books`);
+                                  console.log(`🎯 DFS FILTER: No traditional sportsbooks found, showing all available books`);
                                   booksToProcess = row.allBooks;
                                 }
                               }
-                              // Regular fallback: if no non-selected books but we have all books, show all books for comparison
+                              // For player props with book filter, show all books for comparison if no non-selected books available
                               else if (mode === "props" && bookFilter && bookFilter.length > 0 && booksToProcess.length === 0 && row.allBooks && row.allBooks.length > 0) {
                                 console.log(`🎯 FALLBACK: No non-selected books found, showing all books for comparison`);
                                 booksToProcess = row.allBooks;
