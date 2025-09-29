@@ -1702,7 +1702,7 @@ export default function OddsTable({
     let r = allRows;
     
     // Check if we're filtering for DFS apps only
-    const dfsApps = ['prizepicks', 'underdog', 'pick6'];
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
     const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
     
     console.log('🔍 DFS FILTER DEBUG: bookFilter =', bookFilter);
