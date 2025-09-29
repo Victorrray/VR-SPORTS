@@ -38,7 +38,27 @@ const SPORT_CATEGORIES = {
   },
   international: {
     title: "International Sports", 
-    sports: ["soccer_epl", "soccer_uefa_champs_league", "tennis_atp", "tennis_wta"]
+    sports: ["soccer_epl", "soccer_uefa_champs_league", "soccer_fifa_world_cup", "soccer_conmebol_copa_america", "soccer_uefa_european_championship"]
+  },
+  tennis: {
+    title: "Tennis",
+    sports: ["tennis_atp", "tennis_wta", "tennis_atp_french_open", "tennis_atp_us_open", "tennis_atp_wimbledon", "tennis_atp_australian_open", "tennis_wta_french_open", "tennis_wta_us_open", "tennis_wta_wimbledon", "tennis_wta_australian_open"]
+  },
+  combat: {
+    title: "Combat Sports",
+    sports: ["boxing_heavyweight", "mma_mixed_martial_arts", "boxing", "mma"]
+  },
+  motorsports: {
+    title: "Motorsports & Racing",
+    sports: ["motorsport_nascar", "motorsport_f1", "motorsport_indycar", "horse_racing"]
+  },
+  golf: {
+    title: "Golf",
+    sports: ["golf_pga", "golf_masters", "golf_us_open", "golf_british_open", "golf_pga_championship", "golf_the_open_championship"]
+  },
+  international_leagues: {
+    title: "International Leagues",
+    sports: ["australianrules_afl", "rugby_league_nrl", "cricket_icc_world_cup", "cricket_big_bash", "cricket_the_hundred", "basketball_euroleague", "basketball_nbl", "basketball_wnba", "americanfootball_cfl"]
   },
   other: {
     title: "Other Sports",
