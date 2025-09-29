@@ -1110,7 +1110,7 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6'];
+            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = propData.allBooks.some(book => {
@@ -1151,7 +1151,7 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6'];
+            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = allCombinedBooks.some(book => {
@@ -1722,10 +1722,19 @@ export default function OddsTable({
     const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
     
     console.log('🔍 DFS FILTER DEBUG: bookFilter =', bookFilter);
+    console.log('🔍 DFS FILTER DEBUG: bookFilter type =', typeof bookFilter, 'length =', bookFilter?.length);
     console.log('🔍 DFS FILTER DEBUG: filteringForDFSOnly =', filteringForDFSOnly);
     console.log('🔍 DFS FILTER DEBUG: Number of rows before filtering:', r.length);
     console.log('🔍 DFS FILTER DEBUG: dfsApps array =', dfsApps);
     console.log('🔍 DFS FILTER DEBUG: bookFilter.every check =', bookFilter?.map(book => ({ book, isDFS: dfsApps.includes(book) })));
+    
+    // Log all available bookmakers in the data
+    const allBookmakers = new Set();
+    r.forEach(row => {
+      const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
+      if (bookmakerKey) allBookmakers.add(bookmakerKey);
+    });
+    console.log('🔍 DFS FILTER DEBUG: All bookmakers in data =', Array.from(allBookmakers));
     
     // If filtering for DFS apps only, strictly filter to only show DFS apps
     if (filteringForDFSOnly) {

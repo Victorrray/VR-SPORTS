@@ -59,26 +59,28 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
+  "prizepicks", "underdog", "draftkings_pick6",
+  // Sharp books and exchanges (high priority)
+  "pinnacle", "prophet_exchange", "rebet",
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
   "hardrock", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
   "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
-  // US exchange books
-  "prophet_exchange", "rebet", "betopenly",
-  // International (for comparison)
-  "pinnacle"
+  // Other exchange books
+  "betopenly", "prophetx"
 ];
 
 // Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
+  "prizepicks", "underdog", "draftkings_pick6",
+  // Sharp books and exchanges (high priority)
+  "pinnacle", "prophet_exchange", "rebet",
   // Major sportsbooks
   "draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", 
   "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
-  "espnbet", "fanatics", "pinnacle", "betopenly", "rebet"
+  "espnbet", "fanatics", "betopenly", "prophetx"
 ];
 
 // Player props completely removed
