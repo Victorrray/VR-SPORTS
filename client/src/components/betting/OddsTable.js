@@ -1751,11 +1751,21 @@ export default function OddsTable({
       r = r.filter(row => {
         // For player props, bookmaker info is in row.bk, for game odds it's in row.out.bookmaker
         const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
-        const isSelectedDFSApp = bookFilter.some(selectedBook => bookmakerKey.includes(selectedBook.toLowerCase()));
+        
+        // Debug each filter check
+        const matchResults = bookFilter.map(selectedBook => {
+          const filterKey = selectedBook.toLowerCase();
+          const matches = bookmakerKey.includes(filterKey);
+          console.log(`🔍 FILTER CHECK: "${bookmakerKey}" includes "${filterKey}"? ${matches}`);
+          return matches;
+        });
+        
+        const isSelectedDFSApp = matchResults.some(match => match);
+        
         if (!isSelectedDFSApp) {
-          console.log(`🎯 Excluding non-selected DFS app: "${bookmakerKey}" (not in filter: ${bookFilter})`);
+          console.log(`🎯 EXCLUDING: "${bookmakerKey}" (not in filter: ${JSON.stringify(bookFilter)})`);
         } else {
-          console.log(`🎯 Including selected DFS app: "${bookmakerKey}" (matches filter: ${bookFilter})`);
+          console.log(`🎯 INCLUDING: "${bookmakerKey}" (matches filter: ${JSON.stringify(bookFilter)})`);
         }
         return isSelectedDFSApp;
       });
@@ -1937,19 +1947,31 @@ export default function OddsTable({
     if (loading) {
       setMinLoadingComplete(false);
       
-      // Set a 30-second timer as maximum wait time
+      // Set different wait times based on mode
+      // Player props need more time due to individual event API calls
+      const maxWaitTime = mode === 'props' ? 45000 : 15000; // 45s for props, 15s for regular odds
       minLoadingTimeRef.current = setTimeout(() => {
-        console.log('🎯 Maximum loading time (30s) reached');
+        console.log(`🎯 Maximum loading time (${maxWaitTime/1000}s) reached for ${mode} mode`);
         setMinLoadingComplete(true);
-      }, 30000); // 30 seconds maximum
+      }, maxWaitTime);
     } else {
-      // Loading finished - clear the timer and allow immediate display
+      // Loading finished - but for player props, add extra delay if no data found
       if (minLoadingTimeRef.current) {
         clearTimeout(minLoadingTimeRef.current);
         minLoadingTimeRef.current = null;
       }
-      setMinLoadingComplete(true);
-      console.log('🎯 Loading completed - data ready for display');
+      
+      if (mode === 'props' && allRows.length === 0) {
+        // For player props with no initial data, wait an additional 10 seconds
+        console.log('🎯 Player props loading finished but no data - waiting additional 10s for individual event calls');
+        minLoadingTimeRef.current = setTimeout(() => {
+          console.log('🎯 Additional player props wait time completed');
+          setMinLoadingComplete(true);
+        }, 10000); // Additional 10 seconds for player props
+      } else {
+        setMinLoadingComplete(true);
+        console.log('🎯 Loading completed - data ready for display');
+      }
     }
     
     return () => {
@@ -1957,7 +1979,7 @@ export default function OddsTable({
         clearTimeout(minLoadingTimeRef.current);
       }
     };
-  }, [loading]);
+  }, [loading, mode, allRows.length]);
 
   // Additional effect: If data loads quickly, immediately allow display
   useEffect(() => {
