@@ -1749,7 +1749,7 @@ export default function OddsTable({
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
         // Check if this is a DFS app - always show DFS app bets regardless of EV
-        const dfsApps = ['prizepicks', 'underdog', 'pick6'];
+        const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
         const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         const isDFSApp = dfsApps.some(app => bookmakerKey.includes(app));
         
@@ -1768,6 +1768,7 @@ export default function OddsTable({
       });
     }
     // keep only best odds per game/market/point bucket (most favorable for bettor)
+    // Note: When DFS filtering is active, this will only compare odds among the filtered DFS apps
     const bestBy = new Map();
     const groupKey = (r) => {
       const mk = String(r?.mkt?.key || '').toLowerCase();
