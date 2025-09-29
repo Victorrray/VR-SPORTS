@@ -1811,16 +1811,34 @@ export default function OddsTable({
       const ev = evMap.get(rr.key) ?? -999;
       const cur = bestBy.get(gk);
       
+      // Debug logging for best odds selection
+      const bookmakerKey = (rr?.bk?.key || rr?.out?.bookmaker?.key || rr?.out?.book || '').toLowerCase();
+      console.log(`🎯 BEST ODDS: Evaluating ${bookmakerKey} with odds ${odds} for group ${gk}`);
+      
       if (!cur) {
+        console.log(`🎯 BEST ODDS: Setting initial best for group ${gk}: ${bookmakerKey} (${odds})`);
         bestBy.set(gk, { row: rr, odds, ev });
       } else {
         // Prioritize best odds, but use EV as tiebreaker
         if (isBetterOdds(odds, cur.odds) || (odds === cur.odds && ev > cur.ev)) {
+          const currentBookmaker = (cur.row?.bk?.key || cur.row?.out?.bookmaker?.key || cur.row?.out?.book || '').toLowerCase();
+          console.log(`🎯 BEST ODDS: Updating best for group ${gk}: ${currentBookmaker} (${cur.odds}) → ${bookmakerKey} (${odds})`);
           bestBy.set(gk, { row: rr, odds, ev });
+        } else {
+          console.log(`🎯 BEST ODDS: Keeping current best for group ${gk}: ${bookmakerKey} (${odds}) not better than current`);
         }
       }
     });
     r = Array.from(bestBy.values()).map(v => v.row);
+    
+    // Debug final results
+    console.log(`🎯 FINAL RESULTS: ${r.length} rows after best odds selection`);
+    r.forEach(row => {
+      const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
+      const odds = Number(row?.out?.price ?? row?.out?.odds ?? 0);
+      console.log(`🎯 FINAL ROW: ${bookmakerKey} - ${row.game?.home_team} vs ${row.game?.away_team} - ${row.mkt?.key} - ${row.out?.name} - ${odds}`);
+    });
+    
     return r.slice().sort((a, b) => (sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b)));
   }, [allRows, evOnlyPositive, evMin, sort.dir, sorter, evMap]);
 
