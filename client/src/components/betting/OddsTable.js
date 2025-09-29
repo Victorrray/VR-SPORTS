@@ -127,12 +127,13 @@ function calculateEV(odds, fairLine, bookmakerKey = null) {
   const isDFSApp = ['prizepicks', 'underdog', 'pick6'].includes(bookmakerKey);
   
   if (isDFSApp) {
-    // DFS apps use fixed -137 odds for player props
-    const dfsOdds = -137; // Fixed odds for DFS apps
+    // DFS apps use fixed odds for player props
+    // Underdog uses -116, others use -137
+    const dfsOdds = bookmakerKey === 'underdog' ? -116 : -137;
     const dfsDec = toDec(dfsOdds);
     const fairDec = toDec(fairLine);
     
-    // Calculate EV using the fixed -137 odds
+    // Calculate EV using the fixed DFS odds
     // Higher EV means better value compared to market consensus
     return ((dfsDec / fairDec) - 1) * 100;
   }
@@ -764,10 +765,16 @@ export default function OddsTable({
         
         // Collect all bookmakers
         if (game.bookmakers) {
+          console.log(`📊 GAME: ${game.home_team} vs ${game.away_team} has ${game.bookmakers.length} bookmakers:`, 
+            game.bookmakers.map(b => b.key));
+          
           game.bookmakers.forEach(bookmaker => {
             allBookmakers.add(bookmaker.key);
             if (['prizepicks', 'underdog', 'draftkings_pick6', 'pick6'].includes(bookmaker.key?.toLowerCase())) {
               dfsBookmakers.add(bookmaker.key);
+              console.log(`🎯 DFS BOOKMAKER FOUND: ${bookmaker.key}`);
+            } else {
+              console.log(`📈 TRADITIONAL BOOKMAKER FOUND: ${bookmaker.key} with ${bookmaker.markets?.length || 0} markets`);
             }
             
             // Check for Tyreek Hill specifically
@@ -815,22 +822,30 @@ export default function OddsTable({
             // In regular mode: only show regular markets (h2h, spreads, totals)
             if (mode === 'props') {
               if (!isDFSSite && !isPlayerPropMarket) {
-                console.log(`Skipping market ${market.key} for ${bookmaker.key} - not DFS and not player prop (props mode)`);
+                console.log(`🚫 SKIPPING: ${bookmaker.key} market ${market.key} - not DFS (${isDFSSite}) and not player prop (${isPlayerPropMarket})`);
                 return;
               }
               
-              // For DFS sites, ensure we're using fixed -137 odds
+              // Debug: Log what we're processing
+              if (!isDFSSite && isPlayerPropMarket) {
+                console.log(`✅ PROCESSING TRADITIONAL: ${bookmaker.key} market ${market.key} - has player props`);
+              } else if (isDFSSite) {
+                console.log(`✅ PROCESSING DFS: ${bookmaker.key} market ${market.key}`);
+              }
+              
+              // For DFS sites, ensure we're using fixed odds
               if (isDFSSite) {
-                console.log(`Processing DFS site ${bookmaker.key} with fixed -137 odds for market ${market.key}`);
-                // Force -137 odds for all DFS app outcomes
+                const dfsOdds = bookmaker.key === 'underdog' ? -116 : -137;
+                console.log(`Processing DFS site ${bookmaker.key} with fixed ${dfsOdds} odds for market ${market.key}`);
+                // Force fixed odds for all DFS app outcomes
                 if (market.outcomes && market.outcomes.length > 0) {
                   console.log(`DFS site ${bookmaker.key} has ${market.outcomes.length} outcomes for market ${market.key}`);
                   
                   // Only process real DFS data - no synthetic outcomes
                   
                   market.outcomes.forEach(outcome => {
-                    console.log(`Setting -137 odds for ${outcome.name} in ${market.key}`);
-                    outcome.price = -137;
+                    console.log(`Setting ${dfsOdds} odds for ${outcome.name} in ${market.key}`);
+                    outcome.price = dfsOdds;
                     
                     // Keep original name for clean display
                     outcome._originalName = outcome.name;
@@ -1612,9 +1627,10 @@ export default function OddsTable({
     
     // For DFS apps, we want to prioritize them in EV sorting
     if (isDFSApp && mode === 'props') {
-      console.log(`Calculating EV for DFS app ${bookmakerKey} with fixed -137 odds`);
-      // Force the odds to be -137 for EV calculation
-      return calculateEV(-137, fairDevigMap.get(row.key), bookmakerKey);
+      const dfsOdds = bookmakerKey === 'underdog' ? -116 : -137;
+      console.log(`Calculating EV for DFS app ${bookmakerKey} with fixed ${dfsOdds} odds`);
+      // Force the odds to be fixed for EV calculation
+      return calculateEV(dfsOdds, fairDevigMap.get(row.key), bookmakerKey);
     }
     
     // IMPORTANT: For fair line calculation, we use ALL books, not just filtered books
