@@ -2713,39 +2713,12 @@ export default function OddsTable({
 
                             const dedupedBooks = (() => {
                               const seenKeys = new Set();
-                              // Special case: If filtering for DFS apps only, show traditional sportsbooks for comparison
-                              const isDFSOnlyFilter = bookFilter && bookFilter.length > 0 && 
-                                bookFilter.every(book => ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'prophetx'].includes(book.toLowerCase()));
                               
-                              let booksToProcess;
+                              // Mini-table should ALWAYS show all available books for comparison
+                              // The main table filter should NOT affect the mini-table
+                              let booksToProcess = row.allBooks || [];
                               
-                              if (mode === "props" && isDFSOnlyFilter && row.allBooks && row.allBooks.length > 0) {
-                                // Filter to show only traditional sportsbooks (non-DFS) for comparison
-                                const traditionalBooks = row.allBooks.filter(book => {
-                                  const bookKey = book.bookmaker?.key?.toLowerCase() || '';
-                                  return !['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'prophetx'].includes(bookKey);
-                                });
-                                
-                                if (traditionalBooks.length > 0) {
-                                  console.log(`🎯 DFS FILTER: Showing ${traditionalBooks.length} traditional sportsbooks for comparison`);
-                                  booksToProcess = traditionalBooks;
-                                } else {
-                                  console.log(`🎯 DFS FILTER: No traditional sportsbooks found, showing all available books`);
-                                  booksToProcess = row.allBooks;
-                                }
-                              }
-                              // For non-DFS filters, use the original logic
-                              else {
-                                booksToProcess = (mode === "props" && bookFilter && bookFilter.length > 0) 
-                                  ? row.nonSelectedBooks || [] 
-                                  : row.allBooks || [];
-                              }
-                              
-                              // For player props with book filter, show all books for comparison if no non-selected books available
-                              if (mode === "props" && bookFilter && bookFilter.length > 0 && booksToProcess.length === 0 && row.allBooks && row.allBooks.length > 0) {
-                                console.log(`🎯 FALLBACK: No non-selected books found, showing all books for comparison`);
-                                booksToProcess = row.allBooks;
-                              }
+                              console.log(`🎯 Mini table: Always showing all ${booksToProcess.length} available books for comparison`);
                               
                               console.log(`🎯 Mini table for ${row.key}: Using ${booksToProcess.length} books (${mode === "props" && bookFilter && bookFilter.length > 0 ? 'non-selected' : 'all'} books)`);
                               if (mode === "props" && bookFilter && bookFilter.length > 0) {
