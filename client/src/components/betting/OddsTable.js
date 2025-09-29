@@ -748,6 +748,10 @@ export default function OddsTable({
       }
       
       // Debug: Log raw games data to see what's actually being received
+      const allBookmakers = new Set();
+      const dfsBookmakers = new Set();
+      const tyreekHillBookmakers = new Set();
+      
       games?.forEach((game, idx) => {
         console.log(`Game ${idx + 1} (${game.id}):`, {
           sport: game.sport_key,
@@ -757,7 +761,34 @@ export default function OddsTable({
           totalMarkets: game.bookmakers?.reduce((sum, b) => sum + (b.markets?.length || 0), 0) || 0,
           marketKeys: game.bookmakers?.flatMap(b => b.markets?.map(m => m.key) || []) || []
         });
+        
+        // Collect all bookmakers
+        if (game.bookmakers) {
+          game.bookmakers.forEach(bookmaker => {
+            allBookmakers.add(bookmaker.key);
+            if (['prizepicks', 'underdog', 'draftkings_pick6', 'pick6'].includes(bookmaker.key?.toLowerCase())) {
+              dfsBookmakers.add(bookmaker.key);
+            }
+            
+            // Check for Tyreek Hill specifically
+            if (bookmaker.markets) {
+              bookmaker.markets.forEach(market => {
+                if (market.outcomes) {
+                  market.outcomes.forEach(outcome => {
+                    if (outcome.name && outcome.name.toLowerCase().includes('tyreek') && outcome.name.toLowerCase().includes('hill')) {
+                      tyreekHillBookmakers.add(bookmaker.key);
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
       });
+      
+      console.log(`🎯 ALL BOOKMAKERS AVAILABLE:`, Array.from(allBookmakers));
+      console.log(`🎯 DFS BOOKMAKERS AVAILABLE:`, Array.from(dfsBookmakers));
+      console.log(`🎯 TYREEK HILL BOOKMAKERS:`, Array.from(tyreekHillBookmakers));
       
       
       games?.forEach(game => {
@@ -990,6 +1021,18 @@ export default function OddsTable({
               const isSelected = !bookFilter || !bookFilter.length || normalizedFilter.includes(bookKey);
               
               console.log(`🎯 CATEGORIZING: ${bookKey} - Selected: ${isSelected} (Filter: ${JSON.stringify(normalizedFilter)})`);
+              
+              // Enhanced debugging for DFS apps
+              if (['prizepicks', 'underdog', 'draftkings_pick6', 'pick6'].includes(bookKey)) {
+                console.log(`🎯 DFS APP FOUND: ${bookKey} (${bookmaker.title}) - Selected: ${isSelected}`, {
+                  bookmakerKey: bookmaker.key,
+                  bookmakerTitle: bookmaker.title,
+                  playerName: playerName,
+                  outcomeName: outcome.name,
+                  point: outcome.point,
+                  price: outcome.price
+                });
+              }
               
               if (!propGroups.get(propKey).selectedBooks) propGroups.get(propKey).selectedBooks = [];
               if (!propGroups.get(propKey).nonSelectedBooks) propGroups.get(propKey).nonSelectedBooks = [];

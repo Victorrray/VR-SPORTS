@@ -59,7 +59,7 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "prophetx", "pick6",
+  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
@@ -74,7 +74,7 @@ const FOCUSED_BOOKMAKERS = [
 // Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "prophetx", "pick6",
+  "prizepicks", "underdog", "prophetx", "draftkings_pick6",
   // Major sportsbooks
   "draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", 
   "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
@@ -2105,7 +2105,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             userPlan: userProfile.plan,
             totalBookmakers: allowedBookmakers.length,
             first19: allowedBookmakers.slice(0, 19),
-            dfsAppsIncluded: allowedBookmakers.slice(0, 19).filter(b => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(b)),
+            dfsAppsIncluded: allowedBookmakers.slice(0, 19).filter(b => ['prizepicks', 'underdog', 'draftkings_pick6', 'prophetx'].includes(b)),
             bookmakerListForAPI: bookmakerList
           });
           
@@ -2128,6 +2128,27 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             const duration = Date.now() - startTime;
             console.log(`✅ Player props API call completed in ${duration}ms, status: ${propsResponse.status}`);
             console.log(`📊 Player props response data:`, JSON.stringify(propsResponse.data, null, 2).substring(0, 500) + '...');
+          
+          // Enhanced debugging for bookmaker coverage
+          if (propsResponse.data && propsResponse.data.bookmakers) {
+            console.log(`🎯 PLAYER PROPS DEBUG - Game: ${game.id}`);
+            console.log(`🎯 Total bookmakers in response: ${propsResponse.data.bookmakers.length}`);
+            propsResponse.data.bookmakers.forEach(book => {
+              console.log(`🎯 Bookmaker: ${book.key} (${book.title}) - Markets: ${book.markets?.length || 0}`);
+              if (book.markets) {
+                book.markets.forEach(market => {
+                  console.log(`  📈 Market: ${market.key} - Outcomes: ${market.outcomes?.length || 0}`);
+                  if (market.outcomes) {
+                    market.outcomes.forEach(outcome => {
+                      if (outcome.name.toLowerCase().includes('tyreek') || outcome.name.toLowerCase().includes('hill')) {
+                        console.log(`    🏈 TYREEK HILL FOUND: ${outcome.name} - ${outcome.point} - ${outcome.price}`);
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
             
             setCachedResponse(cacheKey, propsResponse.data);
             

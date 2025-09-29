@@ -678,9 +678,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // 1. It's more efficient (no filtering needed)
     // 2. It will include ALL books, even ones not in the current data
     // 3. It's consistent with how the OddsTable component expects "show all" to work
-    const result = (currentSelectedBooks && currentSelectedBooks.length) 
+    let result = (currentSelectedBooks && currentSelectedBooks.length) 
       ? currentSelectedBooks 
       : [];
+    
+    // SPECIAL HANDLING FOR PLAYER PROPS: If any DFS app is selected, include ALL DFS apps
+    if (isPlayerPropsMode && result.length > 0) {
+      const dfsApps = ['prizepicks', 'underdog', 'draftkings_pick6', 'pick6'];
+      const hasDFSSelected = result.some(book => dfsApps.includes(book.toLowerCase()));
+      
+      if (hasDFSSelected) {
+        // Add all DFS apps to ensure comprehensive coverage
+        const allDFSApps = dfsApps.filter(app => !result.map(b => b.toLowerCase()).includes(app));
+        result = [...result, ...allDFSApps];
+        console.log('🎯 DFS AUTO-INCLUDE: Added all DFS apps for comprehensive coverage:', allDFSApps);
+      }
+    }
     
     // Debug logging for filtering issues
     console.log('🎯 Bookmaker Filtering Debug:', {
