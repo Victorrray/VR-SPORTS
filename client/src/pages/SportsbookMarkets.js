@@ -527,22 +527,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
   }, [picked, isPlayerPropsMode, selectedPlayerPropMarkets]); // Run when sport, mode, or markets change
 
-  // Auto-select ALL player prop markets when entering player props mode or changing sports
-  useEffect(() => {
-    if (isPlayerPropsMode && picked && picked.length > 0) {
-      const sportBasedMarkets = getPlayerPropMarketsBySport(picked);
-      const availableMarketKeys = sportBasedMarkets
-        .filter(market => !market.isHeader)
-        .map(market => market.key);
-      
-      // Always select ALL available markets for the selected sports
-      if (availableMarketKeys.length > 0) {
-        console.log('🎯 Auto-selecting ALL player prop markets for sports:', picked, '→', availableMarketKeys);
-        setSelectedPlayerPropMarkets(availableMarketKeys);
-        setDraftSelectedPlayerPropMarkets(availableMarketKeys);
-      }
-    }
-  }, [picked, isPlayerPropsMode]); // Run when sport or mode changes
+  // Removed auto-selection logic - users should be able to select individual player prop markets
 
   // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {
