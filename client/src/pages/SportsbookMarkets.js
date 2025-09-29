@@ -759,18 +759,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       ? currentSelectedBooks 
       : [];
     
-    // SPECIAL HANDLING FOR PLAYER PROPS: If any DFS app is selected, include ALL DFS apps
-    if (isPlayerPropsMode && result.length > 0) {
-      const dfsApps = ['prizepicks', 'underdog', 'draftkings_pick6', 'pick6'];
-      const hasDFSSelected = result.some(book => dfsApps.includes(book.toLowerCase()));
-      
-      if (hasDFSSelected) {
-        // Add all DFS apps to ensure comprehensive coverage
-        const allDFSApps = dfsApps.filter(app => !result.map(b => b.toLowerCase()).includes(app));
-        result = [...result, ...allDFSApps];
-        console.log('🎯 DFS AUTO-INCLUDE: Added all DFS apps for comprehensive coverage:', allDFSApps);
-      }
-    }
+    // Removed auto-include logic - users should be able to select individual DFS apps
     
     // Debug logging for filtering issues
     console.log('🎯 Bookmaker Filtering Debug:', {
