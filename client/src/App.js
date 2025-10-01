@@ -1,8 +1,7 @@
 // file: src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './hooks/useAuth';
-import { PlanProvider } from './providers/PlanProvider';
+import { AuthProvider, useAuth } from './hooks/SimpleAuth';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AccessibilityProvider } from './components/layout/AccessibilityProvider';
 import { BetSlipProvider } from './contexts/BetSlipContext';
@@ -197,17 +196,15 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <PlanProvider>
-          <BetSlipProvider>
-            <AccessibilityProvider>
-              <ToastProvider>
-                <ErrorBoundary>
-                  <AppRoutes />
-                </ErrorBoundary>
-              </ToastProvider>
-            </AccessibilityProvider>
-          </BetSlipProvider>
-        </PlanProvider>
+        <BetSlipProvider>
+          <AccessibilityProvider>
+            <ToastProvider>
+              <ErrorBoundary>
+                <AppRoutes />
+              </ErrorBoundary>
+            </ToastProvider>
+          </AccessibilityProvider>
+        </BetSlipProvider>
       </AuthProvider>
     </HelmetProvider>
   );

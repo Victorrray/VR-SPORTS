@@ -1198,6 +1198,55 @@ app.get('/healthz', (_req, res) => {
   });
 });
 
+// Simple /api/me endpoint - returns user plan info
+app.get('/api/me', async (req, res) => {
+  const userId = req.headers['x-user-id'];
+  
+  if (!userId) {
+    return res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('plan, api_request_count, grandfathered')
+      .eq('id', userId)
+      .single();
+
+    if (error || !data) {
+      console.log('User not found, returning free plan');
+      return res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
+    }
+
+    // Platinum or grandfathered = unlimited
+    if (data.plan === 'platinum' || data.grandfathered) {
+      return res.json({
+        plan: data.plan || 'platinum',
+        remaining: null,
+        limit: null,
+        unlimited: true,
+        used: data.api_request_count || 0
+      });
+    }
+
+    // Free plan = 250 limit
+    const limit = 250;
+    const used = data.api_request_count || 0;
+    const remaining = Math.max(0, limit - used);
+
+    res.json({
+      plan: data.plan || 'free',
+      remaining,
+      limit,
+      used,
+      unlimited: false
+    });
+  } catch (error) {
+    console.error('Error fetching user plan:', error);
+    res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
+  }
+});
+
 // Usage endpoint - get current user's quota info
 app.get('/api/me/usage', requireUser, async (req, res) => {
   const userId = req.__userId;
