@@ -10,7 +10,7 @@ import MobileBottomBar from '../components/layout/MobileBottomBar';
 
 // Hooks
 import { useMarkets } from '../hooks/useMarkets';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/SimpleAuth';
 import { useMe } from '../hooks/useMe';
 import { useBetSlip } from '../contexts/BetSlipContext';
 

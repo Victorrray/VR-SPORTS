@@ -1,7 +1,7 @@
 // src/pages/Login.js
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/SimpleAuth";
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, ArrowRight } from "lucide-react";
 import { optimizedStorage } from "../utils/storageOptimizer";
 import "./Login.css";

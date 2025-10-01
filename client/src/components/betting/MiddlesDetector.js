@@ -1,6 +1,6 @@
 // Middles Detection System - Find middle betting opportunities
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/SimpleAuth';
 import { bankrollManager } from '../../utils/bankrollManager';
 import { 
   TrendingUp, Calculator, DollarSign, Clock, 

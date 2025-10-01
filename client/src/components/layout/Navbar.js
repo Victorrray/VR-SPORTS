@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { Search, User, ChevronDown, CreditCard, Settings, Menu } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/SimpleAuth";
 import { useMe } from "../../hooks/useMe";
 import styles from "./Navbar.module.css";
 

@@ -1,6 +1,6 @@
 // Debug component to show authentication status
 import React from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/SimpleAuth';
 
 export default function AuthDebug() {
   const { user, authLoading, isSupabaseEnabled } = useAuth();

@@ -39,9 +39,6 @@ import './styles/accessibility.css';
 import './styles/browserCompat.css';
 import './styles/responsive-mobile.css';
 
-// Import session renewal hook
-import useSessionRenewal from './hooks/useSessionRenewal';
-
 function AppRoutes() {
   const { user } = useAuth();
   const location = useLocation();
@@ -49,9 +46,6 @@ function AppRoutes() {
   const [quotaModal, setQuotaModal] = useState({ open: false, detail: null });
   const [mobileSearchCallback, setMobileSearchCallback] = useState(null);
   const [debugPanelOpen, setDebugPanelOpen] = useState(false);
-  
-  // Set up automatic session renewal (renew 5 minutes before expiry)
-  useSessionRenewal(5);
 
   // Clear mobile search callback when navigating away from sportsbooks
   useEffect(() => {

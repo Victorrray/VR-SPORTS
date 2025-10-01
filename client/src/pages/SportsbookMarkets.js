@@ -18,14 +18,13 @@ import OddsTable from "../components/betting/OddsTable";
 import ArbitrageDetector from "../components/betting/ArbitrageDetector";
 import MiddlesDetector from "../components/betting/MiddlesDetector";
 import AuthRequired from "../components/auth/AuthRequired";
-import AuthStatusCheck from "../components/auth/AuthStatusCheck";
 import ApiErrorDisplay from "../components/common/ApiErrorDisplay";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
 import { useMarkets } from '../hooks/useMarkets';
 import { useMe } from '../hooks/useMe';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/SimpleAuth';
 import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
 import DesktopHeader from '../components/layout/DesktopHeader';
 import './SportsbookMarkets.css';
@@ -1343,16 +1342,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         <AuthRequired message="Please sign in to view live odds and betting data" />
       )}
       
-      {/* Show authentication status check when user is signed in but username is not set */}
-      {(user && (!user.user_metadata?.username || !me || !me.plan)) && (
-        <AuthStatusCheck 
-          onRetry={() => {
-            // Force refresh user data and markets
-            if (me?.refresh) me.refresh({ force: true });
-            window.location.reload();
-          }} 
-        />
-      )}
+      {/* Authentication check removed - handled by SimpleAuth */}
 
       {/* Show subscription required message for users without Gold plan */}
       {me && !me.plan && (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Check, ArrowRight, Crown, Sparkles } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/SimpleAuth';
 import './BillingSuccess.css';
 
 const BillingSuccess = () => {

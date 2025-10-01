@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/SimpleAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { Crown, Zap, TrendingUp, Shield, Check, ArrowLeft, Calendar, CreditCard, X, AlertTriangle } from 'lucide-react';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertCircle, Zap, Clock } from 'lucide-react';
-import { usePlan } from '../../hooks/usePlan';
+import { usePlan } from '../../hooks/SimplePlan';
 
 const QuotaBadge = () => {
   const { plan, planLoading, stale } = usePlan();

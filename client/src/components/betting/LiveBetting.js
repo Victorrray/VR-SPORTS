@@ -1,6 +1,6 @@
 // Live Betting Component with Real-time Odds Updates
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/SimpleAuth';
 import { useRealtimeCachedFetch } from '../../hooks/useCachedFetch';
 import { 
   Play, Pause, Clock, TrendingUp, TrendingDown, 

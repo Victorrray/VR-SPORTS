@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/SimpleAuth';
 
 export default function Home() {
   const { user } = useAuth();

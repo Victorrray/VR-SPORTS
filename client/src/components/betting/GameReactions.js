@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/SimpleAuth";
 import { secureFetch } from '../../utils/security';
 import { withApiBase } from '../../config/api';
 import './GameReactions.css';

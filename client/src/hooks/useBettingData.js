@@ -1,6 +1,6 @@
 // Betting data management hook
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from './useAuth';
+import { useAuth } from './SimpleAuth';
 import { db, isSupabaseEnabled } from '../utils/supabase';
 
 export const useBettingData = () => {

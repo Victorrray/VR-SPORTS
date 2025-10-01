@@ -1,6 +1,6 @@
 // src/pages/Account.js - Updated styling
 import React, { useState, useEffect, useMemo } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/SimpleAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";

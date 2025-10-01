@@ -1,6 +1,6 @@
 // User Profile Management Component
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/SimpleAuth';
 import { useBettingData } from '../../hooks/useBettingData';
 import { User, Settings, TrendingUp, DollarSign, Target, Bell, Save, Edit3 } from 'lucide-react';
 import './UserProfile.css';

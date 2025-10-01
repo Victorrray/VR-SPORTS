@@ -1,6 +1,6 @@
 // Arbitrage Detection System
 import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../hooks/SimpleAuth';
 import { useCachedFetch } from '../../hooks/useCachedFetch';
 import { bankrollManager } from '../../utils/bankrollManager';
 import SportMultiSelect from './SportMultiSelect';

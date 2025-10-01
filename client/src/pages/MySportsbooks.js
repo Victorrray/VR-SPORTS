@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../hooks/SimpleAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Check, AlertCircle, BookOpen, DollarSign, Star, TrendingUp, Settings } from 'lucide-react';

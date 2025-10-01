@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { usePlan } from '../../hooks/usePlan';
+import { useAuth } from '../../hooks/SimpleAuth';
+import { usePlan } from '../../hooks/SimplePlan';
 import styles from "./Navbar.module.css";
 
 const UsageMeter = () => {
