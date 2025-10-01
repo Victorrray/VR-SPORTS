@@ -3,10 +3,10 @@ const viteEnv = typeof import.meta !== 'undefined' ? import.meta.env : {};
 
 // Environment variable resolution with better fallbacks
 export const API_BASE_URL = (() => {
-  // Development: Use production API directly since local backend is not available
+  // Development: Use LOCAL backend
   if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 Using production API URL in development mode');
-    return 'https://odds-backend-4e9q.onrender.com';
+    console.log('🔍 Using LOCAL backend at http://localhost:10000');
+    return 'http://localhost:10000';
   }
 
   // Production: Try environment variables in order of preference

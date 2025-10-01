@@ -1096,6 +1096,19 @@ try {
 async function checkPlanAccess(req, res, next) {
   try {
     const userId = req.__userId;
+    
+    // DEMO MODE: Give demo-user platinum access
+    if (userId === 'demo-user') {
+      console.log('💎 Demo user - granting Platinum access');
+      req.__userProfile = {
+        id: 'demo-user',
+        plan: 'platinum',
+        username: 'Demo User',
+        grandfathered: false
+      };
+      return next();
+    }
+    
     const profile = await getUserProfile(userId);
 
     // Gold or Platinum plan (and grandfathered users) get full access
