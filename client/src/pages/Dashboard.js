@@ -94,9 +94,10 @@ export default function Dashboard() {
   }, [user?.user_metadata?.username, user?.email]);
   
   // Only fetch live odds data when actually on the dashboard page
+  // Allow guest users to see dashboard with recommended bets (preview)
   const location = useLocation();
   const isDashboardPage = location.pathname === '/' || location.pathname === '/dashboard';
-  const enableDashboardMarkets = Boolean(user && isDashboardPage);
+  const enableDashboardMarkets = Boolean(isDashboardPage); // Enable for all users on dashboard
   const { games } = useMarkets(
     enableDashboardMarkets ? ["americanfootball_nfl", "basketball_nba", "baseball_mlb"] : [],
     enableDashboardMarkets ? ["us"] : [],

@@ -638,12 +638,12 @@ export default function Account() {
               <div className="subscription-actions">
                 <button
                   className="security-btn upgrade-btn"
-                  onClick={handleUpgradeToPlatinum}
+                  onClick={() => navigate('/subscribe')}
                   disabled={loading}
                 >
                   <CreditCard size={16} />
                   <div className="btn-content">
-                    <span>{loading ? 'Creating checkout...' : 'Upgrade to Platinum'}</span>
+                    <span>Choose Your Plan</span>
                     <small>Unlimited access & features</small>
                   </div>
                 </button>
@@ -668,7 +668,7 @@ export default function Account() {
             <p className="subscription-note">
               {me?.plan === 'platinum' 
                 ? 'You have unlimited access to all features. Cancel anytime.' 
-                : 'Upgrade to Platinum for unlimited API access and premium features.'
+                : 'Choose a plan to unlock unlimited API access and premium features.'
               }
             </p>
             
