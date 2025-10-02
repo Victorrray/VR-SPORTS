@@ -465,8 +465,17 @@ body,
   white-space: nowrap;
 }
 
-.odds-main { font-weight: 700; padding: .12em .35em; border-radius: 6px; }
-.odds-main.odds-best { background: color-mix(in srgb, var(--success) 26%, transparent); color: #132917; }
+.odds-main { 
+  font-weight: 700; 
+  padding: .12em .35em; 
+  border-radius: 6px; 
+}
+.odds-main.odds-best { 
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  font-weight: 800;
+}
 
 .odds-row:hover { background: rgba(78,123,255,.17) !important; cursor: pointer; transition: background .18s; }
 .odds-row.expanded { background: rgba(47,92,255,.24) !important; }
