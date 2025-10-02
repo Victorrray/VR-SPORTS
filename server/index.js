@@ -48,6 +48,7 @@ function filterValidMarkets(markets) {
 
 // Stripe configuration
 const STRIPE_PRICE_GOLD = process.env.STRIPE_PRICE_GOLD || process.env.STRIPE_PRICE_PLATINUM; // Backward compatibility
+const STRIPE_PRICE_PLATINUM = process.env.STRIPE_PRICE_PLATINUM || process.env.STRIPE_PRICE_GOLD; // Backward compatibility
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const FRONTEND_URL = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
@@ -1478,12 +1479,16 @@ app.get('/api/usage/me', requireUser, async (req, res) => {
   }
 });
 
-// Stripe: Create checkout session for Platinum subscription
+// Stripe: Create checkout session for Gold or Platinum subscription
 app.post('/api/billing/create-checkout-session', requireUser, async (req, res) => {
   try {
+    const { plan = 'platinum' } = req.body;
+    
     console.log('🔍 Checkout session request received');
+    console.log('🔍 Requested plan:', plan);
     console.log('🔍 Stripe configured:', !!stripe);
     console.log('🔍 STRIPE_PRICE_GOLD:', STRIPE_PRICE_GOLD);
+    console.log('🔍 STRIPE_PRICE_PLATINUM:', STRIPE_PRICE_PLATINUM);
     console.log('🔍 FRONTEND_URL:', FRONTEND_URL);
     
     if (!stripe) {
@@ -1491,9 +1496,17 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured', hint: 'Set STRIPE_SECRET_KEY in backend env' });
     }
     
-    if (!STRIPE_PRICE_GOLD) {
-      console.error('❌ STRIPE_PRICE_GOLD not set');
-      return res.status(500).json({ code: 'MISSING_ENV', message: 'STRIPE_PRICE_GOLD not set', hint: 'Set STRIPE_PRICE_GOLD (Price ID)' });
+    // Select the correct price ID based on requested plan
+    const priceId = plan === 'gold' ? STRIPE_PRICE_GOLD : STRIPE_PRICE_PLATINUM;
+    const planName = plan === 'gold' ? 'Gold' : 'Platinum';
+    
+    if (!priceId) {
+      console.error(`❌ STRIPE_PRICE_${planName.toUpperCase()} not set`);
+      return res.status(500).json({ 
+        code: 'MISSING_ENV', 
+        message: `STRIPE_PRICE_${planName.toUpperCase()} not set`, 
+        hint: `Set STRIPE_PRICE_${planName.toUpperCase()} (Price ID) in backend env` 
+      });
     }
     
     const userId = req.__userId;
@@ -1504,13 +1517,14 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       return res.status(401).json({ code: 'AUTH_REQUIRED', message: 'Authenticated user required' });
     }
 
-    console.log(`✅ Creating checkout session for user: ${userId}`);
+    console.log(`✅ Creating ${planName} checkout session for user: ${userId}`);
+    console.log(`✅ Using price ID: ${priceId}`);
     
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{
-        price: STRIPE_PRICE_GOLD,
+        price: priceId,
         quantity: 1,
       }],
       success_url: `${FRONTEND_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -1518,11 +1532,11 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       allow_promotion_codes: true,
       metadata: { 
         userId, 
-        plan: 'gold'  // Default to gold, will be updated based on price_id
+        plan: plan.toLowerCase()
       }
     });
     
-    console.log(`✅ Created checkout session: ${session.id} for user: ${userId}`);
+    console.log(`✅ Created ${planName} checkout session: ${session.id} for user: ${userId}`);
     res.json({ url: session.url });
   } catch (error) {
     console.error('❌ Stripe checkout error:', error);

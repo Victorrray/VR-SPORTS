@@ -45,7 +45,7 @@ const Pricing = ({ onUpgrade }) => {
 
   // Removed handleStartFree since free trial card is removed
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (plan = 'platinum') => {
     try {
       setError('');
       setLoading(true);
@@ -60,7 +60,7 @@ const Pricing = ({ onUpgrade }) => {
       const { data: sessionData } = await supabase.auth.getSession();
       const isAuthenticated = !!sessionData.session;
       
-      debugPricingClick('upgrade', isAuthenticated, 'upgrade');
+      debugPricingClick('upgrade', isAuthenticated, plan);
       
       if (!isAuthenticated) {
         debugLog('PRICING', 'User not authenticated, redirecting to login');
@@ -71,7 +71,7 @@ const Pricing = ({ onUpgrade }) => {
       }
 
       // Create Stripe checkout session
-      debugLog('PRICING', 'Creating Stripe checkout session');
+      debugLog('PRICING', `Creating Stripe checkout session for ${plan} plan`);
       const { withApiBase } = require('../../config/api');
       
       // Get the session token
@@ -88,7 +88,8 @@ const Pricing = ({ onUpgrade }) => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ plan })
       });
       
       const data = await response.json();
@@ -284,13 +285,23 @@ const Pricing = ({ onUpgrade }) => {
             {/* CTA Button */}
             <button
               data-testid="pricing-signup"
-              onClick={handleUpgrade}
+              onClick={() => handleUpgrade('gold')}
+              disabled={loading}
               className="signup-button"
               style={{background: 'linear-gradient(135deg, #FFD700, #FFA500)', boxShadow: '0 10px 30px rgba(255, 215, 0, 0.35)'}}
             >
               <div className="button-content">
-                <span>Start Gold Plan</span>
-                <ArrowRight size={20} className="button-arrow" />
+                {loading ? (
+                  <>
+                    <Loader2 size={20} className="button-spinner" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Start Gold Plan</span>
+                    <ArrowRight size={20} className="button-arrow" />
+                  </>
+                )}
               </div>
             </button>
 
@@ -393,7 +404,7 @@ const Pricing = ({ onUpgrade }) => {
             {/* CTA Button */}
             <button
               data-testid="pricing-upgrade"
-              onClick={handleUpgrade}
+              onClick={() => handleUpgrade('platinum')}
               disabled={loading}
               className="upgrade-button"
             >
