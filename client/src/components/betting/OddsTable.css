@@ -497,13 +497,22 @@ body,
 .mini-table-row { display: flex; gap: .9em; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
 .mini-table-header-cell {
   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  min-width: 84px; background: #222b45; border-radius: 12px;
-  padding: .35em .14em .55em; margin: 0 .07em; position: relative;
+  min-width: 140px; background: #222b45; border-radius: 12px;
+  padding: .35em .5em .55em; margin: 0 .07em; position: relative;
 }
 .mini-table-legend { background: #1f2742; }
 .mini-legend-stack { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: .2em; }
 .mini-legend-stack .legend-team { font-size: .95em; font-weight: 800; color: #d7e4ff; padding: .43em .12em; min-height: 2.2em; display: flex; align-items: center; justify-content: center; }
-.mini-book-name { max-width: 130px; font-weight: 700; font-size: .96em; line-height: 1.15; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mini-book-name { 
+  width: 100%;
+  font-weight: 700; 
+  font-size: .96em; 
+  line-height: 1.15; 
+  text-align: center; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .mini-col-type { font-size: .78em; font-weight: 900; color: #cfe0ff; opacity: .9; text-transform: uppercase; }
 .mini-table-odds-cell {
   font-size: 1.18em; font-weight: 600; color: #f9fafb;
