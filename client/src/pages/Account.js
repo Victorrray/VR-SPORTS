@@ -308,7 +308,7 @@ export default function Account() {
   };
 
   const handleCancelSubscription = () => {
-    navigate('/billing/cancel');
+    navigate('/billing/cancel?from=account');
   };
 
   const handleUpgradeToPlatinum = async () => {

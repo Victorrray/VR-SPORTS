@@ -128,7 +128,7 @@ export default function ProfilePage() {
   };
 
   const handleCancelSubscription = () => {
-    navigate('/billing/cancel');
+    navigate('/billing/cancel?from=account');
   };
 
   const displayedBooks = showAllBooks 

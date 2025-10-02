@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { X, ArrowLeft, AlertTriangle, CheckCircle, Loader } from 'lucide-react';
 import { useAuth } from '../hooks/SimpleAuth';
 import './BillingCancel.css';
@@ -7,10 +7,14 @@ import './BillingCancel.css';
 const BillingCancel = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [cancelled, setCancelled] = useState(false);
   const [error, setError] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
+  
+  // Check if this is a checkout abandonment (from Stripe redirect)
+  const isCheckoutAbandonment = searchParams.get('from') !== 'account';
 
   const handleCancelSubscription = async () => {
     if (!user?.id) {
@@ -46,6 +50,43 @@ const BillingCancel = () => {
       setLoading(false);
     }
   };
+
+  // If user abandoned checkout (didn't complete payment)
+  if (isCheckoutAbandonment) {
+    return (
+      <div className="billing-cancel-page">
+        <div className="cancel-container">
+          <div className="icon-container">
+            <AlertTriangle size={48} />
+          </div>
+          
+          <h1>Checkout Cancelled</h1>
+          
+          <p className="description">
+            You cancelled the checkout process. No charges were made to your account.
+          </p>
+          
+          <p className="description">
+            Ready to upgrade? You can try again anytime to unlock unlimited API calls, arbitrage detection, and premium features.
+          </p>
+          
+          <div className="action-buttons">
+            <Link to="/pricing" className="btn btn-primary">
+              View Plans Again
+            </Link>
+            <Link to="/account" className="btn btn-secondary">
+              Back to Account
+            </Link>
+          </div>
+          
+          <Link to="/" className="back-link">
+            <ArrowLeft size={16} />
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (cancelled) {
     return (
