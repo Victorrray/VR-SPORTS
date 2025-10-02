@@ -1,55 +1,42 @@
-// Centralized sportsbooks configuration
-// This matches the actual sportsbooks available in the odds API data
+// Cleaned-up sportsbooks configuration
+// Duplicates removed, defunct books removed
 
 export const AVAILABLE_SPORTSBOOKS = [
-  // Popular US Sportsbooks (matching API data)
-  { key: 'draftkings', name: 'DraftKings', popular: true },
-  { key: 'fanduel', name: 'FanDuel', popular: true },
-  { key: 'betmgm', name: 'BetMGM', popular: true },
-  { key: 'caesars', name: 'Caesars Sportsbook', popular: true },
-  { key: 'pointsbetus', name: 'PointsBet US', popular: true },
-  { key: 'wynnbet', name: 'WynnBET', popular: true },
-  { key: 'betrivers', name: 'BetRivers', popular: true },
-  { key: 'unibet_us', name: 'Unibet US', popular: true },
+  // ===== TOP TIER - MUST HAVE =====
+  { key: 'draftkings', name: 'DraftKings', popular: true, tier: 1 },
+  { key: 'fanduel', name: 'FanDuel', popular: true, tier: 1 },
+  { key: 'betmgm', name: 'BetMGM', popular: true, tier: 1 },
+  { key: 'caesars', name: 'Caesars Sportsbook', popular: true, tier: 1 },
   
-  // Other available sportsbooks
-  { key: 'williamhill_us', name: 'Caesars (William Hill)', popular: false },
-  { key: 'superbook', name: 'SuperBook', popular: false },
-  { key: 'barstool', name: 'ESPN BET', popular: false },
-  { key: 'espnbet', name: 'ESPN BET', popular: true },
-  { key: 'fanatics', name: 'Fanatics Sportsbook', popular: true },
-  { key: 'twinspires', name: 'TwinSpires', popular: false },
-  { key: 'foxbet', name: 'FOX Bet', popular: false },
-  { key: 'betfred_us', name: 'Betfred US', popular: false },
-  { key: 'circasports', name: 'Circa Sports', popular: false },
-  { key: 'lowvig', name: 'LowVig', popular: false },
-  { key: 'novig', name: 'NoVig', popular: true },
-  { key: 'fliff', name: 'Fliff', popular: true },
-  { key: 'bovada', name: 'Bovada', popular: false },
-  { key: 'betonlineag', name: 'BetOnline', popular: false },
-  { key: 'betonline', name: 'BetOnline', popular: true },
-  { key: 'hardrock', name: 'Hard Rock Bet', popular: true },
-  { key: 'mybookieag', name: 'MyBookie', popular: false },
-  { key: 'rebet', name: 'Rebet', popular: false },
-  { key: 'pinnacle', name: 'Pinnacle', popular: true },
+  // ===== DFS APPS =====
+  { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true, tier: 1 },
+  { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true, tier: 1 },
+  { key: 'pick6', name: 'DK Pick6', popular: true, isDFS: true, tier: 2 },
   
-  // DFS Apps (expanded for player props)
-  { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true },
-  { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true },
-  { key: 'pick6', name: 'DK Pick6', popular: true, isDFS: true },
+  // ===== SECOND TIER - MAJOR OPERATORS =====
+  { key: 'espnbet', name: 'ESPN BET', popular: true, tier: 2 },
+  { key: 'fanatics', name: 'Fanatics Sportsbook', popular: true, tier: 2 },
+  { key: 'hardrock', name: 'Hard Rock Bet', popular: true, tier: 2 },
+  { key: 'pointsbetus', name: 'PointsBet US', popular: true, tier: 2 },
+  { key: 'betrivers', name: 'BetRivers', popular: true, tier: 2 },
+  { key: 'wynnbet', name: 'WynnBET', popular: true, tier: 2 },
+  { key: 'unibet_us', name: 'Unibet US', popular: true, tier: 2 },
   
-  // Exchange Books
-  { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true },
+  // ===== SHARP/LOW VIG BOOKS =====
+  { key: 'pinnacle', name: 'Pinnacle', popular: true, tier: 2 },
+  { key: 'novig', name: 'NoVig', popular: true, tier: 2 },
   
-  // Additional Sportsbooks for expanded coverage
-  // wynnbet already defined above
-  { key: 'superbook', name: 'SuperBook', popular: true },
-  { key: 'twinspires', name: 'TwinSpires', popular: true },
-  { key: 'betfred_us', name: 'Betfred US', popular: true },
-  { key: 'circasports', name: 'Circa Sports', popular: true },
-  { key: 'lowvig', name: 'LowVig', popular: true },
-  { key: 'barstool', name: 'ESPN BET (Barstool)', popular: true },
-  { key: 'foxbet', name: 'FOX Bet', popular: true },
+  // ===== EXCHANGE =====
+  { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true, tier: 3 },
+  
+  // ===== REGIONAL/SPECIALTY =====
+  { key: 'fliff', name: 'Fliff', popular: false, tier: 3 },
+  { key: 'circasports', name: 'Circa Sports', popular: false, tier: 3 },
+  
+  // ===== OFFSHORE (Optional - can remove if not wanted) =====
+  { key: 'bovada', name: 'Bovada', popular: false, tier: 3, offshore: true },
+  { key: 'betonline', name: 'BetOnline', popular: false, tier: 3, offshore: true },
+  { key: 'mybookieag', name: 'MyBookie', popular: false, tier: 3, offshore: true },
 ];
 
 // Helper function to get sportsbook by key
@@ -60,6 +47,16 @@ export const getSportsbookByKey = (key) => {
 // Helper function to get popular sportsbooks
 export const getPopularSportsbooks = () => {
   return AVAILABLE_SPORTSBOOKS.filter(book => book.popular);
+};
+
+// Helper function to get sportsbooks by tier
+export const getSportsbooksByTier = (tier) => {
+  return AVAILABLE_SPORTSBOOKS.filter(book => book.tier === tier);
+};
+
+// Helper function to get top tier sportsbooks
+export const getTopTierSportsbooks = () => {
+  return AVAILABLE_SPORTSBOOKS.filter(book => book.tier === 1);
 };
 
 // Helper function to get sportsbooks available to free users
@@ -96,7 +93,7 @@ export const getDFSApps = () => {
 
 // Helper function to get traditional sportsbooks only (excluding DFS)
 export const getTraditionalSportsbooks = () => {
-  return AVAILABLE_SPORTSBOOKS.filter(book => !book.isDFS);
+  return AVAILABLE_SPORTSBOOKS.filter(book => !book.isDFS && !book.isExchange);
 };
 
 // Helper function to check if a sportsbook is a DFS app
@@ -104,3 +101,44 @@ export const isDFSApp = (key) => {
   const book = getSportsbookByKey(key);
   return book?.isDFS || false;
 };
+
+// Helper function to get non-offshore books only
+export const getNonOffshoreSportsbooks = () => {
+  return AVAILABLE_SPORTSBOOKS.filter(book => !book.offshore);
+};
+
+// Helper function to get player props priority books
+export const getPlayerPropsPriorityBooks = () => {
+  // Return books in priority order for player props
+  return AVAILABLE_SPORTSBOOKS
+    .filter(book => book.tier <= 2) // Only tier 1 and 2
+    .sort((a, b) => {
+      // DFS apps first
+      if (a.isDFS && !b.isDFS) return -1;
+      if (!a.isDFS && b.isDFS) return 1;
+      // Then by tier
+      return a.tier - b.tier;
+    });
+};
+
+// Helper function to get ALL books that support player props
+export const getPlayerPropsBooks = () => {
+  // ALL books in our system support player props (US-focused)
+  // Excludes: None - all books are US-based and support player props
+  return AVAILABLE_SPORTSBOOKS.map(book => book.key);
+};
+
+// Helper function to check if a book supports player props
+export const supportsPlayerProps = (bookKey) => {
+  // All books in our cleaned list support player props
+  return AVAILABLE_SPORTSBOOKS.some(book => book.key === bookKey);
+};
+
+// REMOVED (Duplicates/Defunct):
+// - williamhill_us (duplicate of caesars)
+// - barstool (duplicate of espnbet)
+// - betonlineag (duplicate of betonline)
+// - foxbet (defunct)
+// - twinspires (rebranded to fanduel)
+// - rebet (low volume)
+// - lowvig (low volume)
