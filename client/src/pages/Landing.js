@@ -142,6 +142,28 @@ export default function Landing() {
     }
   }, [searchParams, setSearchParams]);
 
+  // Scroll animations
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all sections
+    const sections = document.querySelectorAll('.animate-on-scroll');
+    sections.forEach(section => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="landing-page-revamp">
       <Helmet>
@@ -218,7 +240,7 @@ export default function Landing() {
       </section>
 
       {/* Stats Section */}
-      <section className="stats-section">
+      <section className="stats-section animate-on-scroll">
         <div className="stats-container">
           {STATS.map((stat, index) => (
             <div key={index} className="stat-card">
@@ -230,7 +252,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="features-section-new">
+      <section className="features-section-new animate-on-scroll">
         <div className="section-container">
           <div className="section-header">
             <h2 className="section-title">
@@ -258,42 +280,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="testimonials-section">
-        <div className="section-container">
-          <div className="section-header">
-            <h2 className="section-title">
-              Loved by <span className="gradient-text">Winning Bettors</span>
-            </h2>
-            <p className="section-subtitle">
-              See what our users are saying
-            </p>
-          </div>
-
-          <div className="testimonials-grid">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <div key={index} className="testimonial-card">
-                <div className="testimonial-stars">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} size={16} fill="#fbbf24" color="#fbbf24" />
-                  ))}
-                </div>
-                <p className="testimonial-content">"{testimonial.content}"</p>
-                <div className="testimonial-author">
-                  <div className="author-avatar">{testimonial.name.charAt(0)}</div>
-                  <div>
-                    <div className="author-name">{testimonial.name}</div>
-                    <div className="author-role">{testimonial.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
-      <section className="pricing-section-landing">
+      <section className="pricing-section-landing animate-on-scroll">
         <div className="section-container">
           <div className="section-header">
             <h2 className="section-title">
@@ -304,23 +292,6 @@ export default function Landing() {
             </p>
           </div>
           <Pricing />
-        </div>
-      </section>
-
-      {/* Final CTA Section */}
-      <section className="final-cta-section">
-        <div className="final-cta-container">
-          <Trophy size={48} className="cta-icon" />
-          <h2 className="final-cta-title">
-            Ready to Start Winning?
-          </h2>
-          <p className="final-cta-subtitle">
-            Join 50,000+ bettors who are already making smarter bets
-          </p>
-          <button onClick={() => navigate('/subscribe')} className="final-cta-button">
-            Get Started Now
-            <ArrowRight size={20} />
-          </button>
         </div>
       </section>
 

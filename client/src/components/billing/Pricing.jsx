@@ -386,25 +386,6 @@ const Pricing = ({ onUpgrade }) => {
               </div>
             </button>
 
-            {/* Trust Signals */}
-            <div className="trust-signals">
-              <div className="trust-item">
-                <Star size={14} className="trust-icon" />
-                <span></span>
-              </div>
-              <div className="trust-item">
-                <span>•</span>
-              </div>
-              <div className="trust-item">
-                <span></span>
-              </div>
-              <div className="trust-item">
-                <span>•</span>
-              </div>
-              <div className="trust-item">
-                <span></span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
