@@ -1297,7 +1297,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         alignItems: "center", 
         justifyContent: "center",
         background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))",
-        borderBottom: "1px solid rgba(139, 92, 246, 0.1)",
+        border: "1px solid rgba(139, 92, 246, 0.1)",
+        borderRadius: "12px",
         marginBottom: "20px",
         padding: "0 20px"
       }}>
