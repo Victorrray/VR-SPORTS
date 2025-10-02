@@ -2635,20 +2635,6 @@ export default function OddsTable({
                         return `${num/g}/${den/g}`;
                       })()}
                     </span>
-                    {/* Desktop subtext retained; mobile hides via CSS */}
-                    <div className="mobile-subtext">
-                      {cleanBookTitle(row.bk?.title)}
-                      {(row.mkt.key || '') !== 'h2h' && (row.out.point != null && row.out.point !== '') ? ` • ${formatLine(row.out.point, row.mkt.key, 'game')}` : ''}
-                      {fair != null ? ` • Fair ${(() => {
-                        const n = Number(fair);
-                        if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
-                        if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
-                        const num = n > 0 ? Math.round(Math.abs(n)) : 100;
-                        const den = n > 0 ? 100 : Math.round(Math.abs(n));
-                        const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
-                        return `${num/g}/${den/g}`;
-                      })()}` : ''}
-                    </div>
                   </td>
                   <td>{fair != null ? (Number(fair) > 0 ? `+${fair}` : `${fair}`) : ''}</td>
                   <td aria-hidden={true}></td>
