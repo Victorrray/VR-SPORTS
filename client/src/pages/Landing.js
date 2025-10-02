@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { 
   Target, 
@@ -9,7 +9,15 @@ import {
   BarChart3,
   TrendingUp,
   Play,
-  ArrowRight
+  ArrowRight,
+  Zap,
+  Eye,
+  DollarSign,
+  CheckCircle,
+  Star,
+  Sparkles,
+  Trophy,
+  Clock
 } from 'lucide-react';
 
 // Components
@@ -17,7 +25,7 @@ import EdgeCalculator from '../components/betting/EdgeCalculator';
 import Pricing from '../components/billing/Pricing';
 
 // Styles
-import '../styles/landing.css';
+import '../styles/landing-revamp.css';
 
 const QUICK_ACTIONS = [
   {
@@ -43,11 +51,82 @@ const QUICK_ACTIONS = [
   }
 ];
 
+// Stats for social proof
+const STATS = [
+  { number: "50K+", label: "Active Users" },
+  { number: "15+", label: "Sportsbooks" },
+  { number: "4.2%", label: "Avg Edge" },
+  { number: "24/7", label: "Live Updates" }
+];
+
+// Features showcase
+const FEATURES = [
+  {
+    icon: Eye,
+    title: "Real-Time Odds Comparison",
+    description: "Compare odds across 15+ major sportsbooks instantly. Never miss the best line again.",
+    color: "#8b5cf6"
+  },
+  {
+    icon: TrendingUp,
+    title: "+EV Bet Finder",
+    description: "Our algorithm identifies positive expected value bets with edge calculations in real-time.",
+    color: "#10b981"
+  },
+  {
+    icon: Target,
+    title: "Player Props Analysis",
+    description: "Deep dive into player props with historical data, trends, and line movement tracking.",
+    color: "#f59e0b"
+  },
+  {
+    icon: BarChart3,
+    title: "Advanced Analytics",
+    description: "Track your betting performance with detailed stats, ROI tracking, and insights.",
+    color: "#3b82f6"
+  },
+  {
+    icon: Zap,
+    title: "Arbitrage Detection",
+    description: "Automatically find arbitrage opportunities across sportsbooks for guaranteed profits.",
+    color: "#ec4899"
+  },
+  {
+    icon: Shield,
+    title: "Line Movement Alerts",
+    description: "Get notified when odds shift significantly so you can capitalize on market movements.",
+    color: "#14b8a6"
+  }
+];
+
+// Testimonials
+const TESTIMONIALS = [
+  {
+    name: "Mike Johnson",
+    role: "Professional Bettor",
+    content: "OddSightSeer helped me increase my ROI by 15% in just 3 months. The +EV finder is a game-changer.",
+    rating: 5
+  },
+  {
+    name: "Sarah Chen",
+    role: "Sports Analyst",
+    content: "Best odds comparison tool I've used. The player props analysis is incredibly detailed and accurate.",
+    rating: 5
+  },
+  {
+    name: "David Martinez",
+    role: "Casual Bettor",
+    content: "Finally found a platform that makes line shopping easy. Saved hundreds on better odds already.",
+    rating: 5
+  }
+];
+
 // Landing Page Component for non-authenticated users
 export default function Landing() {
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [showSignOutMessage, setShowSignOutMessage] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const signedOut = searchParams.get('signed_out');
@@ -64,7 +143,7 @@ export default function Landing() {
   }, [searchParams, setSearchParams]);
 
   return (
-    <div className="home-page">
+    <div className="landing-page-revamp">
       <Helmet>
         <title>OddSightSeer - Smart Sports Betting Odds Comparison & Analytics</title>
         <meta name="description" content="Compare live sports betting odds across major sportsbooks. Find the best lines, track player props, and make smarter bets with real-time analytics." />
@@ -79,116 +158,171 @@ export default function Landing() {
       
       {/* Sign Out Success Message */}
       {showSignOutMessage && (
-        <div style={{
-          position: 'fixed',
-          top: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-          color: 'white',
-          padding: '12px 24px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
-          zIndex: 1000,
-          fontSize: '14px',
-          fontWeight: '600',
-          animation: 'slideDown 0.3s ease-out'
-        }}>
+        <div className="success-toast">
           ✅ You have been signed out successfully
         </div>
       )}
       
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <div className="hero-text">
-            <div className="hero-badge">
-              <Users size={16} />
-              <span>Trusted by Sports Bettors</span>
+      {/* Hero Section - Revamped */}
+      <section className="hero-revamp">
+        <div className="hero-background-effects">
+          <div className="gradient-orb orb-1"></div>
+          <div className="gradient-orb orb-2"></div>
+          <div className="gradient-grid"></div>
+        </div>
+        
+        <div className="hero-container">
+          <div className="hero-badge-new">
+            <Sparkles size={14} />
+            <span>Trusted by 50,000+ Sports Bettors</span>
+          </div>
+          
+          <h1 className="hero-title-new">
+            Win More Bets with
+            <span className="gradient-text"> Smart Odds Comparison</span>
+          </h1>
+          
+          <p className="hero-subtitle-new">
+            Compare live odds across 15+ sportsbooks, find +EV bets instantly, and track your performance with advanced analytics. Join thousands of winning bettors.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="hero-cta-group">
+            <button onClick={() => navigate('/subscribe')} className="cta-btn-primary">
+              <TrendingUp size={20} />
+              Start Winning Today
+              <ArrowRight size={20} />
+            </button>
+            <button onClick={() => navigate('/login')} className="cta-btn-secondary">
+              <Play size={18} />
+              Watch Demo
+            </button>
+          </div>
+
+          {/* Trust Badges */}
+          <div className="trust-badges">
+            <div className="trust-item">
+              <CheckCircle size={16} />
+              <span>No credit card required</span>
             </div>
-            
-            <h1 className="hero-title">
-              Find the Best <span className="highlight">Sports Betting Odds</span> Instantly
-            </h1>
-            
-            <p className="hero-subtitle">
-              Compare odds across all major sportsbooks, analyze player props, and track your betting performance with advanced analytics. 
-              Make smarter bets with real-time data.
+            <div className="trust-item">
+              <CheckCircle size={16} />
+              <span>Cancel anytime</span>
+            </div>
+            <div className="trust-item">
+              <CheckCircle size={16} />
+              <span>7-day money back</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="stats-section">
+        <div className="stats-container">
+          {STATS.map((stat, index) => (
+            <div key={index} className="stat-card">
+              <div className="stat-number">{stat.number}</div>
+              <div className="stat-label">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="features-section-new">
+        <div className="section-container">
+          <div className="section-header">
+            <h2 className="section-title">
+              Everything You Need to <span className="gradient-text">Win More</span>
+            </h2>
+            <p className="section-subtitle">
+              Powerful tools designed for serious sports bettors
             </p>
           </div>
 
-          {/* Value Props */}
-          <div className="value-props">
-            <div className="value-prop">
-              <Shield size={20} />
-              <span>Live Odds Comparison</span>
-            </div>
-            <div className="value-prop">
-              <Users size={20} />
-              <span>All Major Sportsbooks</span>
-            </div>
-            <div className="value-prop">
-              <Activity size={20} />
-              <span>Player Props Analysis</span>
-            </div>
+          <div className="features-grid-new">
+            {FEATURES.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <div key={index} className="feature-card-new">
+                  <div className="feature-icon-wrapper" style={{background: `linear-gradient(135deg, ${feature.color}, ${feature.color}dd)`}}>
+                    <IconComponent size={28} />
+                  </div>
+                  <h3 className="feature-title-new">{feature.title}</h3>
+                  <p className="feature-desc-new">{feature.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="testimonials-section">
+        <div className="section-container">
+          <div className="section-header">
+            <h2 className="section-title">
+              Loved by <span className="gradient-text">Winning Bettors</span>
+            </h2>
+            <p className="section-subtitle">
+              See what our users are saying
+            </p>
           </div>
 
-        {/* CTA Buttons */}
-        <div className="cta-buttons">
-          <Link to="/login" className="cta-primary">
-            <TrendingUp size={20} />
-            Compare Odds Now
-          </Link>
-          <Link to="/login" className="cta-secondary">
-            <Play size={20} />
-            Get Started Free
-          </Link>
-        </div>
-
-        {/* Features Grid */}
-        <div className="features-grid">
-          {QUICK_ACTIONS.map((action) => {
-            const IconComponent = action.icon;
-            return (
-              <div key={action.title} className="feature-card">
-                <div className="feature-icon">
-                  <IconComponent size={32} color="white" />
+          <div className="testimonials-grid">
+            {TESTIMONIALS.map((testimonial, index) => (
+              <div key={index} className="testimonial-card">
+                <div className="testimonial-stars">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} size={16} fill="#fbbf24" color="#fbbf24" />
+                  ))}
                 </div>
-                <h3 className="feature-title">
-                  {action.title}
-                </h3>
-                <p className="feature-description">
-                  {action.description}
-                </p>
-                <Link
-                  to="/login"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '12px 24px',
-                    background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                    color: 'white',
-                    textDecoration: 'none',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    transition: 'all 0.3s ease',
-                    marginTop: '16px'
-                  }}
-                >
-                  Try Now
-                  <ArrowRight size={16} />
-                </Link>
+                <p className="testimonial-content">"{testimonial.content}"</p>
+                <div className="testimonial-author">
+                  <div className="author-avatar">{testimonial.name.charAt(0)}</div>
+                  <div>
+                    <div className="author-name">{testimonial.name}</div>
+                    <div className="author-role">{testimonial.role}</div>
+                  </div>
+                </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Pricing Section - Temporarily removed for redesign
-      <Pricing />
-      */}
+      {/* Pricing Section */}
+      <section className="pricing-section-landing">
+        <div className="section-container">
+          <div className="section-header">
+            <h2 className="section-title">
+              Choose Your <span className="gradient-text">Winning Plan</span>
+            </h2>
+            <p className="section-subtitle">
+              Start free, upgrade when you're ready
+            </p>
+          </div>
+          <Pricing />
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="final-cta-section">
+        <div className="final-cta-container">
+          <Trophy size={48} className="cta-icon" />
+          <h2 className="final-cta-title">
+            Ready to Start Winning?
+          </h2>
+          <p className="final-cta-subtitle">
+            Join 50,000+ bettors who are already making smarter bets
+          </p>
+          <button onClick={() => navigate('/subscribe')} className="final-cta-button">
+            Get Started Now
+            <ArrowRight size={20} />
+          </button>
+        </div>
+      </section>
 
       {/* Edge Calculator Modal */}
       {showEdgeCalculator && (
@@ -200,7 +334,6 @@ export default function Landing() {
           }}
         />
       )}
-      </section>
     </div>
   );
 }
