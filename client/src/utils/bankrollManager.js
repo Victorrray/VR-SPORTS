@@ -3,7 +3,7 @@
 import React from 'react';
 
 const BANKROLL_STORAGE_KEY = 'userBankroll';
-const DEFAULT_BANKROLL = 1000;
+const DEFAULT_BANKROLL = 100;
 
 export const bankrollManager = {
   // Get current bankroll from storage

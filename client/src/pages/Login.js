@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams, useLocation, Link } from "react-router-do
 import { useAuth } from "../hooks/SimpleAuth";
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, ArrowRight } from "lucide-react";
 import { optimizedStorage } from "../utils/storageOptimizer";
-import "./Login.css";
+import "./Login-revamp.css";
 
 export default function Login() {
   const auth = useAuth();

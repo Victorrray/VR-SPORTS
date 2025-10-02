@@ -215,10 +215,6 @@ export default function Landing() {
               Start Winning Today
               <ArrowRight size={20} />
             </button>
-            <button onClick={() => navigate('/login')} className="cta-btn-secondary">
-              <Play size={18} />
-              Watch Demo
-            </button>
           </div>
 
           {/* Trust Badges */}
