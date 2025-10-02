@@ -2441,49 +2441,6 @@ export default function OddsTable({
               <span className="sort-label">Odds <span className="sort-indicator">{sort.key==='odds'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
             </th>
             <th>De-Vig</th>
-            <th>
-              {onAddBet && (
-                <button
-                  className="bet-slip-header-btn"
-                  onClick={onOpenBetSlip}
-                  title="Open Bet Slip"
-                  style={{
-                    background: betSlipCount > 0 ? 'var(--accent)' : '#334155',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '6px',
-                    padding: '6px 10px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  🎫 Slip
-                  {betSlipCount > 0 && (
-                    <span
-                      style={{
-                        background: '#ef4444',
-                        color: '#fff',
-                        borderRadius: '50%',
-                        width: '18px',
-                        height: '18px',
-                        fontSize: '10px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: '700'
-                      }}
-                    >
-                      {betSlipCount}
-                    </span>
-                  )}
-                </button>
-              )}
-            </th>
           </tr>
         </thead>
         <tbody>
