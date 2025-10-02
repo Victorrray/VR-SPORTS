@@ -11,8 +11,8 @@ export const AVAILABLE_SPORTSBOOKS = [
   // ===== DFS APPS =====
   { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true, tier: 1 },
   { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true, tier: 1 },
-  { key: 'pick6', name: 'DK Pick6', popular: true, isDFS: true, tier: 2 },
-  { key: 'dabble_au', name: 'Dabble AU', popular: true, isDFS: true, tier: 2 },
+  { key: 'pick6', name: 'DK Pick6', popular: true, isDFS: true, tier: 1 },
+  { key: 'dabble_au', name: 'Dabble', popular: true, isDFS: true, tier: 1 },
   
   // ===== SECOND TIER - MAJOR OPERATORS =====
   { key: 'espnbet', name: 'ESPN BET', popular: true, tier: 2 },
