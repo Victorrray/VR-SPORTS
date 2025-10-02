@@ -31,17 +31,17 @@ export default function DesktopHeader({
 
       <div className="desktop-section-selector">
         {sections.map(section => {
-          // Skip platinum-required sections if user doesn't have platinum
-          if (section.requiresPlatinum && !hasPlatinum) return null;
-          
           const IconComponent = section.icon;
           const isActive = currentSection === section.id;
+          const isDisabled = section.requiresPlatinum && !hasPlatinum;
           
           return (
             <button
               key={section.id}
-              className={`desktop-section-option ${isActive ? 'active' : ''}`}
-              onClick={() => onSectionChange(section.id)}
+              className={`desktop-section-option ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
+              onClick={() => !isDisabled && onSectionChange(section.id)}
+              disabled={isDisabled}
+              title={isDisabled ? 'Requires Platinum Plan' : ''}
             >
               <IconComponent size={16} className="section-icon" />
               <span>{section.name}</span>

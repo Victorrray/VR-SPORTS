@@ -82,6 +82,22 @@
   opacity: 1;
 }
 
+.desktop-section-option.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: #6b7280;
+  background: transparent;
+}
+
+.desktop-section-option.disabled:hover {
+  background: transparent;
+  transform: none;
+}
+
+.desktop-section-option.disabled .section-icon {
+  opacity: 0.4;
+}
+
 /* Show desktop header on larger screens */
 @media (min-width: 769px) {
   .desktop-header {
