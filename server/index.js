@@ -1481,20 +1481,30 @@ app.get('/api/usage/me', requireUser, async (req, res) => {
 // Stripe: Create checkout session for Platinum subscription
 app.post('/api/billing/create-checkout-session', requireUser, async (req, res) => {
   try {
+    console.log('🔍 Checkout session request received');
+    console.log('🔍 Stripe configured:', !!stripe);
+    console.log('🔍 STRIPE_PRICE_GOLD:', STRIPE_PRICE_GOLD);
+    console.log('🔍 FRONTEND_URL:', FRONTEND_URL);
+    
     if (!stripe) {
+      console.error('❌ Stripe not configured');
       return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured', hint: 'Set STRIPE_SECRET_KEY in backend env' });
     }
     
     if (!STRIPE_PRICE_GOLD) {
+      console.error('❌ STRIPE_PRICE_GOLD not set');
       return res.status(500).json({ code: 'MISSING_ENV', message: 'STRIPE_PRICE_GOLD not set', hint: 'Set STRIPE_PRICE_GOLD (Price ID)' });
     }
     
     const userId = req.__userId;
+    console.log('🔍 User ID:', userId);
+    
     if (!userId || userId === 'demo-user') {
+      console.error('❌ Invalid user ID');
       return res.status(401).json({ code: 'AUTH_REQUIRED', message: 'Authenticated user required' });
     }
 
-    console.log(`Creating checkout session for user: ${userId}`);
+    console.log(`✅ Creating checkout session for user: ${userId}`);
     
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -1512,11 +1522,18 @@ app.post('/api/billing/create-checkout-session', requireUser, async (req, res) =
       }
     });
     
-    console.log(`Created checkout session: ${session.id} for user: ${userId}`);
+    console.log(`✅ Created checkout session: ${session.id} for user: ${userId}`);
     res.json({ url: session.url });
   } catch (error) {
-    console.error('Stripe checkout error:', error);
-    res.status(500).json({ error: 'CHECKOUT_START_FAILED', detail: error.message });
+    console.error('❌ Stripe checkout error:', error);
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({ 
+      code: 'CHECKOUT_START_FAILED', 
+      message: error.message,
+      detail: error.message,
+      type: error.type,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

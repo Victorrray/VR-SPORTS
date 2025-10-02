@@ -94,16 +94,22 @@ const Pricing = ({ onUpgrade }) => {
       const data = await response.json();
       debugCheckoutResult(data);
       
+      if (!response.ok) {
+        console.error('❌ Checkout failed:', data);
+        const errorMsg = data.message || data.detail || data.error || data.code || 'Checkout failed';
+        throw new Error(errorMsg);
+      }
+      
       if (data?.url) {
         debugLog('PRICING', 'Redirecting to Stripe checkout');
         window.location.href = data.url;
       } else {
         setLoading(false);
-        throw new Error(data?.error || 'No checkout URL received');
+        throw new Error('No checkout URL received');
       }
       
     } catch (error) {
-      console.error('Failed to handle upgrade:', error);
+      console.error('❌ Failed to handle upgrade:', error);
       setError(error.message || 'Failed to start checkout. Please try again.');
       setLoading(false);
     }
