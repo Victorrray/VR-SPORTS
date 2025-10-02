@@ -407,7 +407,7 @@ export default function Account() {
           <div className="user-info-grid">
             <div className="user-avatar-section">
               <div className="avatar">{initialsFromEmail(email)}</div>
-              <div className={`status-badge ${me?.plan === 'platinum' ? 'platinum' : me?.plan === 'gold' ? 'gold' : 'free-trial'}`}>
+              <div className={`status-badge ${me?.plan === 'platinum' ? 'platinum' : me?.plan === 'gold' ? 'gold' : 'guest'}`}>
                 {me?.plan === 'platinum' ? (
                   <>
                     <Crown size={12} />
@@ -420,8 +420,8 @@ export default function Account() {
                   </>
                 ) : (
                   <>
-                    <Zap size={12} />
-                    <span>Free Trial</span>
+                    <User size={12} />
+                    <span>Guest</span>
                   </>
                 )}
               </div>
