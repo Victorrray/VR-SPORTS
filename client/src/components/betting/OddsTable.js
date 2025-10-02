@@ -442,6 +442,7 @@ export default function OddsTable({
   onAddBet = null,
   betSlipCount = 0,
   onOpenBetSlip = null,
+  searchQuery = "", // Add search query prop
 }) {
   
   // Get user plan information for free trial restrictions
@@ -1797,6 +1798,35 @@ export default function OddsTable({
       console.log('🎯 After filtering: ' + r.length + ' rows');
     }
     
+    // Apply search query filter for player props
+    if (searchQuery && searchQuery.trim() && mode === 'props') {
+      const query = searchQuery.trim().toLowerCase();
+      console.log('🔍 SEARCH FILTER: Applying search query:', query);
+      console.log('🔍 SEARCH FILTER: Rows before search:', r.length);
+      
+      r = r.filter(row => {
+        const playerName = (row.playerName || '').toLowerCase();
+        const teamName = (row.out?.name || '').toLowerCase();
+        const homeTeam = (row.game?.home_team || '').toLowerCase();
+        const awayTeam = (row.game?.away_team || '').toLowerCase();
+        const marketKey = (row.mkt?.key || '').toLowerCase();
+        
+        const matches = playerName.includes(query) || 
+                       teamName.includes(query) || 
+                       homeTeam.includes(query) || 
+                       awayTeam.includes(query) ||
+                       marketKey.includes(query);
+        
+        if (matches) {
+          console.log(`🔍 SEARCH MATCH: ${playerName} - ${homeTeam} vs ${awayTeam}`);
+        }
+        
+        return matches;
+      });
+      
+      console.log('🔍 SEARCH FILTER: Rows after search:', r.length);
+    }
+    
     // Apply EV filter if specified, but always show DFS app bets
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
@@ -1893,7 +1923,7 @@ export default function OddsTable({
     });
     
     return r.slice().sort((a, b) => (sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b)));
-  }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap]);
+  }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap, searchQuery, mode]);
 
   const totalPages = Math.ceil(rows.length / pageSize);
   const paginatedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page, pageSize]);

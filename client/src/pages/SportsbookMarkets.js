@@ -1489,6 +1489,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             onAddBet={addBet}
             betSlipCount={bets.length}
             onOpenBetSlip={openBetSlip}
+            searchQuery={debouncedQuery}
           />
         ) : null
       ) : !isOverQuota ? (
