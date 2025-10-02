@@ -163,6 +163,73 @@ function median(nums) {
   const mid = Math.floor(n / 2);
   return n % 2 ? a[mid] : (a[mid - 1] + a[mid]) / 2;
 }
+
+// Book weighting for more accurate fair line calculation
+// Sharp books and low-vig books get higher weights
+const BOOK_WEIGHTS = {
+  // Tier 1: Sharp books (highest weight)
+  'pinnacle': 3.0,
+  'circa': 2.5,
+  'circasports': 2.5,
+  
+  // Tier 2: Low-vig books
+  'novig': 2.0,
+  'lowvig': 2.0,
+  'prophet_exchange': 1.8,
+  'rebet': 1.8,
+  
+  // Tier 3: Major sportsbooks
+  'draftkings': 1.5,
+  'fanduel': 1.5,
+  'betmgm': 1.5,
+  'caesars': 1.5,
+  'pointsbet': 1.5,
+  'betrivers': 1.5,
+  
+  // Tier 4: DFS apps (standard weight)
+  'prizepicks': 1.0,
+  'underdog': 1.0,
+  'pick6': 1.0,
+  'prophetx': 1.0,
+  
+  // Tier 5: Other books (lower weight)
+  'default': 1.0
+};
+
+function getBookWeight(bookKey) {
+  if (!bookKey) return BOOK_WEIGHTS.default;
+  const key = bookKey.toLowerCase();
+  return BOOK_WEIGHTS[key] || BOOK_WEIGHTS.default;
+}
+
+function weightedMedian(values, weights) {
+  if (!values || !values.length) return null;
+  if (!weights || weights.length !== values.length) {
+    return median(values); // Fallback to regular median
+  }
+  
+  // Sort by value, keeping weights aligned
+  const sorted = values.map((val, i) => ({ val, weight: weights[i] }))
+    .sort((a, b) => a.val - b.val);
+  
+  // Calculate cumulative weights
+  const totalWeight = sorted.reduce((sum, item) => sum + item.weight, 0);
+  const halfWeight = totalWeight / 2;
+  
+  let cumWeight = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    cumWeight += sorted[i].weight;
+    if (cumWeight >= halfWeight) {
+      // If exactly at half, average with next value
+      if (cumWeight === halfWeight && i < sorted.length - 1) {
+        return (sorted[i].val + sorted[i + 1].val) / 2;
+      }
+      return sorted[i].val;
+    }
+  }
+  
+  return sorted[sorted.length - 1].val;
+}
 function formatLine(line, marketKey, mode="game") {
   if (line == null || line === "") return "";
   const n = Number(line); if (isNaN(n)) return line;
@@ -1656,12 +1723,33 @@ export default function OddsTable({
       return null;
     }
     
-    // For player props, use consensus probability from all available books
+    // For player props, use weighted consensus probability from all available books
     if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
-      const probs = allBooks.map(b => americanToProb(b.price ?? b.odds))
-        .filter(p => typeof p === "number" && p > 0 && p < 1);
-      const consensusProb = median(probs);
+      // Calculate probabilities and weights for each book
+      const bookData = allBooks
+        .map(b => ({
+          prob: americanToProb(b.price ?? b.odds),
+          weight: getBookWeight(b.bookmaker?.key || b.book),
+          book: b.bookmaker?.key || b.book
+        }))
+        .filter(d => typeof d.prob === "number" && d.prob > 0 && d.prob < 1);
+      
+      if (bookData.length === 0) return null;
+      
+      const probs = bookData.map(d => d.prob);
+      const weights = bookData.map(d => d.weight);
+      const consensusProb = weightedMedian(probs, weights);
       const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
+      
+      // Debug logging for weighted calculation
+      if (row.playerName === 'Kendrick Bourne' && row.mkt?.key?.includes('reception')) {
+        console.log(`🔍 WEIGHTED EV for ${row.playerName}:`, {
+          bookData: bookData.map(d => ({ book: d.book, prob: d.prob.toFixed(4), weight: d.weight })),
+          consensusProb: consensusProb?.toFixed(4),
+          unweightedMedian: median(probs)?.toFixed(4),
+          difference: consensusProb && median(probs) ? ((consensusProb - median(probs)) * 100).toFixed(2) + '%' : 'N/A'
+        });
+      }
       
       if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 4) { // Minimum 4 books for reliable EV
         const fairDec = 1 / consensusProb;
@@ -1678,10 +1766,20 @@ export default function OddsTable({
       return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
     
-    // Fallback to consensus method for regular markets using all books
-    const probs = allBooks.map(b => americanToProb(b.price ?? b.odds))
-      .filter(p => typeof p === "number" && p > 0 && p < 1);
-    const consensusProb = median(probs);
+    // Fallback to weighted consensus method for regular markets using all books
+    const bookData = allBooks
+      .map(b => ({
+        prob: americanToProb(b.price ?? b.odds),
+        weight: getBookWeight(b.bookmaker?.key || b.book),
+        book: b.bookmaker?.key || b.book
+      }))
+      .filter(d => typeof d.prob === "number" && d.prob > 0 && d.prob < 1);
+    
+    if (bookData.length === 0) return null;
+    
+    const probs = bookData.map(d => d.prob);
+    const weights = bookData.map(d => d.weight);
+    const consensusProb = weightedMedian(probs, weights);
     const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
     
     if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 4) { // Minimum 4 books for reliable EV
