@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/SimpleAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, Check, AlertCircle, BookOpen, DollarSign, Star, TrendingUp, Settings } from 'lucide-react';
+import { Save, Check, AlertCircle, DollarSign, Star, TrendingUp, Settings } from 'lucide-react';
 import { optimizedStorage } from '../utils/storageOptimizer';
 import { bankrollManager } from '../utils/bankrollManager';
 import SportMultiSelect from '../components/betting/SportMultiSelect';
@@ -211,17 +211,7 @@ export default function MySportsbooks() {
   return (
     <div className="sportsbooks-page">
       <div className="page-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/account')}
-          aria-label="Back to Account"
-        >
-          <ArrowLeft size={20} />
-        </button>
         <div className="header-content">
-          <div className="header-icon">
-            <BookOpen size={24} />
-          </div>
           <div className="header-text">
             <h1>My Sportsbooks</h1>
             <p>Customize which sportsbooks to include in your odds comparisons</p>
