@@ -202,8 +202,10 @@ export default function MySportsbooks() {
   // Filter sportsbooks based on user plan
   const availableSportsbooks = me?.plan === 'platinum' ? AVAILABLE_SPORTSBOOKS : getFreePlanSportsbooks();
   
-  const popularBooks = availableSportsbooks.filter(book => book.popular);
-  const otherBooks = availableSportsbooks.filter(book => !book.popular);
+  // Separate DFS apps from regular sportsbooks
+  const dfsApps = availableSportsbooks.filter(book => book.isDFS);
+  const popularBooks = availableSportsbooks.filter(book => book.popular && !book.isDFS);
+  const otherBooks = availableSportsbooks.filter(book => !book.popular && !book.isDFS);
 
   const getSelectedCount = () => selectedBooks.length;
   const getTotalAvailable = () => availableSportsbooks.length;
@@ -304,6 +306,40 @@ export default function MySportsbooks() {
       </div>
 
       <div className="sportsbooks-sections">
+        {/* DFS Apps Section */}
+        {dfsApps.length > 0 && (
+          <div className="section">
+            <div className="section-header">
+              <Settings size={20} />
+              <h3>DFS Apps</h3>
+              <span className="section-count">({dfsApps.length})</span>
+            </div>
+            <div className="sportsbooks-grid">
+              {dfsApps.map(book => (
+                <div 
+                  key={book.key}
+                  className={`sportsbook-card ${selectedBooks.includes(book.key) ? 'selected' : ''}`}
+                  onClick={() => {
+                    if (selectedBooks.includes(book.key)) {
+                      setSelectedBooks(selectedBooks.filter(b => b !== book.key));
+                    } else {
+                      setSelectedBooks([...selectedBooks, book.key]);
+                    }
+                  }}
+                >
+                  <div className="sportsbook-info">
+                    <div className="sportsbook-name">{book.name}</div>
+                    <div className="popular-badge">DFS</div>
+                  </div>
+                  <div className="selection-indicator">
+                    {selectedBooks.includes(book.key) && <Check size={16} />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="section">
           <div className="section-header">
             <Star size={20} />
