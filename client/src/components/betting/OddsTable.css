@@ -1259,52 +1259,66 @@ body,
 
   .odds-table-card.revamp .odds-grid th,
   .odds-table-card.revamp .odds-grid td {
-    padding-top: 0.7em;
-    padding-bottom: 0.7em;
+    padding: 12px 16px;
     vertical-align: middle;
   }
 
   .odds-table-card.revamp .odds-grid tbody tr.odds-row:hover td {
-    background: linear-gradient(90deg, rgba(72, 109, 255, 0.1), rgba(72, 109, 255, 0.05));
+    background: linear-gradient(90deg, rgba(72, 109, 255, 0.15), rgba(72, 109, 255, 0.08));
+    transition: all 0.2s ease;
   }
 
+  /* EV % Column */
   .odds-table-card.revamp .odds-grid th:first-child,
   .odds-table-card.revamp .odds-grid td:first-child {
-    width: 9%;
+    width: 8%;
     text-align: center;
   }
 
+  /* MATCH Column */
   .odds-table-card.revamp .odds-grid th:nth-child(2),
   .odds-table-card.revamp .odds-grid td:nth-child(2) {
-    width: 28%;
+    width: 20%;
     text-align: left;
   }
 
+  /* TEAM Column - Increased for better readability */
   .odds-table-card.revamp .odds-grid th:nth-child(3),
   .odds-table-card.revamp .odds-grid td:nth-child(3) {
-    width: 16%;
+    width: 25%;
     text-align: left;
+    font-weight: 600;
+    font-size: 1.02em;
+    line-height: 1.4;
   }
 
+  /* LINE Column */
   .odds-table-card.revamp .odds-grid th:nth-child(4),
   .odds-table-card.revamp .odds-grid td:nth-child(4) {
     width: 10%;
+    text-align: center;
   }
 
+  /* BOOK Column - Increased */
   .odds-table-card.revamp .odds-grid th:nth-child(5),
   .odds-table-card.revamp .odds-grid td:nth-child(5) {
-    width: 13%;
+    width: 15%;
     text-align: left;
+    font-weight: 500;
   }
 
+  /* ODDS Column */
   .odds-table-card.revamp .odds-grid th:nth-child(6),
   .odds-table-card.revamp .odds-grid td:nth-child(6) {
     width: 12%;
+    text-align: center;
   }
 
+  /* DE-VIG Column - Reduced */
   .odds-table-card.revamp .odds-grid th:nth-child(7),
   .odds-table-card.revamp .odds-grid td:nth-child(7) {
-    width: 12%;
+    width: 10%;
+    text-align: center;
   }
 
   .odds-table-card.revamp .desktop-matchup {
