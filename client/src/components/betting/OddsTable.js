@@ -2026,6 +2026,11 @@ export default function OddsTable({
   console.log('🔍 FINAL DEBUG: allRows.length =', allRows.length);
   console.log('🔍 FINAL DEBUG: minLoadingComplete =', minLoadingComplete);
   
+  // Log unique bookmakers in the data
+  const uniqueBookmakers = [...new Set(allRows.map(row => row.book))];
+  console.log('🔍 FINAL DEBUG: Unique bookmakers in data =', uniqueBookmakers);
+  console.log('🔍 FINAL DEBUG: Has pick6 data? =', uniqueBookmakers.includes('pick6'));
+  
   // Check if we're filtering for DFS apps only
   const finalDfsApps = ['prizepicks', 'underdog', 'pick6'];
   const finalFilteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => finalDfsApps.includes(book));
