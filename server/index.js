@@ -59,7 +59,7 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "draftkings_pick6",
+  "prizepicks", "underdog", "pick6",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // US region books
@@ -74,7 +74,7 @@ const FOCUSED_BOOKMAKERS = [
 // Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "draftkings_pick6",
+  "prizepicks", "underdog", "pick6",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // Major sportsbooks
@@ -2169,7 +2169,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             userPlan: userProfile.plan,
             totalBookmakers: allowedBookmakers.length,
             first19: allowedBookmakers.slice(0, 19),
-            dfsAppsIncluded: allowedBookmakers.slice(0, 19).filter(b => ['prizepicks', 'underdog', 'draftkings_pick6', 'prophetx'].includes(b)),
+            dfsAppsIncluded: allowedBookmakers.slice(0, 19).filter(b => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(b)),
             bookmakerListForAPI: bookmakerList
           });
           
