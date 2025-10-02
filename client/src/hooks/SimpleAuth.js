@@ -6,13 +6,36 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Fetch user profile from profiles table
+  const fetchProfile = async (userId) => {
+    if (!userId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        setProfile(data);
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    }
+  };
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
       setAuthLoading(false);
     });
 
@@ -20,6 +43,11 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
       setAuthLoading(false);
     });
 
@@ -52,6 +80,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     session,
+    profile,
     authLoading,
     signIn,
     signUp,
