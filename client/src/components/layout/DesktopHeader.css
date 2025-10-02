@@ -83,19 +83,22 @@
 }
 
 .desktop-section-option.disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
-  color: #6b7280;
-  background: transparent;
+  color: #4b5563;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 }
 
 .desktop-section-option.disabled:hover {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.2);
   transform: none;
+  box-shadow: none;
 }
 
 .desktop-section-option.disabled .section-icon {
-  opacity: 0.4;
+  opacity: 0.5;
+  color: #4b5563;
 }
 
 /* Show desktop header on larger screens */
