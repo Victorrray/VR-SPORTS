@@ -180,26 +180,26 @@ const Pricing = ({ onUpgrade }) => {
           </div>
         )}
 
-        {/* Pricing Cards */}
+        {/* Pricing Cards - Brand New Design */}
         <div className="pricing-showcase two-cards">
-          {/* Free Trial Card */}
-          <div className="free-trial-card">
-            {/* Free Badge */}
-            <div className="free-badge">
-              <Sparkles size={16} />
-              <span>Free Forever</span>
+          {/* Gold Plan Card */}
+          <div className="pricing-card gold-card">
+            {/* Gold Badge */}
+            <div className="free-badge" style={{background: 'linear-gradient(135deg, #FFD700, #FFA500)'}}>
+              <Crown size={16} />
+              <span>Best Value</span>
             </div>
 
             {/* Card Header */}
             <div className="card-header">
-              <div className="plan-icon-wrapper free">
+              <div className="plan-icon-wrapper" style={{background: 'linear-gradient(135deg, #FFD700, #FFA500)', boxShadow: '0 8px 24px rgba(255, 215, 0, 0.3)'}}>
                 <div className="plan-icon">
-                  <Star size={28} />
+                  <Crown size={28} />
                 </div>
               </div>
               <div className="plan-info">
-                <h3 className="plan-title">Free Access</h3>
-                <p className="plan-tagline">Start your winning journey</p>
+                <h3 className="plan-title">Gold Plan</h3>
+                <p className="plan-tagline">Perfect for serious bettors</p>
               </div>
             </div>
 
@@ -207,11 +207,11 @@ const Pricing = ({ onUpgrade }) => {
             <div className="pricing-display">
               <div className="price-main">
                 <span className="currency">$</span>
-                <span className="amount">0</span>
-                <span className="period">/forever</span>
+                <span className="amount">15</span>
+                <span className="period">/month</span>
               </div>
               <div className="price-note">
-                <span className="savings">No credit card required</span>
+                <span className="savings">Save 25% vs daily subscriptions</span>
               </div>
             </div>
 
@@ -221,36 +221,43 @@ const Pricing = ({ onUpgrade }) => {
                 <div className="feature-icon">
                   <Check size={12} />
                 </div>
-                <span>Live scores for NFL, NBA, MLB</span>
+                <span>Live odds from 10+ major sportsbooks</span>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">
                   <Check size={12} />
                 </div>
-                <span>Team stats and player performance data</span>
+                <span>Real-time line movement tracking</span>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">
                   <Check size={12} />
                 </div>
-                <span>Game schedules and results history</span>
+                <span>Basic +EV bet finder</span>
               </div>
               <div className="feature-item">
                 <div className="feature-icon">
                   <Check size={12} />
                 </div>
-                <span>Basic analytics and trends</span>
+                <span>Player props and game lines</span>
+              </div>
+              <div className="feature-item">
+                <div className="feature-icon">
+                  <Check size={12} />
+                </div>
+                <span>Email support</span>
               </div>
             </div>
 
             {/* CTA Button */}
             <button
               data-testid="pricing-signup"
-              onClick={() => navigate('/login')}
+              onClick={handleUpgrade}
               className="signup-button"
+              style={{background: 'linear-gradient(135deg, #FFD700, #FFA500)', boxShadow: '0 10px 30px rgba(255, 215, 0, 0.35)'}}
             >
               <div className="button-content">
-                <span>Get Started Free</span>
+                <span>Start Gold Plan</span>
                 <ArrowRight size={20} className="button-arrow" />
               </div>
             </button>
@@ -258,13 +265,13 @@ const Pricing = ({ onUpgrade }) => {
             {/* Trust Signals */}
             <div className="trust-signals">
               <div className="trust-item">
-                <span>✓ Instant access</span>
+                <span>✓ Cancel anytime</span>
               </div>
               <div className="trust-item">
                 <span>•</span>
               </div>
               <div className="trust-item">
-                <span>No commitments</span>
+                <span>7-day money back</span>
               </div>
             </div>
           </div>
