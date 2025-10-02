@@ -193,7 +193,7 @@
   color: var(--nav-text);
   font-size: 0.95em;
   font-weight: 600;
-  padding: 0.8em 1.4em;
+  padding: 0.9em 1.4em;
   border-radius: 14px;
   cursor: pointer;
   text-decoration: none;
@@ -628,7 +628,7 @@
   color: var(--nav-text);
   font-size: 0.95em;
   font-weight: 600;
-  padding: 0.8em 1.4em;
+  padding: 0.9em 1.4em;
   border-radius: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
