@@ -52,7 +52,8 @@ const Pricing = ({ onUpgrade }) => {
       
       if (!supabase) {
         // No Supabase configured, redirect to login
-        navigate('/login?returnTo=/sportsbooks&intent=upgrade');
+        setLoading(false);
+        navigate('/login?returnTo=/subscribe&intent=upgrade');
         return;
       }
       
@@ -63,8 +64,9 @@ const Pricing = ({ onUpgrade }) => {
       
       if (!isAuthenticated) {
         debugLog('PRICING', 'User not authenticated, redirecting to login');
-        saveIntent('upgrade', '/sportsbooks');
-        navigate('/login?returnTo=/sportsbooks&intent=upgrade');
+        saveIntent('upgrade', '/subscribe');
+        setLoading(false);
+        navigate('/login?returnTo=/subscribe&intent=upgrade');
         return;
       }
 
@@ -83,13 +85,13 @@ const Pricing = ({ onUpgrade }) => {
         debugLog('PRICING', 'Redirecting to Stripe checkout');
         window.location.href = data.url;
       } else {
+        setLoading(false);
         throw new Error(data?.error || 'No checkout URL received');
       }
       
     } catch (error) {
       console.error('Failed to handle upgrade:', error);
       setError(error.message || 'Failed to start checkout. Please try again.');
-    } finally {
       setLoading(false);
     }
   };

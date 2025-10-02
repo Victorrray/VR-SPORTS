@@ -421,6 +421,15 @@
 @media (max-width: 768px) {
   .pricing-showcase.two-cards {
     grid-template-columns: 1fr;
+    justify-items: center;
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  
+  .pricing-card,
+  .platinum-card {
+    max-width: 420px;
+    width: 100%;
   }
   
   .hero-title {
