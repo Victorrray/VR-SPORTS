@@ -32,6 +32,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import BillingSuccess from './pages/BillingSuccess';
 import BillingCancel from './pages/BillingCancel';
+import Subscribe from './pages/Subscribe';
 import QuotaModal from './components/modals/QuotaModal';
 import UsernameSetup from './components/auth/UsernameSetup';
 import "./App.css";
@@ -126,6 +127,7 @@ function AppRoutes() {
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Landing />} />
+              <Route path="/subscribe" element={<PrivateRoute><Subscribe /></PrivateRoute>} />
               <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
               <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />
               <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
