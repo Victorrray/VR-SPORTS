@@ -73,9 +73,22 @@ const Pricing = ({ onUpgrade }) => {
       // Create Stripe checkout session
       debugLog('PRICING', 'Creating Stripe checkout session');
       const { withApiBase } = require('../../config/api');
+      
+      // Get the session token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+      
       const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       const data = await response.json();
@@ -223,11 +236,8 @@ const Pricing = ({ onUpgrade }) => {
             <div className="pricing-display">
               <div className="price-main">
                 <span className="currency">$</span>
-                <span className="amount">15</span>
+                <span className="amount">10</span>
                 <span className="period">/month</span>
-              </div>
-              <div className="price-note">
-                <span className="savings">Save 25% vs daily subscriptions</span>
               </div>
             </div>
 
@@ -282,12 +292,6 @@ const Pricing = ({ onUpgrade }) => {
             <div className="trust-signals">
               <div className="trust-item">
                 <span>✓ Cancel anytime</span>
-              </div>
-              <div className="trust-item">
-                <span>•</span>
-              </div>
-              <div className="trust-item">
-                <span>7-day money back</span>
               </div>
             </div>
           </div>
