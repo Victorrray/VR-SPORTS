@@ -298,8 +298,8 @@
   align-items: center;
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.04));
   border: 2px solid rgba(139, 92, 246, 0.2);
-  border-radius: 16px;
-  padding: 0.7em 1.2em;
+  border-radius: 12px;
+  padding: 0.5em 1em;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
