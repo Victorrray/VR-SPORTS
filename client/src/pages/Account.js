@@ -607,12 +607,12 @@ export default function Account() {
                 </span>
                 <div className="plan-details">
                   <span className="plan-name">
-                    {(me?.plan === 'gold' || me?.plan === 'platinum') ? 'Gold Plan' : 'No Active Plan'}
+                    {me?.plan === 'platinum' ? 'Platinum Plan' : me?.plan === 'gold' ? 'Gold Plan' : 'No Active Plan'}
                   </span>
                   <span className="plan-desc">
                     {(me?.plan === 'gold' || me?.plan === 'platinum')
                       ? 'Full access to live odds and game data' 
-                      : 'Subscribe to Gold plan for $10/month'
+                      : 'Subscribe to Platinum plan for $10/month'
                     }
                   </span>
                 </div>

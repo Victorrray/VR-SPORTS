@@ -39,7 +39,7 @@ export default function UsagePlan() {
 
   console.log('🔍 UsagePlan: Loading complete, rendering main content');
 
-  const hasGoldPlan = me?.plan === 'gold' || me?.plan === 'platinum';
+  const hasPaidPlan = me?.plan === 'gold' || me?.plan === 'platinum';
 
   // Subscription data for Gold plan
   const subscriptionData = {
@@ -83,11 +83,11 @@ export default function UsagePlan() {
         </button>
         <div className="header-content">
           <div className="header-icon">
-            {hasGoldPlan ? <Crown size={24} /> : <Zap size={24} />}
+            {hasPaidPlan ? <Crown size={24} /> : <Zap size={24} />}
           </div>
           <div className="header-text">
             <h1>Subscription Plan</h1>
-            <p>Manage your Gold subscription</p>
+            <p>Manage your {isPlatinum ? 'Platinum' : 'Gold'} subscription</p>
           </div>
         </div>
       </div>
