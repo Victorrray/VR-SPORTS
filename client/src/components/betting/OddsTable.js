@@ -1716,9 +1716,9 @@ export default function OddsTable({
     }
     
     // Only proceed if we have enough books for a meaningful consensus
-    if (allBooks.length < 4) {
+    if (allBooks.length < 3) {
       if (row.playerName === 'Breece Hall' && row.mkt?.key?.includes('reception')) {
-        console.log(`🔍 EV DEBUG: Not enough books (${allBooks.length} < 4) - returning null`);
+        console.log(`🔍 EV DEBUG: Not enough books (${allBooks.length} < 3) - returning null`);
       }
       return null;
     }
@@ -1751,7 +1751,7 @@ export default function OddsTable({
         });
       }
       
-      if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 4) { // Minimum 4 books for reliable EV
+      if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Minimum 3 books for reliable EV
         const fairDec = 1 / consensusProb;
         return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
       }
@@ -1782,7 +1782,7 @@ export default function OddsTable({
     const consensusProb = weightedMedian(probs, weights);
     const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
     
-    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 4) { // Minimum 4 books for reliable EV
+    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Minimum 3 books for reliable EV
       const fairDec = 1 / consensusProb;
       return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
