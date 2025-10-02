@@ -1252,15 +1252,29 @@ body,
 }
 
 @media (min-width: 1100px) {
+  /* Ensure table container has proper width */
+  .odds-table-card.revamp {
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto 24px;
+    padding: 24px;
+  }
+
   .odds-table-card.revamp .odds-grid {
     font-size: 0.95em;
     table-layout: fixed;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
   }
 
   .odds-table-card.revamp .odds-grid th,
   .odds-table-card.revamp .odds-grid td {
-    padding: 12px 16px;
+    padding: 14px 12px;
     vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .odds-table-card.revamp .odds-grid tbody tr.odds-row:hover td {
@@ -1271,38 +1285,45 @@ body,
   /* EV % Column */
   .odds-table-card.revamp .odds-grid th:first-child,
   .odds-table-card.revamp .odds-grid td:first-child {
-    width: 8%;
+    width: 7%;
+    min-width: 60px;
     text-align: center;
   }
 
   /* MATCH Column */
   .odds-table-card.revamp .odds-grid th:nth-child(2),
   .odds-table-card.revamp .odds-grid td:nth-child(2) {
-    width: 20%;
+    width: 18%;
+    min-width: 140px;
     text-align: left;
+    white-space: normal;
   }
 
   /* TEAM Column - Increased for better readability */
   .odds-table-card.revamp .odds-grid th:nth-child(3),
   .odds-table-card.revamp .odds-grid td:nth-child(3) {
-    width: 25%;
+    width: 28%;
+    min-width: 200px;
     text-align: left;
     font-weight: 600;
     font-size: 1.02em;
     line-height: 1.4;
+    white-space: normal;
   }
 
   /* LINE Column */
   .odds-table-card.revamp .odds-grid th:nth-child(4),
   .odds-table-card.revamp .odds-grid td:nth-child(4) {
-    width: 10%;
+    width: 9%;
+    min-width: 70px;
     text-align: center;
   }
 
   /* BOOK Column - Increased */
   .odds-table-card.revamp .odds-grid th:nth-child(5),
   .odds-table-card.revamp .odds-grid td:nth-child(5) {
-    width: 15%;
+    width: 16%;
+    min-width: 120px;
     text-align: left;
     font-weight: 500;
   }
@@ -1310,14 +1331,16 @@ body,
   /* ODDS Column */
   .odds-table-card.revamp .odds-grid th:nth-child(6),
   .odds-table-card.revamp .odds-grid td:nth-child(6) {
-    width: 12%;
+    width: 11%;
+    min-width: 80px;
     text-align: center;
   }
 
   /* DE-VIG Column - Reduced */
   .odds-table-card.revamp .odds-grid th:nth-child(7),
   .odds-table-card.revamp .odds-grid td:nth-child(7) {
-    width: 10%;
+    width: 11%;
+    min-width: 80px;
     text-align: center;
   }
 
@@ -1328,5 +1351,11 @@ body,
 
   .odds-table-card.revamp .desktop-matchup-league {
     font-size: 0.92em;
+  }
+
+  /* Ensure team names don't wrap unnecessarily */
+  .odds-table-card.revamp .odds-grid td:nth-child(3) {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 }
