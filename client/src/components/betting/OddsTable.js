@@ -1637,8 +1637,23 @@ export default function OddsTable({
     // This ensures we have enough data to calculate an accurate fair line
     const allBooks = row.allBooks || [];
     
+    // Debug logging for EV calculation
+    if (row.playerName === 'Breece Hall' && row.mkt?.key?.includes('reception')) {
+      console.log(`🔍 EV DEBUG for ${row.playerName} ${row.mkt?.key}:`, {
+        bookmakerKey,
+        userOdds,
+        allBooksCount: allBooks.length,
+        allBooks: allBooks.map(b => ({ book: b.bookmaker?.key || b.book, odds: b.price || b.odds, name: b.name }))
+      });
+    }
+    
     // Only proceed if we have enough books for a meaningful consensus
-    if (allBooks.length < 4) return null;
+    if (allBooks.length < 4) {
+      if (row.playerName === 'Breece Hall' && row.mkt?.key?.includes('reception')) {
+        console.log(`🔍 EV DEBUG: Not enough books (${allBooks.length} < 4) - returning null`);
+      }
+      return null;
+    }
     
     // For player props, use consensus probability from all available books
     if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
