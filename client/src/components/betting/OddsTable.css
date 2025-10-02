@@ -426,12 +426,10 @@ body,
   color: var(--text-muted);
   font-size: 1.05em;
   font-weight: 700;
+  padding: 1.1em .7em;
   letter-spacing: .03em;
   border-bottom: 2.5px solid #334c;
   text-transform: uppercase;
-  position: sticky;
-  top: 0;
-  z-index: 2;
 }
 .odds-grid thead tr th:first-child { border-top-left-radius: 14px; }
 .odds-grid thead tr th:last-child  { border-top-right-radius: 14px; }
@@ -582,9 +580,6 @@ body,
   text-align: center;
   background: rgba(0, 0, 0, 0.3);
   border: none;
-  position: sticky;
-  top: 0;
-  z-index: 2;
   backdrop-filter: blur(4px);
 }
 

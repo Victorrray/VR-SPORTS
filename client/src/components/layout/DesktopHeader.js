@@ -16,8 +16,8 @@ export default function DesktopHeader({
   const sections = [
     { id: 'game', name: 'Game Odds', icon: BarChart3 },
     { id: 'props', name: 'Player Props', icon: Target },
-    { id: 'arbitrage', name: 'Arbitrage', icon: Zap, requiresPlatinum: true },
-    { id: 'middles', name: 'Middles', icon: Activity, requiresPlatinum: true }
+    { id: 'arbitrage', name: 'Arbitrage', icon: Zap, disabled: true },
+    { id: 'middles', name: 'Middles', icon: Activity, disabled: true }
   ];
 
   return (
@@ -33,7 +33,7 @@ export default function DesktopHeader({
         {sections.map(section => {
           const IconComponent = section.icon;
           const isActive = currentSection === section.id;
-          const isDisabled = section.requiresPlatinum && !hasPlatinum;
+          const isDisabled = section.disabled || (section.requiresPlatinum && !hasPlatinum);
           
           return (
             <button
@@ -41,7 +41,7 @@ export default function DesktopHeader({
               className={`desktop-section-option ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
               onClick={() => !isDisabled && onSectionChange(section.id)}
               disabled={isDisabled}
-              title={isDisabled ? 'Requires Platinum Plan' : ''}
+              title={isDisabled ? (section.disabled ? 'Coming Soon' : 'Requires Platinum Plan') : ''}
             >
               <IconComponent size={16} className="section-icon" />
               <span>{section.name}</span>
