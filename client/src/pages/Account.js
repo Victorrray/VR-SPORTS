@@ -98,10 +98,11 @@ export default function Account() {
           .eq("id", user.id)
           .single();
         if (!error && data && data.username) setUsername(data.username);
+        // Only show error for critical issues, not for missing profile (PGRST116)
         if (error && error.code !== 'PGRST116') {
-          // Log non-not-found errors
-          console.error('Account: Failed to load username', error);
-          setError('Failed to load profile');
+          // Log non-not-found errors but don't show error to user
+          console.warn('Account: Profile query returned error (non-critical):', error);
+          // Don't set error state - profile is optional for guest users
         }
       } catch (e) {
         console.error('Account: Exception while loading profile', e);
