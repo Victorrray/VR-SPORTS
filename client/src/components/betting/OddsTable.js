@@ -2899,6 +2899,21 @@ export default function OddsTable({
                               
                               console.log(`🎯 Mini table: Always showing all ${booksToProcess.length} available books for comparison`);
                               
+                              // Debug logging for Matthew Stafford prop
+                              if (row.playerName === 'Matthew Stafford' && row.mkt?.key?.includes('pass_attempts')) {
+                                console.log(`🔍 MINI TABLE DEBUG for ${row.playerName} ${row.mkt?.key}:`, {
+                                  allBooksCount: row.allBooks?.length || 0,
+                                  allBooks: row.allBooks?.map(b => ({ 
+                                    book: b.bookmaker?.key || b.book, 
+                                    odds: b.price || b.odds,
+                                    name: b.name 
+                                  })),
+                                  overBooksCount: row.overBooks?.length || 0,
+                                  underBooksCount: row.underBooks?.length || 0,
+                                  isCombinedProp: row.isCombinedProp
+                                });
+                              }
+                              
                               console.log(`🎯 Mini table for ${row.key}: Using ${booksToProcess.length} books (${mode === "props" && bookFilter && bookFilter.length > 0 ? 'non-selected' : 'all'} books)`);
                               if (mode === "props" && bookFilter && bookFilter.length > 0) {
                                 console.log(`🎯 Selected books: ${row.selectedBooks?.length || 0}, Non-selected books: ${row.nonSelectedBooks?.length || 0}`);
