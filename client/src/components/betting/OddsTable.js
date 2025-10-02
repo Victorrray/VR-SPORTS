@@ -124,12 +124,12 @@ function calculateEV(odds, fairLine, bookmakerKey = null) {
   const toDec = o => (o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1);
   
   // Special EV calculation for DFS apps only
-  const isDFSApp = ['prizepicks', 'underdog', 'pick6'].includes(bookmakerKey);
+  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'dabble_au'].includes(bookmakerKey);
   
   if (isDFSApp) {
     // DFS apps use fixed odds for player props
-    // Underdog uses -116, others use -137
-    const dfsOdds = bookmakerKey === 'underdog' ? -116 : -137;
+    // All DFS apps now use -119
+    const dfsOdds = -119;
     const dfsDec = toDec(dfsOdds);
     const fairDec = toDec(fairLine);
     
@@ -639,7 +639,7 @@ export default function OddsTable({
   /* ---------- Build rows (game mode) ---------- */
   const allRows = useMemo(() => {
     // Debug: Check if we have any DFS app data
-    const dfsApps = ['prizepicks', 'underdog', 'pick6'];
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au'];
     let dfsAppCount = 0;
     let dfsMarketCount = 0;
     let dfsOutcomeCount = 0;
@@ -713,13 +713,13 @@ export default function OddsTable({
         console.log('🔍 PROPS DEBUG: marketFilter =', marketFilter);
         
         // Check if we're filtering for DFS apps only
-        const propsDfsApps = ['prizepicks', 'underdog', 'pick6'];
+        const propsDfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au'];
         const propsFilteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => propsDfsApps.includes(book));
         console.log('🔍 PROPS DEBUG: propsFilteringForDFSOnly =', propsFilteringForDFSOnly);
       
       // Log what markets we're looking for
       console.log('Looking for player prop markets containing: player_, batter_, pitcher_');
-      console.log('Looking for DFS sites:', ['prizepicks', 'underdog', 'pick6']);
+      console.log('Looking for DFS sites:', ['prizepicks', 'underdog', 'pick6', 'dabble_au']);
       
       // Special handling for DFS apps in props mode
       if (propsFilteringForDFSOnly) {
@@ -770,7 +770,7 @@ export default function OddsTable({
           
           game.bookmakers.forEach(bookmaker => {
             allBookmakers.add(bookmaker.key);
-            if (['prizepicks', 'underdog', 'draftkings_pick6', 'pick6'].includes(bookmaker.key?.toLowerCase())) {
+            if (['prizepicks', 'underdog', 'draftkings_pick6', 'pick6', 'dabble_au'].includes(bookmaker.key?.toLowerCase())) {
               dfsBookmakers.add(bookmaker.key);
               console.log(`🎯 DFS BOOKMAKER FOUND: ${bookmaker.key}`);
             } else {
@@ -814,7 +814,7 @@ export default function OddsTable({
           console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
           bookmaker.markets.forEach(market => {
             // Filter markets based on mode
-            const isDFSSite = ['prizepicks', 'underdog', 'pick6'].includes(bookmaker.key?.toLowerCase());
+            const isDFSSite = ['prizepicks', 'underdog', 'pick6', 'dabble_au'].includes(bookmaker.key?.toLowerCase());
             const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
             const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
             
@@ -835,7 +835,7 @@ export default function OddsTable({
               
               // For DFS sites, ensure we're using fixed odds
               if (isDFSSite) {
-                const dfsOdds = bookmaker.key === 'underdog' ? -116 : -137;
+                const dfsOdds = -119;
                 console.log(`Processing DFS site ${bookmaker.key} with fixed ${dfsOdds} odds for market ${market.key}`);
                 // Force fixed odds for all DFS app outcomes
                 if (market.outcomes && market.outcomes.length > 0) {
@@ -1110,7 +1110,7 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
+            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = propData.allBooks.some(book => {
@@ -1151,7 +1151,7 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
+            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = allCombinedBooks.some(book => {
@@ -1627,7 +1627,7 @@ export default function OddsTable({
     
     // For DFS apps, we want to prioritize them in EV sorting
     if (isDFSApp && mode === 'props') {
-      const dfsOdds = bookmakerKey === 'underdog' ? -116 : -137;
+      const dfsOdds = -119;
       console.log(`Calculating EV for DFS app ${bookmakerKey} with fixed ${dfsOdds} odds`);
       // Force the odds to be fixed for EV calculation
       return calculateEV(dfsOdds, fairDevigMap.get(row.key), bookmakerKey);
@@ -1718,7 +1718,7 @@ export default function OddsTable({
     let r = allRows;
     
     // Check if we're filtering for DFS apps only
-    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
     const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
     
     console.log('🔍 DFS FILTER DEBUG: bookFilter =', bookFilter);
@@ -1786,7 +1786,7 @@ export default function OddsTable({
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
         // Check if this is a DFS app - always show DFS app bets regardless of EV
-        const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'];
+        const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
         const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         const isDFSApp = dfsApps.some(app => bookmakerKey.includes(app));
         
