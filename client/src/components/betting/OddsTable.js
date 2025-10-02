@@ -2430,10 +2430,7 @@ export default function OddsTable({
             <th className="sort-th" onClick={()=>setSort(s=>({ key:'match', dir:s.key==='match'&&s.dir==='desc'?'asc':'desc' }))}>
               <span className="sort-label">Match <span className="sort-indicator">{sort.key==='match'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
             </th>
-            <th>Team</th>
-            <th className="sort-th" onClick={()=>setSort(s=>({ key:'line', dir:s.key==='line'&&s.dir==='desc'?'asc':'desc' }))}>
-              <span className="sort-label">Line <span className="sort-indicator">{sort.key==='line'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
-            </th>
+            <th>Team / Line</th>
             <th className="sort-th" onClick={()=>setSort(s=>({ key:'book', dir:s.key==='book'&&s.dir==='desc'?'asc':'desc' }))}>
               <span className="sort-label">Book <span className="sort-indicator">{sort.key==='book'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
             </th>
@@ -2599,16 +2596,15 @@ export default function OddsTable({
                           : (row.mkt?.key || '') === 'h2h'
                             ? shortTeam(row.out?.name, row.game?.sport_key)
                             : (row.out?.name || '')}
+                        {/* Add line inline with team name */}
+                        {mode === "props" 
+                          ? (row.out?.point ? ` ${row.out.point}` : '')
+                          : ((row.mkt?.key || '') !== 'h2h' && row.out?.point ? ` ${formatLine(row.out.point, row.mkt.key, 'game')}` : '')}
                       </span>
                       <span style={{ opacity:.9 }}>
                         {formatMarket(row.mkt?.key || '')}
                       </span>
                     </div>
-                  </td>
-                  <td>
-                    {mode === "props" 
-                      ? `${row.out?.name || ''} ${row.out?.point || ''}`
-                      : (row.mkt?.key || '') === 'h2h' ? '' : formatLine(row.out?.point, row.mkt?.key, 'game')}
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
