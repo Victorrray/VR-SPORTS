@@ -173,10 +173,10 @@ const BOOK_WEIGHTS = {
   'circasports': 2.5,
   
   // Tier 2: Low-vig books
-  'novig': 2.0,
+  'novig': 2.5,
   'lowvig': 2.0,
-  'prophet_exchange': 1.8,
-  'rebet': 1.8,
+  'prophet_exchange': 2.5,
+  'rebet': 1.25,
   
   // Tier 3: Major sportsbooks
   'draftkings': 1.5,
