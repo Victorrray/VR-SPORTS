@@ -1251,6 +1251,14 @@ body,
   }
 }
 
+/* Desktop table layout - show normal table for screens wider than mobile */
+@media (min-width: 561px) {
+  /* Ensure desktop table rows are visible and mobile cards are hidden */
+  .odds-grid thead { display: table-header-group !important; }
+  .odds-grid tbody tr.odds-row { display: table-row !important; }
+  .odds-grid tbody tr.mobile-card-row { display: none !important; }
+}
+
 @media (min-width: 1100px) {
   /* Ensure table container has proper width */
   .odds-table-card.revamp {
