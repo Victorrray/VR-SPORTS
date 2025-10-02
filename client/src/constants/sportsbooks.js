@@ -12,6 +12,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true, tier: 1 },
   { key: 'underdog', name: 'Underdog Fantasy', popular: true, isDFS: true, tier: 1 },
   { key: 'pick6', name: 'DK Pick6', popular: true, isDFS: true, tier: 2 },
+  { key: 'dabble_au', name: 'Dabble AU', popular: true, isDFS: true, tier: 2 },
   
   // ===== SECOND TIER - MAJOR OPERATORS =====
   { key: 'espnbet', name: 'ESPN BET', popular: true, tier: 2 },
@@ -28,6 +29,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   
   // ===== EXCHANGE =====
   { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true, tier: 3 },
+  { key: 'rebet', name: 'ReBet', popular: true, isExchange: true, tier: 3 },
   
   // ===== REGIONAL/SPECIALTY =====
   { key: 'fliff', name: 'Fliff', popular: false, tier: 3 },
@@ -140,5 +142,10 @@ export const supportsPlayerProps = (bookKey) => {
 // - betonlineag (duplicate of betonline)
 // - foxbet (defunct)
 // - twinspires (rebranded to fanduel)
-// - rebet (low volume)
 // - lowvig (low volume)
+// - betfred_us (removed per user request)
+// - superbook (removed per user request)
+
+// ADDED:
+// + rebet (ReBet exchange - us2 region)
+// + dabble_au (Dabble AU DFS app)
