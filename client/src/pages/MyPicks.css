@@ -281,11 +281,11 @@
   align-items: center;
   text-align: center;
   padding: 60px 40px;
-  background: rgba(139, 92, 246, 0.05);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow: none;
   margin: 40px 0;
 }
 

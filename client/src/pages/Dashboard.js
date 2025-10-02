@@ -98,12 +98,24 @@ export default function Dashboard() {
   const location = useLocation();
   const isDashboardPage = location.pathname === '/' || location.pathname === '/dashboard';
   const enableDashboardMarkets = Boolean(isDashboardPage); // Enable for all users on dashboard
-  const { games } = useMarkets(
+  const { games, loading, error } = useMarkets(
     enableDashboardMarkets ? ["americanfootball_nfl", "basketball_nba", "baseball_mlb"] : [],
     enableDashboardMarkets ? ["us"] : [],
     enableDashboardMarkets ? ["h2h", "spreads", "totals"] : [],
     { enabled: enableDashboardMarkets }
   );
+
+  // Debug: Log games data
+  React.useEffect(() => {
+    console.log('Dashboard - useMarkets data:', {
+      gamesCount: games?.length || 0,
+      loading,
+      error,
+      enableDashboardMarkets,
+      isDashboardPage,
+      firstGame: games?.[0]
+    });
+  }, [games, loading, error, enableDashboardMarkets, isDashboardPage]);
 
   return (
     <main style={{ 

@@ -32,7 +32,11 @@ export default function Navbar({ onOpenMobileSearch }) {
     { label: "Odds", to: "/sportsbooks" },
     { label: "Picks", to: "/picks" },
     { label: "Scores", to: "/scores" },
-    ...(user ? [{ label: "Profile", to: "/account" }] : [{ label: "Login", to: "/login" }]),
+    ...(user ? [
+      { label: "My Sportsbooks", to: "/my-sportsbooks" },
+      { label: "My Account", to: "/account" },
+      { label: "My Subscription", to: "/subscribe" }
+    ] : [{ label: "Login", to: "/login" }]),
   ];
 
   function handleSearchSubmit(e) {
@@ -50,23 +54,8 @@ export default function Navbar({ onOpenMobileSearch }) {
     navigate(`/sportsbooks?${params.toString()}`);
   }
 
-  const { withApiBase } = require('../../config/api');
-  const handleUpgrade = async () => {
-    try {
-      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
-        method: 'POST',
-        credentials: 'include'
-      });
-      const data = await response.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        alert('Unable to start checkout. Please try again.');
-      }
-    } catch (error) {
-      console.error('Failed to create checkout:', error);
-      alert('Unable to start checkout. Please try again.');
-    }
+  const handleUpgrade = () => {
+    navigate('/subscribe');
   };
 
   const handleManageBilling = () => {

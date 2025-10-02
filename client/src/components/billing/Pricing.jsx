@@ -68,13 +68,27 @@ const Pricing = ({ onUpgrade }) => {
         return;
       }
 
-      // For now, redirect to sportsbooks (upgrade functionality can be added later)
-      navigate('/sportsbooks');
+      // Create Stripe checkout session
+      debugLog('PRICING', 'Creating Stripe checkout session');
+      const { withApiBase } = require('../../config/api');
+      const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      const data = await response.json();
+      debugCheckoutResult(data);
+      
+      if (data?.url) {
+        debugLog('PRICING', 'Redirecting to Stripe checkout');
+        window.location.href = data.url;
+      } else {
+        throw new Error(data?.error || 'No checkout URL received');
+      }
       
     } catch (error) {
       console.error('Failed to handle upgrade:', error);
-      // Fallback to login page
-      navigate('/login?returnTo=/sportsbooks&intent=upgrade');
+      setError(error.message || 'Failed to start checkout. Please try again.');
     } finally {
       setLoading(false);
     }
