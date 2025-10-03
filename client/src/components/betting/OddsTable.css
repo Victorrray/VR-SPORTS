@@ -851,7 +851,6 @@ body,
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    min-height: 220px;
   }
   
   .mobile-odds-card::before {
@@ -1296,6 +1295,7 @@ body,
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    box-sizing: border-box;
   }
 
   .odds-table-card.revamp .odds-grid tbody tr.odds-row:hover td {
@@ -1309,6 +1309,7 @@ body,
     width: 7%;
     min-width: 60px;
     text-align: center;
+    position: static;
   }
 
   /* MATCH Column */

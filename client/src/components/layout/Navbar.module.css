@@ -22,7 +22,7 @@
   border-bottom: 1px solid var(--nav-border);
   color: var(--text);
   box-shadow: var(--nav-shadow);
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 100;
   overflow: visible;
@@ -193,7 +193,7 @@
   color: var(--nav-text);
   font-size: 0.95em;
   font-weight: 600;
-  padding: 0.9em 1.4em;
+  padding: 0.75em 1.4em;
   border-radius: 14px;
   cursor: pointer;
   text-decoration: none;
@@ -202,6 +202,10 @@
   white-space: nowrap;
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .link::before {
