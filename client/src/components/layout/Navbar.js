@@ -136,37 +136,31 @@ export default function Navbar({ onOpenMobileSearch }) {
             {userMenuOpen && (
               <div className={styles.userMenuDropdown}>
                 <Link 
-                  to="/account" 
+                  to="/my-sportsbooks" 
                   className={styles.userMenuItem}
                   onClick={() => setUserMenuOpen(false)}
                 >
                   <Settings size={16} />
-                  Profile Settings
+                  My Sportsbooks
                 </Link>
-                
-                {me?.plan === 'platinum' ? (
-                  <button 
-                    className={styles.userMenuItem}
-                    onClick={() => {
-                      setUserMenuOpen(false);
-                      handleManageBilling();
-                    }}
-                  >
-                    <CreditCard size={16} />
-                    Manage Billing
-                  </button>
-                ) : (
-                  <button 
-                    className={styles.userMenuItem}
-                    onClick={() => {
-                      setUserMenuOpen(false);
-                      handleUpgrade();
-                    }}
-                  >
-                    <CreditCard size={16} />
-                    Upgrade to Platinum
-                  </button>
-                )}
+
+                <Link 
+                  to="/account" 
+                  className={styles.userMenuItem}
+                  onClick={() => setUserMenuOpen(false)}
+                >
+                  <User size={16} />
+                  My Account
+                </Link>
+
+                <Link 
+                  to="/subscribe" 
+                  className={styles.userMenuItem}
+                  onClick={() => setUserMenuOpen(false)}
+                >
+                  <CreditCard size={16} />
+                  My Subscription Plan
+                </Link>
               </div>
             )}
           </div>
@@ -246,6 +240,7 @@ export default function Navbar({ onOpenMobileSearch }) {
                 style={{
                   padding: '16px 20px',
                   cursor: 'pointer',
+                  borderBottom: '1px solid #374151',
                   color: '#ffffff',
                   fontSize: '15px',
                   fontWeight: '600',
@@ -265,6 +260,34 @@ export default function Navbar({ onOpenMobileSearch }) {
                 }}
               >
                 My Account
+              </button>
+              <button 
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  navigate('/subscribe');
+                }}
+                style={{
+                  padding: '16px 20px',
+                  cursor: 'pointer',
+                  color: '#ffffff',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  background: 'transparent',
+                  border: 'none',
+                  width: '100%',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#3b82f6';
+                  e.target.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#ffffff';
+                }}
+              >
+                My Subscription Plan
               </button>
             </div>
           )}

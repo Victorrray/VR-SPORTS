@@ -36,9 +36,9 @@ const SPORT_CATEGORIES = {
     title: "Major US Sports",
     sports: ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "baseball_mlb", "icehockey_nhl"]
   },
-  international: {
-    title: "International Sports", 
-    sports: ["soccer_epl", "soccer_uefa_champs_league", "soccer_fifa_world_cup", "soccer_conmebol_copa_america", "soccer_uefa_european_championship"]
+  soccer: {
+    title: "Soccer", 
+    sports: ["soccer_epl", "soccer_uefa_champs_league", "soccer_fifa_world_cup", "soccer_conmebol_copa_america", "soccer_uefa_european_championship", "soccer_spain_la_liga", "soccer_germany_bundesliga", "soccer_italy_serie_a", "soccer_france_ligue_one"]
   },
   tennis: {
     title: "Tennis",
@@ -48,13 +48,13 @@ const SPORT_CATEGORIES = {
     title: "Combat Sports",
     sports: ["boxing_heavyweight", "mma_mixed_martial_arts", "boxing", "mma"]
   },
-  motorsports: {
-    title: "Motorsports & Racing",
-    sports: ["motorsport_nascar", "motorsport_f1", "motorsport_indycar", "horse_racing"]
-  },
   golf: {
     title: "Golf",
     sports: ["golf_pga", "golf_masters", "golf_us_open", "golf_british_open", "golf_pga_championship", "golf_the_open_championship"]
+  },
+  motorsports: {
+    title: "Motorsports & Racing",
+    sports: ["motorsport_nascar", "motorsport_f1", "motorsport_indycar", "horse_racing"]
   },
   international_leagues: {
     title: "International Leagues",
@@ -101,10 +101,16 @@ export default function SportMultiSelect({
   const { categorizedList, filteredList } = useMemo(() => {
     let filtered = list || [];
     
+    // Filter out DFS apps if showDFSApps is false
+    if (isSportsbook && !showDFSApps) {
+      const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'sleeper', 'prophetx'];
+      filtered = filtered.filter(item => !dfsAppKeys.includes(item.key));
+    }
+    
     // Apply search filter
     if (enableSearch && searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      filtered = (list || []).filter(item => 
+      filtered = filtered.filter(item => 
         item.title.toLowerCase().includes(term) ||
         item.key.toLowerCase().includes(term)
       );

@@ -1343,7 +1343,9 @@ export default function OddsTable({
                 description: propData.playerName,
                 price: primaryBook.price,
                 odds: primaryBook.price,
-                point: propData.point
+                point: propData.point,
+                bookmaker: primaryBook.bookmaker,
+                book: primaryBook.bookmaker?.key
               },
               bk: primaryBook.bookmaker,
               sport: propData.sport,
@@ -1351,7 +1353,8 @@ export default function OddsTable({
               isCombinedProp: true, // Flag to indicate this has both sides
               overBooks: propData.overBooks,
               underBooks: propData.underBooks,
-              allBooks: [...propData.overBooks, ...propData.underBooks], // Combined for mini-table
+              // IMPORTANT: allBooks should only contain books from the SAME side for EV calculation
+              allBooks: showOver ? propData.overBooks : propData.underBooks,
               selectedBooks: propData.selectedBooks || [],
               nonSelectedBooks: propData.nonSelectedBooks || [],
               otherSideName: showOver ? 'Under' : 'Over'
@@ -1896,8 +1899,8 @@ export default function OddsTable({
       console.log('🎯 After filtering: ' + r.length + ' rows');
     }
     
-    // Apply search query filter for player props
-    if (searchQuery && searchQuery.trim() && mode === 'props') {
+    // Apply search query filter for both game odds and player props
+    if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.trim().toLowerCase();
       console.log('🔍 SEARCH FILTER: Applying search query:', query);
       console.log('🔍 SEARCH FILTER: Rows before search:', r.length);
@@ -1908,15 +1911,17 @@ export default function OddsTable({
         const homeTeam = (row.game?.home_team || '').toLowerCase();
         const awayTeam = (row.game?.away_team || '').toLowerCase();
         const marketKey = (row.mkt?.key || '').toLowerCase();
+        const league = (row.game?.sport_title || '').toLowerCase();
         
         const matches = playerName.includes(query) || 
                        teamName.includes(query) || 
                        homeTeam.includes(query) || 
                        awayTeam.includes(query) ||
-                       marketKey.includes(query);
+                       marketKey.includes(query) ||
+                       league.includes(query);
         
         if (matches) {
-          console.log(`🔍 SEARCH MATCH: ${playerName} - ${homeTeam} vs ${awayTeam}`);
+          console.log(`🔍 SEARCH MATCH: ${playerName || teamName} - ${homeTeam} vs ${awayTeam}`);
         }
         
         return matches;
@@ -3211,6 +3216,7 @@ export default function OddsTable({
                               ) : (
                                 <>
                                   <th>{shortTeam(row.game.home_team, row.game.sport_key)}</th>
+                                  {row.game.sport_key?.includes('soccer') && <th>Draw</th>}
                                   <th>{shortTeam(row.game.away_team, row.game.sport_key)}</th>
                                 </>
                               )}
@@ -3296,6 +3302,11 @@ export default function OddsTable({
                                       <td className="mini-odds-cell">
                                         {formatOdds(Number(grab(p, true)))}
                                       </td>
+                                      {row.game.sport_key?.includes('soccer') && p.outcomes && p.outcomes.length >= 3 && (
+                                        <td className="mini-odds-cell">
+                                          {formatOdds(Number(p.outcomes[2]?.price ?? p.outcomes[2]?.odds ?? 0))}
+                                        </td>
+                                      )}
                                       <td className="mini-odds-cell">
                                         {formatOdds(Number(grab(p, false)))}
                                       </td>

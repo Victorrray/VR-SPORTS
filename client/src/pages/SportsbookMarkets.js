@@ -386,11 +386,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     { date: selectedDate }
   );
 
-  // Initialize mode from URL parameters
+  // Initialize mode and search query from URL parameters
   useEffect(() => {
-    // Check for mode parameter in URL
+    // Check for mode and query parameters in URL
     const searchParams = new URLSearchParams(location.search);
     const mode = searchParams.get('mode');
+    const urlQuery = searchParams.get('q');
+    
+    // Set search query from URL if present
+    if (urlQuery && urlQuery !== query) {
+      console.log('🔍 Setting search query from URL:', urlQuery);
+      setQuery(urlQuery);
+    }
     
     if (mode === 'arbitrage') {
       console.log('🔍 Initializing arbitrage mode from URL parameter');
