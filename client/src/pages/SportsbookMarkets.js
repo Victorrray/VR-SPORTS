@@ -279,7 +279,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Golf
     { key: 'golf_pga', title: 'PGA Tour' },
-    { key: 'golf_masters', title: 'Masters Tournament Winner' },
     { key: 'golf_us_open', title: 'US Open Golf' },
     { key: 'golf_british_open', title: 'British Open' },
     { key: 'golf_pga_championship', title: 'PGA Championship' },
@@ -780,7 +779,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         const response = await secureFetch(withApiBase('/api/sports'), { credentials: 'include' });
         if (response.ok) {
           const sports = await response.json();
-          setSportList(sports);
+          // Filter out "winner" and "election" sports
+          const filteredSports = sports.filter(sport => 
+            !sport.key.includes('winner') && 
+            !sport.key.includes('election') &&
+            !sport.key.includes('_outright')
+          );
+          setSportList(filteredSports);
         }
       } catch (error) {
         console.warn('Failed to fetch sports list:', error);
