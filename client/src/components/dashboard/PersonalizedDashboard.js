@@ -232,7 +232,8 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
               marketDetail = `${firstOdds.outcome} ${spread}`;
             } else if (marketKey === 'totals') {
               selectedTeam = null;
-              marketDetail = `${firstOdds.outcome} ${firstOdds.point}`;
+              const outcomeText = firstOdds.outcome ? firstOdds.outcome.toUpperCase() : 'TOTAL';
+              marketDetail = `${outcomeText} ${firstOdds.point}`;
             }
           }
         }

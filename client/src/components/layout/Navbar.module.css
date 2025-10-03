@@ -1,8 +1,8 @@
 :root {
   /* Enhanced navbar variables matching VR-Odds purple theme */
-  --nav-bg: rgba(11, 18, 32, 0.98);
-  --nav-border: rgba(139, 92, 246, 0.15);
-  --nav-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+  --nav-bg: rgba(10, 6, 18, 0.95);
+  --nav-border: rgba(139, 92, 246, 0.2);
+  --nav-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
   --nav-backdrop: blur(24px);
   --nav-accent: #8b5cf6;
   --nav-accent-hover: #a78bfa;
@@ -111,17 +111,17 @@
 }
 
 .brandBtn:hover {
-  background: rgba(61, 126, 255, 0.1);
-  border: 1px solid rgba(61, 126, 255, 0.3);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
   color: #fff;
 }
 
 .brandBtn:active,
 .brandBtn:focus {
-  background: rgba(61, 126, 255, 0.1);
-  border: 1px solid rgba(61, 126, 255, 0.3);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
   color: #fff;
   transform: none;
   outline: none;
