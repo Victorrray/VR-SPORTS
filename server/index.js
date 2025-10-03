@@ -2007,7 +2007,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
           const bookmakerList = allowedBookmakers.join(',');
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true`;
           // Split markets into regular and alternate for optimized caching
           const regularMarkets = marketsToFetch.filter(market => !ALTERNATE_MARKETS.includes(market));
           const alternateMarkets = marketsToFetch.filter(market => ALTERNATE_MARKETS.includes(market));
@@ -2206,7 +2206,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           
           // Use individual event endpoint for player props
           // Include both us and us_dfs regions to get traditional sportsbooks AND DFS apps
-          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true`;
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
           const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, bookmakers: bookmakerList });

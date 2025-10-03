@@ -1223,6 +1223,50 @@ body,
   justify-content: center;
   align-items: center;
   flex: 0 0 62px;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Bet limit indicator for exchanges */
+.bet-limit-indicator {
+  font-size: 0.7em;
+  font-weight: 600;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+/* Bet Now button - direct link to sportsbook */
+.bet-now-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  min-width: 32px;
+  min-height: 32px;
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.bet-now-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+.bet-now-btn:active {
+  transform: scale(0.95);
 }
 
   /* Hide desktop mini-table on mobile */

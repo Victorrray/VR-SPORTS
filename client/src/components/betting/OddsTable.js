@@ -3140,6 +3140,26 @@ export default function OddsTable({
                                         <div className="mini-odds-col">
                                           <div className="mini-swipe-odds">
                                             {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
+                                            {(() => {
+                                              // Debug logging for bet limits
+                                              if (ob.bookmaker?.key === 'novig' || ob.bookmaker?.key === 'prophetx') {
+                                                console.log(`🔍 BET LIMIT DEBUG for ${ob.bookmaker?.key}:`, {
+                                                  bet_limit: ob.bet_limit,
+                                                  betLimit: ob.betLimit,
+                                                  fullObject: ob
+                                                });
+                                              }
+                                              
+                                              const betLimit = ob.bet_limit || ob.betLimit;
+                                              if (betLimit) {
+                                                return (
+                                                  <span className="bet-limit-indicator" title={`Max bet: $${betLimit}`}>
+                                                    💰${betLimit}
+                                                  </span>
+                                                );
+                                              }
+                                              return null;
+                                            })()}
                                           </div>
                                         </div>
                                       </>
@@ -3160,20 +3180,48 @@ export default function OddsTable({
                                     </>
                                   )}
                                   <div className="mini-pick-col">
-                                    <button 
-                                      className="add-pick-btn"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (onAddBet) {
-                                          addToBetSlip(row, ob, e.target);
-                                        } else {
-                                          addToPicks(row, ob, true, e.target);
-                                        }
-                                      }}
-                                      title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
-                                    >
-                                      +
-                                    </button>
+                                    {(() => {
+                                      // Debug logging for links
+                                      if (i === 0) {
+                                        console.log(`🔗 LINK DEBUG for ${ob.bookmaker?.key}:`, {
+                                          bookmaker_link: ob.bookmaker_link,
+                                          market_link: ob.market_link,
+                                          betslip_link: ob.betslip_link,
+                                          fullObject: ob
+                                        });
+                                      }
+                                      
+                                      if (ob.bookmaker_link || ob.market_link) {
+                                        return (
+                                          <a 
+                                            href={ob.market_link || ob.bookmaker_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="bet-now-btn"
+                                            onClick={(e) => e.stopPropagation()}
+                                            title="Bet Now at Sportsbook"
+                                          >
+                                            🎯
+                                          </a>
+                                        );
+                                      }
+                                      return (
+                                        <button 
+                                          className="add-pick-btn"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (onAddBet) {
+                                              addToBetSlip(row, ob, e.target);
+                                            } else {
+                                              addToPicks(row, ob, true, e.target);
+                                            }
+                                          }}
+                                          title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
+                                        >
+                                          +
+                                        </button>
+                                      );
+                                    })()}
                                   </div>
                                 </div>
                                 ))}
