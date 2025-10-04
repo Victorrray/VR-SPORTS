@@ -87,7 +87,8 @@ const TRIAL_BOOKMAKERS = [
 // Player props completely removed
 
 const MAX_BOOKMAKERS = 20; // Increased to accommodate more sportsbooks and DFS apps for player props
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes for regular markets
+const PLAYER_PROPS_CACHE_DURATION_MS = 90 * 1000; // 90 seconds for player props (DFS markets close quickly)
 const ALTERNATE_MARKETS_CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes for alternate markets
 
 // List of alternate markets that change less frequently
@@ -96,6 +97,15 @@ const ALTERNATE_MARKETS = [
   'alternate_totals',
   'team_totals',
   'alternate_team_totals'
+];
+
+// List of player prop markets that need faster refresh
+const PLAYER_PROP_MARKETS = [
+  'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts',
+  'player_rush_yds', 'player_rush_tds', 'player_rush_attempts',
+  'player_receptions', 'player_reception_yds', 'player_reception_tds',
+  'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+  'player_strikeouts', 'player_hits', 'player_total_bases', 'player_rbis'
 ];
 
 // In-memory cache for API responses
@@ -732,16 +742,27 @@ function getCachedResponse(cacheKey) {
     return null;
   }
   
-  // Determine if this is an alternate markets cache key
+  // Determine cache duration based on market type
   const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
-  const cacheDuration = isAlternateMarket ? ALTERNATE_MARKETS_CACHE_DURATION_MS : CACHE_DURATION_MS;
+  const isPlayerProp = PLAYER_PROP_MARKETS.some(market => cacheKey.includes(market));
+  
+  let cacheDuration = CACHE_DURATION_MS; // Default 5 minutes
+  let cacheType = 'regular';
+  
+  if (isPlayerProp) {
+    cacheDuration = PLAYER_PROPS_CACHE_DURATION_MS; // 90 seconds for player props
+    cacheType = 'player prop';
+  } else if (isAlternateMarket) {
+    cacheDuration = ALTERNATE_MARKETS_CACHE_DURATION_MS; // 30 minutes for alternates
+    cacheType = 'alternate market';
+  }
   
   if (Date.now() - cached.timestamp < cacheDuration) {
-    console.log(` Cache HIT for ${cacheKey}${isAlternateMarket ? ' (alternate market)' : ''}`);
+    console.log(` Cache HIT for ${cacheKey} (${cacheType})`);
     return cached.data;
   }
   
-  console.log(` Cache EXPIRED for ${cacheKey}`);
+  console.log(` Cache EXPIRED for ${cacheKey} (${cacheType})`);
   apiCache.delete(cacheKey); // Remove expired cache
   return null;
 }
@@ -1833,6 +1854,208 @@ app.post('/api/billing/webhook',
   }
 );
 
+// GET /historical/odds - Historical odds snapshots for a sport (costs 1 credit per snapshot)
+app.get("/api/historical/odds/:sport", requireUser, async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const { 
+      regions = 'us',
+      markets = 'h2h',
+      date,
+      bookmakers
+    } = req.query;
+    
+    if (!API_KEY) {
+      return res.status(400).json({ 
+        code: 'MISSING_ENV', 
+        message: "Missing ODDS_API_KEY" 
+      });
+    }
+    
+    console.log(`🌐 Fetching historical odds for ${sport} at ${date || 'latest'}`);
+    
+    const params = new URLSearchParams({
+      apiKey: API_KEY,
+      regions,
+      markets
+    });
+    
+    if (date) params.set('date', date);
+    if (bookmakers) params.set('bookmakers', bookmakers);
+    
+    const url = `https://api.the-odds-api.com/v4/historical/sports/${encodeURIComponent(sport)}/odds?${params.toString()}`;
+    
+    const response = await axios.get(url, { timeout: 10000 });
+    
+    console.log(`✅ Retrieved historical odds snapshot:`, {
+      timestamp: response.data.timestamp,
+      gameCount: response.data.data?.length || 0
+    });
+    
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching historical odds:', error.message);
+    res.status(error.response?.status || 500).json({ 
+      error: error.message,
+      hint: 'Failed to fetch historical odds from The Odds API'
+    });
+  }
+});
+
+// GET /historical/events/{eventId}/odds - Historical odds for specific event (costs 1 credit per snapshot)
+app.get("/api/historical/events/:sport/:eventId/odds", requireUser, async (req, res) => {
+  try {
+    const { sport, eventId } = req.params;
+    const { 
+      regions = 'us',
+      markets = 'h2h',
+      date,
+      bookmakers
+    } = req.query;
+    
+    if (!API_KEY) {
+      return res.status(400).json({ 
+        code: 'MISSING_ENV', 
+        message: "Missing ODDS_API_KEY" 
+      });
+    }
+    
+    // Check cache (cache for 1 hour since historical data doesn't change)
+    const cacheKey = getCacheKey('historical-event-odds', { sport, eventId, date, regions, markets, bookmakers });
+    const cached = getCachedResponse(cacheKey);
+    
+    if (cached) {
+      console.log(`📦 Using cached historical odds for event ${eventId}`);
+      return res.json(cached);
+    }
+    
+    console.log(`🌐 Fetching historical odds for event ${eventId} at ${date || 'latest'}`);
+    
+    const params = new URLSearchParams({
+      apiKey: API_KEY,
+      regions,
+      markets
+    });
+    
+    if (date) params.set('date', date);
+    if (bookmakers) params.set('bookmakers', bookmakers);
+    
+    const url = `https://api.the-odds-api.com/v4/historical/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/odds?${params.toString()}`;
+    
+    const response = await axios.get(url, { timeout: 10000 });
+    
+    // Cache for 1 hour
+    setCachedResponse(cacheKey, response.data, 3600000);
+    
+    console.log(`✅ Retrieved historical odds for event:`, {
+      timestamp: response.data.timestamp,
+      bookmakerCount: response.data.data?.bookmakers?.length || 0
+    });
+    
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching historical event odds:', error.message);
+    res.status(error.response?.status || 500).json({ 
+      error: error.message,
+      hint: 'Failed to fetch historical event odds from The Odds API'
+    });
+  }
+});
+
+// GET /events/{eventId}/markets - Returns available markets for an event (costs 1 credit)
+app.get("/api/events/:sport/:eventId/markets", requireUser, async (req, res) => {
+  try {
+    const { sport, eventId } = req.params;
+    const { regions = 'us' } = req.query;
+    
+    if (!API_KEY) {
+      return res.status(400).json({ 
+        code: 'MISSING_ENV', 
+        message: "Missing ODDS_API_KEY", 
+        hint: 'Set ODDS_API_KEY in backend env' 
+      });
+    }
+    
+    // Check cache first (cache for 5 minutes)
+    const cacheKey = getCacheKey('event-markets', { sport, eventId, regions });
+    const cached = getCachedResponse(cacheKey);
+    
+    if (cached) {
+      console.log(`📦 Using cached markets for event ${eventId}`);
+      return res.json(cached);
+    }
+    
+    console.log(`🌐 Fetching available markets for event ${eventId} (costs 1 credit)`);
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}`;
+    
+    const response = await axios.get(url, { timeout: 8000 });
+    const data = response.data;
+    
+    // Cache for 5 minutes
+    setCachedResponse(cacheKey, data, CACHE_DURATION_MS);
+    
+    console.log(`✅ Retrieved markets for event ${eventId}:`, data.bookmakers?.map(b => ({
+      bookmaker: b.key,
+      marketCount: b.markets?.length || 0,
+      markets: b.markets?.map(m => m.key) || []
+    })));
+    
+    res.json(data);
+    
+  } catch (error) {
+    console.error('Error fetching event markets:', error.message);
+    res.status(error.response?.status || 500).json({ 
+      error: error.message,
+      hint: 'Failed to fetch event markets from The Odds API'
+    });
+  }
+});
+
+// GET /participants - Returns list of teams/players for a sport (FREE - doesn't count against quota)
+app.get("/api/participants/:sport", requireUser, async (req, res) => {
+  try {
+    const { sport } = req.params;
+    
+    if (!API_KEY) {
+      return res.status(400).json({ 
+        code: 'MISSING_ENV', 
+        message: "Missing ODDS_API_KEY", 
+        hint: 'Set ODDS_API_KEY in backend env' 
+      });
+    }
+    
+    // Check cache first (cache for 24 hours since participants don't change often)
+    const cacheKey = getCacheKey('participants', { sport });
+    const cached = getCachedResponse(cacheKey);
+    
+    if (cached) {
+      console.log(`📦 Using cached participants for ${sport}`);
+      return res.json(cached);
+    }
+    
+    console.log(`🌐 Fetching participants for ${sport} (FREE - no quota cost)`);
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/participants?apiKey=${API_KEY}`;
+    
+    const response = await axios.get(url, { timeout: 8000 });
+    const participants = response.data;
+    
+    // Cache for 24 hours (86400000 ms)
+    setCachedResponse(cacheKey, participants, 86400000);
+    
+    console.log(`✅ Retrieved ${participants.length} participants for ${sport}`);
+    res.json(participants);
+    
+  } catch (error) {
+    console.error('Error fetching participants:', error.message);
+    res.status(error.response?.status || 500).json({ 
+      error: error.message,
+      hint: 'Failed to fetch participants from The Odds API'
+    });
+  }
+});
+
 // sports list (Odds API) - CACHED to reduce API calls
 app.get("/api/sports", requireUser, checkPlanAccess, async (_req, res) => {
   try {
@@ -2007,7 +2230,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
           const bookmakerList = allowedBookmakers.join(',');
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true`;
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           // Split markets into regular and alternate for optimized caching
           const regularMarkets = marketsToFetch.filter(market => !ALTERNATE_MARKETS.includes(market));
           const alternateMarkets = marketsToFetch.filter(market => ALTERNATE_MARKETS.includes(market));
@@ -2206,7 +2429,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           
           // Use individual event endpoint for player props
           // Include both us and us_dfs regions to get traditional sportsbooks AND DFS apps
-          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true`;
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
           const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, bookmakers: bookmakerList });

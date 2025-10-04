@@ -15,7 +15,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 2rem;
-  padding: 1.2rem 2rem;
+  padding: 1.2rem 2rem 1.8rem 2rem;
   background: var(--nav-bg);
   backdrop-filter: var(--nav-backdrop);
   -webkit-backdrop-filter: var(--nav-backdrop);
@@ -26,7 +26,7 @@
   top: 0;
   z-index: 100;
   overflow: visible;
-  height: 70px;
+  min-height: 70px;
 }
 
 /* Mobile search and profile buttons */
@@ -298,21 +298,22 @@
 
 /* Search Bar Styling - Enhanced & Centered */
 .navSearch {
-  display: flex;
+  display: none; /* Hidden by default */
   align-items: center;
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.04));
-  border: 2px solid rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 12px;
-  padding: 0.5em 1em;
-  transition: all 0.3s ease;
+  padding: 0.6rem 1rem;
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
-  grid-column: 2;
-  justify-self: center;
-  align-self: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
   max-width: 500px;
   width: 100%;
+  align-self: center;
+  justify-self: center;
 }
 
 .navSearch:focus-within {

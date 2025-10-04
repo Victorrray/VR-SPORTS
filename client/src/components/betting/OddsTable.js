@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import './OddsTable.css';
+import { useBetSlip } from '../../contexts/BetSlipContext';
+import { TrendingUp, TrendingDown, Trophy } from 'lucide-react';
+import { getBestLink, supportsDeepLinking } from '../../utils/deepLinkBuilder';
 import { useMe } from '../../hooks/useMe';
 import EnhancedLoadingSpinner from '../common/EnhancedLoadingSpinner';
-import { TrendingUp, TrendingDown } from "lucide-react";
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
 import "./OddsTable.css";
 import "./OddsTable.desktop.css";
 import "./OddsTable.soccer.css";
-
 // Import team logo utilities
 import { resolveTeamLogo } from "../../utils/logoResolver";
 import { getTeamLogos } from "../../constants/teamLogos";
@@ -116,6 +118,41 @@ function grab(bookmaker, isHome) {
                     bookmaker.outcomes[1].price || bookmaker.outcomes[1].odds;
   }
   return '';
+}
+
+/* ---------- Market Status Detection ---------- */
+function isMarketLikelyLocked(book, isDFSApp = false) {
+  if (!book) return false;
+  
+  // DFS apps lock markets much faster than traditional sportsbooks
+  const staleThresholdMinutes = isDFSApp ? 5 : 15;
+  
+  // Check if last_update is stale
+  if (book.last_update) {
+    const lastUpdate = new Date(book.last_update);
+    const now = new Date();
+    const minutesSinceUpdate = (now - lastUpdate) / (1000 * 60);
+    
+    if (minutesSinceUpdate > staleThresholdMinutes) {
+      console.log(`🔒 Market likely locked: ${book.bookmaker?.key} - last update ${minutesSinceUpdate.toFixed(0)} minutes ago (threshold: ${staleThresholdMinutes}m)`);
+      return true;
+    }
+  }
+  
+  // Check for extreme odds that indicate locked market
+  const odds = Number(book.price ?? book.odds ?? 0);
+  if (Math.abs(odds) > 5000) {
+    console.log(`🔒 Market likely locked: ${book.bookmaker?.key} - extreme odds ${odds}`);
+    return true;
+  }
+  
+  // Check for missing/invalid odds
+  if (!odds || odds === 0) {
+    console.log(`🔒 Market likely locked: ${book.bookmaker?.key} - missing or zero odds`);
+    return true;
+  }
+  
+  return false;
 }
 
 /* ---------- Helpers (unchanged core math) ---------- */
@@ -981,17 +1018,22 @@ export default function OddsTable({
                   console.log(`🔍 DFS DEBUG: Found over/under outcomes:`, { over: overOutcome, under: underOutcome });
                   
                   if (overOutcome && underOutcome && overOutcome.point !== undefined) {
-                    // Create combined Over/Under row - we'll determine which to show after collecting all books
-                    const basePropKey = `${game.id}-${market.key}-${playerName}-${overOutcome.point}`;
-                    console.log(`Creating combined prop for ${playerName}: ${market.key} ${overOutcome.point}`);
+                    // Normalize market key to combine regular and alternate markets
+                    // e.g., player_rush_attempts_alternate -> player_rush_attempts
+                    const normalizedMarketKey = market.key.replace(/_alternate$/, '');
+                    
+                    // Group by player + market type WITHOUT point value
+                    // This combines all lines (regular + alternate) for the same player/stat
+                    const basePropKey = `${game.id}-${normalizedMarketKey}-${playerName}`;
+                    console.log(`Creating combined prop for ${playerName}: ${normalizedMarketKey} line ${overOutcome.point} (from ${market.key})`);
                     
                     if (!propGroups.has(basePropKey)) {
                       propGroups.set(basePropKey, {
                         key: basePropKey,
                         game,
                         mkt: { 
-                          key: market.key, 
-                          name: formatMarketName(market.key)
+                          key: normalizedMarketKey, 
+                          name: formatMarketName(normalizedMarketKey)
                         },
                         playerName: playerName,
                         point: overOutcome.point,
@@ -1005,22 +1047,31 @@ export default function OddsTable({
                     const propGroup = propGroups.get(basePropKey);
                     
                     // Add both Over and Under books to their respective arrays
+                    // Include point/line value so we can show different lines in mini-table
                     propGroup.overBooks.push({
                       price: overOutcome.price,
                       odds: overOutcome.price,
+                      point: overOutcome.point,
+                      line: overOutcome.point,
                       book: bookmaker.title,
                       bookmaker: bookmaker,
                       market: market,
-                      outcome: overOutcome
+                      outcome: overOutcome,
+                      outcomeName: 'Over',
+                      last_update: market.last_update || bookmaker.last_update
                     });
                     
                     propGroup.underBooks.push({
                       price: underOutcome.price,
                       odds: underOutcome.price,
+                      point: underOutcome.point,
+                      line: underOutcome.point,
                       book: bookmaker.title,
                       bookmaker: bookmaker,
                       market: market,
-                      outcome: underOutcome
+                      outcome: underOutcome,
+                      outcomeName: 'Under',
+                      last_update: market.last_update || bookmaker.last_update
                     });
                   }
                 }
@@ -1343,18 +1394,20 @@ export default function OddsTable({
                 description: propData.playerName,
                 price: primaryBook.price,
                 odds: primaryBook.price,
-                point: propData.point,
+                point: primaryBook.point || primaryBook.line || propData.point, // Use best book's line
                 bookmaker: primaryBook.bookmaker,
                 book: primaryBook.bookmaker?.key
               },
               bk: primaryBook.bookmaker,
               sport: propData.sport,
+              playerName: propData.playerName, // Add player name for display
               isPlayerProp: true,
               isCombinedProp: true, // Flag to indicate this has both sides
               overBooks: propData.overBooks,
               underBooks: propData.underBooks,
-              // IMPORTANT: allBooks should only contain books from the SAME side for EV calculation
-              allBooks: showOver ? propData.overBooks : propData.underBooks,
+              // Include ALL books from BOTH sides for accurate EV calculation
+              // EV calculation needs market consensus from all available odds
+              allBooks: [...(propData.overBooks || []), ...(propData.underBooks || [])],
               selectedBooks: propData.selectedBooks || [],
               nonSelectedBooks: propData.nonSelectedBooks || [],
               otherSideName: showOver ? 'Under' : 'Over'
@@ -1693,20 +1746,12 @@ export default function OddsTable({
     // Get bookmaker key for DFS-specific EV calculation
     const bookmakerKey = row?.out?.bookmaker?.key || row?.out?.book?.toLowerCase();
     
-    // Check if this is a DFS app
-    const isDFSApp = ['prizepicks', 'underdog', 'pick6'].includes(bookmakerKey);
-    
-    // For DFS apps, we want to prioritize them in EV sorting
-    if (isDFSApp && mode === 'props') {
-      const dfsOdds = -119;
-      console.log(`Calculating EV for DFS app ${bookmakerKey} with fixed ${dfsOdds} odds`);
-      // Force the odds to be fixed for EV calculation
-      return calculateEV(dfsOdds, fairDevigMap.get(row.key), bookmakerKey);
-    }
-    
     // IMPORTANT: For fair line calculation, we use ALL books, not just filtered books
     // This ensures we have enough data to calculate an accurate fair line
     const allBooks = row.allBooks || [];
+    
+    // Check if this is a DFS app
+    const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(bookmakerKey);
     
     // Debug logging for EV calculation
     if (row.playerName === 'Breece Hall' && row.mkt?.key?.includes('reception')) {
@@ -1720,9 +1765,11 @@ export default function OddsTable({
     
     // Only proceed if we have enough books for a meaningful consensus
     if (allBooks.length < 3) {
-      if (row.playerName === 'Breece Hall' && row.mkt?.key?.includes('reception')) {
-        console.log(`🔍 EV DEBUG: Not enough books (${allBooks.length} < 3) - returning null`);
-      }
+      console.log(`⚠️ EV CALC FAILED: Not enough books for ${row.playerName || 'unknown'} ${row.mkt?.key || 'unknown'} - only ${allBooks.length} books (need 3+)`, {
+        bookmakerKey,
+        isDFSApp,
+        allBooks: allBooks.map(b => ({ book: b.bookmaker?.key || b.book, odds: b.price || b.odds }))
+      });
       return null;
     }
     
@@ -1756,8 +1803,23 @@ export default function OddsTable({
       
       if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Minimum 3 books for reliable EV
         const fairDec = 1 / consensusProb;
-        return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
+        const ev = calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
+        console.log(`✅ EV CALC SUCCESS for ${row.playerName || 'unknown'} ${row.mkt?.key || 'unknown'}:`, {
+          bookmakerKey,
+          isDFSApp,
+          userOdds,
+          consensusProb: consensusProb.toFixed(4),
+          fairLine: decimalToAmerican(fairDec),
+          ev: ev?.toFixed(2) + '%',
+          uniqCnt
+        });
+        return ev;
       }
+      console.log(`⚠️ EV CALC FAILED: Consensus check failed for ${row.playerName || 'unknown'}`, {
+        consensusProb,
+        uniqCnt,
+        needsAtLeast3: uniqCnt >= 3
+      });
       return null;
     }
     
@@ -1795,14 +1857,24 @@ export default function OddsTable({
     const m = new Map();
     allRows.forEach(r => {
       try {
-        m.set(r.key, getEV(r));
+        const ev = getEV(r);
+        m.set(r.key, ev);
+        // Debug logging for player props EV
+        if (mode === 'props' && r.playerName) {
+          console.log(`📊 EV for ${r.playerName} ${r.mkt?.key}:`, {
+            ev: ev,
+            allBooksCount: r.allBooks?.length || 0,
+            userOdds: r.out?.price,
+            bookmaker: r.bk?.key
+          });
+        }
       } catch (err) {
         console.warn('EV calculation error for row:', r.key, err);
         m.set(r.key, null);
       }
     });
     return m;
-  }, [allRows]);
+  }, [allRows, mode]);
 
   const fairDevigMap = useMemo(() => {
     const m = new Map();
@@ -2697,7 +2769,7 @@ export default function OddsTable({
                         </div>
                         <div className="mob-ev-section">
                           <div className={`mob-ev ${ev && ev > 0 ? 'pos' : 'neg'}`}>
-                            {typeof ev === 'number' ? `${ev.toFixed(2)}%` : ''}
+                            {typeof ev === 'number' ? `${ev.toFixed(2)}%` : 'N/A'}
                           </div>
                           <button 
                             className="mob-add-pick-btn"
@@ -2744,7 +2816,9 @@ export default function OddsTable({
                             <>
                               {String(row.mkt?.key).includes('total') ? (
                                 <div className="mob-total-stack">
-                                  <div className="mob-total-market">TOTAL</div>
+                                  <div className="mob-total-market">
+                                    {row.out.name} {formatLine(row.out.point, row.mkt.key, 'game')}
+                                  </div>
                                 </div>
                               ) : (
                                 formatMarket(row.mkt?.key || '')
@@ -2772,6 +2846,30 @@ export default function OddsTable({
                             />
                           )}
                           {cleanBookTitle(row.bk?.title)}
+                          {(() => {
+                            // Check if the primary book's market is locked
+                            const isOverSide = row.out.name === 'Over';
+                            const primaryBook = isOverSide 
+                              ? row.overBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(row.bk?.key))
+                              : row.underBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(row.bk?.key));
+                            
+                            if (primaryBook && isMarketLikelyLocked(primaryBook)) {
+                              return (
+                                <span style={{ 
+                                  fontSize: '0.7em', 
+                                  color: '#ef4444',
+                                  fontWeight: '700',
+                                  background: 'rgba(239, 68, 68, 0.15)',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  marginLeft: '6px'
+                                }}>
+                                  🔒 LOCKED
+                                </span>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                         <div className="mob-right-section">
                           <div className={`mob-odds-container ${priceDelta[row.key] ? (priceDelta[row.key] === 'up' ? 'up' : 'down') : ''}`}>
@@ -3084,7 +3182,38 @@ export default function OddsTable({
                                           {cleanBookTitle(ob.book)}
                                         </div>
                                         <div className="mini-prop-side">
-                                          {row.out.name} {row.out.point}
+                                          {(() => {
+                                            // Show the actual line this sportsbook offers
+                                            const isOverSide = row.out.name === 'Over';
+                                            const relevantBook = isOverSide 
+                                              ? row.overBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key))
+                                              : row.underBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key));
+                                            
+                                            // Check if market is locked
+                                            const isLocked = relevantBook && isMarketLikelyLocked(relevantBook);
+                                            
+                                            if (relevantBook) {
+                                              const line = relevantBook.point || relevantBook.line;
+                                              return (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                  {`${row.out.name.toUpperCase()} ${line}`}
+                                                  {isLocked && (
+                                                    <span style={{ 
+                                                      fontSize: '0.7em', 
+                                                      color: '#ef4444',
+                                                      fontWeight: '700',
+                                                      background: 'rgba(239, 68, 68, 0.15)',
+                                                      padding: '2px 4px',
+                                                      borderRadius: '3px'
+                                                    }}>
+                                                      🔒 LOCKED
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              );
+                                            }
+                                            return `${row.out.name} ${row.out.point}`;
+                                          })()}
                                         </div>
                                       </div>
                                     ) : (
@@ -3118,7 +3247,9 @@ export default function OddsTable({
                                               const overBook = row.overBooks?.find(book => 
                                                 normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key)
                                               );
-                                              return overBook ? formatOdds(Number(overBook.price ?? overBook.odds ?? 0)) : '-';
+                                              if (!overBook) return '-';
+                                              // Show only odds, line is displayed under sportsbook name
+                                              return formatOdds(Number(overBook.price ?? overBook.odds ?? 0));
                                             })()}
                                           </div>
                                         </div>
@@ -3129,7 +3260,9 @@ export default function OddsTable({
                                               const underBook = row.underBooks?.find(book => 
                                                 normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key)
                                               );
-                                              return underBook ? formatOdds(Number(underBook.price ?? underBook.odds ?? 0)) : '-';
+                                              if (!underBook) return '-';
+                                              // Show only odds, line is displayed under sportsbook name
+                                              return formatOdds(Number(underBook.price ?? underBook.odds ?? 0));
                                             })()}
                                           </div>
                                         </div>
@@ -3181,27 +3314,47 @@ export default function OddsTable({
                                   )}
                                   <div className="mini-pick-col">
                                     {(() => {
-                                      // Debug logging for links
+                                      // Debug logging for links and source IDs
                                       if (i === 0) {
-                                        console.log(`🔗 LINK DEBUG for ${ob.bookmaker?.key}:`, {
+                                        console.log(`🔗 LINK & SID DEBUG for ${ob.bookmaker?.key}:`, {
                                           bookmaker_link: ob.bookmaker_link,
                                           market_link: ob.market_link,
                                           betslip_link: ob.betslip_link,
+                                          event_sid: ob.event_sid,
+                                          market_sid: ob.market_sid,
+                                          outcome_sid: ob.outcome_sid,
                                           fullObject: ob
                                         });
                                       }
                                       
-                                      if (ob.bookmaker_link || ob.market_link) {
+                                      if (ob.bookmaker_link || ob.market_link || ob.event_sid) {
+                                        const hasDeepLinking = supportsDeepLinking(ob.bookmaker?.key);
+                                        const title = hasDeepLinking 
+                                          ? "Bet Now (Smart Link)" 
+                                          : "Bet Now at Sportsbook";
+                                        
                                         return (
                                           <a 
                                             href={ob.market_link || ob.bookmaker_link}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="bet-now-btn"
-                                            onClick={(e) => e.stopPropagation()}
-                                            title="Bet Now at Sportsbook"
+                                            onClick={async (e) => {
+                                              e.stopPropagation();
+                                              // Try to get enhanced deep link
+                                              if (hasDeepLinking) {
+                                                e.preventDefault();
+                                                const bestLink = await getBestLink(ob);
+                                                if (bestLink) {
+                                                  window.open(bestLink, '_blank', 'noopener,noreferrer');
+                                                } else {
+                                                  window.open(ob.market_link || ob.bookmaker_link, '_blank', 'noopener,noreferrer');
+                                                }
+                                              }
+                                            }}
+                                            title={title}
                                           >
-                                            🎯
+                                            {hasDeepLinking ? '🚀' : '🎯'}
                                           </a>
                                         );
                                       }

@@ -1,7 +1,7 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star, Activity } from 'lucide-react';
+import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star, Activity, RefreshCw } from 'lucide-react';
 import { optimizedStorage } from "../utils/storageOptimizer";
 import { smartCache } from "../utils/enhancedCache";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
@@ -315,6 +315,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftMinProfit, setDraftMinProfit] = useState(2);
   const [draftMaxStake, setDraftMaxStake] = useState(100);
   const [draftArbitrageSortBy, setDraftArbitrageSortBy] = useState('profit');
+  
+  // Refresh cooldown state
+  const [refreshCooldown, setRefreshCooldown] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
@@ -377,13 +381,53 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     books: marketBooks = [], 
     isLoading: marketsLoading, 
     error: marketsError, 
-    bookmakers 
+    bookmakers,
+    refresh: refreshMarkets
   } = useMarkets(
     sportsForMode,
     regionsForMode,
     getAllCompatibleMarkets(sportsForMode),
     { date: selectedDate }
   );
+
+  // Cooldown timer effect
+  useEffect(() => {
+    if (refreshCooldown > 0) {
+      const timer = setTimeout(() => {
+        setRefreshCooldown(refreshCooldown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [refreshCooldown]);
+  
+  // Handle refresh with cooldown
+  const handleRefresh = () => {
+    if (refreshCooldown > 0 || isRefreshing) return;
+    
+    console.log('🔄 Manual refresh triggered');
+    setIsRefreshing(true);
+    
+    // Clear API cache to force fresh data
+    if (window.localStorage) {
+      const keys = Object.keys(window.localStorage);
+      keys.forEach(key => {
+        if (key.includes('api-cache') || key.includes('market-cache')) {
+          window.localStorage.removeItem(key);
+        }
+      });
+    }
+    
+    // Trigger refresh
+    if (refreshMarkets) {
+      refreshMarkets();
+    }
+    
+    // Set cooldown and reset refreshing state
+    setRefreshCooldown(20);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 1000);
+  };
 
   // Initialize mode and search query from URL parameters
   useEffect(() => {
@@ -1307,7 +1351,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         height: "60px", 
         display: "flex", 
         alignItems: "center", 
-        justifyContent: "center",
+        justifyContent: "space-between",
         background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))",
         border: "1px solid rgba(139, 92, 246, 0.1)",
         borderRadius: "12px",
@@ -1348,6 +1392,53 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </>
           )}
         </h1>
+        
+        {/* Refresh Button with Cooldown Timer */}
+        <button
+          onClick={handleRefresh}
+          disabled={marketsLoading || isRefreshing || refreshCooldown > 0}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 16px',
+            background: (marketsLoading || isRefreshing || refreshCooldown > 0)
+              ? 'rgba(139, 92, 246, 0.3)' 
+              : 'linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.8))',
+            border: '1px solid rgba(139, 92, 246, 0.4)',
+            borderRadius: '8px',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s ease',
+            opacity: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 0.6 : 1,
+            minWidth: '120px'
+          }}
+          onMouseEnter={(e) => {
+            if (!marketsLoading && !isRefreshing && refreshCooldown === 0) {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+          title={refreshCooldown > 0 ? `Wait ${refreshCooldown}s before refreshing again` : 'Refresh odds data (clears cache)'}
+        >
+          <RefreshCw 
+            size={16} 
+            style={{ 
+              animation: (marketsLoading || isRefreshing) ? 'spin 1s linear infinite' : 'none'
+            }} 
+          />
+          {(marketsLoading || isRefreshing) 
+            ? 'Refreshing...' 
+            : refreshCooldown > 0 
+              ? `Wait ${refreshCooldown}s` 
+              : 'Refresh'}
+        </button>
       </div>
 
       {/* Show authentication required message */}
@@ -1487,33 +1578,90 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       ) : isPlayerPropsMode ? (
         !isOverQuota ? (
           console.log('SportsbookMarkets: selectedPlayerPropMarkets =', selectedPlayerPropMarkets),
-          <OddsTable
-            key={`props-${tableNonce}`}
-            games={filteredGames}
-            pageSize={15}
-            mode="props"
-            bookFilter={effectiveSelectedBooks}
-            marketFilter={selectedPlayerPropMarkets} // Use selected player prop markets
-            evMin={null}
-            loading={filtersLoading || playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
-            error={error || marketsError}
-            oddsFormat={oddsFormat}
-            allCaps={false}
-            onAddBet={addBet}
-            betSlipCount={bets.length}
-            onOpenBetSlip={openBetSlip}
-            searchQuery={debouncedQuery}
-          />
+          <div style={{ position: 'relative' }}>
+            {/* Refresh Overlay */}
+            {isRefreshing && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(10, 6, 18, 0.8)',
+                backdropFilter: 'blur(4px)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                borderRadius: '12px',
+                gap: '12px'
+              }}>
+                <RefreshCw size={48} color="#a78bfa" style={{ animation: 'spin 1s linear infinite' }} />
+                <div style={{ color: 'white', fontSize: '18px', fontWeight: '600' }}>
+                  Refreshing Odds...
+                </div>
+                <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>
+                  Getting latest lines from all sportsbooks
+                </div>
+              </div>
+            )}
+            <OddsTable
+              key={`props-${tableNonce}`}
+              games={filteredGames}
+              pageSize={15}
+              mode="props"
+              bookFilter={effectiveSelectedBooks}
+              marketFilter={selectedPlayerPropMarkets} // Use selected player prop markets
+              evMin={null}
+              loading={filtersLoading || playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
+              error={error || marketsError}
+              oddsFormat={oddsFormat}
+              allCaps={false}
+              onAddBet={addBet}
+              betSlipCount={bets.length}
+              onOpenBetSlip={openBetSlip}
+              searchQuery={debouncedQuery}
+            />
+          </div>
         ) : null
       ) : !isOverQuota ? (
-        <OddsTable
-          key={tableNonce}
-          games={filteredGames}
-          pageSize={15}
-          mode="game"
-          bookFilter={effectiveSelectedBooks}
-          marketFilter={[]} // Empty array to show ALL markets
-          evMin={minEV === "" ? null : Number(minEV)}
+        <div style={{ position: 'relative' }}>
+          {/* Refresh Overlay */}
+          {isRefreshing && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(10, 6, 18, 0.8)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              borderRadius: '12px',
+              gap: '12px'
+            }}>
+              <RefreshCw size={48} color="#a78bfa" style={{ animation: 'spin 1s linear infinite' }} />
+              <div style={{ color: 'white', fontSize: '18px', fontWeight: '600' }}>
+                Refreshing Odds...
+              </div>
+              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}>
+                Getting latest lines from all sportsbooks
+              </div>
+            </div>
+          )}
+          <OddsTable
+            key={tableNonce}
+            games={filteredGames}
+            pageSize={15}
+            mode="game"
+            bookFilter={effectiveSelectedBooks}
+            marketFilter={[]} // Empty array to show ALL markets
+            evMin={minEV === "" ? null : Number(minEV)}
           loading={filtersLoading || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
           error={error || marketsError}
           oddsFormat={oddsFormat}
@@ -1522,6 +1670,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           betSlipCount={bets.length}
           onOpenBetSlip={openBetSlip}
         />
+        </div>
       ) : null}
 
       {/* Mobile filter button - positioned on the left */}

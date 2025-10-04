@@ -46,47 +46,6 @@
     border-spacing: 0;
   }
 
-  .odds-table th {
-    text-align: left;
-    padding: 14px 20px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--bg-elev-1);
-    border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
-  }
-
-  .odds-table th:first-child {
-    padding-left: 24px;
-  }
-
-  .odds-table th:last-child {
-    padding-right: 24px;
-  }
-
-  /* Table rows */
-  .odds-row {
-    transition: background-color 0.2s ease;
-  }
-
-  .odds-row:hover {
-    background-color: var(--bg-hover);
-  }
-
-  .odds-row td {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
-  }
-
-  .odds-row td:first-child {
-    padding-left: 24px;
-  }
-
-  .odds-row td:last-child {
-    padding-right: 24px;
-  }
-
   /* Match column */
   .match-column {
     width: 30%;
