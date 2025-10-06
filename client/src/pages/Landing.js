@@ -210,7 +210,7 @@ export default function Landing() {
 
           {/* CTA Buttons */}
           <div className="hero-cta-group">
-            <button onClick={() => navigate('/subscribe')} className="cta-btn-primary">
+            <button onClick={() => navigate('/login')} className="cta-btn-primary">
               <TrendingUp size={20} />
               Start Winning Today
               <ArrowRight size={20} />

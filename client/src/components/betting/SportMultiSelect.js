@@ -93,9 +93,13 @@ export default function SportMultiSelect({
   const [portalStyle, setPortalStyle] = useState({});
   const [actualAlign, setActualAlign] = useState(portalAlign);
 
-  // Use a portal automatically on small screens
+  // Detect if we're inside the desktop filters sidebar
+  const isInDesktopSidebar = typeof window !== "undefined" && 
+    boxRef.current?.closest('.desktop-filters-sidebar');
+  
+  // Use a portal automatically on small screens, but NOT in desktop sidebar
   const isMobile = typeof window !== "undefined" && window.innerWidth <= 800;
-  const shouldPortal = usePortal || isMobile;
+  const shouldPortal = isInDesktopSidebar ? false : (usePortal || isMobile);
 
   // Categorized and filtered list
   const { categorizedList, filteredList } = useMemo(() => {
@@ -314,7 +318,16 @@ export default function SportMultiSelect({
 
       {/* Non-portal desktop dropdown */}
       {open && !shouldPortal && (
-        <div className="ms-menu" role="listbox">
+        <div 
+          className="ms-menu" 
+          role="listbox"
+          style={isInDesktopSidebar ? {
+            position: 'fixed',
+            top: boxRef.current ? `${boxRef.current.getBoundingClientRect().bottom + 4}px` : 'auto',
+            left: boxRef.current ? `${boxRef.current.getBoundingClientRect().left}px` : 'auto',
+            width: '320px'
+          } : {}}
+        >
           {/* Search bar */}
           {enableSearch && (
             <div className="ms-search-container">

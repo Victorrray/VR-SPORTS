@@ -9,6 +9,7 @@ import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton"
 import "./OddsTable.css";
 import "./OddsTable.desktop.css";
 import "./OddsTable.soccer.css";
+import "./OddsTableDesktop.css";
 // Import team logo utilities
 import { resolveTeamLogo } from "../../utils/logoResolver";
 import { getTeamLogos } from "../../constants/teamLogos";
@@ -124,34 +125,35 @@ function grab(bookmaker, isHome) {
 function isMarketLikelyLocked(book, isDFSApp = false) {
   if (!book) return false;
   
-  // DFS apps lock markets much faster than traditional sportsbooks
-  const staleThresholdMinutes = isDFSApp ? 5 : 15;
+  // Check for missing/invalid odds first
+  const odds = Number(book.price ?? book.odds ?? 0);
+  if (!odds || odds === 0) {
+    console.log(`🔒 Market locked: ${book.bookmaker?.key} - missing or zero odds`);
+    return true;
+  }
   
-  // Check if last_update is stale
+  // Check for extreme odds that indicate locked market
+  if (Math.abs(odds) > 5000) {
+    console.log(`🔒 Market locked: ${book.bookmaker?.key} - extreme odds ${odds}`);
+    return true;
+  }
+  
+  // Only check timestamp if we have it (API may not always provide last_update)
   if (book.last_update) {
+    // DFS apps lock markets much faster than traditional sportsbooks
+    const staleThresholdMinutes = isDFSApp ? 5 : 15;
+    
     const lastUpdate = new Date(book.last_update);
     const now = new Date();
     const minutesSinceUpdate = (now - lastUpdate) / (1000 * 60);
     
     if (minutesSinceUpdate > staleThresholdMinutes) {
-      console.log(`🔒 Market likely locked: ${book.bookmaker?.key} - last update ${minutesSinceUpdate.toFixed(0)} minutes ago (threshold: ${staleThresholdMinutes}m)`);
+      console.log(`🔒 Market locked: ${book.bookmaker?.key} - last update ${minutesSinceUpdate.toFixed(0)} minutes ago (threshold: ${staleThresholdMinutes}m)`);
       return true;
     }
   }
   
-  // Check for extreme odds that indicate locked market
-  const odds = Number(book.price ?? book.odds ?? 0);
-  if (Math.abs(odds) > 5000) {
-    console.log(`🔒 Market likely locked: ${book.bookmaker?.key} - extreme odds ${odds}`);
-    return true;
-  }
-  
-  // Check for missing/invalid odds
-  if (!odds || odds === 0) {
-    console.log(`🔒 Market likely locked: ${book.bookmaker?.key} - missing or zero odds`);
-    return true;
-  }
-  
+  // If no timestamp data, assume market is active (can't determine lock status)
   return false;
 }
 
@@ -1383,6 +1385,27 @@ export default function OddsTable({
           const showOver = !underEV || (overEV && overEV >= (underEV || 0));
           const primaryBook = showOver ? bestOverBook : bestUnderBook;
           
+          // Check if primary book's market is locked - skip this row if locked
+          if (primaryBook) {
+            const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(
+              normalizeBookKey(primaryBook.bookmaker?.key)
+            );
+            
+            // Log timestamp info for debugging
+            if (isDFSApp) {
+              console.log(`🔍 DFS Market Check: ${propData.playerName} ${propData.mkt?.key} at ${primaryBook.bookmaker?.key}`, {
+                last_update: primaryBook.last_update,
+                hasTimestamp: !!primaryBook.last_update,
+                odds: primaryBook.price
+              });
+            }
+            
+            if (isMarketLikelyLocked(primaryBook, isDFSApp)) {
+              console.log(`⏭️ Skipping locked market: ${propData.playerName} ${propData.mkt?.key} at ${primaryBook.bookmaker?.key}`);
+              return; // Skip this row - market is locked
+            }
+          }
+          
           if (primaryBook) {
             // Create the main row with both sides data
             const finalPropData = {
@@ -2501,20 +2524,12 @@ export default function OddsTable({
       <table className="odds-grid" data-mode={mode}>
         <thead>
           <tr>
-            <th className="ev-col sort-th" onClick={()=>setSort(s=>({ key:'ev', dir:s.key==='ev'&&s.dir==='desc'?'asc':'desc' }))}>
-              <span className="sort-label">EV % <span className="sort-indicator">{sort.key==='ev'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
-            </th>
-            <th className="sort-th" onClick={()=>setSort(s=>({ key:'match', dir:s.key==='match'&&s.dir==='desc'?'asc':'desc' }))}>
-              <span className="sort-label">Match <span className="sort-indicator">{sort.key==='match'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
-            </th>
-            <th>Team / Line</th>
-            <th className="sort-th" onClick={()=>setSort(s=>({ key:'book', dir:s.key==='book'&&s.dir==='desc'?'asc':'desc' }))}>
-              <span className="sort-label">Book <span className="sort-indicator">{sort.key==='book'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
-            </th>
-            <th className="sort-th" onClick={()=>setSort(s=>({ key:'odds', dir:s.key==='odds'&&s.dir==='desc'?'asc':'desc' }))}>
-              <span className="sort-label">Odds <span className="sort-indicator">{sort.key==='odds'?(sort.dir==='desc'?'▼':'▲'):''}</span></span>
-            </th>
-            <th>De-Vig</th>
+            <th className="ev-col">EV %</th>
+            <th className="match-col">Match</th>
+            <th className="team-line-col">Team / Line</th>
+            <th className="book-col">Book</th>
+            <th className="odds-col">Odds</th>
+            <th className="devig-col">De-Vig</th>
           </tr>
         </thead>
         <tbody>
@@ -2853,7 +2868,11 @@ export default function OddsTable({
                               ? row.overBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(row.bk?.key))
                               : row.underBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(row.bk?.key));
                             
-                            if (primaryBook && isMarketLikelyLocked(primaryBook)) {
+                            const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(
+                              normalizeBookKey(row.bk?.key)
+                            );
+                            
+                            if (primaryBook && isMarketLikelyLocked(primaryBook, isDFSApp)) {
                               return (
                                 <span style={{ 
                                   fontSize: '0.7em', 
@@ -3190,7 +3209,10 @@ export default function OddsTable({
                                               : row.underBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key));
                                             
                                             // Check if market is locked
-                                            const isLocked = relevantBook && isMarketLikelyLocked(relevantBook);
+                                            const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(
+                                              normalizeBookKey(ob.bookmaker?.key)
+                                            );
+                                            const isLocked = relevantBook && isMarketLikelyLocked(relevantBook, isDFSApp);
                                             
                                             if (relevantBook) {
                                               const line = relevantBook.point || relevantBook.line;

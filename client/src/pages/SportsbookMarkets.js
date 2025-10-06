@@ -29,6 +29,7 @@ import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
 import DesktopHeader from '../components/layout/DesktopHeader';
 import './SportsbookMarkets.css';
 import './SportsbookMarkets.desktop.css';
+import './SportsbookMarkets.sidebar.css';
 
 const ENABLE_PLAYER_PROPS_V2 = true;
 
@@ -1344,6 +1345,232 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         hasPlatinum={hasPlatinum}
       />
       
+      {/* Desktop Sidebar + Main Content Layout */}
+      <div className="sportsbook-markets-container">
+        {/* Desktop Filters Sidebar (visible on desktop only) */}
+        <aside className="desktop-filters-sidebar">
+          <div className="desktop-filters-card">
+            {/* Section Selector Buttons */}
+            <div className="desktop-section-buttons">
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'game' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('game')}
+              >
+                <BarChart3 size={18} />
+                Game Odds
+              </button>
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('props')}
+              >
+                <Target size={18} />
+                Player Props
+              </button>
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('arbitrage')}
+              >
+                <Zap size={18} />
+                Arbitrage
+              </button>
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('middles')}
+              >
+                <Activity size={18} />
+                Middles
+              </button>
+            </div>
+
+            <div className="desktop-filters-header">
+              <svg className="desktop-filters-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              <h3>Filters</h3>
+            </div>
+
+            {/* Player Props Filters */}
+            {showPlayerProps && (
+              <>
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>🏈</span> Sports
+                  </div>
+                  <SportMultiSelect
+                    list={sportList || []}
+                    selected={draftPicked || []}
+                    onChange={setDraftPicked}
+                    placeholderText="Select sports..."
+                    allLabel="All Sports"
+                    enableCategories={true}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>📅</span> Date
+                  </div>
+                  <DatePicker
+                    value={draftSelectedDate}
+                    onChange={setDraftSelectedDate}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>🎯</span> Player Prop Markets
+                  </div>
+                  <SportMultiSelect
+                    list={getPlayerPropMarketsBySport(draftPicked)}
+                    selected={draftSelectedPlayerPropMarkets || []}
+                    onChange={setDraftSelectedPlayerPropMarkets}
+                    placeholderText="Select player props..."
+                    allLabel="All Player Props"
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>🏪</span> Sportsbooks
+                  </div>
+                  <SportMultiSelect
+                    list={enhancedSportsbookList}
+                    selected={draftSelectedPlayerPropsBooks || []}
+                    onChange={setDraftSelectedPlayerPropsBooks}
+                    placeholderText="Select sportsbooks..."
+                    allLabel="All Sportsbooks"
+                    isSportsbook={true}
+                    enableCategories={true}
+                    showDFSApps={true}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Arbitrage Filters */}
+            {showArbitrage && (
+              <>
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>💰</span> Minimum Profit %
+                  </div>
+                  <input
+                    type="number"
+                    min="0.1"
+                    max="50"
+                    step="0.1"
+                    value={draftMinProfit}
+                    onChange={(e) => setDraftMinProfit(Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>💵</span> Max Stake
+                  </div>
+                  <input
+                    type="number"
+                    min="10"
+                    max="10000"
+                    step="10"
+                    value={draftMaxStake}
+                    onChange={(e) => setDraftMaxStake(Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>🔄</span> Sort By
+                  </div>
+                  <select
+                    value={draftArbitrageSortBy}
+                    onChange={(e) => setDraftArbitrageSortBy(e.target.value)}
+                  >
+                    <option value="profit">Profit %</option>
+                    <option value="amount">Profit Amount</option>
+                    <option value="time">Time Found</option>
+                    <option value="sport">Sport</option>
+                  </select>
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>🏪</span> Sportsbooks
+                  </div>
+                  <SportMultiSelect
+                    list={enhancedSportsbookList}
+                    selected={draftSelectedBooks || []}
+                    onChange={setDraftSelectedBooks}
+                    placeholderText="Select sportsbooks..."
+                    allLabel="All Sportsbooks"
+                    isSportsbook={true}
+                    enableCategories={true}
+                    showDFSApps={false}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Game Odds Filters */}
+            {!showPlayerProps && !showArbitrage && (
+              <>
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>📅</span> Date
+                  </div>
+                  <DatePicker
+                    value={draftSelectedDate}
+                    onChange={setDraftSelectedDate}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>🏈</span> Sports
+                  </div>
+                  <SportMultiSelect
+                    list={sportList || []}
+                    selected={draftPicked || []}
+                    onChange={setDraftPicked}
+                    placeholderText="Select sports..."
+                    allLabel="All Sports"
+                    enableCategories={true}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
+                    <span>🏪</span> Sportsbooks
+                  </div>
+                  <SportMultiSelect
+                    list={enhancedSportsbookList}
+                    selected={draftSelectedBooks || []}
+                    onChange={setDraftSelectedBooks}
+                    placeholderText="Select sportsbooks..."
+                    allLabel="All Sportsbooks"
+                    isSportsbook={true}
+                    enableCategories={true}
+                    showDFSApps={false}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Apply/Reset Buttons */}
+            <div className="desktop-filter-actions">
+              <button className="desktop-filter-btn desktop-filter-btn-apply" onClick={applyFilters}>
+                Apply
+              </button>
+              <button className="desktop-filter-btn desktop-filter-btn-reset" onClick={resetAllFilters}>
+                Reset
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="desktop-main-content">
+      
       {/* Debug info removed as requested */}
       
       {/* Dynamic header based on current section */}
@@ -1895,6 +2122,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           </div>
         </div>
       </MobileFiltersSheet>
+
+        </div>
+      </div>
 
       {/* BetSlip Component */}
       <BetSlip

@@ -118,14 +118,22 @@ export default function MySportsbooks() {
       try {
         bankrollManager.setBankroll(validation.amount);
         console.log('Bankroll saved via modal:', validation.amount);
+        
+        // Verify it was saved
+        const savedValue = localStorage.getItem('userBankroll');
+        console.log('Verified saved bankroll in localStorage:', savedValue);
+        
+        // Show success feedback
+        alert('Bankroll saved successfully!');
       } catch (error) {
         console.error('Failed to save bankroll from modal:', error);
+        alert('Error saving bankroll: ' + error.message);
       }
       
       setShowBankrollModal(false);
     } else {
       console.error('Invalid bankroll:', validation.error);
-      // You could show an error message here
+      alert('Invalid bankroll: ' + validation.error);
     }
   };
 
@@ -243,24 +251,12 @@ export default function MySportsbooks() {
                 value={`$${bankroll.toLocaleString()}`}
                 onClick={handleBankrollClick}
                 readOnly
-                placeholder="Enter your bankroll"
-                className="bankroll-input"
+                placeholder="Click to set your bankroll"
+                className="bankroll-input clickable"
+                title="Click to edit bankroll"
               />
-              <button 
-                className="bankroll-save-button"
-                onClick={() => {
-                  try {
-                    bankrollManager.setBankroll(bankroll);
-                    alert('Bankroll saved successfully!');
-                  } catch (error) {
-                    console.error('Failed to save bankroll:', error);
-                    alert('Error saving bankroll');
-                  }
-                }}
-              >
-                <Save size={16} />
-              </button>
             </div>
+            <p className="bankroll-hint">Click the input above to change your bankroll</p>
           </div>
         </div>
       </div>

@@ -1,0 +1,540 @@
+/* Desktop Filters Sidebar Layout */
+@media (min-width: 1024px) {
+  /* Main container with sidebar layout */
+  .sportsbook-markets-container {
+    display: flex;
+    gap: 28px;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Filters sidebar - left side - BIGGER */
+  .desktop-filters-sidebar {
+    width: 360px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: visible !important;
+  }
+
+  /* Sidebar card styling - BIGGER */
+  .desktop-filters-card {
+    background: linear-gradient(135deg, rgba(15, 11, 26, 0.98), rgba(26, 16, 37, 0.95));
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+    overflow: visible !important;
+  }
+
+  /* Section selector buttons at top */
+  .desktop-section-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  }
+
+  .desktop-section-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .desktop-section-btn:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.4);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
+
+  .desktop-section-btn.active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: rgba(139, 92, 246, 0.6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  }
+
+  .desktop-section-btn svg {
+    flex-shrink: 0;
+  }
+
+  /* Sidebar header - BIGGER */
+  .desktop-filters-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.25);
+  }
+
+  .desktop-filters-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+  }
+
+  .desktop-filters-icon {
+    color: rgba(139, 92, 246, 0.9);
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Filter sections - BIGGER SPACING */
+  .desktop-filter-section {
+    margin-bottom: 28px;
+    position: relative;
+    overflow: visible !important;
+  }
+
+  .desktop-filter-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .desktop-filter-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .desktop-filter-label svg {
+    width: 16px;
+    height: 16px;
+    color: rgba(139, 92, 246, 0.7);
+  }
+
+  .desktop-filter-label span {
+    font-size: 1rem;
+  }
+
+  /* Main content area */
+  .desktop-main-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Hide mobile filters button on desktop */
+  .mobile-filters-button {
+    display: none !important;
+  }
+
+  /* Hide the Filters button and section selector in DesktopHeader on desktop */
+  .sportsbook-markets .desktop-header .desktop-filters,
+  .sportsbook-markets .desktop-header .desktop-filter-button,
+  .sportsbook-markets .desktop-header .desktop-section-selector {
+    display: none !important;
+  }
+
+  /* Hide the entire desktop header on desktop since sidebar has everything */
+  .sportsbook-markets .desktop-header {
+    display: none !important;
+  }
+
+  /* Scrollbar styling for sidebar */
+  .desktop-filters-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .desktop-filters-sidebar::-webkit-scrollbar-track {
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 3px;
+  }
+
+  .desktop-filters-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+  }
+
+  .desktop-filters-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.5);
+  }
+
+  /* Filter controls styling - BIGGER */
+  .desktop-filter-section .sport-multi-select,
+  .desktop-filter-section .date-picker,
+  .desktop-filter-section select,
+  .desktop-filter-section input {
+    width: 100%;
+    background: rgba(15, 11, 26, 0.7);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+
+  .desktop-filter-section select:hover,
+  .desktop-filter-section input:hover {
+    border-color: rgba(139, 92, 246, 0.45);
+    background: rgba(15, 11, 26, 0.85);
+  }
+
+  .desktop-filter-section select:focus,
+  .desktop-filter-section input:focus {
+    outline: none;
+    border-color: rgba(139, 92, 246, 0.7);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+  }
+
+  /* Ensure dropdowns open properly on desktop */
+  .desktop-filter-section .sport-multi-select button,
+  .desktop-filter-section .date-picker button {
+    width: 100%;
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
+
+  /* Force desktop dropdown behavior in sidebar */
+  .desktop-filters-sidebar .ms-mobile-overlay,
+  .desktop-filters-sidebar .ms-mobile-sheet {
+    display: none !important;
+  }
+
+  /* DatePicker - Centered modal with ABSOLUTE MAXIMUM z-index */
+  .dp-mobile-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .dp-mobile-sheet {
+    position: relative !important;
+    background: rgba(15, 11, 26, 0.98) !important;
+    border: 1px solid rgba(139, 92, 246, 0.4) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7) !important;
+    max-height: 80vh !important;
+    width: 380px !important;
+    max-width: 90vw !important;
+    z-index: 2147483647 !important;
+  }
+
+  body .dp-mobile-header,
+  .dp-mobile-header {
+    padding: 20px 24px !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    visibility: visible !important;
+  }
+
+  body .dp-mobile-header h3,
+  .dp-mobile-header h3 {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    margin: 0 !important;
+  }
+
+  body .dp-mobile-close,
+  .dp-mobile-close {
+    background: rgba(139, 92, 246, 0.15) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+  }
+
+  body .dp-mobile-close:hover,
+  .dp-mobile-close:hover {
+    background: rgba(139, 92, 246, 0.25) !important;
+  }
+
+  body .dp-mobile-content,
+  .dp-mobile-content {
+    max-height: 400px !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  body .dp-mobile-category-header,
+  .dp-mobile-category-header {
+    padding: 8px 12px !important;
+    font-size: 0.7em !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    text-transform: uppercase !important;
+    display: block !important;
+  }
+
+  body .dp-mobile-option,
+  .dp-mobile-option {
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    cursor: pointer !important;
+  }
+
+  body .dp-mobile-option:hover,
+  .dp-mobile-option:hover {
+    background: rgba(139, 92, 246, 0.15) !important;
+  }
+
+  body .dp-mobile-checkbox,
+  .dp-mobile-checkbox {
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid rgba(139, 92, 246, 0.5) !important;
+    border-radius: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  body .dp-mobile-checkbox.dp-checked,
+  .dp-mobile-checkbox.dp-checked {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+    border-color: #8b5cf6 !important;
+    color: white !important;
+  }
+
+  body .dp-mobile-label,
+  .dp-mobile-label {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.95rem !important;
+  }
+
+  body .dp-mobile-footer,
+  .dp-mobile-footer {
+    padding: 16px 24px !important;
+    border-top: 1px solid rgba(139, 92, 246, 0.25) !important;
+    display: flex !important;
+    gap: 12px !important;
+  }
+
+  body .dp-mobile-done,
+  .dp-mobile-done {
+    flex: 1 !important;
+    padding: 12px 20px !important;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: white !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+  }
+
+  .desktop-filters-sidebar .dp-mobile-category-header {
+    padding: 8px 12px !important;
+    font-size: 0.7em !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    text-transform: uppercase !important;
+  }
+
+  .desktop-filters-sidebar .dp-mobile-option {
+    padding: 10px 12px !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease !important;
+  }
+
+  .desktop-filters-sidebar .dp-mobile-option:hover {
+    background: rgba(139, 92, 246, 0.15) !important;
+  }
+
+  .desktop-filters-sidebar .dp-mobile-checkbox.dp-checked {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+  }
+
+  .desktop-filters-sidebar .dp-mobile-footer {
+    display: none !important;
+  }
+
+  /* Show desktop dropdown menu - use fixed positioning to break out of card */
+  .desktop-filters-sidebar .ms-menu {
+    position: fixed !important;
+    display: block !important;
+    z-index: 99999 !important;
+    background: rgba(15, 11, 26, 0.98) !important;
+    border: 1px solid rgba(139, 92, 246, 0.4) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+    max-height: 500px !important;
+    overflow-y: auto !important;
+    width: 320px !important;
+    margin-top: 4px !important;
+  }
+  
+  /* Ensure the dropdown container allows positioning */
+  .desktop-filters-sidebar .sport-multi-select,
+  .desktop-filters-sidebar .ms-box {
+    position: relative !important;
+  }
+
+  /* Style the dropdown panels for desktop */
+  .desktop-filters-sidebar .sport-multi-select-dropdown,
+  .desktop-filters-sidebar .date-picker-dropdown {
+    position: absolute;
+    z-index: 1000;
+    background: rgba(15, 11, 26, 0.98);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  /* Style dropdown items */
+  .desktop-filters-sidebar .ms-menu .ms-item {
+    padding: 10px 16px !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    transition: all 0.15s ease !important;
+  }
+
+  .desktop-filters-sidebar .ms-menu .ms-item:hover {
+    background: rgba(139, 92, 246, 0.15) !important;
+    color: rgba(255, 255, 255, 1) !important;
+  }
+
+  .desktop-filters-sidebar .ms-menu .ms-item.selected {
+    background: rgba(139, 92, 246, 0.2) !important;
+    color: white !important;
+  }
+
+  /* Search input in dropdown */
+  .desktop-filters-sidebar .ms-menu .ms-search {
+    padding: 12px !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+  }
+
+  .desktop-filters-sidebar .ms-menu .ms-search input {
+    background: rgba(15, 11, 26, 0.6) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    color: white !important;
+    width: 100% !important;
+  }
+
+  /* EV Filter inputs */
+  .desktop-ev-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .desktop-ev-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .desktop-ev-filter-row label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    min-width: 80px;
+  }
+
+  .desktop-ev-filter-row input[type="number"] {
+    flex: 1;
+  }
+
+  .desktop-ev-filter-row input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+  }
+
+  /* Apply/Reset buttons - BIGGER */
+  .desktop-filter-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(139, 92, 246, 0.25);
+  }
+
+  .desktop-filter-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+  }
+
+  .desktop-filter-btn-apply {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  }
+
+  .desktop-filter-btn-apply:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+  }
+
+  .desktop-filter-btn-reset {
+    background: rgba(139, 92, 246, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+  }
+
+  .desktop-filter-btn-reset:hover {
+    background: rgba(139, 92, 246, 0.22);
+    border-color: rgba(139, 92, 246, 0.55);
+    transform: translateY(-1px);
+  }
+}
+
+/* Mobile - keep filters modal */
+@media (max-width: 1023px) {
+  .desktop-filters-sidebar {
+    display: none !important;
+  }
+
+  .sportsbook-markets-container {
+    display: block;
+  }
+
+  .desktop-main-content {
+    width: 100%;
+  }
+}
