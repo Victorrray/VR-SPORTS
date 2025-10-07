@@ -1577,23 +1577,21 @@ export default function OddsTable({
           bookFilter && bookFilter.length ? bookFilter : 'ALL BOOKS (no filter)');
         
         const candidates = allMarketOutcomes.filter(o => {
-          // If no bookFilter specified, include all bookmakers EXCEPT DFS-only apps in game mode
+          const bookKey = o.bookmaker?.key?.toLowerCase() || '';
+          const dfsOnlyApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+          
+          // ALWAYS exclude DFS apps from game mode, regardless of bookFilter
+          if (mode === 'game' && (dfsOnlyApps.some(app => bookKey.includes(app)) || dfsOnlyApps.includes(bookKey))) {
+            console.log(`🎯 Excluding DFS-only app "${bookKey}" from game odds (only offers player props)`);
+            return false;
+          }
+          
+          // If no bookFilter specified, include all remaining bookmakers
           if (!bookFilter || !bookFilter.length) {
-            // DFS apps only offer player props, not game lines
-            const dfsOnlyApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
-            const bookKey = o.bookmaker?.key?.toLowerCase() || '';
-            
-            // In game mode, exclude DFS-only apps
-            if (mode === 'game' && dfsOnlyApps.some(app => bookKey.includes(app))) {
-              console.log(`🎯 Excluding DFS-only app "${bookKey}" from game odds (only offers player props)`);
-              return false;
-            }
-            
             console.log(`🎯 Including bookmaker "${bookKey}" for market ${mktKey}`);
             return true;
           }
           
-          const bookKey = o.bookmaker?.key?.toLowerCase() || '';
           const normalizedFilter = bookFilter.map(f => f.toLowerCase());
           
           console.log(`🎯 Game odds - Checking book: "${bookKey}" vs normalized filter:`, normalizedFilter);

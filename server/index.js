@@ -2229,7 +2229,14 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           // COST REDUCTION: Use bookmakers based on user plan
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-          const bookmakerList = allowedBookmakers.join(',');
+          
+          // Filter out DFS apps for game odds (they only offer player props)
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+          const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
+          const bookmakerList = gameOddsBookmakers.join(',');
+          
+          console.log(`🎯 Game odds bookmakers (DFS filtered): ${bookmakerList}`);
+          
           const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           // Split markets into regular and alternate for optimized caching
           const regularMarkets = marketsToFetch.filter(market => !ALTERNATE_MARKETS.includes(market));
