@@ -28,8 +28,8 @@ const PLAYER_PROPS_API_BASE = process.env.PLAYER_PROPS_API_BASE || null;
 const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 === 'true';
 const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 30_000);
 const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
-const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_MARKETS || 15);
-const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_BOOKS || 15);
+const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_MARKETS || 25);
+const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_BOOKS || 25);
 const PLAYER_PROPS_REQUEST_TIMEOUT = Number(process.env.PLAYER_PROPS_REQUEST_TIMEOUT || 15000); // 15 seconds
 const PLAYER_PROPS_MAX_CACHE_ENTRIES = Number(process.env.PLAYER_PROPS_MAX_CACHE_ENTRIES || 50);
 
@@ -2411,26 +2411,26 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       }
       
       // For each game, fetch individual player props using event ID
-      for (let i = 0; i < allGames.length && i < 10; i++) { // Limit to first 10 games for cost control
+      for (let i = 0; i < allGames.length && i < 25; i++) { // Limit to first 25 games for comprehensive coverage
         const game = allGames[i];
         if (!game.id) {
           console.log(`⚠️ Game ${i} missing ID, skipping player props`);
           continue;
         }
         
-        console.log(`🎯 Processing game ${i+1}/10: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
+        console.log(`🎯 Processing game ${i+1}/${Math.min(allGames.length, 25)}: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
         
         try {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-          const bookmakerList = allowedBookmakers.slice(0, 19).join(','); // Limit to 19 books for props (use all trial bookmakers including DFS apps)
+          const bookmakerList = allowedBookmakers.slice(0, 25).join(','); // Limit to 25 books for props (comprehensive coverage including all DFS apps)
           
           // Debug logging for DFS apps
           console.log('🎯 Player Props Bookmaker Debug:', {
             userPlan: userProfile.plan,
             totalBookmakers: allowedBookmakers.length,
-            first19: allowedBookmakers.slice(0, 19),
-            dfsAppsIncluded: allowedBookmakers.slice(0, 19).filter(b => ['prizepicks', 'underdog', 'pick6', 'prophetx'].includes(b)),
+            first25: allowedBookmakers.slice(0, 25),
+            dfsAppsIncluded: allowedBookmakers.slice(0, 25).filter(b => ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'prophetx'].includes(b)),
             bookmakerListForAPI: bookmakerList
           });
           

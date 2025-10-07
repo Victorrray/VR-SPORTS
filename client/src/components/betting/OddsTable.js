@@ -24,13 +24,33 @@ const getYesBetExplanation = getYesNoExplanation;
 const logos = {};
 
 // Centralized priority list for the mini-table comparison view
+// These books appear first in the mini-table, in this order
 const MINI_TABLE_PRIORITY_BOOKS = [
-  'fanduel',
   'draftkings',
-  'pinnacle',
+  'fanduel',
+  'caesars',
   'betmgm',
+  'pinnacle',
+  'novig',
+  'prophetx'
+];
+
+// Fallback books to fill the mini-table if priority books aren't available
+// These appear after priority books, sorted by odds quality
+const MINI_TABLE_FALLBACK_BOOKS = [
+  'prizepicks',
+  'underdog',
+  'dabble_au',
+  'espnbet',
+  'betrivers',
+  'unibet',
+  'wynnbet',
+  'pointsbet',
+  'hardrock',
+  'fanatics',
   'betonline',
-  'bovada'
+  'bovada',
+  'mybookie'
 ];
 
 const normalizeBookKey = (bookKeyOrName = '') => String(bookKeyOrName).toLowerCase();
@@ -1383,7 +1403,24 @@ export default function OddsTable({
           }) : null;
           
           // Choose the side with better EV for the main display
-          const showOver = !underEV || (overEV && overEV >= (underEV || 0));
+          // If EVs are equal or both null/0, compare the actual odds quality
+          let showOver;
+          if (overEV !== null && underEV !== null && Math.abs(overEV - underEV) > 0.1) {
+            // Clear EV difference - choose the better EV
+            showOver = overEV > underEV;
+          } else {
+            // EVs are similar or both null - compare odds directly
+            // Better odds = higher positive number or lower negative number (closer to 0)
+            const overOdds = bestOverBook?.price || 0;
+            const underOdds = bestUnderBook?.price || 0;
+            
+            // Convert to decimal for fair comparison
+            const overDec = americanToDecimal(overOdds);
+            const underDec = americanToDecimal(underOdds);
+            
+            showOver = overDec > underDec;
+            console.log(`🎯 EV similar, comparing odds: Over ${overOdds} (${overDec.toFixed(3)}) vs Under ${underOdds} (${underDec.toFixed(3)}) -> Show ${showOver ? 'Over' : 'Under'}`);
+          }
           const primaryBook = showOver ? bestOverBook : bestUnderBook;
           
           // Check if primary book's market is locked - skip this row if locked
@@ -2959,9 +2996,9 @@ export default function OddsTable({
                             const oPointStr = String(row.out.point ?? '');
 
                             // Priority bookmakers to show in the mini-table
-                            // For player props, show ALL books for better EV calculations
+                            // For player props, show more books for better EV calculations and line shopping
                             // For regular odds, limit to priority books for cleaner display
-                            const maxMiniBooks = mode === "props" ? 50 : MINI_TABLE_PRIORITY_BOOKS.length;
+                            const maxMiniBooks = mode === "props" ? 20 : MINI_TABLE_PRIORITY_BOOKS.length;
 
                             // Mini-table should respect the bookFilter when active
                             // If bookFilter is set, only show selected books; otherwise show all
@@ -3578,11 +3615,24 @@ export default function OddsTable({
                                 return compareOdds(a, b);
                               });
 
-                              // For player props, show ALL books for better EV calculations
-                              // For regular odds, limit to priority books for cleaner display
-                              const maxDesktopBooks = mode === "props" ? 50 : MINI_TABLE_PRIORITY_BOOKS.length;
-                              const displayBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop]
-                                .slice(0, maxDesktopBooks);
+                              // For player props, show more books for better EV calculations and line shopping
+                              // Filter out locked/stale markets to avoid showing unavailable bets
+                              const maxDesktopBooks = mode === "props" ? 20 : MINI_TABLE_PRIORITY_BOOKS.length;
+                              const allBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop];
+                              
+                              // Filter out locked markets
+                              const activeBooks = allBooks.filter(book => {
+                                const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'].includes(
+                                  normalizeBookKey(book.bookmaker?.key)
+                                );
+                                const isLocked = isMarketLikelyLocked(book, isDFSApp);
+                                if (isLocked) {
+                                  console.log(`🔒 Filtering out locked market from mini-table: ${book.bookmaker?.key || book.book}`);
+                                }
+                                return !isLocked;
+                              });
+                              
+                              const displayBooks = activeBooks.slice(0, maxDesktopBooks);
 
                               return (
                                 <>

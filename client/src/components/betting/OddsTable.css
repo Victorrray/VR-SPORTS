@@ -1519,7 +1519,7 @@ body,
 
   /* Show more indicator */
   .mini-swipe::after {
-    content: 'Showing top 6 books';
+    content: 'Swipe to see all books';
     display: block;
     text-align: center;
     font-size: 0.75em;
