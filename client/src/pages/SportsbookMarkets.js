@@ -1054,6 +1054,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       if (categorizedMarkets[categoryKey] && categorizedMarkets[categoryKey].length > 0) {
         const categoryInfo = MARKET_CATEGORIES[categoryKey];
         
+        // Safety check: skip if category info is not defined
+        if (!categoryInfo) {
+          console.warn(`Category "${categoryKey}" not found in MARKET_CATEGORIES`);
+          return;
+        }
+        
         // Add category header
         organized.push({
           key: `${categoryKey}_header`,
@@ -1208,6 +1214,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       categories.forEach(category => {
         if (PLAYER_PROP_MARKETS[category]) {
           const categoryInfo = PLAYER_PROP_CATEGORIES[category];
+          
+          // Safety check: skip if category info is not defined
+          if (!categoryInfo) {
+            console.warn(`Player prop category "${category}" not found in PLAYER_PROP_CATEGORIES`);
+            return;
+          }
+          
           // Add category header
           organizedMarkets.push({
             key: `${category}_header`,
@@ -1241,6 +1254,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     footballCategories.forEach(category => {
       if (PLAYER_PROP_MARKETS[category]) {
         const categoryInfo = PLAYER_PROP_CATEGORIES[category];
+        
+        // Safety check: skip if category info is not defined
+        if (!categoryInfo) {
+          console.warn(`Football player prop category "${category}" not found in PLAYER_PROP_CATEGORIES`);
+          return;
+        }
+        
         // Add category header (for visual organization)
         organizedMarkets.push({
           key: `${category}_header`,
@@ -1545,7 +1565,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   <SportMultiSelect
                     list={enhancedSportsbookList}
                     selected={draftSelectedBooks || []}
-                    onChange={setDraftSelectedBooks}
+                    onChange={(newSelection) => {
+                      console.log('🏪 Game Odds Sportsbook selection changed:', {
+                        newSelection,
+                        previousSelection: draftSelectedBooks,
+                        listAvailable: enhancedSportsbookList?.length,
+                        listKeys: enhancedSportsbookList?.map(b => b.key)
+                      });
+                      setDraftSelectedBooks(newSelection);
+                    }}
                     placeholderText="Select sportsbooks..."
                     allLabel="All Sportsbooks"
                     isSportsbook={true}
@@ -1841,7 +1869,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               bookFilter={effectiveSelectedBooks}
               marketFilter={selectedPlayerPropMarkets} // Use selected player prop markets
               evMin={null}
-              loading={filtersLoading || playerPropsProcessing || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
+              loading={filtersLoading || playerPropsProcessing || marketsLoading}
               error={error || marketsError}
               oddsFormat={oddsFormat}
               allCaps={false}
@@ -1889,7 +1917,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             bookFilter={effectiveSelectedBooks}
             marketFilter={[]} // Empty array to show ALL markets
             evMin={minEV === "" ? null : Number(minEV)}
-          loading={filtersLoading || (marketsLoading && (!filteredGames || filteredGames.length === 0))}
+          loading={filtersLoading || marketsLoading}
           error={error || marketsError}
           oddsFormat={oddsFormat}
           allCaps={false}

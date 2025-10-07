@@ -1222,6 +1222,9 @@ export default function OddsTable({
           // Debug logging for sportsbook filtering
           console.log(`🎯 Filtering prop ${propKey} with bookFilter:`, bookFilter);
           
+          // Define DFS apps list once for this scope
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
+          
           // Check allBooks for regular props
           if (propData.allBooks && propData.allBooks.length > 0) {
             console.log(`🎯 Available books for ${propKey}:`, propData.allBooks.map(b => ({
@@ -1231,7 +1234,6 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = propData.allBooks.some(book => {
@@ -1272,7 +1274,6 @@ export default function OddsTable({
             })));
             
             // Check if we're filtering for DFS apps only
-            const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
             const filteringForDFSOnly = bookFilter.every(book => dfsApps.includes(book));
             
             hasMatchingBook = allCombinedBooks.some(book => {
@@ -2954,14 +2955,16 @@ export default function OddsTable({
                             // For regular odds, limit to priority books for cleaner display
                             const maxMiniBooks = mode === "props" ? 50 : MINI_TABLE_PRIORITY_BOOKS.length;
 
+                            // Mini-table should respect the bookFilter when active
+                            // If bookFilter is set, only show selected books; otherwise show all
+                            let booksToProcess = (mode === "props" && bookFilter && bookFilter.length > 0) 
+                              ? (row.selectedBooks || [])
+                              : (row.allBooks || []);
+                            
                             const dedupedBooks = (() => {
                               const seenKeys = new Set();
                               
-                              // Mini-table should ALWAYS show all available books for comparison
-                              // The main table filter should NOT affect the mini-table
-                              let booksToProcess = row.allBooks || [];
-                              
-                              console.log(`🎯 Mini table: Always showing all ${booksToProcess.length} available books for comparison`);
+                              console.log(`🎯 Mini table: Showing ${booksToProcess.length} books (${bookFilter && bookFilter.length > 0 ? 'filtered' : 'all'})`);
                               
                               // Debug logging for Matthew Stafford prop
                               if (row.playerName === 'Matthew Stafford' && row.mkt?.key?.includes('pass_attempts')) {
@@ -3076,6 +3079,52 @@ export default function OddsTable({
                             };
 
                             pushEntry(topEntry);
+                            
+                            // TODO: Re-enable Best Odds and Average Odds summary cards after improvements
+                            // Calculate Best Odds and Average Odds summary cards
+                            // if (booksToProcess.length > 0) {
+                            //   const allOdds = booksToProcess
+                            //     .map(book => book.price || book.odds)
+                            //     .filter(odds => odds != null && !isNaN(odds));
+                            //   
+                            //   if (allOdds.length > 0) {
+                            //     // Find best odds (highest value is best for + odds, closest to 0 for - odds)
+                            //     const bestOddsValue = allOdds.reduce((best, current) => {
+                            //       // Convert to decimal for comparison
+                            //       const bestDec = best > 0 ? (best / 100) + 1 : (100 / Math.abs(best)) + 1;
+                            //       const currDec = current > 0 ? (current / 100) + 1 : (100 / Math.abs(current)) + 1;
+                            //       return currDec > bestDec ? current : best;
+                            //     });
+                            //     
+                            //     // Calculate average odds
+                            //     const avgOddsValue = Math.round(allOdds.reduce((sum, odds) => sum + odds, 0) / allOdds.length);
+                            //     
+                            //     console.log('📊 Summary Cards:', { bestOddsValue, avgOddsValue, totalBooks: allOdds.length });
+                            //     
+                            //     // Add Best Odds card directly to orderedBooks (bypass pushEntry to avoid dedup)
+                            //     orderedBooks.push({
+                            //       book: 'BEST ODDS',
+                            //       bookmaker: { key: 'best_odds_summary' },
+                            //       price: bestOddsValue,
+                            //       odds: bestOddsValue,
+                            //       isSummaryCard: true,
+                            //       summaryType: 'best',
+                            //       _rowId: 'best-odds-card'
+                            //     });
+                            //     
+                            //     // Add Average Odds card directly to orderedBooks
+                            //     orderedBooks.push({
+                            //       book: 'AVG ODDS',
+                            //       bookmaker: { key: 'avg_odds_summary' },
+                            //       price: avgOddsValue,
+                            //       odds: avgOddsValue,
+                            //       isSummaryCard: true,
+                            //       summaryType: 'avg',
+                            //       _rowId: 'avg-odds-card'
+                            //     });
+                            //   }
+                            // }
+                            
                             combinedBooks.forEach(pushEntry);
 
                             let cols = orderedBooks;
@@ -3180,28 +3229,38 @@ export default function OddsTable({
                             return (
                               <>
                                 {cols.map((ob, i) => (
-                                <div className="mini-swipe-row" key={ob._rowId || i}>
+                                <div 
+                                  className={`mini-swipe-row ${ob.isSummaryCard ? 'summary-card' : ''} ${ob.summaryType === 'best' ? 'best-odds-card' : ''} ${ob.summaryType === 'avg' ? 'avg-odds-card' : ''}`} 
+                                  key={ob._rowId || i}
+                                >
                                   <div className="mini-book-col">
                                     {mode === "props" ? (
-                                      <div className="mini-prop-info">
-                                        <div className="mini-prop-book">
-                                          {logos[ob.bookmaker?.key] && (
-                                            <img 
-                                              src={logos[ob.bookmaker?.key]} 
-                                              alt={cleanBookTitle(ob.book)}
-                                              className="bookmaker-logo"
-                                              style={{
-                                                width: '16px',
-                                                height: '16px',
-                                                marginRight: '4px',
-                                                objectFit: 'contain'
-                                              }}
-                                            />
-                                          )}
+                                      // For summary cards, use simple horizontal layout like game mode
+                                      ob.isSummaryCard ? (
+                                        <div style={{ display: 'flex', alignItems: 'center', fontWeight: '700', fontSize: '0.85em', letterSpacing: '0.5px' }}>
                                           {cleanBookTitle(ob.book)}
                                         </div>
-                                        <div className="mini-prop-side">
-                                          {(() => {
+                                      ) : (
+                                        <div className="mini-prop-info">
+                                          <div className="mini-prop-book">
+                                            {logos[ob.bookmaker?.key] && (
+                                              <img 
+                                                src={logos[ob.bookmaker?.key]} 
+                                                alt={cleanBookTitle(ob.book)}
+                                                className="bookmaker-logo"
+                                                style={{
+                                                  width: '16px',
+                                                  height: '16px',
+                                                  marginRight: '4px',
+                                                  objectFit: 'contain'
+                                                }}
+                                              />
+                                            )}
+                                            {cleanBookTitle(ob.book)}
+                                          </div>
+                                          <div className="mini-prop-side">
+                                            {(() => {
+                                            
                                             // Show the actual line this sportsbook offers
                                             const isOverSide = row.out.name === 'Over';
                                             const relevantBook = isOverSide 
@@ -3238,6 +3297,7 @@ export default function OddsTable({
                                           })()}
                                         </div>
                                       </div>
+                                      )
                                     ) : (
                                       <div style={{ display: 'flex', alignItems: 'center' }}>
                                         {logos[ob.bookmaker?.key] && (
@@ -3320,19 +3380,34 @@ export default function OddsTable({
                                       </>
                                     )
                                   ) : (
-                                    // For regular games, show two odds columns
-                                    <>
-                                      <div className="mini-odds-col">
-                                        <div className="mini-swipe-odds">
-                                          {formatOdds(Number(grab(ob, true)))}
+                                    // For regular games, show odds columns
+                                    ob.isSummaryCard ? (
+                                      // Summary cards show single centered odds (matching regular card layout)
+                                      <>
+                                        <div className="mini-odds-col">
+                                          <div className="mini-swipe-odds" style={{ fontSize: '1.1em', fontWeight: '700' }}>
+                                            {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
+                                          </div>
                                         </div>
-                                      </div>
-                                      <div className="mini-odds-col">
-                                        <div className="mini-swipe-odds">
-                                          {formatOdds(Number(grab(ob, false)))}
+                                        <div className="mini-odds-col">
+                                          {/* Empty column for layout consistency */}
                                         </div>
-                                      </div>
-                                    </>
+                                      </>
+                                    ) : (
+                                      // Regular books show two odds columns (home/away)
+                                      <>
+                                        <div className="mini-odds-col">
+                                          <div className="mini-swipe-odds">
+                                            {formatOdds(Number(grab(ob, true)))}
+                                          </div>
+                                        </div>
+                                        <div className="mini-odds-col">
+                                          <div className="mini-swipe-odds">
+                                            {formatOdds(Number(grab(ob, false)))}
+                                          </div>
+                                        </div>
+                                      </>
+                                    )
                                   )}
                                   <div className="mini-pick-col">
                                     {(() => {
@@ -3425,7 +3500,7 @@ export default function OddsTable({
 
                 {/* Desktop/Tablet mini-table (hide on mobile via CSS) */}
                 {expandedRows[row.key] && ((mode === "props" && bookFilter && bookFilter.length > 0) 
-                  ? (row.nonSelectedBooks && row.nonSelectedBooks.length > 0)
+                  ? (row.selectedBooks && row.selectedBooks.length > 0)
                   : (row.allBooks && row.allBooks.length > 0)) && (
                   <tr className="desktop-mini-wrap">
                     <td colSpan={8}>

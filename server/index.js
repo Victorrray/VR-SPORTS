@@ -60,7 +60,7 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "pick6",
+  "prizepicks", "underdog", "pick6", "dabble_au",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // US region books
@@ -75,7 +75,7 @@ const FOCUSED_BOOKMAKERS = [
 // Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "pick6",
+  "prizepicks", "underdog", "pick6", "dabble_au",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // Major sportsbooks
@@ -2482,6 +2482,19 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           // Merge player props into the existing game's bookmakers
           if (propsResponse.data && propsResponse.data.bookmakers) {
             console.log(`🔗 Merging ${propsResponse.data.bookmakers.length} bookmakers with player props`);
+            
+            // Check specifically for Dabble
+            const dabbleData = propsResponse.data.bookmakers.find(b => b.key === 'dabble_au');
+            if (dabbleData) {
+              console.log(`🎰 DABBLE FOUND! Markets: ${dabbleData.markets?.length || 0}`, {
+                key: dabbleData.key,
+                markets: dabbleData.markets?.map(m => m.key) || []
+              });
+            } else {
+              console.log(`❌ Dabble NOT in response. Available bookmakers:`, 
+                propsResponse.data.bookmakers.map(b => b.key));
+            }
+            
             const existingBookmakers = new Map();
             game.bookmakers.forEach(book => {
               existingBookmakers.set(book.key, book);

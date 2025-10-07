@@ -8,6 +8,7 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
   const [selectedDates, setSelectedDates] = useState(() => {
     return value ? [value] : [];
   });
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   // Generate date options with categories
   const dateOptions = useMemo(() => {
@@ -90,6 +91,15 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
     setIsOpen(false);
   };
 
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -121,7 +131,53 @@ export default function DatePicker({ value, onChange, placeholder = "Select Date
         <ChevronDown size={16} className={`dp-chevron ${isOpen ? 'dp-open' : ''}`} />
       </button>
 
-      {isOpen && (
+      {isOpen && !isMobile && (
+        <div className="dp-menu">
+          {/* Quick Options */}
+          {dateOptions.quickOptions.map((option) => (
+            <div
+              key={option.key}
+              className={`dp-item ${value === option.key ? 'dp-selected' : ''}`}
+              onClick={() => {
+                onChange(option.key);
+                setIsOpen(false);
+              }}
+            >
+              {option.key === "live" ? "🔴 Live Games" : option.title}
+            </div>
+          ))}
+
+          {/* Today */}
+          {dateOptions.todayOptions.map((option) => (
+            <div
+              key={option.key}
+              className={`dp-item ${value === option.key ? 'dp-selected' : ''}`}
+              onClick={() => {
+                onChange(option.key);
+                setIsOpen(false);
+              }}
+            >
+              {option.title}
+            </div>
+          ))}
+
+          {/* Upcoming Days */}
+          {dateOptions.upcomingOptions.map((option) => (
+            <div
+              key={option.key}
+              className={`dp-item ${value === option.key ? 'dp-selected' : ''}`}
+              onClick={() => {
+                onChange(option.key);
+                setIsOpen(false);
+              }}
+            >
+              {option.title}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {isOpen && isMobile && (
         <div className="dp-mobile-overlay">
           <div className="dp-mobile-sheet">
             <div className="dp-mobile-header">

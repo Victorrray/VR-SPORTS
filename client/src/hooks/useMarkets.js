@@ -370,6 +370,28 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       
       console.log('🔍 useMarkets: Response data:', data);
       
+      // Check for Dabble specifically
+      if (Array.isArray(data)) {
+        const allBookmakers = new Set();
+        let dabbleCount = 0;
+        data.forEach(game => {
+          if (game.bookmakers) {
+            game.bookmakers.forEach(book => {
+              allBookmakers.add(book.key);
+              if (book.key === 'dabble_au') {
+                dabbleCount++;
+                console.log(`🎰 DABBLE FOUND in game ${game.home_team} vs ${game.away_team}:`, {
+                  markets: book.markets?.length || 0,
+                  marketKeys: book.markets?.map(m => m.key) || []
+                });
+              }
+            });
+          }
+        });
+        console.log('🔍 All bookmakers in response:', Array.from(allBookmakers));
+        console.log(`🎰 Dabble found in ${dabbleCount} games`);
+      }
+      
       if (!data || !Array.isArray(data)) {
         console.error('🔴 useMarkets: Invalid response format - expected array, got:', data);
         setError('Invalid response format from server');
