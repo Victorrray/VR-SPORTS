@@ -945,18 +945,19 @@ export default function OddsTable({
             const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
             const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
             
-            // In props mode: only show player prop markets or DFS sites, and respect marketFilter
+            // In props mode: only show player prop markets (for ALL bookmakers including DFS)
             // In regular mode: only show regular markets (h2h, spreads, totals)
             if (mode === 'props') {
-              if (!isDFSSite && !isPlayerPropMarket) {
-                console.log(`🚫 SKIPPING: ${bookmaker.key} market ${market.key} - not DFS (${isDFSSite}) and not player prop (${isPlayerPropMarket})`);
+              // ALWAYS require player prop markets, even for DFS sites
+              if (!isPlayerPropMarket) {
+                console.log(`🚫 SKIPPING: ${bookmaker.key} market ${market.key} - not a player prop market`);
                 return;
               }
               
               // Debug: Log what we're processing
               if (!isDFSSite && isPlayerPropMarket) {
                 console.log(`✅ PROCESSING TRADITIONAL: ${bookmaker.key} market ${market.key} - has player props`);
-              } else if (isDFSSite) {
+              } else if (isDFSSite && isPlayerPropMarket) {
                 console.log(`✅ PROCESSING DFS: ${bookmaker.key} market ${market.key}`);
               }
               
