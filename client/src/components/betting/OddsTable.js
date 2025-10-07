@@ -1577,9 +1577,19 @@ export default function OddsTable({
           bookFilter && bookFilter.length ? bookFilter : 'ALL BOOKS (no filter)');
         
         const candidates = allMarketOutcomes.filter(o => {
-          // If no bookFilter specified, include all bookmakers
+          // If no bookFilter specified, include all bookmakers EXCEPT DFS-only apps in game mode
           if (!bookFilter || !bookFilter.length) {
-            console.log(`🎯 Including all bookmakers for market ${mktKey}`);
+            // DFS apps only offer player props, not game lines
+            const dfsOnlyApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+            const bookKey = o.bookmaker?.key?.toLowerCase() || '';
+            
+            // In game mode, exclude DFS-only apps
+            if (mode === 'game' && dfsOnlyApps.some(app => bookKey.includes(app))) {
+              console.log(`🎯 Excluding DFS-only app "${bookKey}" from game odds (only offers player props)`);
+              return false;
+            }
+            
+            console.log(`🎯 Including bookmaker "${bookKey}" for market ${mktKey}`);
             return true;
           }
           

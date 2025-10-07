@@ -11,17 +11,22 @@ const SPORTSBOOK_CATEGORIES = {
   popular: {
     title: "Popular Sportsbooks",
     icon: Star,
-    books: ["draftkings", "fanduel", "betmgm", "caesars", "pointsbet"]
+    books: ["draftkings", "fanduel", "betmgm", "caesars", "williamhill_us", "pointsbet"]
   },
   dfs: {
     title: "DFS Apps",
     icon: Gamepad2,
-    books: ["prizepicks", "underdog", "pick6", "sleeper"]
+    books: ["prizepicks", "underdog", "pick6", "dabble_au", "sleeper"]
+  },
+  exchanges: {
+    title: "Exchanges",
+    icon: TrendingUp,
+    books: ["novig", "prophetx", "rebet"]
   },
   premium: {
     title: "Premium Options", 
     icon: TrendingUp,
-    books: ["pinnacle", "circa", "superbook", "westgate", "rebet"]
+    books: ["pinnacle", "circa", "superbook", "westgate"]
   },
   regional: {
     title: "Regional & Others",

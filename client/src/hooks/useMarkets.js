@@ -399,11 +399,24 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         return;
       }
       
+      // Custom bookmaker name mappings (override API titles)
+      const bookmakerNameMap = {
+        'dabble_au': 'Dabble',
+        'williamhill_us': 'Caesars', // William Hill US merged with Caesars
+        // Add more custom mappings here if needed
+      };
+      
       // Normalize the data structure
       const normalizedData = data.map(game => ({
         ...game,
-        // Ensure bookmakers is always an array
-        bookmakers: Array.isArray(game.bookmakers) ? game.bookmakers : [],
+        // Ensure bookmakers is always an array with custom name mapping
+        bookmakers: Array.isArray(game.bookmakers) 
+          ? game.bookmakers.map(bookmaker => ({
+              ...bookmaker,
+              // Override title with custom name if mapping exists
+              title: bookmakerNameMap[bookmaker.key] || bookmaker.title || bookmaker.key
+            }))
+          : [],
         // Ensure scores is an object with home/away
         scores: game.scores || { home: null, away: null },
         // Add default values for required fields
