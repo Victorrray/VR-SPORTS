@@ -598,6 +598,32 @@ export default function Account() {
         <div className="card-header">
           <CreditCard size={20} />
           <h2>Subscription</h2>
+          <button
+            onClick={async () => {
+              setLoading(true);
+              await refresh();
+              setLoading(false);
+              setSuccess('Plan status refreshed!');
+              setTimeout(() => setSuccess(''), 3000);
+            }}
+            disabled={loading}
+            style={{
+              marginLeft: 'auto',
+              padding: '8px 12px',
+              background: 'rgba(139, 92, 246, 0.1)',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
+              borderRadius: '6px',
+              color: 'var(--accent)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '14px'
+            }}
+          >
+            <RefreshCw size={14} />
+            Refresh
+          </button>
         </div>
         <div className="subscription-content">
           <div className="subscription-status">
