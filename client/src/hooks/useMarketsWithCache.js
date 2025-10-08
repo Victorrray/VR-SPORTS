@@ -12,11 +12,13 @@ export const useMarketsWithCache = (sports = [], regions = [], markets = [], opt
   const { enabled = true, date = null } = options;
   
   // Determine if we should use cached data
+  // DISABLED: Now using Supabase caching in main /api/odds endpoint instead
   const isNFLOnly = useMemo(() => {
-    return sports.length === 1 && sports[0] === 'americanfootball_nfl';
+    return false; // Disabled - use main API endpoint for all sports
+    // return sports.length === 1 && sports[0] === 'americanfootball_nfl';
   }, [sports]);
 
-  const shouldUseCache = isNFLOnly && enabled;
+  const shouldUseCache = false; // Disabled - Supabase caching now built into main endpoint
 
   // Use cached odds for NFL
   const {
