@@ -2548,6 +2548,10 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
       console.log('🎯 Fetching player props for markets:', playerPropMarkets);
       
+      // Set a total timeout for player props to prevent request hanging
+      const playerPropsStartTime = Date.now();
+      const TOTAL_PLAYER_PROPS_TIMEOUT = 120000; // 2 minutes total timeout
+      
       // If no games were found in the regular API call, fetch games specifically for player props
       if (allGames.length === 0) {
         console.log('🎯 No games found in regular API call, fetching games specifically for player props');
@@ -2593,16 +2597,40 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       }
       
       // For each game, fetch individual player props using event ID
-      // NO LIMIT - Supabase caching makes this cost-effective!
-      console.log(`🎯 Processing ALL ${allGames.length} games for player props (Supabase cache enabled)`);
-      for (let i = 0; i < allGames.length; i++) {
+      // Smart limit based on sport to prevent timeouts
+      const SPORT_GAME_LIMITS = {
+        'baseball_mlb': 30,           // MLB has 162-game season, limit to 30
+        'basketball_nba': 30,          // NBA has 82-game season, limit to 30
+        'icehockey_nhl': 30,           // NHL has 82-game season, limit to 30
+        'americanfootball_nfl': 100,  // NFL has 17-game season, can handle all
+        'americanfootball_ncaaf': 50, // NCAAF has many games, limit to 50
+        'basketball_ncaab': 50,        // NCAAB has many games, limit to 50
+        'soccer_epl': 20,              // Soccer games, limit to 20
+        'default': 40                  // Default limit for other sports
+      };
+      
+      const sportKey = sportsArray[0]; // Get first sport (usually only one for player props)
+      const gameLimit = SPORT_GAME_LIMITS[sportKey] || SPORT_GAME_LIMITS['default'];
+      const gamesToProcess = Math.min(allGames.length, gameLimit);
+      
+      console.log(`🎯 Processing ${gamesToProcess}/${allGames.length} games for player props (limit: ${gameLimit}, sport: ${sportKey})`);
+      console.log(`📊 Supabase cache enabled - subsequent requests will be instant!`);
+      
+      for (let i = 0; i < gamesToProcess; i++) {
+        // Check if we've exceeded total timeout
+        const elapsedTime = Date.now() - playerPropsStartTime;
+        if (elapsedTime > TOTAL_PLAYER_PROPS_TIMEOUT) {
+          console.log(`⏱️ Player props timeout reached (${elapsedTime}ms). Processed ${i}/${gamesToProcess} games. Returning partial results.`);
+          break;
+        }
+        
         const game = allGames[i];
         if (!game.id) {
           console.log(`⚠️ Game ${i} missing ID, skipping player props`);
           continue;
         }
         
-        console.log(`🎯 Processing game ${i+1}/${allGames.length}: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
+        console.log(`🎯 Processing game ${i+1}/${gamesToProcess}: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
         
         try {
           const userProfile = req.__userProfile || { plan: 'free' };
