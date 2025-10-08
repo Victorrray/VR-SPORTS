@@ -27,7 +27,7 @@ function maskId(id = "") {
 
 export default function Account() {
   const { user, signOut } = useAuth();
-  const { me } = useMe();
+  const { me, refresh } = useMe();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
