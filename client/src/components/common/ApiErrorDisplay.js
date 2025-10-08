@@ -12,6 +12,11 @@ const ApiErrorDisplay = ({ error, onRetry }) => {
     
     const errorStr = error.toString();
     
+    // Check for JSON parsing errors (HTML returned instead of JSON)
+    if (errorStr.includes('Unexpected token') || errorStr.includes('<!doctype') || errorStr.includes('not valid JSON')) {
+      return 'Server returned HTML instead of JSON - API endpoint may be misconfigured or unavailable';
+    }
+    
     // Check for common error types
     if (errorStr.includes('504')) {
       return 'Gateway Timeout (504) - The server took too long to respond';

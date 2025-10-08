@@ -240,6 +240,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       let response;
       let data;
       try {
+        console.log('🔍 useMarkets: Making request to:', fullUrl);
         response = await secureFetch(fullUrl, {
           signal: controller.signal,
           credentials: 'include',
@@ -253,7 +254,13 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         
         clearTimeout(timeoutId);
         
-      console.log('🔍 useMarkets: Response received:', response.status, response.statusText);
+      console.log('🔍 useMarkets: Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        type: response.type,
+        redirected: response.redirected
+      });
 
         // Handle quota exceeded before other errors
         const quotaResult = await handleApiResponse(response);
@@ -289,6 +296,15 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         }
         
         // Check if response is valid JSON
+        const contentType = response.headers.get('content-type');
+        console.log('🔍 useMarkets: Response content-type:', contentType);
+        
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('🔴 useMarkets: Expected JSON but got:', text.substring(0, 500));
+          throw new Error(`Server returned ${contentType || 'unknown content type'} instead of JSON. This usually means the API endpoint is not configured correctly.`);
+        }
+        
         data = await response.json();
         
         // Emit API usage event to trigger usage counter refresh

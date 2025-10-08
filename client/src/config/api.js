@@ -34,14 +34,14 @@ export function withApiBase(path) {
   
   console.log('🔍 withApiBase called with:', { path, base, NODE_ENV: process.env.NODE_ENV });
 
-  // Use production URL in development mode since local backend is not available
+  // In development, return relative path to use Create React App proxy
   if (process.env.NODE_ENV === 'development') {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    const result = `${base}${cleanPath}`;
-    console.log('🔍 withApiBase (dev) returning:', result);
-    return result;
+    console.log('🔍 withApiBase (dev) returning relative path for proxy:', cleanPath);
+    return cleanPath;
   }
 
+  // In production, use full URL
   if (!base) return path; // fallback to relative for local proxy/dev
   if (path.startsWith('http')) return path;
   const result = `${base}${path.startsWith('/') ? '' : '/'}${path}`;

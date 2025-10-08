@@ -2067,10 +2067,38 @@ app.get("/api/participants/:sport", requireUser, async (req, res) => {
   }
 });
 
-// sports list (Odds API) - CACHED to reduce API calls
+// sports list - Uses Supabase cache to reduce API calls
 app.get("/api/sports", requireUser, checkPlanAccess, async (_req, res) => {
   try {
-    // If no API key, return fallback sports list
+    // Step 1: Try to get sports from Supabase cache
+    if (supabase) {
+      try {
+        const { data: cachedSports, error: cacheError } = await supabase
+          .rpc('get_active_sports');
+        
+        if (!cacheError && cachedSports && cachedSports.length > 0) {
+          console.log(`📦 Returning ${cachedSports.length} sports from Supabase cache`);
+          return res.json(cachedSports);
+        }
+        
+        if (cacheError) {
+          console.warn('⚠️ Supabase cache error:', cacheError.message);
+        }
+      } catch (supabaseErr) {
+        console.warn('⚠️ Supabase query failed:', supabaseErr.message);
+      }
+    }
+    
+    // Step 2: If no Supabase cache, check memory cache
+    const cacheKey = getCacheKey('sports', {});
+    const memoryCached = getCachedResponse(cacheKey);
+    
+    if (memoryCached) {
+      console.log('📦 Using memory cached sports list');
+      return res.json(memoryCached);
+    }
+    
+    // Step 3: If no API key, return fallback sports list
     if (!API_KEY) {
       const fallbackSports = [
         // Major US Sports
@@ -2094,68 +2122,65 @@ app.get("/api/sports", requireUser, checkPlanAccess, async (_req, res) => {
       return res.json(fallbackSports);
     }
     
-    // Filter function to remove championship winners and other unwanted sports
-    const filterSportsList = (sportsList) => {
-      // List of sports to exclude
-      const excludedSports = [
-        'americanfootball_ncaaf_championship_winner',
-        'americanfootball_nfl_super_bowl_winner',
-        'baseball_mlb_world_series_winner',
-        'basketball_nba_championship_winner',
-        'basketball_ncaab_championship_winner',
-        'icehockey_nhl_championship_winner',
-        'soccer_uefa_champs_league_winner',
-        'soccer_epl_winner',
-        'soccer_fifa_world_cup_winner',
-        'soccer_uefa_europa_league_winner'
-      ];
-      
-      // List of less popular leagues to exclude
-      const lessPopularLeagues = [
-        'australianrules_afl',
-        'baseball_kbo',
-        'baseball_npb',
-        'baseball_mlb_preseason',
-        'baseball_milb',
-        'basketball_euroleague',
-        'basketball_nba_preseason',
-        'cricket_',
-        'cricket_test_match',
-        'rugbyleague_',
-        'rugbyunion_'
-      ];
-      
-      return sportsList.filter(sport => {
-        // Exclude championship winners
-        if (excludedSports.includes(sport.key)) {
-          return false;
-        }
-        
-        // Exclude less popular leagues
-        if (lessPopularLeagues.some(league => sport.key.startsWith(league))) {
-          return false;
-        }
-        
-        return true;
-      });
-    };
-
-    // Check cache first - sports list rarely changes
-    const cacheKey = getCacheKey('sports', {});
-    const cachedSports = getCachedResponse(cacheKey);
+    // Step 4: Fetch from The Odds API and update Supabase cache
+    console.log('🌐 Fetching sports list from The Odds API');
+    const url = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
+    const response = await axios.get(url);
     
-    if (cachedSports) {
-      console.log('📦 Using cached sports list');
-      return res.json(filterSportsList(cachedSports));
+    // Filter unwanted sports
+    const excludedSports = [
+      'americanfootball_ncaaf_championship_winner',
+      'americanfootball_nfl_super_bowl_winner',
+      'baseball_mlb_world_series_winner',
+      'basketball_nba_championship_winner',
+      'basketball_ncaab_championship_winner',
+      'icehockey_nhl_championship_winner',
+      'soccer_uefa_champs_league_winner',
+      'soccer_epl_winner',
+      'soccer_fifa_world_cup_winner',
+      'soccer_uefa_europa_league_winner'
+    ];
+    
+    const lessPopularLeagues = [
+      'australianrules_afl',
+      'baseball_kbo',
+      'baseball_npb',
+      'baseball_mlb_preseason',
+      'baseball_milb',
+      'basketball_euroleague',
+      'basketball_nba_preseason',
+      'cricket_',
+      'cricket_test_match',
+      'rugbyleague_',
+      'rugbyunion_'
+    ];
+    
+    const filteredSports = response.data.filter(sport => {
+      if (excludedSports.includes(sport.key)) return false;
+      if (lessPopularLeagues.some(league => sport.key.startsWith(league))) return false;
+      return true;
+    });
+    
+    // Step 5: Update Supabase cache
+    if (supabase) {
+      try {
+        for (const sport of filteredSports) {
+          await supabase.rpc('refresh_sports_cache', {
+            p_sport_key: sport.key,
+            p_title: sport.title,
+            p_group_name: sport.group || null,
+            p_active: sport.active !== false
+          });
+        }
+        console.log(`✅ Updated ${filteredSports.length} sports in Supabase cache`);
+      } catch (updateErr) {
+        console.warn('⚠️ Failed to update Supabase cache:', updateErr.message);
+      }
     }
     
-    console.log('🌐 API call for sports list');
-    const url = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
-    const r = await axios.get(url);
-    
-    // Filter and cache the sports list
-    const filteredSports = filterSportsList(r.data);
+    // Step 6: Update memory cache
     setCachedResponse(cacheKey, filteredSports);
+    
     res.json(filteredSports);
   } catch (err) {
     console.error("sports error:", err?.response?.status, err?.response?.data || err.message);

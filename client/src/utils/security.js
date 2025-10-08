@@ -29,18 +29,20 @@ export const secureFetch = async (url, options = {}) => {
 
   // Handle API URL for both development and production
   const isProduction = process.env.NODE_ENV === 'production';
-  const isBackendHost = (u) => u.includes('odds-backend-4e9q.onrender.com') || u.includes('vr-sports.onrender.com') || u.startsWith('/api');
+  const isBackendHost = (u) => u.includes('odds-backend-4e9q.onrender.com') || u.includes('vr-sports.onrender.com');
+  const isApiPath = (u) => u.startsWith('/api/');
 
-  // In development, proxy backend calls to avoid CORS
-  if (!isProduction && (isBackendHost(url) && url.startsWith('http'))) {
+  // In development, don't proxy localhost URLs - they're already correct
+  // Only proxy production backend URLs if accidentally used in development
+  if (!isProduction && isBackendHost(url) && url.startsWith('http')) {
     const proxyUrl = new URL(url);
-    url = `/api${proxyUrl.pathname}${proxyUrl.search}`;
+    url = `${proxyUrl.pathname}${proxyUrl.search}`;
   }
 
   // Same-origin vs cross-origin
   const isRelative = url.startsWith('/');
   const sameOrigin = isRelative || url.startsWith(window.location.origin);
-  const backendAPI = isBackendHost(url);
+  const backendAPI = isBackendHost(url) || isApiPath(url);
   const method = (options.method || 'GET').toUpperCase();
 
   // Build headers conservatively for cross-origin GETs
