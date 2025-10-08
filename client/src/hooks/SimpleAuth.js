@@ -77,6 +77,32 @@ export function AuthProvider({ children }) {
     setSession(null);
   };
 
+  const setUsername = async (username) => {
+    if (!user) return { error: { message: 'Not signed in' } };
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ username: username.trim() })
+        .eq('id', user.id);
+      
+      if (error) {
+        if (error.code === '23505') {
+          return { error: { message: 'This username is already in use' } };
+        }
+        return { error: { message: error.message || 'Failed to set username' } };
+      }
+      
+      // Refresh profile after successful update
+      await fetchProfile(user.id);
+      
+      return { success: true };
+    } catch (err) {
+      console.error('setUsername error:', err);
+      return { error: { message: 'An unexpected error occurred' } };
+    }
+  };
+
   const value = {
     user,
     session,
@@ -85,6 +111,7 @@ export function AuthProvider({ children }) {
     signIn,
     signUp,
     signOut,
+    setUsername,
     isSupabaseEnabled: true
   };
 
