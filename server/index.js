@@ -3353,10 +3353,25 @@ app.get("/api/scores", enforceUsage, async (req, res) => {
 
 /* ------------------------------------ Cached Odds Endpoints ------------------------------------ */
 
-// Get cached NFL odds from Supabase
-app.get('/api/cached-odds/nfl', enforceUsage, async (req, res) => {
+// Get cached odds from Supabase for any sport
+app.get('/api/cached-odds/:sport', enforceUsage, async (req, res) => {
   try {
+    const { sport } = req.params;
     const { markets, bookmakers, eventId } = req.query;
+    
+    // Map short sport names to full keys
+    const sportKeyMap = {
+      'nfl': 'americanfootball_nfl',
+      'ncaaf': 'americanfootball_ncaaf',
+      'nba': 'basketball_nba',
+      'ncaab': 'basketball_ncaab',
+      'mlb': 'baseball_mlb',
+      'nhl': 'icehockey_nhl',
+      'epl': 'soccer_epl'
+    };
+    
+    const sportKey = sportKeyMap[sport] || sport; // Use mapping or assume full key
+    console.log(`📦 Fetching cached odds for sport: ${sportKey}`);
     
     const options = {
       markets: markets ? markets.split(',') : null,
@@ -3364,10 +3379,12 @@ app.get('/api/cached-odds/nfl', enforceUsage, async (req, res) => {
       eventId: eventId || null
     };
 
-    const cachedOdds = await oddsCacheService.getCachedOdds('americanfootball_nfl', options);
+    const cachedOdds = await oddsCacheService.getCachedOdds(sportKey, options);
     
     // Transform cached data to match frontend expectations
     const transformedData = transformCachedOddsToFrontend(cachedOdds);
+    
+    console.log(`✅ Returning ${transformedData.length} cached games for ${sportKey}`);
     
     res.set('Cache-Control', 'public, max-age=30'); // 30 second client cache
     res.json(transformedData);
