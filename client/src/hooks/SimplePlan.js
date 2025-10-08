@@ -17,14 +17,25 @@ export function usePlan() {
 
     setPlanLoading(true);
     try {
+      console.log('🔄 Fetching plan for user:', user.id);
+      console.log('🔄 API URL:', `${API_BASE_URL}/api/me`);
+      
       const res = await axios.get(`${API_BASE_URL}/api/me`, {
-        headers: { 'x-user-id': user.id }
+        headers: { 
+          'x-user-id': user.id,
+          'Cache-Control': 'no-cache' // Prevent caching
+        }
       });
-      console.log('✅ Plan loaded:', res.data);
+      
+      console.log('✅ Plan API response:', res.data);
+      console.log('✅ Plan value:', res.data.plan);
+      console.log('✅ Unlimited:', res.data.unlimited);
+      
       setPlan(res.data);
       setPlanLoading(false);
     } catch (err) {
       console.error('❌ Plan fetch error:', err);
+      console.error('❌ Error details:', err.response?.data);
       // Default to free plan on error
       setPlan({ plan: 'free', remaining: 250, limit: 250 });
       setPlanLoading(false);
