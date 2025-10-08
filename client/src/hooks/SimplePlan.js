@@ -31,9 +31,19 @@ export function usePlan() {
     }
   };
 
-  // Fetch plan when user logs in
+  // Fetch plan when user logs in or user ID changes
   useEffect(() => {
     if (authLoading) return;
+    
+    // Reset plan when user changes (sign out/sign in)
+    if (!user) {
+      console.log('🔄 User signed out - clearing plan');
+      setPlan(null);
+      setPlanLoading(false);
+      return;
+    }
+    
+    console.log('🔄 User changed - fetching plan for:', user.id);
     fetchPlan();
   }, [user?.id, authLoading]);
 
@@ -55,16 +65,9 @@ export function usePlan() {
   const refreshPlan = async () => {
     if (!user) return null;
     
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/me`, {
-        headers: { 'x-user-id': user.id }
-      });
-      setPlan(res.data);
-      return res.data;
-    } catch (err) {
-      console.error('Plan refresh error:', err);
-      return plan;
-    }
+    console.log('🔄 Manual plan refresh triggered');
+    await fetchPlan();
+    return plan;
   };
 
   return { 
