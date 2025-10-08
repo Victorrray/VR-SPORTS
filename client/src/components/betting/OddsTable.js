@@ -1368,8 +1368,20 @@ export default function OddsTable({
           const overEV = calculateSideEV(propData.overBooks, true);
           const underEV = calculateSideEV(propData.underBooks, false);
           
-          // Find best line + odds combination for each side
-          const bestOverBook = propData.overBooks.length > 0 ? propData.overBooks.reduce((best, book) => {
+          // Determine which books to use based on filter
+          // If bookFilter is active, only use selectedBooks; otherwise use all books
+          const hasFilter = bookFilter && bookFilter.length > 0;
+          const overBooksToUse = hasFilter && propData.selectedBooks ? 
+            propData.selectedBooks.filter(b => b.name?.toLowerCase().includes('over') || (b.point !== undefined && !b.name?.toLowerCase().includes('under'))) :
+            propData.overBooks;
+          const underBooksToUse = hasFilter && propData.selectedBooks ?
+            propData.selectedBooks.filter(b => b.name?.toLowerCase().includes('under')) :
+            propData.underBooks;
+          
+          console.log(`🎯 FILTER DEBUG: ${propData.playerName} - hasFilter: ${hasFilter}, overBooks: ${overBooksToUse.length}, underBooks: ${underBooksToUse.length}`);
+          
+          // Find best line + odds combination for each side (from filtered books)
+          const bestOverBook = overBooksToUse.length > 0 ? overBooksToUse.reduce((best, book) => {
             const bestLine = parseFloat(best.point || best.line || 0);
             const bookLine = parseFloat(book.point || book.line || 0);
             
@@ -1386,7 +1398,7 @@ export default function OddsTable({
             return bookDecimal > bestDecimal ? book : best;
           }) : null;
           
-          const bestUnderBook = propData.underBooks.length > 0 ? propData.underBooks.reduce((best, book) => {
+          const bestUnderBook = underBooksToUse.length > 0 ? underBooksToUse.reduce((best, book) => {
             const bestLine = parseFloat(best.point || best.line || 0);
             const bookLine = parseFloat(book.point || book.line || 0);
             
