@@ -2593,14 +2593,16 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       }
       
       // For each game, fetch individual player props using event ID
-      for (let i = 0; i < allGames.length && i < 25; i++) { // Limit to first 25 games for comprehensive coverage
+      // NO LIMIT - Supabase caching makes this cost-effective!
+      console.log(`🎯 Processing ALL ${allGames.length} games for player props (Supabase cache enabled)`);
+      for (let i = 0; i < allGames.length; i++) {
         const game = allGames[i];
         if (!game.id) {
           console.log(`⚠️ Game ${i} missing ID, skipping player props`);
           continue;
         }
         
-        console.log(`🎯 Processing game ${i+1}/${Math.min(allGames.length, 25)}: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
+        console.log(`🎯 Processing game ${i+1}/${allGames.length}: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
         
         try {
           const userProfile = req.__userProfile || { plan: 'free' };
@@ -2622,12 +2624,57 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
           const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, bookmakers: bookmakerList });
+          
+          // SUPABASE CACHE: Check Supabase first for player props
+          let supabaseCachedProps = null;
+          if (supabase && oddsCacheService) {
+            try {
+              const cachedPropsData = await oddsCacheService.getCachedOdds(game.sport_key, {
+                eventId: game.id,
+                markets: playerPropMarkets
+              });
+              
+              if (cachedPropsData && cachedPropsData.length > 0) {
+                console.log(`📦 Supabase cache HIT for player props - Game ${game.id}: ${cachedPropsData.length} cached entries`);
+                supabaseCachedProps = transformCachedOddsToApiFormat(cachedPropsData);
+                if (supabaseCachedProps.length > 0) {
+                  console.log(`✅ Using player props from Supabase cache for game ${game.id}`);
+                }
+              }
+            } catch (cacheErr) {
+              console.warn(`⚠️ Supabase cache error for player props:`, cacheErr.message);
+            }
+          }
+          
+          // If Supabase cache hit, use it
+          if (supabaseCachedProps && supabaseCachedProps.length > 0) {
+            // Merge the cached game data with the current game
+            const cachedGame = supabaseCachedProps[0];
+            if (cachedGame && cachedGame.bookmakers) {
+              console.log(`💰 Saved player props API call for game ${game.id} using Supabase cache`);
+              // Merge bookmakers directly
+              const existingBookmakers = new Map();
+              game.bookmakers.forEach(book => existingBookmakers.set(book.key, book));
+              
+              cachedGame.bookmakers.forEach(propsBook => {
+                if (existingBookmakers.has(propsBook.key)) {
+                  const existing = existingBookmakers.get(propsBook.key);
+                  existing.markets = [...(existing.markets || []), ...(propsBook.markets || [])];
+                } else {
+                  game.bookmakers.push(propsBook);
+                }
+              });
+              continue; // Skip to next game
+            }
+          }
+          
+          // Check memory cache
           const cachedProps = getCachedResponse(cacheKey);
           
           let propsResponse;
           if (cachedProps) {
             propsResponse = { data: cachedProps };
-            console.log(`📦 Using cached player props for game ${game.id}`);
+            console.log(`📦 Using memory cached player props for game ${game.id}`);
           } else {
             console.log(`🌐 Making API call for player props for game ${game.id}...`);
             const startTime = Date.now();
@@ -2658,6 +2705,26 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           }
             
             setCachedResponse(cacheKey, propsResponse.data);
+            
+            // SUPABASE CACHE: Save player props to Supabase
+            if (supabase && propsResponse.data && propsResponse.data.bookmakers) {
+              try {
+                console.log(`💾 Saving player props to Supabase cache for game ${game.id}`);
+                // Create a game object with the props data
+                const gameWithProps = {
+                  id: game.id,
+                  sport_key: game.sport_key,
+                  home_team: game.home_team,
+                  away_team: game.away_team,
+                  commence_time: game.commence_time,
+                  bookmakers: propsResponse.data.bookmakers
+                };
+                await saveOddsToSupabase([gameWithProps], game.sport_key);
+                console.log(`✅ Successfully cached player props in Supabase for game ${game.id}`);
+              } catch (supabaseSaveErr) {
+                console.warn(`⚠️ Failed to save player props to Supabase:`, supabaseSaveErr.message);
+              }
+            }
             
             // Increment usage for player props API call
             const userId = req.__userId;
