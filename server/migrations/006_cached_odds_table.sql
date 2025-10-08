@@ -1,8 +1,13 @@
 -- Migration: Cached Odds Table
 -- Purpose: Cache odds data from The Odds API to reduce API calls and improve performance
 
+-- Drop existing table if it has wrong structure (safe because it's just cache data)
+DROP TABLE IF EXISTS cached_odds CASCADE;
+DROP TABLE IF EXISTS cached_events CASCADE;
+DROP TABLE IF EXISTS odds_update_log CASCADE;
+
 -- Create cached_odds table
-CREATE TABLE IF NOT EXISTS cached_odds (
+CREATE TABLE cached_odds (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   
   -- Sport and event identification
@@ -37,9 +42,10 @@ CREATE INDEX IF NOT EXISTS idx_cached_odds_sport_event ON cached_odds(sport_key,
 CREATE INDEX IF NOT EXISTS idx_cached_odds_market ON cached_odds(market_key);
 
 -- Create index for active (non-expired) odds
+-- Note: Cannot use WHERE expires_at > NOW() because NOW() is not immutable
+-- Instead, we'll just index expires_at and filter in queries
 CREATE INDEX IF NOT EXISTS idx_cached_odds_active 
-  ON cached_odds(sport_key, expires_at) 
-  WHERE expires_at > NOW();
+  ON cached_odds(sport_key, expires_at);
 
 -- Add comment
 COMMENT ON TABLE cached_odds IS 'Cached odds data from The Odds API with 5-minute TTL';
@@ -63,7 +69,7 @@ $$ LANGUAGE plpgsql;
 COMMENT ON FUNCTION cleanup_expired_odds() IS 'Removes cached odds older than 1 hour past expiration';
 
 -- Create cached_events table for event metadata
-CREATE TABLE IF NOT EXISTS cached_events (
+CREATE TABLE cached_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   sport_key TEXT NOT NULL,
   event_id TEXT NOT NULL UNIQUE,
@@ -84,7 +90,7 @@ CREATE INDEX IF NOT EXISTS idx_cached_events_commence ON cached_events(commence_
 COMMENT ON TABLE cached_events IS 'Cached event metadata from The Odds API';
 
 -- Create odds_update_log table for tracking updates
-CREATE TABLE IF NOT EXISTS odds_update_log (
+CREATE TABLE odds_update_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   sport_key TEXT NOT NULL,
   update_type TEXT NOT NULL, -- 'full_refresh', 'incremental', 'player_props'
