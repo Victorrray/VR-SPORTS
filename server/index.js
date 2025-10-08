@@ -1359,7 +1359,7 @@ app.get('/api/me', async (req, res) => {
     // Platinum or grandfathered = unlimited
     if (data.plan === 'platinum' || data.grandfathered) {
       return res.json({
-        plan: data.plan || 'platinum',
+        plan: 'platinum',
         remaining: null,
         limit: null,
         unlimited: true,
@@ -1367,13 +1367,13 @@ app.get('/api/me', async (req, res) => {
       });
     }
 
-    // Free plan = 250 limit
+    // New users (plan = null) or free plan = 250 limit
     const limit = 250;
     const used = data.api_request_count || 0;
     const remaining = Math.max(0, limit - used);
 
     res.json({
-      plan: data.plan || 'free',
+      plan: data.plan || 'free', // null becomes 'free' for display
       remaining,
       limit,
       used,
