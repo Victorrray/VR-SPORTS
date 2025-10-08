@@ -1834,11 +1834,14 @@ export default function OddsTable({
     }
     
     // Only proceed if we have enough books for a meaningful consensus
+    // Note: allBooks should contain ALL available books from mini table, not just filtered ones
     if (allBooks.length < 3) {
-      console.log(`⚠️ EV CALC FAILED: Not enough books for ${row.playerName || 'unknown'} ${row.mkt?.key || 'unknown'} - only ${allBooks.length} books (need 3+)`, {
+      console.log(`⚠️ EV CALC FAILED: Not enough books in mini table for ${row.playerName || 'unknown'} ${row.mkt?.key || 'unknown'} - only ${allBooks.length} books (need 3+)`, {
         bookmakerKey,
         isDFSApp,
-        allBooks: allBooks.map(b => ({ book: b.bookmaker?.key || b.book, odds: b.price || b.odds }))
+        userOdds,
+        allBooks: allBooks.map(b => ({ book: b.bookmaker?.key || b.book, odds: b.price || b.odds })),
+        note: 'EV uses ALL books from mini table, not just your filtered selection'
       });
       return null;
     }
