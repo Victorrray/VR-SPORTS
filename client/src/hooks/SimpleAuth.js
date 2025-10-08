@@ -78,28 +78,57 @@ export function AuthProvider({ children }) {
   };
 
   const setUsername = async (username) => {
-    if (!user) return { error: { message: 'Not signed in' } };
+    if (!user) {
+      console.error('❌ setUsername: No user signed in');
+      return { error: { message: 'Not signed in' } };
+    }
+    
+    console.log('🔄 setUsername: Attempting to set username:', username, 'for user:', user.id);
     
     try {
-      const { error } = await supabase
+      // First, check if profile exists
+      const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
-        .update({ username: username.trim() })
-        .eq('id', user.id);
+        .select('id')
+        .eq('id', user.id)
+        .single();
       
-      if (error) {
-        if (error.code === '23505') {
-          return { error: { message: 'This username is already in use' } };
+      if (checkError && checkError.code === 'PGRST116') {
+        // Profile doesn't exist, create it
+        console.log('📝 Profile does not exist, creating...');
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({ id: user.id, username: username.trim() });
+        
+        if (insertError) {
+          console.error('❌ Failed to create profile:', insertError);
+          return { error: { message: insertError.message || 'Failed to create profile' } };
         }
-        return { error: { message: error.message || 'Failed to set username' } };
+      } else {
+        // Profile exists, update it
+        console.log('✏️ Profile exists, updating username...');
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ username: username.trim(), updated_at: new Date().toISOString() })
+          .eq('id', user.id);
+        
+        if (updateError) {
+          console.error('❌ Failed to update username:', updateError);
+          if (updateError.code === '23505') {
+            return { error: { message: 'This username is already in use' } };
+          }
+          return { error: { message: updateError.message || 'Failed to set username' } };
+        }
       }
       
       // Refresh profile after successful update
+      console.log('✅ Username set successfully, refreshing profile...');
       await fetchProfile(user.id);
       
       return { success: true };
     } catch (err) {
-      console.error('setUsername error:', err);
-      return { error: { message: 'An unexpected error occurred' } };
+      console.error('❌ setUsername unexpected error:', err);
+      return { error: { message: `An unexpected error occurred: ${err.message}` } };
     }
   };
 
