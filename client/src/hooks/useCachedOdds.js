@@ -1,5 +1,6 @@
 // client/src/hooks/useCachedOdds.js
 import { useState, useEffect, useCallback } from 'react';
+import { secureFetch } from '../utils/security';
 
 /**
  * Hook to fetch cached odds from Supabase instead of directly from The Odds API
@@ -39,13 +40,13 @@ export function useCachedOdds(sport = 'nfl', options = {}) {
       const queryString = params.toString();
       const url = `/api/cached-odds/${sport}${queryString ? `?${queryString}` : ''}`;
 
-      // Use simple fetch for cached data (no auth needed, public data)
-      const response = await fetch(url, {
+      // Use secureFetch to include auth headers
+      const response = await secureFetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
         },
-        credentials: 'omit', // Don't send cookies to avoid 431 error
+        credentials: 'include',
       });
       
       if (!response.ok) {
@@ -105,14 +106,14 @@ export function useCachedOddsStats(sport = 'americanfootball_nfl', limit = 10) {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
+        const response = await secureFetch(
           `/api/cached-odds/stats?sport=${sport}&limit=${limit}`,
           {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
             },
-            credentials: 'omit', // Don't send cookies
+            credentials: 'include',
           }
         );
         
@@ -142,13 +143,13 @@ export function useCachedOddsStats(sport = 'americanfootball_nfl', limit = 10) {
  */
 export async function triggerOddsUpdate(sport = 'nfl', adminKey) {
   try {
-    const response = await fetch(`/api/cached-odds/${sport}/update`, {
+    const response = await secureFetch(`/api/cached-odds/${sport}/update`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-admin-key': adminKey,
       },
-      credentials: 'omit',
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -168,14 +169,14 @@ export async function triggerOddsUpdate(sport = 'nfl', adminKey) {
  */
 export async function controlCachingService(sport = 'nfl', action = 'start', adminKey) {
   try {
-    const response = await fetch(`/api/cached-odds/${sport}/control`, {
+    const response = await secureFetch(`/api/cached-odds/${sport}/control`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-admin-key': adminKey,
       },
       body: JSON.stringify({ action }),
-      credentials: 'omit',
+      credentials: 'include',
     });
 
     if (!response.ok) {

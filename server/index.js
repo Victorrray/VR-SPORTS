@@ -162,6 +162,111 @@ function getCacheKey(endpoint, params) {
   return `${endpoint}_${JSON.stringify(params)}`;
 }
 
+// Transform Supabase cached odds back to The Odds API format
+function transformCachedOddsToApiFormat(cachedOdds) {
+  if (!cachedOdds || cachedOdds.length === 0) return [];
+  
+  // Group by event_id to reconstruct games
+  const gamesMap = new Map();
+  
+  cachedOdds.forEach(cached => {
+    const eventId = cached.event_id;
+    
+    if (!gamesMap.has(eventId)) {
+      gamesMap.set(eventId, {
+        id: eventId,
+        sport_key: cached.sport_key,
+        sport_title: cached.sport_title || cached.sport_key.toUpperCase(),
+        commence_time: cached.commence_time,
+        home_team: cached.home_team,
+        away_team: cached.away_team,
+        bookmakers: []
+      });
+    }
+    
+    const game = gamesMap.get(eventId);
+    
+    // Find or create bookmaker
+    let bookmaker = game.bookmakers.find(b => b.key === cached.bookmaker_key);
+    if (!bookmaker) {
+      bookmaker = {
+        key: cached.bookmaker_key,
+        title: cached.bookmaker_title || cached.bookmaker_key,
+        last_update: cached.last_update || new Date().toISOString(),
+        markets: []
+      };
+      game.bookmakers.push(bookmaker);
+    }
+    
+    // Find or create market
+    let market = bookmaker.markets.find(m => m.key === cached.market_key);
+    if (!market) {
+      market = {
+        key: cached.market_key,
+        last_update: cached.last_update || new Date().toISOString(),
+        outcomes: []
+      };
+      bookmaker.markets.push(market);
+    }
+    
+    // Add outcome if it has odds data
+    if (cached.odds_data && typeof cached.odds_data === 'object') {
+      const outcomes = Array.isArray(cached.odds_data) ? cached.odds_data : [cached.odds_data];
+      outcomes.forEach(outcome => {
+        if (outcome && outcome.name && outcome.price !== undefined) {
+          market.outcomes.push(outcome);
+        }
+      });
+    }
+  });
+  
+  return Array.from(gamesMap.values());
+}
+
+// Save odds data to Supabase for persistent caching
+async function saveOddsToSupabase(games, sportKey) {
+  if (!supabase || !games || games.length === 0) return;
+  
+  const cacheEntries = [];
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 minute cache
+  
+  games.forEach(game => {
+    game.bookmakers?.forEach(bookmaker => {
+      bookmaker.markets?.forEach(market => {
+        // Create a cache entry for each market
+        cacheEntries.push({
+          sport_key: sportKey,
+          event_id: game.id,
+          home_team: game.home_team,
+          away_team: game.away_team,
+          commence_time: game.commence_time,
+          bookmaker_key: bookmaker.key,
+          bookmaker_title: bookmaker.title,
+          market_key: market.key,
+          odds_data: market.outcomes, // Store all outcomes as JSON
+          last_update: bookmaker.last_update || now,
+          expires_at: expiresAt,
+          created_at: now
+        });
+      });
+    });
+  });
+  
+  if (cacheEntries.length === 0) return;
+  
+  // Upsert to Supabase (update if exists, insert if new)
+  const { error } = await supabase
+    .from('cached_odds')
+    .upsert(cacheEntries, {
+      onConflict: 'sport_key,event_id,bookmaker_key,market_key'
+    });
+  
+  if (error) {
+    throw new Error(`Supabase upsert failed: ${error.message}`);
+  }
+}
+
 const PLAYER_PROPS_TIMEZONE = process.env.PLAYER_PROPS_TIMEZONE || 'America/New_York';
 
 const PLAYER_PROPS_MARKET_MAP = {
@@ -2273,6 +2378,35 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           
           console.log(`🎯 Game odds bookmakers (DFS filtered): ${bookmakerList}`);
           
+          // SUPABASE CACHE: Check Supabase first before hitting The Odds API
+          let supabaseCachedData = null;
+          if (supabase && oddsCacheService) {
+            try {
+              const cachedOdds = await oddsCacheService.getCachedOdds(sport, {
+                markets: marketsToFetch,
+                bookmakers: gameOddsBookmakers
+              });
+              
+              if (cachedOdds && cachedOdds.length > 0) {
+                console.log(`📦 Supabase cache HIT for ${sport}: ${cachedOdds.length} cached entries`);
+                // Transform cached data back to API format
+                supabaseCachedData = transformCachedOddsToApiFormat(cachedOdds);
+                console.log(`✅ Using ${supabaseCachedData.length} games from Supabase cache`);
+              } else {
+                console.log(`📦 Supabase cache MISS for ${sport}`);
+              }
+            } catch (cacheErr) {
+              console.warn(`⚠️ Supabase cache error for ${sport}:`, cacheErr.message);
+            }
+          }
+          
+          // If we have Supabase cached data, use it and skip API call
+          if (supabaseCachedData && supabaseCachedData.length > 0) {
+            allGames.push(...supabaseCachedData);
+            console.log(`💰 Saved API call for ${sport} using Supabase cache`);
+            continue; // Skip to next sport
+          }
+          
           const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           // Split markets into regular and alternate for optimized caching
           const regularMarkets = marketsToFetch.filter(market => !ALTERNATE_MARKETS.includes(market));
@@ -2362,6 +2496,18 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             } else {
               // Just cache everything in one go
               setCachedResponse(cacheKey, responseData);
+            }
+            
+            // SUPABASE CACHE: Save to Supabase for persistent caching
+            if (supabase && oddsCacheService && responseData && responseData.length > 0) {
+              try {
+                console.log(`💾 Saving ${responseData.length} games to Supabase cache for ${sport}`);
+                await saveOddsToSupabase(responseData, sport);
+                console.log(`✅ Successfully cached ${responseData.length} games in Supabase`);
+              } catch (supabaseSaveErr) {
+                console.warn(`⚠️ Failed to save to Supabase cache:`, supabaseSaveErr.message);
+                // Don't fail the request if Supabase save fails
+              }
             }
             
             // Increment usage for each actual external API call made
