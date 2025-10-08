@@ -2635,14 +2635,14 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
         try {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-          const bookmakerList = allowedBookmakers.slice(0, 25).join(','); // Limit to 25 books for props (comprehensive coverage including all DFS apps)
+          const bookmakerList = allowedBookmakers.join(','); // Send ALL bookmakers for complete coverage
           
           // Debug logging for DFS apps
           console.log('🎯 Player Props Bookmaker Debug:', {
             userPlan: userProfile.plan,
             totalBookmakers: allowedBookmakers.length,
-            first25: allowedBookmakers.slice(0, 25),
-            dfsAppsIncluded: allowedBookmakers.slice(0, 25).filter(b => ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'prophetx'].includes(b)),
+            allBookmakers: allowedBookmakers,
+            dfsAppsIncluded: allowedBookmakers.filter(b => ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'prophetx'].includes(b)),
             bookmakerListForAPI: bookmakerList
           });
           
