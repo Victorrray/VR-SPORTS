@@ -22,7 +22,7 @@ import ApiErrorDisplay from "../components/common/ApiErrorDisplay";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
-import { useMarkets } from '../hooks/useMarkets';
+import { useMarketsWithCache } from '../hooks/useMarketsWithCache';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/SimpleAuth';
 import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
@@ -380,11 +380,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const { 
     games: marketGames = [], 
     books: marketBooks = [], 
-    isLoading: marketsLoading, 
+    loading: marketsLoading, 
     error: marketsError, 
     bookmakers,
-    refresh: refreshMarkets
-  } = useMarkets(
+    refresh: refreshMarkets,
+    usingCache
+  } = useMarketsWithCache(
     sportsForMode,
     regionsForMode,
     getAllCompatibleMarkets(sportsForMode),
@@ -1648,52 +1649,73 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           )}
         </h1>
         
-        {/* Refresh Button with Cooldown Timer */}
-        <button
-          onClick={handleRefresh}
-          disabled={marketsLoading || isRefreshing || refreshCooldown > 0}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            background: (marketsLoading || isRefreshing || refreshCooldown > 0)
-              ? 'rgba(139, 92, 246, 0.3)' 
-              : 'linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.8))',
-            border: '1px solid rgba(139, 92, 246, 0.4)',
-            borderRadius: '8px',
-            color: 'white',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease',
-            opacity: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 0.6 : 1,
-            minWidth: '120px'
-          }}
-          onMouseEnter={(e) => {
-            if (!marketsLoading && !isRefreshing && refreshCooldown === 0) {
-              e.currentTarget.style.transform = 'scale(1.05)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-          title={refreshCooldown > 0 ? `Wait ${refreshCooldown}s before refreshing again` : 'Refresh odds data (clears cache)'}
-        >
-          <RefreshCw 
-            size={16} 
-            style={{ 
-              animation: (marketsLoading || isRefreshing) ? 'spin 1s linear infinite' : 'none'
-            }} 
-          />
-          {(marketsLoading || isRefreshing) 
-            ? 'Refreshing...' 
-            : refreshCooldown > 0 
-              ? `Wait ${refreshCooldown}s` 
-              : 'Refresh'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Cache Indicator */}
+          {usingCache && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              background: 'rgba(16, 185, 129, 0.15)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              borderRadius: '6px',
+              fontSize: '13px',
+              color: '#10b981',
+              fontWeight: '500'
+            }}>
+              <Zap size={14} />
+              <span>Cached</span>
+            </div>
+          )}
+          
+          {/* Refresh Button with Cooldown Timer */}
+          <button
+            onClick={handleRefresh}
+            disabled={marketsLoading || isRefreshing || refreshCooldown > 0}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              background: (marketsLoading || isRefreshing || refreshCooldown > 0)
+                ? 'rgba(139, 92, 246, 0.3)' 
+                : 'linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.8))',
+              border: '1px solid rgba(139, 92, 246, 0.4)',
+              borderRadius: '8px',
+              color: 'white',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              opacity: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 0.6 : 1,
+              minWidth: '120px'
+            }}
+            onMouseEnter={(e) => {
+              if (!marketsLoading && !isRefreshing && refreshCooldown === 0) {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            title={refreshCooldown > 0 ? `Wait ${refreshCooldown}s before refreshing again` : usingCache ? 'Refresh cached data' : 'Refresh odds data (clears cache)'}
+          >
+            <RefreshCw 
+              size={16} 
+              style={{ 
+                animation: (marketsLoading || isRefreshing) ? 'spin 1s linear infinite' : 'none'
+              }} 
+            />
+            {(marketsLoading || isRefreshing) 
+              ? 'Refreshing...' 
+              : refreshCooldown > 0 
+                ? `Wait ${refreshCooldown}s` 
+                : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {/* Show authentication required message */}

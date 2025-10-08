@@ -20,7 +20,18 @@ const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_K
   ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
   : null;
 
+// Initialize Odds Cache Service
+const oddsCacheService = require('./services/oddsCache');
+if (supabase) {
+  oddsCacheService.initialize(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
 const app = express();
+
+// Increase header size limits to prevent 431 errors
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ODDS_API_KEY;
 const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
@@ -3074,6 +3085,128 @@ app.get("/api/scores", enforceUsage, async (req, res) => {
   }
 });
 
+/* ------------------------------------ Cached Odds Endpoints ------------------------------------ */
+
+// Get cached NFL odds from Supabase
+app.get('/api/cached-odds/nfl', enforceUsage, async (req, res) => {
+  try {
+    const { markets, bookmakers, eventId } = req.query;
+    
+    const options = {
+      markets: markets ? markets.split(',') : null,
+      bookmakers: bookmakers ? bookmakers.split(',') : null,
+      eventId: eventId || null
+    };
+
+    const cachedOdds = await oddsCacheService.getCachedOdds('americanfootball_nfl', options);
+    
+    // Transform cached data to match frontend expectations
+    const transformedData = transformCachedOddsToFrontend(cachedOdds);
+    
+    res.set('Cache-Control', 'public, max-age=30'); // 30 second client cache
+    res.json(transformedData);
+  } catch (err) {
+    console.error('Cached odds error:', err);
+    res.status(500).json({ error: 'Failed to get cached odds', detail: err.message });
+  }
+});
+
+// Manual trigger for NFL odds update (admin only)
+app.post('/api/cached-odds/nfl/update', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== ADMIN_API_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const result = await oddsCacheService.updateNFLOdds();
+    res.json({ 
+      success: true, 
+      message: 'NFL odds updated successfully',
+      ...result 
+    });
+  } catch (err) {
+    console.error('Manual update error:', err);
+    res.status(500).json({ error: 'Failed to update odds', detail: err.message });
+  }
+});
+
+// Get update statistics
+app.get('/api/cached-odds/stats', async (req, res) => {
+  try {
+    const { sport = 'americanfootball_nfl', limit = 10 } = req.query;
+    const stats = await oddsCacheService.getUpdateStats(sport, parseInt(limit));
+    res.json({ stats });
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Failed to get stats', detail: err.message });
+  }
+});
+
+// Start/stop NFL updates
+app.post('/api/cached-odds/nfl/control', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== ADMIN_API_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { action } = req.body;
+    
+    if (action === 'start') {
+      await oddsCacheService.startNFLUpdates();
+      res.json({ success: true, message: 'NFL updates started' });
+    } else if (action === 'stop') {
+      await oddsCacheService.stopNFLUpdates();
+      res.json({ success: true, message: 'NFL updates stopped' });
+    } else {
+      res.status(400).json({ error: 'Invalid action. Use "start" or "stop"' });
+    }
+  } catch (err) {
+    console.error('Control error:', err);
+    res.status(500).json({ error: 'Failed to control updates', detail: err.message });
+  }
+});
+
+// Helper function to transform cached odds to frontend format
+function transformCachedOddsToFrontend(cachedOdds) {
+  const eventsMap = new Map();
+
+  for (const odd of cachedOdds) {
+    if (!eventsMap.has(odd.event_id)) {
+      eventsMap.set(odd.event_id, {
+        id: odd.event_id,
+        sport_key: odd.sport_key,
+        sport_title: 'NFL',
+        commence_time: odd.commence_time,
+        home_team: odd.event_name.split(' @ ')[1],
+        away_team: odd.event_name.split(' @ ')[0],
+        bookmakers: []
+      });
+    }
+
+    const event = eventsMap.get(odd.event_id);
+    let bookmaker = event.bookmakers.find(b => b.key === odd.bookmaker_key);
+    
+    if (!bookmaker) {
+      bookmaker = {
+        key: odd.bookmaker_key,
+        title: odd.bookmaker_key,
+        markets: []
+      };
+      event.bookmakers.push(bookmaker);
+    }
+
+    bookmaker.markets.push({
+      key: odd.market_key,
+      last_update: odd.last_updated,
+      outcomes: odd.outcomes
+    });
+  }
+
+  return Array.from(eventsMap.values());
+}
+
 /* ------------------------------------ Game Reactions ------------------------------------ */
 
 // Persistent file-based storage for reactions (better than in-memory)
@@ -3215,8 +3348,18 @@ app.use((req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
+    
+    // Auto-start NFL odds caching if enabled
+    if (process.env.AUTO_START_NFL_CACHE === 'true' && supabase) {
+      console.log('🏈 Auto-starting NFL odds caching...');
+      try {
+        await oddsCacheService.startNFLUpdates();
+      } catch (error) {
+        console.error('❌ Failed to auto-start NFL caching:', error.message);
+      }
+    }
   });
 }
 
