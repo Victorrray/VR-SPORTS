@@ -1836,12 +1836,18 @@ export default function OddsTable({
     const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(bookmakerKey);
     
     // Debug logging for EV calculation
-    if (row.playerName === 'Breece Hall' && row.mkt?.key?.includes('reception')) {
+    if (row.playerName === 'Jalen Hurts' || row.playerName === 'Breece Hall') {
       console.log(`🔍 EV DEBUG for ${row.playerName} ${row.mkt?.key}:`, {
         bookmakerKey,
         userOdds,
         allBooksCount: allBooks.length,
-        allBooks: allBooks.map(b => ({ book: b.bookmaker?.key || b.book, odds: b.price || b.odds, name: b.name }))
+        allBooks: allBooks.map(b => ({ 
+          book: b.bookmaker?.key || b.book, 
+          odds: b.price || b.odds, 
+          name: b.name,
+          point: b.point,
+          line: b.line
+        }))
       });
     }
     
