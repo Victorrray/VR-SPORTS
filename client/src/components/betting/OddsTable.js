@@ -186,14 +186,15 @@ function calculateEV(odds, fairLine, bookmakerKey = null) {
   const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'dabble_au'].includes(bookmakerKey);
   
   if (isDFSApp) {
-    // DFS apps use fixed odds for player props
-    // All DFS apps now use -119
-    const dfsOdds = -119;
-    const dfsDec = toDec(dfsOdds);
+    // DFS apps pay even money (+100) regardless of displayed odds
+    // PrizePicks, Underdog, Pick6 all use pick'em model with +100 payout
+    const dfsPayoutOdds = +100; // Even money payout
+    const dfsDec = toDec(dfsPayoutOdds);
     const fairDec = toDec(fairLine);
     
-    // Calculate EV using the fixed DFS odds
-    // Higher EV means better value compared to market consensus
+    // Calculate EV: Compare +100 payout to market consensus
+    // If market is -120, getting +100 is +EV
+    // If market is -102, getting +100 is -EV
     return ((dfsDec / fairDec) - 1) * 100;
   }
   
