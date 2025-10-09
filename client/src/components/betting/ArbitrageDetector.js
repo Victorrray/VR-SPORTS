@@ -23,19 +23,22 @@ const ArbitrageDetector = ({
 }) => {
   const { user, profile } = useAuth();
   
+  // Convert sport prop to array if it's a string
+  const initialSports = Array.isArray(sport) ? sport : [sport];
+  
   // Use props if provided, otherwise use internal state
   const [internalMinProfit, setInternalMinProfit] = useState(0.5);
   const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
   const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
   const [internalSortBy, setInternalSortBy] = useState('profit');
-  const [internalSelectedSports, setInternalSelectedSports] = useState([sport]);
+  const [internalSelectedSports, setInternalSelectedSports] = useState(initialSports);
   
   // Draft state for filters (before applying)
   const [draftMinProfit, setDraftMinProfit] = useState(0.5);
   const [draftMaxStake, setDraftMaxStake] = useState(bankrollManager.getBankroll());
   const [draftSelectedMarkets, setDraftSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
   const [draftSortBy, setDraftSortBy] = useState('profit');
-  const [draftSelectedSports, setDraftSelectedSports] = useState([sport]);
+  const [draftSelectedSports, setDraftSelectedSports] = useState(initialSports);
   
   // Sports list for selection
   const sportsList = [
