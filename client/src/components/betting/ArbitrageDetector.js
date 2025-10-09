@@ -29,14 +29,24 @@ const ArbitrageDetector = ({
   // Use props if provided, otherwise use internal state
   const [internalMinProfit, setInternalMinProfit] = useState(0.5);
   const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
-  const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
+  const [internalSelectedMarkets, setInternalSelectedMarkets] = useState([
+    'h2h', 'spreads', 'totals', 
+    'player_pass_tds', 'player_pass_yds', 'player_rush_yds', 'player_receptions', 'player_reception_yds',
+    'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+    'player_hits', 'player_total_bases', 'player_strikeouts', 'pitcher_strikeouts'
+  ]);
   const [internalSortBy, setInternalSortBy] = useState('profit');
   const [internalSelectedSports, setInternalSelectedSports] = useState(initialSports);
   
   // Draft state for filters (before applying)
   const [draftMinProfit, setDraftMinProfit] = useState(0.5);
   const [draftMaxStake, setDraftMaxStake] = useState(bankrollManager.getBankroll());
-  const [draftSelectedMarkets, setDraftSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
+  const [draftSelectedMarkets, setDraftSelectedMarkets] = useState([
+    'h2h', 'spreads', 'totals',
+    'player_pass_tds', 'player_pass_yds', 'player_rush_yds', 'player_receptions', 'player_reception_yds',
+    'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+    'player_hits', 'player_total_bases', 'player_strikeouts', 'pitcher_strikeouts'
+  ]);
   const [draftSortBy, setDraftSortBy] = useState('profit');
   const [draftSelectedSports, setDraftSelectedSports] = useState(initialSports);
   
@@ -72,7 +82,12 @@ const ArbitrageDetector = ({
   const resetFilters = () => {
     const defaultMinProfit = 0.5;
     const defaultMaxStake = bankrollManager.getBankroll();
-    const defaultMarkets = ['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals'];
+    const defaultMarkets = [
+      'h2h', 'spreads', 'totals',
+      'player_pass_tds', 'player_pass_yds', 'player_rush_yds', 'player_receptions', 'player_reception_yds',
+      'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+      'player_hits', 'player_total_bases', 'player_strikeouts', 'pitcher_strikeouts'
+    ];
     const defaultSortBy = 'profit';
     const defaultSports = [sport];
     
@@ -109,8 +124,8 @@ const ArbitrageDetector = ({
     }
   }, [propMaxStake]);
 
-  // Fetch odds data for arbitrage analysis
-  const { data: oddsData, loading, refresh, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
+  // Fetch game odds data for arbitrage analysis
+  const { data: oddsData, loading: oddsLoading, refresh, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
     params: { 
       sports: internalSelectedSports.join(','),
       markets: selectedMarkets.join(','),
@@ -120,8 +135,24 @@ const ArbitrageDetector = ({
     transform: (data) => data || []
   });
 
-  // Use real games data passed from parent component instead of fetching separately
-  const realGamesData = games && games.length > 0 ? games : oddsData;
+  // Fetch player props data for arbitrage analysis (excluding DFS apps)
+  const { data: propsData, loading: propsLoading } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
+    params: { 
+      sports: internalSelectedSports.join(','),
+      markets: 'player_pass_tds,player_pass_yds,player_pass_completions,player_pass_attempts,player_pass_interceptions,player_pass_longest_completion,player_rush_yds,player_rush_attempts,player_rush_longest,player_receptions,player_reception_yds,player_reception_longest,player_1st_td,player_last_td,player_anytime_td,player_points,player_rebounds,player_assists,player_threes,player_blocks,player_steals,player_turnovers,player_points_rebounds_assists,player_points_rebounds,player_points_assists,player_rebounds_assists,player_blocks_steals,player_double_double,player_triple_double,player_hits,player_total_bases,player_runs,player_rbis,player_home_runs,player_stolen_bases,player_strikeouts,pitcher_strikeouts,pitcher_hits_allowed,pitcher_walks,pitcher_earned_runs,pitcher_outs',
+      regions: 'us,us_dfs', // Include us_dfs to get all data, we'll filter out DFS apps later
+      bookFilter: 'draftkings,fanduel,betmgm,caesars,pointsbet,betrivers,unibet,wynnbet,superbook,twinspires,betfred_us,espnbet,fanatics,hardrock,fliff,novig,circasports,lowvig,bovada,mybookie,betonline,pinnacle' // Exclude DFS apps
+    },
+    pollingInterval: autoRefresh ? 120000 : null,
+    transform: (data) => data || []
+  });
+
+  // Combine game odds and player props data
+  const loading = oddsLoading || propsLoading;
+  const combinedData = [...(oddsData || []), ...(propsData || [])];
+  
+  // Use real games data passed from parent component, or combined fetched data
+  const realGamesData = games && games.length > 0 ? games : combinedData;
 
   // Helper function to format bet selection text
   const formatBetSelection = (outcome, marketKey) => {
@@ -180,9 +211,14 @@ const ArbitrageDetector = ({
       const now = new Date();
       if (gameTime <= now) return; // Skip games that have already started
 
+      // DFS apps to exclude from arbitrage (can't arbitrage on DFS)
+      const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'prophetx'];
+      
       // Collect all market keys available across bookmakers
       const marketKeys = new Set();
       game.bookmakers.forEach(bookmaker => {
+        // Skip DFS apps
+        if (dfsApps.includes(bookmaker.key?.toLowerCase())) return;
         if (bookFilter.length > 0 && !bookFilter.includes(bookmaker.key)) return; // Apply book filter
         bookmaker?.markets?.forEach(market => {
           if (market?.key && selectedMarkets.includes(market.key)) {
@@ -196,6 +232,8 @@ const ArbitrageDetector = ({
         const outcomeOdds = {};
         
         game.bookmakers.forEach(bookmaker => {
+          // Skip DFS apps
+          if (dfsApps.includes(bookmaker.key?.toLowerCase())) return;
           if (bookFilter.length > 0 && !bookFilter.includes(bookmaker.key)) return; // Apply book filter
           
           const gameMarket = bookmaker?.markets?.find(m => m.key === marketKey);
