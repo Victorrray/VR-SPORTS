@@ -1337,16 +1337,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setShowArbitrage(sectionId === 'arbitrage');
     setShowMiddles(sectionId === 'middles');
     
+    // Update URL to persist mode selection
+    const searchParams = new URLSearchParams(location.search);
+    if (sectionId === 'props') {
+      searchParams.set('mode', 'props');
+    } else if (sectionId === 'arbitrage') {
+      searchParams.set('mode', 'arbitrage');
+    } else if (sectionId === 'middles') {
+      searchParams.set('mode', 'middles');
+    } else {
+      searchParams.delete('mode'); // Remove mode param for game odds
+    }
+    navigate(`?${searchParams.toString()}`, { replace: true });
+    
     // Force a re-render by updating the table nonce
     setTableNonce(prev => prev + 1);
-    
-    // Update URL with mode parameter for persistence
-    const searchParams = new URLSearchParams(location.search);
-    if (sectionId === 'game') {
-      searchParams.delete('mode'); // Default mode is game odds, so remove parameter
-    } else {
-      searchParams.set('mode', sectionId);
-    }
     
     // Use replace state to avoid breaking browser history
     window.history.replaceState(

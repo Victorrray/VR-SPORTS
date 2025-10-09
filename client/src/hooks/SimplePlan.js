@@ -59,6 +59,9 @@ export function usePlan() {
   }, [user?.id, authLoading]);
 
   // Refresh plan when page becomes visible (user returns to tab)
+  // DISABLED: Causing unwanted re-renders and mode resets
+  // Users can manually refresh using the refresh button instead
+  /*
   useEffect(() => {
     if (!user) return;
 
@@ -72,6 +75,7 @@ export function usePlan() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user?.id]);
+  */
 
   const refreshPlan = async () => {
     if (!user) return null;
