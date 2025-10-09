@@ -1510,13 +1510,20 @@ export default function OddsTable({
               });
             }
             
-            if (isMarketLikelyLocked(primaryBook, isDFSApp)) {
-              console.log(`⏭️ Skipping locked market: ${propData.playerName} ${propData.mkt?.key} at ${primaryBook.bookmaker?.key}`);
-              return; // Skip this row - market is locked
+            // Mark locked markets instead of skipping them
+            const isLocked = isMarketLikelyLocked(primaryBook, isDFSApp);
+            if (isLocked) {
+              console.log(`🔒 Marking as locked market: ${propData.playerName} ${propData.mkt?.key} at ${primaryBook.bookmaker?.key}`);
             }
           }
           
           if (primaryBook) {
+            // Check if market is locked
+            const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(
+              normalizeBookKey(primaryBook.bookmaker?.key)
+            );
+            const isLocked = isMarketLikelyLocked(primaryBook, isDFSApp);
+            
             // Create the main row with both sides data
             const finalPropData = {
               key: propData.key,
@@ -1536,6 +1543,7 @@ export default function OddsTable({
               playerName: propData.playerName, // Add player name for display
               isPlayerProp: true,
               isCombinedProp: true, // Flag to indicate this has both sides
+              isLocked: isLocked, // Mark if market is locked
               overBooks: propData.overBooks,
               underBooks: propData.underBooks,
               // Include ALL books from BOTH sides for accurate EV calculation
@@ -2284,7 +2292,14 @@ export default function OddsTable({
       console.log(`🎯 FINAL ROW: ${bookmakerKey} - ${row.game?.home_team} vs ${row.game?.away_team} - ${row.mkt?.key} - ${row.out?.name} - ${odds}`);
     });
     
-    return r.slice().sort((a, b) => (sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b)));
+    return r.slice().sort((a, b) => {
+      // Always push locked markets to the bottom
+      if (a.isLocked && !b.isLocked) return 1;
+      if (!a.isLocked && b.isLocked) return -1;
+      
+      // If both locked or both unlocked, use normal sorting
+      return sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b);
+    });
   }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap, searchQuery, mode]);
 
   const totalPages = Math.ceil(rows.length / pageSize);
