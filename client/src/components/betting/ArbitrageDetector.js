@@ -136,15 +136,18 @@ const ArbitrageDetector = ({
   });
 
   // Fetch player props data for arbitrage analysis (excluding DFS apps)
-  const { data: propsData, loading: propsLoading } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
+  // Note: Player props are fetched separately via /api/player-props endpoint
+  const { data: propsData, loading: propsLoading } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/player-props'); })(), {
     params: { 
       sports: internalSelectedSports.join(','),
-      markets: 'player_pass_tds,player_pass_yds,player_pass_completions,player_pass_attempts,player_pass_interceptions,player_pass_longest_completion,player_rush_yds,player_rush_attempts,player_rush_longest,player_receptions,player_reception_yds,player_reception_longest,player_1st_td,player_last_td,player_anytime_td,player_points,player_rebounds,player_assists,player_threes,player_blocks,player_steals,player_turnovers,player_points_rebounds_assists,player_points_rebounds,player_points_assists,player_rebounds_assists,player_blocks_steals,player_double_double,player_triple_double,player_hits,player_total_bases,player_runs,player_rbis,player_home_runs,player_stolen_bases,player_strikeouts,pitcher_strikeouts,pitcher_hits_allowed,pitcher_walks,pitcher_earned_runs,pitcher_outs',
-      regions: 'us,us_dfs', // Include us_dfs to get all data, we'll filter out DFS apps later
+      date: '', // Empty date to get all upcoming games
       bookFilter: 'draftkings,fanduel,betmgm,caesars,pointsbet,betrivers,unibet,wynnbet,superbook,twinspires,betfred_us,espnbet,fanatics,hardrock,fliff,novig,circasports,lowvig,bovada,mybookie,betonline,pinnacle' // Exclude DFS apps
     },
     pollingInterval: autoRefresh ? 120000 : null,
-    transform: (data) => data || []
+    transform: (data) => {
+      console.log('🎯 Player props data received:', data?.length || 0, 'games');
+      return data || [];
+    }
   });
 
   // Combine game odds and player props data
