@@ -2563,8 +2563,10 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
             const bookmakerList = allowedBookmakers.join(',');
             
-            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}`;
-            console.log(`🌐 Fetching games for player props: ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+            // Add date filter if provided
+            const dateParam = date ? `&commenceTimeFrom=${date}T00:00:00Z&commenceTimeTo=${date}T23:59:59Z` : '';
+            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}${dateParam}`;
+            console.log(`🌐 Fetching games for player props (date: ${date || 'all'}): ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
             
             try {
               const response = await axios.get(url);
