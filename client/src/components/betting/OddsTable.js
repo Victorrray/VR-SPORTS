@@ -1371,24 +1371,37 @@ export default function OddsTable({
           // Determine which books to use based on filter
           // If bookFilter is active, only use books that match the filter
           const hasFilter = bookFilter && bookFilter.length > 0;
+          let overBooksToUse, underBooksToUse;
           
           if (hasFilter) {
             // Filter overBooks and underBooks to only include books in the filter
             const normalizedFilter = bookFilter.map(f => f.toLowerCase());
-            const overBooksToUse = propData.overBooks.filter(b => {
+            overBooksToUse = propData.overBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
               return normalizedFilter.includes(bookKey);
             });
-            const underBooksToUse = propData.underBooks.filter(b => {
+            underBooksToUse = propData.underBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
               return normalizedFilter.includes(bookKey);
             });
             
-            console.log(`🎯 FILTER DEBUG: ${propData.playerName} - Filtering for ${bookFilter.join(', ')} - overBooks: ${overBooksToUse.length}/${propData.overBooks.length}, underBooks: ${underBooksToUse.length}/${propData.underBooks.length}`);
+            console.log(`🎯 FILTER DEBUG: ${propData.playerName} - Filtering for ${bookFilter.join(', ')} - overBooks: ${overBooksToUse.length}/${propData.overBooks.length}, underBooks: ${underBooksToUse.length}/${propData.underBooks.length}`, {
+              filter: normalizedFilter,
+              overBooksFiltered: overBooksToUse.map(b => b.bookmaker?.key || b.book),
+              underBooksFiltered: underBooksToUse.map(b => b.bookmaker?.key || b.book),
+              allOverBooks: propData.overBooks.map(b => ({ key: b.bookmaker?.key || b.book, name: b.name })),
+              allUnderBooks: propData.underBooks.map(b => ({ key: b.bookmaker?.key || b.book, name: b.name }))
+            });
           } else {
-            var overBooksToUse = propData.overBooks;
-            var underBooksToUse = propData.underBooks;
+            overBooksToUse = propData.overBooks;
+            underBooksToUse = propData.underBooks;
             console.log(`🎯 FILTER DEBUG: ${propData.playerName} - No filter, showing all books - overBooks: ${overBooksToUse.length}, underBooks: ${underBooksToUse.length}`);
+          }
+          
+          // Skip this prop if no books match the filter
+          if (hasFilter && overBooksToUse.length === 0 && underBooksToUse.length === 0) {
+            console.log(`⏭️ Skipping ${propData.playerName} - no books match filter`);
+            return; // Skip this prop entirely
           }
           
           // Find best line + odds combination for each side (from filtered books)
