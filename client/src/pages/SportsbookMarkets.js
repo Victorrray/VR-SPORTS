@@ -1344,7 +1344,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Handle section change from SectionMenu
   const handleSectionChange = (sectionId) => {
-    console.log(`Changing section to: ${sectionId}`);
+    console.log(`🔄 Changing section to: ${sectionId}`);
     
     // Update all mode states based on the selected section
     setShowPlayerProps(sectionId === 'props');
@@ -1362,7 +1362,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     } else {
       searchParams.delete('mode'); // Remove mode param for game odds
     }
-    navigate(`?${searchParams.toString()}`, { replace: true });
+    
+    // Use navigate with replace to update URL without page reload
+    const newUrl = `${location.pathname}?${searchParams.toString()}`;
+    console.log(`🔄 Navigating to: ${newUrl}`);
+    navigate(newUrl, { replace: true });
     
     // Force a re-render by updating the table nonce
     setTableNonce(prev => prev + 1);
