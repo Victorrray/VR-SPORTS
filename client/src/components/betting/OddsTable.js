@@ -1440,9 +1440,43 @@ export default function OddsTable({
           }) : null;
           
           // Choose the side with better EV for the main display
-          // If EVs are equal or both null/0, compare the actual odds quality
+          // For DFS apps, compare BOTH sides to market and show the better value
           let showOver;
-          if (overEV !== null && underEV !== null && Math.abs(overEV - underEV) > 0.1) {
+          const primaryBookKey = bestOverBook?.bookmaker?.key || bestUnderBook?.bookmaker?.key || '';
+          const isDFSPrimaryBook = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(primaryBookKey.toLowerCase());
+          
+          if (isDFSPrimaryBook && bestOverBook && bestUnderBook) {
+            // For DFS: Compare each side to market consensus
+            // Calculate market consensus for each side (excluding DFS books)
+            const nonDFSOverBooks = propData.overBooks.filter(b => {
+              const key = (b.bookmaker?.key || b.book || '').toLowerCase();
+              return !['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(key);
+            });
+            const nonDFSUnderBooks = propData.underBooks.filter(b => {
+              const key = (b.bookmaker?.key || b.book || '').toLowerCase();
+              return !['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(key);
+            });
+            
+            // Calculate average market odds for each side
+            const avgOverOdds = nonDFSOverBooks.length > 0 
+              ? nonDFSOverBooks.reduce((sum, b) => sum + (b.price || 0), 0) / nonDFSOverBooks.length 
+              : null;
+            const avgUnderOdds = nonDFSUnderBooks.length > 0 
+              ? nonDFSUnderBooks.reduce((sum, b) => sum + (b.price || 0), 0) / nonDFSUnderBooks.length 
+              : null;
+            
+            // DFS pays +100 (even money), so compare to market
+            // If market is -120, DFS +100 is good value
+            // If market is -102, DFS +100 is bad value
+            const overValue = avgOverOdds ? Math.abs(avgOverOdds) - 100 : 0; // Higher = better DFS value
+            const underValue = avgUnderOdds ? Math.abs(avgUnderOdds) - 100 : 0;
+            
+            showOver = overValue > underValue;
+            console.log(`🎯 DFS SIDE SELECTION: ${propData.playerName} - Over market: ${avgOverOdds?.toFixed(0)}, Under market: ${avgUnderOdds?.toFixed(0)} -> Show ${showOver ? 'Over' : 'Under'} (better value)`, {
+              overValue: overValue.toFixed(1),
+              underValue: underValue.toFixed(1)
+            });
+          } else if (overEV !== null && underEV !== null && Math.abs(overEV - underEV) > 0.1) {
             // Clear EV difference - choose the better EV
             showOver = overEV > underEV;
           } else {
