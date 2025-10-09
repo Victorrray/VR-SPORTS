@@ -2767,17 +2767,22 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           if (propsResponse.data && propsResponse.data.bookmakers) {
             console.log(`🔗 Merging ${propsResponse.data.bookmakers.length} bookmakers with player props`);
             
-            // Check specifically for Dabble
-            const dabbleData = propsResponse.data.bookmakers.find(b => b.key === 'dabble_au');
-            if (dabbleData) {
-              console.log(`🎰 DABBLE FOUND! Markets: ${dabbleData.markets?.length || 0}`, {
-                key: dabbleData.key,
-                markets: dabbleData.markets?.map(m => m.key) || []
-              });
-            } else {
-              console.log(`❌ Dabble NOT in response. Available bookmakers:`, 
-                propsResponse.data.bookmakers.map(b => b.key));
-            }
+            // Check for DFS apps in response
+            const dfsAppsToCheck = ['prizepicks', 'underdog', 'pick6', 'dabble_au'];
+            dfsAppsToCheck.forEach(dfsKey => {
+              const dfsData = propsResponse.data.bookmakers.find(b => b.key === dfsKey);
+              if (dfsData) {
+                console.log(`✅ ${dfsKey.toUpperCase()} FOUND! Markets: ${dfsData.markets?.length || 0}`, {
+                  key: dfsData.key,
+                  title: dfsData.title,
+                  markets: dfsData.markets?.map(m => m.key) || []
+                });
+              } else {
+                console.log(`❌ ${dfsKey.toUpperCase()} NOT in response`);
+              }
+            });
+            
+            console.log(`📊 All bookmakers in response:`, propsResponse.data.bookmakers.map(b => ({ key: b.key, title: b.title, markets: b.markets?.length || 0 })));
             
             const existingBookmakers = new Map();
             game.bookmakers.forEach(book => {
