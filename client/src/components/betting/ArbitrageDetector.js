@@ -217,6 +217,30 @@ const ArbitrageDetector = ({
         // Calculate arbitrage for two-way markets (moneyline, totals, spreads)
         const outcomes = Object.values(outcomeOdds);
         if (outcomes.length === 2) {
+          // For spreads, verify the lines are opposites (e.g., +3.5 and -3.5)
+          if (marketKey === 'spreads') {
+            const point1 = outcomes[0].point;
+            const point2 = outcomes[1].point;
+            
+            // Skip if points don't exist or aren't exact opposites
+            if (!point1 || !point2 || Math.abs(point1 + point2) > 0.01) {
+              console.log(`⚠️ Skipping invalid spread arbitrage: ${outcomes[0].name} ${point1} vs ${outcomes[1].name} ${point2} (lines don't match)`);
+              return;
+            }
+          }
+          
+          // For totals, verify the lines match
+          if (marketKey === 'totals') {
+            const point1 = outcomes[0].point;
+            const point2 = outcomes[1].point;
+            
+            // Skip if points don't exist or don't match
+            if (!point1 || !point2 || Math.abs(point1 - point2) > 0.01) {
+              console.log(`⚠️ Skipping invalid totals arbitrage: Over ${point1} vs Under ${point2} (lines don't match)`);
+              return;
+            }
+          }
+          
           const arb = calculateTwoWayArbitrage(outcomes, game, { key: marketKey });
           if (arb && arb.profit_percentage >= minProfit) {
             opportunities.push({
