@@ -52,10 +52,14 @@ export default function SectionMenu({
   const currentSectionData = sections.find(s => s.id === currentSection) || sections[0];
   
   const handleSectionChange = (sectionId) => {
+    console.log(`📍 SectionMenu: Changing to ${sectionId}`);
+    setIsOpen(false); // Close dropdown first
     if (onSectionChange) {
-      onSectionChange(sectionId);
+      // Use setTimeout to ensure dropdown closes before navigation
+      setTimeout(() => {
+        onSectionChange(sectionId);
+      }, 0);
     }
-    setIsOpen(false);
   };
 
   return (
