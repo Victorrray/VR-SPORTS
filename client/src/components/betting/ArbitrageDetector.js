@@ -24,14 +24,14 @@ const ArbitrageDetector = ({
   const { user, profile } = useAuth();
   
   // Use props if provided, otherwise use internal state
-  const [internalMinProfit, setInternalMinProfit] = useState(2);
+  const [internalMinProfit, setInternalMinProfit] = useState(0.5);
   const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
   const [internalSelectedMarkets, setInternalSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
   const [internalSortBy, setInternalSortBy] = useState('profit');
   const [internalSelectedSports, setInternalSelectedSports] = useState([sport]);
   
   // Draft state for filters (before applying)
-  const [draftMinProfit, setDraftMinProfit] = useState(2);
+  const [draftMinProfit, setDraftMinProfit] = useState(0.5);
   const [draftMaxStake, setDraftMaxStake] = useState(bankrollManager.getBankroll());
   const [draftSelectedMarkets, setDraftSelectedMarkets] = useState(['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals']);
   const [draftSortBy, setDraftSortBy] = useState('profit');
@@ -67,7 +67,7 @@ const ArbitrageDetector = ({
 
   // Reset filters function
   const resetFilters = () => {
-    const defaultMinProfit = 2;
+    const defaultMinProfit = 0.5;
     const defaultMaxStake = bankrollManager.getBankroll();
     const defaultMarkets = ['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals'];
     const defaultSortBy = 'profit';
