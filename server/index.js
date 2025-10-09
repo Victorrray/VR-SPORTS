@@ -2644,8 +2644,9 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             userPlan: userProfile.plan,
             totalBookmakers: allowedBookmakers.length,
             allBookmakers: allowedBookmakers,
-            dfsAppsIncluded: allowedBookmakers.filter(b => ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'prophetx'].includes(b)),
-            bookmakerListForAPI: bookmakerList
+            dfsAppsIncluded: allowedBookmakers.filter(b => ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'prophetx'].includes(b)),
+            bookmakerListForAPI: bookmakerList,
+            requestingPick6: bookmakerList.includes('pick6') || bookmakerList.includes('draftkings_pick6')
           });
           
           // Use individual event endpoint for player props
