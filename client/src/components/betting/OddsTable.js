@@ -1929,11 +1929,49 @@ export default function OddsTable({
         });
         return ev;
       }
-      console.log(`⚠️ EV CALC FAILED: Consensus check failed for ${row.playerName || 'unknown'}`, {
+      
+      // FALLBACK: If EV calculation fails, use simple odds comparison
+      // Find the bet with the best odds in the mini table and compare
+      console.log(`⚠️ EV CALC FAILED: Using fallback comparison for ${row.playerName || 'unknown'}`, {
         consensusProb,
         uniqCnt,
-        needsAtLeast3: uniqCnt >= 3
+        allBooksCount: allBooks.length
       });
+      
+      if (allBooks.length >= 2) {
+        // Find best odds in the mini table (excluding the user's book)
+        const otherBooks = allBooks.filter(b => {
+          const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
+          return bookKey !== bookmakerKey;
+        });
+        
+        if (otherBooks.length > 0) {
+          // Find the best odds among other books
+          const bestOtherOdds = otherBooks.reduce((best, book) => {
+            const odds = book.price || book.odds || 0;
+            const bestOdds = best.price || best.odds || 0;
+            const oddsDecimal = americanToDecimal(odds);
+            const bestDecimal = americanToDecimal(bestOdds);
+            return oddsDecimal > bestDecimal ? book : best;
+          });
+          
+          const bestOtherOddsValue = bestOtherOdds.price || bestOtherOdds.odds;
+          const userDecimal = americanToDecimal(userOdds);
+          const bestDecimal = americanToDecimal(bestOtherOddsValue);
+          
+          // Simple comparison: if user's odds are better than best available, it's +EV
+          const simplifiedEV = ((userDecimal / bestDecimal) - 1) * 100;
+          
+          console.log(`📊 FALLBACK EV for ${row.playerName || 'unknown'}: ${simplifiedEV.toFixed(2)}%`, {
+            userOdds,
+            bestOtherOdds: bestOtherOddsValue,
+            booksCompared: allBooks.length
+          });
+          
+          return simplifiedEV;
+        }
+      }
+      
       return null;
     }
     
