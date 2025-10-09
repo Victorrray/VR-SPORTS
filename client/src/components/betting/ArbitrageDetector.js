@@ -220,39 +220,31 @@ const ArbitrageDetector = ({
         // Calculate arbitrage for two-way markets (moneyline, totals, spreads)
         const outcomes = Object.values(outcomeOdds);
         if (outcomes.length === 2) {
-          // For spreads, allow lines within 1.5 points (includes middles)
-          // Example: +3 vs -3.5 is valid (0.5 point middle opportunity)
+          // For spreads, require EXACT opposite lines for true arbitrage
+          // Example: +3.5 and -3.5 (guaranteed profit regardless of outcome)
           if (marketKey === 'spreads') {
             const point1 = outcomes[0].point;
             const point2 = outcomes[1].point;
             
-            // Skip if points don't exist or are too far apart (>1.5 points difference)
-            if (!point1 || !point2 || Math.abs(point1 + point2) > 1.5) {
-              console.log(`⚠️ Skipping spread - lines too far apart: ${outcomes[0].name} ${point1} vs ${outcomes[1].name} ${point2}`);
+            // Skip if points don't exist or aren't exact opposites
+            // Middles (0.5-1.5 point gaps) will be handled by the Middles tool
+            if (!point1 || !point2 || Math.abs(point1 + point2) > 0.01) {
+              console.log(`⚠️ Skipping spread arbitrage: ${outcomes[0].name} ${point1} vs ${outcomes[1].name} ${point2} (lines don't match - use Middles tool for gaps)`);
               return;
-            }
-            
-            // Log if this is a middle opportunity (not exact opposite)
-            if (Math.abs(point1 + point2) > 0.01) {
-              console.log(`🎯 Middle opportunity found: ${outcomes[0].name} ${point1} vs ${outcomes[1].name} ${point2} (${Math.abs(point1 + point2)} point gap)`);
             }
           }
           
-          // For totals, allow lines within 1.5 points (includes middles)
-          // Example: Over 46 vs Under 45.5 is valid (0.5 point middle opportunity)
+          // For totals, require EXACT matching lines for true arbitrage
+          // Example: Over 45.5 and Under 45.5 (guaranteed profit regardless of outcome)
           if (marketKey === 'totals') {
             const point1 = outcomes[0].point;
             const point2 = outcomes[1].point;
             
-            // Skip if points don't exist or are too far apart (>1.5 points difference)
-            if (!point1 || !point2 || Math.abs(point1 - point2) > 1.5) {
-              console.log(`⚠️ Skipping totals - lines too far apart: Over ${point1} vs Under ${point2}`);
+            // Skip if points don't exist or don't match exactly
+            // Middles (0.5-1.5 point gaps) will be handled by the Middles tool
+            if (!point1 || !point2 || Math.abs(point1 - point2) > 0.01) {
+              console.log(`⚠️ Skipping totals arbitrage: Over ${point1} vs Under ${point2} (lines don't match - use Middles tool for gaps)`);
               return;
-            }
-            
-            // Log if this is a middle opportunity (not exact match)
-            if (Math.abs(point1 - point2) > 0.01) {
-              console.log(`🎯 Middle opportunity found: Over ${point1} vs Under ${point2} (${Math.abs(point1 - point2)} point gap)`);
             }
           }
           
