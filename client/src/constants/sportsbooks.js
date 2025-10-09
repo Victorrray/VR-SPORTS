@@ -18,6 +18,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'espnbet', name: 'ESPN BET', popular: true, tier: 2 },
   { key: 'fanatics', name: 'Fanatics Sportsbook', popular: true, tier: 2 },
   { key: 'hardrock', name: 'Hard Rock Bet', popular: true, tier: 2 },
+  { key: 'hardrockbet', name: 'Hard Rock Bet (US2)', popular: true, tier: 2 },
   { key: 'pointsbetus', name: 'PointsBet US', popular: true, tier: 2 },
   { key: 'betrivers', name: 'BetRivers', popular: true, tier: 2 },
   { key: 'wynnbet', name: 'WynnBET', popular: true, tier: 2 },

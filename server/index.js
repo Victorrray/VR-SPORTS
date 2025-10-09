@@ -77,7 +77,7 @@ const FOCUSED_BOOKMAKERS = [
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "pointsbet", "bovada", 
   "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
-  "hardrock", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
+  "hardrock", "hardrockbet", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
   "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
   // Other exchange books
   "betopenly", "prophetx"
@@ -91,7 +91,7 @@ const TRIAL_BOOKMAKERS = [
   "pinnacle", "prophet_exchange", "rebet",
   // Major sportsbooks
   "draftkings", "fanduel", "caesars", "betmgm", "pointsbet", "betrivers", 
-  "unibet", "bovada", "betonline", "fliff", "hardrock", "novig", "wynnbet",
+  "unibet", "bovada", "betonline", "fliff", "hardrock", "hardrockbet", "novig", "wynnbet",
   "espnbet", "fanatics", "betopenly", "prophetx"
 ];
 
