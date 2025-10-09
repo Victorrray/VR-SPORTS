@@ -7,6 +7,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'fanduel', name: 'FanDuel', popular: true, tier: 1 },
   { key: 'betmgm', name: 'BetMGM', popular: true, tier: 1 },
   { key: 'caesars', name: 'Caesars Sportsbook', popular: true, tier: 1 },
+  { key: 'williamhill_us', name: 'Caesars (William Hill)', popular: true, tier: 1 },
   
   // ===== DFS APPS =====
   { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true, tier: 1 },
