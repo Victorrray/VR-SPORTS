@@ -1676,7 +1676,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           {getCurrentSectionId() === 'arbitrage' && (
             <>
               <Zap size={24} color="#a78bfa" />
-              Arbitrage Opportunities
+              Arbitrage
             </>
           )}
           {getCurrentSectionId() === 'middles' && (
