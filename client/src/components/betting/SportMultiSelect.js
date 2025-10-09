@@ -43,7 +43,7 @@ const SPORT_CATEGORIES = {
   },
   soccer: {
     title: "Soccer", 
-    sports: ["soccer_epl", "soccer_uefa_champs_league", "soccer_fifa_world_cup", "soccer_conmebol_copa_america", "soccer_uefa_european_championship", "soccer_spain_la_liga", "soccer_germany_bundesliga", "soccer_italy_serie_a", "soccer_france_ligue_one"]
+    sports: ["soccer_epl", "soccer_uefa_champs_league", "soccer_mls", "soccer_fifa_world_cup", "soccer_conmebol_copa_america", "soccer_uefa_european_championship", "soccer_spain_la_liga", "soccer_germany_bundesliga", "soccer_italy_serie_a", "soccer_france_ligue_one"]
   },
   tennis: {
     title: "Tennis",
@@ -51,7 +51,7 @@ const SPORT_CATEGORIES = {
   },
   combat: {
     title: "Combat Sports",
-    sports: ["boxing_heavyweight", "mma_mixed_martial_arts", "boxing", "mma"]
+    sports: ["mma_mixed_martial_arts", "boxing_heavyweight", "boxing"]
   },
   golf: {
     title: "Golf",
