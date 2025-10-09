@@ -32,11 +32,11 @@ export default function SectionMenu({
     { 
       id: "arbitrage", 
       name: "Arbitrage", 
-      description: "Find profitable arbitrage opportunities (Coming Soon)",
+      description: "Find profitable arbitrage opportunities",
       icon: Zap,
       emoji: "⚡",
       requiresPlatinum: true,
-      disabled: true
+      disabled: false
     },
     { 
       id: "middles", 
