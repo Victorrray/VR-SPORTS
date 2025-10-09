@@ -71,7 +71,7 @@ const userUsage = new Map(); // user_id -> { period_start, period_end, calls_mad
 // Constants for improved player props stability and COST REDUCTION
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "pick6", "dabble_au",
+  "prizepicks", "underdog", "pick6", "draftkings_pick6", "dabble_au",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // US region books
@@ -86,7 +86,7 @@ const FOCUSED_BOOKMAKERS = [
 // Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "pick6", "dabble_au",
+  "prizepicks", "underdog", "pick6", "draftkings_pick6", "dabble_au",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // Major sportsbooks
@@ -2769,18 +2769,25 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           if (propsResponse.data && propsResponse.data.bookmakers) {
             console.log(`🔗 Merging ${propsResponse.data.bookmakers.length} bookmakers with player props`);
             
-            // Check for DFS apps in response
-            const dfsAppsToCheck = ['prizepicks', 'underdog', 'pick6', 'dabble_au'];
-            dfsAppsToCheck.forEach(dfsKey => {
-              const dfsData = propsResponse.data.bookmakers.find(b => b.key === dfsKey);
+            // Check for DFS apps in response (including alternate keys)
+            const dfsAppsToCheck = [
+              { key: 'prizepicks', alts: [] },
+              { key: 'underdog', alts: [] },
+              { key: 'pick6', alts: ['draftkings_pick6'] },
+              { key: 'dabble_au', alts: [] }
+            ];
+            
+            dfsAppsToCheck.forEach(({ key: dfsKey, alts }) => {
+              const allKeys = [dfsKey, ...alts];
+              const dfsData = propsResponse.data.bookmakers.find(b => allKeys.includes(b.key));
               if (dfsData) {
-                console.log(`✅ ${dfsKey.toUpperCase()} FOUND! Markets: ${dfsData.markets?.length || 0}`, {
+                console.log(`✅ ${dfsKey.toUpperCase()} FOUND! (API key: ${dfsData.key}) Markets: ${dfsData.markets?.length || 0}`, {
                   key: dfsData.key,
                   title: dfsData.title,
                   markets: dfsData.markets?.map(m => m.key) || []
                 });
               } else {
-                console.log(`❌ ${dfsKey.toUpperCase()} NOT in response`);
+                console.log(`❌ ${dfsKey.toUpperCase()} NOT in response (checked: ${allKeys.join(', ')})`);
               }
             });
             
