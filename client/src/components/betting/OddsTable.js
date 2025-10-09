@@ -1369,16 +1369,27 @@ export default function OddsTable({
           const underEV = calculateSideEV(propData.underBooks, false);
           
           // Determine which books to use based on filter
-          // If bookFilter is active, only use selectedBooks; otherwise use all books
+          // If bookFilter is active, only use books that match the filter
           const hasFilter = bookFilter && bookFilter.length > 0;
-          const overBooksToUse = hasFilter && propData.selectedBooks ? 
-            propData.selectedBooks.filter(b => b.name?.toLowerCase().includes('over') || (b.point !== undefined && !b.name?.toLowerCase().includes('under'))) :
-            propData.overBooks;
-          const underBooksToUse = hasFilter && propData.selectedBooks ?
-            propData.selectedBooks.filter(b => b.name?.toLowerCase().includes('under')) :
-            propData.underBooks;
           
-          console.log(`🎯 FILTER DEBUG: ${propData.playerName} - hasFilter: ${hasFilter}, overBooks: ${overBooksToUse.length}, underBooks: ${underBooksToUse.length}`);
+          if (hasFilter) {
+            // Filter overBooks and underBooks to only include books in the filter
+            const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+            const overBooksToUse = propData.overBooks.filter(b => {
+              const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
+              return normalizedFilter.includes(bookKey);
+            });
+            const underBooksToUse = propData.underBooks.filter(b => {
+              const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
+              return normalizedFilter.includes(bookKey);
+            });
+            
+            console.log(`🎯 FILTER DEBUG: ${propData.playerName} - Filtering for ${bookFilter.join(', ')} - overBooks: ${overBooksToUse.length}/${propData.overBooks.length}, underBooks: ${underBooksToUse.length}/${propData.underBooks.length}`);
+          } else {
+            var overBooksToUse = propData.overBooks;
+            var underBooksToUse = propData.underBooks;
+            console.log(`🎯 FILTER DEBUG: ${propData.playerName} - No filter, showing all books - overBooks: ${overBooksToUse.length}, underBooks: ${underBooksToUse.length}`);
+          }
           
           // Find best line + odds combination for each side (from filtered books)
           const bestOverBook = overBooksToUse.length > 0 ? overBooksToUse.reduce((best, book) => {
@@ -1835,21 +1846,20 @@ export default function OddsTable({
     // Check if this is a DFS app
     const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(bookmakerKey);
     
-    // Debug logging for EV calculation
-    if (row.playerName === 'Jalen Hurts' || row.playerName === 'Breece Hall') {
-      console.log(`🔍 EV DEBUG for ${row.playerName} ${row.mkt?.key}:`, {
-        bookmakerKey,
-        userOdds,
-        allBooksCount: allBooks.length,
-        allBooks: allBooks.map(b => ({ 
-          book: b.bookmaker?.key || b.book, 
-          odds: b.price || b.odds, 
-          name: b.name,
-          point: b.point,
-          line: b.line
-        }))
-      });
-    }
+    // Debug logging for EV calculation - log for ALL player props to see what's happening
+    console.log(`🔍 EV DEBUG for ${row.playerName || 'unknown'} ${row.mkt?.key || 'unknown'}:`, {
+      bookmakerKey,
+      userOdds,
+      allBooksCount: allBooks.length,
+      isPlayerProp: row.isPlayerProp,
+      allBooks: allBooks.map(b => ({ 
+        book: b.bookmaker?.key || b.book, 
+        odds: b.price || b.odds, 
+        name: b.name,
+        point: b.point,
+        line: b.line
+      }))
+    });
     
     // Only proceed if we have enough books for a meaningful consensus
     // Note: allBooks should contain ALL available books from mini table, not just filtered ones

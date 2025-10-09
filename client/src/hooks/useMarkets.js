@@ -110,7 +110,7 @@ function normalizeArray(resp) {
 const marketCache = new Map();
 
 export const useMarkets = (sports = [], regions = [], markets = [], options = {}) => {
-  const { enabled = true, date = null } = options;
+  const { enabled = true, date = null, autoRefresh = true } = options;
   const [games, setGames] = useState([]);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -560,15 +560,23 @@ useEffect(() => {
   // Initial fetch
   fetchMarkets();
   
-  // Set up refresh interval
-  const refreshInterval = setInterval(refreshMarkets, 30000); // Refresh every 30 seconds
+  // Set up refresh interval only if autoRefresh is enabled
+  let refreshInterval;
+  if (autoRefresh) {
+    refreshInterval = setInterval(refreshMarkets, 30000); // Refresh every 30 seconds
+    console.log('🔄 Auto-refresh enabled (30s interval)');
+  } else {
+    console.log('⏸️ Auto-refresh disabled');
+  }
   
   // Clean up
   return () => {
-    clearInterval(refreshInterval);
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+    }
     activeRequest.current = null;
   };
-}, [enabled, fetchMarkets, refreshMarkets]);
+}, [enabled, autoRefresh, fetchMarkets, refreshMarkets]);
 
 useEffect(() => {
   if (games) {

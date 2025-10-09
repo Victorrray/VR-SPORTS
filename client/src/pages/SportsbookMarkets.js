@@ -320,6 +320,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Refresh cooldown state
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Auto-refresh toggle state (default: enabled)
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(() => {
+    const saved = localStorage.getItem('autoRefreshEnabled');
+    return saved !== null ? saved === 'true' : true; // Default to enabled
+  });
+  
+  // Toggle auto-refresh and save to localStorage
+  const toggleAutoRefresh = () => {
+    const newValue = !autoRefreshEnabled;
+    setAutoRefreshEnabled(newValue);
+    localStorage.setItem('autoRefreshEnabled', String(newValue));
+    console.log('🔄 Auto-refresh', newValue ? 'enabled' : 'disabled');
+  };
 
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
@@ -389,7 +403,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     sportsForMode,
     regionsForMode,
     getAllCompatibleMarkets(sportsForMode),
-    { date: selectedDate }
+    { date: selectedDate, autoRefresh: autoRefreshEnabled }
   );
 
   // Cooldown timer effect
@@ -1413,6 +1427,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
               </svg>
               <h3>Filters</h3>
+            </div>
+
+            {/* Auto-Refresh Toggle */}
+            <div className="desktop-filter-section" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                  <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
+                  Auto-Refresh (30s)
+                </span>
+                <input
+                  type="checkbox"
+                  checked={autoRefreshEnabled}
+                  onChange={toggleAutoRefresh}
+                  style={{
+                    width: '40px',
+                    height: '20px',
+                    cursor: 'pointer',
+                    accentColor: 'var(--accent)'
+                  }}
+                />
+              </label>
             </div>
 
             {/* Player Props Filters */}
