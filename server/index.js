@@ -2326,8 +2326,8 @@ app.get("/api/events", enforceUsage, async (req, res) => {
 // odds endpoint (unified for multiple sports)
 app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
   try {
-    const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american" } = req.query;
-    console.log('🔍 /api/odds called with:', { sports, regions, markets, userId: req.__userId });
+    const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american", date } = req.query;
+    console.log('🔍 /api/odds called with:', { sports, regions, markets, date, userId: req.__userId });
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
     
     // If no API key, return error instead of mock data
