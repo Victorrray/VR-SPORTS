@@ -209,10 +209,10 @@ const ArbitrageDetector = ({
     games.forEach(game => {
       if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
 
-      // Only process games that haven't started yet
-      const gameTime = new Date(game.commence_time);
-      const now = new Date();
-      if (gameTime <= now) return; // Skip games that have already started
+      // Process both upcoming AND live games for arbitrage opportunities
+      // Live games often have the BEST arbitrage due to rapid line movements
+      // Only skip completed games if we have that status
+      if (game.status === 'final' || game.completed) return;
 
       // DFS apps to exclude from arbitrage (can't arbitrage on DFS)
       const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'prophetx'];
