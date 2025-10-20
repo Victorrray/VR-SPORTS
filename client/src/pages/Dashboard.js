@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Crown, Zap } from 'lucide-react';
 
@@ -7,6 +7,7 @@ import PersonalizedDashboard from '../components/dashboard/PersonalizedDashboard
 import EdgeCalculator from '../components/betting/EdgeCalculator';
 import BetSlip from '../components/betting/BetSlip';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
+import PremiumGiftNotification from '../components/PremiumGiftNotification';
 
 // Hooks
 import { useMarkets } from '../hooks/useMarkets';
@@ -19,7 +20,39 @@ export default function Dashboard() {
   const { user, profile } = useAuth();
   const { me } = useMe();
   const [showEdgeCalculator, setShowEdgeCalculator] = useState(false);
+  const [showGiftNotification, setShowGiftNotification] = useState(false);
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
+
+  // Check for gifted premium membership
+  useEffect(() => {
+    if (me && user) {
+      const userId = user.id;
+      const hasSeenGiftKey = `hasSeenGiftNotification_${userId}`;
+      const hasSeenNotification = localStorage.getItem(hasSeenGiftKey);
+      
+      // Check if user has platinum plan and is_gifted flag
+      const isGiftedPremium = me.plan === 'platinum' && me.is_gifted === true;
+      
+      console.log('Gift notification check:', {
+        plan: me.plan,
+        isGifted: me.is_gifted,
+        hasSeenNotification,
+        shouldShow: isGiftedPremium && !hasSeenNotification
+      });
+      
+      if (isGiftedPremium && !hasSeenNotification) {
+        setShowGiftNotification(true);
+      }
+    }
+  }, [me, user]);
+
+  const handleCloseGiftNotification = () => {
+    setShowGiftNotification(false);
+    if (user?.id) {
+      const hasSeenGiftKey = `hasSeenGiftNotification_${user.id}`;
+      localStorage.setItem(hasSeenGiftKey, 'true');
+    }
+  };
 
   // Get plan badge component
   const getPlanBadge = () => {
@@ -125,6 +158,14 @@ export default function Dashboard() {
       position: 'relative',
       zIndex: 1
     }}>
+      {/* Premium Gift Notification */}
+      {showGiftNotification && (
+        <PremiumGiftNotification 
+          expirationDate={me?.subscription_end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
+          onClose={handleCloseGiftNotification}
+        />
+      )}
+
       {/* Header Section */}
       <div style={{ 
         padding: '16px 20px',
