@@ -514,7 +514,7 @@ export default function Landing() {
             {[
               {
                 q: 'What\'s the difference between Gold and Platinum?',
-                a: 'Gold ($10/mo) includes 10+ sportsbooks, line movement tracking, and basic +EV finder. Platinum ($25/mo) adds 15+ sportsbooks, advanced +EV calculations, arbitrage detection, and priority support.'
+                a: 'Gold ($10/mo) includes 10+ sportsbooks, line movement tracking, +EV finder, and player props. Platinum ($25/mo) adds 5 more sportsbooks (15+ total), arbitrage opportunities, and live betting markets.'
               },
               {
                 q: 'How accurate is the +EV calculation?',

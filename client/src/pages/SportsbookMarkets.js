@@ -664,6 +664,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return dateFilteredGames;
   }, [marketGames, selectedDate]);
 
+  // Arbitrage games filter - includes LIVE games for arbitrage detection
+  // Arbitrage opportunities only exist when games are actively being traded
+  const arbitrageGames = useMemo(() => {
+    if (!Array.isArray(marketGames)) return [];
+    
+    // For arbitrage, we want ALL games (upcoming + live)
+    // Arbitrage opportunities exist across all active markets
+    console.log('⚡ Arbitrage games - showing all active games:', marketGames.length);
+    return marketGames;
+  }, [marketGames]);
+
   // Clear filters loading when data is ready
   useEffect(() => {
     if (!marketsLoading && filteredGames.length > 0) {
@@ -1829,7 +1840,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       ) : (marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
           sport={picked.length > 0 ? picked : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl']}
-          games={filteredGames}
+          games={arbitrageGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
           minProfit={draftMinProfit}
