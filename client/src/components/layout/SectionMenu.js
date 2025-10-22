@@ -41,11 +41,11 @@ export default function SectionMenu({
     { 
       id: "middles", 
       name: "Middles", 
-      description: "Find middle betting opportunities between different lines (Coming Soon)",
+      description: "Find middle betting opportunities between different lines",
       icon: Activity,
       emoji: "🎪",
       requiresPlatinum: true,
-      disabled: true
+      disabled: false
     }
   ];
 
