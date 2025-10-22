@@ -269,7 +269,7 @@ export default function Landing() {
           <div className="hero-cta-group" style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => navigate('/login')} className="cta-btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <TrendingUp size={20} />
-              Start Free Trial
+              Choose Your Plan
               <ArrowRight size={20} />
             </button>
             <button onClick={() => navigate('/sportsbooks')} className="cta-btn-secondary" style={{
@@ -301,7 +301,7 @@ export default function Landing() {
           <div className="trust-badges">
             <div className="trust-item">
               <CheckCircle size={16} />
-              <span>No credit card required</span>
+              <span>Gold or Platinum</span>
             </div>
             <div className="trust-item">
               <CheckCircle size={16} />
@@ -380,8 +380,8 @@ export default function Landing() {
             {[
               {
                 step: '1',
-                title: 'Sign Up Free',
-                description: 'Create your account in seconds. No credit card required.',
+                title: 'Choose Your Plan',
+                description: 'Select Gold ($10/mo) or Platinum ($25/mo). Both include 7-day money-back guarantee.',
                 icon: Users
               },
               {
@@ -513,8 +513,8 @@ export default function Landing() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {[
               {
-                q: 'Is OddSightSeer really free?',
-                a: 'Yes! Our free tier gives you access to odds comparison and basic analytics. Premium features are available with Platinum.'
+                q: 'What\'s the difference between Gold and Platinum?',
+                a: 'Gold ($10/mo) includes 10+ sportsbooks, line movement tracking, and basic +EV finder. Platinum ($25/mo) adds 15+ sportsbooks, advanced +EV calculations, arbitrage detection, and priority support.'
               },
               {
                 q: 'How accurate is the +EV calculation?',
@@ -569,7 +569,7 @@ export default function Landing() {
               Choose Your <span className="gradient-text">Winning Plan</span>
             </h2>
             <p className="section-subtitle">
-              Start free, upgrade when you're ready. Use code <strong style={{ color: 'var(--accent)' }}>Plat</strong> for 50% off Platinum!
+              Use code <strong style={{ color: 'var(--accent)' }}>Plat</strong> for 50% off Platinum! Both plans include 7-day money-back guarantee.
             </p>
           </div>
           <Pricing />
@@ -608,7 +608,7 @@ export default function Landing() {
           onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
           >
             <Zap size={18} />
-            Start Your Free Trial Now
+            Get Started Now
             <ArrowRight size={18} />
           </button>
         </div>

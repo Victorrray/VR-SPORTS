@@ -320,7 +320,7 @@ const Pricing = ({ onUpgrade }) => {
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>+EV bet finder with edge</span>
+                <span>+EV bet finder</span>
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
@@ -328,15 +328,15 @@ const Pricing = ({ onUpgrade }) => {
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>Arbitrage alerts</span>
+                <span>Arbitrage opportunities</span>
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>Advanced filters</span>
+                <span>Live betting markets</span>
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>Priority support</span>
+                <span>Email support</span>
               </div>
             </div>
 
