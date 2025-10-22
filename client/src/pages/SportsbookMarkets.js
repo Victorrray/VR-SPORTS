@@ -1210,20 +1210,29 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const organizedMarkets = [];
     const sportCategories = new Map();
 
+    console.log('🎯 getPlayerPropMarketsBySport called with sports:', selectedSports);
+
     // Determine which categories to include based on selected sports
     selectedSports.forEach(sport => {
+      console.log(`📊 Processing sport: ${sport}`);
+      
+      // Handle basketball sports FIRST (both NBA and NCAA) - MUST come before football check
+      if (sport === 'basketball_nba' || sport === 'basketball_ncaab' || sport.includes('basketball')) {
+        sportCategories.set('basketball', ['basketball']);
+        console.log(`🏀 Adding basketball player prop categories for sport: ${sport}`);
+      }
       // Handle football sports (both NFL and NCAA)
-      if (sport.includes('football') || sport === 'americanfootball_nfl' || sport === 'americanfootball_ncaaf') {
+      else if (sport === 'americanfootball_nfl' || sport === 'americanfootball_ncaaf' || sport.includes('football')) {
         sportCategories.set('football', ['passing', 'rushing', 'receiving', 'touchdowns', 'combination', 'defense', 'kicking']);
         console.log(`🏈 Adding football player prop categories for sport: ${sport}`);
       } 
       // Handle baseball sports
-      else if (sport.includes('baseball') || sport === 'baseball_mlb') {
+      else if (sport === 'baseball_mlb' || sport.includes('baseball')) {
         sportCategories.set('baseball', ['batting', 'pitching']);
         console.log(`⚾ Adding baseball player prop categories for sport: ${sport}`);
       } 
       // Handle hockey sports
-      else if (sport.includes('hockey') || sport === 'icehockey_nhl') {
+      else if (sport === 'icehockey_nhl' || sport.includes('hockey')) {
         sportCategories.set('hockey', ['hockey']);
         console.log(`🏒 Adding hockey player prop categories for sport: ${sport}`);
       } 
@@ -1231,13 +1240,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       else if (sport.includes('soccer')) {
         sportCategories.set('soccer', ['soccerPlayers']);
         console.log(`⚽ Adding soccer player prop categories for sport: ${sport}`);
-      } 
-      // Handle basketball sports (both NBA and NCAA)
-      else if (sport.includes('basketball') || sport === 'basketball_nba' || sport === 'basketball_ncaab') {
-        sportCategories.set('basketball', ['basketball']);
-        console.log(`🏀 Adding basketball player prop categories for sport: ${sport}`);
       }
     });
+
+    console.log('📋 Sport categories determined:', Array.from(sportCategories.keys()));
 
     // Build organized markets for each sport
     sportCategories.forEach((categories, sportType) => {
