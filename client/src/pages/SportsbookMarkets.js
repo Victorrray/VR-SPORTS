@@ -1995,6 +1995,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
         </div>
       ) : null}
+      </div>
 
       {/* Mobile filter button - positioned on the left */}
       <FilterMenu onClick={() => setMobileFiltersOpen(true)} isOpen={mobileFiltersOpen} />
@@ -2244,6 +2245,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       />
     </div>
   );
-};
+}
 
 export default SportsbookMarkets;
