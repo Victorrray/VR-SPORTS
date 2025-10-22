@@ -2372,8 +2372,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           if (supabase && oddsCacheService) {
             try {
               const cachedOdds = await oddsCacheService.getCachedOdds(sport, {
-                markets: marketsToFetch,
-                bookmakers: gameOddsBookmakers
+                markets: marketsToFetch
               });
               
               if (cachedOdds && cachedOdds.length > 0) {
