@@ -1356,7 +1356,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Memoized enhanced sportsbook list to prevent unnecessary recalculations
   const enhancedSportsbookList = useMemo(() => {
-    const marketBookKeys = new Set((marketBooks || []).map(book => book.key));
+    // If marketBooks is empty, use AVAILABLE_SPORTSBOOKS as fallback
+    const booksToUse = marketBooks && marketBooks.length > 0 
+      ? marketBooks 
+      : AVAILABLE_SPORTSBOOKS.filter(s => !s.isHeader).map(s => ({ key: s.key, title: s.title }));
+    
+    const marketBookKeys = new Set((booksToUse || []).map(book => book.key));
     
     // Get all available DFS apps
     const dfsApps = getDFSApps();
@@ -1364,7 +1369,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // For both Straight Bets and Player Props modes, include all sportsbooks AND DFS apps
     const enhancedBooks = [
-      ...(marketBooks || []),
+      ...(booksToUse || []),
       ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
     ];
     
