@@ -2214,8 +2214,74 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 />
               </div>
             </>
+          ) : showMiddles ? (
+            <>
+              {/* Middles-specific filters */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  📏 Minimum Gap (Points)
+                </label>
+                <input
+                  type="number"
+                  min="0.5"
+                  max="20"
+                  step="0.5"
+                  value={minMiddleGap}
+                  onChange={(e) => setMinMiddleGap(Number(e.target.value))}
+                  className="form-control"
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  📊 Min Probability %
+                </label>
+                <input
+                  type="number"
+                  min="5"
+                  max="50"
+                  step="1"
+                  value={minProbability}
+                  onChange={(e) => setMinProbability(Number(e.target.value))}
+                  className="form-control"
+                />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  💵 Max Stake
+                </label>
+                <input
+                  type="number"
+                  min="10"
+                  max="10000"
+                  step="10"
+                  value={maxStake}
+                  onChange={(e) => setMaxStake(Number(e.target.value))}
+                  className="form-control"
+                />
+              </div>
+
+              {/* Sportsbooks Filter for Middles */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  🏪 Sportsbooks
+                </label>
+                <SportMultiSelect
+                  list={enhancedSportsbookList}
+                  selected={draftSelectedBooks || []}
+                  onChange={setDraftSelectedBooks}
+                  placeholderText="Select sportsbooks..."
+                  allLabel="All Sportsbooks"
+                  isSportsbook={true}
+                  enableCategories={true}
+                  showDFSApps={false}
+                />
+              </div>
+            </>
           ) : (
             <>
+              {/* Straight Bets Filters */}
               {/* Date Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -2275,9 +2341,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   />
                 </div>
               )}
-              </>
-            )}
-
+            </>
+          )}
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Apply
