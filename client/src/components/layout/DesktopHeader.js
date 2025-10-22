@@ -14,7 +14,7 @@ export default function DesktopHeader({
 }) {
   // Section options
   const sections = [
-    { id: 'game', name: 'Game Odds', icon: BarChart3 },
+    { id: 'game', name: 'Straight Bets', icon: BarChart3 },
     { id: 'props', name: 'Player Props', icon: Target },
     { id: 'arbitrage', name: 'Arbitrage', icon: Zap, disabled: true },
     { id: 'middles', name: 'Middles', icon: Activity, disabled: true }

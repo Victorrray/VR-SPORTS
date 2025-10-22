@@ -4,9 +4,9 @@ import { BarChart3, ChevronDown } from "lucide-react";
 import "./GameOddsSelector.css";
 
 /**
- * Game Odds selector component positioned on the right side
+ * Straight Bets selector component positioned on the right side
  */
-export default function GameOddsSelector({ onClick, currentValue = "Game Odds", ev = "3.26%", onSectionChange }) {
+export default function GameOddsSelector({ onClick, currentValue = "Straight Bets", ev = "3.26%", onSectionChange }) {
   return (
     <div className="game-odds-selector-container">
       <button

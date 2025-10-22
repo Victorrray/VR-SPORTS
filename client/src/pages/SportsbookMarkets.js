@@ -354,7 +354,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     : picked;
     
   // Log the sports being used for the current mode
-  console.log(`🎯 Sports for ${isPlayerPropsMode ? 'Player Props' : 'Game Odds'} mode:`, sportsForMode);
+  console.log(`🎯 Sports for ${isPlayerPropsMode ? 'Player Props' : 'Straight Bets'} mode:`, sportsForMode);
   
   const hasPlatinum = true; // TESTING MODE: Always set to true to enable all features
   const hasGoldOrBetter = me?.plan === 'gold' || me?.plan === 'platinum';
@@ -826,7 +826,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Debug logging for filtering issues
     console.log('🎯 Bookmaker Filtering Debug:', {
-      mode: isPlayerPropsMode ? 'Player Props' : 'Game Odds',
+      mode: isPlayerPropsMode ? 'Player Props' : 'Straight Bets',
       selectedBooks: selectedBooks,
       selectedPlayerPropsBooks: selectedPlayerPropsBooks,
       currentSelectedBooks: currentSelectedBooks,
@@ -1321,7 +1321,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const dfsApps = getDFSApps();
     const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
     
-    // For both Game Odds and Player Props modes, include all sportsbooks AND DFS apps
+    // For both Straight Bets and Player Props modes, include all sportsbooks AND DFS apps
     const enhancedBooks = [
       ...(marketBooks || []),
       ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
@@ -1336,7 +1336,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         allBooks: enhancedBooks.map(b => b.key)
       });
     } else {
-      console.log('📈 Game Odds Sportsbooks:', {
+      console.log('📈 Straight Bets Sportsbooks:', {
         totalAvailable: enhancedBooks.length,
         regularBooks: marketBooks?.length || 0,
         dfsApps: missingDFSApps.length,
@@ -1420,7 +1420,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 onClick={() => handleSectionChange('game')}
               >
                 <BarChart3 size={18} />
-                Game Odds
+                Straight Bets
               </button>
               <button 
                 className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
@@ -1595,7 +1595,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </>
             )}
 
-            {/* Game Odds Filters */}
+            {/* Straight Bets Filters */}
             {!showPlayerProps && !showArbitrage && (
               <>
                 <div className="desktop-filter-section">
@@ -1630,7 +1630,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     list={enhancedSportsbookList}
                     selected={draftSelectedBooks || []}
                     onChange={(newSelection) => {
-                      console.log('🏪 Game Odds Sportsbook selection changed:', {
+                      console.log('🏪 Straight Bets Sportsbook selection changed:', {
                         newSelection,
                         previousSelection: draftSelectedBooks,
                         listAvailable: enhancedSportsbookList?.length,
@@ -1707,7 +1707,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           {getCurrentSectionId() === 'game' && (
             <>
               <BarChart3 size={24} color="#a78bfa" />
-              Game Odds
+              Straight Bets
             </>
           )}
         </h1>

@@ -16,7 +16,7 @@ export default function SectionMenu({
   const sections = [
     { 
       id: "game", 
-      name: "Game Odds", 
+      name: "Straight Bets", 
       description: "Compare odds across all major sportsbooks",
       icon: BarChart3,
       emoji: "📊"
