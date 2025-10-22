@@ -2559,13 +2559,9 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
         try {
           // Fetch games for the requested sports
           for (const sport of sportsArray) {
-            const userProfile = req.__userProfile || { plan: 'free' };
-            const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-            const bookmakerList = allowedBookmakers.join(',');
-            
             // Add date filter if provided
             const dateParam = date ? `&commenceTimeFrom=${date}T00:00:00Z&commenceTimeTo=${date}T23:59:59Z` : '';
-            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}${dateParam}`;
+            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}${dateParam}`;
             console.log(`🌐 Fetching games for player props (date: ${date || 'all'}): ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
             
             try {
