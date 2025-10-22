@@ -199,48 +199,6 @@ export default function Landing() {
         </div>
       )}
 
-      {/* PROMO BANNER */}
-      <div style={{
-        background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-        padding: '16px 20px',
-        textAlign: 'center',
-        borderBottom: '2px solid rgba(139, 92, 246, 0.3)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '12px',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}>
-          <Flame size={18} style={{ color: '#fbbf24' }} />
-          <span style={{ fontWeight: '600', fontSize: '14px' }}>LIMITED TIME: 50% OFF Platinum</span>
-        </div>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.2)',
-          padding: '8px 12px',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          border: '1px solid rgba(255, 255, 255, 0.3)'
-        }}
-        onClick={copyPromoCode}
-        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
-        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
-        >
-          <code style={{ color: '#fbbf24', fontWeight: '700', fontSize: '14px' }}>{PROMO_CODE}</code>
-          {copiedPromo ? (
-            <Check size={16} style={{ color: '#10b981' }} />
-          ) : (
-            <Copy size={16} style={{ color: '#fff' }} />
-          )}
-        </div>
-        <span style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '13px' }}>
-          {copiedPromo ? '✓ Copied!' : 'Click to copy'}
-        </span>
-      </div>
       
       {/* Hero Section - Revamped */}
       <section className="hero-revamp">
@@ -253,7 +211,7 @@ export default function Landing() {
         <div className="hero-container">
           <div className="hero-badge-new">
             <Sparkles size={14} />
-            <span>Trusted by 50,000+ Sports Bettors</span>
+            <span>Trusted by Serious Sports Bettors</span>
           </div>
           
           <h1 className="hero-title-new">
@@ -569,7 +527,7 @@ export default function Landing() {
               Choose Your <span className="gradient-text">Winning Plan</span>
             </h2>
             <p className="section-subtitle">
-              Use code <strong style={{ color: 'var(--accent)' }}>Plat</strong> for 50% off Platinum! Both plans include 7-day money-back guarantee.
+              Both plans include 7-day money-back guarantee.
             </p>
           </div>
           <Pricing />
@@ -587,7 +545,7 @@ export default function Landing() {
             Ready to Win More Bets?
           </h2>
           <p style={{ fontSize: '16px', color: 'rgba(255, 255, 255, 0.9)', marginBottom: '32px' }}>
-            Join 50,000+ bettors who are already using OddSightSeer to find +EV bets and maximize their ROI.
+            Join bettors who are using OddSightSeer to find +EV bets and maximize their ROI.
           </p>
           <button onClick={() => navigate('/login')} style={{
             padding: '14px 32px',
