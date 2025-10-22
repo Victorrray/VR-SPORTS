@@ -317,7 +317,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Arbitrage-specific filter states
   const [draftMinProfit, setDraftMinProfit] = useState(2);
   const [draftMaxStake, setDraftMaxStake] = useState(100);
-  const [draftArbitrageSortBy, setDraftArbitrageSortBy] = useState('profit');
   
   // Refresh cooldown state
   const [refreshCooldown, setRefreshCooldown] = useState(0);
@@ -1564,21 +1563,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
                 <div className="desktop-filter-section">
                   <div className="desktop-filter-label">
-                    <span>🔄</span> Sort By
-                  </div>
-                  <select
-                    value={draftArbitrageSortBy}
-                    onChange={(e) => setDraftArbitrageSortBy(e.target.value)}
-                  >
-                    <option value="profit">Profit %</option>
-                    <option value="amount">Profit Amount</option>
-                    <option value="time">Time Found</option>
-                    <option value="sport">Sport</option>
-                  </select>
-                </div>
-
-                <div className="desktop-filter-section">
-                  <div className="desktop-filter-label">
                     <span>🏪</span> Sportsbooks
                   </div>
                   <SportMultiSelect
@@ -1846,7 +1830,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           minProfit={draftMinProfit}
           maxStake={draftMaxStake}
           selectedMarkets={draftMarketKeys}
-          sortBy={draftArbitrageSortBy}
         />
       ) : isArbitrageMode && !hasPlatinum ? (
         <div style={{
@@ -2126,22 +2109,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   onChange={(e) => setDraftMaxStake(Number(e.target.value))}
                   className="form-control"
                 />
-              </div>
-
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  🔄 Sort By
-                </label>
-                <select
-                  value={draftArbitrageSortBy}
-                  onChange={(e) => setDraftArbitrageSortBy(e.target.value)}
-                  className="form-control"
-                >
-                  <option value="profit">Profit %</option>
-                  <option value="amount">Profit Amount</option>
-                  <option value="time">Time Found</option>
-                  <option value="sport">Sport</option>
-                </select>
               </div>
 
               {/* Sportsbooks Filter for Arbitrage */}
