@@ -1900,7 +1900,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </div>
       ) : isPlayerPropsMode ? (
         !isOverQuota ? (
-          console.log('SportsbookMarkets: selectedPlayerPropMarkets =', selectedPlayerPropMarkets),
           <div style={{ position: 'relative' }}>
             {/* Refresh Overlay */}
             {isRefreshing && (
@@ -1995,6 +1994,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
         </div>
       ) : null}
+      </div>
       </div>
 
       {/* Mobile filter button - positioned on the left */}
