@@ -2225,6 +2225,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </>
             )}
 
+          {/* Auto-Refresh Toggle */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', marginTop: '20px', marginBottom: '16px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
+                Auto-Refresh (30s)
+              </span>
+              <input
+                type="checkbox"
+                checked={autoRefreshEnabled}
+                onChange={toggleAutoRefresh}
+                style={{
+                  width: '40px',
+                  height: '20px',
+                  cursor: 'pointer',
+                  accentColor: 'var(--accent)'
+                }}
+              />
+            </label>
+          </div>
+
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Apply
@@ -2235,9 +2256,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           </div>
         </div>
       </MobileFiltersSheet>
-
-        </div>
-      </div>
 
       {/* BetSlip Component */}
       <BetSlip
