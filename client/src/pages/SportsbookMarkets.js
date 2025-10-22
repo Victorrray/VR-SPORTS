@@ -710,23 +710,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         !availableMarketKeys.includes(market)
       );
       
-      // If we have invalid markets in draft selection, update to only valid markets
+      // If we have invalid markets in draft selection, update to appropriate markets for new sport
       if (hasInvalidMarkets) {
-        const validMarkets = (draftSelectedPlayerPropMarkets || []).filter(market => 
-          availableMarketKeys.includes(market)
-        );
+        // Get first 3 valid markets for the new sport
+        const newMarkets = availableMarketKeys.slice(0, 3);
         
         console.log('🎯 Updating draft player prop markets for sport change:', {
           draftSports: draftPicked,
           oldDraftMarkets: draftSelectedPlayerPropMarkets,
-          validMarkets: validMarkets,
+          newMarkets: newMarkets,
           availableMarkets: availableMarketKeys
         });
         
-        setDraftSelectedPlayerPropMarkets(validMarkets);
+        setDraftSelectedPlayerPropMarkets(newMarkets);
       }
     }
   }, [draftPicked, showPlayerProps]);
+
 
   // Auto-select all relevant markets when applied sports change
   useEffect(() => {
