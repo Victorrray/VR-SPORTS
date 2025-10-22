@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useMe } from '../../hooks/useMe';
 import { debugLog, debugPricingClick, debugCheckoutResult, debugPlanUpdate } from '../../lib/debug';
-import './Pricing.css';
+import './Pricing-Simple.css';
 
 // Intent persistence helpers
 function saveIntent(intent, returnTo) {
@@ -221,63 +221,45 @@ const Pricing = ({ onUpgrade }) => {
           {/* Gold Plan Card */}
           <div className="pricing-card gold-card">
             {/* Gold Badge */}
-            <div className="free-badge" style={{background: 'linear-gradient(135deg, #FFD700, #FFA500)'}}>
-              <Crown size={16} />
+            <div className="card-badge gold-badge">
               <span>Best Value</span>
             </div>
 
-            {/* Card Header */}
-            <div className="card-header">
-              <div className="plan-icon-wrapper" style={{background: 'linear-gradient(135deg, #FFD700, #FFA500)', boxShadow: '0 8px 24px rgba(255, 215, 0, 0.3)'}}>
-                <div className="plan-icon">
-                  <Crown size={28} />
-                </div>
-              </div>
-              <div className="plan-info">
-                <h3 className="plan-title">Gold Plan</h3>
-                <p className="plan-tagline">Perfect for serious bettors</p>
+            {/* Card Header - Simplified */}
+            <div className="card-header-simple">
+              <h3 className="plan-title-simple">Gold Plan</h3>
+              <p className="plan-tagline-simple">Perfect for serious bettors</p>
+            </div>
+
+            {/* Pricing - Simplified */}
+            <div className="pricing-display-simple">
+              <div className="price-main-simple">
+                <span className="currency-simple">$</span>
+                <span className="amount-simple">10</span>
+                <span className="period-simple">/month</span>
               </div>
             </div>
 
-            {/* Pricing */}
-            <div className="pricing-display">
-              <div className="price-main">
-                <span className="currency">$</span>
-                <span className="amount">10</span>
-                <span className="period">/month</span>
+            {/* Benefits List - Simplified */}
+            <div className="features-grid-simple">
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>10+ sportsbooks</span>
               </div>
-            </div>
-
-            {/* Benefits List */}
-            <div className="features-grid">
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Live odds from 10+ major sportsbooks</span>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>Line movement tracking</span>
               </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Real-time line movement tracking</span>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>+EV bet finder</span>
               </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Basic +EV bet finder</span>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>Player props</span>
               </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Player props and game lines</span>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
+              <div className="feature-item-simple">
+                <Check size={16} />
                 <span>Email support</span>
               </div>
             </div>
@@ -287,117 +269,74 @@ const Pricing = ({ onUpgrade }) => {
               data-testid="pricing-signup"
               onClick={() => handleUpgrade('gold')}
               disabled={loading}
-              className="signup-button"
-              style={{background: 'linear-gradient(135deg, #FFD700, #FFA500)', boxShadow: '0 10px 30px rgba(255, 215, 0, 0.35)'}}
+              className="signup-button-simple"
             >
-              <div className="button-content">
-                {loading ? (
-                  <>
-                    <Loader2 size={20} className="button-spinner" />
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Start Gold Plan</span>
-                    <ArrowRight size={20} className="button-arrow" />
-                  </>
-                )}
-              </div>
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="button-spinner" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <span>Start Gold Plan</span>
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
 
-            {/* Trust Signals */}
-            <div className="trust-signals">
-              <div className="trust-item">
-                <span>✓ Cancel anytime</span>
-              </div>
+            {/* Trust Signal */}
+            <div className="trust-signal-simple">
+              ✓ Cancel anytime
             </div>
           </div>
 
-          <div className="platinum-card">
+          <div className="pricing-card platinum-card-simple">
             {/* Premium Badge */}
-            <div className="premium-badge">
-              <Crown size={16} />
+            <div className="card-badge platinum-badge">
               <span>Most Popular</span>
             </div>
 
-            {/* Card Header */}
-            <div className="card-header">
-              <div className="plan-icon-wrapper">
-                <div className="plan-icon">
-                  <Zap size={28} />
-                </div>
-              </div>
-              <div className="plan-info">
-                <h3 className="plan-title">Platinum Access</h3>
-                <p className="plan-tagline">Everything you need to win</p>
-              </div>
+            {/* Card Header - Simplified */}
+            <div className="card-header-simple">
+              <h3 className="plan-title-simple">Platinum Access</h3>
+              <p className="plan-tagline-simple">Everything you need to win</p>
             </div>
 
-            {/* Pricing */}
-            <div className="pricing-display">
-              <div className="price-main">
-                <span className="currency">$</span>
-                <span className="amount">25</span>
-                <span className="period">/month</span>
+            {/* Pricing - Simplified */}
+            <div className="pricing-display-simple">
+              <div className="price-main-simple">
+                <span className="currency-simple">$</span>
+                <span className="amount-simple">25</span>
+                <span className="period-simple">/month</span>
               </div>
-              <div className="price-note">
-                <span className="savings">Save 40% vs daily subscriptions</span>
-              </div>
+              <div className="savings-note">Save 40% vs daily subscriptions</div>
             </div>
 
-            {/* Value Proposition */}
-            <div className="value-prop">
-              <div className="value-item">
-                <div className="value-number">15+</div>
-                <div className="value-label">Sportsbooks</div>
+            {/* Benefits List - Simplified */}
+            <div className="features-grid-simple">
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>15+ sportsbooks</span>
               </div>
-              <div className="value-item">
-                <div className="value-number">24/7</div>
-                <div className="value-label">Live Updates</div>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>+EV bet finder with edge</span>
               </div>
-              <div className="value-item">
-                <div className="value-number">4.2%</div>
-                <div className="value-label">Avg Edge</div>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>Player props & spreads</span>
               </div>
-            </div>
-
-            {/* Benefits List */}
-            <div className="features-grid">
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Live odds from DraftKings, FanDuel, BetMGM + 12 more</span>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>Arbitrage alerts</span>
               </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Expected value (+EV) bet finder with edge calculations</span>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>Advanced filters</span>
               </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Player props, spreads, totals, and live betting markets</span>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Arbitrage opportunities and line shopping alerts</span>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Advanced filtering by sport, market, and edge %</span>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">
-                  <Check size={12} />
-                </div>
-                <span>Priority support and feature requests</span>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>Priority support</span>
               </div>
             </div>
 
@@ -406,23 +345,20 @@ const Pricing = ({ onUpgrade }) => {
               data-testid="pricing-upgrade"
               onClick={() => handleUpgrade('platinum')}
               disabled={loading}
-              className="upgrade-button"
+              className="upgrade-button-simple"
             >
-              <div className="button-content">
-                {loading ? (
-                  <>
-                    <Loader2 size={20} className="button-spinner" />
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Start Winning Today</span>
-                    <ArrowRight size={20} className="button-arrow" />
-                  </>
-                )}
-              </div>
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="button-spinner" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <span>Start Winning Today</span>
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
-
           </div>
         </div>
       </div>
