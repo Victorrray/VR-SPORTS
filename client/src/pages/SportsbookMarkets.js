@@ -1359,7 +1359,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // If marketBooks is empty, use AVAILABLE_SPORTSBOOKS as fallback
     const booksToUse = marketBooks && marketBooks.length > 0 
       ? marketBooks 
-      : AVAILABLE_SPORTSBOOKS.filter(s => !s.isHeader).map(s => ({ key: s.key, title: s.title }));
+      : AVAILABLE_SPORTSBOOKS.filter(s => !s.isHeader).map(s => ({ key: s.key, title: s.name }));
     
     const marketBookKeys = new Set((booksToUse || []).map(book => book.key));
     
