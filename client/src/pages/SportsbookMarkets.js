@@ -590,42 +590,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           });
           
           setSelectedPlayerPropMarkets(marketsToUse);
-          setDraftSelectedPlayerPropMarkets(marketsToUse);
         }
       }
     }
   }, [picked, isPlayerPropsMode, selectedPlayerPropMarkets]); // Run when sport, mode, or markets change
 
-  // Auto-update DRAFT player prop markets when DRAFT sports change in the modal
-  useEffect(() => {
-    if (isPlayerPropsMode && draftPicked && draftPicked.length > 0) {
-      const sportBasedMarkets = getPlayerPropMarketsBySport(draftPicked);
-      const availableMarketKeys = sportBasedMarkets
-        .filter(market => !market.isHeader)
-        .map(market => market.key);
-      
-      // Check if current draft selection contains markets that don't exist for the draft sport
-      const hasInvalidMarkets = (draftSelectedPlayerPropMarkets || []).some(market => 
-        !availableMarketKeys.includes(market)
-      );
-      
-      // If we have invalid markets in draft selection, update to only valid markets
-      if (hasInvalidMarkets) {
-        const validMarkets = (draftSelectedPlayerPropMarkets || []).filter(market => 
-          availableMarketKeys.includes(market)
-        );
-        
-        console.log('🎯 Updating draft player prop markets for sport change:', {
-          draftSports: draftPicked,
-          oldDraftMarkets: draftSelectedPlayerPropMarkets,
-          validMarkets: validMarkets,
-          availableMarkets: availableMarketKeys
-        });
-        
-        setDraftSelectedPlayerPropMarkets(validMarkets);
-      }
-    }
-  }, [draftPicked, isPlayerPropsMode]); // Run when draft sport changes
 
   // Removed auto-selection logic - users should be able to select individual player prop markets
 
