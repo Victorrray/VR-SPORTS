@@ -246,14 +246,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
     "player_points", "player_rebounds", "player_assists"
   ]);
-  // Comprehensive sports list organized by categories
+  // Simplified sports list - only major sports
   const AVAILABLE_SPORTS = [
-    // Major US Sports
     { key: 'americanfootball_nfl', title: 'NFL' },
-    { key: 'americanfootball_ncaaf', title: 'NCAA Football' },
+    { key: 'americanfootball_ncaaf', title: 'NCAA' },
     { key: 'basketball_nba', title: 'NBA' },
     { key: 'basketball_ncaab', title: 'NCAA Basketball' },
-    { key: 'basketball_wnba', title: 'WNBA' },
     { key: 'baseball_mlb', title: 'MLB' },
     { key: 'icehockey_nhl', title: 'NHL' },
     
@@ -342,6 +340,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     localStorage.setItem('autoRefreshEnabled', String(newValue));
     console.log('🔄 Auto-refresh', newValue ? 'enabled' : 'disabled');
   };
+  
+  // Ensure toggleAutoRefresh is available in the render scope
+  const handleToggleAutoRefresh = toggleAutoRefresh;
 
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
@@ -902,15 +903,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         }
       } catch (error) {
         console.warn('Failed to fetch sports list:', error);
-        // Fallback sports list
+        // Fallback sports list - simplified
         setSportList([
-          // Major US Sports
-          { key: 'americanfootball_nfl', title: 'NFL', group: "Major US Sports" },
-          { key: 'americanfootball_ncaaf', title: 'NCAAF', group: "Major US Sports" },
-          { key: 'basketball_nba', title: 'NBA', group: "Major US Sports" },
-          { key: 'basketball_ncaab', title: 'NCAAB', group: "Major US Sports" },
-          { key: 'icehockey_nhl', title: 'NHL', group: "Major US Sports" },
-          { key: 'baseball_mlb', title: 'MLB', group: "Major US Sports" },
+          { key: 'americanfootball_nfl', title: 'NFL', group: "Sports" },
+          { key: 'americanfootball_ncaaf', title: 'NCAA', group: "Sports" },
+          { key: 'basketball_nba', title: 'NBA', group: "Sports" },
+          { key: 'basketball_ncaab', title: 'NCAA Basketball', group: "Sports" },
+          { key: 'baseball_mlb', title: 'MLB', group: "Sports" },
+          { key: 'icehockey_nhl', title: 'NHL', group: "Sports" },
           
           // Soccer
           { key: 'soccer_epl', title: 'EPL', group: "Soccer" },
@@ -2348,6 +2348,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               )}
             </>
           )}
+          
+          {/* Auto-Refresh Toggle */}
+          <div style={{ marginBottom: 20, padding: '12px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: 8, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 500, color: 'var(--text-primary)' }}>
+              <input
+                type="checkbox"
+                checked={autoRefreshEnabled}
+                onChange={toggleAutoRefresh}
+                style={{ cursor: 'pointer', width: 18, height: 18 }}
+              />
+              🔄 Auto-Refresh Data
+            </label>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 6 }}>
+              Automatically refresh odds every 30 seconds
+            </div>
+          </div>
+          
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Apply
