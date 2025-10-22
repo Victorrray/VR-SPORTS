@@ -276,8 +276,8 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, #8b5cf6 0%, #06b6d4 100%);
+  width: 0;
+  background: transparent;
 }
 
 .market-info {
@@ -409,11 +409,11 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: 100px;
-  padding: 20px 16px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(6, 182, 212, 0.03) 100%);
+  min-height: 80px;
+  padding: 16px 12px;
+  background: transparent;
   gap: 6px;
-  border-right: 1px solid rgba(139, 92, 246, 0.08);
+  border-right: none;
 }
 
 .confidence-indicator {

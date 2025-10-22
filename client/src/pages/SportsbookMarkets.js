@@ -27,7 +27,7 @@ import { secureFetch } from "../utils/security";
 import { useMarketsWithCache } from '../hooks/useMarketsWithCache';
 import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/SimpleAuth';
-import { AVAILABLE_SPORTSBOOKS, getDFSApps } from '../constants/sportsbooks';
+import { AVAILABLE_SPORTSBOOKS, getDFSApps, getFreePlanSportsbooks } from '../constants/sportsbooks';
 import DesktopHeader from '../components/layout/DesktopHeader';
 import './SportsbookMarkets.css';
 import './SportsbookMarkets.desktop.css';
@@ -1356,10 +1356,25 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Memoized enhanced sportsbook list to prevent unnecessary recalculations
   const enhancedSportsbookList = useMemo(() => {
-    // If marketBooks is empty, use AVAILABLE_SPORTSBOOKS as fallback
-    const booksToUse = marketBooks && marketBooks.length > 0 
+    // Start with API books if available
+    let booksToUse = marketBooks && marketBooks.length > 0 
       ? marketBooks 
       : AVAILABLE_SPORTSBOOKS.filter(s => !s.isHeader).map(s => ({ key: s.key, title: s.name }));
+    
+    // For Platinum users, also add any missing books from AVAILABLE_SPORTSBOOKS
+    if (hasPlatinum) {
+      const apiBookKeys = new Set((booksToUse || []).map(book => book.key));
+      const allConfiguredBooks = AVAILABLE_SPORTSBOOKS.filter(s => !s.isHeader);
+      const missingConfiguredBooks = allConfiguredBooks.filter(book => !apiBookKeys.has(book.key));
+      
+      // Add missing configured books
+      if (missingConfiguredBooks.length > 0) {
+        booksToUse = [
+          ...(booksToUse || []),
+          ...missingConfiguredBooks.map(s => ({ key: s.key, title: s.name }))
+        ];
+      }
+    }
     
     const marketBookKeys = new Set((booksToUse || []).map(book => book.key));
     
@@ -1377,21 +1392,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     if (showPlayerProps) {
       console.log('🎯 Player Props Sportsbooks:', {
         totalAvailable: enhancedBooks.length,
-        regularBooks: marketBooks?.length || 0,
+        apiBooks: marketBooks?.length || 0,
+        configuredBooks: hasPlatinum ? AVAILABLE_SPORTSBOOKS.length : 3,
         dfsApps: missingDFSApps.length,
         allBooks: enhancedBooks.map(b => b.key)
       });
     } else {
       console.log('📈 Straight Bets Sportsbooks:', {
         totalAvailable: enhancedBooks.length,
-        regularBooks: marketBooks?.length || 0,
+        apiBooks: marketBooks?.length || 0,
+        configuredBooks: hasPlatinum ? AVAILABLE_SPORTSBOOKS.length : 3,
         dfsApps: missingDFSApps.length,
         allBooks: enhancedBooks.map(b => b.key)
       });
     }
     
     return enhancedBooks;
-  }, [marketBooks, showPlayerProps]);
+  }, [marketBooks, hasPlatinum, showPlayerProps]);
 
   // Helper function to get current section ID
   const getCurrentSectionId = () => {
