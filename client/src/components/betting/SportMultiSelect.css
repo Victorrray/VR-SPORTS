@@ -234,6 +234,12 @@
   cursor: pointer;
 }
 
+.ms-item span {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
 /* ============== Mobile Search ============== */
 .ms-mobile-search {
   padding: 16px 20px;
