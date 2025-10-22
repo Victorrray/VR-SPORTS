@@ -348,8 +348,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   
   // For player props, use selected sports or default to NFL and NCAAF if none selected
   // For regular mode, use all selected sports (no longer limiting to single sport)
+  // For arbitrage mode, use all major sports by default to find maximum opportunities
   const sportsForMode = isPlayerPropsMode 
     ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf"]) 
+    : isArbitrageMode
+    ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "baseball_mlb", "icehockey_nhl"])
     : picked;
     
   // Log the sports being used for the current mode
@@ -1672,25 +1675,25 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         }}>
           {getCurrentSectionId() === 'props' && (
             <>
-              <Target size={24} color="#a78bfa" />
+              <Target size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
               Player Props
             </>
           )}
           {getCurrentSectionId() === 'arbitrage' && (
             <>
-              <Zap size={24} color="#a78bfa" />
+              <Zap size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
               Arbitrage
             </>
           )}
           {getCurrentSectionId() === 'middles' && (
             <>
-              <Activity size={24} color="#a78bfa" />
+              <Activity size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
               Middle Betting
             </>
           )}
           {getCurrentSectionId() === 'game' && (
             <>
-              <BarChart3 size={24} color="#a78bfa" />
+              <BarChart3 size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
               Straight Bets
             </>
           )}
@@ -2022,6 +2025,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           {/* Player Props Mode Filters */}
           {showPlayerProps ? (
             <>
+              {/* Auto-Refresh Toggle */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
+                    Auto-Refresh (30s)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={autoRefreshEnabled}
+                    onChange={toggleAutoRefresh}
+                    style={{
+                      width: '40px',
+                      height: '20px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--accent)'
+                    }}
+                  />
+                </label>
+              </div>
+
               {/* Sports Selection for Player Props */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -2192,27 +2216,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               )}
               </>
             )}
-
-          {/* Auto-Refresh Toggle */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', marginTop: '20px', marginBottom: '16px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
-                Auto-Refresh (30s)
-              </span>
-              <input
-                type="checkbox"
-                checked={autoRefreshEnabled}
-                onChange={toggleAutoRefresh}
-                style={{
-                  width: '40px',
-                  height: '20px',
-                  cursor: 'pointer',
-                  accentColor: 'var(--accent)'
-                }}
-              />
-            </label>
-          </div>
 
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>

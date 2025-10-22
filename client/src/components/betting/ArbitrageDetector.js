@@ -30,9 +30,13 @@ const ArbitrageDetector = ({
   const [internalMinProfit, setInternalMinProfit] = useState(0.5);
   const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
   const [internalSelectedMarkets, setInternalSelectedMarkets] = useState([
-    'h2h', 'spreads', 'totals', 
+    // Game markets
+    'h2h', 'spreads', 'totals', 'team_totals', 'alternate_spreads', 'alternate_totals',
+    // NFL/NCAAF player props
     'player_pass_tds', 'player_pass_yds', 'player_rush_yds', 'player_receptions', 'player_reception_yds',
+    // NBA player props
     'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+    // MLB player props
     'player_hits', 'player_total_bases', 'player_strikeouts', 'pitcher_strikeouts'
   ]);
   const [internalSortBy, setInternalSortBy] = useState('profit');
@@ -42,9 +46,13 @@ const ArbitrageDetector = ({
   const [draftMinProfit, setDraftMinProfit] = useState(0.5);
   const [draftMaxStake, setDraftMaxStake] = useState(bankrollManager.getBankroll());
   const [draftSelectedMarkets, setDraftSelectedMarkets] = useState([
-    'h2h', 'spreads', 'totals',
+    // Game markets
+    'h2h', 'spreads', 'totals', 'team_totals', 'alternate_spreads', 'alternate_totals',
+    // NFL/NCAAF player props
     'player_pass_tds', 'player_pass_yds', 'player_rush_yds', 'player_receptions', 'player_reception_yds',
+    // NBA player props
     'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+    // MLB player props
     'player_hits', 'player_total_bases', 'player_strikeouts', 'pitcher_strikeouts'
   ]);
   const [draftSortBy, setDraftSortBy] = useState('profit');
@@ -83,9 +91,13 @@ const ArbitrageDetector = ({
     const defaultMinProfit = 0.5;
     const defaultMaxStake = bankrollManager.getBankroll();
     const defaultMarkets = [
-      'h2h', 'spreads', 'totals',
+      // Game markets
+      'h2h', 'spreads', 'totals', 'team_totals', 'alternate_spreads', 'alternate_totals',
+      // NFL/NCAAF player props
       'player_pass_tds', 'player_pass_yds', 'player_rush_yds', 'player_receptions', 'player_reception_yds',
+      // NBA player props
       'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+      // MLB player props
       'player_hits', 'player_total_bases', 'player_strikeouts', 'pitcher_strikeouts'
     ];
     const defaultSortBy = 'profit';
