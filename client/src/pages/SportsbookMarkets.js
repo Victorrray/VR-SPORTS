@@ -2124,7 +2124,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
-                  showDFSApps={false} /* Hide DFS apps in game odds mode */
+                  showDFSApps={false}
                 />
               </div>
             </>
@@ -2169,7 +2169,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
                   enableCategories={true}
-                  showDFSApps={false} /* Hide DFS apps in game odds mode */
+                  showDFSApps={false}
                 />
               </div>
 
