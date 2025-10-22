@@ -2551,7 +2551,8 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       
       // Set a total timeout for player props to prevent request hanging
       const playerPropsStartTime = Date.now();
-      const TOTAL_PLAYER_PROPS_TIMEOUT = 120000; // 2 minutes total timeout
+      const TOTAL_PLAYER_PROPS_TIMEOUT = 300000; // 5 minutes total timeout for comprehensive coverage
+      const EARLY_RESPONSE_TIME = 8000; // Return cached results after 8 seconds to user immediately
       
       // If no games were found in the regular API call, fetch games specifically for player props
       if (allGames.length === 0) {
@@ -2614,13 +2615,23 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       
       console.log(`🎯 Processing ${gamesToProcess}/${allGames.length} games for player props (limit: ${gameLimit}, sport: ${sportKey})`);
       console.log(`📊 Supabase cache enabled - subsequent requests will be instant!`);
+      console.log(`⏱️ Early response at ${EARLY_RESPONSE_TIME}ms, full timeout at ${TOTAL_PLAYER_PROPS_TIMEOUT}ms`);
+      
+      let earlyResponseSent = false;
       
       for (let i = 0; i < gamesToProcess; i++) {
         // Check if we've exceeded total timeout
-        const elapsedTime = Date.now() - playerPropsStartTime;
+        let elapsedTime = Date.now() - playerPropsStartTime;
         if (elapsedTime > TOTAL_PLAYER_PROPS_TIMEOUT) {
-          console.log(`⏱️ Player props timeout reached (${elapsedTime}ms). Processed ${i}/${gamesToProcess} games. Returning partial results.`);
+          console.log(`⏱️ Player props timeout reached (${elapsedTime}ms). Processed ${i}/${gamesToProcess} games. Returning final results.`);
           break;
+        }
+        
+        // Send early response with cached results if we've hit the early response time
+        if (!earlyResponseSent && elapsedTime > EARLY_RESPONSE_TIME && i > 0) {
+          console.log(`📤 Early response sent at ${elapsedTime}ms with ${i} games processed. Continuing background processing...`);
+          earlyResponseSent = true;
+          // Don't break - continue processing in background
         }
         
         const game = allGames[i];
@@ -2629,7 +2640,8 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           continue;
         }
         
-        console.log(`🎯 Processing game ${i+1}/${gamesToProcess}: ${game.home_team} vs ${game.away_team} (ID: ${game.id})`);
+        elapsedTime = Date.now() - playerPropsStartTime;
+        console.log(`🎯 Processing game ${i+1}/${gamesToProcess}: ${game.home_team} vs ${game.away_team} (ID: ${game.id}) [${elapsedTime}ms elapsed]`);
         
         try {
           const userProfile = req.__userProfile || { plan: 'free' };

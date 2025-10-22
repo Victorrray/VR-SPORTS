@@ -1510,10 +1510,11 @@ export default function OddsTable({
               });
             }
             
-            // Mark locked markets instead of skipping them
+            // Skip locked markets entirely - don't show them to user
             const isLocked = isMarketLikelyLocked(primaryBook, isDFSApp);
             if (isLocked) {
-              console.log(`🔒 Marking as locked market: ${propData.playerName} ${propData.mkt?.key} at ${primaryBook.bookmaker?.key}`);
+              console.log(`🔒 Skipping locked market: ${propData.playerName} ${propData.mkt?.key} at ${primaryBook.bookmaker?.key}`);
+              return; // Skip this prop entirely if primary book is locked
             }
           }
           
@@ -1543,12 +1544,10 @@ export default function OddsTable({
               playerName: propData.playerName, // Add player name for display
               isPlayerProp: true,
               isCombinedProp: true, // Flag to indicate this has both sides
-              isLocked: isLocked, // Mark if market is locked
-              overBooks: propData.overBooks,
-              underBooks: propData.underBooks,
-              // Include ALL books from BOTH sides for accurate EV calculation
-              // EV calculation needs market consensus from all available odds
-              allBooks: [...(propData.overBooks || []), ...(propData.underBooks || [])],
+              overBooks: overBooksToUse,
+              underBooks: underBooksToUse,
+              // Include only FILTERED books for display and EV calculation
+              allBooks: [...(overBooksToUse || []), ...(underBooksToUse || [])],
               selectedBooks: propData.selectedBooks || [],
               nonSelectedBooks: propData.nonSelectedBooks || [],
               otherSideName: showOver ? 'Under' : 'Over'
@@ -3445,31 +3444,9 @@ export default function OddsTable({
                                               ? row.overBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key))
                                               : row.underBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key));
                                             
-                                            // Check if market is locked
-                                            const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(
-                                              normalizeBookKey(ob.bookmaker?.key)
-                                            );
-                                            const isLocked = relevantBook && isMarketLikelyLocked(relevantBook, isDFSApp);
-                                            
                                             if (relevantBook) {
                                               const line = relevantBook.point || relevantBook.line;
-                                              return (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                  {`${row.out.name.toUpperCase()} ${line}`}
-                                                  {isLocked && (
-                                                    <span style={{ 
-                                                      fontSize: '0.7em', 
-                                                      color: '#ef4444',
-                                                      fontWeight: '700',
-                                                      background: 'rgba(239, 68, 68, 0.15)',
-                                                      padding: '2px 4px',
-                                                      borderRadius: '3px'
-                                                    }}>
-                                                      🔒 LOCKED
-                                                    </span>
-                                                  )}
-                                                </div>
-                                              );
+                                              return `${row.out.name.toUpperCase()} ${line}`;
                                             }
                                             return `${row.out.name} ${row.out.point}`;
                                           })()}
@@ -3753,19 +3730,8 @@ export default function OddsTable({
                               const maxDesktopBooks = mode === "props" ? 20 : MINI_TABLE_PRIORITY_BOOKS.length;
                               const allBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop];
                               
-                              // Filter out locked markets
-                              const activeBooks = allBooks.filter(book => {
-                                const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'].includes(
-                                  normalizeBookKey(book.bookmaker?.key)
-                                );
-                                const isLocked = isMarketLikelyLocked(book, isDFSApp);
-                                if (isLocked) {
-                                  console.log(`🔒 Filtering out locked market from mini-table: ${book.bookmaker?.key || book.book}`);
-                                }
-                                return !isLocked;
-                              });
-                              
-                              const displayBooks = activeBooks.slice(0, maxDesktopBooks);
+                              // All books should already be filtered (locked ones are skipped at row level)
+                              const displayBooks = allBooks.slice(0, maxDesktopBooks);
 
                               return (
                                 <>
@@ -3832,7 +3798,7 @@ export default function OddsTable({
                                         borderTop: '1px solid var(--border-color)',
                                         background: 'var(--bg-secondary)'
                                       }}>
-                                        Showing {displayBooks.length} book{displayBooks.length !== 1 ? 's' : ''} for EV calculation
+                                        Showing {displayBooks.length} available book{displayBooks.length !== 1 ? 's' : ''}
                                       </td>
                                     </tr>
                                   )}
