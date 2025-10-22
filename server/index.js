@@ -2649,9 +2649,8 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           });
           
           // Use individual event endpoint for player props
-          // Use regions=us,us_dfs to get BOTH traditional sportsbooks AND DFS apps
-          // Do NOT specify bookmakers parameter - let regions determine coverage
-          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          // Include bookmakers parameter to filter to user's allowed bookmakers
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&bookmakers=${allowedBookmakers.join(',')}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
           const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, regions: 'us,us_dfs' });
@@ -2800,6 +2799,12 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             });
             
             propsResponse.data.bookmakers.forEach(propsBook => {
+              // Filter to only allowed bookmakers
+              if (!allowedBookmakers.includes(propsBook.key)) {
+                console.log(`⏭️ Skipping ${propsBook.key} - not in allowed bookmakers for user plan`);
+                return;
+              }
+              
               const marketCount = propsBook.markets ? propsBook.markets.length : 0;
               console.log(`📈 Bookmaker ${propsBook.key} has ${marketCount} player prop markets`);
               
