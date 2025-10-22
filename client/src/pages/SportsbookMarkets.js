@@ -320,6 +320,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftMinProfit, setDraftMinProfit] = useState(2);
   const [draftMaxStake, setDraftMaxStake] = useState(100);
   
+  // Middles-specific filter states
+  const [draftMinMiddleGap, setDraftMinMiddleGap] = useState(3);
+  const [draftMinMiddleProbability, setDraftMinMiddleProbability] = useState(15);
+  const [draftMaxMiddleStake, setDraftMaxMiddleStake] = useState(1000);
+  
   // Refresh cooldown state
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -2226,8 +2231,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="0.5"
                   max="20"
                   step="0.5"
-                  value={minMiddleGap}
-                  onChange={(e) => setMinMiddleGap(Number(e.target.value))}
+                  value={draftMinMiddleGap || 3}
+                  onChange={(e) => setDraftMinMiddleGap(Number(e.target.value))}
                   className="form-control"
                 />
               </div>
@@ -2241,8 +2246,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="5"
                   max="50"
                   step="1"
-                  value={minProbability}
-                  onChange={(e) => setMinProbability(Number(e.target.value))}
+                  value={draftMinMiddleProbability || 15}
+                  onChange={(e) => setDraftMinMiddleProbability(Number(e.target.value))}
                   className="form-control"
                 />
               </div>
@@ -2256,8 +2261,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="10"
                   max="10000"
                   step="10"
-                  value={maxStake}
-                  onChange={(e) => setMaxStake(Number(e.target.value))}
+                  value={draftMaxMiddleStake || 1000}
+                  onChange={(e) => setDraftMaxMiddleStake(Number(e.target.value))}
                   className="form-control"
                 />
               </div>
