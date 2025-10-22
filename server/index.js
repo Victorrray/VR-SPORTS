@@ -2637,21 +2637,24 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
         try {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-          const bookmakerList = allowedBookmakers.join(','); // Send ALL bookmakers for complete coverage
           
-          // Debug logging for DFS apps
-          console.log('🎯 Player Props Bookmaker Debug:', {
+          // For player props, use regions instead of bookmakers parameter
+          // This ensures TheOddsAPI returns ALL bookmakers for the specified regions
+          // (both traditional sportsbooks AND DFS apps)
+          // Per TheOddsAPI docs: when both regions and bookmakers are specified, bookmakers takes priority
+          // We want regions to take priority to get complete coverage
+          
+          console.log('🎯 Player Props Request Debug:', {
             userPlan: userProfile.plan,
-            totalBookmakers: allowedBookmakers.length,
-            allBookmakers: allowedBookmakers,
-            dfsAppsIncluded: allowedBookmakers.filter(b => ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'prophetx'].includes(b)),
-            bookmakerListForAPI: bookmakerList,
-            requestingPick6: bookmakerList.includes('pick6') || bookmakerList.includes('draftkings_pick6')
+            allowedBookmakers: allowedBookmakers,
+            regions: 'us,us_dfs',
+            note: 'Using regions parameter (not bookmakers) to get full coverage from TheOddsAPI'
           });
           
           // Use individual event endpoint for player props
-          // Include both us and us_dfs regions to get traditional sportsbooks AND DFS apps
-          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${bookmakerList}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          // Use regions=us,us_dfs to get BOTH traditional sportsbooks AND DFS apps
+          // Do NOT specify bookmakers parameter - let regions determine coverage
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
           const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, bookmakers: bookmakerList });

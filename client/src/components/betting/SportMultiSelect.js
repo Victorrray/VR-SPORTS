@@ -61,9 +61,25 @@ const SPORT_CATEGORIES = {
     title: "Motorsports & Racing",
     sports: ["motorsport_nascar", "motorsport_f1", "motorsport_indycar", "horse_racing"]
   },
-  international_leagues: {
-    title: "International Leagues",
-    sports: ["australianrules_afl", "rugby_league_nrl", "cricket_icc_world_cup", "cricket_big_bash", "cricket_the_hundred", "basketball_euroleague", "basketball_nbl", "basketball_wnba", "americanfootball_cfl"]
+  cricket: {
+    title: "Cricket",
+    sports: ["cricket_icc_world_cup", "cricket_big_bash", "cricket_the_hundred"]
+  },
+  rugby: {
+    title: "Rugby",
+    sports: ["rugby_league_nrl"]
+  },
+  basketball_intl: {
+    title: "International Basketball",
+    sports: ["basketball_euroleague", "basketball_nbl", "basketball_wnba"]
+  },
+  american_football_intl: {
+    title: "International American Football",
+    sports: ["americanfootball_cfl"]
+  },
+  australian_sports: {
+    title: "Australian Sports",
+    sports: ["australianrules_afl"]
   },
   other: {
     title: "Other Sports",
