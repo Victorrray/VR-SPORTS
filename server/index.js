@@ -2367,17 +2367,6 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
       for (const sport of sportsArray) {
         try {
-          // COST REDUCTION: Use bookmakers based on user plan
-          const userProfile = req.__userProfile || { plan: 'free' };
-          const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-          
-          // Filter out DFS apps for game odds (they only offer player props)
-          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
-          const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
-          const bookmakerList = gameOddsBookmakers.join(',');
-          
-          console.log(`🎯 Game odds bookmakers (DFS filtered): ${bookmakerList}`);
-          
           // SUPABASE CACHE: Check Supabase first before hitting The Odds API
           let supabaseCachedData = null;
           if (supabase && oddsCacheService) {
@@ -2530,15 +2519,9 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       
       console.log(`Got ${allGames.length} total games with base markets`);
       
-      // Filter bookmakers based on user plan before returning
-      const userProfile = req.__userProfile || { plan: 'free' };
-      const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-      
-      allGames.forEach(game => {
-        game.bookmakers = game.bookmakers.filter(bookmaker => 
-          allowedBookmakers.includes(bookmaker.key)
-        );
-      });
+      // NOTE: Do NOT filter bookmakers for game odds - show all available bookmakers from The Odds API
+      // Plan-based restrictions should only apply to player props, not regular game odds
+      console.log(`Returning all bookmakers from API (no plan-based filtering for game odds)`);
 
     }
     
