@@ -39,10 +39,10 @@ const PLAYER_PROPS_API_BASE = process.env.PLAYER_PROPS_API_BASE || null;
 const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 === 'true';
 const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 30_000);
 const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
-const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_MARKETS || 25);
-const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = Number(process.env.PLAYER_PROPS_MAX_BOOKS || 25);
-const PLAYER_PROPS_REQUEST_TIMEOUT = Number(process.env.PLAYER_PROPS_REQUEST_TIMEOUT || 15000); // 15 seconds
-const PLAYER_PROPS_MAX_CACHE_ENTRIES = Number(process.env.PLAYER_PROPS_MAX_CACHE_ENTRIES || 50);
+const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = 50; // Increased from 25 to 50
+const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = 25;   // Keep at 25 books
+const PLAYER_PROPS_REQUEST_TIMEOUT = 30000;      // Increased from 15s to 30s
+const PLAYER_PROPS_MAX_CACHE_ENTRIES = 100;      // Increased from 50 to 100
 
 // Known invalid markets that should be filtered out
 const INVALID_PLAYER_PROP_MARKETS = [

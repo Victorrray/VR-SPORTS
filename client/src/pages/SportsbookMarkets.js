@@ -2,6 +2,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star, Activity, RefreshCw } from 'lucide-react';
+import SEOHelmet from '../components/seo/SEOHelmet';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 import { optimizedStorage } from "../utils/storageOptimizer";
 import { smartCache } from "../utils/enhancedCache";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
@@ -1381,6 +1383,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   return (
     <div className="sportsbook-markets">
+      <SEOHelmet
+        title={PAGE_TITLES.sportsbooks}
+        description={PAGE_DESCRIPTIONS.sportsbooks}
+        path="/sportsbooks"
+        schema={generateSchemaMarkup('WebApplication')}
+      />
       {/* Desktop Header */}
       <DesktopHeader
         onFilterClick={() => setMobileFiltersOpen(true)}

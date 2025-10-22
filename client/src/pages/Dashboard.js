@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Crown, Zap } from 'lucide-react';
+import SEOHelmet from '../components/seo/SEOHelmet';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 
 // Components
 import PersonalizedDashboard from '../components/dashboard/PersonalizedDashboard';
@@ -158,6 +160,12 @@ export default function Dashboard() {
       position: 'relative',
       zIndex: 1
     }}>
+      <SEOHelmet
+        title={PAGE_TITLES.dashboard}
+        description={PAGE_DESCRIPTIONS.dashboard}
+        path="/dashboard"
+        schema={generateSchemaMarkup('WebApplication')}
+      />
       {/* Premium Gift Notification */}
       {showGiftNotification && (
         <PremiumGiftNotification 

@@ -1,6 +1,8 @@
 // src/pages/Scores.jsx
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MessageCircle, Users, Trophy, Calendar, RefreshCw, Clock, Info, ChevronDown, Football, Basketball, Zap, Gamepad2, Target, Home } from 'lucide-react';
+import SEOHelmet from '../components/seo/SEOHelmet';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 import GameReactions from '../components/betting/GameReactions';
 import GameDetailsModal from '../components/modals/GameDetailsModal';
 import ScoresLoadingSkeleton from '../components/betting/ScoresLoadingSkeleton';
@@ -247,6 +249,12 @@ export default function Scores() {
 
   return (
     <main className="scores-page">
+      <SEOHelmet
+        title={PAGE_TITLES.scores}
+        description={PAGE_DESCRIPTIONS.scores}
+        path="/scores"
+        schema={generateSchemaMarkup('WebApplication')}
+      />
       <div className="scores-header">
         <div className="header-left">
           <div className="page-title">
