@@ -239,6 +239,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [playerPropsProcessing, setPlayerPropsProcessing] = useState(false);
   const [filtersLoading, setFiltersLoading] = useState(false);
   const [navigationExpanded, setNavigationExpanded] = useState(false);
+  
+  // Draft state for player props filter modal
+  const [draftPicked, setDraftPicked] = useState(["americanfootball_nfl"]);
+  const [draftSelectedDate, setDraftSelectedDate] = useState("");
+  const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState([
+    "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
+    "player_points", "player_rebounds", "player_assists"
+  ]);
+  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState([]);
+  const [draftMarketKeys, setDraftMarketKeys] = useState(["h2h", "spreads", "totals", "team_totals"]);
   // Comprehensive sports list organized by categories
   const AVAILABLE_SPORTS = [
     // Major US Sports
@@ -692,6 +702,37 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       console.log('🎯 Auto-selected draft markets for sports:', draftPicked, '→', autoSelectedMarkets);
     }
   }, [draftPicked]);
+
+  // Auto-update draft player prop markets when draft sports change
+  useEffect(() => {
+    if (showPlayerProps && draftPicked && draftPicked.length > 0) {
+      const sportBasedMarkets = getPlayerPropMarketsBySport(draftPicked);
+      const availableMarketKeys = sportBasedMarkets
+        .filter(market => !market.isHeader)
+        .map(market => market.key);
+      
+      // Check if current draft selection contains markets that don't exist for the draft sport
+      const hasInvalidMarkets = (draftSelectedPlayerPropMarkets || []).some(market => 
+        !availableMarketKeys.includes(market)
+      );
+      
+      // If we have invalid markets in draft selection, update to only valid markets
+      if (hasInvalidMarkets) {
+        const validMarkets = (draftSelectedPlayerPropMarkets || []).filter(market => 
+          availableMarketKeys.includes(market)
+        );
+        
+        console.log('🎯 Updating draft player prop markets for sport change:', {
+          draftSports: draftPicked,
+          oldDraftMarkets: draftSelectedPlayerPropMarkets,
+          validMarkets: validMarkets,
+          availableMarkets: availableMarketKeys
+        });
+        
+        setDraftSelectedPlayerPropMarkets(validMarkets);
+      }
+    }
+  }, [draftPicked, showPlayerProps]);
 
   // Auto-select all relevant markets when applied sports change
   useEffect(() => {
