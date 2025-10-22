@@ -312,6 +312,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const oddsFormat = "american";
   const debouncedQuery = useDebounce(query, 300);
   
+  // Draft filter state - initialize with current applied state
+  const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate);
+  const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
+  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState(selectedPlayerPropsBooks);
+  const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
+  
   // Arbitrage-specific filter states
   const [draftMinProfit, setDraftMinProfit] = useState(2);
   const [draftMaxStake, setDraftMaxStake] = useState(100);
