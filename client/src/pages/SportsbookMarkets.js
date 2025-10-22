@@ -242,13 +242,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   
   // Draft state for player props filter modal
   const [draftPicked, setDraftPicked] = useState(["americanfootball_nfl"]);
-  const [draftSelectedDate, setDraftSelectedDate] = useState("");
   const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState([
     "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
     "player_points", "player_rebounds", "player_assists"
   ]);
-  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState([]);
-  const [draftMarketKeys, setDraftMarketKeys] = useState(["h2h", "spreads", "totals", "team_totals"]);
   // Comprehensive sports list organized by categories
   const AVAILABLE_SPORTS = [
     // Major US Sports
@@ -314,15 +311,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Missing variables
   const oddsFormat = "american";
   const debouncedQuery = useDebounce(query, 300);
-  
-  // Draft filter state - initialize with current applied state
-  const [draftPicked, setDraftPicked] = useState(picked);
-  const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate);
-  const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
-  // Initialize with user's saved selection or empty array to show ALL books
-  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState(selectedPlayerPropsBooks);
-  const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
-  const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState(selectedPlayerPropMarkets);
   
   // Arbitrage-specific filter states
   const [draftMinProfit, setDraftMinProfit] = useState(2);
