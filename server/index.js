@@ -2657,7 +2657,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
-          const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, bookmakers: bookmakerList });
+          const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, regions: 'us,us_dfs' });
           
           // SUPABASE CACHE: Check Supabase first for player props
           let supabaseCachedProps = null;
