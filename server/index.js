@@ -2407,9 +2407,9 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           
           // Create separate cache keys for regular and alternate markets
           const regularCacheKey = needsRegularMarkets ? 
-            getCacheKey('odds', { sport, regions, markets: regularMarkets, bookmakers: bookmakerList }) : null;
+            getCacheKey('odds', { sport, regions, markets: regularMarkets }) : null;
           const alternateCacheKey = needsAlternateMarkets ? 
-            getCacheKey('odds_alternate', { sport, regions, markets: alternateMarkets, bookmakers: bookmakerList }) : null;
+            getCacheKey('odds_alternate', { sport, regions, markets: alternateMarkets }) : null;
           
           // Check cache for both types
           const cachedRegularData = needsRegularMarkets ? getCachedResponse(regularCacheKey) : null;
@@ -2421,7 +2421,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             (!needsAlternateMarkets || cachedAlternateData);
           
           // For backward compatibility, create a combined cache key
-          const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsToFetch, bookmakers: bookmakerList });
+          const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsToFetch });
           const cachedData = getCachedResponse(cacheKey);
           
           let responseData;
