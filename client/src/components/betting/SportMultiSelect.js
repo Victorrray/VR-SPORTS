@@ -334,7 +334,8 @@ export default function SportMultiSelect({
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        {label} ▾
+        <span className="ms-toggle-label">{label}</span>
+        <span className="ms-toggle-arrow">▾</span>
       </button>
 
       {/* Non-portal desktop dropdown */}
