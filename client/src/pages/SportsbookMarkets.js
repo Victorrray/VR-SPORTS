@@ -277,9 +277,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     { key: 'tennis_wta_australian_open', title: 'Australian Open (WTA)' },
     
     // Combat Sports
-    { key: 'boxing_heavyweight', title: 'Boxing (Heavyweight)' },
     { key: 'mma_mixed_martial_arts', title: 'MMA' },
-    { key: 'boxing', title: 'Boxing' },
     
     // Motorsports & Racing
     { key: 'motorsport_nascar', title: 'NASCAR' },
