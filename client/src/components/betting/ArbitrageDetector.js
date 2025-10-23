@@ -633,7 +633,7 @@ const ArbitrageDetector = ({
             <h3>{compact ? 'No Opportunities' : 'No Real Arbitrage Opportunities Found'}</h3>
             {!compact && (
               <div>
-                <p>Scanning live odds across all 6 sports (NFL, NCAA, NBA, NCAA Basketball, MLB, NHL) and {internalSelectedSports.length > 0 ? internalSelectedSports.length : 'all'} sportsbooks.</p>
+                <p>Scanning live odds across all 6 sports (NFL, NCAA, NBA, NCAA Basketball, MLB, NHL) and {bookFilter && bookFilter.length > 0 ? bookFilter.length : 'all'} sportsbooks.</p>
                 <p>Try lowering the minimum profit threshold or check back as odds update.</p>
                 {realGamesData?.length === 0 && <p>No games data available. Please check your sports selection.</p>}
               </div>
