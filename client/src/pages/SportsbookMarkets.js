@@ -1932,7 +1932,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </div>
       ) : isMiddlesMode && hasPlatinum ? (
         <MiddlesDetector 
-          sport={picked.length > 0 ? picked : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl']}
+          sport={['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl']}
           games={[]}
           bookFilter={effectiveSelectedBooks}
           compact={false}
