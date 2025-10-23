@@ -2171,6 +2171,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </>
           ) : showArbitrage ? (
             <>
+              {/* Auto-Refresh Toggle */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
+                    Auto-Refresh (30s)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={autoRefreshEnabled}
+                    onChange={toggleAutoRefresh}
+                    style={{
+                      width: '40px',
+                      height: '20px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--accent)'
+                    }}
+                  />
+                </label>
+              </div>
+
               {/* Arbitrage-specific filters */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -2221,6 +2242,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </>
           ) : showMiddles ? (
             <>
+              {/* Auto-Refresh Toggle */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
+                    Auto-Refresh (30s)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={autoRefreshEnabled}
+                    onChange={toggleAutoRefresh}
+                    style={{
+                      width: '40px',
+                      height: '20px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--accent)'
+                    }}
+                  />
+                </label>
+              </div>
+
               {/* Middles-specific filters */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -2286,6 +2328,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </>
           ) : (
             <>
+              {/* Auto-Refresh Toggle */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
+                    Auto-Refresh (30s)
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={autoRefreshEnabled}
+                    onChange={toggleAutoRefresh}
+                    style={{
+                      width: '40px',
+                      height: '20px',
+                      cursor: 'pointer',
+                      accentColor: 'var(--accent)'
+                    }}
+                  />
+                </label>
+              </div>
+
               {/* Straight Bets Filters */}
               {/* Date Filter */}
               <div style={{ marginBottom: 20 }}>
@@ -2348,22 +2411,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               )}
             </>
           )}
-          
-          {/* Auto-Refresh Toggle */}
-          <div style={{ marginBottom: 20, padding: '12px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: 8, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontWeight: 500, color: 'var(--text-primary)' }}>
-              <input
-                type="checkbox"
-                checked={autoRefreshEnabled}
-                onChange={toggleAutoRefresh}
-                style={{ cursor: 'pointer', width: 18, height: 18 }}
-              />
-              🔄 Auto-Refresh Data
-            </label>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: 6 }}>
-              Automatically refresh odds every 30 seconds
-            </div>
-          </div>
           
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>

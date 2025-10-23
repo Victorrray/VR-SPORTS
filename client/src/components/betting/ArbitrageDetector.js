@@ -525,7 +525,7 @@ const ArbitrageDetector = ({
         <div className="arbitrage-controls">
           <div className="controls-header">
             <h3>🎯 Real-Time Arbitrage Scanner</h3>
-            <p>Analyzing live odds from {realGamesData?.length || 0} games across multiple sportsbooks</p>
+            <p>Analyzing live odds across all 6 sports and multiple sportsbooks</p>
           </div>
           <div className="controls-grid">
             <div className="control-group">
@@ -633,7 +633,7 @@ const ArbitrageDetector = ({
             <h3>{compact ? 'No Opportunities' : 'No Real Arbitrage Opportunities Found'}</h3>
             {!compact && (
               <div>
-                <p>Scanning live odds from {realGamesData?.length || 0} games across multiple sportsbooks.</p>
+                <p>Scanning live odds across all 6 sports (NFL, NCAA, NBA, NCAA Basketball, MLB, NHL) and {internalSelectedSports.length > 0 ? internalSelectedSports.length : 'all'} sportsbooks.</p>
                 <p>Try lowering the minimum profit threshold or check back as odds update.</p>
                 {realGamesData?.length === 0 && <p>No games data available. Please check your sports selection.</p>}
               </div>
