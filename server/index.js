@@ -2554,42 +2554,78 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       const TOTAL_PLAYER_PROPS_TIMEOUT = 300000; // 5 minutes total timeout for comprehensive coverage
       const EARLY_RESPONSE_TIME = 8000; // Return cached results after 8 seconds to user immediately
       
-      // If no games were found in the regular API call, fetch games specifically for player props
-      if (allGames.length === 0) {
-        console.log('🎯 No games found in regular API call, fetching games specifically for player props');
+      // For player props, we need to fetch games with the date filter applied
+      // This is separate from regular game odds because:
+      // 1. Player props require individual event API calls
+      // 2. We need to filter by date BEFORE fetching props
+      // 3. Regular odds may have different date filtering needs
+      let playerPropsGames = allGames;
+      
+      // If a date filter is specified, fetch games specifically for that date
+      if (date) {
+        console.log(`🎯 Date filter specified (${date}), fetching games for player props with date filter`);
+        playerPropsGames = [];
         
         try {
-          // Fetch games for the requested sports
+          // Fetch games for the requested sports with date filter
           for (const sport of sportsArray) {
-            // Add date filter if provided
-            const dateParam = date ? `&commenceTimeFrom=${date}T00:00:00Z&commenceTimeTo=${date}T23:59:59Z` : '';
+            const dateParam = `&commenceTimeFrom=${date}T00:00:00Z&commenceTimeTo=${date}T23:59:59Z`;
             const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}${dateParam}`;
-            console.log(`🌐 Fetching games for player props (date: ${date || 'all'}): ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+            console.log(`🌐 Fetching games for player props (date: ${date}): ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
             
             try {
               const response = await axios.get(url);
               if (response.data && Array.isArray(response.data)) {
-                console.log(`🎯 Found ${response.data.length} games for sport ${sport}`);
-                allGames.push(...response.data);
+                console.log(`🎯 Found ${response.data.length} games for sport ${sport} on ${date}`);
+                playerPropsGames.push(...response.data);
               }
             } catch (sportError) {
               console.error(`🚫 Error fetching games for sport ${sport}:`, sportError.message);
             }
           }
           
-          console.log(`🎯 Total games found for player props: ${allGames.length}`);
+          console.log(`🎯 Total games found for player props on ${date}: ${playerPropsGames.length}`);
+        } catch (error) {
+          console.error('🚫 Error fetching games for player props with date filter:', error.message);
+        }
+      } else if (allGames.length === 0) {
+        // If no date filter and no games from regular API, fetch all games for player props
+        console.log('🎯 No games found in regular API call and no date filter, fetching all games for player props');
+        
+        try {
+          // Fetch games for the requested sports
+          for (const sport of sportsArray) {
+            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}`;
+            console.log(`🌐 Fetching all games for player props: ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+            
+            try {
+              const response = await axios.get(url);
+              if (response.data && Array.isArray(response.data)) {
+                console.log(`🎯 Found ${response.data.length} games for sport ${sport}`);
+                playerPropsGames.push(...response.data);
+              }
+            } catch (sportError) {
+              console.error(`🚫 Error fetching games for sport ${sport}:`, sportError.message);
+            }
+          }
+          
+          console.log(`🎯 Total games found for player props: ${playerPropsGames.length}`);
         } catch (error) {
           console.error('🚫 Error fetching games for player props:', error.message);
         }
+      } else {
+        // Use games from regular API call
+        console.log(`🎯 Using ${allGames.length} games from regular API call for player props`);
+        playerPropsGames = allGames;
       }
       
-      console.log(`🎯 Processing ${Math.min(allGames.length, 10)} games for player props`);
-      console.log(`🎯 Total games available for props: ${allGames.length}`);
+      console.log(`🎯 Processing ${Math.min(playerPropsGames.length, 10)} games for player props`);
+      console.log(`🎯 Total games available for props: ${playerPropsGames.length}`);
       
       // Sort games to prioritize NCAA games if they're requested
       if (sportsArray.includes('americanfootball_ncaaf') || sportsArray.includes('basketball_ncaab')) {
         console.log('🎓 NCAA sports requested, prioritizing NCAA games for player props');
-        allGames.sort((a, b) => {
+        playerPropsGames.sort((a, b) => {
           const aIsNCAA = a.sport_key === 'americanfootball_ncaaf' || a.sport_key === 'basketball_ncaab';
           const bIsNCAA = b.sport_key === 'americanfootball_ncaaf' || b.sport_key === 'basketball_ncaab';
           return bIsNCAA - aIsNCAA; // Sort NCAA games first
@@ -2611,9 +2647,9 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       
       const sportKey = sportsArray[0]; // Get first sport (usually only one for player props)
       const gameLimit = SPORT_GAME_LIMITS[sportKey] || SPORT_GAME_LIMITS['default'];
-      const gamesToProcess = Math.min(allGames.length, gameLimit);
+      const gamesToProcess = Math.min(playerPropsGames.length, gameLimit);
       
-      console.log(`🎯 Processing ${gamesToProcess}/${allGames.length} games for player props (limit: ${gameLimit}, sport: ${sportKey})`);
+      console.log(`🎯 Processing ${gamesToProcess}/${playerPropsGames.length} games for player props (limit: ${gameLimit}, sport: ${sportKey})`);
       console.log(`📊 Supabase cache enabled - subsequent requests will be instant!`);
       console.log(`⏱️ Early response at ${EARLY_RESPONSE_TIME}ms, full timeout at ${TOTAL_PLAYER_PROPS_TIMEOUT}ms`);
       
@@ -2634,7 +2670,7 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           // Don't break - continue processing in background
         }
         
-        const game = allGames[i];
+        const game = playerPropsGames[i];
         if (!game.id) {
           console.log(`⚠️ Game ${i} missing ID, skipping player props`);
           continue;
