@@ -1546,6 +1546,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               <>
                 <div className="desktop-filter-section">
                   <div className="desktop-filter-label">
+                    <span>📅</span> Date
+                  </div>
+                  <DatePicker
+                    value={draftSelectedDate}
+                    onChange={setDraftSelectedDate}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
                     <span>🏈</span> Sports
                   </div>
                   <SportMultiSelect
@@ -1555,16 +1565,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     placeholderText="Select sports..."
                     allLabel="All Sports"
                     enableCategories={true}
-                  />
-                </div>
-
-                <div className="desktop-filter-section">
-                  <div className="desktop-filter-label">
-                    <span>📅</span> Date
-                  </div>
-                  <DatePicker
-                    value={draftSelectedDate}
-                    onChange={setDraftSelectedDate}
                   />
                 </div>
 
@@ -2113,6 +2113,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
               </div>
 
+              {/* Date Filter for Player Props */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  📅 Date
+                </label>
+                <DatePicker
+                  value={draftSelectedDate}
+                  onChange={setDraftSelectedDate}
+                />
+              </div>
+
               {/* Sports Selection for Player Props */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -2125,17 +2136,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   placeholderText="Select sports..."
                   allLabel="All Sports"
                   enableCategories={true}
-                />
-              </div>
-
-              {/* Date Filter for Player Props */}
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
-                  📅 Date
-                </label>
-                <DatePicker
-                  value={draftSelectedDate}
-                  onChange={setDraftSelectedDate}
                 />
               </div>
 
