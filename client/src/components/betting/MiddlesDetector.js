@@ -1,6 +1,7 @@
 // Middles Detection System - Find middle betting opportunities
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/SimpleAuth';
+import { useCachedFetch } from '../../hooks/useCachedFetch';
 import { bankrollManager } from '../../utils/bankrollManager';
 import { 
   TrendingUp, Calculator, DollarSign, Clock, 
@@ -8,14 +9,33 @@ import {
 } from 'lucide-react';
 import './MiddlesDetector.css'; // Enhanced middle-specific styles
 
-const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilter = [], compact = false }) => {
+const MiddlesDetector = ({ sport = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'], games = [], bookFilter = [], compact = false, autoRefresh = true }) => {
   const { user, profile } = useAuth();
+  
+  // Convert sport prop to array if it's a string
+  const initialSports = Array.isArray(sport) ? sport : [sport];
+  const [internalSelectedSports, setInternalSelectedSports] = useState(initialSports);
+  
   const [minMiddleGap, setMinMiddleGap] = useState(3); // Minimum 3 point gap for totals/spreads
   const [minProbability, setMinProbability] = useState(15); // Minimum 15% chance of hitting middle
   
   const [maxStake, setMaxStake] = useState(bankrollManager.getBankroll());
   const [selectedMarkets, setSelectedMarkets] = useState(['spreads', 'totals', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals']);
   const [sortBy, setSortBy] = useState('probability');
+  
+  // Fetch game odds data for middles analysis
+  const { data: oddsData, loading: oddsLoading, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
+    params: { 
+      sports: internalSelectedSports.join(','),
+      markets: selectedMarkets.join(','),
+      regions: 'us,uk,eu,au'
+    },
+    pollingInterval: autoRefresh ? 120000 : null, // 2 minutes when auto-refresh is on
+    transform: (data) => data || []
+  });
+  
+  // Use real games data passed from parent component, or fetched data
+  const realGamesData = games && games.length > 0 ? games : (oddsData || []);
 
   // Update maxStake when bankroll changes
   useEffect(() => {
@@ -26,10 +46,10 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
   }, []);
 
   // Calculate middle opportunities from real data
-  const calculateMiddles = (games) => {
+  const calculateMiddles = (gamesData) => {
     const opportunities = [];
     
-    games.forEach(game => {
+    gamesData.forEach(game => {
       if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
 
       // Only process games that haven't started yet
@@ -97,7 +117,7 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
       });
     });
     
-    console.log('🎪 Found', opportunities.length, 'middle opportunities');
+    console.log('🎪 Found', opportunities.length, 'middle opportunities from', gamesData.length, 'games');
     return opportunities;
   };
 
@@ -252,21 +272,19 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
     }
   };
 
-  const middleOpportunities = useMemo(() => {
-    if (games && games.length > 0) {
-      console.log('🎪 Calculating middles from real data:', games.length, 'games');
-      return calculateMiddles(games);
+  const realMiddleOpportunities = useMemo(() => {
+    if (realGamesData && realGamesData.length > 0) {
+      console.log(' Calculating middles from real data:', realGamesData.length, 'games');
+      return calculateMiddles(realGamesData);
     }
     return [];
-  }, [games, selectedMarkets, minMiddleGap, minProbability, maxStake, bookFilter]);
+  }, [realGamesData, selectedMarkets, minMiddleGap, minProbability, maxStake]);
 
-  // Filter and sort opportunities
   const filteredOpportunities = useMemo(() => {
-    let filtered = middleOpportunities.filter(opp => 
+    let filtered = realMiddleOpportunities.filter(opp => 
       opp.probability >= minProbability && opp.gap >= minMiddleGap
     );
 
-    // Sort opportunities
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'probability':
@@ -283,7 +301,7 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
     });
 
     return filtered;
-  }, [middleOpportunities, minProbability, minMiddleGap, sortBy]);
+  }, [realMiddleOpportunities, minProbability, minMiddleGap, sortBy]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -328,7 +346,7 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
             )}
           </div>
         </div>
-        
+
         <div className="middle-info">
           <div className="middle-range">
             <strong>Middle Range:</strong> {opportunity.middleRange}
@@ -396,9 +414,9 @@ const MiddlesDetector = ({ sport = 'americanfootball_nfl', games = [], bookFilte
             <h3>{compact ? 'No Middles' : 'No Middle Opportunities Found'}</h3>
             {!compact && (
               <div>
-                <p>Scanning {games?.length || 0} games for middle opportunities.</p>
+                <p>Scanning {realGamesData?.length || 0} games across all sports and {bookFilter && bookFilter.length > 0 ? bookFilter.length : 'all'} sportsbooks for middle opportunities.</p>
                 <p>Try lowering the minimum gap or probability threshold.</p>
-                {games?.length === 0 && <p>No games data available. Please check your sports selection.</p>}
+                {realGamesData?.length === 0 && <p>No games data available. Please check your sports selection.</p>}
               </div>
             )}
           </div>
