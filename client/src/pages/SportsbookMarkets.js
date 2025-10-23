@@ -1893,7 +1893,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       ) : (marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
           sport={picked.length > 0 ? picked : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl']}
-          games={arbitrageGames}
+          games={filteredGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
           minProfit={draftMinProfit}
