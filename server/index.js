@@ -2655,14 +2655,16 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           
           console.log('🎯 Player Props Request Debug:', {
             userPlan: userProfile.plan,
-            allowedBookmakers: allowedBookmakers,
             regions: 'us,us_dfs',
-            note: 'Using regions parameter (not bookmakers) to get full coverage from TheOddsAPI'
+            note: 'Using ONLY regions parameter (not bookmakers) to get full coverage from TheOddsAPI',
+            reason: 'When both regions and bookmakers are specified, bookmakers takes priority and overrides regions'
           });
           
           // Use individual event endpoint for player props
-          // Include bookmakers parameter to filter to user's allowed bookmakers
-          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&bookmakers=${allowedBookmakers.join(',')}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          // IMPORTANT: Use ONLY regions parameter, NOT bookmakers
+          // Per TheOddsAPI docs: when both regions and bookmakers are specified, bookmakers takes priority
+          // We want regions to take priority to get complete coverage from both us and us_dfs regions
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
           
           const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, regions: 'us,us_dfs' });
