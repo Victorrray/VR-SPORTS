@@ -12,7 +12,7 @@ import './ArbitrageDetector.css';
 import '../betting/FormControls.css';
 
 const ArbitrageDetector = ({ 
-  sport = 'americanfootball_nfl', 
+  sport = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'], 
   games = [], 
   bookFilter = [], 
   compact = false,

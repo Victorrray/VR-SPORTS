@@ -7,7 +7,6 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'fanduel', name: 'FanDuel', popular: true, tier: 1 },
   { key: 'betmgm', name: 'BetMGM', popular: true, tier: 1 },
   { key: 'caesars', name: 'Caesars Sportsbook', popular: true, tier: 1 },
-  { key: 'williamhill_us', name: 'Caesars (William Hill)', popular: true, tier: 1 },
   
   // ===== DFS APPS =====
   { key: 'prizepicks', name: 'PrizePicks', popular: true, isDFS: true, tier: 1 },
@@ -19,7 +18,6 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'espnbet', name: 'ESPN BET', popular: true, tier: 2 },
   { key: 'fanatics', name: 'Fanatics Sportsbook', popular: true, tier: 2 },
   { key: 'hardrock', name: 'Hard Rock Bet', popular: true, tier: 2 },
-  { key: 'hardrockbet', name: 'Hard Rock Bet (US2)', popular: true, tier: 2 },
   { key: 'pointsbetus', name: 'PointsBet US', popular: true, tier: 2 },
   { key: 'betrivers', name: 'BetRivers', popular: true, tier: 2 },
   { key: 'wynnbet', name: 'WynnBET', popular: true, tier: 2 },
@@ -32,6 +30,7 @@ export const AVAILABLE_SPORTSBOOKS = [
   // ===== EXCHANGE =====
   { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true, tier: 3 },
   { key: 'rebet', name: 'ReBet', popular: true, isExchange: true, tier: 3 },
+  { key: 'betopenly', name: 'BetOpenly', popular: true, isExchange: true, tier: 3 },
   
   // ===== REGIONAL/SPECIALTY =====
   { key: 'fliff', name: 'Fliff', popular: false, tier: 3 },
@@ -140,6 +139,7 @@ export const supportsPlayerProps = (bookKey) => {
 
 // REMOVED (Duplicates/Defunct):
 // - williamhill_us (duplicate of caesars)
+// - hardrockbet (duplicate of hardrock)
 // - barstool (duplicate of espnbet)
 // - betonlineag (duplicate of betonline)
 // - foxbet (defunct)

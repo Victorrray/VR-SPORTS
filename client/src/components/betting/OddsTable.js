@@ -1559,7 +1559,7 @@ export default function OddsTable({
         } else {
           // Regular prop (not Over/Under pair)
           // For filtered display, only show the filtered books
-          if (hasFilter) {
+          if (bookFilter && bookFilter.length > 0) {
             // Filter the allBooks array to only include books in the filter
             const normalizedFilter = bookFilter.map(f => f.toLowerCase());
             propData.allBooks = (propData.allBooks || []).filter(book => {
