@@ -136,35 +136,52 @@ const ArbitrageDetector = ({
     }
   }, [propMaxStake]);
 
-  // Fetch game odds data for arbitrage analysis
-  const { data: oddsData, loading: oddsLoading, refresh, lastUpdate } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
-    params: { 
-      sports: internalSelectedSports.join(','),
-      markets: selectedMarkets.join(','),
-      regions: 'us,uk,eu,au'
-    },
-    pollingInterval: autoRefresh ? 120000 : null, // 2 minutes when auto-refresh is on
-    transform: (data) => data || []
-  });
+  // Fetch game odds data for arbitrage analysis - fetch each sport individually for better cache sharing
+  const oddsDataByFetch = internalSelectedSports.map(sportKey => 
+    useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
+      params: { 
+        sports: sportKey, // Fetch one sport at a time
+        markets: selectedMarkets.join(','),
+        regions: 'us,uk,eu,au'
+      },
+      pollingInterval: autoRefresh ? 120000 : null,
+      transform: (data) => data || []
+    })
+  );
+  
+  const oddsData = useMemo(() => {
+    return oddsDataByFetch.flatMap(fetch => fetch.data || []);
+  }, [oddsDataByFetch]);
+  
+  const oddsLoading = oddsDataByFetch.some(fetch => fetch.loading);
 
-  // Fetch player props data for arbitrage analysis (excluding DFS apps)
-  // Note: Player props are fetched separately via /api/player-props endpoint
-  const { data: propsData, loading: propsLoading } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/player-props'); })(), {
-    params: { 
-      sports: internalSelectedSports.join(','),
-      date: '', // Empty date to get all upcoming games
-      bookFilter: 'draftkings,fanduel,betmgm,caesars,pointsbet,betrivers,unibet,wynnbet,superbook,twinspires,betfred_us,espnbet,fanatics,hardrock,fliff,novig,circasports,lowvig,bovada,mybookie,betonline,pinnacle' // Exclude DFS apps
-    },
-    pollingInterval: autoRefresh ? 120000 : null,
-    transform: (data) => {
-      console.log('🎯 Player props data received:', data?.length || 0, 'games');
-      return data || [];
-    }
-  });
+  // Fetch player props data for arbitrage analysis - fetch each sport individually for better cache sharing
+  const propsDataByFetch = internalSelectedSports.map(sportKey =>
+    useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/player-props'); })(), {
+      params: { 
+        sports: sportKey, // Fetch one sport at a time
+        date: '', // Empty date to get all upcoming games
+        bookFilter: 'draftkings,fanduel,betmgm,caesars,pointsbet,betrivers,unibet,wynnbet,superbook,twinspires,betfred_us,espnbet,fanatics,hardrock,fliff,novig,circasports,lowvig,bovada,mybookie,betonline,pinnacle' // Exclude DFS apps
+      },
+      pollingInterval: autoRefresh ? 120000 : null,
+      transform: (data) => {
+        console.log('🎯 Player props data received for', sportKey, ':', data?.length || 0, 'games');
+        return data || [];
+      }
+    })
+  );
+  
+  const propsData = useMemo(() => {
+    return propsDataByFetch.flatMap(fetch => fetch.data || []);
+  }, [propsDataByFetch]);
+  
+  const propsLoading = propsDataByFetch.some(fetch => fetch.loading);
 
   // Combine game odds and player props data
   const loading = oddsLoading || propsLoading;
-  const combinedData = [...(oddsData || []), ...(propsData || [])];
+  const combinedData = useMemo(() => {
+    return [...(oddsData || []), ...(propsData || [])];
+  }, [oddsData, propsData]);
   
   // Use real games data passed from parent component, or combined fetched data
   const realGamesData = games && games.length > 0 ? games : combinedData;
