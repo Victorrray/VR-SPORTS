@@ -1218,6 +1218,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       title: "Kicking",
       icon: Target,
     },
+    // Basketball categories
+    basketball: {
+      title: "Basketball",
+      icon: Trophy,
+    },
     // Baseball categories
     batting: {
       title: "Batting",
