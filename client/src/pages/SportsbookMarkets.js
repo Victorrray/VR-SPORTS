@@ -108,7 +108,21 @@ const PLAYER_PROP_MARKETS = {
     { key: 'player_assists', title: 'Assists', sport: 'basketball' },
     { key: 'player_threes', title: '3-Pointers Made', sport: 'basketball' },
     { key: 'player_steals', title: 'Steals', sport: 'basketball' },
-    { key: 'player_blocks', title: 'Blocks', sport: 'basketball' }
+    { key: 'player_blocks', title: 'Blocks', sport: 'basketball' },
+    { key: 'player_turnovers', title: 'Turnovers', sport: 'basketball' },
+    // Alternate basketball props
+    { key: 'player_points_alternate', title: 'Alternate Points (Over/Under)', sport: 'basketball' },
+    { key: 'player_rebounds_alternate', title: 'Alternate Rebounds (Over/Under)', sport: 'basketball' },
+    { key: 'player_assists_alternate', title: 'Alternate Assists (Over/Under)', sport: 'basketball' },
+    { key: 'player_blocks_alternate', title: 'Alternate Blocks (Over/Under)', sport: 'basketball' },
+    { key: 'player_steals_alternate', title: 'Alternate Steals (Over/Under)', sport: 'basketball' },
+    { key: 'player_turnovers_alternate', title: 'Alternate Turnovers (Over/Under)', sport: 'basketball' },
+    { key: 'player_threes_alternate', title: 'Alternate Threes (Over/Under)', sport: 'basketball' },
+    // Combination props
+    { key: 'player_points_assists_alternate', title: 'Alternate Points + Assists (Over/Under)', sport: 'basketball' },
+    { key: 'player_points_rebounds_alternate', title: 'Alternate Points + Rebounds (Over/Under)', sport: 'basketball' },
+    { key: 'player_rebounds_assists_alternate', title: 'Alternate Rebounds + Assists (Over/Under)', sport: 'basketball' },
+    { key: 'player_points_rebounds_assists_alternate', title: 'Alternate Points + Rebounds + Assists (Over/Under)', sport: 'basketball' }
   ],
   // Baseball - Batting props
   batting: [

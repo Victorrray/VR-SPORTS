@@ -2841,7 +2841,16 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
               }
             });
             
-            console.log(`📊 All bookmakers in response:`, propsResponse.data.bookmakers.map(b => ({ key: b.key, title: b.title, markets: b.markets?.length || 0 })));
+            // Enhanced logging for sportsbook coverage
+            const allBooksInResponse = propsResponse.data.bookmakers.map(b => ({ key: b.key, title: b.title, markets: b.markets?.length || 0 }));
+            const usBooks = allBooksInResponse.filter(b => b.key && !b.key.includes('exchange') && !b.key.includes('pinnacle'));
+            const dfsApps = allBooksInResponse.filter(b => ['prizepicks', 'underdog', 'pick6', 'prophetx', 'dabble_au'].includes(b.key));
+            
+            console.log(`📊 SPORTSBOOK COVERAGE FOR PLAYER PROPS (Game: ${game.id})`);
+            console.log(`📊 Total bookmakers in response: ${allBooksInResponse.length}`);
+            console.log(`📊 US Sportsbooks: ${usBooks.length} - ${usBooks.map(b => b.key).join(', ')}`);
+            console.log(`📊 DFS Apps: ${dfsApps.length} - ${dfsApps.map(b => b.key).join(', ')}`);
+            console.log(`📊 All bookmakers in response:`, allBooksInResponse);
             
             const existingBookmakers = new Map();
             game.bookmakers.forEach(book => {
@@ -2851,12 +2860,16 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             propsResponse.data.bookmakers.forEach(propsBook => {
               // Filter to only allowed bookmakers
               if (!allowedBookmakers.includes(propsBook.key)) {
-                console.log(`⏭️ Skipping ${propsBook.key} - not in allowed bookmakers for user plan`);
+                const isDFS = ['prizepicks', 'underdog', 'pick6', 'prophetx', 'dabble_au'].includes(propsBook.key);
+                const reason = isDFS ? 'DFS app not in user plan' : 'sportsbook not in user plan';
+                console.log(`⏭️ Skipping ${propsBook.key} (${reason})`);
                 return;
               }
               
               const marketCount = propsBook.markets ? propsBook.markets.length : 0;
-              console.log(`📈 Bookmaker ${propsBook.key} has ${marketCount} player prop markets`);
+              const isDFS = ['prizepicks', 'underdog', 'pick6', 'prophetx', 'dabble_au'].includes(propsBook.key);
+              const bookType = isDFS ? '🎯 DFS' : '🏪 Sportsbook';
+              console.log(`${bookType} ${propsBook.key} has ${marketCount} player prop markets`);
               
               if (existingBookmakers.has(propsBook.key)) {
                 // Merge markets into existing bookmaker
