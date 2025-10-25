@@ -224,6 +224,7 @@ export default function Login() {
             <Chrome size={16} />
             Continue with Google
           </button>
+          {/* Apple login disabled for now - enable when provider is configured
           <button
             onClick={() => signInWithApple?.()}
             style={{
@@ -253,6 +254,7 @@ export default function Login() {
           >
             Continue with Apple
           </button>
+          */}
         </div>
 
         <p className="terms-text">
