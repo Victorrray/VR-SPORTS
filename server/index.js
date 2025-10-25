@@ -2673,6 +2673,23 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           const sportGames = responseData || [];
           console.log(`Got ${sportGames.length} games for ${sport}`);
           
+          // Debug: Log what markets are actually in the response
+          if (sportGames.length > 0) {
+            const uniqueMarkets = new Set();
+            sportGames.forEach(game => {
+              if (game.bookmakers) {
+                game.bookmakers.forEach(bookmaker => {
+                  if (bookmaker.markets) {
+                    bookmaker.markets.forEach(market => {
+                      uniqueMarkets.add(market.key);
+                    });
+                  }
+                });
+              }
+            });
+            console.log(`🎯 Markets found in ${sport} response:`, Array.from(uniqueMarkets).sort());
+          }
+          
           allGames.push(...sportGames);
         } catch (sportErr) {
           console.warn(`Failed to fetch games for sport ${sport}:`, sportErr.response?.status, sportErr.response?.data || sportErr.message);
