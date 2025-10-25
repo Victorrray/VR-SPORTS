@@ -11,7 +11,7 @@ const SPORTSBOOK_CATEGORIES = {
   popular: {
     title: "Popular Sportsbooks",
     icon: Star,
-    books: ["draftkings", "fanduel", "betmgm", "caesars", "williamhill_us", "pointsbet"]
+    books: ["draftkings", "fanduel", "betmgm", "caesars", "pointsbetus"]
   },
   dfs: {
     title: "DFS Apps",
@@ -113,6 +113,29 @@ export default function SportMultiSelect({
   const searchRef = useRef(null);
   const [portalStyle, setPortalStyle] = useState({});
   const [actualAlign, setActualAlign] = useState(portalAlign);
+  const [favorites, setFavorites] = useState(() => {
+    if (typeof window !== 'undefined' && isSportsbook) {
+      const saved = localStorage.getItem('favoriteSportsbooks');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isSportsbook) {
+      localStorage.setItem('favoriteSportsbooks', JSON.stringify(favorites));
+    }
+  }, [favorites, isSportsbook]);
+
+  const toggleFavorite = (e, key) => {
+    e.stopPropagation();
+    setFavorites(prev => 
+      prev.includes(key) 
+        ? prev.filter(k => k !== key)
+        : [...prev, key]
+    );
+  };
 
   // Detect if we're inside the desktop filters sidebar
   const isInDesktopSidebar = typeof window !== "undefined" && 
@@ -295,6 +318,11 @@ export default function SportMultiSelect({
     }
   };
 
+  // Get favorite items from the list
+  const favoriteItems = useMemo(() => {
+    return (filteredList || []).filter(item => favorites.includes(item.key));
+  }, [filteredList, favorites]);
+
   const keysOnly = allKeys(filteredList);
   const currentSelected = selected || [];
   const allSelected = keysOnly && keysOnly.length > 0 && keysOnly.every((k) => currentSelected.includes(k));
@@ -386,7 +414,47 @@ export default function SportMultiSelect({
 
           {/* Content */}
           <div className="ms-content">
-            {enableCategories && categorizedList ? (
+                {/* Favorites section (only for sportsbooks) */}
+                {isSportsbook && favoriteItems.length > 0 && (
+                  <div className="ms-category">
+                    <div className="ms-category-header">
+                      <Star size={16} style={{ color: '#fbbf24' }} />
+                      <span>Favorites</span>
+                    </div>
+                    <div className="ms-category-items">
+                      {favoriteItems.map((item) => (
+                        <div
+                          key={item.key}
+                          className={`ms-item ${currentSelected.includes(item.key) ? "ms-selected" : ""}`}
+                          onClick={() => toggleOne(item.key)}
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                            <input
+                              type="checkbox"
+                              checked={currentSelected.includes(item.key)}
+                              onChange={() => {}}
+                              tabIndex={-1}
+                            />
+                            <span>{item.title}</span>
+                          </div>
+                          <Star
+                            size={16}
+                            style={{
+                              color: '#fbbf24',
+                              fill: '#fbbf24',
+                              cursor: 'pointer',
+                              marginRight: '8px'
+                            }}
+                            onClick={(e) => toggleFavorite(e, item.key)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {enableCategories && categorizedList ? (
               // Categorized view
               Object.entries(categorizedList).map(([categoryKey, category]) => (
                 <div key={categoryKey} className="ms-category">
@@ -400,14 +468,30 @@ export default function SportMultiSelect({
                         key={item.key}
                         className={`ms-item ${currentSelected.includes(item.key) ? "ms-selected" : ""}`}
                         onClick={() => toggleOne(item.key)}
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
-                        <input
-                          type="checkbox"
-                          checked={currentSelected.includes(item.key)}
-                          onChange={() => {}}
-                          tabIndex={-1}
-                        />
-                        <span>{item.title}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                          <input
+                            type="checkbox"
+                            checked={currentSelected.includes(item.key)}
+                            onChange={() => {}}
+                            tabIndex={-1}
+                          />
+                          <span>{item.title}</span>
+                        </div>
+                        {isSportsbook && (
+                          <Star
+                            size={16}
+                            style={{
+                              color: favorites.includes(item.key) ? '#fbbf24' : '#6b7280',
+                              fill: favorites.includes(item.key) ? '#fbbf24' : 'none',
+                              cursor: 'pointer',
+                              marginRight: '8px',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onClick={(e) => toggleFavorite(e, item.key)}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -436,14 +520,30 @@ export default function SportMultiSelect({
                       key={item.key}
                       className={`ms-item ${currentSelected.includes(item.key) ? "ms-selected" : ""}`}
                       onClick={() => toggleOne(item.key)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={currentSelected.includes(item.key)}
-                        onChange={() => {}}
-                        tabIndex={-1}
-                      />
-                      <span>{item.title}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                        <input
+                          type="checkbox"
+                          checked={currentSelected.includes(item.key)}
+                          onChange={() => {}}
+                          tabIndex={-1}
+                        />
+                        <span>{item.title}</span>
+                      </div>
+                      {isSportsbook && (
+                        <Star
+                          size={16}
+                          style={{
+                            color: favorites.includes(item.key) ? '#fbbf24' : '#6b7280',
+                            fill: favorites.includes(item.key) ? '#fbbf24' : 'none',
+                            cursor: 'pointer',
+                            marginRight: '8px',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onClick={(e) => toggleFavorite(e, item.key)}
+                        />
+                      )}
                     </div>
                   )
                 ))}

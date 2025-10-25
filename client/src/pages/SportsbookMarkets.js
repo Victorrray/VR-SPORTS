@@ -1377,6 +1377,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return organizedMarkets;
   }, []); // Empty dependency array since PLAYER_PROP_MARKETS is static
 
+  // Player props bookmaker whitelist - only books that actually return player props from TheOddsAPI
+  const PLAYER_PROPS_SUPPORTED_BOOKS = [
+    // Major US Sportsbooks
+    'draftkings', 'fanduel', 'betmgm', 'caesars', 'pointsbetus', 'betrivers',
+    'unibet_us', 'wynnbet', 'espnbet', 'fanatics', 'hardrock',
+    // DFS Apps (primary player props providers)
+    'prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6',
+    // Other books with player props support
+    'bovada', 'betonline', 'mybookieag'
+    // NOTE: NoVig, Fliff, Pinnacle, and exchanges don't return player props from TheOddsAPI
+  ];
+
   // Memoized enhanced sportsbook list to prevent unnecessary recalculations
   const enhancedSportsbookList = useMemo(() => {
     // Start with API books if available
@@ -1405,11 +1417,34 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const dfsApps = getDFSApps();
     const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
     
-    // For both Straight Bets and Player Props modes, include all sportsbooks AND DFS apps
-    const enhancedBooks = [
-      ...(booksToUse || []),
-      ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
-    ];
+    // For Player Props mode, filter to only supported books
+    let enhancedBooks;
+    if (showPlayerProps) {
+      // Filter to only books that actually support player props
+      const supportedBooksToUse = (booksToUse || []).filter(book => 
+        PLAYER_PROPS_SUPPORTED_BOOKS.includes(book.key)
+      );
+      const supportedDFSApps = missingDFSApps.filter(dfs => 
+        PLAYER_PROPS_SUPPORTED_BOOKS.includes(dfs.key)
+      );
+      
+      enhancedBooks = [
+        ...supportedBooksToUse,
+        ...supportedDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
+      ];
+      
+      console.log('🎯 Player Props Sportsbooks (filtered for API support):', {
+        totalSupported: enhancedBooks.length,
+        excluded: (booksToUse || []).filter(b => !PLAYER_PROPS_SUPPORTED_BOOKS.includes(b.key)).map(b => b.key),
+        supported: enhancedBooks.map(b => b.key)
+      });
+    } else {
+      // For Straight Bets mode, include all sportsbooks AND DFS apps
+      enhancedBooks = [
+        ...(booksToUse || []),
+        ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
+      ];
+    }
     
     // Log different messages based on mode
     if (showPlayerProps) {

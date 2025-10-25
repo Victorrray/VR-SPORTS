@@ -2347,9 +2347,149 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
     const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
     
-    // Filter out unsupported markets from TheOddsAPI
-    const supportedMarkets = ['h2h', 'spreads', 'totals'];
-    const filteredRegularMarkets = regularMarkets.filter(m => supportedMarkets.includes(m));
+    // Sport-specific market support from TheOddsAPI
+    // Based on official API documentation: https://the-odds-api.com/sports-odds-data/betting-markets.html
+    // Includes: Featured Markets, Additional Markets, and Game Period Markets
+    const SPORT_MARKET_SUPPORT = {
+      // Football (NFL, NCAAF) - full support for all markets
+      'americanfootball_nfl': [
+        // Featured markets
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        // Additional markets
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        // Quarter markets
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
+        // Half markets
+        'h2h_h1', 'h2h_h2',
+        'h2h_3_way_h1', 'h2h_3_way_h2',
+        'spreads_h1', 'spreads_h2',
+        'alternate_spreads_h1', 'alternate_spreads_h2',
+        'totals_h1', 'totals_h2',
+        'alternate_totals_h1', 'alternate_totals_h2',
+        'team_totals_h1', 'team_totals_h2',
+        'alternate_team_totals_h1', 'alternate_team_totals_h2'
+      ],
+      'americanfootball_ncaaf': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
+        'h2h_h1', 'h2h_h2',
+        'h2h_3_way_h1', 'h2h_3_way_h2',
+        'spreads_h1', 'spreads_h2',
+        'alternate_spreads_h1', 'alternate_spreads_h2',
+        'totals_h1', 'totals_h2',
+        'alternate_totals_h1', 'alternate_totals_h2',
+        'team_totals_h1', 'team_totals_h2',
+        'alternate_team_totals_h1', 'alternate_team_totals_h2'
+      ],
+      // Basketball (NBA, NCAAB) - supports quarters and full game
+      'basketball_nba': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
+      ],
+      'basketball_ncaab': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
+      ],
+      // Baseball (MLB) - supports innings markets
+      'baseball_mlb': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        // Full game
+        'h2h_h1', 'h2h_h2',
+        'h2h_3_way_h1', 'h2h_3_way_h2',
+        'spreads_h1', 'spreads_h2',
+        'alternate_spreads_h1', 'alternate_spreads_h2',
+        'totals_h1', 'totals_h2',
+        'alternate_totals_h1', 'alternate_totals_h2',
+        'team_totals_h1', 'team_totals_h2',
+        'alternate_team_totals_h1', 'alternate_team_totals_h2',
+        // Innings markets
+        'h2h_1st_1_innings', 'h2h_1st_3_innings', 'h2h_1st_5_innings', 'h2h_1st_7_innings',
+        'h2h_3_way_1st_1_innings', 'h2h_3_way_1st_3_innings', 'h2h_3_way_1st_5_innings', 'h2h_3_way_1st_7_innings',
+        'spreads_1st_1_innings', 'spreads_1st_3_innings', 'spreads_1st_5_innings', 'spreads_1st_7_innings',
+        'alternate_spreads_1st_1_innings', 'alternate_spreads_1st_3_innings', 'alternate_spreads_1st_5_innings', 'alternate_spreads_1st_7_innings',
+        'totals_1st_1_innings', 'totals_1st_3_innings', 'totals_1st_5_innings', 'totals_1st_7_innings',
+        'alternate_totals_1st_1_innings', 'alternate_totals_1st_3_innings', 'alternate_totals_1st_5_innings', 'alternate_totals_1st_7_innings'
+      ],
+      // Hockey (NHL) - supports periods
+      'icehockey_nhl': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_p1', 'h2h_p2', 'h2h_p3',
+        'h2h_3_way_p1', 'h2h_3_way_p2', 'h2h_3_way_p3',
+        'spreads_p1', 'spreads_p2', 'spreads_p3',
+        'alternate_spreads_p1', 'alternate_spreads_p2', 'alternate_spreads_p3',
+        'totals_p1', 'totals_p2', 'totals_p3',
+        'alternate_totals_p1', 'alternate_totals_p2', 'alternate_totals_p3',
+        'team_totals_p1', 'team_totals_p2', 'team_totals_p3',
+        'alternate_team_totals_p1', 'alternate_team_totals_p2', 'alternate_team_totals_p3'
+      ],
+      // Soccer (all leagues) - supports h2h, spreads, totals, and soccer-specific markets
+      'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_mls': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_spain_la_liga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_germany_bundesliga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_italy_serie_a': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_france_ligue_one': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_fifa_world_cup': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      // Combat Sports (MMA, Boxing)
+      'mma_mixed_martial_arts': ['h2h', 'spreads', 'totals', 'h2h_lay'],
+      'boxing_boxing': ['h2h', 'spreads', 'totals', 'h2h_lay'],
+      // Golf and other sports with outrights
+      'golf_pga': ['outrights', 'outrights_lay'],
+      'golf_masters': ['outrights', 'outrights_lay'],
+      'golf_us_open': ['outrights', 'outrights_lay'],
+      'golf_british_open': ['outrights', 'outrights_lay'],
+      // Default for any other sport
+      'default': ['h2h', 'spreads', 'totals']
+    };
+    
+    // Filter markets based on the sport being requested
+    const filteredRegularMarkets = regularMarkets.filter(m => {
+      // For each sport, check if the market is supported
+      return sportsArray.some(sport => {
+        const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
+        return supportedForSport.includes(m);
+      });
+    });
+    
+    console.log('🎯 Sport-specific market filtering:');
+    sportsArray.forEach(sport => {
+      const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
+      console.log(`  ${sport}: ${supportedForSport.join(', ')}`);
+    });
     
     console.log('Original regular markets:', regularMarkets);
     console.log('Filtered to supported markets:', filteredRegularMarkets);
