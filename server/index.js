@@ -836,7 +836,7 @@ async function getEventIdsForLeagueDate(league, date) {
 
   try {
     const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(league)}/events?apiKey=${API_KEY}`;
-    const { data } = await axios.get(url, { timeout: 8000 });
+    const { data } = await axios.get(url, { timeout: 5000 }); // Reduced from 8s to 5s for faster response
     const events = Array.isArray(data) ? data : [];
     const filtered = events.filter((event) => {
       const commence = event?.commence_time ? new Date(event.commence_time) : null;
@@ -2119,7 +2119,7 @@ app.get("/api/events/:sport/:eventId/markets", requireUser, async (req, res) => 
     console.log(`🌐 Fetching available markets for event ${eventId} (costs 1 credit)`);
     const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/markets?apiKey=${API_KEY}&regions=${regions}`;
     
-    const response = await axios.get(url, { timeout: 8000 });
+    const response = await axios.get(url, { timeout: 5000 }); // Reduced from 8s to 5s
     const data = response.data;
     
     // Cache for 5 minutes
@@ -2167,7 +2167,7 @@ app.get("/api/participants/:sport", requireUser, async (req, res) => {
     console.log(`🌐 Fetching participants for ${sport} (FREE - no quota cost)`);
     const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/participants?apiKey=${API_KEY}`;
     
-    const response = await axios.get(url, { timeout: 8000 });
+    const response = await axios.get(url, { timeout: 5000 }); // Reduced from 8s to 5s
     const participants = response.data;
     
     // Cache for 24 hours (86400000 ms)
@@ -2721,8 +2721,8 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       
       // Set a total timeout for player props to prevent request hanging
       const playerPropsStartTime = Date.now();
-      const TOTAL_PLAYER_PROPS_TIMEOUT = 300000; // 5 minutes total timeout for comprehensive coverage
-      const EARLY_RESPONSE_TIME = 8000; // Return cached results after 8 seconds to user immediately
+      const TOTAL_PLAYER_PROPS_TIMEOUT = 120000; // 2 minutes total timeout for comprehensive coverage
+      const EARLY_RESPONSE_TIME = 2000; // Return cached results after 2 seconds to user immediately
       
       // For player props, we need to fetch games with the date filter applied
       // This is separate from regular game odds because:
@@ -2805,14 +2805,14 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       // For each game, fetch individual player props using event ID
       // Smart limit based on sport to prevent timeouts
       const SPORT_GAME_LIMITS = {
-        'baseball_mlb': 30,           // MLB has 162-game season, limit to 30
-        'basketball_nba': 30,          // NBA has 82-game season, limit to 30
-        'icehockey_nhl': 30,           // NHL has 82-game season, limit to 30
-        'americanfootball_nfl': 100,  // NFL has 17-game season, can handle all
-        'americanfootball_ncaaf': 50, // NCAAF has many games, limit to 50
-        'basketball_ncaab': 50,        // NCAAB has many games, limit to 50
-        'soccer_epl': 20,              // Soccer games, limit to 20
-        'default': 40                  // Default limit for other sports
+        'baseball_mlb': 100,          // MLB has 162-game season, process up to 100
+        'basketball_nba': 100,        // NBA has 82-game season, process up to 100
+        'icehockey_nhl': 100,         // NHL has 32 teams, process up to 100
+        'americanfootball_nfl': 100,  // NFL has 17-game season, process all
+        'americanfootball_ncaaf': 100, // NCAAF has many games, process up to 100
+        'basketball_ncaab': 100,      // NCAAB has many games, process up to 100
+        'soccer_epl': 100,            // Soccer games, process up to 100
+        'default': 100                // Default limit for other sports
       };
       
       const sportKey = sportsArray[0]; // Get first sport (usually only one for player props)
