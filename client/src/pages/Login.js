@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/SimpleAuth";
-import { Eye, EyeOff, ArrowLeft, Mail, Lock, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Mail, Lock, ArrowRight, Chrome } from "lucide-react";
 import { optimizedStorage } from "../utils/storageOptimizer";
 import "./Login-revamp.css";
 
 export default function Login() {
   const auth = useAuth();
-  const { signIn, signUp } = auth || {};
+  const { signIn, signUp, signInWithGoogle, signInWithApple } = auth || {};
   const location = useLocation();
   const [tab, setTab] = useState(location.pathname === '/signup' ? 'signup' : 'login');
   const [email, setEmail] = useState(() => {
@@ -189,19 +189,58 @@ export default function Login() {
           </button>
         )}
 
-        {/* Google OAuth temporarily disabled - needs Supabase configuration
         <div className="divider">
           <span>or</span>
         </div>
 
-        <button
-          onClick={() => signInWithProvider("google")}
-          className="google-btn"
-        >
-          <Chrome size={18} />
-          <span>Continue with Google</span>
-        </button>
-        */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+          <button
+            onClick={() => signInWithGoogle?.()}
+            style={{
+              flex: 1,
+              padding: '12px',
+              background: '#fff',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#f5f5f5'}
+            onMouseLeave={(e) => e.target.style.background = '#fff'}
+          >
+            <Chrome size={18} />
+            Google
+          </button>
+          <button
+            onClick={() => signInWithApple?.()}
+            style={{
+              flex: 1,
+              padding: '12px',
+              background: '#000',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.target.style.background = '#333'}
+            onMouseLeave={(e) => e.target.style.background = '#000'}
+          >
+            🍎 Apple
+          </button>
+        </div>
 
         <p className="terms-text">
           By continuing you agree to our <Link to="/terms" className="terms-link">Terms</Link> and{" "}

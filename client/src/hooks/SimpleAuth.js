@@ -132,6 +132,28 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  const signInWithApple = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+    if (error) throw error;
+    return data;
+  };
+
   const value = {
     user,
     session,
@@ -141,6 +163,8 @@ export function AuthProvider({ children }) {
     signUp,
     signOut,
     setUsername,
+    signInWithGoogle,
+    signInWithApple,
     isSupabaseEnabled: true
   };
 
