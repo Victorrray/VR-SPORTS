@@ -3670,7 +3670,11 @@ export default function OddsTable({
                             <tr>
                               <th>Sportsbook</th>
                               {mode === "props" ? (
-                                <th>Odds</th>
+                                <>
+                                  <th>Line</th>
+                                  <th>Over</th>
+                                  <th>Under</th>
+                                </>
                               ) : (
                                 <>
                                   <th>{shortTeam(row.game.home_team, row.game.sport_key)}</th>
@@ -3754,9 +3758,17 @@ export default function OddsTable({
                                   </td>
                                   
                                   {mode === "props" ? (
-                                    <td className="mini-odds-cell">
-                                      {formatOdds(Number(p.price ?? p.odds ?? 0))}
-                                    </td>
+                                    <>
+                                      <td className="mini-odds-cell" style={{ fontSize: '0.9em', color: 'rgba(255,255,255,0.7)' }}>
+                                        {p.point || p.line || '-'}
+                                      </td>
+                                      <td className="mini-odds-cell">
+                                        {formatOdds(Number(p.price ?? p.odds ?? 0))}
+                                      </td>
+                                      <td className="mini-odds-cell">
+                                        {formatOdds(Number(p.price ?? p.odds ?? 0))}
+                                      </td>
+                                    </>
                                   ) : (
                                     <>
                                       <td className="mini-odds-cell">
@@ -3795,7 +3807,7 @@ export default function OddsTable({
                                   {/* Show book count for player props - add as last row */}
                                   {mode === "props" && displayBooks.length > 0 && (
                                     <tr>
-                                      <td colSpan={mode === "props" ? 2 : 3} style={{
+                                      <td colSpan={mode === "props" ? 5 : 3} style={{
                                         textAlign: 'center',
                                         padding: '8px',
                                         fontSize: '11px',

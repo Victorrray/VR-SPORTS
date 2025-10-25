@@ -666,15 +666,15 @@ body,
   .flash-up, .flash-down { animation: none !important; }
 }
 
-/* Mini Odds Table - Enhanced */
+/* Mini Odds Table - Modern Redesign */
 .mini-odds-container {
-  background: linear-gradient(135deg, rgba(20, 12, 30, 0.98), rgba(35, 20, 45, 0.95));
-  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(15, 11, 26, 0.95), rgba(20, 15, 35, 0.92));
+  border-radius: 14px;
   padding: 0;
-  margin: 12px 0;
-  border: 2px solid rgba(139, 92, 246, 0.3);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(139, 92, 246, 0.1);
-  backdrop-filter: blur(16px);
+  margin: 16px 0;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
   position: relative;
   overflow: hidden;
 }
@@ -685,43 +685,44 @@ body,
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #8b5cf6 0%, #10b981 50%, #fbbf24 100%);
+  height: 2px;
+  background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
   opacity: 0.8;
 }
 
 .mini-odds-table {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
-  font-size: 1em;
+  font-size: 0.95em;
   table-layout: auto;
 }
 
 .mini-odds-table th {
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 800;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.7em;
-  letter-spacing: 1.5px;
-  padding: 16px 20px;
+  font-size: 0.65em;
+  letter-spacing: 1.3px;
+  padding: 14px 16px;
   text-align: center;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.15));
-  border-bottom: 2px solid rgba(139, 92, 246, 0.4);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(124, 58, 237, 0.08));
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+  backdrop-filter: blur(10px);
   white-space: nowrap;
 }
 
 .mini-odds-table th:first-child {
   text-align: left;
-  padding-left: 28px;
-  min-width: 220px;
+  padding-left: 20px;
+  min-width: 140px;
 }
 
 .mini-odds-table th:nth-child(2),
-.mini-odds-table th:nth-child(3) {
+.mini-odds-table th:nth-child(3),
+.mini-odds-table th:nth-child(4) {
   text-align: center;
-  min-width: 150px;
+  min-width: 90px;
 }
 
 .mini-odds-table th:last-child {
@@ -731,31 +732,14 @@ body,
 
 /* Table Rows */
 .mini-odds-table tbody tr {
-  background: rgba(26, 16, 37, 0.4);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+  background: transparent;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
   position: relative;
 }
 
-.mini-odds-table tbody tr::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.3), transparent);
-  transition: width 0.3s ease;
-}
-
 .mini-odds-table tbody tr:hover {
-  background: rgba(139, 92, 246, 0.12);
-  transform: translateX(0);
-  box-shadow: inset 4px 0 0 0 rgba(139, 92, 246, 0.6);
-}
-
-.mini-odds-table tbody tr:hover::before {
-  width: 100%;
+  background: rgba(139, 92, 246, 0.08);
 }
 
 .mini-odds-table tbody tr:last-child {
@@ -764,45 +748,45 @@ body,
 
 /* Table Cells */
 .mini-odds-table td {
-  padding: 20px;
+  padding: 14px 16px;
   text-align: center;
   position: relative;
   vertical-align: middle;
 }
 
 .mini-odds-table td:first-child {
-  padding-left: 28px;
-  padding-right: 20px;
+  padding-left: 20px;
+  padding-right: 16px;
   text-align: left;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.98);
-  font-size: 1.02em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.95em;
   white-space: nowrap;
-  min-width: 220px;
+  min-width: 140px;
 }
 
 /* Book Logo */
 .mini-book-logo {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
   object-fit: contain;
   background: rgba(255, 255, 255, 0.95);
-  padding: 3px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  margin-right: 10px;
+  padding: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  margin-right: 8px;
   vertical-align: middle;
 }
 
 /* Odds Cells */
 .mini-odds-cell {
   font-family: 'SF Mono', 'Roboto Mono', monospace;
-  font-weight: 700;
-  font-size: 1.05em;
-  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  font-size: 0.95em;
+  color: rgba(255, 255, 255, 0.9);
   position: relative;
   transition: all 0.2s ease;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .mini-odds-cell.positive {
