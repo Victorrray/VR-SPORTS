@@ -1730,6 +1730,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
                 <div className="desktop-filter-section">
                   <div className="desktop-filter-label">
+                    <span>📊</span> Markets
+                  </div>
+                  <SportMultiSelect
+                    list={getAvailableMarkets(draftPicked)}
+                    selected={draftMarketKeys || []}
+                    onChange={setDraftMarketKeys}
+                    placeholderText="Select markets..."
+                    allLabel="All Markets"
+                    enableCategories={true}
+                  />
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
                     <span>🏪</span> Sportsbooks
                   </div>
                   <SportMultiSelect
