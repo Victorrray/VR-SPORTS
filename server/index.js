@@ -37,6 +37,7 @@ const API_KEY = process.env.ODDS_API_KEY;
 const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
 const PLAYER_PROPS_API_BASE = process.env.PLAYER_PROPS_API_BASE || null;
 const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 === 'true';
+const REMOVE_API_LIMITS = process.env.REMOVE_API_LIMITS === 'true'; // Testing flag to remove all API limits
 const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 30_000);
 const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
 const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = 50; // Increased from 25 to 50
@@ -1234,6 +1235,18 @@ try {
 async function checkPlanAccess(req, res, next) {
   try {
     const userId = req.__userId;
+    
+    // TESTING MODE: If REMOVE_API_LIMITS is enabled, grant unlimited access
+    if (REMOVE_API_LIMITS) {
+      console.log('🧪 TESTING MODE: API limits removed - granting unlimited access');
+      req.__userProfile = {
+        id: userId || 'test-user',
+        plan: 'platinum',
+        username: 'Test User',
+        grandfathered: false
+      };
+      return next();
+    }
     
     // DEMO MODE: Give demo-user platinum access
     if (userId === 'demo-user') {
