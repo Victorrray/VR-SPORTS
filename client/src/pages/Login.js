@@ -198,47 +198,60 @@ export default function Login() {
             onClick={() => signInWithGoogle?.()}
             style={{
               flex: 1,
-              padding: '12px',
-              background: '#fff',
-              border: '1px solid #ddd',
+              padding: '12px 16px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontWeight: '600',
+              fontWeight: '500',
+              fontSize: '14px',
+              color: 'rgba(255, 255, 255, 0.9)',
+              transition: 'all 0.2s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
-              fontSize: '14px',
-              transition: 'all 0.2s ease'
+              gap: '8px'
             }}
-            onMouseEnter={(e) => e.target.style.background = '#f5f5f5'}
-            onMouseLeave={(e) => e.target.style.background = '#fff'}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+            }}
           >
-            <Chrome size={18} />
-            Google
+            <Chrome size={16} />
+            Continue with Google
           </button>
           <button
             onClick={() => signInWithApple?.()}
             style={{
               flex: 1,
-              padding: '12px',
-              background: '#000',
-              color: '#fff',
-              border: 'none',
+              padding: '12px 16px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
               borderRadius: '8px',
               cursor: 'pointer',
-              fontWeight: '600',
+              fontWeight: '500',
+              fontSize: '14px',
+              color: 'rgba(255, 255, 255, 0.9)',
+              transition: 'all 0.2s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
-              fontSize: '14px',
-              transition: 'all 0.2s ease'
+              gap: '8px'
             }}
-            onMouseEnter={(e) => e.target.style.background = '#333'}
-            onMouseLeave={(e) => e.target.style.background = '#000'}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+            }}
           >
-            🍎 Apple
+            Continue with Apple
           </button>
         </div>
 
