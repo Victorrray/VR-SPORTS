@@ -484,22 +484,38 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
     
     if (mode === 'arbitrage') {
-      console.log('🔍 Initializing arbitrage mode from URL parameter');
-      setShowPlayerProps(false);
-      setShowArbitrage(true);
-      setShowMiddles(false);
+      if (hasPlatinum) {
+        console.log('🔍 Initializing arbitrage mode from URL parameter');
+        setShowPlayerProps(false);
+        setShowArbitrage(true);
+        setShowMiddles(false);
+      } else {
+        console.log('❌ Non-platinum user attempted to access arbitrage mode - redirecting to game odds');
+        // Reset to game odds mode for non-platinum users
+        setShowPlayerProps(false);
+        setShowArbitrage(false);
+        setShowMiddles(false);
+      }
     } else if (mode === 'props') {
       console.log('🎯 Initializing player props mode from URL parameter');
       setShowPlayerProps(true);
       setShowArbitrage(false);
       setShowMiddles(false);
     } else if (mode === 'middles') {
-      console.log('🎪 Initializing middles mode from URL parameter');
-      setShowPlayerProps(false);
-      setShowArbitrage(false);
-      setShowMiddles(true);
+      if (hasPlatinum) {
+        console.log('🎪 Initializing middles mode from URL parameter');
+        setShowPlayerProps(false);
+        setShowArbitrage(false);
+        setShowMiddles(true);
+      } else {
+        console.log('❌ Non-platinum user attempted to access middles mode - redirecting to game odds');
+        // Reset to game odds mode for non-platinum users
+        setShowPlayerProps(false);
+        setShowArbitrage(false);
+        setShowMiddles(false);
+      }
     }
-  }, [location.search]); // Only run when URL parameters change
+  }, [location.search, hasPlatinum]); // Only run when URL parameters or platinum status changes
 
   // Listen for changes to user's sportsbook selections
   useEffect(() => {
@@ -1540,6 +1556,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Handle section change from SectionMenu
   const handleSectionChange = (sectionId) => {
     console.log(`🔄 Changing section to: ${sectionId}`);
+    
+    // Check if user has platinum for arbitrage/middles access
+    if ((sectionId === 'arbitrage' || sectionId === 'middles') && !hasPlatinum) {
+      console.log('❌ User does not have platinum access for this section');
+      return; // Don't allow switching to arbitrage/middles without platinum
+    }
     
     // Update all mode states based on the selected section
     setShowPlayerProps(sectionId === 'props');
