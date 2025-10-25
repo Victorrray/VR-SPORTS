@@ -231,7 +231,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
   const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
   const [selectedDate, setSelectedDate] = useState("");
-  const [marketKeys, setMarketKeys] = useState(["h2h", "spreads", "totals", "team_totals"]); // Added team_totals to default selection
+  const [marketKeys, setMarketKeys] = useState([]); // Start empty to allow filtering by specific markets like quarters
   // Include a mix of NFL, NCAA football, and NCAA basketball relevant markets by default
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState([
     // Football markets (NFL and NCAAF)
@@ -963,7 +963,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // For player props mode, respect the user's selection if they've made one
     // Otherwise use empty array to show ALL books
     const newPlayerPropsBooks = Array.isArray(draftSelectedPlayerPropsBooks) ? draftSelectedPlayerPropsBooks : [];
-    const newMarkets = Array.isArray(draftMarketKeys) && draftMarketKeys.length > 0 ? draftMarketKeys : ["h2h", "spreads", "totals"];
+    const newMarkets = Array.isArray(draftMarketKeys) ? draftMarketKeys : [];
     
     console.log('🏈 Applying filters:', {
       sports: newPicked,
@@ -2180,7 +2180,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             pageSize={15}
             mode="game"
             bookFilter={effectiveSelectedBooks}
-            marketFilter={[]} // Empty array to show ALL markets
+            marketFilter={marketKeys} // Use selected markets, empty array shows all
             evMin={minEV === "" ? null : Number(minEV)}
           loading={filtersLoading || marketsLoading}
           error={error || marketsError}
