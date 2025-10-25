@@ -1658,20 +1658,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
             {/* Auto-Refresh Toggle */}
             <div className="desktop-filter-section" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: hasPlatinum ? 'pointer' : 'not-allowed', padding: '8px 0', opacity: hasPlatinum ? 1 : 0.5 }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
                   <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
-                  Auto-Refresh (30s)
+                  Auto-Refresh (30s) {!hasPlatinum && <span style={{ fontSize: '12px', color: '#ef4444' }}>(Platinum Only)</span>}
                 </span>
                 <input
                   type="checkbox"
                   checked={autoRefreshEnabled}
                   onChange={toggleAutoRefresh}
+                  disabled={!hasPlatinum}
                   style={{
                     width: '40px',
                     height: '20px',
-                    cursor: 'pointer',
-                    accentColor: 'var(--accent)'
+                    cursor: hasPlatinum ? 'pointer' : 'not-allowed',
+                    accentColor: 'var(--accent)',
+                    opacity: hasPlatinum ? 1 : 0.5
                   }}
                 />
               </label>
@@ -2395,20 +2397,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             <>
               {/* Auto-Refresh Toggle */}
               <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: hasPlatinum ? 'pointer' : 'not-allowed', padding: '8px 0', opacity: hasPlatinum ? 1 : 0.5 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
                     <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
-                    Auto-Refresh (30s)
+                    Auto-Refresh (30s) {!hasPlatinum && <span style={{ fontSize: '12px', color: '#ef4444' }}>(Platinum Only)</span>}
                   </span>
                   <input
                     type="checkbox"
                     checked={autoRefreshEnabled}
                     onChange={toggleAutoRefresh}
+                    disabled={!hasPlatinum}
                     style={{
                       width: '40px',
                       height: '20px',
-                      cursor: 'pointer',
-                      accentColor: 'var(--accent)'
+                      cursor: hasPlatinum ? 'pointer' : 'not-allowed',
+                      accentColor: 'var(--accent)',
+                      opacity: hasPlatinum ? 1 : 0.5
                     }}
                   />
                 </label>
@@ -2481,20 +2485,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             <>
               {/* Auto-Refresh Toggle */}
               <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: '8px 0' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: hasPlatinum ? 'pointer' : 'not-allowed', padding: '8px 0', opacity: hasPlatinum ? 1 : 0.5 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
                     <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
-                    Auto-Refresh (30s)
+                    Auto-Refresh (30s) {!hasPlatinum && <span style={{ fontSize: '12px', color: '#ef4444' }}>(Platinum Only)</span>}
                   </span>
                   <input
                     type="checkbox"
                     checked={autoRefreshEnabled}
                     onChange={toggleAutoRefresh}
+                    disabled={!hasPlatinum}
                     style={{
                       width: '40px',
                       height: '20px',
-                      cursor: 'pointer',
-                      accentColor: 'var(--accent)'
+                      cursor: hasPlatinum ? 'pointer' : 'not-allowed',
+                      accentColor: 'var(--accent)',
+                      opacity: hasPlatinum ? 1 : 0.5
                     }}
                   />
                 </label>
