@@ -1201,6 +1201,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       .map(market => market.key);
   };
 
+  // Function to get available markets for the markets filter dropdown
+  const getAvailableMarkets = (selectedSports) => {
+    return getRelevantMarkets(selectedSports);
+  };
+
   // Player prop categories with icons
   const PLAYER_PROP_CATEGORIES = {
     passing: {
