@@ -1015,8 +1015,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       "player_points", "player_rebounds", "player_assists"
     ];
     const defaultSportsbooks = getUserSelectedSportsbooks('game'); // Use user's saved sportsbooks for game mode
-    // Use user's saved sportsbooks for props mode or empty array to show ALL books
-    const defaultPlayerPropsSportsbooks = getUserSelectedSportsbooks('props');
+    // For player props, reset to empty array to show ALL available sportsbooks
+    const defaultPlayerPropsSportsbooks = [];
     
     // Reset draft state
     setDraftPicked(defaultSports);
