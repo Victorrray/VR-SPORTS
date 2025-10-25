@@ -189,10 +189,6 @@ export default function Login() {
           </button>
         )}
 
-        <div className="divider">
-          <span>or</span>
-        </div>
-
         <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
           <button
             onClick={() => signInWithGoogle?.()}
