@@ -75,8 +75,33 @@ body,
   transform: scale(0.95);
 }
 
+/* Tablet responsive enhancements (between phone and desktop) */
+@media (max-width: 1024px) and (min-width: 481px) {
+  .odds-grid th, .odds-grid td {
+    padding: 0.75em 0.6em;
+    font-size: 0.95em;
+  }
+  
+  .odds-grid thead tr th:first-child,
+  .odds-grid tbody tr td:first-child { 
+    padding-left: 0.8em; 
+  }
+  
+  .odds-grid thead tr th:last-child,
+  .odds-grid tbody tr td:last-child { 
+    padding-right: 0.8em; 
+  }
+  
+  .ev-col { width: 12%; }
+  .match-col { width: 20%; }
+  .team-line-col { width: 22%; }
+  .book-col { width: 15%; }
+  .odds-col { width: 15%; }
+  .devig-col { width: 16%; }
+}
+
 /* Mobile responsive enhancements */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .odds-table-card {
     margin: 0 var(--mobile-gutter);
     border-radius: 16px;

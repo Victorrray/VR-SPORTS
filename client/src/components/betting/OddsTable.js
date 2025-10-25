@@ -2829,47 +2829,64 @@ export default function OddsTable({
                     </div>
                   </td>
                   <td>
-                    <div className="desktop-matchup">
-                      <span className="desktop-matchup-time">{formatKickoffNice(row.game?.commence_time)}</span>
-                      <div className="desktop-teams">
-                        <div className="desktop-team-row">
-                          {(() => {
-                            const awayLogo = getTeamLogoForGame(row.game, row.game?.away_team);
-                            return awayLogo ? (
-                              <img
-                                src={awayLogo}
-                                alt={`${row.game?.away_team || 'Away'} logo`}
-                                className="desktop-team-logo"
-                                loading="lazy"
-                                onError={(e) => { e.target.style.display = 'none'; }}
-                              />
-                            ) : null;
+                    {mode === "props" ? (
+                      <div style={{ display:'flex', flexDirection:'column', gap:4, textAlign:'left' }}>
+                        <span style={{ fontWeight:800, fontSize:'1.05em' }}>
+                          {row.playerName || row.out?.description || row.out?.name || 'Player'}
+                        </span>
+                        <span style={{ opacity:0.8, fontSize:'0.9em' }}>
+                          {formatKickoffNice(row.game?.commence_time)}
+                        </span>
+                        <span style={{ opacity:0.7, fontSize:'0.85em' }}>
+                          {(() => { 
+                            const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
+                            return `${sport} | ${league}`; 
                           })()}
-                          <span>{row.game?.away_team || 'Away Team'}</span>
-                        </div>
-                        <div className="desktop-team-row">
-                          {(() => {
-                            const homeLogo = getTeamLogoForGame(row.game, row.game?.home_team);
-                            return homeLogo ? (
-                              <img
-                                src={homeLogo}
-                                alt={`${row.game?.home_team || 'Home'} logo`}
-                                className="desktop-team-logo"
-                                loading="lazy"
-                                onError={(e) => { e.target.style.display = 'none'; }}
-                              />
-                            ) : null;
-                          })()}
-                          <span>{row.game?.home_team || 'Home Team'}</span>
-                        </div>
+                        </span>
                       </div>
-                      <span className="desktop-matchup-league">
-                        {(() => { 
-                          const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
-                          return `${sport} | ${league}`; 
-                        })()}
-                      </span>
-                    </div>
+                    ) : (
+                      <div className="desktop-matchup">
+                        <span className="desktop-matchup-time">{formatKickoffNice(row.game?.commence_time)}</span>
+                        <div className="desktop-teams">
+                          <div className="desktop-team-row">
+                            {(() => {
+                              const awayLogo = getTeamLogoForGame(row.game, row.game?.away_team);
+                              return awayLogo ? (
+                                <img
+                                  src={awayLogo}
+                                  alt={`${row.game?.away_team || 'Away'} logo`}
+                                  className="desktop-team-logo"
+                                  loading="lazy"
+                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                              ) : null;
+                            })()}
+                            <span>{row.game?.away_team || 'Away Team'}</span>
+                          </div>
+                          <div className="desktop-team-row">
+                            {(() => {
+                              const homeLogo = getTeamLogoForGame(row.game, row.game?.home_team);
+                              return homeLogo ? (
+                                <img
+                                  src={homeLogo}
+                                  alt={`${row.game?.home_team || 'Home'} logo`}
+                                  className="desktop-team-logo"
+                                  loading="lazy"
+                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                              ) : null;
+                            })()}
+                            <span>{row.game?.home_team || 'Home Team'}</span>
+                          </div>
+                        </div>
+                        <span className="desktop-matchup-league">
+                          {(() => { 
+                            const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
+                            return `${sport} | ${league}`; 
+                          })()}
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td>
                     <div style={{ display:'flex', flexDirection:'column', gap:2, textAlign:'left' }}>
@@ -2878,7 +2895,7 @@ export default function OddsTable({
                         title={mode === "props" ? getYesBetExplanation(row.mkt?.key, row.out?.name) : null}
                       >
                         {mode === "props" 
-                          ? (row.out?.description || row.out?.name || '')
+                          ? (row.out?.name || '')
                           : (row.mkt?.key || '') === 'h2h'
                             ? shortTeam(row.out?.name, row.game?.sport_key)
                             : (row.out?.name || '')}
