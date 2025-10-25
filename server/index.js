@@ -98,9 +98,9 @@ const TRIAL_BOOKMAKERS = [
 
 // Player props completely removed
 
-const MAX_BOOKMAKERS = 20; // Increased to accommodate more sportsbooks and DFS apps for player props
+const MAX_BOOKMAKERS = 999; // No limit - get all available bookmakers
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes for regular markets
-const PLAYER_PROPS_CACHE_DURATION_MS = 90 * 1000; // 90 seconds for player props (DFS markets close quickly)
+const PLAYER_PROPS_CACHE_DURATION_MS = 30 * 1000; // 30 seconds for player props (faster refresh for maximum coverage)
 const ALTERNATE_MARKETS_CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes for alternate markets
 
 // List of alternate markets that change less frequently
@@ -3165,7 +3165,7 @@ app.get('/api/player-props', requireUser, checkPlanAccess, async (req, res) => {
       ? [explicitGameId]
       : await getEventIdsForLeagueDate(league, date);
 
-    const eventIds = resolvedEventIds.slice(0, Number(req.query.limit || 10));
+    const eventIds = resolvedEventIds.slice(0, Number(req.query.limit || 999)); // No limit - get all games
 
     if (eventIds.length === 0) {
       return res.json({ stale: false, ttl: PLAYER_PROPS_CACHE_TTL_MS, as_of: new Date().toISOString(), items: [] });
