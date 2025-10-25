@@ -98,7 +98,7 @@ const TRIAL_BOOKMAKERS = [
 
 // Player props completely removed
 
-const MAX_BOOKMAKERS = 999; // No limit - get all available bookmakers
+const MAX_BOOKMAKERS = 25; // Limit to your specific sportsbooks
 const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes for regular markets
 const PLAYER_PROPS_CACHE_DURATION_MS = 30 * 1000; // 30 seconds for player props (faster refresh for maximum coverage)
 const ALTERNATE_MARKETS_CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes for alternate markets
