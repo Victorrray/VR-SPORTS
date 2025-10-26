@@ -96,18 +96,30 @@ app.post('/api/billing/webhook',
           return res.status(500).json({ error: 'Failed to retrieve subscription from Stripe' });
         }
         
-        // Validate subscription end date
-        if (!subscription.current_period_end) {
-          console.error('❌ Subscription missing current_period_end:', subscription);
-          return res.status(500).json({ error: 'Invalid subscription data from Stripe' });
+        // Get subscription end date - try multiple fields
+        console.log('📊 Subscription object fields:', {
+          current_period_end: subscription.current_period_end,
+          current_period_start: subscription.current_period_start,
+          trial_end: subscription.trial_end,
+          ended_at: subscription.ended_at,
+          cancel_at: subscription.cancel_at,
+          cancel_at_period_end: subscription.cancel_at_period_end,
+          billing_cycle_anchor: subscription.billing_cycle_anchor
+        });
+        
+        // Use current_period_end, or fallback to 30 days from now
+        let endTimestamp = subscription.current_period_end;
+        if (!endTimestamp) {
+          console.warn('⚠️ current_period_end missing, using 30 days from now as fallback');
+          endTimestamp = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60);
         }
         
-        const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
+        const subscriptionEndDate = new Date(endTimestamp * 1000);
         
         // Validate the date is valid
         if (isNaN(subscriptionEndDate.getTime())) {
           console.error('❌ Invalid subscription end date:', {
-            current_period_end: subscription.current_period_end,
+            endTimestamp: endTimestamp,
             calculated: subscriptionEndDate
           });
           return res.status(500).json({ error: 'Invalid subscription end date' });
