@@ -2343,30 +2343,46 @@ async function fetchQuarterMarketsForGame(eventId, sport, quarterMarkets, bookma
   }
   
   try {
-    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=us&markets=${quarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+    // TheOddsAPI requires comma-separated markets in the query string
+    const marketsParam = quarterMarkets.join(',');
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=us&markets=${encodeURIComponent(marketsParam)}&bookmakers=${encodeURIComponent(bookmakerList)}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
     
     console.log(`🎯 Fetching quarter markets for event ${eventId}: ${quarterMarkets.join(', ')}`);
+    console.log(`   URL: ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+    
     const response = await axios.get(url, { timeout: 5000 });
     
     if (response.data && response.data.bookmakers && response.data.bookmakers.length > 0) {
       const totalMarkets = response.data.bookmakers.reduce((sum, bm) => sum + (bm.markets?.length || 0), 0);
-      console.log(`✅ Got quarter markets for event ${eventId}: ${response.data.bookmakers.length} bookmakers with ${totalMarkets} markets`);
+      const totalOutcomes = response.data.bookmakers.reduce((sum, bm) => 
+        sum + (bm.markets?.reduce((mSum, m) => mSum + (m.outcomes?.length || 0), 0) || 0), 0);
+      
+      console.log(`✅ Got quarter markets for event ${eventId}: ${response.data.bookmakers.length} bookmakers with ${totalMarkets} markets and ${totalOutcomes} outcomes`);
       
       // Log sample data
       if (response.data.bookmakers[0]?.markets?.[0]) {
-        console.log(`   Sample market: ${response.data.bookmakers[0].markets[0].key} with ${response.data.bookmakers[0].markets[0].outcomes?.length || 0} outcomes`);
+        console.log(`   Sample: ${response.data.bookmakers[0].key} - ${response.data.bookmakers[0].markets[0].key} (${response.data.bookmakers[0].markets[0].outcomes?.length || 0} outcomes)`);
       }
       
       return response.data;
     } else {
       console.warn(`⚠️ No bookmakers or markets returned for event ${eventId}`);
-      console.log(`   Response data:`, response.data);
+      if (response.data) {
+        console.log(`   Response structure:`, {
+          has_bookmakers: !!response.data.bookmakers,
+          bookmakers_count: response.data.bookmakers?.length || 0,
+          keys: Object.keys(response.data)
+        });
+      }
       return null;
     }
   } catch (err) {
     console.warn(`⚠️ Failed to fetch quarter markets for event ${eventId}:`, err.message);
+    if (err.response?.status) {
+      console.warn(`   HTTP Status: ${err.response.status}`);
+    }
     if (err.response?.data) {
-      console.warn(`   API Error:`, err.response.data);
+      console.warn(`   API Error:`, JSON.stringify(err.response.data).substring(0, 200));
     }
     return null;
   }
