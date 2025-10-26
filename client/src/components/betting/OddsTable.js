@@ -17,6 +17,9 @@ import { getTeamLogos } from "../../constants/teamLogos";
 // Import player prop utilities
 import { extractPlayerName, formatMarketName, getYesNoExplanation } from "../../utils/playerPropUtils";
 
+// Import market name cache utility
+import { getMarketDisplayName as getCachedMarketName } from "../../utils/marketNameCache";
+
 // Use the imported utility function
 const getYesBetExplanation = getYesNoExplanation;
 
@@ -1662,17 +1665,9 @@ export default function OddsTable({
       return null;
     };
 
-    // Helper function to get market display name
+    // Helper function to get market display name (uses cached version)
     const getMarketDisplayName = (market) => {
-      const marketNames = {
-        h2h: "Moneyline",
-        spreads: "Spread", 
-        totals: "Total",
-        player_points: "Player Points",
-        player_rebounds: "Player Rebounds",
-        player_assists: "Player Assists"
-      };
-      return marketNames[market] || market;
+      return getCachedMarketName(market);
     };
 
     // Helper function to format selection text
