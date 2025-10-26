@@ -3351,23 +3351,9 @@ export default function OddsTable({
                                 return ob.price ?? ob.odds ?? '';
                               }
                               
-                              // Debug: Check what's in ob for quarter markets
-                              if (String(row.mkt?.key || '').includes('_q') || String(row.mkt?.key || '').includes('_h')) {
-                                console.log(`🎯 MINI-TABLE GRAB: Market ${row.mkt?.key}`, {
-                                  ob_price: ob.price,
-                                  ob_odds: ob.odds,
-                                  ob_keys: Object.keys(ob)
-                                });
-                              }
-                              
-                              // If ob already has price/odds set, use it directly (for game mode with pre-populated data)
-                              if (ob.price !== undefined || ob.odds !== undefined) {
-                                const result = ob.price ?? ob.odds ?? '';
-                                if (String(row.mkt?.key || '').includes('_q') || String(row.mkt?.key || '').includes('_h')) {
-                                  console.log(`🎯 MINI-TABLE GRAB: Using direct price/odds: ${result}`);
-                                }
-                                return result;
-                              }
+                              // For spreads/totals, we need to look up the correct outcome
+                              // ob.price/ob.odds is for the PRIMARY outcome (first column)
+                              // For the second column, we need to find the opposite outcome
                               
                               // Get all possible outcomes
                               let outs = [];
@@ -3384,30 +3370,19 @@ export default function OddsTable({
 
                               // Special handling for spreads - we want to match the exact point spread
                               if (isSpreads && outs.length > 0) {
-                                // Determine which team this column represents and what point to expect
+                                // Determine which team this column represents
                                 const teamName = top ? row.game.home_team : row.game.away_team;
-                                const rowPoint = Number(row.out.point ?? 0) || 0;
-                                // If this column is for the same team as the base row outcome,
-                                // use the same point; otherwise use the opposite sign.
-                                const expectedPoint = (row.out.name === teamName) ? rowPoint : -rowPoint;
                                 const teamLower = String(teamName).toLowerCase();
                                 const within = (a, b) => Math.abs(Number(a) - Number(b)) < 0.11; // small tolerance
 
-                                // 1) Exact match on team and point
-                                let match = outs.find(o => o && String(o.name).toLowerCase() === teamLower && within(o.point, expectedPoint));
-
-                                // 2) If not found, try matching same team with opposite point sign (books can invert sides)
-                                if (!match) {
-                                  match = outs.find(o => o && String(o.name).toLowerCase() === teamLower && within(o.point, -expectedPoint));
-                                }
-
-                                // 3) If still not found, match on team only
-                                if (!match) {
-                                  match = outs.find(o => o && String(o.name).toLowerCase() === teamLower);
-                                }
+                                // For spreads, find the outcome for this specific team
+                                // Don't worry about the point value - just match the team name
+                                let match = outs.find(o => o && String(o.name).toLowerCase() === teamLower);
 
                                 if (match) {
-                                  return match.price ?? match.odds ?? '';
+                                  const result = match.price ?? match.odds ?? '';
+                                  console.log(`🎯 SPREAD GRAB: Team=${teamName}, Column=${top ? 'Home' : 'Away'}, Result=${result}`);
+                                  return result;
                                 }
                               }
                               if (isML) {
