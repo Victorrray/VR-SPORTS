@@ -42,6 +42,7 @@ initSentry(app);
 app.post('/api/billing/webhook',
   bodyParser.raw({ type: 'application/json' }),
   async (req, res) => {
+    console.log('🔵 Webhook endpoint hit:', { path: req.path, method: req.method, hasBody: !!req.body });
     if (!stripe) {
       console.error('❌ Stripe not configured');
       return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' });
@@ -91,6 +92,7 @@ app.post('/api/billing/webhook',
         });
         
         // Update user plan and subscription end date in Supabase
+        console.log(`🔍 About to update Supabase for user: ${userId}`);
         const { error } = await supabase
           .from('users')
           .update({ 
@@ -147,7 +149,7 @@ app.post('/api/billing/webhook',
       
       res.json({ received: true });
     } catch (error) {
-      console.error('❌ Webhook handling error:', error);
+      console.error('❌ Webhook handling error:', { message: error.message, code: error.code, stack: error.stack, fullError: error.toString() });
       res.status(500).send('Webhook handler failed');
     }
   }
