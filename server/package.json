@@ -11,15 +11,19 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@sentry/node": "^10.22.0",
+    "@supabase/supabase-js": "^2.56.1",
     "axios": "^1.10.0",
-    "express-rate-limit": "^7.2.0",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.2.0",
     "helmet": "^7.1.0",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "serverless-http": "^4.0.0",
-    "stripe": "^18.5.0"
+    "stripe": "^18.5.0",
+    "winston": "^3.18.3"
   }
 }
