@@ -1804,6 +1804,17 @@ export default function OddsTable({
           };
 
           const allBooksForOutcome = allMarketOutcomes.filter(o => outcomeGroupKey(o) === groupKey && matchesPoint(o));
+          
+          // Debug logging for quarter markets
+          if (mktKey.includes('_q') || mktKey.includes('_h') || mktKey.includes('_p')) {
+            console.log(`🎯 QUARTER MARKET DEBUG: ${mktKey} - groupKey: ${groupKey}`);
+            console.log(`   Total outcomes in market: ${allMarketOutcomes.length}`);
+            console.log(`   Matching outcomes: ${allBooksForOutcome.length}`);
+            if (allBooksForOutcome.length > 0) {
+              console.log(`   Sample outcome:`, allBooksForOutcome[0]);
+            }
+          }
+          
           if (!allBooksForOutcome.length) return;
 
           // Separate selected bookmakers from non-selected ones for mini table
@@ -1853,6 +1864,11 @@ export default function OddsTable({
             nonSelectedBooks: nonSelectedBooks,
             sport: game.sport_key
           };
+          
+          // Debug logging for quarter markets
+          if (mktKey.includes('_q') || mktKey.includes('_h') || mktKey.includes('_p')) {
+            console.log(`🎯 QUARTER MARKET ROW: ${mktKey} - allBooks count: ${gameRow.allBooks.length}`);
+          }
 
           const hasValidOdds = Number(filteredOutcome.price || filteredOutcome.odds || 0) !== 0;
           const uniqueBooksWithOdds = new Set();
