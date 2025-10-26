@@ -2592,7 +2592,8 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
     console.log('Filtered to supported markets:', filteredRegularMarkets);
     
     // Separate quarter/half/period markets from base markets
-    // Quarter markets require separate API calls via /events/{eventId}/odds endpoint
+    // NOTE: TheOddsAPI documentation states quarter markets are available via /events/{eventId}/odds
+    // but actual availability depends on bookmaker support and may be limited
     const quarterMarketPatterns = ['_q1', '_q2', '_q3', '_q4', '_h1', '_h2', '_p1', '_p2', '_p3', '_1st_'];
     const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
     const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
@@ -2600,6 +2601,9 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
     console.log('📊 Market separation:');
     console.log('  Base markets:', baseMarkets);
     console.log('  Quarter/Half/Period markets:', quarterMarkets);
+    if (quarterMarkets.length > 0) {
+      console.log('  ⚠️ Note: Quarter market availability depends on bookmaker support');
+    }
     
     console.log('Regular markets requested:', regularMarkets);
     console.log('Player prop markets requested:', playerPropMarkets);
@@ -3214,14 +3218,19 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
     }
     
     // Step 3: Fetch quarter/half/period markets if requested
+    // NOTE: Quarter market availability is limited - many bookmakers don't provide them
     if (quarterMarkets.length > 0 && allGames.length > 0) {
       console.log(`🎯 Fetching quarter/half/period markets: ${quarterMarkets.join(', ')}`);
+      console.log(`   ⚠️ Note: Quarter markets have limited bookmaker support`);
       
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
       const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
       const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
       const bookmakerList = gameOddsBookmakers.join(',');
+      
+      let quarterMarketsFound = 0;
+      let quarterMarketsFailed = 0;
       
       // Fetch quarter markets for each game
       for (let i = 0; i < allGames.length; i++) {
@@ -3235,18 +3244,25 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
             oddsFormat
           );
           
-          if (quarterData) {
+          if (quarterData && quarterData.bookmakers && quarterData.bookmakers.length > 0) {
             // Merge quarter market data into the game
             allGames[i] = mergeQuarterMarkets(game, quarterData);
+            quarterMarketsFound++;
             console.log(`✅ Merged quarter markets for game ${allGames[i].id}`);
+          } else {
+            quarterMarketsFailed++;
           }
         } catch (err) {
+          quarterMarketsFailed++;
           console.warn(`⚠️ Failed to fetch quarter markets for game ${game.id}:`, err.message);
           // Continue with other games even if quarter markets fail
         }
       }
       
-      console.log(`✅ Quarter market fetching completed for ${allGames.length} games`);
+      console.log(`✅ Quarter market fetching completed: ${quarterMarketsFound} games with data, ${quarterMarketsFailed} without`);
+      if (quarterMarketsFound === 0) {
+        console.warn(`⚠️ No quarter market data returned - bookmakers may not support these markets`);
+      }
     }
     
     console.log(`🔍 Final response - returning ${allGames.length} games total`);
