@@ -2348,13 +2348,26 @@ async function fetchQuarterMarketsForGame(eventId, sport, quarterMarkets, bookma
     console.log(`🎯 Fetching quarter markets for event ${eventId}: ${quarterMarkets.join(', ')}`);
     const response = await axios.get(url, { timeout: 5000 });
     
-    if (response.data && response.data.bookmakers) {
-      console.log(`✅ Got quarter markets for event ${eventId}: ${response.data.bookmakers.length} bookmakers`);
+    if (response.data && response.data.bookmakers && response.data.bookmakers.length > 0) {
+      const totalMarkets = response.data.bookmakers.reduce((sum, bm) => sum + (bm.markets?.length || 0), 0);
+      console.log(`✅ Got quarter markets for event ${eventId}: ${response.data.bookmakers.length} bookmakers with ${totalMarkets} markets`);
+      
+      // Log sample data
+      if (response.data.bookmakers[0]?.markets?.[0]) {
+        console.log(`   Sample market: ${response.data.bookmakers[0].markets[0].key} with ${response.data.bookmakers[0].markets[0].outcomes?.length || 0} outcomes`);
+      }
+      
       return response.data;
+    } else {
+      console.warn(`⚠️ No bookmakers or markets returned for event ${eventId}`);
+      console.log(`   Response data:`, response.data);
+      return null;
     }
-    return null;
   } catch (err) {
     console.warn(`⚠️ Failed to fetch quarter markets for event ${eventId}:`, err.message);
+    if (err.response?.data) {
+      console.warn(`   API Error:`, err.response.data);
+    }
     return null;
   }
 }
@@ -3195,7 +3208,8 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
       const bookmakerList = gameOddsBookmakers.join(',');
       
       // Fetch quarter markets for each game
-      for (const game of allGames) {
+      for (let i = 0; i < allGames.length; i++) {
+        const game = allGames[i];
         try {
           const quarterData = await fetchQuarterMarketsForGame(
             game.id,
@@ -3207,8 +3221,8 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
           
           if (quarterData) {
             // Merge quarter market data into the game
-            game = mergeQuarterMarkets(game, quarterData);
-            console.log(`✅ Merged quarter markets for game ${game.id}`);
+            allGames[i] = mergeQuarterMarkets(game, quarterData);
+            console.log(`✅ Merged quarter markets for game ${allGames[i].id}`);
           }
         } catch (err) {
           console.warn(`⚠️ Failed to fetch quarter markets for game ${game.id}:`, err.message);
