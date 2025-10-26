@@ -96,11 +96,27 @@ app.post('/api/billing/webhook',
           return res.status(500).json({ error: 'Failed to retrieve subscription from Stripe' });
         }
         
+        // Validate subscription end date
+        if (!subscription.current_period_end) {
+          console.error('❌ Subscription missing current_period_end:', subscription);
+          return res.status(500).json({ error: 'Invalid subscription data from Stripe' });
+        }
+        
         const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
+        
+        // Validate the date is valid
+        if (isNaN(subscriptionEndDate.getTime())) {
+          console.error('❌ Invalid subscription end date:', {
+            current_period_end: subscription.current_period_end,
+            calculated: subscriptionEndDate
+          });
+          return res.status(500).json({ error: 'Invalid subscription end date' });
+        }
         
         console.log(`💳 Subscription retrieved:`, {
           subscriptionId: subscription.id,
           status: subscription.status,
+          current_period_end: subscription.current_period_end,
           endDate: subscriptionEndDate.toISOString()
         });
         
