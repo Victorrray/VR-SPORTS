@@ -3351,6 +3351,24 @@ export default function OddsTable({
                                 return ob.price ?? ob.odds ?? '';
                               }
                               
+                              // Debug: Check what's in ob for quarter markets
+                              if (String(row.mkt?.key || '').includes('_q') || String(row.mkt?.key || '').includes('_h')) {
+                                console.log(`🎯 MINI-TABLE GRAB: Market ${row.mkt?.key}`, {
+                                  ob_price: ob.price,
+                                  ob_odds: ob.odds,
+                                  ob_keys: Object.keys(ob)
+                                });
+                              }
+                              
+                              // If ob already has price/odds set, use it directly (for game mode with pre-populated data)
+                              if (ob.price !== undefined || ob.odds !== undefined) {
+                                const result = ob.price ?? ob.odds ?? '';
+                                if (String(row.mkt?.key || '').includes('_q') || String(row.mkt?.key || '').includes('_h')) {
+                                  console.log(`🎯 MINI-TABLE GRAB: Using direct price/odds: ${result}`);
+                                }
+                                return result;
+                              }
+                              
                               // Get all possible outcomes
                               let outs = [];
                               if (Array.isArray(ob?.market?.outcomes)) {
