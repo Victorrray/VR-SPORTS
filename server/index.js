@@ -2388,6 +2388,21 @@ async function fetchQuarterMarketsForGame(eventId, sport, quarterMarkets, bookma
   }
 }
 
+// Helper function to filter out bookmakers with empty markets or outcomes
+function cleanBookmakerData(game) {
+  if (!game.bookmakers) return game;
+  
+  // Filter bookmakers to only those with markets that have outcomes
+  game.bookmakers = game.bookmakers
+    .map(bm => ({
+      ...bm,
+      markets: (bm.markets || []).filter(m => m.outcomes && m.outcomes.length > 0)
+    }))
+    .filter(bm => bm.markets && bm.markets.length > 0);
+  
+  return game;
+}
+
 // Helper function to merge quarter markets into game data
 function mergeQuarterMarkets(gameData, quarterData) {
   if (!quarterData || !quarterData.bookmakers) {
@@ -3271,10 +3286,18 @@ app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
     console.log('🔍 Filtered markets used:', filteredRegularMarkets);
     console.log('🔍 Player prop markets requested:', playerPropMarkets);
     
+    // Clean bookmaker data: remove bookmakers without markets or markets without outcomes
+    const cleanedGames = allGames.map(game => cleanBookmakerData(game));
+    
+    // Filter out games with no bookmakers left after cleaning
+    const finalGames = cleanedGames.filter(game => game.bookmakers && game.bookmakers.length > 0);
+    
+    console.log(`🧹 Cleaned data: ${allGames.length} games → ${finalGames.length} games with valid bookmakers`);
+    
     // Usage already incremented per external API call above
     // No need to increment again here
     
-    res.json(allGames);
+    res.json(finalGames);
   } catch (err) {
     console.error("odds error:", err?.response?.status, err?.response?.data || err.message);
     const status = err?.response?.status || 500;

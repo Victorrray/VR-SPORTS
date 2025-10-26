@@ -1699,13 +1699,18 @@ export default function OddsTable({
         const allMarketOutcomes = [];
         game.bookmakers?.forEach(bk => {
           const mkt = bk.markets?.find(m => m.key === mktKey);
-          if (mkt && mkt.outcomes) {
+          // Only include bookmakers that have this specific market with outcomes
+          if (mkt && mkt.outcomes && mkt.outcomes.length > 0) {
             mkt.outcomes.forEach(out => {
               allMarketOutcomes.push({ ...out, book: bk.title, bookmaker: bk, market: mkt });
             });
           }
         });
-        if (!allMarketOutcomes.length) return;
+        // Skip this market if no bookmakers have it with actual odds
+        if (!allMarketOutcomes.length) {
+          console.log(`📊 No bookmakers have market ${mktKey} with outcomes for ${game.home_team} vs ${game.away_team}`);
+          return;
+        }
 
         // Enhanced logging for debugging bookFilter issues
         console.log(`🎯 Processing market ${mktKey} with ${allMarketOutcomes.length} outcomes. BookFilter:`, 

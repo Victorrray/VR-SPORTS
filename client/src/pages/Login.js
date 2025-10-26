@@ -189,7 +189,7 @@ export default function Login() {
           </button>
         )}
 
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '24px', marginBottom: '16px' }}>
           <button
             onClick={() => signInWithGoogle?.()}
             style={{
