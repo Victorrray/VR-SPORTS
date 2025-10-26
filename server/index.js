@@ -1,11 +1,17 @@
 // server/index.js
+require("dotenv").config();
+
+// Initialize Sentry FIRST (before any other code)
+const { initSentry, sentryErrorHandler } = require('./config/sentry');
+const { logger, logRequest, logError: logErrorUtil } = require('./config/logger');
+const { errorHandler, asyncHandler, notFoundHandler } = require('./middleware/errorHandler');
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const axios = require("axios");
 const bodyParser = require("body-parser");
-require("dotenv").config();
 
 // Import usage configuration
 const { FREE_QUOTA } = require("./config/usage.js");
@@ -28,9 +34,15 @@ if (supabase) {
 
 const app = express();
 
+// Initialize Sentry error tracking
+initSentry(app);
+
 // Increase header size limits to prevent 431 errors
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Add request logging middleware
+app.use(logRequest);
 
 const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ODDS_API_KEY;
@@ -4037,8 +4049,17 @@ app.get('/api/reactions-summary', (req, res) => {
   }
 });
 
+// Add health check routes
+const healthRoutes = require('./routes/health');
+app.use('/', healthRoutes);
 
 /* ------------------------------------ Start ------------------------------------ */
+// 404 handler - before SPA fallback
+app.use(notFoundHandler);
+
+// Error handling middleware - MUST be last
+app.use(errorHandler);
+
 // SPA fallback: keep last, after static and API routes.
 // Use a middleware without a path to catch unmatched GETs in Express 5 safely.
 app.use((req, res, next) => {
@@ -4054,15 +4075,20 @@ app.use((req, res, next) => {
 
 if (require.main === module) {
   app.listen(PORT, async () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
+    logger.info(`✅ Server running on http://localhost:${PORT}`, {
+      environment: process.env.NODE_ENV,
+      port: PORT,
+    });
     
     // Auto-start NFL odds caching if enabled
     if (process.env.AUTO_START_NFL_CACHE === 'true' && supabase) {
-      console.log('🏈 Auto-starting NFL odds caching...');
+      logger.info('🏈 Auto-starting NFL odds caching...');
       try {
         await oddsCacheService.startNFLUpdates();
       } catch (error) {
-        console.error('❌ Failed to auto-start NFL caching:', error.message);
+        logger.error('❌ Failed to auto-start NFL caching:', {
+          error: error.message,
+        });
       }
     }
   });

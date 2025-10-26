@@ -8,12 +8,14 @@
     "scan:secrets": "npx gitleaks detect --no-banner --redact || true"
   },
   "dependencies": {
+    "@sentry/node": "^10.22.0",
     "@supabase/supabase-js": "^2.56.1",
     "@tanstack/react-query": "^5.87.1",
     "axios": "^1.11.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
-    "react-query": "^3.39.3"
+    "react-query": "^3.39.3",
+    "winston": "^3.18.3"
   }
 }
