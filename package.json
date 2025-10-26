@@ -7,7 +7,7 @@
     "start": "node index.js",
     "scan:secrets": "npx gitleaks detect --no-banner --redact || true",
     "test": "jest",
-    "test:unit": "jest --testPathPattern='__tests__' --coverage",
+    "test:unit": "jest --testPathPatterns='server/__tests__' --coverage",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --max-warnings 0 || true",
