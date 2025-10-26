@@ -244,11 +244,7 @@ const Pricing = ({ onUpgrade }) => {
             <div className="features-grid-simple">
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>10+ sportsbooks</span>
-              </div>
-              <div className="feature-item-simple">
-                <Check size={16} />
-                <span>Line movement tracking</span>
+                <span>25+ sportsbooks</span>
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
@@ -260,7 +256,11 @@ const Pricing = ({ onUpgrade }) => {
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>Email support</span>
+                <span>Game lines & spreads</span>
+              </div>
+              <div className="feature-item-simple">
+                <Check size={16} />
+                <span>Real-time odds</span>
               </div>
             </div>
 
@@ -283,11 +283,6 @@ const Pricing = ({ onUpgrade }) => {
                 </>
               )}
             </button>
-
-            {/* Trust Signal */}
-            <div className="trust-signal-simple">
-              ✓ Cancel anytime
-            </div>
           </div>
 
           <div className="pricing-card platinum-card-simple">
@@ -316,7 +311,7 @@ const Pricing = ({ onUpgrade }) => {
             <div className="features-grid-simple">
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>15+ sportsbooks</span>
+                <span>25+ sportsbooks</span>
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
@@ -336,7 +331,7 @@ const Pricing = ({ onUpgrade }) => {
               </div>
               <div className="feature-item-simple">
                 <Check size={16} />
-                <span>Email support</span>
+                <span>Advanced analytics</span>
               </div>
             </div>
 

@@ -137,12 +137,11 @@ const Subscribe = () => {
               </h3>
               <div style={{ display: 'grid', gap: '12px' }}>
                 {[
-                  'Live odds from 10+ major sportsbooks',
-                  'Real-time line movement tracking',
+                  'Live odds from 25+ major sportsbooks',
                   'Advanced +EV bet finder',
                   'Player props and game lines',
                   'Arbitrage opportunities',
-                  'Email support',
+                  'Real-time odds updates',
                   'Unlimited API access'
                 ].map((feature, index) => (
                   <div key={index} style={{

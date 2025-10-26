@@ -263,7 +263,7 @@ export default function Landing() {
             </div>
             <div className="trust-item">
               <CheckCircle size={16} />
-              <span>7-day money back</span>
+              <span>25+ Sportsbooks</span>
             </div>
             <div className="trust-item">
               <CheckCircle size={16} />
@@ -339,7 +339,7 @@ export default function Landing() {
               {
                 step: '1',
                 title: 'Choose Your Plan',
-                description: 'Select Gold ($10/mo) or Platinum ($25/mo). Both include 7-day money-back guarantee.',
+                description: 'Select Gold ($10/mo) or Platinum ($25/mo). Both include access to 25+ sportsbooks.',
                 icon: Users
               },
               {
@@ -472,19 +472,19 @@ export default function Landing() {
             {[
               {
                 q: 'What\'s the difference between Gold and Platinum?',
-                a: 'Gold ($10/mo) includes 10+ sportsbooks, line movement tracking, +EV finder, and player props. Platinum ($25/mo) adds 5 more sportsbooks (15+ total), arbitrage opportunities, and live betting markets.'
+                a: 'Both plans include access to 25+ sportsbooks, +EV finder, and player props. Platinum ($25/mo) adds arbitrage opportunities, live betting markets, and advanced analytics for serious bettors.'
               },
               {
                 q: 'How accurate is the +EV calculation?',
-                a: 'Our algorithm uses industry-standard EV calculations based on real market data from 15+ sportsbooks. Results depend on your betting discipline.'
+                a: 'Our algorithm uses industry-standard EV calculations based on real market data from 25+ sportsbooks. Results depend on your betting discipline.'
               },
               {
                 q: 'Can I use this with my current sportsbooks?',
-                a: 'Absolutely! OddSightSeer works with DraftKings, FanDuel, BetMGM, Caesars, and 10+ other major sportsbooks.'
+                a: 'Absolutely! OddSightSeer works with DraftKings, FanDuel, BetMGM, Caesars, and 20+ other major sportsbooks.'
               },
               {
-                q: 'What if I\'m not satisfied?',
-                a: '7-day money-back guarantee on all Platinum subscriptions. No questions asked.'
+                q: 'Can I cancel anytime?',
+                a: 'Yes, you can cancel your subscription at any time. You\'ll have access until the end of your current billing period.'
               }
             ].map((faq, idx) => (
               <details key={idx} style={{
@@ -527,7 +527,7 @@ export default function Landing() {
               Choose Your <span className="gradient-text">Winning Plan</span>
             </h2>
             <p className="section-subtitle">
-              Both plans include 7-day money-back guarantee.
+              Both plans include access to 25+ sportsbooks.
             </p>
           </div>
           <Pricing />
