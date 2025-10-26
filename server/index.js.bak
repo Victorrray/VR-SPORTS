@@ -81,7 +81,7 @@ app.post('/api/billing/webhook',
         }
         
         // Get subscription details from Stripe
-        console.log(`🔍 Attempting to retrieve subscription: ${session.subscription}`);
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
         const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
         
         console.log(`💳 Subscription retrieved:`, {
