@@ -1346,10 +1346,36 @@ const corsMiddleware = (req, res, next) => {
 // Trust proxy (Render/Heroku) for correct IPs in rate-limiting
 app.set('trust proxy', 1);
 
-// Security headers
+// Security headers - Enhanced for production security
 app.use(helmet({
-  contentSecurityPolicy: false,
+  // Content Security Policy - prevent XSS attacks
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://api.stripe.com", "https://odds-backend-4e9q.onrender.com", "https://vr-sports.onrender.com"],
+      frameSrc: ["'self'", "https://js.stripe.com"],
+    },
+  },
+  // Prevent clickjacking attacks
+  frameguard: {
+    action: 'SAMEORIGIN',
+  },
+  // Prevent MIME type sniffing
+  noSniff: true,
+  // Enable HSTS (HTTP Strict Transport Security)
+  hsts: {
+    maxAge: 31536000, // 1 year in seconds
+    includeSubDomains: true,
+    preload: true,
+  },
+  // Cross-Origin Resource Policy
   crossOriginResourcePolicy: { policy: 'cross-origin' },
+  // Referrer Policy
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
 // Apply CORS middleware
