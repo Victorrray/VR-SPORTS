@@ -693,15 +693,15 @@
   }
 
   .userDropdown {
-    width: 100vw;
-    right: auto;
-    left: 0;
+    width: 320px;
+    right: 16px;
+    left: auto;
     top: auto;
     bottom: calc(100% + 0.8rem);
     animation: popOutUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform-origin: bottom center;
+    transform-origin: bottom right;
     margin: 0;
-    border-radius: 0;
+    border-radius: 12px;
   }
 }
 
