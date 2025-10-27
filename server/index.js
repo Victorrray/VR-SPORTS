@@ -79,6 +79,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Request logging
 app.use(logRequest);
 
+// Authentication middleware - MUST be before routes
+// This extracts the JWT token from Authorization header and populates req.user
+const { authenticate } = require('./middleware/auth');
+app.use(authenticate);
+
 // Static file serving
 const clientBuildPath = path.join(__dirname, '../client/build');
 if (fs.existsSync(clientBuildPath)) {
