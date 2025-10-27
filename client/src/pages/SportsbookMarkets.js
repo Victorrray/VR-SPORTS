@@ -204,7 +204,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { me } = useMe();
+  const { me, loading: meLoading } = useMe();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
   
   // Get user's saved sportsbook selections by mode
@@ -472,6 +472,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Initialize mode and search query from URL parameters
   useEffect(() => {
+    // Skip if plan data is still loading - wait for hasPlatinum to be determined
+    if (meLoading) {
+      console.log('⏳ Waiting for plan data to load before initializing mode...');
+      return;
+    }
+    
     // Check for mode and query parameters in URL
     const searchParams = new URLSearchParams(location.search);
     const mode = searchParams.get('mode');
@@ -515,7 +521,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         setShowMiddles(false);
       }
     }
-  }, [location.search, hasPlatinum]); // Only run when URL parameters or platinum status changes
+  }, [location.search, hasPlatinum, meLoading]); // Only run when URL parameters, platinum status, or loading state changes
 
   // Listen for changes to user's sportsbook selections
   useEffect(() => {
