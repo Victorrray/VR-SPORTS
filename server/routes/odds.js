@@ -340,8 +340,34 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // Step 2: Fetch player props if requested
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
       console.log('🎯 Fetching player props for markets:', playerPropMarkets);
-      // Player props logic would go here - truncated for brevity
-      // This is handled by the /api/player-props endpoint
+      
+      const userProfile = req.__userProfile || { plan: 'free' };
+      const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+      
+      // Filter to DFS apps only for player props
+      const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+      const playerPropsBookmakers = allowedBookmakers.filter(book => dfsApps.includes(book));
+      const bookmakerList = playerPropsBookmakers.join(',');
+      
+      console.log(`🎯 Player props bookmakers for ${sportsArray.join(', ')}: ${bookmakerList}`);
+      
+      for (const sport of sportsArray) {
+        try {
+          // Make API call for player props
+          const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+          
+          console.log(`🔍 Fetching player props for ${sport}...`);
+          const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 30000 });
+          
+          if (playerPropsResponse.data && playerPropsResponse.data.data) {
+            console.log(`✅ Got ${playerPropsResponse.data.data.length} player prop games for ${sport}`);
+            allGames.push(...playerPropsResponse.data.data);
+          }
+        } catch (playerPropsErr) {
+          console.warn(`⚠️ Player props fetch error for ${sport}:`, playerPropsErr.message);
+          // Continue with other sports even if one fails
+        }
+      }
     }
     
     res.json(allGames);
