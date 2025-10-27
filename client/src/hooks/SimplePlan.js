@@ -34,8 +34,7 @@ export function usePlan() {
       console.log('🔐 Session user:', session?.user?.id);
       
       const headers = { 
-        'x-user-id': user.id,
-        'Cache-Control': 'no-cache' // Prevent caching
+        'x-user-id': user.id
       };
       
       // Add auth token if available
