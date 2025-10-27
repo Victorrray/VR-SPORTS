@@ -1,9 +1,9 @@
 .filter-menu-container {
   position: fixed;
-  left: 16px; /* Align to left edge with padding */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Offset by half width to truly center */
   bottom: 140px; /* Position slightly lower to prevent cutoff */
-  transform: none; /* No transform needed */
-  margin-left: 0px; /* No margin shift needed */
+  margin-left: -70px; /* Half of button width to center it */
   z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
@@ -53,9 +53,9 @@
 @media (max-width: 768px) {
   .filter-menu-container {
     bottom: 140px; /* Position slightly lower to prevent cutoff */
-    left: 16px; /* Align to left edge with padding */
-    transform: none; /* No transform needed */
-    margin-left: 0; /* No margin shift needed */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Offset by half width to truly center */
+    margin-left: -60px; /* Half of button width to center it */
     display: block !important; /* Force display on mobile */
     width: 120px;
   }
@@ -72,9 +72,9 @@
 @media (max-width: 380px) {
   .filter-menu-container {
     bottom: 140px; /* Position slightly lower to prevent cutoff */
-    left: 12px; /* Align to left edge with padding */
-    transform: none; /* No transform needed */
-    margin-left: 0; /* No margin shift needed */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Offset by half width to truly center */
+    margin-left: -55px; /* Half of button width to center it */
     width: 110px;
   }
   
