@@ -680,7 +680,11 @@
   }
 
   .userButton {
-    padding: 0.4rem;
+    display: none;
+  }
+
+  .planBadge {
+    display: none;
   }
 
   .userAvatar {
