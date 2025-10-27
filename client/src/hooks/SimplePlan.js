@@ -20,12 +20,24 @@ export function usePlan() {
       console.log('🔄 Fetching plan for user:', user.id);
       console.log('🔄 API URL:', `${API_BASE_URL}/api/me`);
       
-      const res = await axios.get(`${API_BASE_URL}/api/me`, {
-        headers: { 
-          'x-user-id': user.id,
-          'Cache-Control': 'no-cache' // Prevent caching
-        }
-      });
+      // Get Supabase session token for authentication
+      const { supabase } = await import('../lib/supabase');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      const headers = { 
+        'x-user-id': user.id,
+        'Cache-Control': 'no-cache' // Prevent caching
+      };
+      
+      // Add auth token if available
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token });
+      
+      const res = await axios.get(`${API_BASE_URL}/api/me`, { headers });
       
       console.log('✅ Plan API response:', res.data);
       console.log('✅ Plan value:', res.data.plan);
@@ -36,6 +48,7 @@ export function usePlan() {
     } catch (err) {
       console.error('❌ Plan fetch error:', err);
       console.error('❌ Error details:', err.response?.data);
+      console.error('❌ Error status:', err.response?.status);
       // Default to free plan on error
       setPlan({ plan: 'free', remaining: 250, limit: 250 });
       setPlanLoading(false);
