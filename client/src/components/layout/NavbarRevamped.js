@@ -68,10 +68,14 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
     setSearchActive(false);
   }
 
-  const handleLogout = () => {
-    auth?.logout?.();
-    setUserMenuOpen(false);
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await auth?.signOut?.();
+      setUserMenuOpen(false);
+      navigate("/");
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleUpgrade = () => {
@@ -171,7 +175,7 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
                       <User size={20} />
                     </div>
                     <div className={styles.userDetails}>
-                      <div className={styles.userName}>{user?.email || "User"}</div>
+                      <div className={styles.userName}>{me?.username || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User"}</div>
                       <div className={styles.userPlan}>
                         {me?.plan ? `${me.plan.charAt(0).toUpperCase() + me.plan.slice(1)} Plan` : "Free Plan"}
                       </div>
