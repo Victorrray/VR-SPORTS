@@ -2844,7 +2844,7 @@ export default function OddsTable({
                       className="mob-prop-type"
                       data-market={row.mkt?.key?.replace(/player_|_/g, '_').toUpperCase()}
                     >
-                      {row.mkt.name}
+                      {row.mkt.name || formatMarket(row.mkt?.key)}
                     </div>
                   </div>
                 );
