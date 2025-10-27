@@ -350,6 +350,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const bookmakerList = playerPropsBookmakers.join(',');
       
       console.log(`🎯 Player props bookmakers for ${sportsArray.join(', ')}: ${bookmakerList}`);
+      console.log(`🔍 Player props bookmakers details: ${JSON.stringify(playerPropsBookmakers)}`);
       
       for (const sport of sportsArray) {
         try {
@@ -357,7 +358,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
           
           console.log(`🔍 Fetching player props for ${sport}...`);
+          console.log(`🔍 Player props API call: ${playerPropsUrl}`);
           const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 30000 });
+          console.log(`🔍 Player props response: ${JSON.stringify(playerPropsResponse.data)}`);
           
           if (playerPropsResponse.data && playerPropsResponse.data.data) {
             console.log(`✅ Got ${playerPropsResponse.data.data.length} player prop games for ${sport}`);
@@ -365,6 +368,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           }
         } catch (playerPropsErr) {
           console.warn(`⚠️ Player props fetch error for ${sport}:`, playerPropsErr.message);
+          console.log(`⚠️ Player props error details: ${JSON.stringify(playerPropsErr.response?.data)}`);
           // Continue with other sports even if one fails
         }
       }
