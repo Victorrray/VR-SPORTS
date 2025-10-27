@@ -130,7 +130,18 @@ export const secureFetch = async (url, options = {}) => {
   }
 
   try {
+    console.log('🔐 secureFetch: Final headers being sent:', {
+      hasAuth: !!headers['Authorization'],
+      authPrefix: headers['Authorization']?.substring(0, 30),
+      hasUserId: !!headers['x-user-id'],
+      userId: headers['x-user-id'],
+      url: url,
+      method: method
+    });
+    
     const response = await fetch(url, secureOptions);
+    
+    console.log('🔐 secureFetch: Response status:', response.status);
     
     // Check for security-related errors
     if (response.status === 403) {
