@@ -234,15 +234,30 @@ async function authenticate(req, _res, next) {
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
     const supabase = req.app.locals.supabase;
     
-    if (token && supabase && typeof supabase.auth?.getUser === 'function') {
-      const { data, error } = await supabase.auth.getUser(token);
-      if (!error && data?.user) {
-        req.user = data.user;
+    console.log('🔐 authenticate: Checking token:', !!token, 'supabase:', !!supabase);
+    
+    if (token && supabase) {
+      try {
+        // Use the token to get the user - this creates a client with the token
+        const { data, error } = await supabase.auth.getUser(token);
+        
+        console.log('🔐 authenticate: getUser result - error:', !!error, 'user:', !!data?.user);
+        
+        if (!error && data?.user) {
+          req.user = data.user;
+          console.log('✅ authenticate: User authenticated:', data.user.id);
+        } else if (error) {
+          console.warn('⚠️ authenticate: Token verification error:', error.message);
+        }
+      } catch (tokenError) {
+        console.warn('⚠️ authenticate: Token verification exception:', tokenError.message);
       }
+    } else {
+      console.log('🔐 authenticate: No token or supabase available');
     }
   } catch (e) {
     // Non-fatal: continue without req.user
-    console.warn('Auth token verification failed:', e.message);
+    console.warn('❌ Auth middleware error:', e.message);
   }
   next();
 }
