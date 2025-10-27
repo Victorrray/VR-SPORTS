@@ -302,9 +302,76 @@ function formatLine(line, marketKey, mode="game") {
 }
 function formatMarket(key="") {
   const k = String(key).toLowerCase();
+  
+  // Quarter/Half/Period markets
+  if (k === "h2h_q1") return "1st Quarter Moneyline";
+  if (k === "h2h_q2") return "2nd Quarter Moneyline";
+  if (k === "h2h_q3") return "3rd Quarter Moneyline";
+  if (k === "h2h_q4") return "4th Quarter Moneyline";
+  if (k === "h2h_h1") return "1st Half Moneyline";
+  if (k === "h2h_h2") return "2nd Half Moneyline";
+  if (k === "h2h_p1") return "1st Period Moneyline";
+  if (k === "h2h_p2") return "2nd Period Moneyline";
+  if (k === "h2h_p3") return "3rd Period Moneyline";
+  
+  // 3-way markets
+  if (k === "h2h_3_way") return "3-Way Moneyline";
+  if (k === "h2h_3_way_q1") return "1st Quarter 3-Way";
+  if (k === "h2h_3_way_q2") return "2nd Quarter 3-Way";
+  if (k === "h2h_3_way_q3") return "3rd Quarter 3-Way";
+  if (k === "h2h_3_way_q4") return "4th Quarter 3-Way";
+  if (k === "h2h_3_way_h1") return "1st Half 3-Way";
+  if (k === "h2h_3_way_h2") return "2nd Half 3-Way";
+  if (k === "h2h_3_way_p1") return "1st Period 3-Way";
+  if (k === "h2h_3_way_p2") return "2nd Period 3-Way";
+  if (k === "h2h_3_way_p3") return "3rd Period 3-Way";
+  
+  // Spread markets with periods
+  if (k === "spreads_q1") return "1st Quarter Spread";
+  if (k === "spreads_q2") return "2nd Quarter Spread";
+  if (k === "spreads_q3") return "3rd Quarter Spread";
+  if (k === "spreads_q4") return "4th Quarter Spread";
+  if (k === "spreads_h1") return "1st Half Spread";
+  if (k === "spreads_h2") return "2nd Half Spread";
+  if (k === "spreads_p1") return "1st Period Spread";
+  if (k === "spreads_p2") return "2nd Period Spread";
+  if (k === "spreads_p3") return "3rd Period Spread";
+  
+  // Totals markets with periods
+  if (k === "totals_q1") return "1st Quarter Total";
+  if (k === "totals_q2") return "2nd Quarter Total";
+  if (k === "totals_q3") return "3rd Quarter Total";
+  if (k === "totals_q4") return "4th Quarter Total";
+  if (k === "totals_h1") return "1st Half Total";
+  if (k === "totals_h2") return "2nd Half Total";
+  if (k === "totals_p1") return "1st Period Total";
+  if (k === "totals_p2") return "2nd Period Total";
+  if (k === "totals_p3") return "3rd Period Total";
+  
+  // Alternate markets with periods
+  if (k === "alternate_spreads_q1") return "1st Quarter Alt Spread";
+  if (k === "alternate_spreads_q2") return "2nd Quarter Alt Spread";
+  if (k === "alternate_spreads_q3") return "3rd Quarter Alt Spread";
+  if (k === "alternate_spreads_q4") return "4th Quarter Alt Spread";
+  if (k === "alternate_totals_q1") return "1st Quarter Alt Total";
+  if (k === "alternate_totals_q2") return "2nd Quarter Alt Total";
+  if (k === "alternate_totals_q3") return "3rd Quarter Alt Total";
+  if (k === "alternate_totals_q4") return "4th Quarter Alt Total";
+  
+  // Team totals with periods
+  if (k === "team_totals_q1") return "1st Quarter Team Total";
+  if (k === "team_totals_q2") return "2nd Quarter Team Total";
+  if (k === "team_totals_q3") return "3rd Quarter Team Total";
+  if (k === "team_totals_q4") return "4th Quarter Team Total";
+  if (k === "team_totals_h1") return "1st Half Team Total";
+  if (k === "team_totals_h2") return "2nd Half Team Total";
+  
+  // Base markets
   if (k === "h2h") return "MONEYLINE";
   if (k.includes("spread")) return "SPREAD";
   if (k.includes("total")) return "TOTAL";
+  if (k === "draw_no_bet") return "Draw No Bet";
+  if (k === "btts") return "Both Teams to Score";
   
   // Use our utility function for player props
   if (k.startsWith('player_') || k.startsWith('batter_') || k.startsWith('pitcher_')) {
