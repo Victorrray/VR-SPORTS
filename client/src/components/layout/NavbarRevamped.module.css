@@ -627,6 +627,11 @@
     margin-right: 0;
   }
 
+  .hamburger:hover {
+    background: none;
+    color: var(--navbar-text);
+  }
+
   .brand {
     position: absolute;
     left: 50%;
