@@ -43,12 +43,21 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
 
   const navLinks = [
     { label: "Home", to: "/", icon: Home },
-    { label: "Odds", to: "/sportsbooks", icon: BarChart3 },
+    { label: "Odds", to: "/sportsbooks", icon: BarChart3, requiresAuth: true },
     { label: "Picks", to: "/picks", icon: TrendingUp, requiresAuth: true },
-    { label: "Scores", to: "/scores", icon: Shield },
+    { label: "Scores", to: "/scores", icon: Shield, requiresAuth: true },
   ];
 
-  const filteredNavLinks = navLinks.filter(link => !link.requiresAuth || user);
+  // Don't filter - show all links but handle clicks for protected routes
+  const filteredNavLinks = navLinks;
+
+  // Handle navigation for protected routes
+  const handleNavClick = (link, e) => {
+    if (link.requiresAuth && !user) {
+      e.preventDefault();
+      navigate("/login");
+    }
+  };
 
   function handleSearchSubmit(e) {
     e.preventDefault();
@@ -112,6 +121,7 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
               <Link
                 key={link.to}
                 to={link.to}
+                onClick={(e) => handleNavClick(link, e)}
                 className={`${styles.navLink} ${isActive(link.to) ? styles.active : ""}`}
                 title={link.label}
               >
@@ -265,7 +275,10 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
                   key={link.to}
                   to={link.to}
                   className={`${styles.mobileNavLink} ${isActive(link.to) ? styles.active : ""}`}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    handleNavClick(link, e);
+                    setMobileMenuOpen(false);
+                  }}
                 >
                   <Icon size={20} />
                   <span>{link.label}</span>
