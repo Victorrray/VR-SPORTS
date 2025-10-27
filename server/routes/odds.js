@@ -351,4 +351,191 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
   }
 });
 
+/**
+ * GET /api/odds-data
+ * Legacy endpoint for odds snapshots
+ */
+router.get('/odds-data', enforceUsage, async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    const sport = req.query.sport || "basketball_nba";
+    const regions = req.query.regions || "us";
+    const markets = req.query.markets || "h2h,spreads,totals";
+    const oddsFormat = req.query.oddsFormat || "american";
+    const includeBetLimits = req.query.includeBetLimits;
+
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(
+      sport
+    )}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}${
+      includeBetLimits ? `&includeBetLimits=${encodeURIComponent(includeBetLimits)}` : ""
+    }`;
+
+    const r = await axios.get(url);
+    res.json(r.data);
+  } catch (err) {
+    console.error("odds-data error:", err?.response?.status, err?.response?.data || err.message);
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: String(err) });
+  }
+});
+
+/**
+ * GET /api/cached-odds/:sport
+ * Get cached odds from Supabase for any sport
+ */
+router.get('/cached-odds/:sport', enforceUsage, async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const { markets, bookmakers, eventId } = req.query;
+    const oddsCacheService = req.app.locals.oddsCacheService;
+    
+    // Map short sport names to full keys
+    const sportKeyMap = {
+      'nfl': 'americanfootball_nfl',
+      'ncaaf': 'americanfootball_ncaaf',
+      'nba': 'basketball_nba',
+      'ncaab': 'basketball_ncaab',
+      'mlb': 'baseball_mlb',
+      'nhl': 'icehockey_nhl',
+      'epl': 'soccer_epl'
+    };
+    
+    const sportKey = sportKeyMap[sport] || sport;
+    console.log(`📦 Fetching cached odds for sport: ${sportKey}`);
+    
+    const options = {
+      markets: markets ? markets.split(',') : null,
+      bookmakers: bookmakers ? bookmakers.split(',') : null,
+      eventId: eventId || null
+    };
+
+    const cachedOdds = await oddsCacheService.getCachedOdds(sportKey, options);
+    const transformedData = transformCachedOddsToFrontend(cachedOdds);
+    
+    console.log(`✅ Returning ${transformedData.length} cached games for ${sportKey}`);
+    
+    res.set('Cache-Control', 'public, max-age=30');
+    res.json(transformedData);
+  } catch (err) {
+    console.error('Cached odds error:', err);
+    res.status(500).json({ error: 'Failed to get cached odds', detail: err.message });
+  }
+});
+
+/**
+ * POST /api/cached-odds/nfl/update
+ * Manual trigger for NFL odds update (admin only)
+ */
+router.post('/cached-odds/nfl/update', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+    
+    if (adminKey !== ADMIN_API_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const oddsCacheService = req.app.locals.oddsCacheService;
+    const result = await oddsCacheService.updateNFLOdds();
+    
+    res.json({ 
+      success: true, 
+      message: 'NFL odds updated successfully',
+      ...result 
+    });
+  } catch (err) {
+    console.error('Manual update error:', err);
+    res.status(500).json({ error: 'Failed to update odds', detail: err.message });
+  }
+});
+
+/**
+ * GET /api/cached-odds/stats
+ * Get update statistics
+ */
+router.get('/cached-odds/stats', async (req, res) => {
+  try {
+    const { sport = 'americanfootball_nfl', limit = 10 } = req.query;
+    const oddsCacheService = req.app.locals.oddsCacheService;
+    
+    const stats = await oddsCacheService.getUpdateStats(sport, parseInt(limit));
+    res.json({ stats });
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Failed to get stats', detail: err.message });
+  }
+});
+
+/**
+ * POST /api/cached-odds/nfl/control
+ * Start/stop NFL updates (admin only)
+ */
+router.post('/cached-odds/nfl/control', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+    
+    if (adminKey !== ADMIN_API_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { action } = req.body;
+    const oddsCacheService = req.app.locals.oddsCacheService;
+    
+    if (action === 'start') {
+      await oddsCacheService.startNFLUpdates();
+      res.json({ success: true, message: 'NFL updates started' });
+    } else if (action === 'stop') {
+      await oddsCacheService.stopNFLUpdates();
+      res.json({ success: true, message: 'NFL updates stopped' });
+    } else {
+      res.status(400).json({ error: 'Invalid action. Use "start" or "stop"' });
+    }
+  } catch (err) {
+    console.error('Control error:', err);
+    res.status(500).json({ error: 'Failed to control updates', detail: err.message });
+  }
+});
+
+/**
+ * Helper function to transform cached odds to frontend format
+ */
+function transformCachedOddsToFrontend(cachedOdds) {
+  const eventsMap = new Map();
+
+  for (const odd of cachedOdds) {
+    if (!eventsMap.has(odd.event_id)) {
+      eventsMap.set(odd.event_id, {
+        id: odd.event_id,
+        sport_key: odd.sport_key,
+        sport_title: 'NFL',
+        commence_time: odd.commence_time,
+        home_team: odd.event_name.split(' @ ')[1],
+        away_team: odd.event_name.split(' @ ')[0],
+        bookmakers: []
+      });
+    }
+
+    const event = eventsMap.get(odd.event_id);
+    let bookmaker = event.bookmakers.find(b => b.key === odd.bookmaker_key);
+    
+    if (!bookmaker) {
+      bookmaker = {
+        key: odd.bookmaker_key,
+        title: odd.bookmaker_key,
+        markets: []
+      };
+      event.bookmakers.push(bookmaker);
+    }
+
+    bookmaker.markets.push({
+      key: odd.market_key,
+      last_update: odd.last_updated,
+      outcomes: odd.outcomes
+    });
+  }
+
+  return Array.from(eventsMap.values());
+}
+
 module.exports = router;
