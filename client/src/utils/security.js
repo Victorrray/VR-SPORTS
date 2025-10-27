@@ -53,15 +53,25 @@ export const secureFetch = async (url, options = {}) => {
       const cached = getAccessToken?.();
 
       // Always attempt to resolve the current session so we can attach the user id
-      const { data: { session } = {} } = await supabase?.auth?.getSession?.() || { data: {} };
+      let session = null;
+      try {
+        const result = await supabase?.auth?.getSession?.();
+        session = result?.data?.session;
+      } catch (e) {
+        console.error('Error getting session:', e);
+      }
 
       const accessToken = session?.access_token || cached;
       if (accessToken) {
         headers['Authorization'] = `Bearer ${accessToken}`;
+        console.log('🔐 secureFetch: Added Authorization header');
+      } else {
+        console.warn('⚠️ secureFetch: No access token available');
       }
 
       if (session?.user?.id) {
         headers['x-user-id'] = session.user.id;
+        console.log('🔐 secureFetch: Added x-user-id header:', session.user.id);
       }
 
       // Fallback: check stored session snapshots for user id (custom persistence)
@@ -71,7 +81,10 @@ export const secureFetch = async (url, options = {}) => {
           if (storedSession) {
             const parsed = JSON.parse(storedSession);
             const storedId = parsed?.user?.id;
-            if (storedId) headers['x-user-id'] = storedId;
+            if (storedId) {
+              headers['x-user-id'] = storedId;
+              console.log('🔐 secureFetch: Added x-user-id from localStorage:', storedId);
+            }
           }
         } catch (_) {}
       }
@@ -84,11 +97,14 @@ export const secureFetch = async (url, options = {}) => {
             const sessionData = JSON.parse(demoSession);
             if (sessionData.id) {
               headers['x-user-id'] = sessionData.id;
+              console.log('🔐 secureFetch: Added x-user-id from demo session:', sessionData.id);
             }
           }
         } catch (_) {}
       }
-    } catch (_) {}
+    } catch (e) {
+      console.error('❌ secureFetch: Error setting up auth headers:', e);
+    }
   }
 
   // Only attach CSRF and X-Requested-With for same-origin requests
