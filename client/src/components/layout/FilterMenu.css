@@ -1,7 +1,7 @@
 .filter-menu-container {
   position: fixed;
   left: 16px; /* Align to left edge with padding */
-  bottom: calc(100% - 120px); /* Position in content area, near top of viewport */
+  bottom: 80px; /* Position just above the bottom bar */
   transform: none; /* No transform needed */
   margin-left: 0px; /* No margin shift needed */
   z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
@@ -51,7 +51,7 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .filter-menu-container {
-    bottom: calc(100% - 120px); /* Position in content area */
+    bottom: 80px; /* Position just above the bottom bar */
     left: 16px; /* Align to left edge with padding */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
@@ -70,7 +70,7 @@
 
 @media (max-width: 380px) {
   .filter-menu-container {
-    bottom: calc(100% - 120px); /* Position in content area */
+    bottom: 80px; /* Position just above the bottom bar */
     left: 12px; /* Align to left edge with padding */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
