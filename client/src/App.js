@@ -11,7 +11,7 @@ import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import { initBrowserCompat } from './utils/browserCompat';
 import DebugPanel from './components/debug/DebugPanel';
-import Navbar from './components/layout/Navbar';
+import NavbarRevamped from './components/layout/NavbarRevamped';
 import MobileBottomBar from './components/layout/MobileBottomBar';
 import Footer from './components/layout/Footer';
 import Landing from './pages/Landing';
@@ -109,7 +109,7 @@ function AppRoutes() {
       <div className="app">
         <div className="app-layout">
           <LoadingBar />
-          <Navbar onOpenMobileSearch={() => {
+          <NavbarRevamped onOpenMobileSearch={() => {
             console.log('Navbar: onOpenMobileSearch called, callback exists:', !!mobileSearchCallback);
             if (mobileSearchCallback) {
               mobileSearchCallback();
