@@ -1,0 +1,3461 @@
+// server/index.js
+require("dotenv").config();
+
+// Initialize Sentry FIRST (before any other code)
+const { initSentry, sentryErrorHandler } = require('./config/sentry');
+const { logger, logRequest, logError: logErrorUtil } = require('./config/logger');
+const { errorHandler, asyncHandler, notFoundHandler } = require('./middleware/errorHandler');
+
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const axios = require("axios");
+const bodyParser = require("body-parser");
+
+// Import usage configuration
+const { FREE_QUOTA } = require("./config/usage.js");
+
+// Initialize Stripe after dotenv loads
+const Stripe = require("stripe");
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+
+// Initialize Supabase client for server operations
+const { createClient } = require('@supabase/supabase-js');
+const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY 
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
+
+// Initialize Odds Cache Service
+const oddsCacheService = require('./services/oddsCache');
+if (supabase) {
+  oddsCacheService.initialize(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+const app = express();
+
+// Initialize Sentry error tracking
+initSentry(app);
+
+// Billing webhook extracted to server/routes/billing.js
+// NOTE: Webhook must be registered BEFORE express.json() middleware
+
+// NOW apply express.json() for all other routes
+// Increase header size limits to prevent 431 errors
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Add request logging middleware
+app.use(logRequest);
+
+const PORT = process.env.PORT || 10000;
+const API_KEY = process.env.ODDS_API_KEY;
+const SPORTSGAMEODDS_API_KEY = process.env.SPORTSGAMEODDS_API_KEY || null;
+const PLAYER_PROPS_API_BASE = process.env.PLAYER_PROPS_API_BASE || null;
+const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 === 'true';
+const REMOVE_API_LIMITS = process.env.REMOVE_API_LIMITS === 'true'; // Testing flag to remove all API limits
+const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 30_000);
+const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
+const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = 50; // Increased from 25 to 50
+const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = 25;   // Keep at 25 books
+const PLAYER_PROPS_REQUEST_TIMEOUT = 30000;      // Increased from 15s to 30s
+const PLAYER_PROPS_MAX_CACHE_ENTRIES = 100;      // Increased from 50 to 100
+
+// Known invalid markets that should be filtered out
+const INVALID_PLAYER_PROP_MARKETS = [
+  'player_2_plus_tds',
+  'player_receiving_yds',
+  'player_receiving_tds', 
+  'player_receiving_longest'
+];
+
+// Function to filter out invalid markets
+function filterValidMarkets(markets) {
+  return markets.filter(market => !INVALID_PLAYER_PROP_MARKETS.includes(market));
+}
+
+// Stripe configuration
+const STRIPE_PRICE_GOLD = process.env.STRIPE_PRICE_GOLD || process.env.STRIPE_PRICE_PLATINUM; // Backward compatibility
+const STRIPE_PRICE_PLATINUM = process.env.STRIPE_PRICE_PLATINUM || process.env.STRIPE_PRICE_GOLD; // Backward compatibility
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+const FRONTEND_URL = process.env.FRONTEND_URL || process.env.APP_URL || 'http://localhost:3000';
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
+
+// In-memory storage for usage tracking (replace with Supabase in production)
+const userUsage = new Map(); // user_id -> { period_start, period_end, calls_made }
+// userPlans removed - now using Supabase exclusively for plan management
+
+// Constants for improved player props stability and COST REDUCTION
+const FOCUSED_BOOKMAKERS = [
+  // DFS apps for player props (prioritized for slice limit)
+  "prizepicks", "underdog", "pick6", "draftkings_pick6", "dabble_au",
+  // Sharp books and exchanges (high priority)
+  "pinnacle", "prophet_exchange", "rebet",
+  // US region books
+  "draftkings", "fanduel", "betmgm", "caesars", "williamhill_us", "pointsbet", "bovada", 
+  "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
+  "hardrock", "hardrockbet", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
+  "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
+  // Other exchange books
+  "betopenly", "prophetx"
+];
+
+// Trial user bookmaker restrictions (expanded to include all major sportsbooks and DFS apps for player props)
+const TRIAL_BOOKMAKERS = [
+  // DFS apps for player props (prioritized for slice limit)
+  "prizepicks", "underdog", "pick6", "draftkings_pick6", "dabble_au",
+  // Sharp books and exchanges (high priority)
+  "pinnacle", "prophet_exchange", "rebet",
+  // Major sportsbooks
+  "draftkings", "fanduel", "caesars", "williamhill_us", "betmgm", "pointsbet", "betrivers", 
+  "unibet", "bovada", "betonline", "fliff", "hardrock", "hardrockbet", "novig", "wynnbet",
+  "espnbet", "fanatics", "betopenly", "prophetx"
+];
+
+// Player props completely removed
+
+const MAX_BOOKMAKERS = 25; // Limit to your specific sportsbooks
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes for regular markets
+const PLAYER_PROPS_CACHE_DURATION_MS = 30 * 1000; // 30 seconds for player props (faster refresh for maximum coverage)
+const ALTERNATE_MARKETS_CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes for alternate markets
+
+// List of alternate markets that change less frequently
+const ALTERNATE_MARKETS = [
+  'alternate_spreads',
+  'alternate_totals',
+  'team_totals',
+  'alternate_team_totals'
+];
+
+// List of player prop markets that need faster refresh
+const PLAYER_PROP_MARKETS = [
+  'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts',
+  'player_rush_yds', 'player_rush_tds', 'player_rush_attempts',
+  'player_receptions', 'player_reception_yds', 'player_reception_tds',
+  'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+  'player_strikeouts', 'player_hits', 'player_total_bases', 'player_rbis'
+];
+
+// In-memory cache for API responses
+const apiCache = new Map();
+const planCache = new Map();
+const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+const playerPropsCache = new Map(); // key -> { payload, timestamp, stale }
+const playerPropsInFlight = new Map(); // key -> Promise
+const playerPropsMetrics = {
+  requests: 0,
+  cacheHits: 0,
+  staleHits: 0,
+  cacheMisses: 0,
+  vendorErrors: 0,
+  vendorDurations: [],
+  droppedOutcomes: 0,
+  notModifiedHits: 0,
+};
+
+const DEFAULT_BOOK_STATE = (process.env.DEFAULT_BOOK_STATE || 'nj').toLowerCase();
+
+function setPlayerPropsCacheEntry(key, entry) {
+  if (!playerPropsCache.has(key) && playerPropsCache.size >= PLAYER_PROPS_MAX_CACHE_ENTRIES) {
+    let oldestKey = null;
+    let oldestTs = Infinity;
+    for (const [cacheKey, cacheValue] of playerPropsCache.entries()) {
+      if (cacheValue.timestamp < oldestTs) {
+        oldestKey = cacheKey;
+        oldestTs = cacheValue.timestamp;
+      }
+    }
+    if (oldestKey) {
+      playerPropsCache.delete(oldestKey);
+    }
+  }
+  playerPropsCache.set(key, entry);
+}
+
+console.log('[player-props] flag:', ENABLE_PLAYER_PROPS_V2, 'default_state:', DEFAULT_BOOK_STATE);
+
+function getCacheKey(endpoint, params) {
+  return `${endpoint}_${JSON.stringify(params)}`;
+}
+
+// Transform Supabase cached odds back to The Odds API format
+function transformCachedOddsToApiFormat(cachedOdds) {
+  if (!cachedOdds || cachedOdds.length === 0) return [];
+  
+  // Group by event_id to reconstruct games
+  const gamesMap = new Map();
+  
+  cachedOdds.forEach(cached => {
+    const eventId = cached.event_id;
+    
+    if (!gamesMap.has(eventId)) {
+      gamesMap.set(eventId, {
+        id: eventId,
+        sport_key: cached.sport_key,
+        sport_title: cached.sport_title || cached.sport_key.toUpperCase(),
+        commence_time: cached.commence_time,
+        home_team: cached.home_team,
+        away_team: cached.away_team,
+        bookmakers: []
+      });
+    }
+    
+    const game = gamesMap.get(eventId);
+    
+    // Find or create bookmaker
+    let bookmaker = game.bookmakers.find(b => b.key === cached.bookmaker_key);
+    if (!bookmaker) {
+      bookmaker = {
+        key: cached.bookmaker_key,
+        title: cached.bookmaker_title || cached.bookmaker_key,
+        last_update: cached.last_update || new Date().toISOString(),
+        markets: []
+      };
+      game.bookmakers.push(bookmaker);
+    }
+    
+    // Find or create market
+    let market = bookmaker.markets.find(m => m.key === cached.market_key);
+    if (!market) {
+      market = {
+        key: cached.market_key,
+        last_update: cached.last_update || new Date().toISOString(),
+        outcomes: []
+      };
+      bookmaker.markets.push(market);
+    }
+    
+    // Add outcome if it has odds data
+    if (cached.odds_data && typeof cached.odds_data === 'object') {
+      const outcomes = Array.isArray(cached.odds_data) ? cached.odds_data : [cached.odds_data];
+      outcomes.forEach(outcome => {
+        if (outcome && outcome.name && outcome.price !== undefined) {
+          market.outcomes.push(outcome);
+        }
+      });
+    }
+  });
+  
+  return Array.from(gamesMap.values());
+}
+
+// Save odds data to Supabase for persistent caching
+async function saveOddsToSupabase(games, sportKey) {
+  if (!supabase || !games || games.length === 0) return;
+  
+  const cacheEntries = [];
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 minute cache
+  
+  games.forEach(game => {
+    game.bookmakers?.forEach(bookmaker => {
+      bookmaker.markets?.forEach(market => {
+        // Create a cache entry for each market
+        cacheEntries.push({
+          sport_key: sportKey,
+          event_id: game.id,
+          home_team: game.home_team,
+          away_team: game.away_team,
+          commence_time: game.commence_time,
+          bookmaker_key: bookmaker.key,
+          bookmaker_title: bookmaker.title,
+          market_key: market.key,
+          odds_data: market.outcomes, // Store all outcomes as JSON
+          last_update: bookmaker.last_update || now,
+          expires_at: expiresAt,
+          created_at: now
+        });
+      });
+    });
+  });
+  
+  if (cacheEntries.length === 0) return;
+  
+  // Upsert to Supabase (update if exists, insert if new)
+  const { error } = await supabase
+    .from('cached_odds')
+    .upsert(cacheEntries, {
+      onConflict: 'sport_key,event_id,bookmaker_key,market_key'
+    });
+  
+  if (error) {
+    throw new Error(`Supabase upsert failed: ${error.message}`);
+  }
+}
+
+const PLAYER_PROPS_TIMEZONE = process.env.PLAYER_PROPS_TIMEZONE || 'America/New_York';
+
+const PLAYER_PROPS_MARKET_MAP = {
+  player_reception_yds: 'player_receiving_yards',
+  player_reception_yards: 'player_receiving_yards',
+  player_receptions: 'player_receptions',
+  player_receptions_alternate: 'player_receptions_alternate',
+  player_pass_yds: 'player_passing_yards',
+  player_pass_yards: 'player_passing_yards',
+  player_pass_tds: 'player_passing_touchdowns',
+  player_pass_td: 'player_passing_touchdowns',
+  player_rush_yds: 'player_rushing_yards',
+  player_rush_yards: 'player_rushing_yards',
+  player_rush_attempts: 'player_rushing_attempts',
+  player_rush_attempts_alternate: 'player_rushing_attempts_alternate',
+  player_receive_yards: 'player_receiving_yards',
+  player_receiving_yards: 'player_receiving_yards',
+  player_receiving_yards_alternate: 'player_receiving_yards_alternate',
+  player_receiving_receptions: 'player_receptions',
+  player_points: 'player_points',
+  player_points_alternate: 'player_points_alternate',
+  player_assists: 'player_assists',
+  player_assists_alternate: 'player_assists_alternate',
+  player_rebounds: 'player_rebounds',
+  player_rebounds_alternate: 'player_rebounds_alternate',
+  player_threes: 'player_three_pointers_made',
+  player_threes_alternate: 'player_three_pointers_made_alternate',
+  player_total_bases: 'player_total_bases',
+  player_total_bases_alternate: 'player_total_bases_alternate',
+  player_strikeouts: 'player_strikeouts',
+  player_strikeouts_alternate: 'player_strikeouts_alternate',
+  player_points_rebounds_assists: 'player_points_rebounds_assists',
+  player_points_rebounds_assists_alternate: 'player_points_rebounds_assists_alternate',
+  player_anytime_td: 'player_anytime_touchdown',
+  player_anytime_touchdown: 'player_anytime_touchdown',
+  player_anytime_td_alternate: 'player_anytime_touchdown_alternate',
+  player_anytime_touchdown_alternate: 'player_anytime_touchdown_alternate',
+  player_combined_tackles: 'player_combined_tackles',
+  player_combined_tackles_assists: 'player_combined_tackles',
+  player_assists_plus_points: 'player_points_assists',
+  player_points_assists: 'player_points_assists',
+  player_rush_receive_yds: 'player_rush_receive_yards',
+  player_rush_receive_yards: 'player_rush_receive_yards',
+  player_rush_receive_yds_alternate: 'player_rush_receive_yards_alternate',
+  player_rush_receive_yards_alternate: 'player_rush_receive_yards_alternate',
+  player_pass_completions: 'player_pass_completions',
+  player_pass_attempts: 'player_pass_attempts',
+  player_pass_longest_completion: 'player_pass_longest_completion',
+  player_reception_longest: 'player_reception_longest',
+  player_rush_attempts_longest: 'player_rush_longest',
+  player_rush_longest: 'player_rush_longest',
+};
+
+const DEFAULT_PLAYER_PROP_MARKETS = {
+  americanfootball_nfl: [
+    'player_passing_yards',
+    'player_rushing_yards',
+    'player_receiving_yards',
+    'player_receptions',
+    'player_passing_touchdowns',
+    'player_rushing_attempts',
+  ],
+  basketball_nba: [
+    'player_points',
+    'player_assists',
+    'player_rebounds',
+    'player_three_pointers_made',
+  ],
+  baseball_mlb: [
+    'player_total_bases',
+    'player_hits',
+    'player_home_runs',
+    'player_strikeouts',
+  ],
+};
+
+function canonicalizeMarket(marketKey = '') {
+  const key = String(marketKey || '').toLowerCase();
+  return PLAYER_PROPS_MARKET_MAP[key] || key;
+}
+
+function displayMarketName(canonicalKey) {
+  return String(canonicalKey || '')
+    .replace(/player_/g, '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function chunkArray(items = [], size = 1) {
+  if (!Array.isArray(items) || size <= 0) return [items];
+  const chunks = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function safeNumber(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string') {
+    const trimmed = value.trim().toUpperCase();
+    if (trimmed === 'EVEN') return 100;
+  }
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function resolveBookUrl(url, state) {
+  if (!url || typeof url !== 'string' || url.trim().length === 0) {
+    return { url: null, linkAvailable: false };
+  }
+
+  let resolved = url;
+  let linkAvailable = true;
+  const replacement = (state || DEFAULT_BOOK_STATE || '').toLowerCase();
+
+  if (url.includes('{state}')) {
+    if (!replacement) {
+      linkAvailable = false;
+    } else {
+      resolved = url.replace('{state}', replacement);
+    }
+  }
+
+  if (!linkAvailable) {
+    resolved = null;
+  }
+
+  return { url: resolved, linkAvailable };
+}
+
+function toISOInTimeZone(dateString, timeString, timeZone = PLAYER_PROPS_TIMEZONE) {
+  if (!dateString || !timeString) return { iso: null, hasStarted: false };
+  const [year, month, day] = dateString.split('-').map(Number);
+  const [hour, minute, second = '00'] = timeString.split(':');
+  const utcDate = new Date(Date.UTC(year, (month || 1) - 1, day || 1, Number(hour || 0), Number(minute || 0), Number(second || 0)));
+
+  const tzString = utcDate.toLocaleString('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const [monthPart, dayPart, yearPart, timePart] = tzString.replace(',', '').split(' ');
+  const [tzHour, tzMinute, tzSecond] = timePart.split(':').map(Number);
+  const tzDate = new Date(Date.UTC(
+    Number(yearPart),
+    Number(monthPart) - 1,
+    Number(dayPart),
+    tzHour,
+    tzMinute,
+    tzSecond,
+  ));
+
+  return {
+    iso: tzDate.toISOString(),
+    hasStarted: tzDate.getTime() <= Date.now(),
+  };
+}
+
+function recordPlayerPropMetric(field, value) {
+  if (!(field in playerPropsMetrics)) return;
+  if (Array.isArray(playerPropsMetrics[field])) {
+    playerPropsMetrics[field].push(value);
+    if (playerPropsMetrics[field].length > 500) {
+      playerPropsMetrics[field].shift();
+    }
+  } else if (typeof playerPropsMetrics[field] === 'number') {
+    playerPropsMetrics[field] += value;
+  }
+}
+
+function summarizePlayerPropMetrics() {
+  if (!playerPropsMetrics.vendorDurations.length) return null;
+  const sum = playerPropsMetrics.vendorDurations.reduce((acc, v) => acc + v, 0);
+  const avg = Math.round(sum / playerPropsMetrics.vendorDurations.length);
+  return { averageVendorMs: avg, samples: playerPropsMetrics.vendorDurations.length };
+}
+
+async function fetchPlayerPropsFromVendor({
+  sportKey,
+  eventId,
+  markets,
+  bookmakers,
+  regions,
+  state,
+  etag,
+  cachedSnapshot,
+}) {
+  if (!PLAYER_PROPS_API_BASE) {
+    throw new Error('PLAYER_PROPS_API_BASE is not configured');
+  }
+  if (!SPORTSGAMEODDS_API_KEY) {
+    throw new Error('SPORTSGAMEODDS_API_KEY is not configured');
+  }
+
+  const canonicalMarkets = Array.from(new Set((markets || []).map(canonicalizeMarket))).filter(Boolean);
+  const canonicalBooks = bookmakers ? Array.from(new Set(bookmakers.map((b) => String(b).toLowerCase()))) : null;
+
+  const rawMarketsToUse = canonicalMarkets.length
+    ? canonicalMarkets
+    : (DEFAULT_PLAYER_PROP_MARKETS[sportKey] || DEFAULT_PLAYER_PROP_MARKETS.americanfootball_nfl || []);
+
+  // Filter out invalid markets before processing
+  const marketsToUse = filterValidMarkets(rawMarketsToUse);
+  
+  if (rawMarketsToUse.length !== marketsToUse.length) {
+    const filteredOut = rawMarketsToUse.filter(m => !marketsToUse.includes(m));
+    console.log(`🚫 Filtered out invalid markets: ${filteredOut.join(', ')}`);
+  }
+
+  const marketChunks = marketsToUse.length
+    ? chunkArray(marketsToUse, PLAYER_PROPS_MAX_MARKETS_PER_REQUEST || marketsToUse.length)
+    : [[]];
+  const bookChunks = canonicalBooks && canonicalBooks.length
+    ? chunkArray(canonicalBooks, PLAYER_PROPS_MAX_BOOKS_PER_REQUEST || canonicalBooks.length)
+    : [null];
+
+  const itemsMap = new Map();
+  let lastDate = cachedSnapshot?.startDate || null;
+  let lastStart = cachedSnapshot?.startTime || null;
+  let lastEtag = etag || null;
+  const vendorDurations = [];
+
+  if (Array.isArray(cachedSnapshot?.items)) {
+    cachedSnapshot.items.forEach((item) => {
+      const key = `${item.game_id}||${item.player}||${item.market}||${item.book}||${item.ou}`;
+      itemsMap.set(key, item);
+    });
+  }
+
+  for (const marketChunk of marketChunks) {
+    for (const bookChunk of bookChunks) {
+      const params = new URLSearchParams();
+      params.set('sport', sportKey);
+      params.set('eventId', eventId);
+      params.set('apiKey', SPORTSGAMEODDS_API_KEY);
+      if (regions) params.set('regions', regions);
+      if (marketChunk && marketChunk.length) params.set('markets', marketChunk.join(','));
+      if (bookChunk && bookChunk.length) params.set('bookmakers', bookChunk.join(','));
+
+      const config = {
+        timeout: PLAYER_PROPS_REQUEST_TIMEOUT,
+        params: Object.fromEntries(params),
+        headers: {
+          'X-API-Key': SPORTSGAMEODDS_API_KEY,
+        },
+      };
+
+      if (lastEtag) {
+        config.headers['If-None-Match'] = lastEtag;
+      }
+
+      const start = Date.now();
+      let response;
+      try {
+        response = await axiosWithRetry(PLAYER_PROPS_API_BASE, config, {
+          tries: PLAYER_PROPS_RETRY_ATTEMPTS + 1,
+          backoffMs: 400,
+        });
+      } catch (err) {
+        recordPlayerPropMetric('vendorErrors', 1);
+        throw err;
+      } finally {
+        vendorDurations.push(Date.now() - start);
+      }
+
+      if (response.status === 304) {
+        recordPlayerPropMetric('notModifiedHits', 1);
+        continue;
+      }
+
+      lastEtag = response.headers?.etag || lastEtag;
+
+      const payload = response.data;
+      if (!payload) {
+        continue;
+      }
+
+      const books = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload.bookmakers)
+          ? payload.bookmakers
+          : payload.bookmaker
+            ? [payload.bookmaker]
+            : [];
+
+      const metaDate = payload.date || payload.eventDate || payload.game_date;
+      const metaStart = payload.start || payload.eventStart || payload.game_time;
+      if (metaDate) lastDate = metaDate;
+      if (metaStart) lastStart = metaStart;
+
+      books.forEach((bookPayload) => {
+        const bookKey = String(bookPayload.key || bookPayload.book || bookPayload.bookmaker || '').toLowerCase();
+        const bookTitle = bookPayload.title || bookPayload.name || bookPayload.key || bookKey || 'Book';
+        if (!bookKey) return;
+
+        const marketsArray = Array.isArray(bookPayload.markets)
+          ? bookPayload.markets
+          : bookPayload.market
+            ? [bookPayload.market]
+            : [];
+
+        marketsArray.forEach((marketPayload) => {
+          const originalMarketKey = marketPayload?.key || marketPayload?.market_key;
+          const canonicalKey = canonicalizeMarket(originalMarketKey);
+          if (!canonicalKey) {
+            recordPlayerPropMetric('droppedOutcomes', 1);
+            return;
+          }
+
+          const outcomesArray = Array.isArray(marketPayload?.outcomes)
+            ? marketPayload.outcomes
+            : [];
+
+          outcomesArray.forEach((outcomePayload) => {
+            const isActive = outcomePayload?.is_active !== false;
+            const isLatest = outcomePayload?.is_latest !== false;
+            if (!isActive) {
+              recordPlayerPropMetric('droppedOutcomes', 1);
+              return;
+            }
+
+            const playerName = outcomePayload.player || outcomePayload.description || outcomePayload.participant || outcomePayload.name || 'Player';
+            const outcomeName = String(outcomePayload.name || outcomePayload.outcome || '').toLowerCase();
+            const type = outcomeName.includes('under') ? 'UNDER'
+              : outcomeName.includes('over') ? 'OVER'
+              : outcomeName.includes('yes') ? 'YES'
+              : outcomeName.includes('no') ? 'NO'
+              : outcomeName.toUpperCase();
+            const point = safeNumber(outcomePayload.point ?? outcomePayload.line ?? outcomePayload.number);
+            const price = safeNumber(outcomePayload.price ?? outcomePayload.odds ?? outcomePayload.moneyline);
+
+            if (price == null) {
+              recordPlayerPropMetric('droppedOutcomes', 1);
+              return;
+            }
+
+            const { url: resolvedUrl, linkAvailable } = resolveBookUrl(outcomePayload.url || bookPayload.url || bookPayload.link, state);
+
+            const key = `${eventId}||${playerName}||${canonicalKey}||${bookKey}||${type}`;
+
+            itemsMap.set(key, {
+              game_id: eventId,
+              player: playerName,
+              market: canonicalKey,
+              book: bookKey,
+              book_label: bookTitle,
+              ou: type,
+              line: point,
+              price,
+              url: resolvedUrl,
+              link_available: linkAvailable,
+              is_latest: isLatest,
+              is_active: isActive,
+              start_iso: null,
+              has_started: false,
+            });
+          });
+        });
+      });
+    }
+  }
+
+  const { iso, hasStarted } = toISOInTimeZone(lastDate, lastStart, PLAYER_PROPS_TIMEZONE);
+
+  const timestamp = Date.now();
+  const items = Array.from(itemsMap.values()).map((item) => ({
+    ...item,
+    start_iso: iso,
+    has_started: Boolean(hasStarted),
+  }));
+
+  vendorDurations.forEach((d) => recordPlayerPropMetric('vendorDurations', d));
+
+  return {
+    payload: {
+      sportKey,
+      eventId,
+      items,
+      start_iso: iso,
+      has_started: Boolean(hasStarted),
+    },
+    etag: lastEtag,
+    timestamp,
+    stale: false,
+    startDate: lastDate,
+    startTime: lastStart,
+  };
+}
+
+function formatPlayerPropsPayload(entry, { stale }) {
+  return {
+    league: entry.payload.league,
+    game_id: entry.payload.game_id,
+    items: entry.payload.items,
+    start_iso: entry.payload.start_iso,
+    has_started: entry.payload.has_started,
+    ttl: PLAYER_PROPS_CACHE_TTL_MS,
+    as_of: new Date(entry.timestamp).toISOString(),
+    stale,
+  };
+}
+
+async function loadPlayerProps(options) {
+  const {
+    sportKey,
+    eventId,
+    markets,
+    bookmakers,
+    regions,
+    state,
+    force = false,
+  } = options;
+
+  const cacheKey = getCacheKey('player-props', {
+    sportKey,
+    eventId,
+    markets: markets || null,
+    bookmakers: bookmakers || null,
+    regions: regions || null,
+    state,
+  });
+
+  const now = Date.now();
+  const cacheEntry = playerPropsCache.get(cacheKey);
+  const isFresh = cacheEntry && now - cacheEntry.timestamp < PLAYER_PROPS_CACHE_TTL_MS;
+
+  if (!force && isFresh) {
+    recordPlayerPropMetric('cacheHits', 1);
+    return formatPlayerPropsPayload(cacheEntry, { stale: false });
+  }
+
+  const cachedSnapshot = cacheEntry
+    ? {
+        items: cacheEntry.payload.items,
+        startDate: cacheEntry.startDate,
+        startTime: cacheEntry.startTime,
+      }
+    : null;
+
+  if (!force && cacheEntry && !playerPropsInFlight.has(cacheKey)) {
+    const background = fetchPlayerPropsFromVendor({
+      sportKey,
+      eventId,
+      markets,
+      bookmakers,
+      regions,
+      state,
+      etag: cacheEntry.etag,
+      cachedSnapshot,
+    }).then((result) => {
+      if (result?.payload) {
+        const entry = {
+          payload: {
+            league: sportKey,
+            game_id: eventId,
+            items: result.payload.items,
+            start_iso: result.payload.start_iso,
+            has_started: result.payload.has_started,
+          },
+          timestamp: result.timestamp,
+          etag: result.etag,
+          startDate: result.startDate,
+          startTime: result.startTime,
+        };
+        setPlayerPropsCacheEntry(cacheKey, entry);
+      }
+      return result;
+    }).catch((err) => {
+      console.warn('player-props background refresh failed:', err.message);
+      return null;
+    }).finally(() => playerPropsInFlight.delete(cacheKey));
+    playerPropsInFlight.set(cacheKey, background);
+    recordPlayerPropMetric('staleHits', 1);
+    return formatPlayerPropsPayload(cacheEntry, { stale: true });
+  }
+
+  if (!force && cacheEntry) {
+    recordPlayerPropMetric('staleHits', 1);
+    return formatPlayerPropsPayload(cacheEntry, { stale: true });
+  }
+
+  if (playerPropsInFlight.has(cacheKey)) {
+    const inflight = await playerPropsInFlight.get(cacheKey);
+    if (inflight?.payload) {
+      const entry = {
+        payload: {
+          league: sportKey,
+          game_id: eventId,
+          items: inflight.payload.items,
+          start_iso: inflight.payload.start_iso,
+          has_started: inflight.payload.has_started,
+        },
+        timestamp: inflight.timestamp,
+        etag: inflight.etag,
+        startDate: inflight.startDate,
+        startTime: inflight.startTime,
+      };
+      setPlayerPropsCacheEntry(cacheKey, entry);
+      return formatPlayerPropsPayload(entry, { stale: false });
+    }
+    return inflight;
+  }
+
+  recordPlayerPropMetric('cacheMisses', 1);
+
+  const fetchPromise = fetchPlayerPropsFromVendor({
+    sportKey,
+    eventId,
+    markets,
+    bookmakers,
+    regions,
+    state,
+    etag: cacheEntry?.etag,
+    cachedSnapshot,
+  }).then((result) => {
+    if (result?.payload) {
+      const entry = {
+        payload: {
+          league: sportKey,
+          game_id: eventId,
+          items: result.payload.items,
+          start_iso: result.payload.start_iso,
+          has_started: result.payload.has_started,
+        },
+        timestamp: result.timestamp,
+        etag: result.etag,
+        startDate: result.startDate,
+        startTime: result.startTime,
+      };
+      setPlayerPropsCacheEntry(cacheKey, entry);
+      return formatPlayerPropsPayload(entry, { stale: false });
+    }
+    return null;
+  }).catch((err) => {
+    console.error('player-props fetch error:', err.message);
+    if (cacheEntry) {
+      recordPlayerPropMetric('staleHits', 1);
+      return formatPlayerPropsPayload(cacheEntry, { stale: true });
+    }
+    throw err;
+  }).finally(() => playerPropsInFlight.delete(cacheKey));
+
+  playerPropsInFlight.set(cacheKey, fetchPromise);
+  return fetchPromise;
+}
+
+async function getEventIdsForLeagueDate(league, date) {
+  if (!league || !date) return [];
+  if (!API_KEY) {
+    console.warn('⚠️  Cannot resolve events without ODDS_API_KEY');
+    return [];
+  }
+
+  const cacheKey = getCacheKey('events-by-date', { league, date });
+  const cached = getCachedResponse(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(league)}/events?apiKey=${API_KEY}`;
+    const { data } = await axios.get(url, { timeout: 7000 }); // 7s timeout (balanced)
+    const events = Array.isArray(data) ? data : [];
+    const filtered = events.filter((event) => {
+      const commence = event?.commence_time ? new Date(event.commence_time) : null;
+      if (!commence) return false;
+      return commence.toISOString().slice(0, 10) === date;
+    }).map((event) => event.id).filter(Boolean);
+
+    setCachedResponse(cacheKey, filtered);
+    return filtered;
+  } catch (error) {
+    console.error('Failed to load events for league/date', league, date, error.message);
+    return [];
+  }
+}
+
+function getCachedResponse(cacheKey) {
+  const cached = apiCache.get(cacheKey);
+  if (!cached) {
+    console.log(` Cache MISS for ${cacheKey}`);
+    return null;
+  }
+  
+  // Determine cache duration based on market type
+  const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
+  const isPlayerProp = PLAYER_PROP_MARKETS.some(market => cacheKey.includes(market));
+  
+  let cacheDuration = CACHE_DURATION_MS; // Default 5 minutes
+  let cacheType = 'regular';
+  
+  if (isPlayerProp) {
+    cacheDuration = PLAYER_PROPS_CACHE_DURATION_MS; // 90 seconds for player props
+    cacheType = 'player prop';
+  } else if (isAlternateMarket) {
+    cacheDuration = ALTERNATE_MARKETS_CACHE_DURATION_MS; // 30 minutes for alternates
+    cacheType = 'alternate market';
+  }
+  
+  if (Date.now() - cached.timestamp < cacheDuration) {
+    console.log(` Cache HIT for ${cacheKey} (${cacheType})`);
+    return cached.data;
+  }
+  
+  console.log(` Cache EXPIRED for ${cacheKey} (${cacheType})`);
+  apiCache.delete(cacheKey); // Remove expired cache
+  return null;
+}
+
+function setCachedResponse(cacheKey, data) {
+  // Check if this is an alternate market for logging purposes
+  const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
+  
+  apiCache.set(cacheKey, { data, timestamp: Date.now() });
+  console.log(`💾 Cached response for ${cacheKey}${isAlternateMarket ? ' (alternate market with extended TTL)' : ''}`);
+}
+
+// Helper function to get current monthly window (UTC)
+function currentMonthlyWindow(now = new Date()) {
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  return { start, end };
+}
+
+// Helper function to clamp bookmaker lists
+function clampBookmakers(bookmakers = []) {
+  if (!bookmakers || bookmakers.length === 0) {
+    return FOCUSED_BOOKMAKERS;
+  }
+  
+  // Dedupe and limit to MAX_BOOKMAKERS
+  const uniqueBooks = [...new Set(bookmakers)];
+  return uniqueBooks.slice(0, MAX_BOOKMAKERS);
+}
+
+// Helper function to filter bookmakers based on user plan
+function getBookmakersForPlan(plan) {
+  // Gold plan (and grandfathered platinum) get full access
+  if (plan === 'gold' || plan === 'platinum') {
+    return FOCUSED_BOOKMAKERS;
+  }
+  // Legacy free/trial users (should not exist after migration)
+  return TRIAL_BOOKMAKERS;
+}
+
+// Helper function to build event odds URLs consistently
+function buildEventOddsUrl({ sportKey, eventId, apiKey, regions = "us", markets, bookmakers = [] }) {
+  const baseUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/events/${encodeURIComponent(eventId)}/odds`;
+  const params = new URLSearchParams({
+    apiKey,
+    regions,
+    oddsFormat: "american"
+  });
+  
+  if (markets) {
+    params.append('markets', Array.isArray(markets) ? markets.join(',') : markets);
+  }
+  
+  if (bookmakers && bookmakers.length > 0) {
+    params.append('bookmakers', Array.isArray(bookmakers) ? bookmakers.join(',') : bookmakers);
+  }
+  
+  return `${baseUrl}?${params.toString()}`;
+}
+
+// Helper function to get or create user profile
+async function getUserProfile(userId) {
+  if (!supabase) {
+    // Fallback to in-memory storage if Supabase not configured
+    if (!userUsage.has(userId)) {
+      userUsage.set(userId, {
+        id: userId,
+        plan: 'free',
+        api_request_count: 0,
+        created_at: new Date().toISOString()
+      });
+    }
+    return userUsage.get(userId);
+  }
+
+  try {
+    // First, try to get existing user
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error && error.code === "PGRST116") {
+      // User doesn't exist, create them
+      console.log(`🆕 Creating new user: ${userId}`);
+      
+      // Create user with all required fields
+      const newUser = {
+        id: userId,
+        plan: null, // New users must subscribe
+        api_request_count: 0,
+        grandfathered: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: inserted, error: insertErr } = await supabase
+        .from("users")
+        .insert(newUser)
+        .select("*")
+        .single();
+
+      if (insertErr) {
+        console.error('❌ Failed to create user:', insertErr);
+        
+        // Check if it's a constraint violation
+        if (insertErr.code === '23514') {
+          console.error('❌ Plan constraint violation - database constraint too restrictive');
+          throw new Error('Database constraint error: Plan constraint prevents NULL values. Please run the database fix.');
+        }
+        
+        // Check if it's a missing column error
+        if (insertErr.code === '42703') {
+          console.error('❌ Missing column error:', insertErr.message);
+          throw new Error('Database schema error: Missing required columns. Please run the database fix.');
+        }
+        
+        throw new Error(`Database error creating user: ${insertErr.message} (Code: ${insertErr.code})`);
+      }
+
+      console.log(`✅ Successfully created user: ${userId}`);
+      return inserted;
+    }
+
+    if (error) {
+      console.error('❌ Database error fetching user:', error);
+      throw new Error(`Database error: ${error.message} (Code: ${error.code})`);
+    }
+
+    return data;
+
+  } catch (error) {
+    console.error('❌ getUserProfile error:', error);
+    throw error;
+  }
+}
+
+function getCachedPlan(userId) {
+  const cached = planCache.get(userId);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > PLAN_CACHE_TTL_MS) {
+    planCache.delete(userId);
+    return null;
+  }
+  return cached.payload;
+}
+
+function setCachedPlan(userId, payload) {
+  planCache.set(userId, { payload, timestamp: Date.now() });
+}
+
+const allowDemoUserFallback = String(process.env.ALLOW_DEMO_USER || '').toLowerCase() === 'true';
+
+function isLocalRequest(req) {
+  const host = (req.get('host') || '').toLowerCase();
+  const origin = (req.get('origin') || '').toLowerCase();
+  const ip = req.ip || '';
+  const check = (value = '') => (
+    value.startsWith('localhost') ||
+    value.startsWith('127.0.0.1') ||
+    value.endsWith('.local')
+  );
+  return check(host) || check(origin) || ip === '127.0.0.1' || ip === '::1';
+}
+
+// Middleware to require authenticated user
+function requireUser(req, res, next) {
+  const isReadOnlyGet = req.method === 'GET';
+  const tokenUserId = req.user?.id;
+  const headerUserId = req.headers["x-user-id"];
+
+  if (tokenUserId) {
+    if (headerUserId && headerUserId !== tokenUserId) {
+      return res.status(401).json({ error: "UNAUTHENTICATED", detail: "Header user mismatch" });
+    }
+    req.__userId = tokenUserId;
+    return next();
+  }
+
+  if (allowDemoUserFallback && isReadOnlyGet && isLocalRequest(req)) {
+    req.__userId = 'demo-user';
+    return next();
+  }
+
+  return res.status(401).json({ error: "UNAUTHENTICATED" });
+}
+
+// Enhanced axios wrapper with retry logic and quota diagnostics
+async function axiosWithRetry(url, options = {}, { tries = 2, backoffMs = 700 } = {}) {
+  const axiosConfig = {
+    timeout: 9000,
+    ...options
+  };
+  
+  for (let attempt = 1; attempt <= tries; attempt++) {
+    try {
+      const response = await axios.get(url, axiosConfig);
+      
+      // Log quota information
+      const remaining = response.headers['x-requests-remaining'];
+      const used = response.headers['x-requests-used'];
+      if (remaining !== undefined || used !== undefined) {
+        console.log(`API Quota - Remaining: ${remaining || 'N/A'}, Used: ${used || 'N/A'}`);
+      }
+      
+      return response;
+    } catch (error) {
+      const status = error.response?.status;
+      const isLastAttempt = attempt === tries;
+      
+      // Don't retry quota/plan limit errors
+      if (status === 402 || status === 429) {
+        console.error(`API quota/plan limit hit (${status}):`, error.response?.data);
+        throw error;
+      }
+      
+      // Retry transient errors with exponential backoff
+      if (!isLastAttempt && (status >= 500 || !status)) {
+        const delay = backoffMs * Math.pow(2, attempt - 1);
+        const jitter = Math.floor(Math.random() * 250);
+        const waitFor = delay + jitter;
+        console.warn(`Attempt ${attempt} failed (${status || 'timeout'}), retrying in ${waitFor}ms...`);
+        await new Promise(resolve => setTimeout(resolve, waitFor));
+        continue;
+      }
+      
+      throw error;
+    }
+  }
+}
+
+if (!API_KEY) {
+  console.warn("⚠️  Missing ODDS_API_KEY in .env (odds endpoints will still work for ESPN scores).");
+}
+
+// Configure CORS
+const allowedOrigins = new Set([
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:3001',
+  'http://localhost:10000',
+  'https://odds-frontend-j2pn.onrender.com',
+  'https://my-react-frontend-021i.onrender.com',
+  // Primary production domains (correct spelling)
+  'https://oddsightseer.com',
+  'https://www.oddsightseer.com'
+]);
+
+// Add FRONTEND_URL if it exists and isn't already in the set
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.add(process.env.FRONTEND_URL);
+}
+
+console.log('🔄 CORS Allowed Origins:', Array.from(allowedOrigins));
+
+// Create CORS middleware with proper origin validation
+const corsMiddleware = (req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // In development, allow all origins
+  if (process.env.NODE_ENV !== 'production') {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, stripe-signature, x-user-id, Cache-Control, Pragma, Expires');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    return next();
+  }
+  
+  // In production, only allow whitelisted origins
+  if (!origin || allowedOrigins.has(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, stripe-signature, x-user-id, Cache-Control, Pragma, Expires');
+    res.header('Access-Control-Max-Age', '86400');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+    return next();
+  }
+  
+  console.log('🚫 CORS blocked origin:', origin);
+  return res.status(403).json({ error: 'Not allowed by CORS' });
+};
+
+// Trust proxy (Render/Heroku) for correct IPs in rate-limiting
+app.set('trust proxy', 1);
+
+// Security headers - Enhanced for production security
+app.use(helmet({
+  // Content Security Policy - prevent XSS attacks
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'", "https://api.stripe.com", "https://odds-backend-4e9q.onrender.com", "https://vr-sports.onrender.com"],
+      frameSrc: ["'self'", "https://js.stripe.com"],
+    },
+  },
+  // Prevent clickjacking attacks
+  frameguard: {
+    action: 'SAMEORIGIN',
+  },
+  // Prevent MIME type sniffing
+  noSniff: true,
+  // Enable HSTS (HTTP Strict Transport Security)
+  hsts: {
+    maxAge: 31536000, // 1 year in seconds
+    includeSubDomains: true,
+    preload: true,
+  },
+  // Cross-Origin Resource Policy
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  // Referrer Policy
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+}));
+
+// Apply CORS middleware
+app.use(corsMiddleware);
+
+// Attempt to authenticate user (populate req.user) if Authorization header is present
+async function authenticate(req, _res, next) {
+  try {
+    const auth = req.headers.authorization || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (token && supabase && typeof supabase.auth?.getUser === 'function') {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (!error && data?.user) {
+        req.user = data.user;
+      }
+    }
+  } catch (e) {
+    // Non-fatal: continue without req.user
+    console.warn('Auth token verification failed:', e.message);
+  }
+  next();
+}
+
+// Apply authentication on API routes
+app.use('/api', authenticate);
+
+// Basic API rate limiting (production only)
+if (process.env.NODE_ENV === 'production') {
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'rate_limited', hint: 'Too many requests, please try again later.' },
+  });
+  app.use('/api/', apiLimiter);
+}
+
+// Use JSON parser for most routes, but skip Stripe webhook which requires raw body
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/billing/webhook') return next();
+  return bodyParser.json()(req, res, next);
+});
+
+// Serve static client build if available
+const path = require('path');
+const clientBuildPath = path.join(__dirname, '..', 'client', 'build');
+try {
+  app.use(express.static(clientBuildPath));
+} catch (_) {
+  // ok if not present locally
+}
+
+// Usage tracking middleware for Odds API proxy
+async function checkPlanAccess(req, res, next) {
+  try {
+    const userId = req.__userId;
+    
+    // TESTING MODE: If REMOVE_API_LIMITS is enabled, grant unlimited access
+    if (REMOVE_API_LIMITS) {
+      console.log('🧪 TESTING MODE: API limits removed - granting unlimited access');
+      req.__userProfile = {
+        id: userId || 'test-user',
+        plan: 'platinum',
+        username: 'Test User',
+        grandfathered: false
+      };
+      return next();
+    }
+    
+    // DEMO MODE: Give demo-user platinum access
+    if (userId === 'demo-user') {
+      console.log('💎 Demo user - granting Platinum access');
+      req.__userProfile = {
+        id: 'demo-user',
+        plan: 'platinum',
+        username: 'Demo User',
+        grandfathered: false
+      };
+      return next();
+    }
+    
+    const profile = await getUserProfile(userId);
+
+    // Gold or Platinum plan (and grandfathered users) get full access
+    if (profile.plan === 'gold' || profile.plan === 'platinum' || profile.grandfathered) {
+      req.__userProfile = profile;
+      return next();
+    }
+
+    // TEMPORARY: Allow new users (plan = NULL) limited access to set username and basic functionality
+    if (profile.plan === null) {
+      console.log(`🆕 Allowing temporary access for new user: ${userId}`);
+      req.__userProfile = profile;
+      req.__limitedAccess = true; // Flag for limited access
+      return next();
+    }
+
+    // No valid plan - require subscription
+    return res.status(402).json({
+      error: "SUBSCRIPTION_REQUIRED",
+      code: "SUBSCRIPTION_REQUIRED",
+      message: "Subscription required. Choose Gold ($10/month) or Platinum ($25/month) to access live odds and betting data."
+    });
+
+  } catch (error) {
+    console.error('Plan access check error:', error);
+    // In production, deny access on error for security
+    return res.status(500).json({
+      error: "PLAN_CHECK_FAILED",
+      code: "PLAN_CHECK_FAILED", 
+      message: "Unable to verify subscription status. Please try again."
+    });
+  }
+}
+
+// Lightweight usage gate used by public GET endpoints to prevent accidental abuse.
+// Currently a no-op that forwards the request; retain hook for future expansion.
+function enforceUsage(req, res, next) {
+  return next();
+}
+
+// Increment usage after successful API call
+async function incrementUsage(userId, profile) {
+  if (!profile || !userId) return; // Guard missing context
+  if (profile.plan === "platinum") return; // Platinum users don't count against quota
+
+  if (supabase) {
+    try {
+      // Try atomic increment function first
+      const { error: rpcError } = await supabase.rpc("increment_usage", { uid: userId });
+      if (rpcError) {
+        // Fallback to update if RPC not available
+        await supabase.from("users")
+          .update({ api_request_count: profile.api_request_count + 1 })
+          .eq("id", userId);
+      }
+    } catch (error) {
+      console.error('Failed to increment usage:', error);
+    }
+  } else {
+    // Fallback to in-memory storage
+    const userData = userUsage.get(userId);
+    if (userData) {
+      userData.api_request_count += 1;
+      userUsage.set(userId, userData);
+    }
+  }
+}
+
+// Health check endpoints (for Render and monitors)
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true });
+});
+app.get("/health", (_req, res) => {
+  res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+// Readiness endpoint with non-secret env presence for quick verification
+app.get('/healthz', (_req, res) => {
+  res.json({
+    ok: true,
+    env: process.env.NODE_ENV || 'development',
+    hasStripe: !!process.env.STRIPE_SECRET_KEY,
+    hasStripePrice: !!(process.env.STRIPE_PRICE_GOLD || process.env.STRIPE_PRICE_PLATINUM),
+    hasStripeWebhook: !!process.env.STRIPE_WEBHOOK_SECRET,
+    hasSupabase: !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    frontendUrl: process.env.FRONTEND_URL || null,
+    version: process.env.GIT_COMMIT || process.env.RENDER_GIT_COMMIT || null,
+  });
+});
+
+// Simple /api/me endpoint - returns user plan info
+app.get('/api/me', async (req, res) => {
+  const userId = req.headers['x-user-id'];
+  
+  if (!userId) {
+    return res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('plan, api_request_count, grandfathered')
+      .eq('id', userId)
+      .single();
+
+    if (error || !data) {
+      console.log('User not found, returning free plan');
+      return res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
+    }
+
+    // Platinum or grandfathered = unlimited
+    if (data.plan === 'platinum' || data.grandfathered) {
+      return res.json({
+        plan: 'platinum',
+        remaining: null,
+        limit: null,
+        unlimited: true,
+        used: data.api_request_count || 0
+      });
+    }
+
+    // New users (plan = null) or free plan = 250 limit
+    const limit = 250;
+    const used = data.api_request_count || 0;
+    const remaining = Math.max(0, limit - used);
+
+    res.json({
+      plan: data.plan || 'free', // null becomes 'free' for display
+      remaining,
+      limit,
+      used,
+      unlimited: false
+    });
+  } catch (error) {
+    console.error('Error fetching user plan:', error);
+    res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
+  }
+});
+
+// Usage endpoint - get current user's quota info
+app.get('/api/me/usage', requireUser, async (req, res) => {
+  const userId = req.__userId;
+  const cached = getCachedPlan(userId);
+
+  try {
+    // Removed demo user logic - all users get real authentication
+    if (false) {
+      const demoPlan = {
+        id: userId,
+        plan: 'platinum',
+        used: 0,
+        quota: null,
+        source: 'demo'
+      };
+      setCachedPlan(userId, demoPlan);
+      console.log('🎯 Demo user detected, granting platinum access:', userId);
+      return res.json(demoPlan);
+    }
+
+    const profile = await getUserProfile(userId);
+
+    // Handle demo mode when Supabase is not configured
+    if (!supabase && userUsage.has(userId)) {
+      const userData = userUsage.get(userId);
+      const payload = {
+        id: userData.id,
+        plan: userData.plan,
+        used: userData.api_request_count,
+        quota: userData.plan === "platinum" ? null : FREE_QUOTA,
+        source: 'demo'
+      };
+      setCachedPlan(userId, payload);
+      return res.json(payload);
+    }
+
+    const payload = {
+      id: profile.id,
+      plan: profile.plan,
+      used: profile.api_request_count,
+      quota: profile.plan === "platinum" ? null : FREE_QUOTA,
+      source: 'live'
+    };
+    setCachedPlan(userId, payload);
+    return res.json(payload);
+  } catch (error) {
+    console.error('me/usage error:', error);
+    if (cached) {
+      return res.json({ ...cached, source: 'cache', stale: true });
+    }
+    return res.status(503).json({ error: "USAGE_FETCH_FAILED", detail: error.message });
+  }
+});
+
+// Odds API proxy with usage tracking
+// Proxy only explicit Odds API endpoints to avoid path-to-regexp wildcards
+app.get('/api/odds/v4/sports/:sportKey/events/:eventId/odds', requireUser, checkPlanAccess, async (req, res) => {
+  try {
+    const userId = req.__userId;
+    const profile = req.__userProfile;
+
+    // Proxy to Odds API
+    const { sportKey, eventId } = req.params;
+    const upstreamPath = `/v4/sports/${encodeURIComponent(sportKey)}/events/${encodeURIComponent(eventId)}/odds`;
+    const upstreamUrl = `https://api.the-odds-api.com${upstreamPath}`;
+    
+    const response = await axios.get(upstreamUrl, { 
+      params: { ...req.query, apiKey: API_KEY },
+      timeout: 9000
+    });
+
+    // If success, increment usage for non-platinum users
+    if (response.status === 200) {
+      await incrementUsage(userId, profile);
+    }
+
+    return res.status(response.status).json(response.data);
+  } catch (error) {
+    console.error("Odds proxy error:", error?.response?.data || error.message);
+    const status = error?.response?.status || 500;
+    return res.status(status).json({ error: "PROXY_FAILED", detail: error.message });
+  }
+});
+
+app.get('/api/odds-history', requireUser, checkPlanAccess, async (req, res) => {
+  try {
+    if (!API_KEY) {
+      return res.status(400).json({ code: 'MISSING_ENV', message: 'Missing ODDS_API_KEY', hint: 'Set ODDS_API_KEY in backend env' });
+    }
+
+    const userId = req.__userId;
+    const profile = req.__userProfile;
+
+    const { sport, sportKey, eventId, markets, bookmakers, regions = 'us' } = req.query;
+    const resolvedSport = sport || sportKey;
+
+    if (!resolvedSport) {
+      return res.status(400).json({ error: 'missing_sport', message: 'sport parameter is required' });
+    }
+
+    if (!eventId) {
+      return res.status(400).json({ error: 'missing_event', message: 'eventId parameter is required' });
+    }
+
+    const qs = new URLSearchParams({
+      apiKey: API_KEY,
+      regions: String(regions || 'us'),
+      oddsFormat: 'american',
+    });
+
+    if (markets) {
+      qs.set('markets', Array.isArray(markets) ? markets.join(',') : String(markets));
+    }
+
+    if (bookmakers) {
+      qs.set('bookmakers', Array.isArray(bookmakers) ? bookmakers.join(',') : String(bookmakers));
+    }
+
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(resolvedSport)}/events/${encodeURIComponent(eventId)}/odds-history?${qs.toString()}`;
+
+    const response = await axiosWithRetry(upstreamUrl, {}, { tries: 2, backoffMs: 600 });
+
+    if (response.status === 200) {
+      await incrementUsage(userId, profile);
+    }
+
+    return res.status(response.status).json(response.data);
+  } catch (error) {
+    const status = error?.response?.status || 500;
+    const detail = error?.response?.data || error.message;
+    console.error('Odds history proxy error:', detail);
+    return res.status(status).json({ error: 'PROXY_FAILED', detail });
+  }
+});
+
+// Explicit Odds API proxies (Express 5-safe)
+app.get('/api/odds/v4/sports', enforceUsage, async (_req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ code: 'MISSING_ENV', message: "Missing ODDS_API_KEY", hint: 'Set ODDS_API_KEY in backend env' });
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports?apiKey=${API_KEY}`;
+    const r = await axios.get(upstreamUrl);
+    res.json(r.data);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: 'proxy_failed', detail: err?.response?.data || err.message });
+  }
+});
+
+app.get('/api/odds/v4/sports/:sportKey/events', enforceUsage, async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ code: 'MISSING_ENV', message: "Missing ODDS_API_KEY", hint: 'Set ODDS_API_KEY in backend env' });
+    const { sportKey } = req.params;
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/events?apiKey=${API_KEY}`;
+    const r = await axios.get(upstreamUrl);
+    res.json(r.data);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: 'proxy_failed', detail: err?.response?.data || err.message });
+  }
+});
+
+app.get('/api/odds/v4/sports/:sportKey/odds', enforceUsage, async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ code: 'MISSING_ENV', message: "Missing ODDS_API_KEY", hint: 'Set ODDS_API_KEY in backend env' });
+    const { sportKey } = req.params;
+    const { regions = 'us', markets = 'h2h,spreads,totals', oddsFormat = 'american', bookmakers, dateFormat, includeBetLimits } = req.query;
+    const qs = new URLSearchParams({ apiKey: API_KEY, regions, markets, oddsFormat });
+    if (bookmakers) qs.set('bookmakers', String(bookmakers));
+    if (dateFormat) qs.set('dateFormat', String(dateFormat));
+    if (includeBetLimits) qs.set('includeBetLimits', String(includeBetLimits));
+    const upstreamUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/odds?${qs.toString()}`;
+    const r = await axios.get(upstreamUrl);
+    res.json(r.data);
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: 'proxy_failed', detail: err?.response?.data || err.message });
+  }
+});
+
+// Legacy usage endpoint
+app.get('/api/usage/me', requireUser, async (req, res) => {
+  try {
+    const userId = req.__userId;
+    if (!userId || userId === 'demo-user') {
+      return res.status(401).json({ error: 'AUTH_REQUIRED' });
+    }
+
+    if (!supabase) {
+      return res.status(500).json({ error: 'SUPABASE_REQUIRED', detail: 'Supabase connection required for usage lookup' });
+    }
+
+    // Fetch user plan from database
+    let userPlan = 'free_trial'; // default
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('plan')
+      .eq('id', userId)
+      .single();
+    
+    if (!error && user?.plan) {
+      userPlan = user.plan;
+    }
+    
+    if (userPlan === 'platinum') {
+      return res.json({
+        plan: 'platinum',
+        limit: null,
+        calls_made: null,
+        remaining: null,
+        period_end: null
+      });
+    }
+    
+    // Free trial: return current month usage
+    const { start, end } = currentMonthlyWindow();
+    const periodKey = `${userId}-${start.toISOString()}`;
+    const usage = userUsage.get(periodKey) || { calls_made: 0 };
+    
+    res.json({
+      plan: userPlan || 'free_trial',
+      limit: FREE_QUOTA,
+      calls_made: usage.calls_made,
+      remaining: Math.max(0, FREE_QUOTA - usage.calls_made),
+      period_end: end.toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching user usage:', error);
+    res.status(500).json({ error: 'internal_error' });
+  }
+});
+
+// ... (rest of the code remains the same)
+
+// Admin override route to grant platinum manually
+app.post("/api/admin/set-plan", async (req, res) => {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!token || token !== ADMIN_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { userId, plan } = req.body;
+  if (!userId || !plan) {
+    return res.status(400).json({ error: "Missing userId or plan" });
+  }
+
+  if (!supabase) {
+    // Fallback to in-memory storage
+    const userData = userUsage.get(userId) || { api_request_count: 0, plan: 'free' };
+    userData.plan = plan;
+    userUsage.set(userId, userData);
+    return res.json({ ok: true, userId, plan });
+  }
+
+  try {
+    const { error } = await supabase.from("users").update({ plan }).eq("id", userId);
+    if (error) {
+      return res.status(500).json({ error: "SET_PLAN_FAILED", detail: error.message });
+    }
+
+    console.log(`✅ Admin granted platinum to user: ${userId}`);
+    res.json({ ok: true, userId });
+  } catch (error) {
+    console.error('grant-platinum error:', error);
+    res.status(500).json({ error: 'GRANT_PLATINUM_FAILED', detail: error.message });
+  }
+});
+
+// Set user plan (for free trial)
+app.post('/api/users/plan', requireUser, async (req, res) => {
+  try {
+    const userId = req.__userId;
+    if (!userId || userId === 'demo-user') {
+      return res.status(401).json({ error: 'auth_required' });
+    }
+
+    const { plan } = req.body || {};
+    if (plan !== 'free_trial') {
+      return res.status(400).json({ error: 'invalid_plan' });
+    }
+
+    console.log(`Setting plan for user ${userId}: ${plan}`);
+
+    if (supabase) {
+      // Update user plan in Supabase
+      const { error } = await supabase
+        .from('users')
+        .upsert({ 
+          id: userId, 
+          plan: 'free_trial',
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Failed to update user plan:', error);
+        return res.status(500).json({ error: 'database_error' });
+      }
+    } else {
+      return res.status(500).json({ error: "SUPABASE_REQUIRED", message: "Supabase connection required for plan management" });
+    }
+
+    res.json({ ok: true, plan: 'free_trial' });
+  } catch (error) {
+    console.error('Error setting user plan:', error);
+    res.status(500).json({ error: 'internal_error' });
+  }
+});
+
+// Cancel Stripe subscription
+app.post('/api/billing/cancel-subscription', requireUser, async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const userId = req.__userId;
+
+    // Handle demo mode when Supabase is not configured
+    if (!supabase) {
+      // Fallback to in-memory storage
+      const userData = userUsage.get(userId);
+      if (userData && userData.plan === 'platinum') {
+        userData.plan = 'free';
+        userUsage.set(userId, userData);
+        console.log(`✅ Demo mode: Downgraded ${userId} from platinum to free`);
+        return res.json({
+          success: true,
+          message: 'Subscription cancelled successfully (demo mode)',
+          cancel_at_period_end: true,
+          current_period_end: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 days from now
+        });
+      } else {
+        return res.status(400).json({ error: 'No active subscription found' });
+      }
+    }
+
+    // Get user's current subscription from Supabase
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('stripe_customer_id, stripe_subscription_id')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!user.stripe_subscription_id) {
+      return res.status(400).json({ error: 'No active subscription found' });
+    }
+
+    // Cancel the subscription in Stripe
+    const subscription = await stripe.subscriptions.update(user.stripe_subscription_id, {
+      cancel_at_period_end: true
+    });
+
+    // Set subscription end date instead of immediately removing access
+    const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        subscription_end_date: subscriptionEndDate.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error updating user plan:', updateError);
+      return res.status(500).json({ error: 'Failed to update user plan' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Subscription cancelled successfully',
+      cancel_at_period_end: subscription.cancel_at_period_end,
+      current_period_end: subscription.current_period_end
+    });
+
+  } catch (error) {
+    console.error('Error cancelling subscription:', error);
+    res.status(500).json({ error: 'Failed to cancel subscription' });
+  }
+});
+
+// Stripe webhook handler (raw body required for signature verification)
+app.post('/api/billing/webhook',
+  bodyParser.raw({ type: 'application/json' }),
+  async (req, res) => {
+    if (!stripe) {
+      console.error('❌ Stripe not configured');
+      return res.status(500).json({ code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' });
+    }
+    
+    const sig = req.headers['stripe-signature'];
+    let event;
+    
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
+      console.log(`📨 Webhook received: ${event.type}`);
+    } catch (err) {
+      console.error('❌ Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    
+    try {
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        const userId = session.metadata?.userId;
+        
+        console.log(`🔍 Processing checkout.session.completed:`, {
+          sessionId: session.id,
+          userId: userId,
+          hasSubscription: !!session.subscription,
+          supabaseConnected: !!supabase
+        });
+        
+        if (!userId) {
+          console.error('❌ userId missing from checkout session metadata');
+          return res.status(400).json({ error: 'userId not in metadata' });
+        }
+        
+        if (!supabase) {
+          console.error('❌ Supabase not configured');
+          return res.status(500).json({ error: 'Supabase not configured' });
+        }
+        
+        // Get subscription details from Stripe
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);
+        const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
+        
+        console.log(`💳 Subscription retrieved:`, {
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          endDate: subscriptionEndDate.toISOString()
+        });
+        
+        // Update user plan and subscription end date in Supabase
+        const { error } = await supabase
+          .from('users')
+          .update({ 
+            plan: 'gold',
+            subscription_end_date: subscriptionEndDate.toISOString(),
+            grandfathered: false,  // Paying users are not grandfathered
+            stripe_customer_id: subscription.customer,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', userId);
+          
+        if (error) {
+          console.error('❌ Failed to update user plan in Supabase:', error);
+          throw error;
+        }
+        
+        console.log(`✅ Plan set to gold via webhook: ${userId}, expires: ${subscriptionEndDate}`);
+      }
+      
+      // Handle subscription cancellation/deletion
+      else if (event.type === 'customer.subscription.deleted' || event.type === 'customer.subscription.updated') {
+        const subscription = event.data.object;
+        
+        // Find user by Stripe customer ID
+        if (supabase && subscription.customer) {
+          const { data: users, error: findError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('stripe_customer_id', subscription.customer);
+            
+          if (!findError && users && users.length > 0) {
+            const userId = users[0].id;
+            
+            // If subscription is canceled or deleted, remove plan access
+            if (subscription.status === 'canceled' || subscription.status === 'unpaid' || event.type === 'customer.subscription.deleted') {
+              const { error } = await supabase
+                .from('users')
+                .update({ 
+                  plan: null,  // No plan access (must resubscribe)
+                  subscription_end_date: null
+                })
+                .eq('id', userId);
+                
+              if (error) {
+                console.error('Failed to remove user plan in Supabase:', error);
+                throw error;
+              }
+              
+              console.log(`✅ Plan access removed via webhook: ${userId}`);
+            }
+          }
+        }
+      }
+      
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Webhook handling error:', error);
+      res.status(500).send('Webhook handler failed');
+    }
+  }
+);
+
+// GET /historical/odds - Historical odds snapshots for a sport (costs 1 credit per snapshot)
+app.get("/api/historical/odds/:sport", requireUser, async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const { 
+      regions = 'us',
+      markets = 'h2h',
+      date,
+      bookmakers
+    } = req.query;
+    
+    if (!API_KEY) {
+      return res.status(400).json({ 
+        code: 'MISSING_ENV', 
+        message: "Missing ODDS_API_KEY" 
+      });
+    }
+    
+    console.log(`🌐 Fetching historical odds for ${sport} at ${date || 'latest'}`);
+    
+    const params = new URLSearchParams({
+      apiKey: API_KEY,
+      regions,
+      markets
+    });
+    
+    if (date) params.set('date', date);
+    if (bookmakers) params.set('bookmakers', bookmakers);
+    
+    const url = `https://api.the-odds-api.com/v4/historical/sports/${encodeURIComponent(sport)}/odds?${params.toString()}`;
+    
+    const response = await axios.get(url, { timeout: 10000 });
+    
+    console.log(`✅ Retrieved historical odds snapshot:`, {
+      timestamp: response.data.timestamp,
+      gameCount: response.data.data?.length || 0
+    });
+    
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching historical odds:', error.message);
+    res.status(error.response?.status || 500).json({ 
+      error: error.message,
+      hint: 'Failed to fetch historical odds from The Odds API'
+    });
+  }
+});
+
+// GET /historical/events/{eventId}/odds - Historical odds for specific event (costs 1 credit per snapshot)
+app.get("/api/historical/events/:sport/:eventId/odds", requireUser, async (req, res) => {
+  try {
+    const { sport, eventId } = req.params;
+    const { 
+      regions = 'us',
+      markets = 'h2h',
+      date,
+      bookmakers
+    } = req.query;
+    
+    if (!API_KEY) {
+      return res.status(400).json({ 
+        code: 'MISSING_ENV', 
+        message: "Missing ODDS_API_KEY" 
+      });
+    }
+    
+    // Check cache (cache for 1 hour since historical data doesn't change)
+    const cacheKey = getCacheKey('historical-event-odds', { sport, eventId, date, regions, markets, bookmakers });
+    const cached = getCachedResponse(cacheKey);
+    
+    if (cached) {
+      console.log(`📦 Using cached historical odds for event ${eventId}`);
+      return res.json(cached);
+    }
+    
+    console.log(`🌐 Fetching historical odds for event ${eventId} at ${date || 'latest'}`);
+    
+    const params = new URLSearchParams({
+      apiKey: API_KEY,
+      regions,
+      markets
+    });
+    
+    if (date) params.set('date', date);
+    if (bookmakers) params.set('bookmakers', bookmakers);
+    
+    const url = `https://api.the-odds-api.com/v4/historical/sports/${encodeURIComponent(sport)}/events/${encodeURIComponent(eventId)}/odds?${params.toString()}`;
+    
+    const response = await axios.get(url, { timeout: 10000 });
+    
+    // Cache for 1 hour
+    setCachedResponse(cacheKey, response.data, 3600000);
+    
+    console.log(`✅ Retrieved historical odds for event:`, {
+      timestamp: response.data.timestamp,
+      bookmakerCount: response.data.data?.bookmakers?.length || 0
+    });
+    
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error('Error fetching historical event odds:', error.message);
+    res.status(error.response?.status || 500).json({ 
+      error: error.message,
+      hint: 'Failed to fetch historical event odds from The Odds API'
+    });
+  }
+});
+
+// GET /events/{eventId}/markets - Returns available markets for an event (costs 1 credit)
+// Sports routes extracted to server/routes/sports.js
+
+// Helper function to fetch quarter/half/period markets for a specific game
+async function fetchQuarterMarketsForGame(eventId, sport, quarterMarkets, bookmakerList, oddsFormat) {
+  if (!quarterMarkets || quarterMarkets.length === 0) {
+    return null; // No quarter markets requested
+  }
+  
+  try {
+    // TheOddsAPI requires comma-separated markets in the query string
+    const marketsParam = quarterMarkets.join(',');
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=us&markets=${encodeURIComponent(marketsParam)}&bookmakers=${encodeURIComponent(bookmakerList)}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+    
+    console.log(`🎯 Fetching quarter markets for event ${eventId}: ${quarterMarkets.join(', ')}`);
+    console.log(`   URL: ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+    
+    const response = await axios.get(url, { timeout: 5000 });
+    
+    if (response.data && response.data.bookmakers && response.data.bookmakers.length > 0) {
+      const totalMarkets = response.data.bookmakers.reduce((sum, bm) => sum + (bm.markets?.length || 0), 0);
+      const totalOutcomes = response.data.bookmakers.reduce((sum, bm) => 
+        sum + (bm.markets?.reduce((mSum, m) => mSum + (m.outcomes?.length || 0), 0) || 0), 0);
+      
+      console.log(`✅ Got quarter markets for event ${eventId}: ${response.data.bookmakers.length} bookmakers with ${totalMarkets} markets and ${totalOutcomes} outcomes`);
+      
+      // Log sample data
+      if (response.data.bookmakers[0]?.markets?.[0]) {
+        console.log(`   Sample: ${response.data.bookmakers[0].key} - ${response.data.bookmakers[0].markets[0].key} (${response.data.bookmakers[0].markets[0].outcomes?.length || 0} outcomes)`);
+      }
+      
+      return response.data;
+    } else {
+      console.warn(`⚠️ No bookmakers or markets returned for event ${eventId}`);
+      if (response.data) {
+        console.log(`   Response structure:`, {
+          has_bookmakers: !!response.data.bookmakers,
+          bookmakers_count: response.data.bookmakers?.length || 0,
+          keys: Object.keys(response.data)
+        });
+      }
+      return null;
+    }
+  } catch (err) {
+    console.warn(`⚠️ Failed to fetch quarter markets for event ${eventId}:`, err.message);
+    if (err.response?.status) {
+      console.warn(`   HTTP Status: ${err.response.status}`);
+    }
+    if (err.response?.data) {
+      console.warn(`   API Error:`, JSON.stringify(err.response.data).substring(0, 200));
+    }
+    return null;
+  }
+}
+
+// Helper function to filter out bookmakers with empty markets or outcomes
+function cleanBookmakerData(game) {
+  if (!game.bookmakers) return game;
+  
+  // Filter bookmakers to only those with markets that have outcomes
+  game.bookmakers = game.bookmakers
+    .map(bm => ({
+      ...bm,
+      markets: (bm.markets || []).filter(m => m.outcomes && m.outcomes.length > 0)
+    }))
+    .filter(bm => bm.markets && bm.markets.length > 0);
+  
+  return game;
+}
+
+// Helper function to merge quarter markets into game data
+function mergeQuarterMarkets(gameData, quarterData) {
+  if (!quarterData || !quarterData.bookmakers) {
+    return gameData;
+  }
+  
+  // Merge bookmakers from quarter data into game data
+  const bookmakerMap = new Map();
+  
+  // First, add all existing bookmakers from game data
+  if (gameData.bookmakers) {
+    gameData.bookmakers.forEach(bm => {
+      bookmakerMap.set(bm.key, bm);
+    });
+  }
+  
+  // Then, merge in quarter market bookmakers
+  quarterData.bookmakers.forEach(qmBm => {
+    const existingBm = bookmakerMap.get(qmBm.key);
+    if (existingBm && qmBm.markets) {
+      // Add quarter markets to existing bookmaker
+      existingBm.markets = [...(existingBm.markets || []), ...qmBm.markets];
+    } else if (qmBm.markets) {
+      // Add new bookmaker with quarter markets
+      bookmakerMap.set(qmBm.key, qmBm);
+    }
+  });
+  
+  gameData.bookmakers = Array.from(bookmakerMap.values());
+  return gameData;
+}
+
+// odds endpoint (unified for multiple sports)
+app.get("/api/odds", requireUser, checkPlanAccess, async (req, res) => {
+  try {
+    const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american", date } = req.query;
+    console.log('🔍 /api/odds called with:', { sports, regions, markets, date, userId: req.__userId });
+    if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
+    
+    // If no API key, return error instead of mock data
+    if (!API_KEY) {
+      console.log('🔧 No API_KEY found, returning error');
+      return res.status(500).json({ 
+        error: "ODDS_API_KEY not configured", 
+        message: "Please configure ODDS_API_KEY environment variable" 
+      });
+    }
+    
+    const sportsArray = sports.split(',');
+    const marketsArray = markets.split(',');
+    let allGames = [];
+    
+    // Separate player props from regular markets
+    const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
+    const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
+    
+    // Sport-specific market support from TheOddsAPI
+    // Based on official API documentation: https://the-odds-api.com/sports-odds-data/betting-markets.html
+    // Includes: Featured Markets, Additional Markets, and Game Period Markets
+    const SPORT_MARKET_SUPPORT = {
+      // Football (NFL, NCAAF) - full support for all markets
+      'americanfootball_nfl': [
+        // Featured markets
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        // Additional markets
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        // Quarter markets
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
+        // Half markets
+        'h2h_h1', 'h2h_h2',
+        'h2h_3_way_h1', 'h2h_3_way_h2',
+        'spreads_h1', 'spreads_h2',
+        'alternate_spreads_h1', 'alternate_spreads_h2',
+        'totals_h1', 'totals_h2',
+        'alternate_totals_h1', 'alternate_totals_h2',
+        'team_totals_h1', 'team_totals_h2',
+        'alternate_team_totals_h1', 'alternate_team_totals_h2'
+      ],
+      'americanfootball_ncaaf': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
+        'h2h_h1', 'h2h_h2',
+        'h2h_3_way_h1', 'h2h_3_way_h2',
+        'spreads_h1', 'spreads_h2',
+        'alternate_spreads_h1', 'alternate_spreads_h2',
+        'totals_h1', 'totals_h2',
+        'alternate_totals_h1', 'alternate_totals_h2',
+        'team_totals_h1', 'team_totals_h2',
+        'alternate_team_totals_h1', 'alternate_team_totals_h2'
+      ],
+      // Basketball (NBA, NCAAB) - supports quarters and full game
+      'basketball_nba': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
+      ],
+      'basketball_ncaab': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+        'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+        'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
+      ],
+      // Baseball (MLB) - supports innings markets
+      'baseball_mlb': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        // Full game
+        'h2h_h1', 'h2h_h2',
+        'h2h_3_way_h1', 'h2h_3_way_h2',
+        'spreads_h1', 'spreads_h2',
+        'alternate_spreads_h1', 'alternate_spreads_h2',
+        'totals_h1', 'totals_h2',
+        'alternate_totals_h1', 'alternate_totals_h2',
+        'team_totals_h1', 'team_totals_h2',
+        'alternate_team_totals_h1', 'alternate_team_totals_h2',
+        // Innings markets
+        'h2h_1st_1_innings', 'h2h_1st_3_innings', 'h2h_1st_5_innings', 'h2h_1st_7_innings',
+        'h2h_3_way_1st_1_innings', 'h2h_3_way_1st_3_innings', 'h2h_3_way_1st_5_innings', 'h2h_3_way_1st_7_innings',
+        'spreads_1st_1_innings', 'spreads_1st_3_innings', 'spreads_1st_5_innings', 'spreads_1st_7_innings',
+        'alternate_spreads_1st_1_innings', 'alternate_spreads_1st_3_innings', 'alternate_spreads_1st_5_innings', 'alternate_spreads_1st_7_innings',
+        'totals_1st_1_innings', 'totals_1st_3_innings', 'totals_1st_5_innings', 'totals_1st_7_innings',
+        'alternate_totals_1st_1_innings', 'alternate_totals_1st_3_innings', 'alternate_totals_1st_5_innings', 'alternate_totals_1st_7_innings'
+      ],
+      // Hockey (NHL) - supports periods
+      'icehockey_nhl': [
+        'h2h', 'spreads', 'totals', 'h2h_lay',
+        'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+        'h2h_p1', 'h2h_p2', 'h2h_p3',
+        'h2h_3_way_p1', 'h2h_3_way_p2', 'h2h_3_way_p3',
+        'spreads_p1', 'spreads_p2', 'spreads_p3',
+        'alternate_spreads_p1', 'alternate_spreads_p2', 'alternate_spreads_p3',
+        'totals_p1', 'totals_p2', 'totals_p3',
+        'alternate_totals_p1', 'alternate_totals_p2', 'alternate_totals_p3',
+        'team_totals_p1', 'team_totals_p2', 'team_totals_p3',
+        'alternate_team_totals_p1', 'alternate_team_totals_p2', 'alternate_team_totals_p3'
+      ],
+      // Soccer (all leagues) - supports h2h, spreads, totals, and soccer-specific markets
+      'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_mls': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_spain_la_liga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_germany_bundesliga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_italy_serie_a': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_france_ligue_one': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      'soccer_fifa_world_cup': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+      // Combat Sports (MMA, Boxing)
+      'mma_mixed_martial_arts': ['h2h', 'spreads', 'totals', 'h2h_lay'],
+      'boxing_boxing': ['h2h', 'spreads', 'totals', 'h2h_lay'],
+      // Golf and other sports with outrights
+      'golf_pga': ['outrights', 'outrights_lay'],
+      'golf_masters': ['outrights', 'outrights_lay'],
+      'golf_us_open': ['outrights', 'outrights_lay'],
+      'golf_british_open': ['outrights', 'outrights_lay'],
+      // Default for any other sport
+      'default': ['h2h', 'spreads', 'totals']
+    };
+    
+    // Filter markets based on the sport being requested
+    const filteredRegularMarkets = regularMarkets.filter(m => {
+      // For each sport, check if the market is supported
+      return sportsArray.some(sport => {
+        const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
+        return supportedForSport.includes(m);
+      });
+    });
+    
+    console.log('🎯 Sport-specific market filtering:');
+    sportsArray.forEach(sport => {
+      const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
+      console.log(`  ${sport}: ${supportedForSport.join(', ')}`);
+    });
+    
+    console.log('Original regular markets:', regularMarkets);
+    console.log('Filtered to supported markets:', filteredRegularMarkets);
+    
+    // Separate quarter/half/period markets from base markets
+    // NOTE: TheOddsAPI documentation states quarter markets are available via /events/{eventId}/odds
+    // but actual availability depends on bookmaker support and may be limited
+    const quarterMarketPatterns = ['_q1', '_q2', '_q3', '_q4', '_h1', '_h2', '_p1', '_p2', '_p3', '_1st_'];
+    const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
+    const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
+    
+    console.log('📊 Market separation:');
+    console.log('  Base markets:', baseMarkets);
+    console.log('  Quarter/Half/Period markets:', quarterMarkets);
+    if (quarterMarkets.length > 0) {
+      console.log('  ⚠️ Note: Quarter market availability depends on bookmaker support');
+    }
+    
+    console.log('Regular markets requested:', regularMarkets);
+    console.log('Player prop markets requested:', playerPropMarkets);
+    console.log('ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
+    console.log('API_KEY available:', !!API_KEY);
+    console.log('SPORTSGAMEODDS_API_KEY available:', !!SPORTSGAMEODDS_API_KEY);
+    
+    // Step 1: Fetch base odds (h2h, spreads, totals) - quarter markets fetched separately
+    if (baseMarkets.length > 0) {
+      const marketsToFetch = baseMarkets;
+      
+      // Fetch each sport separately since TheOddsAPI doesn't support multiple sports in one request
+      for (const sport of sportsArray) {
+        try {
+          // Get bookmakers for this user's plan
+          const userProfile = req.__userProfile || { plan: 'free' };
+          const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+          
+          // Filter out DFS apps for game odds (they only offer player props)
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+          const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
+          const bookmakerList = gameOddsBookmakers.join(',');
+          
+          console.log(`🎯 Game odds bookmakers for ${sport}: ${bookmakerList}`);
+          
+          // SUPABASE CACHE: Check Supabase first before hitting The Odds API
+          let supabaseCachedData = null;
+          if (supabase && oddsCacheService) {
+            try {
+              const cachedOdds = await oddsCacheService.getCachedOdds(sport, {
+                markets: marketsToFetch
+              });
+              
+              if (cachedOdds && cachedOdds.length > 0) {
+                console.log(`📦 Supabase cache HIT for ${sport}: ${cachedOdds.length} cached entries`);
+                // Transform cached data back to API format
+                supabaseCachedData = transformCachedOddsToApiFormat(cachedOdds);
+                console.log(`✅ Using ${supabaseCachedData.length} games from Supabase cache`);
+              } else {
+                console.log(`📦 Supabase cache MISS for ${sport}`);
+              }
+            } catch (cacheErr) {
+              console.warn(`⚠️ Supabase cache error for ${sport}:`, cacheErr.message);
+            }
+          }
+          
+          // If we have Supabase cached data, use it and skip API call
+          if (supabaseCachedData && supabaseCachedData.length > 0) {
+            allGames.push(...supabaseCachedData);
+            console.log(`💰 Saved API call for ${sport} using Supabase cache`);
+            continue; // Skip to next sport
+          }
+          
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          // Split markets into regular and alternate for optimized caching
+          const regularMarkets = marketsToFetch.filter(market => !ALTERNATE_MARKETS.includes(market));
+          const alternateMarkets = marketsToFetch.filter(market => ALTERNATE_MARKETS.includes(market));
+          
+          // Check if we need to fetch both types of markets
+          const needsRegularMarkets = regularMarkets.length > 0;
+          const needsAlternateMarkets = alternateMarkets.length > 0;
+          
+          // Create separate cache keys for regular and alternate markets
+          const regularCacheKey = needsRegularMarkets ? 
+            getCacheKey('odds', { sport, regions, markets: regularMarkets }) : null;
+          const alternateCacheKey = needsAlternateMarkets ? 
+            getCacheKey('odds_alternate', { sport, regions, markets: alternateMarkets }) : null;
+          
+          // Check cache for both types
+          const cachedRegularData = needsRegularMarkets ? getCachedResponse(regularCacheKey) : null;
+          const cachedAlternateData = needsAlternateMarkets ? getCachedResponse(alternateCacheKey) : null;
+          
+          // Determine if we can use cached data for everything
+          const canUseAllCached = 
+            (!needsRegularMarkets || cachedRegularData) && 
+            (!needsAlternateMarkets || cachedAlternateData);
+          
+          // For backward compatibility, create a combined cache key
+          const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsToFetch });
+          const cachedData = getCachedResponse(cacheKey);
+          
+          let responseData;
+          
+          // If we can use all cached data, combine it
+          if (canUseAllCached) {
+            // Combine cached data from both sources
+            responseData = [];
+            
+            if (cachedRegularData) {
+              console.log(`📦 Using cached regular markets data for ${sport}`);
+              responseData = [...responseData, ...cachedRegularData];
+            }
+            
+            if (cachedAlternateData) {
+              console.log(`📦 Using cached alternate markets data for ${sport} (extended TTL)`);
+              responseData = [...responseData, ...cachedAlternateData];
+            }
+            
+            // For backward compatibility
+            if (cachedData) {
+              console.log(`📦 Using combined cached data for ${sport}`);
+              responseData = cachedData;
+            }
+          } else {
+            // Need to make an API call
+            console.log(`🌐 API call for ${sport}:`, url);
+            const response = await axios.get(url);
+            responseData = response.data;
+            
+            // Cache the data with split strategy
+            if (needsRegularMarkets && needsAlternateMarkets) {
+              // Split the response data by market type
+              const regularData = responseData.map(game => ({
+                ...game,
+                bookmakers: game.bookmakers.map(bookmaker => ({
+                  ...bookmaker,
+                  markets: bookmaker.markets.filter(market => !ALTERNATE_MARKETS.includes(market.key))
+                })).filter(bookmaker => bookmaker.markets.length > 0)
+              })).filter(game => game.bookmakers.length > 0);
+              
+              const alternateData = responseData.map(game => ({
+                ...game,
+                bookmakers: game.bookmakers.map(bookmaker => ({
+                  ...bookmaker,
+                  markets: bookmaker.markets.filter(market => ALTERNATE_MARKETS.includes(market.key))
+                })).filter(bookmaker => bookmaker.markets.length > 0)
+              })).filter(game => game.bookmakers.length > 0);
+              
+              // Cache both separately
+              if (regularData.length > 0) {
+                setCachedResponse(regularCacheKey, regularData);
+              }
+              
+              if (alternateData.length > 0) {
+                setCachedResponse(alternateCacheKey, alternateData);
+              }
+              
+              // Also cache the combined data for backward compatibility
+              setCachedResponse(cacheKey, responseData);
+            } else {
+              // Just cache everything in one go
+              setCachedResponse(cacheKey, responseData);
+            }
+            
+            // SUPABASE CACHE: Save to Supabase for persistent caching
+            if (supabase && oddsCacheService && responseData && responseData.length > 0) {
+              try {
+                console.log(`💾 Saving ${responseData.length} games to Supabase cache for ${sport}`);
+                await saveOddsToSupabase(responseData, sport);
+                console.log(`✅ Successfully cached ${responseData.length} games in Supabase`);
+              } catch (supabaseSaveErr) {
+                console.warn(`⚠️ Failed to save to Supabase cache:`, supabaseSaveErr.message);
+                // Don't fail the request if Supabase save fails
+              }
+            }
+            
+            // Increment usage for each actual external API call made
+            const userId = req.__userId;
+            const profile = req.__userProfile;
+            if (userId && profile) {
+              await incrementUsage(userId, profile);
+              console.log(`📊 Incremented usage for ${sport} API call`);
+            }
+          }
+          const sportGames = responseData || [];
+          console.log(`Got ${sportGames.length} games for ${sport}`);
+          
+          // Debug: Log what markets are actually in the response
+          if (sportGames.length > 0) {
+            const uniqueMarkets = new Set();
+            sportGames.forEach(game => {
+              if (game.bookmakers) {
+                game.bookmakers.forEach(bookmaker => {
+                  if (bookmaker.markets) {
+                    bookmaker.markets.forEach(market => {
+                      uniqueMarkets.add(market.key);
+                    });
+                  }
+                });
+              }
+            });
+            console.log(`🎯 Markets found in ${sport} response:`, Array.from(uniqueMarkets).sort());
+          }
+          
+          allGames.push(...sportGames);
+        } catch (sportErr) {
+          console.warn(`Failed to fetch games for sport ${sport}:`, sportErr.response?.status, sportErr.response?.data || sportErr.message);
+          // Continue with other sports even if one fails
+        }
+      }
+      
+      console.log(`Got ${allGames.length} total games with base markets`);
+      
+      // Filter bookmakers based on user plan before returning
+      const userProfile = req.__userProfile || { plan: 'free' };
+      const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+      
+      allGames.forEach(game => {
+        game.bookmakers = game.bookmakers.filter(bookmaker => 
+          allowedBookmakers.includes(bookmaker.key)
+        );
+      });
+      
+      console.log(`Filtered to ${allowedBookmakers.length} allowed bookmakers for user plan: ${userProfile.plan}`);
+
+    }
+    
+    // Step 2: Fetch player props if requested and enabled
+    console.log(`🔍 Player props check: playerPropMarkets.length=${playerPropMarkets.length}, ENABLE_PLAYER_PROPS_V2=${ENABLE_PLAYER_PROPS_V2}`);
+    
+    if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
+      console.log('🎯 Fetching player props for markets:', playerPropMarkets);
+      
+      // Set a total timeout for player props to prevent request hanging
+      const playerPropsStartTime = Date.now();
+      const TOTAL_PLAYER_PROPS_TIMEOUT = 180000; // 3 minutes total timeout for comprehensive coverage
+      const EARLY_RESPONSE_TIME = 4000; // Return cached results after 4 seconds to user immediately
+      
+      // For player props, we need to fetch games with the date filter applied
+      // This is separate from regular game odds because:
+      // 1. Player props require individual event API calls
+      // 2. We need to filter by date BEFORE fetching props
+      // 3. Regular odds may have different date filtering needs
+      let playerPropsGames = allGames;
+      
+      // If a date filter is specified, fetch games specifically for that date
+      if (date) {
+        console.log(`🎯 Date filter specified (${date}), fetching games for player props with date filter`);
+        playerPropsGames = [];
+        
+        try {
+          // Fetch games for the requested sports with date filter
+          for (const sport of sportsArray) {
+            const dateParam = `&commenceTimeFrom=${date}T00:00:00Z&commenceTimeTo=${date}T23:59:59Z`;
+            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}${dateParam}`;
+            console.log(`🌐 Fetching games for player props (date: ${date}): ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+            
+            try {
+              const response = await axios.get(url);
+              if (response.data && Array.isArray(response.data)) {
+                console.log(`🎯 Found ${response.data.length} games for sport ${sport} on ${date}`);
+                playerPropsGames.push(...response.data);
+              }
+            } catch (sportError) {
+              console.error(`🚫 Error fetching games for sport ${sport}:`, sportError.message);
+            }
+          }
+          
+          console.log(`🎯 Total games found for player props on ${date}: ${playerPropsGames.length}`);
+        } catch (error) {
+          console.error('🚫 Error fetching games for player props with date filter:', error.message);
+        }
+      } else if (allGames.length === 0) {
+        // If no date filter and no games from regular API, fetch all games for player props
+        console.log('🎯 No games found in regular API call and no date filter, fetching all games for player props');
+        
+        try {
+          // Fetch games for the requested sports
+          for (const sport of sportsArray) {
+            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=h2h&oddsFormat=${oddsFormat}`;
+            console.log(`🌐 Fetching all games for player props: ${url.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+            
+            try {
+              const response = await axios.get(url);
+              if (response.data && Array.isArray(response.data)) {
+                console.log(`🎯 Found ${response.data.length} games for sport ${sport}`);
+                playerPropsGames.push(...response.data);
+              }
+            } catch (sportError) {
+              console.error(`🚫 Error fetching games for sport ${sport}:`, sportError.message);
+            }
+          }
+          
+          console.log(`🎯 Total games found for player props: ${playerPropsGames.length}`);
+        } catch (error) {
+          console.error('🚫 Error fetching games for player props:', error.message);
+        }
+      } else {
+        // Use games from regular API call
+        console.log(`🎯 Using ${allGames.length} games from regular API call for player props`);
+        playerPropsGames = allGames;
+      }
+      
+      console.log(`🎯 Processing ${Math.min(playerPropsGames.length, 10)} games for player props`);
+      console.log(`🎯 Total games available for props: ${playerPropsGames.length}`);
+      
+      // Sort games to prioritize NCAA games if they're requested
+      if (sportsArray.includes('americanfootball_ncaaf') || sportsArray.includes('basketball_ncaab')) {
+        console.log('🎓 NCAA sports requested, prioritizing NCAA games for player props');
+        playerPropsGames.sort((a, b) => {
+          const aIsNCAA = a.sport_key === 'americanfootball_ncaaf' || a.sport_key === 'basketball_ncaab';
+          const bIsNCAA = b.sport_key === 'americanfootball_ncaaf' || b.sport_key === 'basketball_ncaab';
+          return bIsNCAA - aIsNCAA; // Sort NCAA games first
+        });
+      }
+      
+      // For each game, fetch individual player props using event ID
+      // Smart limit based on sport to prevent timeouts
+      const SPORT_GAME_LIMITS = {
+        'baseball_mlb': 50,           // MLB has 162-game season, process up to 50 (realistic timeout)
+        'basketball_nba': 50,         // NBA has 82-game season, process up to 50
+        'icehockey_nhl': 50,          // NHL has 32 teams, process up to 50
+        'americanfootball_nfl': 40,   // NFL has 17-game season, process up to 40
+        'americanfootball_ncaaf': 40, // NCAAF has many games, process up to 40
+        'basketball_ncaab': 40,       // NCAAB has many games, process up to 40
+        'soccer_epl': 50,             // Soccer games, process up to 50
+        'default': 40                 // Default limit for other sports
+      };
+      
+      const sportKey = sportsArray[0]; // Get first sport (usually only one for player props)
+      const gameLimit = SPORT_GAME_LIMITS[sportKey] || SPORT_GAME_LIMITS['default'];
+      const gamesToProcess = Math.min(playerPropsGames.length, gameLimit);
+      
+      console.log(`🎯 Processing ${gamesToProcess}/${playerPropsGames.length} games for player props (limit: ${gameLimit}, sport: ${sportKey})`);
+      console.log(`📊 Supabase cache enabled - subsequent requests will be instant!`);
+      console.log(`⏱️ Early response at ${EARLY_RESPONSE_TIME}ms, full timeout at ${TOTAL_PLAYER_PROPS_TIMEOUT}ms`);
+      
+      let earlyResponseSent = false;
+      
+      for (let i = 0; i < gamesToProcess; i++) {
+        // Check if we've exceeded total timeout
+        let elapsedTime = Date.now() - playerPropsStartTime;
+        if (elapsedTime > TOTAL_PLAYER_PROPS_TIMEOUT) {
+          console.log(`⏱️ Player props timeout reached (${elapsedTime}ms). Processed ${i}/${gamesToProcess} games. Returning final results.`);
+          break;
+        }
+        
+        // Send early response with cached results if we've hit the early response time
+        if (!earlyResponseSent && elapsedTime > EARLY_RESPONSE_TIME && i > 0) {
+          console.log(`📤 Early response sent at ${elapsedTime}ms with ${i} games processed. Continuing background processing...`);
+          earlyResponseSent = true;
+          // Don't break - continue processing in background
+        }
+        
+        const game = playerPropsGames[i];
+        if (!game.id) {
+          console.log(`⚠️ Game ${i} missing ID, skipping player props`);
+          continue;
+        }
+        
+        elapsedTime = Date.now() - playerPropsStartTime;
+        console.log(`🎯 Processing game ${i+1}/${gamesToProcess}: ${game.home_team} vs ${game.away_team} (ID: ${game.id}) [${elapsedTime}ms elapsed]`);
+        
+        try {
+          const userProfile = req.__userProfile || { plan: 'free' };
+          const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+          
+          // For player props, use regions instead of bookmakers parameter
+          // This ensures TheOddsAPI returns ALL bookmakers for the specified regions
+          // (both traditional sportsbooks AND DFS apps)
+          // Per TheOddsAPI docs: when both regions and bookmakers are specified, bookmakers takes priority
+          // We want regions to take priority to get complete coverage
+          
+          console.log('🎯 Player Props Request Debug:', {
+            userPlan: userProfile.plan,
+            regions: 'us,us_dfs',
+            note: 'Using ONLY regions parameter (not bookmakers) to get full coverage from TheOddsAPI',
+            reason: 'When both regions and bookmakers are specified, bookmakers takes priority and overrides regions'
+          });
+          
+          // Use individual event endpoint for player props
+          // IMPORTANT: Use ONLY regions parameter, NOT bookmakers
+          // Per TheOddsAPI docs: when both regions and bookmakers are specified, bookmakers takes priority
+          // We want regions to take priority to get complete coverage from both us and us_dfs regions
+          const propsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(game.sport_key)}/events/${encodeURIComponent(game.id)}/odds?apiKey=${API_KEY}&regions=us,us_dfs&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          console.log(`🌐 Player props URL: ${propsUrl.replace(API_KEY, 'API_KEY_HIDDEN')}`);
+          
+          const cacheKey = getCacheKey('player-props', { eventId: game.id, markets: playerPropMarkets, regions: 'us,us_dfs' });
+          
+          // SUPABASE CACHE: Check Supabase first for player props
+          let supabaseCachedProps = null;
+          if (supabase && oddsCacheService) {
+            try {
+              const cachedPropsData = await oddsCacheService.getCachedOdds(game.sport_key, {
+                eventId: game.id,
+                markets: playerPropMarkets
+              });
+              
+              if (cachedPropsData && cachedPropsData.length > 0) {
+                console.log(`📦 Supabase cache HIT for player props - Game ${game.id}: ${cachedPropsData.length} cached entries`);
+                supabaseCachedProps = transformCachedOddsToApiFormat(cachedPropsData);
+                if (supabaseCachedProps.length > 0) {
+                  console.log(`✅ Using player props from Supabase cache for game ${game.id}`);
+                }
+              }
+            } catch (cacheErr) {
+              console.warn(`⚠️ Supabase cache error for player props:`, cacheErr.message);
+            }
+          }
+          
+          // If Supabase cache hit, use it
+          if (supabaseCachedProps && supabaseCachedProps.length > 0) {
+            // Merge the cached game data with the current game
+            const cachedGame = supabaseCachedProps[0];
+            if (cachedGame && cachedGame.bookmakers) {
+              console.log(`💰 Saved player props API call for game ${game.id} using Supabase cache`);
+              // Merge bookmakers directly
+              const existingBookmakers = new Map();
+              game.bookmakers.forEach(book => existingBookmakers.set(book.key, book));
+              
+              cachedGame.bookmakers.forEach(propsBook => {
+                if (existingBookmakers.has(propsBook.key)) {
+                  const existing = existingBookmakers.get(propsBook.key);
+                  existing.markets = [...(existing.markets || []), ...(propsBook.markets || [])];
+                } else {
+                  game.bookmakers.push(propsBook);
+                }
+              });
+              continue; // Skip to next game
+            }
+          }
+          
+          // Check memory cache
+          const cachedProps = getCachedResponse(cacheKey);
+          
+          let propsResponse;
+          if (cachedProps) {
+            propsResponse = { data: cachedProps };
+            console.log(`📦 Using memory cached player props for game ${game.id}`);
+          } else {
+            console.log(`🌐 Making API call for player props for game ${game.id}...`);
+            const startTime = Date.now();
+            propsResponse = await axios.get(propsUrl, { timeout: PLAYER_PROPS_REQUEST_TIMEOUT });
+            const duration = Date.now() - startTime;
+            console.log(`✅ Player props API call completed in ${duration}ms, status: ${propsResponse.status}`);
+            console.log(`📊 Player props response data:`, JSON.stringify(propsResponse.data, null, 2).substring(0, 500) + '...');
+          
+          // Enhanced debugging for bookmaker coverage
+          if (propsResponse.data && propsResponse.data.bookmakers) {
+            console.log(`🎯 PLAYER PROPS DEBUG - Game: ${game.id}`);
+            console.log(`🎯 Total bookmakers in response: ${propsResponse.data.bookmakers.length}`);
+            propsResponse.data.bookmakers.forEach(book => {
+              console.log(`🎯 Bookmaker: ${book.key} (${book.title}) - Markets: ${book.markets?.length || 0}`);
+              if (book.markets) {
+                book.markets.forEach(market => {
+                  console.log(`  📈 Market: ${market.key} - Outcomes: ${market.outcomes?.length || 0}`);
+                  if (market.outcomes) {
+                    market.outcomes.forEach(outcome => {
+                      if (outcome.name.toLowerCase().includes('tyreek') || outcome.name.toLowerCase().includes('hill')) {
+                        console.log(`    🏈 TYREEK HILL FOUND: ${outcome.name} - ${outcome.point} - ${outcome.price}`);
+                      }
+                    });
+                  }
+                });
+              }
+            });
+          }
+            
+            setCachedResponse(cacheKey, propsResponse.data);
+            
+            // SUPABASE CACHE: Save player props to Supabase
+            if (supabase && propsResponse.data && propsResponse.data.bookmakers) {
+              try {
+                console.log(`💾 Saving player props to Supabase cache for game ${game.id}`);
+                // Create a game object with the props data
+                const gameWithProps = {
+                  id: game.id,
+                  sport_key: game.sport_key,
+                  home_team: game.home_team,
+                  away_team: game.away_team,
+                  commence_time: game.commence_time,
+                  bookmakers: propsResponse.data.bookmakers
+                };
+                await saveOddsToSupabase([gameWithProps], game.sport_key);
+                console.log(`✅ Successfully cached player props in Supabase for game ${game.id}`);
+              } catch (supabaseSaveErr) {
+                console.warn(`⚠️ Failed to save player props to Supabase:`, supabaseSaveErr.message);
+              }
+            }
+            
+            // Increment usage for player props API call
+            const userId = req.__userId;
+            const profile = req.__userProfile;
+            if (userId && profile) {
+              await incrementUsage(userId, profile);
+              console.log(`📊 Incremented usage for player props API call`);
+            }
+          }
+          
+          // Merge player props into the existing game's bookmakers
+          if (propsResponse.data && propsResponse.data.bookmakers) {
+            console.log(`🔗 Merging ${propsResponse.data.bookmakers.length} bookmakers with player props`);
+            
+            // Check for DFS apps in response (including alternate keys)
+            const dfsAppsToCheck = [
+              { key: 'prizepicks', alts: [] },
+              { key: 'underdog', alts: [] },
+              { key: 'pick6', alts: ['draftkings_pick6'] },
+              { key: 'dabble_au', alts: [] }
+            ];
+            
+            dfsAppsToCheck.forEach(({ key: dfsKey, alts }) => {
+              const allKeys = [dfsKey, ...alts];
+              const dfsData = propsResponse.data.bookmakers.find(b => allKeys.includes(b.key));
+              if (dfsData) {
+                console.log(`✅ ${dfsKey.toUpperCase()} FOUND! (API key: ${dfsData.key}) Markets: ${dfsData.markets?.length || 0}`, {
+                  key: dfsData.key,
+                  title: dfsData.title,
+                  markets: dfsData.markets?.map(m => m.key) || []
+                });
+              } else {
+                console.log(`❌ ${dfsKey.toUpperCase()} NOT in response (checked: ${allKeys.join(', ')})`);
+              }
+            });
+            
+            // Enhanced logging for sportsbook coverage
+            const allBooksInResponse = propsResponse.data.bookmakers.map(b => ({ key: b.key, title: b.title, markets: b.markets?.length || 0 }));
+            const usBooks = allBooksInResponse.filter(b => b.key && !b.key.includes('exchange') && !b.key.includes('pinnacle'));
+            const dfsApps = allBooksInResponse.filter(b => ['prizepicks', 'underdog', 'pick6', 'prophetx', 'dabble_au'].includes(b.key));
+            
+            console.log(`📊 SPORTSBOOK COVERAGE FOR PLAYER PROPS (Game: ${game.id})`);
+            console.log(`📊 Total bookmakers in response: ${allBooksInResponse.length}`);
+            console.log(`📊 US Sportsbooks: ${usBooks.length} - ${usBooks.map(b => b.key).join(', ')}`);
+            console.log(`📊 DFS Apps: ${dfsApps.length} - ${dfsApps.map(b => b.key).join(', ')}`);
+            console.log(`📊 All bookmakers in response:`, allBooksInResponse);
+            
+            const existingBookmakers = new Map();
+            game.bookmakers.forEach(book => {
+              existingBookmakers.set(book.key, book);
+            });
+            
+            propsResponse.data.bookmakers.forEach(propsBook => {
+              // Filter to only allowed bookmakers
+              if (!allowedBookmakers.includes(propsBook.key)) {
+                const isDFS = ['prizepicks', 'underdog', 'pick6', 'prophetx', 'dabble_au'].includes(propsBook.key);
+                const reason = isDFS ? 'DFS app not in user plan' : 'sportsbook not in user plan';
+                console.log(`⏭️ Skipping ${propsBook.key} (${reason})`);
+                return;
+              }
+              
+              const marketCount = propsBook.markets ? propsBook.markets.length : 0;
+              const isDFS = ['prizepicks', 'underdog', 'pick6', 'prophetx', 'dabble_au'].includes(propsBook.key);
+              const bookType = isDFS ? '🎯 DFS' : '🏪 Sportsbook';
+              console.log(`${bookType} ${propsBook.key} has ${marketCount} player prop markets`);
+              
+              if (existingBookmakers.has(propsBook.key)) {
+                // Merge markets into existing bookmaker
+                const existingBook = existingBookmakers.get(propsBook.key);
+                existingBook.markets = [...(existingBook.markets || []), ...(propsBook.markets || [])];
+                console.log(`🔗 Merged ${marketCount} player prop markets into existing ${propsBook.key}`);
+              } else {
+                // Add new bookmaker with only player props
+                game.bookmakers.push(propsBook);
+                console.log(`➕ Added new bookmaker ${propsBook.key} with ${marketCount} player prop markets`);
+              }
+            });
+          } else {
+            console.log(`❌ No player props data returned for game ${game.id}`);
+            
+            // Try SportsGameOdds fallback if available
+            if (SPORTSGAMEODDS_API_KEY) {
+              console.log(`🔄 Trying SportsGameOdds fallback for game ${game.id}...`);
+              try {
+                const sgoResponse = await axios.get(`https://api.sportsgameodds.com/v1/odds`, {
+                  headers: { 'x-api-key': SPORTSGAMEODDS_API_KEY },
+                  params: {
+                    sport: game.sport_key,
+                    eventId: game.id,
+                    markets: playerPropMarkets.join(',')
+                  },
+                  timeout: PLAYER_PROPS_REQUEST_TIMEOUT
+                });
+                
+                if (sgoResponse.data && sgoResponse.data.length > 0) {
+                  console.log(`✅ SportsGameOdds fallback returned ${sgoResponse.data.length} items`);
+                  // Transform SGO data to TheOddsAPI format and merge
+                  // This would need the transformation logic from the memory
+                } else {
+                  console.log(`❌ SportsGameOdds fallback also returned no data`);
+                }
+              } catch (sgoErr) {
+                console.error(`❌ SportsGameOdds fallback failed:`, sgoErr.message);
+              }
+            }
+          }
+          
+        } catch (propsErr) {
+          console.error(`❌ Failed to fetch player props for game ${game.id}:`);
+          console.error(`   Status: ${propsErr.response?.status}`);
+          console.error(`   Data: ${JSON.stringify(propsErr.response?.data)}`);
+          console.error(`   Message: ${propsErr.message}`);
+          
+          // Try SportsGameOdds fallback on error
+          if (SPORTSGAMEODDS_API_KEY) {
+            console.log(`🔄 Trying SportsGameOdds fallback after error for game ${game.id}...`);
+            try {
+              const sgoResponse = await axios.get(`https://api.sportsgameodds.com/v1/odds`, {
+                headers: { 'x-api-key': SPORTSGAMEODDS_API_KEY },
+                params: {
+                  sport: game.sport_key,
+                  eventId: game.id,
+                  markets: playerPropMarkets.join(',')
+                },
+                timeout: PLAYER_PROPS_REQUEST_TIMEOUT
+              });
+              
+              if (sgoResponse.data && sgoResponse.data.length > 0) {
+                console.log(`✅ SportsGameOdds fallback returned ${sgoResponse.data.length} items after error`);
+                // Transform and merge SGO data
+              }
+            } catch (sgoErr) {
+              console.error(`❌ SportsGameOdds fallback also failed:`, sgoErr.message);
+            }
+          }
+          // Continue with other games even if player props fail
+        }
+      }
+      
+      console.log('🎯 Player props fetching completed');
+    } else if (playerPropMarkets.length > 0) {
+      console.log('🚫 Player props requested but ENABLE_PLAYER_PROPS_V2 is not enabled');
+    }
+    
+    // Step 3: Fetch quarter/half/period markets if requested
+    // NOTE: Quarter market availability is limited - many bookmakers don't provide them
+    if (quarterMarkets.length > 0 && allGames.length > 0) {
+      console.log(`🎯 Fetching quarter/half/period markets: ${quarterMarkets.join(', ')}`);
+      console.log(`   ⚠️ Note: Quarter markets have limited bookmaker support`);
+      
+      const userProfile = req.__userProfile || { plan: 'free' };
+      const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+      const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+      const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
+      const bookmakerList = gameOddsBookmakers.join(',');
+      
+      let quarterMarketsFound = 0;
+      let quarterMarketsFailed = 0;
+      
+      // Fetch quarter markets for each game
+      for (let i = 0; i < allGames.length; i++) {
+        const game = allGames[i];
+        try {
+          const quarterData = await fetchQuarterMarketsForGame(
+            game.id,
+            game.sport_key,
+            quarterMarkets,
+            bookmakerList,
+            oddsFormat
+          );
+          
+          if (quarterData && quarterData.bookmakers && quarterData.bookmakers.length > 0) {
+            // Merge quarter market data into the game
+            allGames[i] = mergeQuarterMarkets(game, quarterData);
+            quarterMarketsFound++;
+            console.log(`✅ Merged quarter markets for game ${allGames[i].id}`);
+          } else {
+            quarterMarketsFailed++;
+          }
+        } catch (err) {
+          quarterMarketsFailed++;
+          console.warn(`⚠️ Failed to fetch quarter markets for game ${game.id}:`, err.message);
+          // Continue with other games even if quarter markets fail
+        }
+      }
+      
+      console.log(`✅ Quarter market fetching completed: ${quarterMarketsFound} games with data, ${quarterMarketsFailed} without`);
+      if (quarterMarketsFound === 0) {
+        console.warn(`⚠️ No quarter market data returned - bookmakers may not support these markets`);
+      }
+    }
+    
+    console.log(`🔍 Final response - returning ${allGames.length} games total`);
+    console.log('🔍 User profile:', req.__userProfile?.plan || 'unknown');
+    console.log('🔍 Regular markets requested:', regularMarkets);
+    console.log('🔍 Filtered markets used:', filteredRegularMarkets);
+    console.log('🔍 Player prop markets requested:', playerPropMarkets);
+    
+    // Clean bookmaker data: remove bookmakers without markets or markets without outcomes
+    const cleanedGames = allGames.map(game => cleanBookmakerData(game));
+    
+    // Filter out games with no bookmakers left after cleaning
+    const finalGames = cleanedGames.filter(game => game.bookmakers && game.bookmakers.length > 0);
+    
+    console.log(`🧹 Cleaned data: ${allGames.length} games → ${finalGames.length} games with valid bookmakers`);
+    
+    // Usage already incremented per external API call above
+    // No need to increment again here
+    
+    res.json(finalGames);
+  } catch (err) {
+    console.error("odds error:", err?.response?.status, err?.response?.data || err.message);
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: String(err) });
+  }
+});
+
+app.get('/api/player-props', requireUser, checkPlanAccess, async (req, res) => {
+  recordPlayerPropMetric('requests', 1);
+
+  if (!ENABLE_PLAYER_PROPS_V2) {
+    return res.status(503).json({ error: 'PLAYER_PROPS_DISABLED', message: 'Player props API is disabled. Set ENABLE_PLAYER_PROPS_V2=true to enable.' });
+  }
+
+  try {
+    const league = req.query.league;
+    const date = req.query.date;
+    const markets = req.query.markets ? String(req.query.markets).split(',').map((m) => m.trim()).filter(Boolean) : undefined;
+    const bookmakers = req.query.bookmakers ? String(req.query.bookmakers).split(',').map((b) => b.trim()).filter(Boolean) : undefined;
+    const regions = req.query.regions;
+    const state = (req.query.state || req.headers['x-user-state'] || DEFAULT_BOOK_STATE).toLowerCase();
+    const force = req.query.force === 'true';
+    const explicitGameId = req.query.game_id || req.query.gameId || null;
+
+    if (!league || !date) {
+      return res.status(400).json({ error: 'missing_parameters', message: 'league and date are required (YYYY-MM-DD)' });
+    }
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ error: 'invalid_date', message: 'date must be YYYY-MM-DD' });
+    }
+
+    const resolvedEventIds = explicitGameId
+      ? [explicitGameId]
+      : await getEventIdsForLeagueDate(league, date);
+
+    const eventIds = resolvedEventIds.slice(0, Number(req.query.limit || 999)); // No limit - get all games
+
+    if (eventIds.length === 0) {
+      return res.json({ stale: false, ttl: PLAYER_PROPS_CACHE_TTL_MS, as_of: new Date().toISOString(), items: [] });
+    }
+
+    const items = [];
+    let stale = false;
+    let ttl = PLAYER_PROPS_CACHE_TTL_MS;
+    let freshest = 0;
+
+    for (const eventId of eventIds) {
+      const payload = await loadPlayerProps({
+        sportKey: league,
+        eventId,
+        markets,
+        bookmakers,
+        regions,
+        state,
+        force,
+      });
+
+      if (!payload) {
+        continue;
+      }
+
+      stale = stale || payload.stale;
+      ttl = Math.min(ttl, payload.ttl);
+      const asOfTs = payload.as_of ? Date.parse(payload.as_of) : 0;
+      if (asOfTs > freshest) {
+        freshest = asOfTs;
+      }
+
+      payload.items.forEach((item) => {
+        items.push(item);
+      });
+    }
+
+    const metrics = summarizePlayerPropMetrics();
+    console.log('[player-props] metrics', {
+      requests: playerPropsMetrics.requests,
+      cacheHits: playerPropsMetrics.cacheHits,
+      cacheMisses: playerPropsMetrics.cacheMisses,
+      staleHits: playerPropsMetrics.staleHits,
+      vendorErrors: playerPropsMetrics.vendorErrors,
+      notModified: playerPropsMetrics.notModifiedHits,
+      droppedOutcomes: playerPropsMetrics.droppedOutcomes,
+      averageVendorMs: metrics?.averageVendorMs || null,
+      samples: metrics?.samples || 0,
+    });
+
+    return res.json({
+      stale,
+      ttl,
+      as_of: freshest ? new Date(freshest).toISOString() : new Date().toISOString(),
+      items,
+    });
+  } catch (error) {
+    recordPlayerPropMetric('vendorErrors', 1);
+    console.error('player-props route error:', error.message);
+
+    const status = error?.response?.status || 500;
+    if (status >= 500) {
+      return res.status(status).json({ error: 'PLAYER_PROPS_UPSTREAM_ERROR', detail: error.message });
+    }
+
+    return res.status(status).json({ error: 'PLAYER_PROPS_ERROR', detail: error.message });
+  }
+});
+
+
+// odds snapshot (Odds API) - legacy endpoint
+app.get("/api/odds-data", enforceUsage, async (req, res) => {
+  try {
+    if (!API_KEY) return res.status(400).json({ error: "Missing ODDS_API_KEY" });
+    const sport = req.query.sport || "basketball_nba";
+    const regions = req.query.regions || "us";
+    const markets = req.query.markets || "h2h,spreads,totals";
+    const oddsFormat = req.query.oddsFormat || "american";
+    const includeBetLimits = req.query.includeBetLimits;
+
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(
+      sport
+    )}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=${oddsFormat}${
+      includeBetLimits ? `&includeBetLimits=${encodeURIComponent(includeBetLimits)}` : ""
+    }`;
+
+    const r = await axios.get(url);
+    res.json(r.data);
+  } catch (err) {
+    console.error("odds-data error:", err?.response?.status, err?.response?.data || err.message);
+    const status = err?.response?.status || 500;
+    res.status(status).json({ error: String(err) });
+  }
+});
+
+
+// Scores endpoint extracted to server/routes/sports.js
+
+/* ------------------------------------ Cached Odds Endpoints ------------------------------------ */
+
+// Get cached odds from Supabase for any sport
+app.get('/api/cached-odds/:sport', enforceUsage, async (req, res) => {
+  try {
+    const { sport } = req.params;
+    const { markets, bookmakers, eventId } = req.query;
+    
+    // Map short sport names to full keys
+    const sportKeyMap = {
+      'nfl': 'americanfootball_nfl',
+      'ncaaf': 'americanfootball_ncaaf',
+      'nba': 'basketball_nba',
+      'ncaab': 'basketball_ncaab',
+      'mlb': 'baseball_mlb',
+      'nhl': 'icehockey_nhl',
+      'epl': 'soccer_epl'
+    };
+    
+    const sportKey = sportKeyMap[sport] || sport; // Use mapping or assume full key
+    console.log(`📦 Fetching cached odds for sport: ${sportKey}`);
+    
+    const options = {
+      markets: markets ? markets.split(',') : null,
+      bookmakers: bookmakers ? bookmakers.split(',') : null,
+      eventId: eventId || null
+    };
+
+    const cachedOdds = await oddsCacheService.getCachedOdds(sportKey, options);
+    
+    // Transform cached data to match frontend expectations
+    const transformedData = transformCachedOddsToFrontend(cachedOdds);
+    
+    console.log(`✅ Returning ${transformedData.length} cached games for ${sportKey}`);
+    
+    res.set('Cache-Control', 'public, max-age=30'); // 30 second client cache
+    res.json(transformedData);
+  } catch (err) {
+    console.error('Cached odds error:', err);
+    res.status(500).json({ error: 'Failed to get cached odds', detail: err.message });
+  }
+});
+
+// Manual trigger for NFL odds update (admin only)
+app.post('/api/cached-odds/nfl/update', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== ADMIN_API_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const result = await oddsCacheService.updateNFLOdds();
+    res.json({ 
+      success: true, 
+      message: 'NFL odds updated successfully',
+      ...result 
+    });
+  } catch (err) {
+    console.error('Manual update error:', err);
+    res.status(500).json({ error: 'Failed to update odds', detail: err.message });
+  }
+});
+
+// Get update statistics
+app.get('/api/cached-odds/stats', async (req, res) => {
+  try {
+    const { sport = 'americanfootball_nfl', limit = 10 } = req.query;
+    const stats = await oddsCacheService.getUpdateStats(sport, parseInt(limit));
+    res.json({ stats });
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Failed to get stats', detail: err.message });
+  }
+});
+
+// Start/stop NFL updates
+app.post('/api/cached-odds/nfl/control', async (req, res) => {
+  try {
+    const adminKey = req.headers['x-admin-key'];
+    if (adminKey !== ADMIN_API_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    const { action } = req.body;
+    
+    if (action === 'start') {
+      await oddsCacheService.startNFLUpdates();
+      res.json({ success: true, message: 'NFL updates started' });
+    } else if (action === 'stop') {
+      await oddsCacheService.stopNFLUpdates();
+      res.json({ success: true, message: 'NFL updates stopped' });
+    } else {
+      res.status(400).json({ error: 'Invalid action. Use "start" or "stop"' });
+    }
+  } catch (err) {
+    console.error('Control error:', err);
+    res.status(500).json({ error: 'Failed to control updates', detail: err.message });
+  }
+});
+
+// Helper function to transform cached odds to frontend format
+function transformCachedOddsToFrontend(cachedOdds) {
+  const eventsMap = new Map();
+
+  for (const odd of cachedOdds) {
+    if (!eventsMap.has(odd.event_id)) {
+      eventsMap.set(odd.event_id, {
+        id: odd.event_id,
+        sport_key: odd.sport_key,
+        sport_title: 'NFL',
+        commence_time: odd.commence_time,
+        home_team: odd.event_name.split(' @ ')[1],
+        away_team: odd.event_name.split(' @ ')[0],
+        bookmakers: []
+      });
+    }
+
+    const event = eventsMap.get(odd.event_id);
+    let bookmaker = event.bookmakers.find(b => b.key === odd.bookmaker_key);
+    
+    if (!bookmaker) {
+      bookmaker = {
+        key: odd.bookmaker_key,
+        title: odd.bookmaker_key,
+        markets: []
+      };
+      event.bookmakers.push(bookmaker);
+    }
+
+    bookmaker.markets.push({
+      key: odd.market_key,
+      last_update: odd.last_updated,
+      outcomes: odd.outcomes
+    });
+  }
+
+  return Array.from(eventsMap.values());
+}
+
+/* ------------------------------------ Game Reactions ------------------------------------ */
+
+// Persistent file-based storage for reactions (better than in-memory)
+const fs = require('fs');
+
+const REACTIONS_FILE = path.join(__dirname, 'reactions.json');
+
+// Load reactions from file on startup
+let gameReactions = new Map();
+try {
+  if (fs.existsSync(REACTIONS_FILE)) {
+    const data = fs.readFileSync(REACTIONS_FILE, 'utf8');
+    const parsed = JSON.parse(data);
+    gameReactions = new Map(Object.entries(parsed));
+    console.log(`📝 Loaded ${gameReactions.size} game reactions from file`);
+  }
+} catch (error) {
+  console.warn('⚠️ Failed to load reactions from file:', error.message);
+  gameReactions = new Map();
+}
+
+// Save reactions to file
+function saveReactions() {
+  try {
+    const data = Object.fromEntries(gameReactions);
+    fs.writeFileSync(REACTIONS_FILE, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('❌ Failed to save reactions to file:', error.message);
+  }
+}
+
+// Get reactions for a specific game
+app.get('/api/reactions/:gameKey', enforceUsage, (req, res) => {
+  try {
+    const { gameKey } = req.params;
+    const reactions = gameReactions.get(gameKey) || {};
+    res.json({ reactions });
+  } catch (err) {
+    console.error('Get reactions error:', err);
+    res.status(500).json({ error: 'Failed to get reactions' });
+  }
+});
+
+// Add or update a reaction
+app.post('/api/reactions/:gameKey', (req, res) => {
+  try {
+    const { gameKey } = req.params;
+    const { userId, username, emoji, action } = req.body;
+
+    if (!userId || !emoji) {
+      return res.status(400).json({ error: 'Missing userId or emoji' });
+    }
+
+    let reactions = gameReactions.get(gameKey) || {};
+
+    if (action === 'remove') {
+      // Remove user's reaction
+      Object.keys(reactions).forEach(reactionEmoji => {
+        reactions[reactionEmoji] = reactions[reactionEmoji]?.filter(
+          user => user.userId !== userId
+        ) || [];
+        if (reactions[reactionEmoji].length === 0) {
+          delete reactions[reactionEmoji];
+        }
+      });
+    } else {
+      // Remove user's previous reaction first
+      Object.keys(reactions).forEach(reactionEmoji => {
+        reactions[reactionEmoji] = reactions[reactionEmoji]?.filter(
+          user => user.userId !== userId
+        ) || [];
+        if (reactions[reactionEmoji].length === 0) {
+          delete reactions[reactionEmoji];
+        }
+      });
+
+      // Add new reaction
+      if (!reactions[emoji]) {
+        reactions[emoji] = [];
+      }
+      
+      const existingUser = reactions[emoji].find(user => user.userId === userId);
+      if (!existingUser) {
+        reactions[emoji].push({
+          userId,
+          username: username || 'Anonymous',
+          timestamp: Date.now()
+        });
+      }
+    }
+
+    gameReactions.set(gameKey, reactions);
+    saveReactions(); // Persist to file
+    res.json({ reactions });
+  } catch (err) {
+    console.error('Add reaction error:', err);
+    res.status(500).json({ error: 'Failed to add reaction' });
+  }
+});
+
+// Get all reactions summary (for analytics)
+app.get('/api/reactions-summary', (req, res) => {
+  try {
+    const summary = {};
+    gameReactions.forEach((reactions, gameKey) => {
+      const totalReactions = Object.values(reactions).reduce(
+        (sum, users) => sum + users.length, 0
+      );
+      if (totalReactions > 0) {
+        summary[gameKey] = {
+          totalReactions,
+          reactions: Object.keys(reactions).reduce((acc, emoji) => {
+            acc[emoji] = reactions[emoji].length;
+            return acc;
+          }, {})
+        };
+      }
+    });
+    res.json({ summary });
+  } catch (err) {
+    console.error('Get reactions summary error:', err);
+    res.status(500).json({ error: 'Failed to get reactions summary' });
+  }
+});
+
+// Add health check routes
+const healthRoutes = require('./routes/health');
+app.use('/', healthRoutes);
+
+/* ------------------------------------ Start ------------------------------------ */
+// 404 handler - before SPA fallback
+app.use(notFoundHandler);
+
+// Error handling middleware - MUST be last
+app.use(errorHandler);
+
+// SPA fallback: keep last, after static and API routes.
+// Use a middleware without a path to catch unmatched GETs in Express 5 safely.
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (req.path.startsWith('/api/')) return next();
+  const indexPath = path.join(clientBuildPath, 'index.html');
+  res.sendFile(indexPath, err => {
+    if (err) {
+      res.status(404).send('Not Found');
+    }
+  });
+});
+
+if (require.main === module) {
+  app.listen(PORT, async () => {
+    logger.info(`✅ Server running on http://localhost:${PORT}`, {
+      environment: process.env.NODE_ENV,
+      port: PORT,
+    });
+    
+    // Auto-start NFL odds caching if enabled
+    if (process.env.AUTO_START_NFL_CACHE === 'true' && supabase) {
+      logger.info('🏈 Auto-starting NFL odds caching...');
+      try {
+        await oddsCacheService.startNFLUpdates();
+      } catch (error) {
+        logger.error('❌ Failed to auto-start NFL caching:', {
+          error: error.message,
+        });
+      }
+    }
+  });
+}
+
+module.exports = app;
