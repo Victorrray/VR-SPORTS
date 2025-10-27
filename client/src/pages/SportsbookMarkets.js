@@ -1,7 +1,7 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star, Activity, RefreshCw } from 'lucide-react';
+import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star, Activity, RefreshCw, Search } from 'lucide-react';
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 import { optimizedStorage } from "../utils/storageOptimizer";
@@ -1681,14 +1681,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
             {/* Search Filter */}
             <div className="desktop-filter-section" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
-              <form onSubmit={handleSearchSubmit} style={{ width: '100%' }}>
+              <form onSubmit={(e) => { e.preventDefault(); const params = new URLSearchParams(location.search); if (query) params.set('q', query); else params.delete('q'); navigate(`/sportsbooks?${params.toString()}`); }} style={{ width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', borderRadius: '8px', padding: '10px 12px' }}>
                   <Search size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
                   <input
                     type="text"
                     placeholder="Search sports..."
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
                     style={{
                       flex: 1,
                       background: 'transparent',
