@@ -1,7 +1,7 @@
 .section-menu-container {
   position: fixed;
   right: 16px; /* Align to right edge with padding */
-  bottom: 160px; /* Position higher, more towards center */
+  bottom: 140px; /* Position slightly lower to prevent cutoff */
   transform: none; /* No transform needed */
   margin-right: 0; /* No margin shift needed */
   z-index: 1011; /* Match z-index with filter button */
@@ -172,7 +172,7 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 160px; /* Position higher, more towards center */
+    bottom: 140px; /* Position slightly lower to prevent cutoff */
     right: 16px; /* Align to right edge with padding */
     left: auto; /* Reset left positioning */
     transform: none; /* No transform needed */
@@ -198,7 +198,7 @@
 
 @media (max-width: 380px) {
   .section-menu-container {
-    bottom: 160px; /* Position higher, more towards center */
+    bottom: 140px; /* Position slightly lower to prevent cutoff */
     right: 12px; /* Align to right edge with padding */
     left: auto; /* Reset left positioning */
     transform: none; /* No transform needed */
