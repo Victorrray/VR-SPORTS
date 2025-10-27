@@ -1679,6 +1679,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </label>
             </div>
 
+            {/* Search Filter */}
+            <div className="desktop-filter-section" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
+              <form onSubmit={handleSearchSubmit} style={{ width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', borderRadius: '8px', padding: '10px 12px' }}>
+                  <Search size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
+                  <input
+                    type="text"
+                    placeholder="Search sports..."
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    style={{
+                      flex: 1,
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-primary)',
+                      fontSize: '14px',
+                      outline: 'none',
+                      padding: '0'
+                    }}
+                  />
+                </div>
+              </form>
+            </div>
+
             {/* Player Props Filters */}
             {showPlayerProps && (
               <>

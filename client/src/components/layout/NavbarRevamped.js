@@ -134,24 +134,6 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
 
         {/* Right Section: Search + User Menu */}
         <div className={styles.navRight}>
-          {/* Search Bar */}
-          {location.pathname.startsWith("/sportsbooks") && (
-            <form className={styles.searchContainer} onSubmit={handleSearchSubmit}>
-              <div className={`${styles.searchBox} ${searchActive ? styles.active : ""}`}>
-                <Search size={18} className={styles.searchIcon} />
-                <input
-                  type="text"
-                  placeholder="Search sports..."
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  onFocus={() => setSearchActive(true)}
-                  onBlur={() => !q && setSearchActive(false)}
-                  className={styles.searchInput}
-                />
-              </div>
-            </form>
-          )}
-
           {/* User Section */}
           {!user ? (
             <Link to="/login" className={styles.loginBtn}>
