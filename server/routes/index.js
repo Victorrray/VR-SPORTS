@@ -6,6 +6,7 @@
 const healthRoutes = require('./health');
 const usersRoutes = require('./users');
 const adminRoutes = require('./admin');
+const sportsRoutes = require('./sports');
 
 /**
  * Register all routes with the Express app
@@ -21,10 +22,12 @@ function registerRoutes(app) {
   // Admin routes
   app.use('/api/admin', adminRoutes);
   
+  // Sports routes
+  app.use('/api', sportsRoutes);
+  
   // TODO: Add more routes as they are extracted
   // app.use('/api/odds', oddsRoutes);
   // app.use('/api/billing', billingRoutes);
-  // app.use('/api/sports', sportsRoutes);
 }
 
 module.exports = {
@@ -32,4 +35,5 @@ module.exports = {
   healthRoutes,
   usersRoutes,
   adminRoutes,
+  sportsRoutes,
 };
