@@ -2916,7 +2916,12 @@ export default function OddsTable({
                   </td>
                   <td>
                     <div className="desktop-matchup">
-                      <span className="desktop-matchup-time">{formatKickoffNice(row.game?.commence_time)}</span>
+                      <span className="desktop-matchup-league">
+                        {(() => { 
+                          const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
+                          return `${sport} | ${league}`; 
+                        })()}
+                      </span>
                       <div className="desktop-teams">
                         <div className="desktop-team-row">
                           {(() => {
@@ -2949,12 +2954,7 @@ export default function OddsTable({
                           <span>{row.game?.home_team || 'Home Team'}</span>
                         </div>
                       </div>
-                      <span className="desktop-matchup-league">
-                        {(() => { 
-                          const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
-                          return `${sport} | ${league}`; 
-                        })()}
-                      </span>
+                      <span className="desktop-matchup-time">{formatKickoffNice(row.game?.commence_time)}</span>
                     </div>
                   </td>
                   <td>
