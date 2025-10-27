@@ -612,8 +612,13 @@
     min-height: 60px;
   }
 
-  .brand {
+  .navLeft {
     flex: 1;
+    justify-content: center;
+  }
+
+  .brand {
+    flex: none;
   }
 
   .brandLogo {
