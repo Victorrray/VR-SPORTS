@@ -1,6 +1,6 @@
 .section-menu-container {
   position: fixed;
-  right: 20%; /* Moved more toward the center from the right */
+  right: 16px; /* Align to right edge with padding */
   bottom: 135px; /* Keep the vertical position */
   transform: none; /* No transform needed */
   margin-right: 0; /* No margin shift needed */
@@ -173,7 +173,7 @@
 @media (max-width: 768px) {
   .section-menu-container {
     bottom: 135px; /* Keep the vertical position */
-    right: 20%; /* Moved more toward the center from the right */
+    right: 16px; /* Align to right edge with padding */
     left: auto; /* Reset left positioning */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
@@ -199,7 +199,7 @@
 @media (max-width: 380px) {
   .section-menu-container {
     bottom: 135px; /* Keep the vertical position */
-    right: 15%; /* Moved more toward the center for small screens */
+    right: 12px; /* Align to right edge with padding */
     left: auto; /* Reset left positioning */
     transform: none; /* No transform needed */
     margin-left: 0; /* No margin shift needed */
