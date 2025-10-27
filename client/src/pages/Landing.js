@@ -227,48 +227,9 @@ export default function Landing() {
           <div className="hero-cta-group" style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => navigate('/login')} className="cta-btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <TrendingUp size={20} />
-              Choose Your Plan
+              Get Started Today
               <ArrowRight size={20} />
             </button>
-            <button onClick={() => navigate('/sportsbooks')} className="cta-btn-secondary" style={{
-              padding: '12px 24px',
-              borderRadius: '12px',
-              border: '2px solid var(--accent)',
-              background: 'transparent',
-              color: 'var(--accent)',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-            }}
-            >
-              <Play size={18} />
-              See Live Demo
-            </button>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="trust-badges">
-            <div className="trust-item">
-              <CheckCircle size={16} />
-              <span>Gold or Platinum</span>
-            </div>
-            <div className="trust-item">
-              <CheckCircle size={16} />
-              <span>25+ Sportsbooks</span>
-            </div>
-            <div className="trust-item">
-              <CheckCircle size={16} />
-              <span>4.9★ Rating</span>
-            </div>
           </div>
         </div>
       </section>
