@@ -99,6 +99,13 @@ app.use(express.static(path.join(__dirname, '../client/public')));
 
 // Import route modules
 const { registerRoutes } = require('./routes');
+const { ENABLE_PLAYER_PROPS_V2 } = require('./config/constants');
+
+// Log feature flags at startup
+console.log('🚀 Feature Flags:', {
+  ENABLE_PLAYER_PROPS_V2,
+  NODE_ENV: process.env.NODE_ENV,
+});
 
 // Register all routes
 registerRoutes(app);
