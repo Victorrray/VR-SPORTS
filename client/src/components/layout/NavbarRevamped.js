@@ -1,0 +1,333 @@
+// src/components/layout/NavbarRevamped.js
+// Modern, revamped navigation bar with enhanced UX
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { 
+  Search, User, ChevronDown, CreditCard, Settings, Menu, X,
+  Home, BarChart3, TrendingUp, LogOut, Bell, Zap, Shield
+} from "lucide-react";
+import { useAuth } from "../../hooks/SimpleAuth";
+import { useMe } from "../../hooks/useMe";
+import styles from "./NavbarRevamped.module.css";
+
+export default function NavbarRevamped({ onOpenMobileSearch }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const auth = useAuth();
+  const user = auth?.user;
+  const { me } = useMe();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
+  const [q, setQ] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+
+  // Track scroll position for navbar effects
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isActive = (path) => location.pathname === path;
+
+  // Keep search input in sync with URL ?q
+  useEffect(() => {
+    const isSports = location.pathname.startsWith("/sportsbooks");
+    const params = new URLSearchParams(location.search);
+    setQ(isSports ? (params.get("q") || "") : "");
+  }, [location.pathname, location.search]);
+
+  const navLinks = [
+    { label: "Home", to: "/", icon: Home },
+    { label: "Odds", to: "/sportsbooks", icon: BarChart3 },
+    { label: "Picks", to: "/picks", icon: TrendingUp, requiresAuth: true },
+    { label: "Scores", to: "/scores", icon: Shield },
+  ];
+
+  const filteredNavLinks = navLinks.filter(link => !link.requiresAuth || user);
+
+  function handleSearchSubmit(e) {
+    e.preventDefault();
+    const params = new URLSearchParams(location.search);
+    if (q) params.set("q", q);
+    else params.delete("q");
+    navigate(`/sportsbooks?${params.toString()}`);
+    setSearchActive(false);
+  }
+
+  const handleLogout = () => {
+    auth?.logout?.();
+    setUserMenuOpen(false);
+    navigate("/");
+  };
+
+  const handleUpgrade = () => {
+    navigate("/subscribe");
+    setUserMenuOpen(false);
+  };
+
+  const getPlanBadge = () => {
+    if (!me?.plan) return null;
+    const planConfig = {
+      platinum: { label: "Platinum", color: "#a78bfa", icon: "⭐" },
+      gold: { label: "Gold", color: "#fbbf24", icon: "✨" },
+      free: { label: "Free", color: "#6b7280", icon: "🎯" }
+    };
+    return planConfig[me.plan] || planConfig.free;
+  };
+
+  const planBadge = getPlanBadge();
+
+  return (
+    <>
+      <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
+        {/* Left Section: Logo + Mobile Menu */}
+        <div className={styles.navLeft}>
+          <button
+            className={styles.hamburger}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle Menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          <Link to="/" className={styles.brand}>
+            <div className={styles.brandLogo}>
+              <span className={styles.logoText}>Odd</span>
+              <span className={styles.logoAccent}>Sight</span>
+              <span className={styles.logoText}>Seer</span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Center Section: Navigation Links (Desktop) */}
+        <div className={styles.navCenter}>
+          {filteredNavLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`${styles.navLink} ${isActive(link.to) ? styles.active : ""}`}
+                title={link.label}
+              >
+                <Icon size={18} />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Right Section: Search + User Menu */}
+        <div className={styles.navRight}>
+          {/* Search Bar */}
+          {location.pathname.startsWith("/sportsbooks") && (
+            <form className={styles.searchContainer} onSubmit={handleSearchSubmit}>
+              <div className={`${styles.searchBox} ${searchActive ? styles.active : ""}`}>
+                <Search size={18} className={styles.searchIcon} />
+                <input
+                  type="text"
+                  placeholder="Search sports..."
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  onFocus={() => setSearchActive(true)}
+                  onBlur={() => !q && setSearchActive(false)}
+                  className={styles.searchInput}
+                />
+              </div>
+            </form>
+          )}
+
+          {/* User Section */}
+          {!user ? (
+            <Link to="/login" className={styles.loginBtn}>
+              <User size={18} />
+              <span>Sign In</span>
+            </Link>
+          ) : (
+            <div className={styles.userSection}>
+              {/* Plan Badge */}
+              {planBadge && (
+                <div className={`${styles.planBadge} ${styles[`plan-${me?.plan}`]}`}>
+                  <span className={styles.planIcon}>{planBadge.icon}</span>
+                  <span className={styles.planLabel}>{planBadge.label}</span>
+                </div>
+              )}
+
+              {/* User Menu Button */}
+              <button
+                className={styles.userButton}
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                aria-expanded={userMenuOpen}
+              >
+                <div className={styles.userAvatar}>
+                  <User size={18} />
+                </div>
+                <ChevronDown size={16} className={`${styles.chevron} ${userMenuOpen ? styles.open : ""}`} />
+              </button>
+
+              {/* User Dropdown Menu */}
+              {userMenuOpen && (
+                <div className={styles.userDropdown}>
+                  {/* User Info */}
+                  <div className={styles.userInfo}>
+                    <div className={styles.userAvatar}>
+                      <User size={20} />
+                    </div>
+                    <div className={styles.userDetails}>
+                      <div className={styles.userName}>{user?.email || "User"}</div>
+                      <div className={styles.userPlan}>
+                        {me?.plan ? `${me.plan.charAt(0).toUpperCase() + me.plan.slice(1)} Plan` : "Free Plan"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.divider} />
+
+                  {/* Menu Items */}
+                  <Link
+                    to="/my-sportsbooks"
+                    className={styles.dropdownItem}
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <Settings size={18} />
+                    <div>
+                      <div className={styles.itemLabel}>My Sportsbooks</div>
+                      <div className={styles.itemDesc}>Manage your books</div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to="/account"
+                    className={styles.dropdownItem}
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <User size={18} />
+                    <div>
+                      <div className={styles.itemLabel}>Account Settings</div>
+                      <div className={styles.itemDesc}>Profile & preferences</div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to="/subscribe"
+                    className={styles.dropdownItem}
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    <Zap size={18} />
+                    <div>
+                      <div className={styles.itemLabel}>Subscription</div>
+                      <div className={styles.itemDesc}>Manage plan</div>
+                    </div>
+                  </Link>
+
+                  <div className={styles.divider} />
+
+                  {/* Upgrade Button (if not platinum) */}
+                  {me?.plan !== "platinum" && (
+                    <button
+                      className={styles.upgradeBtn}
+                      onClick={handleUpgrade}
+                    >
+                      <Zap size={18} />
+                      Upgrade to Platinum
+                    </button>
+                  )}
+
+                  {/* Logout Button */}
+                  <button
+                    className={styles.logoutBtn}
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={18} />
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className={styles.mobileMenu}>
+          <div className={styles.mobileMenuContent}>
+            {/* Mobile Navigation Links */}
+            {filteredNavLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`${styles.mobileNavLink} ${isActive(link.to) ? styles.active : ""}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Icon size={20} />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+
+            <div className={styles.mobileDivider} />
+
+            {/* Mobile User Section */}
+            {!user ? (
+              <Link
+                to="/login"
+                className={styles.mobileLoginBtn}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <User size={20} />
+                Sign In
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/my-sportsbooks"
+                  className={styles.mobileNavLink}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Settings size={20} />
+                  My Sportsbooks
+                </Link>
+
+                <Link
+                  to="/account"
+                  className={styles.mobileNavLink}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <User size={20} />
+                  Account
+                </Link>
+
+                <Link
+                  to="/subscribe"
+                  className={styles.mobileNavLink}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Zap size={20} />
+                  Subscription
+                </Link>
+
+                <div className={styles.mobileDivider} />
+
+                <button
+                  className={styles.mobileLogoutBtn}
+                  onClick={handleLogout}
+                >
+                  <LogOut size={20} />
+                  Sign Out
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
