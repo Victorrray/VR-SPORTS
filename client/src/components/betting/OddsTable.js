@@ -2932,7 +2932,10 @@ export default function OddsTable({
                                 alt={`${row.game?.away_team || 'Away'} logo`}
                                 className="desktop-team-logo"
                                 loading="lazy"
-                                onError={(e) => { e.target.style.display = 'none'; }}
+                                onError={(e) => { 
+                                  console.warn(`❌ Failed to load logo: ${awayLogo}`);
+                                  e.target.style.display = 'none'; 
+                                }}
                               />
                             ) : null;
                           })()}
@@ -2947,7 +2950,10 @@ export default function OddsTable({
                                 alt={`${row.game?.home_team || 'Home'} logo`}
                                 className="desktop-team-logo"
                                 loading="lazy"
-                                onError={(e) => { e.target.style.display = 'none'; }}
+                                onError={(e) => { 
+                                  console.warn(`❌ Failed to load logo: ${homeLogo}`);
+                                  e.target.style.display = 'none'; 
+                                }}
                               />
                             ) : null;
                           })()}

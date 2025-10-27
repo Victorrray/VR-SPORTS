@@ -151,16 +151,16 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
       // ESPN CDN logo URL format - use slug-based URL which is more reliable
       const leagueCode = league.toLowerCase() === "ncaaf" ? "college-football" : league.toLowerCase();
       
-      // Try multiple ESPN URL formats for better compatibility
-      // Format 1: Using team ID (most reliable)
-      const url1 = `https://a.espncdn.com/media/motion/2022/logos/${leagueCode}/teams/500/${espnId}.png`;
+      // Use the newer ESPN CDN format that's more reliable
+      // Format: https://a.espncdn.com/media/motion/2024/logos/{league}/teams/500/{id}.png
+      const url = `https://a.espncdn.com/media/motion/2024/logos/${leagueCode}/teams/500/${espnId}.png`;
       
       // Log for debugging
       if (process.env.NODE_ENV === 'development') {
-        console.log(`🏈 Logo URL for ${teamName} (${slug}):`, url1);
+        console.log(`🏈 Logo URL for ${teamName} (${slug}):`, url);
       }
       
-      return url1;
+      return url;
     }
   }
 
