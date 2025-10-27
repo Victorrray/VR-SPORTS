@@ -10,6 +10,7 @@ export function usePlan() {
 
   const fetchPlan = async () => {
     if (!user) {
+      console.log('🔄 No user, skipping plan fetch');
       setPlan(null);
       setPlanLoading(false);
       return;
@@ -22,8 +23,15 @@ export function usePlan() {
       
       // Get Supabase session token for authentication
       const { supabase } = await import('../lib/supabase');
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('❌ Session error:', sessionError);
+      }
+      
       const token = session?.access_token;
+      console.log('🔐 Session token available:', !!token);
+      console.log('🔐 Session user:', session?.user?.id);
       
       const headers = { 
         'x-user-id': user.id,
@@ -35,20 +43,29 @@ export function usePlan() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token });
+      console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token, tokenPrefix: token?.substring(0, 20) });
       
       const res = await axios.get(`${API_BASE_URL}/api/me`, { headers });
       
       console.log('✅ Plan API response:', res.data);
       console.log('✅ Plan value:', res.data.plan);
       console.log('✅ Unlimited:', res.data.unlimited);
+      console.log('✅ Used:', res.data.used);
+      console.log('✅ Remaining:', res.data.remaining);
       
-      setPlan(res.data);
+      // Validate response
+      if (!res.data || !res.data.plan) {
+        console.warn('⚠️ Invalid plan response:', res.data);
+        setPlan({ plan: 'free', remaining: 250, limit: 250 });
+      } else {
+        setPlan(res.data);
+      }
       setPlanLoading(false);
     } catch (err) {
-      console.error('❌ Plan fetch error:', err);
+      console.error('❌ Plan fetch error:', err.message);
       console.error('❌ Error details:', err.response?.data);
       console.error('❌ Error status:', err.response?.status);
+      console.error('❌ Full error:', err);
       // Default to free plan on error
       setPlan({ plan: 'free', remaining: 250, limit: 250 });
       setPlanLoading(false);
