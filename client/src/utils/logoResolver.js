@@ -144,23 +144,39 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
   const slug = toSlug(teamName || "");
   
   // 2) For all leagues, use ESPN CDN
-  if (league) {
+  if (league && slug) {
     // Try to find ESPN team ID
     const espnId = ESPN_TEAM_IDS[slug];
     if (espnId) {
-      // ESPN CDN logo URL format - use slug-based URL which is more reliable
+      // ESPN CDN logo URL format
       const leagueCode = league.toLowerCase() === "ncaaf" ? "college-football" : league.toLowerCase();
       
-      // Use the newer ESPN CDN format that's more reliable
-      // Format: https://a.espncdn.com/media/motion/2024/logos/{league}/teams/500/{id}.png
-      const url = `https://a.espncdn.com/media/motion/2024/logos/${leagueCode}/teams/500/${espnId}.png`;
+      // Try multiple ESPN CDN formats for reliability
+      // Primary format: https://a.espncdn.com/media/motion/2024/logos/{league}/teams/500/{id}.png
+      const urls = [
+        `https://a.espncdn.com/media/motion/2024/logos/${leagueCode}/teams/500/${espnId}.png`,
+        `https://a.espncdn.com/media/motion/2023/logos/${leagueCode}/teams/500/${espnId}.png`,
+        `https://a.espncdn.com/media/motion/2022/logos/${leagueCode}/teams/500/${espnId}.png`,
+        `https://a.espncdn.com/media/motion/2021/logos/${leagueCode}/teams/500/${espnId}.png`
+      ];
+      
+      // Use the primary URL (most recent)
+      const url = urls[0];
       
       // Log for debugging
       if (process.env.NODE_ENV === 'development') {
-        console.log(`🏈 Logo URL for ${teamName} (${slug}):`, url);
+        console.log(`🏈 Logo URL for ${teamName} (${slug}):`, url, {
+          espnId,
+          leagueCode,
+          league
+        });
       }
       
       return url;
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`⚠️ ESPN ID not found for ${teamName} (${slug}) in league ${league}`);
+      }
     }
   }
 

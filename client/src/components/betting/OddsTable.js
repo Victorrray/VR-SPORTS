@@ -2907,14 +2907,16 @@ export default function OddsTable({
                         <div className="desktop-team-row">
                           {(() => {
                             const awayLogo = getTeamLogoForGame(row.game, row.game?.away_team);
+                            console.log(`🔍 Away team logo attempt: ${row.game?.away_team} -> ${awayLogo}`);
                             return awayLogo ? (
                               <img
                                 src={awayLogo}
                                 alt={`${row.game?.away_team || 'Away'} logo`}
                                 className="desktop-team-logo"
                                 loading="lazy"
+                                onLoad={() => console.log(`✅ Loaded logo: ${awayLogo}`)}
                                 onError={(e) => { 
-                                  console.warn(`❌ Failed to load logo: ${awayLogo}`);
+                                  console.error(`❌ Failed to load logo: ${awayLogo}`, e);
                                   e.target.style.display = 'none'; 
                                 }}
                               />
@@ -2925,14 +2927,16 @@ export default function OddsTable({
                         <div className="desktop-team-row">
                           {(() => {
                             const homeLogo = getTeamLogoForGame(row.game, row.game?.home_team);
+                            console.log(`🔍 Home team logo attempt: ${row.game?.home_team} -> ${homeLogo}`);
                             return homeLogo ? (
                               <img
                                 src={homeLogo}
                                 alt={`${row.game?.home_team || 'Home'} logo`}
                                 className="desktop-team-logo"
                                 loading="lazy"
+                                onLoad={() => console.log(`✅ Loaded logo: ${homeLogo}`)}
                                 onError={(e) => { 
-                                  console.warn(`❌ Failed to load logo: ${homeLogo}`);
+                                  console.error(`❌ Failed to load logo: ${homeLogo}`, e);
                                   e.target.style.display = 'none'; 
                                 }}
                               />
