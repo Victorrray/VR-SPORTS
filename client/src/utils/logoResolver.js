@@ -145,31 +145,64 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
   
   // 2) For all leagues, use ESPN CDN with correct format
   if (league && slug) {
-    // Try to find ESPN team ID
-    const espnId = ESPN_TEAM_IDS[slug];
-    if (espnId) {
-      // ESPN CDN logo URL format - try multiple formats
-      const leagueCode = league.toLowerCase() === "ncaaf" ? "college-football" : league.toLowerCase();
+    // Map league codes to ESPN CDN format
+    const leagueMap = {
+      'nfl': 'nfl',
+      'nba': 'nba',
+      'mlb': 'mlb',
+      'nhl': 'nhl',
+      'ncaaf': 'college-football',
+      'ncaab': 'college-basketball',
+      'wnba': 'wnba',
+      'mls': 'soccer'
+    };
+    
+    const leagueCode = leagueMap[league.toLowerCase()] || league.toLowerCase();
+    
+    // Map team names to ESPN team codes (used in scoreboard URLs)
+    const teamCodeMap = {
+      'arizona-cardinals': 'ari',
+      'atlanta-falcons': 'atl',
+      'baltimore-ravens': 'bal',
+      'buffalo-bills': 'buf',
+      'carolina-panthers': 'car',
+      'chicago-bears': 'chi',
+      'cincinnati-bengals': 'cin',
+      'cleveland-browns': 'cle',
+      'dallas-cowboys': 'dal',
+      'denver-broncos': 'den',
+      'detroit-lions': 'det',
+      'green-bay-packers': 'gb',
+      'houston-texans': 'hou',
+      'indianapolis-colts': 'ind',
+      'jacksonville-jaguars': 'jax',
+      'kansas-city-chiefs': 'kc',
+      'las-vegas-raiders': 'lv',
+      'los-angeles-chargers': 'lac',
+      'los-angeles-rams': 'lar',
+      'miami-dolphins': 'mia',
+      'minnesota-vikings': 'min',
+      'new-england-patriots': 'ne',
+      'new-orleans-saints': 'no',
+      'new-york-giants': 'nyg',
+      'new-york-jets': 'nyj',
+      'philadelphia-eagles': 'phi',
+      'pittsburgh-steelers': 'pit',
+      'san-francisco-49ers': 'sf',
+      'seattle-seahawks': 'sea',
+      'tampa-bay-buccaneers': 'tb',
+      'tennessee-titans': 'ten',
+      'washington-commanders': 'wsh'
+    };
+    
+    const teamCode = teamCodeMap[slug];
+    if (teamCode) {
+      // Use the correct ESPN CDN format: /i/teamlogos/{sport}/{size}/scoreboard/{team_code}.png
+      const url = `https://a.espncdn.com/i/teamlogos/${leagueCode}/500/scoreboard/${teamCode}.png`;
       
-      // Try multiple ESPN CDN formats for reliability
-      // Primary: /teams/{id}.png (newer format without /500/)
-      // Secondary: /teams/500/{id}.png (older format)
-      const urls = [
-        `https://a.espncdn.com/media/motion/2024/logos/${leagueCode}/teams/${espnId}.png`,
-        `https://a.espncdn.com/media/motion/2023/logos/${leagueCode}/teams/${espnId}.png`,
-        `https://a.espncdn.com/media/motion/2022/logos/${leagueCode}/teams/${espnId}.png`,
-        `https://a.espncdn.com/media/motion/2021/logos/${leagueCode}/teams/${espnId}.png`,
-        `https://a.espncdn.com/media/motion/2024/logos/${leagueCode}/teams/500/${espnId}.png`,
-        `https://a.espncdn.com/media/motion/2023/logos/${leagueCode}/teams/500/${espnId}.png`
-      ];
-      
-      // Use the primary URL (most recent without /500/)
-      const url = urls[0];
-      
-      // Log for debugging
       if (process.env.NODE_ENV === 'development') {
         console.log(`🏈 Logo URL for ${teamName} (${slug}):`, url, {
-          espnId,
+          teamCode,
           leagueCode,
           league
         });
@@ -178,7 +211,7 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
       return url;
     } else {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`⚠️ ESPN ID not found for ${teamName} (${slug}) in league ${league}`);
+        console.warn(`⚠️ Team code not found for ${teamName} (${slug}) in league ${league}`);
       }
     }
   }
