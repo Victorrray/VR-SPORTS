@@ -161,6 +161,7 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
     
     // Map team names to ESPN team codes (used in scoreboard URLs)
     const teamCodeMap = {
+      // NFL Teams
       'arizona-cardinals': 'ari',
       'atlanta-falcons': 'atl',
       'baltimore-ravens': 'bal',
@@ -192,7 +193,37 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
       'seattle-seahawks': 'sea',
       'tampa-bay-buccaneers': 'tb',
       'tennessee-titans': 'ten',
-      'washington-commanders': 'wsh'
+      'washington-commanders': 'wsh',
+      // NBA Teams
+      'atlanta-hawks': 'atl',
+      'boston-celtics': 'bos',
+      'brooklyn-nets': 'bkn',
+      'charlotte-hornets': 'cha',
+      'chicago-bulls': 'chi',
+      'cleveland-cavaliers': 'cle',
+      'dallas-mavericks': 'dal',
+      'denver-nuggets': 'den',
+      'detroit-pistons': 'det',
+      'golden-state-warriors': 'gs',
+      'houston-rockets': 'hou',
+      'los-angeles-clippers': 'lac',
+      'los-angeles-lakers': 'lal',
+      'memphis-grizzlies': 'mem',
+      'miami-heat': 'mia',
+      'milwaukee-bucks': 'mil',
+      'minnesota-timberwolves': 'min',
+      'new-orleans-pelicans': 'no',
+      'new-york-knicks': 'ny',
+      'oklahoma-city-thunder': 'okc',
+      'orlando-magic': 'orl',
+      'philadelphia-76ers': 'phi',
+      'phoenix-suns': 'phx',
+      'portland-trail-blazers': 'por',
+      'sacramento-kings': 'sac',
+      'san-antonio-spurs': 'sa',
+      'toronto-raptors': 'tor',
+      'utah-jazz': 'uta',
+      'washington-wizards': 'wsh'
     };
     
     const teamCode = teamCodeMap[slug];
