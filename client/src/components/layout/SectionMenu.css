@@ -1,6 +1,6 @@
 .section-menu-container {
   position: fixed;
-  right: calc(50% - 300px); /* Position far to the right with huge gap */
+  right: calc(50% - 160px); /* Position closer to center with small gap */
   bottom: 140px; /* Position slightly lower to prevent cutoff */
   z-index: 1011; /* Match z-index with filter button */
   display: block !important; /* Force display */
@@ -27,7 +27,6 @@
   min-height: 44px;
   width: 100%;
   max-width: 140px;
-  margin-left: 120px;
 }
 
 .section-button:hover {
