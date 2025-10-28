@@ -1008,10 +1008,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedPlayerPropMarkets(Array.isArray(draftSelectedPlayerPropMarkets) && draftSelectedPlayerPropMarkets.length > 0 ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
     setMobileFiltersOpen(false);
 
-    // Clear loading after a short delay to allow state updates to propagate
+    // Trigger data refresh after filters are applied
     setTimeout(() => {
+      console.log('🔄 Triggering refresh after filter application');
+      if (refreshMarkets) {
+        refreshMarkets();
+      }
       setFiltersLoading(false);
-    }, 1000);
+    }, 500);
   };
 
   const resetDraftFilters = () => {
