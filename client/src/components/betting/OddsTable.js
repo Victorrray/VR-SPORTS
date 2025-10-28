@@ -443,53 +443,34 @@ const getTeamLogoForGame = (game = {}, teamName = '') => {
   let logoUrl = '';
   let isHomeTeam = false;
   
-  // Check if this is home or away team and get API logo
+  // Check if this is home or away team
   if (key === homeKey) {
-    logoUrl = game?.home_logo || '';
     isHomeTeam = true;
   } else if (key === awayKey) {
-    logoUrl = game?.away_logo || '';
     isHomeTeam = false;
   }
   
-  // Debug logging to see what logos we're getting from API
+  // Extract league from sport_key (e.g., "americanfootball_nfl" -> "nfl")
+  const league = game?.sport_key?.split('_').pop() || '';
+  
+  // Try logo resolver first (ESPN CDN)
+  logoUrl = resolveTeamLogo({
+    league: league,
+    teamName: teamName,
+    apiLogo: null
+  });
+  
+  // Debug logging to see what logos we're resolving
   if (process.env.NODE_ENV === 'development') {
-    console.log(`🏈 Logo check for ${teamName}:`, {
+    console.log(`🏈 Logo resolved for ${teamName}:`, {
       game_id: game?.id,
       sport: game?.sport_key,
+      league: league,
       home_team: game?.home_team,
       away_team: game?.away_team,
-      home_logo: game?.home_logo,
-      away_logo: game?.away_logo,
       resolved_logo: logoUrl,
       isHomeTeam
     });
-  }
-  
-  // If API didn't provide logo, try logo resolution utilities
-  if (!logoUrl) {
-    // Extract league from sport_key (e.g., "americanfootball_nfl" -> "nfl")
-    const league = game?.sport_key?.split('_').pop() || '';
-    
-    // Try logo resolver first
-    logoUrl = resolveTeamLogo({
-      league: league,
-      teamName: teamName,
-      apiLogo: null
-    });
-    
-    // If that fails, try the team logos constants
-    if (!logoUrl || logoUrl.includes('unknown')) {
-      const teamLogos = getTeamLogos(league, game?.home_team, game?.away_team);
-      logoUrl = isHomeTeam ? teamLogos.home : teamLogos.away;
-    }
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🏈 Fallback logo for ${teamName}:`, {
-        league,
-        fallback_logo: logoUrl
-      });
-    }
   }
   
   return logoUrl || '';

@@ -1,9 +1,7 @@
 .section-menu-container {
   position: fixed;
-  right: 50%; /* Center horizontally */
-  transform: translateX(50%); /* Offset by half width to truly center */
+  right: calc(50% - 150px); /* Position to the right of center with gap */
   bottom: 140px; /* Position slightly lower to prevent cutoff */
-  margin-right: -70px; /* Half of button width to center it */
   z-index: 1011; /* Match z-index with filter button */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
