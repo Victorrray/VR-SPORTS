@@ -275,6 +275,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             const response = await axios.get(url);
             responseData = response.data;
             
+            // Log quota information from response headers
+            const quotaRemaining = response.headers['x-requests-remaining'];
+            const quotaUsed = response.headers['x-requests-used'];
+            const quotaLast = response.headers['x-requests-last'];
+            console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
+            
             // Cache the data
             if (needsRegularMarkets && needsAlternateMarkets) {
               const regularData = responseData.map(game => ({
@@ -360,11 +366,19 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           console.log(`🔍 Fetching player props for ${sport}...`);
           console.log(`🔍 Player props API call: ${playerPropsUrl}`);
           const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 30000 });
-          console.log(`🔍 Player props response: ${JSON.stringify(playerPropsResponse.data)}`);
           
-          if (playerPropsResponse.data && playerPropsResponse.data.data) {
-            console.log(`✅ Got ${playerPropsResponse.data.data.length} player prop games for ${sport}`);
-            allGames.push(...playerPropsResponse.data.data);
+          // Log quota information from response headers
+          const quotaRemaining = playerPropsResponse.headers['x-requests-remaining'];
+          const quotaUsed = playerPropsResponse.headers['x-requests-used'];
+          const quotaLast = playerPropsResponse.headers['x-requests-last'];
+          console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
+          
+          // TheOddsAPI returns data directly in response.data (array of events)
+          if (playerPropsResponse.data && Array.isArray(playerPropsResponse.data)) {
+            console.log(`✅ Got ${playerPropsResponse.data.length} player prop games for ${sport}`);
+            allGames.push(...playerPropsResponse.data);
+          } else if (playerPropsResponse.data) {
+            console.warn(`⚠️ Unexpected response structure for player props:`, typeof playerPropsResponse.data);
           }
         } catch (playerPropsErr) {
           console.warn(`⚠️ Player props fetch error for ${sport}:`, playerPropsErr.message);
