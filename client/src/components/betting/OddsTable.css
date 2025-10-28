@@ -1663,5 +1663,45 @@ body,
     overflow-wrap: break-word;
   }
   
+  /* Desktop team logo styles */
+  .desktop-team-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    object-fit: contain;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .desktop-matchup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .desktop-matchup-league {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .desktop-teams {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .desktop-team-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .desktop-matchup-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  
   /* Desktop mini-table styles moved to OddsTableDesktop.css */
 }
