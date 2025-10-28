@@ -171,13 +171,10 @@
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .section-menu-container {
-    bottom: 140px; /* Position slightly lower to prevent cutoff */
-    right: 50%; /* Center horizontally */
-    left: auto; /* Reset left positioning */
-    transform: translateX(50%); /* Offset by half width to truly center */
-    margin-right: -60px; /* Half of button width to center it */
+    /* Keep the same positioning as desktop to maintain gap */
+    right: calc(50% - 250px);
+    bottom: 140px;
     display: block !important; /* Force display on mobile */
-    width: 120px;
   }
   
   .section-button {
