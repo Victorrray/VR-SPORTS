@@ -95,19 +95,22 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
   };
 
   const planBadge = getPlanBadge();
+  const isLandingPage = location.pathname === "/";
 
   return (
     <>
       <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
-        {/* Left Section: Logo + Mobile Menu */}
+        {/* Left Section: Logo + Mobile Menu (on landing page) */}
         <div className={styles.navLeft}>
-          <button
-            className={styles.hamburger}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle Menu"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {isLandingPage && (
+            <button
+              className={styles.hamburger}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Menu"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          )}
 
           <Link to="/" className={styles.brand}>
             <div className={styles.brandLogo}>
@@ -137,8 +140,19 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
           })}
         </div>
 
-        {/* Right Section: Search + User Menu */}
+        {/* Right Section: Search + User Menu + Mobile Menu (non-landing) */}
         <div className={styles.navRight}>
+          {/* Mobile Menu Button (on non-landing pages) */}
+          {!isLandingPage && (
+            <button
+              className={styles.hamburger}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Menu"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          )}
+
           {/* User Section */}
           {!user ? (
             <Link to="/login" className={styles.loginBtn}>
