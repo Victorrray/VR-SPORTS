@@ -27,6 +27,7 @@
   min-height: 44px;
   width: 100%;
   max-width: 140px;
+  padding-left: 24px;
 }
 
 .section-button:hover {
