@@ -1,6 +1,6 @@
 .filter-menu-container {
   position: fixed;
-  left: calc(50% - 70px); /* Position very close to center */
+  left: calc(50% - 160px); /* Position with spacing */
   bottom: 140px; /* Position slightly lower to prevent cutoff */
   z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
@@ -52,7 +52,7 @@
 @media (max-width: 768px) {
   .filter-menu-container {
     /* Keep the same positioning as desktop to maintain gap */
-    left: calc(50% - 70px);
+    left: calc(50% - 160px);
     bottom: 140px;
     display: block !important; /* Force display on mobile */
   }

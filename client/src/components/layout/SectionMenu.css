@@ -1,6 +1,6 @@
 .section-menu-container {
   position: fixed;
-  right: calc(50% - 70px); /* Position very close to center */
+  right: calc(50% - 160px); /* Position with spacing */
   bottom: 140px; /* Position slightly lower to prevent cutoff */
   z-index: 1011; /* Match z-index with filter button */
   display: block !important; /* Force display */
@@ -172,7 +172,7 @@
 @media (max-width: 768px) {
   .section-menu-container {
     /* Keep the same positioning as desktop to maintain gap */
-    right: calc(50% - 70px);
+    right: calc(50% - 160px);
     bottom: 140px;
     display: block !important; /* Force display on mobile */
   }
