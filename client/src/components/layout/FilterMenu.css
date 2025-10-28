@@ -1,6 +1,6 @@
 .filter-menu-container {
   position: fixed;
-  left: calc(50% - 180px); /* Position closer to center */
+  left: calc(50% - 120px); /* Position very close to center */
   bottom: 140px; /* Position slightly lower to prevent cutoff */
   z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
