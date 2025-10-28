@@ -1902,25 +1902,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       
       {/* Dynamic header based on current section */}
       <div style={{ 
-        height: "60px", 
-        display: "flex", 
-        alignItems: "center", 
-        justifyContent: "space-between",
-        background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))",
-        border: "1px solid rgba(139, 92, 246, 0.1)",
-        borderRadius: "12px",
-        marginBottom: "20px",
-        padding: "0 20px"
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: '24px',
+        position: 'relative',
+        minHeight: '60px'
       }}>
-        <h1 style={{ 
-          margin: 0, 
-          fontSize: "24px", 
-          fontWeight: "700", 
-          color: "var(--text-primary)",
-          display: "flex",
-          alignItems: "center",
-          gap: "12px"
-        }}>
+        <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0, fontSize: '28px', fontWeight: '700', color: 'white' }}>
           {getCurrentSectionId() === 'props' && (
             <>
               <Target size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
@@ -1947,7 +1936,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           )}
         </h1>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'absolute', right: 0 }}>
           {/* Cache Indicator */}
           {usingCache && (
             <div style={{
@@ -1967,31 +1956,30 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </div>
           )}
           
-          {/* Refresh Button with Cooldown Timer */}
+          {/* Refresh Button - Icon Only */}
           <button
             onClick={handleRefresh}
             disabled={marketsLoading || isRefreshing || refreshCooldown > 0}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '10px 16px',
+              justifyContent: 'center',
+              padding: '8px',
               background: (marketsLoading || isRefreshing || refreshCooldown > 0)
                 ? 'rgba(139, 92, 246, 0.3)' 
                 : 'linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.8))',
               border: '1px solid rgba(139, 92, 246, 0.4)',
               borderRadius: '8px',
               color: 'white',
-              fontSize: '14px',
-              fontWeight: '600',
               cursor: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
               opacity: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 0.6 : 1,
-              minWidth: '120px'
+              width: '36px',
+              height: '36px'
             }}
             onMouseEnter={(e) => {
               if (!marketsLoading && !isRefreshing && refreshCooldown === 0) {
-                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.transform = 'scale(1.1)';
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
               }
             }}
@@ -2002,16 +1990,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             title={refreshCooldown > 0 ? `Wait ${refreshCooldown}s before refreshing again` : usingCache ? 'Refresh cached data' : 'Refresh odds data (clears cache)'}
           >
             <RefreshCw 
-              size={16} 
+              size={18} 
               style={{ 
                 animation: (marketsLoading || isRefreshing) ? 'spin 1s linear infinite' : 'none'
               }} 
             />
-            {(marketsLoading || isRefreshing) 
-              ? 'Refreshing...' 
-              : refreshCooldown > 0 
-                ? `Wait ${refreshCooldown}s` 
-                : 'Refresh'}
           </button>
         </div>
       </div>
