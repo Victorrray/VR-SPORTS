@@ -1936,7 +1936,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           )}
         </h1>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'absolute', right: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'absolute', right: '50%', marginRight: '280px' }}>
           {/* Cache Indicator */}
           {usingCache && (
             <div style={{

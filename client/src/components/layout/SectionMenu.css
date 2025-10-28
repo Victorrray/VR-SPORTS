@@ -1,6 +1,6 @@
 .section-menu-container {
   position: fixed;
-  right: calc(50% - 220px); /* Position further to the right with larger gap */
+  right: calc(50% - 300px); /* Position far to the right with huge gap */
   bottom: 140px; /* Position slightly lower to prevent cutoff */
   z-index: 1011; /* Match z-index with filter button */
   display: block !important; /* Force display */
