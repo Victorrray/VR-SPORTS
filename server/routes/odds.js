@@ -344,6 +344,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     }
     
     // Step 2: Fetch player props if requested
+    // NOTE: Player props must be fetched using /events/{eventId}/odds endpoint, one event at a time
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
       console.log('🎯 Fetching player props for markets:', playerPropMarkets);
       
@@ -360,29 +361,44 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       
       for (const sport of sportsArray) {
         try {
-          // Make API call for player props
-          const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+          // First, get list of events for this sport
+          const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
+          console.log(`🔍 Fetching events for ${sport}...`);
+          const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
+          const events = eventsResponse.data || [];
           
-          console.log(`🔍 Fetching player props for ${sport}...`);
-          console.log(`🔍 Player props API call: ${playerPropsUrl}`);
-          const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 30000 });
+          console.log(`📅 Got ${events.length} events for ${sport}`);
           
-          // Log quota information from response headers
-          const quotaRemaining = playerPropsResponse.headers['x-requests-remaining'];
-          const quotaUsed = playerPropsResponse.headers['x-requests-used'];
-          const quotaLast = playerPropsResponse.headers['x-requests-last'];
-          console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
-          
-          // TheOddsAPI returns data directly in response.data (array of events)
-          if (playerPropsResponse.data && Array.isArray(playerPropsResponse.data)) {
-            console.log(`✅ Got ${playerPropsResponse.data.length} player prop games for ${sport}`);
-            allGames.push(...playerPropsResponse.data);
-          } else if (playerPropsResponse.data) {
-            console.warn(`⚠️ Unexpected response structure for player props:`, typeof playerPropsResponse.data);
+          // For each event, fetch player props using /events/{eventId}/odds endpoint
+          for (const event of events) {
+            try {
+              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+              
+              console.log(`🔍 Fetching player props for event ${event.id} (${event.home_team} vs ${event.away_team})...`);
+              const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 30000 });
+              
+              // Log quota information from response headers
+              const quotaRemaining = playerPropsResponse.headers['x-requests-remaining'];
+              const quotaUsed = playerPropsResponse.headers['x-requests-used'];
+              const quotaLast = playerPropsResponse.headers['x-requests-last'];
+              console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
+              
+              // TheOddsAPI returns a single event object with bookmakers and markets
+              if (playerPropsResponse.data && playerPropsResponse.data.bookmakers) {
+                console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team}`);
+                allGames.push(playerPropsResponse.data);
+              }
+            } catch (eventErr) {
+              // Skip events that don't have player props available
+              if (eventErr.response?.status === 422) {
+                console.log(`⏭️ No player props available for event ${event.id}`);
+              } else {
+                console.warn(`⚠️ Player props fetch error for event ${event.id}:`, eventErr.message);
+              }
+            }
           }
-        } catch (playerPropsErr) {
-          console.warn(`⚠️ Player props fetch error for ${sport}:`, playerPropsErr.message);
-          console.log(`⚠️ Player props error details: ${JSON.stringify(playerPropsErr.response?.data)}`);
+        } catch (sportErr) {
+          console.warn(`⚠️ Failed to fetch events for ${sport}:`, sportErr.message);
           // Continue with other sports even if one fails
         }
       }
