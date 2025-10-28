@@ -2970,20 +2970,36 @@ export default function OddsTable({
                           {row.playerName || row.out?.description || 'Player'}
                         </span>
                       )}
-                      <span 
-                        style={{ fontWeight:800 }}
-                        title={mode === "props" ? getYesBetExplanation(row.mkt?.key, row.out?.name) : null}
-                      >
-                        {mode === "props" 
-                          ? (row.out?.name || '')
-                          : (row.mkt?.key || '') === 'h2h'
-                            ? shortTeam(row.out?.name, row.game?.sport_key)
-                            : (row.out?.name || '')}
-                        {/* Add line inline with team name */}
-                        {mode === "props" 
-                          ? (row.out?.point ? ` ${row.out.point}` : '')
-                          : ((row.mkt?.key || '') !== 'h2h' && row.out?.point ? ` ${formatLine(row.out.point, row.mkt.key, 'game')}` : '')}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {mode !== "props" && (row.mkt?.key || '') !== 'h2h' && (
+                          (() => {
+                            const teamLogo = getTeamLogoForGame(row.game, row.out?.name);
+                            return teamLogo ? (
+                              <img
+                                src={teamLogo}
+                                alt={`${row.out?.name} logo`}
+                                className="desktop-team-logo"
+                                loading="lazy"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                            ) : null;
+                          })()
+                        )}
+                        <span 
+                          style={{ fontWeight:800 }}
+                          title={mode === "props" ? getYesBetExplanation(row.mkt?.key, row.out?.name) : null}
+                        >
+                          {mode === "props" 
+                            ? (row.out?.name || '')
+                            : (row.mkt?.key || '') === 'h2h'
+                              ? shortTeam(row.out?.name, row.game?.sport_key)
+                              : (row.out?.name || '')}
+                          {/* Add line inline with team name */}
+                          {mode === "props" 
+                            ? (row.out?.point ? ` ${row.out.point}` : '')
+                            : ((row.mkt?.key || '') !== 'h2h' && row.out?.point ? ` ${formatLine(row.out.point, row.mkt.key, 'game')}` : '')}
+                        </span>
+                      </div>
                       <span style={{ opacity:.9 }}>
                         {formatMarket(row.mkt?.key || '')}
                       </span>
