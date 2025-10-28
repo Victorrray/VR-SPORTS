@@ -529,14 +529,15 @@ router.post('/cached-odds/nfl/control', async (req, res) => {
 
 /**
  * GET /api/odds/player-props
- * Player props endpoint - fetches player prop odds
+ * Player props endpoint - fetches player prop odds using the /odds endpoint
+ * Note: TheOddsAPI only supports player props through the /odds endpoint with specific market keys
  */
 router.get('/player-props', requireUser, checkPlanAccess, async (req, res) => {
   try {
     const { league, date, game_id, markets, bookmakers } = req.query;
     
-    if (!league || !date) {
-      return res.status(400).json({ error: 'Missing required parameters: league, date' });
+    if (!league) {
+      return res.status(400).json({ error: 'Missing required parameter: league' });
     }
 
     // Convert league to sport_key format
@@ -565,22 +566,23 @@ router.get('/player-props', requireUser, checkPlanAccess, async (req, res) => {
       return res.status(400).json({ error: 'No valid player prop markets specified' });
     }
 
-    // Build API request
+    // Build API request - use /odds endpoint which supports player props
     const params = {
       apiKey: API_KEY,
-      sport: sportKey,
-      regions: 'us,us2,us_exchanges',
+      regions: 'us,us_dfs',
       markets: marketsList.join(','),
       oddsFormat: 'american'
     };
     
-    if (date) params.dateFormat = 'iso';
-    if (bookmakers) params.bookmakers = bookmakers;
+    // Use DFS apps for player props
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
+    params.bookmakers = bookmakers || dfsApps.join(',');
 
-    console.log('🎯 Fetching player props:', { sportKey, date, markets: marketsList.join(',') });
+    console.log('🎯 Fetching player props:', { sportKey, markets: marketsList.join(','), bookmakers: params.bookmakers });
 
-    // Fetch from TheOddsAPI
-    const response = await axios.get('https://api.the-odds-api.com/v4/sports/' + sportKey + '/events', { params });
+    // Fetch from TheOddsAPI using /odds endpoint
+    const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/odds`;
+    const response = await axios.get(url, { params, timeout: 30000 });
     
     if (response.status !== 200) {
       throw new Error(`TheOddsAPI returned status ${response.status}`);
