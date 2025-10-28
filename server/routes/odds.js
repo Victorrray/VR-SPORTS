@@ -528,6 +528,109 @@ router.post('/cached-odds/nfl/control', async (req, res) => {
 });
 
 /**
+ * GET /api/odds/player-props
+ * Player props endpoint - fetches player prop odds
+ */
+router.get('/player-props', requireUser, checkPlanAccess, async (req, res) => {
+  try {
+    const { league, date, game_id, markets, bookmakers } = req.query;
+    
+    if (!league || !date) {
+      return res.status(400).json({ error: 'Missing required parameters: league, date' });
+    }
+
+    // Convert league to sport_key format
+    const sportKeyMap = {
+      'americanfootball_nfl': 'americanfootball_nfl',
+      'nfl': 'americanfootball_nfl',
+      'basketball_nba': 'basketball_nba',
+      'nba': 'basketball_nba',
+      'baseball_mlb': 'baseball_mlb',
+      'mlb': 'baseball_mlb',
+      'icehockey_nhl': 'icehockey_nhl',
+      'nhl': 'icehockey_nhl'
+    };
+    
+    const sportKey = sportKeyMap[league] || league;
+    
+    // Parse markets - if not provided, use default player prop markets
+    let marketsList = markets 
+      ? (typeof markets === 'string' ? markets.split(',') : markets)
+      : ['player_points', 'player_assists', 'player_rebounds', 'player_pass_tds', 'player_passing_yards', 'player_rushing_yards', 'player_receiving_yards', 'player_receptions'];
+    
+    // Ensure all markets are player prop markets
+    marketsList = marketsList.filter(m => m.startsWith('player_'));
+    
+    if (marketsList.length === 0) {
+      return res.status(400).json({ error: 'No valid player prop markets specified' });
+    }
+
+    // Build API request
+    const params = {
+      apiKey: API_KEY,
+      sport: sportKey,
+      regions: 'us,us2,us_exchanges',
+      markets: marketsList.join(','),
+      oddsFormat: 'american'
+    };
+    
+    if (date) params.dateFormat = 'iso';
+    if (bookmakers) params.bookmakers = bookmakers;
+
+    console.log('🎯 Fetching player props:', { sportKey, date, markets: marketsList.join(',') });
+
+    // Fetch from TheOddsAPI
+    const response = await axios.get('https://api.the-odds-api.com/v4/sports/' + sportKey + '/events', { params });
+    
+    if (response.status !== 200) {
+      throw new Error(`TheOddsAPI returned status ${response.status}`);
+    }
+
+    const events = response.data || [];
+    
+    // Transform to player props format
+    const items = [];
+    for (const event of events) {
+      if (!event.bookmakers || event.bookmakers.length === 0) continue;
+      
+      for (const bookmaker of event.bookmakers) {
+        for (const market of bookmaker.markets || []) {
+          if (!market.key.startsWith('player_')) continue;
+          
+          for (const outcome of market.outcomes || []) {
+            items.push({
+              event_id: event.id,
+              sport_key: sportKey,
+              commence_time: event.commence_time,
+              home_team: event.home_team,
+              away_team: event.away_team,
+              bookmaker_key: bookmaker.key,
+              bookmaker_title: bookmaker.title,
+              market_key: market.key,
+              market_name: market.key.replace('player_', ''),
+              player_name: outcome.name,
+              outcome_name: outcome.description,
+              price: outcome.price,
+              point: outcome.point
+            });
+          }
+        }
+      }
+    }
+
+    res.json({
+      items,
+      stale: false,
+      ttl: 300,
+      as_of: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('Player props error:', err);
+    res.status(500).json({ error: 'Failed to fetch player props', detail: err.message });
+  }
+});
+
+/**
  * Helper function to transform cached odds to frontend format
  */
 function transformCachedOddsToFrontend(cachedOdds) {
