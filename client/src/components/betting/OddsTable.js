@@ -433,6 +433,20 @@ function shortTeam(name="", sportKey="") {
 
 const normalizeTeamKey = (name = '') => String(name).toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
 
+// Generate fallback logo URLs for a team
+const getLogoFallbackUrls = (league = '', espnId = '') => {
+  if (!league || !espnId) return [];
+  const leagueCode = league.toLowerCase() === "ncaaf" ? "college-football" : league.toLowerCase();
+  return [
+    `https://a.espncdn.com/media/motion/2024/logos/${leagueCode}/teams/${espnId}.png`,
+    `https://a.espncdn.com/media/motion/2023/logos/${leagueCode}/teams/${espnId}.png`,
+    `https://a.espncdn.com/media/motion/2022/logos/${leagueCode}/teams/${espnId}.png`,
+    `https://a.espncdn.com/media/motion/2021/logos/${leagueCode}/teams/${espnId}.png`,
+    `https://a.espncdn.com/media/motion/2024/logos/${leagueCode}/teams/500/${espnId}.png`,
+    `https://a.espncdn.com/media/motion/2023/logos/${leagueCode}/teams/500/${espnId}.png`
+  ];
+};
+
 const getTeamLogoForGame = (game = {}, teamName = '') => {
   const key = normalizeTeamKey(teamName);
   if (!key) return '';
@@ -2917,7 +2931,13 @@ export default function OddsTable({
                                 onLoad={() => console.log(`✅ Loaded logo: ${awayLogo}`)}
                                 onError={(e) => { 
                                   console.error(`❌ Failed to load logo: ${awayLogo}`, e);
-                                  e.target.style.display = 'none'; 
+                                  // Try fallback URLs
+                                  const fallbacks = getLogoFallbackUrls(row.game?.sport_key?.split('_').pop(), '');
+                                  if (fallbacks.length > 0) {
+                                    e.target.src = fallbacks[0];
+                                  } else {
+                                    e.target.style.display = 'none';
+                                  }
                                 }}
                               />
                             ) : null;
@@ -2937,7 +2957,13 @@ export default function OddsTable({
                                 onLoad={() => console.log(`✅ Loaded logo: ${homeLogo}`)}
                                 onError={(e) => { 
                                   console.error(`❌ Failed to load logo: ${homeLogo}`, e);
-                                  e.target.style.display = 'none'; 
+                                  // Try fallback URLs
+                                  const fallbacks = getLogoFallbackUrls(row.game?.sport_key?.split('_').pop(), '');
+                                  if (fallbacks.length > 0) {
+                                    e.target.src = fallbacks[0];
+                                  } else {
+                                    e.target.style.display = 'none';
+                                  }
                                 }}
                               />
                             ) : null;
