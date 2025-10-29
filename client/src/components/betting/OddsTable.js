@@ -3130,12 +3130,29 @@ export default function OddsTable({
                           {mode === "props" ? (
                             // For player props, show Over/Under with line
                             <div className="mob-prop-bet">
-                              <span 
-                                className={`mob-prop-side ${row.out.name === 'Over' ? 'over' : 'under'}`}
-                                title={getYesBetExplanation(row.mkt?.key, row.out?.name)}
-                              >
-                                {row.out.name} {row.out.point}
-                              </span>
+                              {(() => {
+                                // Hide outcome name for 1ST TD and ANYTIME TOUCHDOWN markets
+                                const marketKey = (row.mkt?.key || '').toLowerCase();
+                                const isTouchdownMarket = marketKey.includes('first_td') || 
+                                                         marketKey.includes('1st_td') || 
+                                                         marketKey.includes('first_touchdown') ||
+                                                         marketKey.includes('anytime_td') || 
+                                                         marketKey.includes('anytime_touchdown');
+                                
+                                if (isTouchdownMarket && row.out.name === 'Yes') {
+                                  // For TD markets with Yes outcome, don't show the outcome name
+                                  return null;
+                                }
+                                
+                                return (
+                                  <span 
+                                    className={`mob-prop-side ${row.out.name === 'Over' ? 'over' : 'under'}`}
+                                    title={getYesBetExplanation(row.mkt?.key, row.out?.name)}
+                                  >
+                                    {row.out.name} {row.out.point}
+                                  </span>
+                                );
+                              })()}
                             </div>
                           ) : (
                             <>
@@ -3535,6 +3552,19 @@ export default function OddsTable({
                                           </div>
                                           <div className="mini-prop-side">
                                             {(() => {
+                                            
+                                            // Hide outcome name for 1ST TD and ANYTIME TOUCHDOWN markets
+                                            const marketKey = (row.mkt?.key || '').toLowerCase();
+                                            const isTouchdownMarket = marketKey.includes('first_td') || 
+                                                                     marketKey.includes('1st_td') || 
+                                                                     marketKey.includes('first_touchdown') ||
+                                                                     marketKey.includes('anytime_td') || 
+                                                                     marketKey.includes('anytime_touchdown');
+                                            
+                                            if (isTouchdownMarket && row.out.name === 'Yes') {
+                                              // For TD markets with Yes outcome, don't show the outcome name
+                                              return null;
+                                            }
                                             
                                             // Show the actual line this sportsbook offers
                                             const isOverSide = row.out.name === 'Over';
