@@ -1,7 +1,7 @@
 .section-menu-container {
   position: fixed;
   right: calc(50% - 160px); /* Position with spacing */
-  bottom: 100px; /* Aligned with filter menu */
+  bottom: 110px; /* Moved up by ~5% */
   z-index: 1011; /* Match z-index with filter button */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
@@ -173,7 +173,7 @@
   .section-menu-container {
     /* Keep the same positioning as desktop to maintain gap */
     right: calc(50% - 160px);
-    bottom: 100px;
+    bottom: 110px;
     display: block !important; /* Force display on mobile */
   }
   
@@ -194,7 +194,7 @@
 
 @media (max-width: 380px) {
   .section-menu-container {
-    bottom: 100px; /* Aligned with filter menu */
+    bottom: 110px; /* Moved up by ~5% */
     right: 50%; /* Center horizontally */
     left: auto; /* Reset left positioning */
     transform: translateX(50%); /* Offset by half width to truly center */

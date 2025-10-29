@@ -1,7 +1,7 @@
 .filter-menu-container {
   position: fixed;
   left: calc(50% - 160px); /* Position with spacing */
-  bottom: 100px; /* Aligned with section menu */
+  bottom: 110px; /* Moved up by ~5% */
   z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
@@ -53,7 +53,7 @@
   .filter-menu-container {
     /* Keep the same positioning as desktop to maintain gap */
     left: calc(50% - 160px);
-    bottom: 100px;
+    bottom: 110px;
     display: block !important; /* Force display on mobile */
   }
   
@@ -68,7 +68,7 @@
 
 @media (max-width: 380px) {
   .filter-menu-container {
-    bottom: 100px; /* Aligned with section menu */
+    bottom: 110px; /* Moved up by ~5% */
     left: 50%; /* Center horizontally */
     transform: translateX(-50%); /* Offset by half width to truly center */
     margin-left: -55px; /* Half of button width to center it */
