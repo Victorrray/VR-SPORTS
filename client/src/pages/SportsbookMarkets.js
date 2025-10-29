@@ -1900,47 +1900,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               <span>Cached</span>
             </div>
           )}
-          
-          {/* Refresh Button - Icon Only */}
-          <button
-            onClick={handleRefresh}
-            disabled={marketsLoading || isRefreshing || refreshCooldown > 0}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '8px',
-              background: (marketsLoading || isRefreshing || refreshCooldown > 0)
-                ? 'rgba(139, 92, 246, 0.3)' 
-                : 'linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.8))',
-              border: '1px solid rgba(139, 92, 246, 0.4)',
-              borderRadius: '8px',
-              color: 'white',
-              cursor: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              opacity: (marketsLoading || isRefreshing || refreshCooldown > 0) ? 0.6 : 1,
-              width: '36px',
-              height: '36px'
-            }}
-            onMouseEnter={(e) => {
-              if (!marketsLoading && !isRefreshing && refreshCooldown === 0) {
-                e.currentTarget.style.transform = 'scale(1.1)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
-            title={refreshCooldown > 0 ? `Wait ${refreshCooldown}s before refreshing again` : usingCache ? 'Refresh cached data' : 'Refresh odds data (clears cache)'}
-          >
-            <RefreshCw 
-              size={18} 
-              style={{ 
-                animation: (marketsLoading || isRefreshing) ? 'spin 1s linear infinite' : 'none'
-              }} 
-            />
-          </button>
         </div>
       </div>
 
