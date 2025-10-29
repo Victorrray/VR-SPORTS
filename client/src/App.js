@@ -77,13 +77,17 @@ function AppRoutes() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
+  // Get profile from context
+  const { profile } = useAuth();
+
   useEffect(() => {
-    if (user && !user.user_metadata?.username) {
+    // Show username setup if user is logged in but has no username in profile
+    if (user && profile && !profile.username) {
       setShowUsernameSetup(true);
     } else {
       setShowUsernameSetup(false);
     }
-  }, [user]);
+  }, [user, profile]);
 
   // Only redirect non-authenticated users from login-required pages to landing page
   const shouldRedirectToLanding = !user && (

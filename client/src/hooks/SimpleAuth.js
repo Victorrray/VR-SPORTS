@@ -20,11 +20,20 @@ export function AuthProvider({ children }) {
         .eq('id', userId)
         .single();
       
-      if (data && !error) {
+      if (error) {
+        console.warn('⚠️ Error fetching profile:', error.message);
+        // Profile doesn't exist yet - this is normal for new users
+        setProfile(null);
+        return;
+      }
+      
+      if (data) {
+        console.log('✅ Profile fetched:', { id: data.id, username: data.username });
         setProfile(data);
       }
     } catch (err) {
-      console.error('Error fetching profile:', err);
+      console.error('❌ Error fetching profile:', err);
+      setProfile(null);
     }
   };
 
@@ -34,18 +43,24 @@ export function AuthProvider({ children }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('👤 Initial session found, fetching profile for user:', session.user.id);
         fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
       }
       setAuthLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('🔐 Auth state changed:', _event);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('👤 User logged in, fetching profile for user:', session.user.id);
         fetchProfile(session.user.id);
       } else {
+        console.log('👤 User logged out, clearing profile');
         setProfile(null);
       }
       setAuthLoading(false);
