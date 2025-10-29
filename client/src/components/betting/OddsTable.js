@@ -3131,16 +3131,22 @@ export default function OddsTable({
                             // For player props, show Over/Under with line
                             <div className="mob-prop-bet">
                               {(() => {
-                                // Hide outcome name for 1ST TD and ANYTIME TOUCHDOWN markets
+                                // Hide outcome name for binary Yes/No markets (TD and Goal Scorer markets)
                                 const marketKey = (row.mkt?.key || '').toLowerCase();
-                                const isTouchdownMarket = marketKey.includes('first_td') || 
-                                                         marketKey.includes('1st_td') || 
-                                                         marketKey.includes('first_touchdown') ||
-                                                         marketKey.includes('anytime_td') || 
-                                                         marketKey.includes('anytime_touchdown');
+                                const isBinaryMarket = marketKey.includes('first_td') || 
+                                                      marketKey.includes('1st_td') || 
+                                                      marketKey.includes('first_touchdown') ||
+                                                      marketKey.includes('anytime_td') || 
+                                                      marketKey.includes('anytime_touchdown') ||
+                                                      marketKey.includes('first_goal') ||
+                                                      marketKey.includes('goal_scorer_first') ||
+                                                      marketKey.includes('anytime_goal') ||
+                                                      marketKey.includes('goal_scorer_anytime') ||
+                                                      marketKey.includes('last_goal') ||
+                                                      marketKey.includes('goal_scorer_last');
                                 
-                                if (isTouchdownMarket && row.out.name === 'Yes') {
-                                  // For TD markets with Yes outcome, don't show the outcome name
+                                if (isBinaryMarket && row.out.name === 'Yes') {
+                                  // For binary markets with Yes outcome, don't show the outcome name
                                   return null;
                                 }
                                 
@@ -3553,16 +3559,22 @@ export default function OddsTable({
                                           <div className="mini-prop-side">
                                             {(() => {
                                             
-                                            // Hide outcome name for 1ST TD and ANYTIME TOUCHDOWN markets
+                                            // Hide outcome name for binary Yes/No markets (TD and Goal Scorer markets)
                                             const marketKey = (row.mkt?.key || '').toLowerCase();
-                                            const isTouchdownMarket = marketKey.includes('first_td') || 
-                                                                     marketKey.includes('1st_td') || 
-                                                                     marketKey.includes('first_touchdown') ||
-                                                                     marketKey.includes('anytime_td') || 
-                                                                     marketKey.includes('anytime_touchdown');
+                                            const isBinaryMarket = marketKey.includes('first_td') || 
+                                                                  marketKey.includes('1st_td') || 
+                                                                  marketKey.includes('first_touchdown') ||
+                                                                  marketKey.includes('anytime_td') || 
+                                                                  marketKey.includes('anytime_touchdown') ||
+                                                                  marketKey.includes('first_goal') ||
+                                                                  marketKey.includes('goal_scorer_first') ||
+                                                                  marketKey.includes('anytime_goal') ||
+                                                                  marketKey.includes('goal_scorer_anytime') ||
+                                                                  marketKey.includes('last_goal') ||
+                                                                  marketKey.includes('goal_scorer_last');
                                             
-                                            if (isTouchdownMarket && row.out.name === 'Yes') {
-                                              // For TD markets with Yes outcome, don't show the outcome name
+                                            if (isBinaryMarket && row.out.name === 'Yes') {
+                                              // For binary markets with Yes outcome, don't show the outcome name
                                               return null;
                                             }
                                             
