@@ -27,7 +27,7 @@ const ArbitrageDetector = ({
   const initialSports = Array.isArray(sport) ? sport : [sport];
   
   // Use props if provided, otherwise use internal state
-  const [internalMinProfit, setInternalMinProfit] = useState(0.5);
+  const [internalMinProfit, setInternalMinProfit] = useState(0.5); // Default 0.5% minimum profit
   const [internalMaxStake, setInternalMaxStake] = useState(bankrollManager.getBankroll());
   const [internalSelectedMarkets, setInternalSelectedMarkets] = useState([
     // Game markets
@@ -43,7 +43,7 @@ const ArbitrageDetector = ({
   const [internalSelectedSports, setInternalSelectedSports] = useState(initialSports);
   
   // Draft state for filters (before applying)
-  const [draftMinProfit, setDraftMinProfit] = useState(0.5);
+  const [draftMinProfit, setDraftMinProfit] = useState(0.5); // Default 0.5% minimum profit
   const [draftMaxStake, setDraftMaxStake] = useState(bankrollManager.getBankroll());
   const [draftSelectedMarkets, setDraftSelectedMarkets] = useState([
     // Game markets
@@ -88,7 +88,7 @@ const ArbitrageDetector = ({
 
   // Reset filters function
   const resetFilters = () => {
-    const defaultMinProfit = 0.5;
+    const defaultMinProfit = 0.5; // 0.5% minimum profit
     const defaultMaxStake = bankrollManager.getBankroll();
     const defaultMarkets = [
       // Game markets
@@ -147,17 +147,17 @@ const ArbitrageDetector = ({
     transform: (data) => data || []
   });
 
-  // Fetch player props data for arbitrage analysis (excluding DFS apps)
-  // Note: Player props are fetched separately via /api/player-props endpoint
-  const { data: propsData, loading: propsLoading } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/player-props'); })(), {
+  // Fetch player props data for arbitrage analysis
+  // Note: Player props are fetched separately via /api/odds endpoint with player prop markets
+  const { data: propsData, loading: propsLoading } = useCachedFetch((() => { const { withApiBase } = require('../../config/api'); return withApiBase('/api/odds'); })(), {
     params: { 
       sports: internalSelectedSports.join(','),
-      date: '', // Empty date to get all upcoming games
-      bookFilter: 'draftkings,fanduel,betmgm,caesars,pointsbet,betrivers,unibet,wynnbet,superbook,twinspires,betfred_us,espnbet,fanatics,hardrock,fliff,novig,circasports,lowvig,bovada,mybookie,betonline,pinnacle' // Exclude DFS apps
+      markets: selectedMarkets.filter(m => m.includes('player_')).join(','), // Only player prop markets
+      regions: 'us,us_dfs'
     },
     pollingInterval: autoRefresh ? 120000 : null,
     transform: (data) => {
-      console.log('🎯 Player props data received:', data?.length || 0, 'games');
+      console.log('🎯 Player props data received for arbitrage:', data?.length || 0, 'games');
       return data || [];
     }
   });

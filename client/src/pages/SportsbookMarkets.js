@@ -232,12 +232,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
   const [selectedDate, setSelectedDate] = useState("");
   const [marketKeys, setMarketKeys] = useState([]); // Start empty to allow filtering by specific markets like quarters
-  // Include a mix of NFL, NCAA football, and NCAA basketball relevant markets by default
+  // All available player prop markets
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState([
     // Football markets (NFL and NCAAF)
-    "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
+    "player_pass_yds", "player_pass_tds", "player_rush_yds", "player_rush_tds", "player_receptions", "player_reception_yds", "player_anytime_td",
     // Basketball markets (NBA and NCAAB)
-    "player_points", "player_rebounds", "player_assists"
+    "player_points", "player_rebounds", "player_assists", "player_threes", "player_blocks", "player_steals", "player_turnovers",
+    // Baseball markets (MLB)
+    "player_hits", "player_total_bases", "player_strikeouts", "pitcher_strikeouts",
+    // Alternate markets
+    "player_points_alternate", "player_rebounds_alternate", "player_assists_alternate", "player_threes_alternate",
+    "player_points_assists_alternate", "player_points_rebounds_alternate", "player_rebounds_assists_alternate", "player_points_rebounds_assists_alternate"
   ]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
@@ -253,11 +258,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [filtersLoading, setFiltersLoading] = useState(false);
   const [navigationExpanded, setNavigationExpanded] = useState(false);
   
-  // Draft state for player props filter modal
+  // Draft state for player props filter modal - default to NFL only with all markets
   const [draftPicked, setDraftPicked] = useState(["americanfootball_nfl"]);
   const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState([
-    "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
-    "player_points", "player_rebounds", "player_assists"
+    // Football markets (NFL and NCAAF)
+    "player_pass_yds", "player_pass_tds", "player_rush_yds", "player_rush_tds", "player_receptions", "player_reception_yds", "player_anytime_td",
+    // Basketball markets (NBA and NCAAB)
+    "player_points", "player_rebounds", "player_assists", "player_threes", "player_blocks", "player_steals", "player_turnovers",
+    // Baseball markets (MLB)
+    "player_hits", "player_total_bases", "player_strikeouts", "pitcher_strikeouts",
+    // Alternate markets
+    "player_points_alternate", "player_rebounds_alternate", "player_assists_alternate", "player_threes_alternate",
+    "player_points_assists_alternate", "player_points_rebounds_alternate", "player_rebounds_assists_alternate", "player_points_rebounds_assists_alternate"
   ]);
   // Simplified sports list - only major sports
   const AVAILABLE_SPORTS = [
@@ -1733,13 +1745,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
                 <div className="desktop-filter-section">
                   <div className="desktop-filter-label">
-                    <span>🏈</span> Sports
+                    <span>🏈</span> Sports (Select One)
                   </div>
                   <SportMultiSelect
                     list={sportList || []}
                     selected={draftPicked || []}
-                    onChange={setDraftPicked}
-                    placeholderText="Select sports..."
+                    onChange={(selected) => {
+                      // Player props: only allow one sport at a time
+                      if (selected.length > 1) {
+                        // Keep only the last selected sport
+                        setDraftPicked([selected[selected.length - 1]]);
+                      } else {
+                        setDraftPicked(selected);
+                      }
+                    }}
+                    placeholderText="Select one sport..."
                     allLabel="All Sports"
                     enableCategories={true}
                   />
