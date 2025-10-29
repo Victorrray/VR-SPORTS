@@ -157,6 +157,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     const marketsArray = markets.split(',');
     let allGames = [];
     
+    // Define DFS apps list at top level for use throughout the function
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+    
     // Separate player props from regular markets
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
     const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
@@ -196,7 +199,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
           
           // Filter out DFS apps for game odds
-          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
           const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
           const bookmakerList = gameOddsBookmakers.join(',');
           
@@ -352,7 +354,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
       
       // Filter to DFS apps only for player props
-      const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
       const playerPropsBookmakers = allowedBookmakers.filter(book => dfsApps.includes(book));
       const bookmakerList = playerPropsBookmakers.join(',');
       
