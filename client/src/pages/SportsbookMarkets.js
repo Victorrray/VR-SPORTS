@@ -271,59 +271,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     "player_points_alternate", "player_rebounds_alternate", "player_assists_alternate", "player_threes_alternate",
     "player_points_assists_alternate", "player_points_rebounds_alternate", "player_rebounds_assists_alternate", "player_points_rebounds_assists_alternate"
   ]);
-  // Simplified sports list - only major sports
+  // Major US Sports only (for now)
   const AVAILABLE_SPORTS = [
     { key: 'americanfootball_nfl', title: 'NFL' },
     { key: 'americanfootball_ncaaf', title: 'NCAA' },
     { key: 'basketball_nba', title: 'NBA' },
     { key: 'basketball_ncaab', title: 'NCAA Basketball' },
     { key: 'baseball_mlb', title: 'MLB' },
-    { key: 'icehockey_nhl', title: 'NHL' },
-    
-    // International Sports (Soccer)
-    { key: 'soccer_epl', title: 'EPL' },
-    { key: 'soccer_uefa_champs_league', title: 'UEFA Champions League' },
-    { key: 'soccer_fifa_world_cup', title: 'FIFA World Cup' },
-    { key: 'soccer_conmebol_copa_america', title: 'Copa America' },
-    { key: 'soccer_uefa_european_championship', title: 'UEFA European Championship' },
-    
-    // Tennis
-    { key: 'tennis_atp', title: 'ATP Tennis' },
-    { key: 'tennis_wta', title: 'WTA Tennis' },
-    { key: 'tennis_atp_french_open', title: 'French Open (ATP)' },
-    { key: 'tennis_atp_us_open', title: 'US Open (ATP)' },
-    { key: 'tennis_atp_wimbledon', title: 'Wimbledon (ATP)' },
-    { key: 'tennis_atp_australian_open', title: 'Australian Open (ATP)' },
-    { key: 'tennis_wta_french_open', title: 'French Open (WTA)' },
-    { key: 'tennis_wta_us_open', title: 'US Open (WTA)' },
-    { key: 'tennis_wta_wimbledon', title: 'Wimbledon (WTA)' },
-    { key: 'tennis_wta_australian_open', title: 'Australian Open (WTA)' },
-    
-    // Combat Sports
-    { key: 'mma_mixed_martial_arts', title: 'MMA' },
-    
-    // Motorsports & Racing
-    { key: 'motorsport_nascar', title: 'NASCAR' },
-    { key: 'motorsport_f1', title: 'Formula 1' },
-    { key: 'motorsport_indycar', title: 'IndyCar' },
-    { key: 'horse_racing', title: 'Horse Racing' },
-    
-    // Golf
-    { key: 'golf_pga', title: 'PGA Tour' },
-    { key: 'golf_us_open', title: 'US Open Golf' },
-    { key: 'golf_british_open', title: 'British Open' },
-    { key: 'golf_pga_championship', title: 'PGA Championship' },
-    { key: 'golf_the_open_championship', title: 'The Open Championship' },
-    
-    // International Leagues
-    { key: 'australianrules_afl', title: 'AFL' },
-    { key: 'americanfootball_cfl', title: 'CFL' },
-    { key: 'basketball_nbl', title: 'NBL' },
-    { key: 'rugby_league_nrl', title: 'NRL' },
-    { key: 'cricket_icc_world_cup', title: 'Cricket World Cup' },
-    { key: 'cricket_big_bash', title: 'Big Bash League' },
-    { key: 'cricket_the_hundred', title: 'The Hundred' },
-    { key: 'basketball_euroleague', title: 'EuroLeague Basketball' }
+    { key: 'icehockey_nhl', title: 'NHL' }
   ];
 
   const [sportList, setSportList] = useState(AVAILABLE_SPORTS);

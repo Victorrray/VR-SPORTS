@@ -12,7 +12,7 @@ import './ArbitrageDetector.css';
 import '../betting/FormControls.css';
 
 const ArbitrageDetector = ({ 
-  sport = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'], 
+  sport = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'],
   games = [], 
   bookFilter = [], 
   compact = false,
@@ -58,16 +58,14 @@ const ArbitrageDetector = ({
   const [draftSortBy, setDraftSortBy] = useState('profit');
   const [draftSelectedSports, setDraftSelectedSports] = useState(initialSports);
   
-  // Sports list for selection
+  // Sports list for selection - Major US Sports only
   const sportsList = [
     { key: 'americanfootball_nfl', title: 'NFL' },
-    { key: 'americanfootball_ncaaf', title: 'NCAAF' },
+    { key: 'americanfootball_ncaaf', title: 'NCAA' },
     { key: 'basketball_nba', title: 'NBA' },
-    { key: 'basketball_ncaab', title: 'NCAAB' },
+    { key: 'basketball_ncaab', title: 'NCAA Basketball' },
     { key: 'baseball_mlb', title: 'MLB' },
-    { key: 'icehockey_nhl', title: 'NHL' },
-    { key: 'soccer_epl', title: 'EPL' },
-    { key: 'soccer_uefa_champs_league', title: 'Champions League' }
+    { key: 'icehockey_nhl', title: 'NHL' }
   ];
   
   // Use props or internal state

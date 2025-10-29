@@ -9,7 +9,13 @@ import {
 } from 'lucide-react';
 import './MiddlesDetector.css'; // Enhanced middle-specific styles
 
-const MiddlesDetector = ({ sport = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'], games = [], bookFilter = [], compact = false, autoRefresh = true }) => {
+const MiddlesDetector = ({ 
+  sport = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'], 
+  games = [], 
+  bookFilter = [], 
+  compact = false, 
+  autoRefresh = true 
+}) => {
   const { user, profile } = useAuth();
   
   // Convert sport prop to array if it's a string
