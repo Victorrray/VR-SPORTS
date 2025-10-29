@@ -502,36 +502,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
     
     if (mode === 'arbitrage') {
-      if (hasPlatinum) {
-        console.log('🔍 Initializing arbitrage mode from URL parameter');
-        setShowPlayerProps(false);
-        setShowArbitrage(true);
-        setShowMiddles(false);
-      } else {
-        console.log('❌ Non-platinum user attempted to access arbitrage mode - redirecting to game odds');
-        // Reset to game odds mode for non-platinum users
-        setShowPlayerProps(false);
-        setShowArbitrage(false);
-        setShowMiddles(false);
-      }
+      console.log('🔍 Initializing arbitrage mode from URL parameter');
+      setShowPlayerProps(false);
+      setShowArbitrage(true);
+      setShowMiddles(false);
+      // Note: Non-platinum users will see the upgrade message instead of being redirected
     } else if (mode === 'props') {
       console.log('🎯 Initializing player props mode from URL parameter');
       setShowPlayerProps(true);
       setShowArbitrage(false);
       setShowMiddles(false);
     } else if (mode === 'middles') {
-      if (hasPlatinum) {
-        console.log('🎪 Initializing middles mode from URL parameter');
-        setShowPlayerProps(false);
-        setShowArbitrage(false);
-        setShowMiddles(true);
-      } else {
-        console.log('❌ Non-platinum user attempted to access middles mode - redirecting to game odds');
-        // Reset to game odds mode for non-platinum users
-        setShowPlayerProps(false);
-        setShowArbitrage(false);
-        setShowMiddles(false);
-      }
+      console.log('🎪 Initializing middles mode from URL parameter');
+      setShowPlayerProps(false);
+      setShowArbitrage(false);
+      setShowMiddles(true);
+      // Note: Non-platinum users will see the upgrade message instead of being redirected
     }
   }, [location.search, hasPlatinum, meLoading]); // Only run when URL parameters, platinum status, or loading state changes
 
