@@ -340,7 +340,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
   
   // Arbitrage-specific filter states
-  const [draftMinProfit, setDraftMinProfit] = useState(2);
+  const [draftMinProfit, setDraftMinProfit] = useState(0.5);
   const [draftMaxStake, setDraftMaxStake] = useState(100);
   
   // Middles-specific filter states
@@ -1568,13 +1568,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Handle section change from SectionMenu
   const handleSectionChange = (sectionId) => {
-    console.log(`🔄 Changing section to: ${sectionId}`);
-    
-    // Check if user has platinum for arbitrage/middles access
-    if ((sectionId === 'arbitrage' || sectionId === 'middles') && !hasPlatinum) {
-      console.log('❌ User does not have platinum access for this section');
-      return; // Don't allow switching to arbitrage/middles without platinum
-    }
+    console.log(`🔄 Changing section to: ${sectionId}`, { hasPlatinum, userPlan: me?.plan });
     
     // Update all mode states based on the selected section
     setShowPlayerProps(sectionId === 'props');
