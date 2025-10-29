@@ -1623,21 +1623,12 @@ export default function OddsTable({
           }
         } else {
           // Regular prop (not Over/Under pair)
-          // For filtered display, only show the filtered books
-          // BUT: Always include novig and fliff for better line shopping
-          if (bookFilter && bookFilter.length > 0) {
-            // Filter the allBooks array to only include books in the filter
-            const normalizedFilter = bookFilter.map(f => f.toLowerCase());
-            const alwaysInclude = ['novig', 'fliff'];
-            propData.allBooks = (propData.allBooks || []).filter(book => {
-              const bookKey = (book.bookmaker?.key || book.book || '').toLowerCase();
-              return normalizedFilter.includes(bookKey) || alwaysInclude.some(key => bookKey.includes(key));
-            });
-          }
+          // NOTE: allBooks should ALWAYS contain ALL available books for the mini table
+          // The main row display is filtered, but the mini table shows all books for line shopping
           
-          // Skip if no books match the filter
-          if (propData.allBooks.length === 0) {
-            console.log(`Skipping regular prop ${propKey} - no matching sportsbook after filter`);
+          // Skip if no books available at all
+          if (!propData.allBooks || propData.allBooks.length === 0) {
+            console.log(`Skipping regular prop ${propKey} - no books available`);
             return;
           }
           
