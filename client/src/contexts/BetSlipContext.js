@@ -13,8 +13,18 @@ export const useBetSlip = () => {
 export const BetSlipProvider = ({ children }) => {
   const [bets, setBets] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Debug: Log whenever bets state changes
+  React.useEffect(() => {
+    console.log('🎯 BetSlip State Changed:', { 
+      betCount: bets.length, 
+      bets: bets.map(b => ({ id: b.id, selection: b.selection })),
+      timestamp: new Date().toISOString()
+    });
+  }, [bets]);
 
   const addBet = useCallback((bet) => {
+    console.log('🎯 BetSlip: addBet called', { betId: bet.id, betCount: bets.length + 1, timestamp: new Date().toISOString() });
     setBets(prevBets => {
       // Check if bet already exists
       const existingIndex = prevBets.findIndex(b => b.id === bet.id);
@@ -22,10 +32,13 @@ export const BetSlipProvider = ({ children }) => {
         // Update existing bet
         const updated = [...prevBets];
         updated[existingIndex] = { ...updated[existingIndex], ...bet };
+        console.log('🎯 BetSlip: Updated existing bet', { betId: bet.id, totalBets: updated.length });
         return updated;
       }
       // Add new bet
-      return [...prevBets, bet];
+      const newBets = [...prevBets, bet];
+      console.log('🎯 BetSlip: Added new bet', { betId: bet.id, totalBets: newBets.length });
+      return newBets;
     });
     
     // Auto-open bet slip when adding first bet
@@ -35,10 +48,16 @@ export const BetSlipProvider = ({ children }) => {
   }, [bets.length]);
 
   const removeBet = useCallback((betId) => {
-    setBets(prevBets => prevBets.filter(bet => bet.id !== betId));
+    console.log('🎯 BetSlip: removeBet called', { betId, timestamp: new Date().toISOString() });
+    setBets(prevBets => {
+      const filtered = prevBets.filter(bet => bet.id !== betId);
+      console.log('🎯 BetSlip: Removed bet', { betId, remainingBets: filtered.length });
+      return filtered;
+    });
   }, []);
 
   const updateBet = useCallback((betId, updates) => {
+    console.log('🎯 BetSlip: updateBet called', { betId, updates, timestamp: new Date().toISOString() });
     setBets(prevBets => 
       prevBets.map(bet => 
         bet.id === betId ? { ...bet, ...updates } : bet
@@ -47,6 +66,7 @@ export const BetSlipProvider = ({ children }) => {
   }, []);
 
   const clearAllBets = useCallback(() => {
+    console.log('🎯 BetSlip: clearAllBets called', { timestamp: new Date().toISOString(), stackTrace: new Error().stack });
     setBets([]);
   }, []);
 
@@ -60,7 +80,11 @@ export const BetSlipProvider = ({ children }) => {
 
   const placeBets = useCallback((placedBets) => {
     // Here you would typically send the bets to your backend
-    console.log('Placing bets:', placedBets);
+    console.log('🎯 BetSlip: placeBets called', { 
+      betCount: placedBets.length, 
+      timestamp: new Date().toISOString(),
+      stackTrace: new Error().stack 
+    });
     
     // For now, we'll just save them to localStorage as placed bets
     try {
@@ -75,14 +99,15 @@ export const BetSlipProvider = ({ children }) => {
       localStorage.setItem('placed_bets', JSON.stringify([...existingBets, ...newBets]));
       
       // Clear the bet slip
+      console.log('🎯 BetSlip: Clearing bets after placement');
       clearAllBets();
       closeBetSlip();
       
       // Show success notification (you could integrate with a toast library)
-      console.log(`Successfully placed ${placedBets.length} bet(s)`);
+      console.log(`✅ BetSlip: Successfully placed ${placedBets.length} bet(s)`);
       
     } catch (error) {
-      console.error('Failed to place bets:', error);
+      console.error('❌ BetSlip: Failed to place bets:', error);
     }
   }, [clearAllBets, closeBetSlip]);
 
