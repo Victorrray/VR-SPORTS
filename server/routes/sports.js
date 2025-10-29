@@ -13,6 +13,7 @@ const { API_KEY } = require('../config/constants');
 /**
  * GET /api/sports
  * Returns list of available sports with Supabase caching
+ * Also fetches NCAA team logos from ESPN
  */
 router.get('/sports', requireUser, checkPlanAccess, async (_req, res) => {
   try {
@@ -109,6 +110,36 @@ router.get('/sports', requireUser, checkPlanAccess, async (_req, res) => {
       return true;
     });
     
+    // Step 4b: Fetch NCAA team logos from ESPN (for college football)
+    console.log('🏈 Fetching NCAA football team logos from ESPN');
+    let ncaaTeamLogos = {};
+    try {
+      const ncaaResponse = await axios.get(
+        'https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams',
+        { timeout: 10000 }
+      );
+      
+      if (ncaaResponse.data?.sports?.[0]?.leagues?.[0]?.teams) {
+        const teams = ncaaResponse.data.sports[0].leagues[0].teams;
+        teams.forEach(teamWrapper => {
+          const team = teamWrapper.team;
+          if (team && team.id && team.logos && team.logos.length > 0) {
+            ncaaTeamLogos[team.id] = {
+              id: team.id,
+              name: team.displayName || team.name,
+              abbreviation: team.abbreviation,
+              logo: team.logos[0].href,
+              color: team.color,
+              alternateColor: team.alternateColor
+            };
+          }
+        });
+        console.log(`✅ Fetched ${Object.keys(ncaaTeamLogos).length} NCAA team logos`);
+      }
+    } catch (ncaaErr) {
+      console.warn('⚠️ Failed to fetch NCAA team logos:', ncaaErr.message);
+    }
+    
     // Step 5: Update Supabase cache
     if (supabase) {
       try {
@@ -127,9 +158,13 @@ router.get('/sports', requireUser, checkPlanAccess, async (_req, res) => {
     }
     
     // Step 6: Update memory cache
-    setCachedResponse(cacheKey, filteredSports);
+    const sportsWithLogos = {
+      sports: filteredSports,
+      ncaaTeamLogos: ncaaTeamLogos
+    };
+    setCachedResponse(cacheKey, sportsWithLogos);
     
-    res.json(filteredSports);
+    res.json(sportsWithLogos);
   } catch (err) {
     console.error("sports error:", err?.response?.status, err?.response?.data || err.message);
     res.status(500).json({ error: String(err) });
