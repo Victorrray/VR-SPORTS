@@ -1472,8 +1472,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // DFS Apps (primary player props providers)
     'prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6',
     // Other books with player props support
-    'bovada', 'betonline', 'mybookieag'
-    // NOTE: NoVig, Fliff, Pinnacle, and exchanges don't return player props from TheOddsAPI
+    'bovada', 'betonline', 'mybookieag',
+    // Sharp/Specialty books
+    'novig', 'fliff', 'pinnacle',
+    // Exchanges
+    'prophetx', 'rebet', 'betopenly',
+    // Regional/Other
+    'circasports'
   ];
 
   // Memoized enhanced sportsbook list to prevent unnecessary recalculations
