@@ -361,12 +361,14 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
       
-      // Filter to DFS apps only for player props
-      const playerPropsBookmakers = allowedBookmakers.filter(book => dfsApps.includes(book));
+      // Use ALL allowed bookmakers for player props (both traditional sportsbooks and DFS apps)
+      // TheOddsAPI will return player props data for whichever bookmakers have it available
+      const playerPropsBookmakers = allowedBookmakers;
       const bookmakerList = playerPropsBookmakers.join(',');
       
       console.log(`🎯 Player props bookmakers for ${sportsArray.join(', ')}: ${bookmakerList}`);
       console.log(`🔍 Player props bookmakers details: ${JSON.stringify(playerPropsBookmakers)}`);
+      console.log(`🔍 Total bookmakers requested: ${playerPropsBookmakers.length}`);
       
       let playerPropsCount = 0;
       
