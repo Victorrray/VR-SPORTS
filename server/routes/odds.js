@@ -46,24 +46,14 @@ const SPORT_MARKET_SUPPORT = {
     'alternate_team_totals_h1', 'alternate_team_totals_h2'
   ],
   'americanfootball_ncaaf': [
+    // Core markets only - NCAA doesn't support alternate/team markets
     'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
     'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
-    'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
     'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
-    'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
     'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
-    'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
-    'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
-    'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
     'h2h_h1', 'h2h_h2',
-    'h2h_3_way_h1', 'h2h_3_way_h2',
     'spreads_h1', 'spreads_h2',
-    'alternate_spreads_h1', 'alternate_spreads_h2',
-    'totals_h1', 'totals_h2',
-    'alternate_totals_h1', 'alternate_totals_h2',
-    'team_totals_h1', 'team_totals_h2',
-    'alternate_team_totals_h1', 'alternate_team_totals_h2'
+    'totals_h1', 'totals_h2'
   ],
   'basketball_nba': [
     'h2h', 'spreads', 'totals', 'h2h_lay',
@@ -78,16 +68,11 @@ const SPORT_MARKET_SUPPORT = {
     'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
   ],
   'basketball_ncaab': [
+    // Core markets only - NCAA Basketball has limited market support
     'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
     'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
-    'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
     'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
-    'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
-    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
-    'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
-    'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
-    'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
+    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4'
   ],
   'baseball_mlb': [
     'h2h', 'spreads', 'totals', 'h2h_lay',
