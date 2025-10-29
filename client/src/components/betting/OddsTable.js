@@ -1612,6 +1612,7 @@ export default function OddsTable({
               overBooks: overBooksToUse,
               underBooks: underBooksToUse,
               // For mini-table: include ALL books for line shopping and comparison
+              // Use UNFILTERED books (propData) for mini-table, not the filtered ones (overBooksToUse/underBooksToUse)
               // Even if main row is filtered, users need to see all available odds
               allBooks: [...(propData.overBooks || []), ...(propData.underBooks || [])],
               selectedBooks: propData.selectedBooks || [],
@@ -3272,12 +3273,13 @@ export default function OddsTable({
                               
                               console.log(`🎯 Mini table: Showing ${booksToProcess.length} books for line shopping and comparison`);
                               
-                              // For combined props, collect all unique bookmakers from both sides
+                              // For combined props, collect all unique bookmakers from allBooks (which contains ALL books, not filtered)
                               if (mode === "props" && row.isCombinedProp) {
                                 const allBookmakers = new Map();
                                 
-                                // Collect all unique bookmakers from both Over and Under
-                                [...(row.overBooks || []), ...(row.underBooks || [])].forEach(book => {
+                                // Use row.allBooks which contains ALL unfiltered books for both Over and Under
+                                // This ensures the mini-table shows all available odds regardless of main filter
+                                (row.allBooks || []).forEach(book => {
                                   const key = normalizeBookKey(book.bookmaker?.key);
                                   if (key && !allBookmakers.has(key)) {
                                     allBookmakers.set(key, {
