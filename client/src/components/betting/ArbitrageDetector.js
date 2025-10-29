@@ -481,20 +481,6 @@ const ArbitrageDetector = ({
             </div>
           ))}
         </div>
-        <div className="opportunity-meta">
-          <div className="meta-item">
-            <Clock size={14} />
-            Found {new Date(opportunity.opportunities[0].time_found).toLocaleTimeString()}
-          </div>
-          <div className="meta-item expires">
-            <AlertTriangle size={14} />
-            Expires in {formatTimeRemaining(opportunity.opportunities[0].expires_in)}
-          </div>
-          <div className="meta-item">
-            <Calculator size={14} />
-            Total Prob: {opportunity.opportunities[0].total_implied_prob.toFixed(1)}%
-          </div>
-        </div>
         <div className="opportunity-actions">
           <button 
             className="execute-btn"
