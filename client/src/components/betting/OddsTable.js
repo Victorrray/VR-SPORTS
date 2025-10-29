@@ -3583,11 +3583,11 @@ export default function OddsTable({
                                             const relevantBook = isOverSide 
                                               ? (row.allBooks || []).find(book => 
                                                   normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
-                                                  (book.outcomeName === 'Over' || book.line?.includes('Over'))
+                                                  (book.outcomeName === 'Over' || String(book.line || '').includes('Over'))
                                                 )
                                               : (row.allBooks || []).find(book => 
                                                   normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
-                                                  (book.outcomeName === 'Under' || book.line?.includes('Under'))
+                                                  (book.outcomeName === 'Under' || String(book.line || '').includes('Under'))
                                                 );
                                             
                                             if (relevantBook) {
@@ -3629,7 +3629,7 @@ export default function OddsTable({
                                               // Find Over odds for this bookmaker from allBooks (unfiltered)
                                               const overBook = (row.allBooks || []).find(book => 
                                                 normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
-                                                (book.outcomeName === 'Over' || book.line?.includes('Over'))
+                                                (book.outcomeName === 'Over' || String(book.line || '').includes('Over'))
                                               );
                                               if (!overBook) return '-';
                                               // Show only odds, line is displayed under sportsbook name
@@ -3643,7 +3643,7 @@ export default function OddsTable({
                                               // Find Under odds for this bookmaker from allBooks (unfiltered)
                                               const underBook = (row.allBooks || []).find(book => 
                                                 normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
-                                                (book.outcomeName === 'Under' || book.line?.includes('Under'))
+                                                (book.outcomeName === 'Under' || String(book.line || '').includes('Under'))
                                               );
                                               if (!underBook) return '-';
                                               // Show only odds, line is displayed under sportsbook name
