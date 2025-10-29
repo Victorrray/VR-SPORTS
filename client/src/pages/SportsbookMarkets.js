@@ -1581,14 +1581,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setShowArbitrage(sectionId === 'arbitrage');
     setShowMiddles(sectionId === 'middles');
     
-    // When switching to player props mode, auto-select all DFS apps
-    if (sectionId === 'props') {
-      const dfsAppsKeys = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
-      console.log('🎯 Switching to Player Props - auto-selecting DFS apps:', dfsAppsKeys);
-      setDraftSelectedPlayerPropsBooks(dfsAppsKeys);
-      setSelectedPlayerPropsBooks(dfsAppsKeys);
-    }
-    
     // Update URL to persist mode selection
     const searchParams = new URLSearchParams(location.search);
     if (sectionId === 'props') {
