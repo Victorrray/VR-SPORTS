@@ -226,7 +226,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return ['draftkings', 'fanduel', 'betmgm', 'caesars'];
   };
   
-  const [picked, setPicked] = useState(["americanfootball_nfl", "basketball_nba"]);
+  const [picked, setPicked] = useState(["americanfootball_nfl", "basketball_nba", "icehockey_nhl"]);
   const [query, setQuery] = useState("");
   const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
   const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
