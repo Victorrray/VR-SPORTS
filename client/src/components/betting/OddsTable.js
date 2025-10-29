@@ -3578,11 +3578,17 @@ export default function OddsTable({
                                               return null;
                                             }
                                             
-                                            // Show the actual line this sportsbook offers
+                                            // Show the actual line this sportsbook offers from allBooks (unfiltered)
                                             const isOverSide = row.out.name === 'Over';
                                             const relevantBook = isOverSide 
-                                              ? row.overBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key))
-                                              : row.underBooks?.find(book => normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key));
+                                              ? (row.allBooks || []).find(book => 
+                                                  normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
+                                                  (book.outcomeName === 'Over' || book.line?.includes('Over'))
+                                                )
+                                              : (row.allBooks || []).find(book => 
+                                                  normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
+                                                  (book.outcomeName === 'Under' || book.line?.includes('Under'))
+                                                );
                                             
                                             if (relevantBook) {
                                               const line = relevantBook.point || relevantBook.line;
@@ -3620,9 +3626,10 @@ export default function OddsTable({
                                         <div className="mini-odds-col">
                                           <div className="mini-swipe-odds">
                                             {(() => {
-                                              // Find Over odds for this bookmaker
-                                              const overBook = row.overBooks?.find(book => 
-                                                normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key)
+                                              // Find Over odds for this bookmaker from allBooks (unfiltered)
+                                              const overBook = (row.allBooks || []).find(book => 
+                                                normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
+                                                (book.outcomeName === 'Over' || book.line?.includes('Over'))
                                               );
                                               if (!overBook) return '-';
                                               // Show only odds, line is displayed under sportsbook name
@@ -3633,9 +3640,10 @@ export default function OddsTable({
                                         <div className="mini-odds-col">
                                           <div className="mini-swipe-odds">
                                             {(() => {
-                                              // Find Under odds for this bookmaker
-                                              const underBook = row.underBooks?.find(book => 
-                                                normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key)
+                                              // Find Under odds for this bookmaker from allBooks (unfiltered)
+                                              const underBook = (row.allBooks || []).find(book => 
+                                                normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(ob.bookmaker?.key) &&
+                                                (book.outcomeName === 'Under' || book.line?.includes('Under'))
                                               );
                                               if (!underBook) return '-';
                                               // Show only odds, line is displayed under sportsbook name
