@@ -367,54 +367,65 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           console.log(`📅 Got ${events.length} events for ${sport}`);
           
-          // For each event, fetch player props using /events/{eventId}/odds endpoint
-          for (const event of events) {
-            try {
-              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
-              
-              console.log(`🔍 Fetching player props for event ${event.id} (${event.home_team} vs ${event.away_team})...`);
-              const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 30000 });
-              
-              // Log quota information from response headers
-              const quotaRemaining = playerPropsResponse.headers['x-requests-remaining'];
-              const quotaUsed = playerPropsResponse.headers['x-requests-used'];
-              const quotaLast = playerPropsResponse.headers['x-requests-last'];
-              console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
-              
-              // TheOddsAPI returns a single event object with bookmakers and markets
-              if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
-                // Filter bookmakers to only include those with player prop markets
-                const eventWithProps = {
-                  ...playerPropsResponse.data,
-                  bookmakers: playerPropsResponse.data.bookmakers
-                    .filter(bk => 
-                      bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key))
-                    )
-                    .map(bk => ({
-                      ...bk,
-                      // Ensure title is set for display
-                      title: bk.title || bk.key?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'
-                    }))
-                };
-                
-                if (eventWithProps.bookmakers.length > 0) {
-                  console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team} with ${eventWithProps.bookmakers.length} bookmakers and ${eventWithProps.bookmakers.reduce((sum, bk) => sum + (bk.markets?.length || 0), 0)} markets`);
-                  allGames.push(eventWithProps);
-                  playerPropsCount++;
-                } else {
-                  console.log(`⏭️ Event ${event.id} has bookmakers but no player prop markets`);
+          // Limit concurrent requests to avoid timeouts (max 5 concurrent)
+          const MAX_CONCURRENT = 5;
+          for (let i = 0; i < events.length; i += MAX_CONCURRENT) {
+            const batch = events.slice(i, i + MAX_CONCURRENT);
+            const batchPromises = batch.map(event => 
+              (async () => {
+                try {
+                  const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+                  
+                  console.log(`🔍 Fetching player props for event ${event.id} (${event.home_team} vs ${event.away_team})...`);
+                  const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 20000 });
+                  
+                  // Log quota information from response headers
+                  const quotaRemaining = playerPropsResponse.headers['x-requests-remaining'];
+                  const quotaUsed = playerPropsResponse.headers['x-requests-used'];
+                  const quotaLast = playerPropsResponse.headers['x-requests-last'];
+                  console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
+                  
+                  // TheOddsAPI returns a single event object with bookmakers and markets
+                  if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
+                    // Filter bookmakers to only include those with player prop markets
+                    const eventWithProps = {
+                      ...playerPropsResponse.data,
+                      bookmakers: playerPropsResponse.data.bookmakers
+                        .filter(bk => 
+                          bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key))
+                        )
+                        .map(bk => ({
+                          ...bk,
+                          // Ensure title is set for display
+                          title: bk.title || bk.key?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'
+                        }))
+                    };
+                    
+                    if (eventWithProps.bookmakers.length > 0) {
+                      console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team} with ${eventWithProps.bookmakers.length} bookmakers and ${eventWithProps.bookmakers.reduce((sum, bk) => sum + (bk.markets?.length || 0), 0)} markets`);
+                      allGames.push(eventWithProps);
+                      playerPropsCount++;
+                    } else {
+                      console.log(`⏭️ Event ${event.id} has bookmakers but no player prop markets`);
+                    }
+                  } else {
+                    console.log(`⏭️ Event ${event.id} has no bookmakers with player props`);
+                  }
+                } catch (eventErr) {
+                  // Skip events that don't have player props available
+                  if (eventErr.response?.status === 422) {
+                    console.log(`⏭️ No player props available for event ${event.id}`);
+                  } else if (eventErr.code === 'ECONNABORTED') {
+                    console.warn(`⚠️ Player props timeout for event ${event.id}`);
+                  } else {
+                    console.warn(`⚠️ Player props fetch error for event ${event.id}:`, eventErr.message);
+                  }
                 }
-              } else {
-                console.log(`⏭️ Event ${event.id} has no bookmakers with player props`);
-              }
-            } catch (eventErr) {
-              // Skip events that don't have player props available
-              if (eventErr.response?.status === 422) {
-                console.log(`⏭️ No player props available for event ${event.id}`);
-              } else {
-                console.warn(`⚠️ Player props fetch error for event ${event.id}:`, eventErr.message);
-              }
-            }
+              })()
+            );
+            
+            // Wait for all concurrent requests in this batch to complete
+            await Promise.all(batchPromises);
           }
         } catch (sportErr) {
           console.warn(`⚠️ Failed to fetch events for ${sport}:`, sportErr.message);
