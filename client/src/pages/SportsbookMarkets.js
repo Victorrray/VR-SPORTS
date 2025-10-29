@@ -952,6 +952,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       playerPropsMode: showPlayerProps
     });
     
+    // Update state - this will trigger useMarketsWithCache to re-fetch data
     setPicked(newPicked);
     setSelectedDate(newDate);
     setSelectedBooks(newBooks);
@@ -962,16 +963,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     optimizedStorage.set('userSelectedSportsbooks', newBooks);
     optimizedStorage.set('userSelectedSportsbooks_props', newPlayerPropsBooks);
     setSelectedPlayerPropMarkets(Array.isArray(draftSelectedPlayerPropMarkets) && draftSelectedPlayerPropMarkets.length > 0 ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
+    
+    // Close modal immediately so user sees the new data loading
     setMobileFiltersOpen(false);
 
-    // Trigger data refresh after filters are applied
+    // Trigger data refresh after filters are applied (state updates trigger useMarketsWithCache)
     setTimeout(() => {
       console.log('🔄 Triggering refresh after filter application');
       if (refreshMarkets) {
         refreshMarkets();
       }
       setFiltersLoading(false);
-    }, 500);
+    }, 100); // Reduced timeout - state updates already queued
   };
 
   const resetDraftFilters = () => {
