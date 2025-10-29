@@ -474,7 +474,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       setShowMiddles(true);
       // Note: Non-platinum users will see the upgrade message instead of being redirected
     }
-  }, [location.search, hasPlatinum, meLoading]); // Only run when URL parameters, platinum status, or loading state changes
+  }, [location.search, meLoading]); // Only run when URL parameters or loading state changes
 
   // Listen for changes to user's sportsbook selections
   useEffect(() => {
