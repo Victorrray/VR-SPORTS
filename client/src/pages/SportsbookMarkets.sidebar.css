@@ -6,7 +6,7 @@
     gap: 28px;
     max-width: 1800px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 24px 24px 0 24px; /* Add top padding to align filters with odds table */
   }
 
   /* Filters sidebar - left side - BIGGER */
