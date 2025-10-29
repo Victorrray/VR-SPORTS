@@ -390,13 +390,19 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 // Filter bookmakers to only include those with player prop markets
                 const eventWithProps = {
                   ...playerPropsResponse.data,
-                  bookmakers: playerPropsResponse.data.bookmakers.filter(bk => 
-                    bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key))
-                  )
+                  bookmakers: playerPropsResponse.data.bookmakers
+                    .filter(bk => 
+                      bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key))
+                    )
+                    .map(bk => ({
+                      ...bk,
+                      // Ensure title is set for display
+                      title: bk.title || bk.key?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'
+                    }))
                 };
                 
                 if (eventWithProps.bookmakers.length > 0) {
-                  console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team} with ${eventWithProps.bookmakers.length} bookmakers`);
+                  console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team} with ${eventWithProps.bookmakers.length} bookmakers and ${eventWithProps.bookmakers.reduce((sum, bk) => sum + (bk.markets?.length || 0), 0)} markets`);
                   allGames.push(eventWithProps);
                   playerPropsCount++;
                 } else {
