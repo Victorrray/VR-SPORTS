@@ -198,7 +198,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
           
-          // Filter out DFS apps for game odds
+          // For game odds, filter out DFS apps (they only have player props)
           const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
           const bookmakerList = gameOddsBookmakers.join(',');
           
@@ -336,10 +336,18 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
       
+      // Only filter game odds bookmakers, not player props
       allGames.forEach(game => {
-        game.bookmakers = game.bookmakers.filter(bookmaker => 
-          allowedBookmakers.includes(bookmaker.key)
-        );
+        if (game.bookmakers) {
+          game.bookmakers = game.bookmakers.filter(bookmaker => {
+            // Always include DFS apps (they have player props)
+            if (dfsApps.includes(bookmaker.key)) {
+              return true;
+            }
+            // For traditional bookmakers, check if they're in the allowed list
+            return allowedBookmakers.includes(bookmaker.key);
+          });
+        }
       });
       
       console.log(`Filtered to ${allowedBookmakers.length} allowed bookmakers for user plan: ${userProfile.plan}`);
