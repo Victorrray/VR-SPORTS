@@ -359,6 +359,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       console.log(`🎯 Player props bookmakers for ${sportsArray.join(', ')}: ${bookmakerList}`);
       console.log(`🔍 Player props bookmakers details: ${JSON.stringify(playerPropsBookmakers)}`);
       
+      let playerPropsCount = 0;
+      
       for (const sport of sportsArray) {
         try {
           // First, get list of events for this sport
@@ -384,9 +386,24 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
               
               // TheOddsAPI returns a single event object with bookmakers and markets
-              if (playerPropsResponse.data && playerPropsResponse.data.bookmakers) {
-                console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team}`);
-                allGames.push(playerPropsResponse.data);
+              if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
+                // Filter bookmakers to only include those with player prop markets
+                const eventWithProps = {
+                  ...playerPropsResponse.data,
+                  bookmakers: playerPropsResponse.data.bookmakers.filter(bk => 
+                    bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key))
+                  )
+                };
+                
+                if (eventWithProps.bookmakers.length > 0) {
+                  console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team} with ${eventWithProps.bookmakers.length} bookmakers`);
+                  allGames.push(eventWithProps);
+                  playerPropsCount++;
+                } else {
+                  console.log(`⏭️ Event ${event.id} has bookmakers but no player prop markets`);
+                }
+              } else {
+                console.log(`⏭️ Event ${event.id} has no bookmakers with player props`);
               }
             } catch (eventErr) {
               // Skip events that don't have player props available
@@ -402,8 +419,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           // Continue with other sports even if one fails
         }
       }
+      
+      console.log(`✅ Total player props events fetched: ${playerPropsCount}`);
     }
     
+    console.log(`📊 Final response: ${allGames.length} total games/events (including ${allGames.filter(g => g.bookmakers?.some(b => dfsApps.includes(b.key))).length} with player props)`);
     res.json(allGames);
   } catch (err) {
     console.error('Odds error:', err);
