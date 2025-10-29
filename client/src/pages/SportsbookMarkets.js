@@ -874,41 +874,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setShowMobileSearch(false);
   };
 
-  // Fetch sports list for filters
+  // Fetch sports list for filters - Major US Sports only
   useEffect(() => {
     const fetchSports = async () => {
       try {
         const response = await secureFetch(withApiBase('/api/sports'), { credentials: 'include' });
         if (response.ok) {
           const sports = await response.json();
-          // Filter out "winner" and "election" sports
-          const filteredSports = sports.filter(sport => 
-            !sport.key.includes('winner') && 
-            !sport.key.includes('election') &&
-            !sport.key.includes('_outright')
-          );
-          setSportList(filteredSports);
+          // Filter to only major US sports
+          const majorUSsports = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'];
+          const filteredSports = sports.filter(sport => majorUSsports.includes(sport.key));
+          setSportList(filteredSports.length > 0 ? filteredSports : AVAILABLE_SPORTS);
         }
       } catch (error) {
         console.warn('Failed to fetch sports list:', error);
-        // Fallback sports list - simplified
-        setSportList([
-          { key: 'americanfootball_nfl', title: 'NFL', group: "Sports" },
-          { key: 'americanfootball_ncaaf', title: 'NCAA', group: "Sports" },
-          { key: 'basketball_nba', title: 'NBA', group: "Sports" },
-          { key: 'basketball_ncaab', title: 'NCAA Basketball', group: "Sports" },
-          { key: 'baseball_mlb', title: 'MLB', group: "Sports" },
-          { key: 'icehockey_nhl', title: 'NHL', group: "Sports" },
-          
-          // Soccer
-          { key: 'soccer_epl', title: 'EPL', group: "Soccer" },
-          { key: 'soccer_uefa_champs_league', title: 'Champions League', group: "Soccer" },
-          { key: 'soccer_mls', title: 'MLS', group: "Soccer" },
-          
-          // Combat Sports
-          { key: 'mma_mixed_martial_arts', title: 'MMA', group: "Combat Sports" },
-          { key: 'boxing_boxing', title: 'Boxing', group: "Combat Sports" }
-        ]);
+        // Fallback to major US sports only
+        setSportList(AVAILABLE_SPORTS);
       }
     };
     fetchSports();
