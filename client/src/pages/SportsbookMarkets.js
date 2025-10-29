@@ -230,7 +230,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [query, setQuery] = useState("");
   const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
   const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(""); // Empty string = "All Dates" (no date filtering)
   const [marketKeys, setMarketKeys] = useState([]); // Start empty to allow filtering by specific markets like quarters
   // All available player prop markets
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState([
@@ -289,7 +289,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const debouncedQuery = useDebounce(query, 300);
   
   // Draft filter state - initialize with current applied state
-  const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate);
+  const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate); // Empty string = "All Dates"
   const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
   const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState(selectedPlayerPropsBooks);
   const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
