@@ -1442,26 +1442,35 @@ export default function OddsTable({
           if (hasFilter) {
             // Filter overBooks and underBooks to only include books in the filter
             const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+            console.log(`🎯 FILTER DEBUG START: ${propData.playerName}`, {
+              rawFilter: bookFilter,
+              normalizedFilter: normalizedFilter,
+              allOverBooksKeys: propData.overBooks.map(b => b.bookmaker?.key || b.book),
+              allUnderBooksKeys: propData.underBooks.map(b => b.bookmaker?.key || b.book)
+            });
+            
             overBooksToUse = propData.overBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              return normalizedFilter.includes(bookKey);
+              const matches = normalizedFilter.includes(bookKey);
+              console.log(`  🎯 Over book check: "${bookKey}" in filter? ${matches}`);
+              return matches;
             });
             underBooksToUse = propData.underBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              return normalizedFilter.includes(bookKey);
+              const matches = normalizedFilter.includes(bookKey);
+              console.log(`  🎯 Under book check: "${bookKey}" in filter? ${matches}`);
+              return matches;
             });
             
-            console.log(`🎯 FILTER DEBUG: ${propData.playerName} - Filtering for ${bookFilter.join(', ')} - overBooks: ${overBooksToUse.length}/${propData.overBooks.length}, underBooks: ${underBooksToUse.length}/${propData.underBooks.length}`, {
+            console.log(`🎯 FILTER DEBUG END: ${propData.playerName} - Filtering for ${bookFilter.join(', ')} - overBooks: ${overBooksToUse.length}/${propData.overBooks.length}, underBooks: ${underBooksToUse.length}/${propData.underBooks.length}`, {
               filter: normalizedFilter,
               overBooksFiltered: overBooksToUse.map(b => b.bookmaker?.key || b.book),
-              underBooksFiltered: underBooksToUse.map(b => b.bookmaker?.key || b.book),
-              allOverBooks: propData.overBooks.map(b => ({ key: b.bookmaker?.key || b.book, name: b.name })),
-              allUnderBooks: propData.underBooks.map(b => ({ key: b.bookmaker?.key || b.book, name: b.name }))
+              underBooksFiltered: underBooksToUse.map(b => b.bookmaker?.key || b.book)
             });
           } else {
             overBooksToUse = propData.overBooks;
             underBooksToUse = propData.underBooks;
-            console.log(`🎯 FILTER DEBUG: ${propData.playerName} - No filter, showing all books - overBooks: ${overBooksToUse.length}, underBooks: ${underBooksToUse.length}`);
+            console.log(`🎯 FILTER DEBUG: ${propData.playerName} - No filter (empty array), showing all books - overBooks: ${overBooksToUse.length}, underBooks: ${underBooksToUse.length}`);
           }
           
           // Skip this prop if no books match the filter
@@ -1559,6 +1568,14 @@ export default function OddsTable({
             console.log(`🎯 EV similar, comparing odds: Over ${overOdds} (${overDec.toFixed(3)}) vs Under ${underOdds} (${underDec.toFixed(3)}) -> Show ${showOver ? 'Over' : 'Under'}`);
           }
           const primaryBook = showOver ? bestOverBook : bestUnderBook;
+          
+          console.log(`🎯 PRIMARY BOOK SELECTED: ${propData.playerName}`, {
+            showOver: showOver,
+            primaryBookKey: primaryBook?.bookmaker?.key,
+            primaryBookTitle: primaryBook?.bookmaker?.title,
+            bookFilter: bookFilter,
+            hasFilter: hasFilter
+          });
           
           // Check if primary book's market is locked - skip this row if locked
           if (primaryBook) {
