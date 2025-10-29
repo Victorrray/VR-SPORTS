@@ -334,11 +334,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     : ["h2h", "spreads", "totals", "team_totals", "alternate_spreads", "alternate_totals", "alternate_team_totals"]; // Include all regular markets
   const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
-  // For player props, use selected sports or default to NFL and NCAAF if none selected
+  // For player props, use selected sports or default to NFL only if none selected
   // For regular mode, use all selected sports (no longer limiting to single sport)
   // For arbitrage mode, use all major sports by default to find maximum opportunities
   const sportsForMode = isPlayerPropsMode 
-    ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf"]) 
+    ? (picked.length > 0 ? picked : ["americanfootball_nfl"]) 
     : isArbitrageMode
     ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "baseball_mlb", "icehockey_nhl"])
     : picked;
