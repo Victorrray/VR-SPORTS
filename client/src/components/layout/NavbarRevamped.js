@@ -51,6 +51,9 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
 
   // Don't filter - show all links but handle clicks for protected routes
   const filteredNavLinks = navLinks;
+  
+  // Check if on login/signup page
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/signup';
 
   // Handle navigation for protected routes
   const handleNavClick = (link, e) => {
@@ -153,13 +156,13 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
             </button>
           )}
 
-          {/* User Section */}
-          {!user ? (
+          {/* User Section - Hide on login/signup pages */}
+          {!isLoginPage && !user ? (
             <Link to="/login" className={styles.loginBtn}>
               <User size={18} />
               <span>Sign In</span>
             </Link>
-          ) : (
+          ) : !isLoginPage && (
             <div className={styles.userSection}>
               {/* Plan Badge */}
               {planBadge && (

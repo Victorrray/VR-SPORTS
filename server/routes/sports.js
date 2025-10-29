@@ -140,6 +140,36 @@ router.get('/sports', requireUser, checkPlanAccess, async (_req, res) => {
       console.warn('⚠️ Failed to fetch NCAA team logos:', ncaaErr.message);
     }
     
+    // Step 4c: Fetch MLB team logos from ESPN (for baseball)
+    console.log('⚾ Fetching MLB team logos from ESPN');
+    let mlbTeamLogos = {};
+    try {
+      const mlbResponse = await axios.get(
+        'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams',
+        { timeout: 10000 }
+      );
+      
+      if (mlbResponse.data?.sports?.[0]?.leagues?.[0]?.teams) {
+        const teams = mlbResponse.data.sports[0].leagues[0].teams;
+        teams.forEach(teamWrapper => {
+          const team = teamWrapper.team;
+          if (team && team.id && team.logos && team.logos.length > 0) {
+            mlbTeamLogos[team.id] = {
+              id: team.id,
+              name: team.displayName || team.name,
+              abbreviation: team.abbreviation,
+              logo: team.logos[0].href,
+              color: team.color,
+              alternateColor: team.alternateColor
+            };
+          }
+        });
+        console.log(`✅ Fetched ${Object.keys(mlbTeamLogos).length} MLB team logos`);
+      }
+    } catch (mlbErr) {
+      console.warn('⚠️ Failed to fetch MLB team logos:', mlbErr.message);
+    }
+    
     // Step 5: Update Supabase cache
     if (supabase) {
       try {
@@ -160,7 +190,8 @@ router.get('/sports', requireUser, checkPlanAccess, async (_req, res) => {
     // Step 6: Update memory cache
     const sportsWithLogos = {
       sports: filteredSports,
-      ncaaTeamLogos: ncaaTeamLogos
+      ncaaTeamLogos: ncaaTeamLogos,
+      mlbTeamLogos: mlbTeamLogos
     };
     setCachedResponse(cacheKey, sportsWithLogos);
     
