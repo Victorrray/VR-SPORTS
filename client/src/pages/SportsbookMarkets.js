@@ -1880,43 +1880,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       
       {/* Debug info removed as requested */}
       
-      {/* Dynamic header based on current section */}
-      <div style={{ 
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: '24px',
-        position: 'relative',
-        minHeight: '60px'
-      }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0, fontSize: '28px', fontWeight: '700', color: 'white' }}>
-          {getCurrentSectionId() === 'props' && (
-            <>
-              <Target size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
-              Player Props
-            </>
-          )}
-          {getCurrentSectionId() === 'arbitrage' && (
-            <>
-              <Zap size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
-              Arbitrage
-            </>
-          )}
-          {getCurrentSectionId() === 'middles' && (
-            <>
-              <Activity size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
-              Middle Betting
-            </>
-          )}
-          {getCurrentSectionId() === 'game' && (
-            <>
-              <BarChart4 size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
-              Straight Bets
-            </>
-          )}
-        </h1>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'absolute', right: '40px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'absolute', right: '40px', marginTop: '24px' }}>
           {/* Cache Indicator */}
           {usingCache && (
             <div style={{
@@ -1936,7 +1900,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </div>
           )}
         </div>
-      </div>
 
       {/* Show authentication required message */}
       {(marketsError && marketsError.includes('Authentication required')) && (
