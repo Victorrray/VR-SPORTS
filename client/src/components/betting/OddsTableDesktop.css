@@ -14,15 +14,15 @@
     background: transparent !important;
   }
   
-  /* Container - Modern card design */
+  /* Container - Modern card design with vibrant colors */
   tr.desktop-mini-wrap .mini-odds-container {
-    background: linear-gradient(135deg, rgba(15, 11, 26, 0.6), rgba(26, 16, 37, 0.5)) !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
-    border-radius: 16px !important;
+    background: linear-gradient(135deg, rgba(15, 11, 26, 0.85), rgba(26, 16, 37, 0.8)) !important;
+    border: 2px solid rgba(139, 92, 246, 0.4) !important;
+    border-radius: 14px !important;
     padding: 0 !important;
-    margin: 12px auto !important;
-    max-width: 95% !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(12px) !important;
     overflow: hidden !important;
   }
@@ -31,9 +31,9 @@
   tr.desktop-mini-wrap .mini-odds-container::before {
     content: '' !important;
     display: block !important;
-    height: 3px !important;
-    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%) !important;
-    opacity: 0.8 !important;
+    height: 4px !important;
+    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%) !important;
+    opacity: 1 !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-container::after {
@@ -49,9 +49,9 @@
     background: transparent !important;
   }
   
-  /* Header row - Modern gradient */
+  /* Header row - Vibrant gradient */
   tr.desktop-mini-wrap .mini-odds-table thead {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1)) !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(124, 58, 237, 0.18)) !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table thead tr {
@@ -59,13 +59,13 @@
   }
   
   tr.desktop-mini-wrap .mini-odds-table th {
-    padding: 14px 20px !important;
+    padding: 16px 20px !important;
     background: transparent !important;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
-    font-size: 0.7em !important;
+    border-bottom: 2px solid rgba(139, 92, 246, 0.4) !important;
+    font-size: 0.75em !important;
     font-weight: 700 !important;
-    letter-spacing: 1.2px !important;
-    color: rgba(255, 255, 255, 0.7) !important;
+    letter-spacing: 1.3px !important;
+    color: rgba(255, 255, 255, 0.95) !important;
     text-transform: uppercase !important;
     text-align: center !important;
   }
@@ -80,21 +80,25 @@
     padding-right: 24px !important;
   }
   
-  /* Body rows - Modern hover effects */
+  /* Body rows - Vibrant hover effects */
   tr.desktop-mini-wrap .mini-odds-table tbody {
     background: transparent !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table tbody tr {
-    background: transparent !important;
+    background: rgba(15, 11, 26, 0.3) !important;
     border: none !important;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
     transition: all 0.2s ease !important;
   }
   
+  tr.desktop-mini-wrap .mini-odds-table tbody tr:nth-child(even) {
+    background: rgba(139, 92, 246, 0.06) !important;
+  }
+  
   tr.desktop-mini-wrap .mini-odds-table tbody tr:hover {
-    background: rgba(139, 92, 246, 0.08) !important;
-    transform: translateX(4px) !important;
+    background: rgba(139, 92, 246, 0.15) !important;
+    transform: translateX(2px) !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table tbody tr:last-child {
@@ -167,25 +171,26 @@
   
   /* Add pick button */
   tr.desktop-mini-wrap .add-pick-btn {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 1em !important;
-    border-radius: 6px !important;
-    background: rgba(139, 92, 246, 0.7) !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1.1em !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
     border: none !important;
     color: white !important;
     cursor: pointer !important;
-    transition: all 0.15s ease !important;
+    transition: all 0.2s ease !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     margin: 0 auto !important;
-    box-shadow: none !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
   }
   
   tr.desktop-mini-wrap .add-pick-btn:hover {
-    background: rgba(139, 92, 246, 0.9) !important;
-    transform: scale(1.05) !important;
+    background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5) !important;
   }
   
   /* Remove any mobile-specific styles that might bleed through */
