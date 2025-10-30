@@ -451,7 +451,7 @@ body,
   color: var(--text-muted);
   font-size: 1.05em;
   font-weight: 700;
-  padding: 1.1em .7em;
+  padding: 0.95em 0.9em;
   letter-spacing: .03em;
   border-bottom: 2.5px solid #334c;
   text-transform: uppercase;
@@ -1603,8 +1603,8 @@ body,
   /* MATCH Column */
   .odds-table-card.revamp .odds-grid th:nth-child(2),
   .odds-table-card.revamp .odds-grid td:nth-child(2) {
-    width: 18%;
-    min-width: 140px;
+    width: 25%;
+    min-width: 180px;
     text-align: left;
     white-space: normal;
   }
@@ -1612,8 +1612,8 @@ body,
   /* TEAM / LINE Column - Combined, increased for better readability */
   .odds-table-card.revamp .odds-grid th:nth-child(3),
   .odds-table-card.revamp .odds-grid td:nth-child(3) {
-    width: 32%;
-    min-width: 220px;
+    width: 25%;
+    min-width: 180px;
     text-align: left;
     font-weight: 600;
     font-size: 1.02em;
