@@ -835,19 +835,20 @@ body,
   .mini-odds-table {
     font-size: 1em !important;
     table-layout: fixed !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    overflow: visible !important;
-    box-shadow: none !important;
+    background: linear-gradient(135deg, rgba(15, 11, 26, 0.8), rgba(26, 16, 37, 0.75)) !important;
+    border: 2px solid rgba(139, 92, 246, 0.35) !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
     width: 100% !important;
+    margin: 0 !important;
   }
   
   .mini-odds-table th {
     padding: 16px 20px !important;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.12)) !important;
-    border-bottom: 2px solid rgba(139, 92, 246, 0.4) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(124, 58, 237, 0.25)) !important;
+    border-bottom: 2px solid rgba(139, 92, 246, 0.5) !important;
+    color: rgba(255, 255, 255, 0.95) !important;
     font-size: 0.8em !important;
     letter-spacing: 1.2px !important;
     font-weight: 700 !important;
@@ -873,13 +874,17 @@ body,
   }
   
   .mini-odds-table tbody tr {
-    border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
-    transition: all 0.15s ease !important;
-    background: rgba(15, 11, 26, 0.3) !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+    transition: all 0.2s ease !important;
+    background: rgba(15, 11, 26, 0.4) !important;
+  }
+  
+  .mini-odds-table tbody tr:nth-child(even) {
+    background: rgba(139, 92, 246, 0.05) !important;
   }
   
   .mini-odds-table tbody tr:hover {
-    background: rgba(139, 92, 246, 0.08) !important;
+    background: rgba(139, 92, 246, 0.15) !important;
   }
   
   .mini-odds-table tbody tr:last-child {
@@ -889,7 +894,7 @@ body,
   .mini-odds-table td {
     padding: 16px 20px !important;
     font-size: 0.95em !important;
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
     text-align: center !important;
     height: 50px !important;
     display: table-cell !important;
@@ -904,6 +909,8 @@ body,
     text-align: left !important;
     padding-left: 24px !important;
     padding-right: 20px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
   }
   
   .mini-odds-table td:nth-child(2),
