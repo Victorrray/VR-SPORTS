@@ -404,18 +404,18 @@ body,
   box-shadow: 0 12px 40px color-mix(in srgb, var(--accent) 10%, #000);
 }
 .odds-table-card.revamp .odds-grid th {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 28%, #0f1626), color-mix(in srgb, var(--accent) 12%, #0f1626));
-  color: #cfe8ff;
-  border-bottom: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 18%, transparent);
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.25), rgba(124, 58, 237, 0.15));
+  color: #e9d5ff;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.15);
 }
 .odds-table-card.revamp .odds-grid tbody tr td {
-  background: color-mix(in srgb, #0f1424 88%, transparent);
-  border-bottom: 1px solid #273048;
+  background: rgba(59, 13, 110, 0.2);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
 }
 .odds-table-card.revamp .odds-grid tbody tr td:first-child {
-  background: color-mix(in srgb, #10182c 94%, transparent);
-  border-right: 1px solid #24304a;
+  background: rgba(88, 28, 135, 0.15);
+  border-right: 1px solid rgba(139, 92, 246, 0.15);
 }
 /* Hover effect removed for desktop view */
 .odds-table-card.revamp .ev-col.positive { color: var(--success); }
