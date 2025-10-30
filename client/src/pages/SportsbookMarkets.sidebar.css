@@ -3,23 +3,42 @@
   /* Main container with sidebar layout */
   .sportsbook-markets-container {
     display: flex;
-    gap: 28px;
+    flex-direction: column;
+    gap: 0;
     max-width: 1800px;
     margin: 0 auto;
-    padding: 48px 24px 0 24px; /* Add more top padding to align filters with odds table */
+    padding: 0 24px;
+  }
+
+  /* Centered header above filter and odds table */
+  .sportsbook-markets-container::before {
+    content: attr(data-section);
+    display: block;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 24px;
+    padding-top: 48px;
+  }
+
+  /* Inner flex container for filter + odds */
+  .desktop-markets-inner {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
   }
 
   /* Filters sidebar - left side - BIGGER */
   .desktop-filters-sidebar {
     width: 360px;
     flex-shrink: 0;
-    position: sticky;
-    top: 80px;
+    position: relative;
     height: fit-content;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 200px);
     overflow-y: auto;
     overflow-x: visible !important;
-    padding-top: 20px;
+    padding-top: 0;
   }
 
   /* Sidebar card styling - BIGGER */
