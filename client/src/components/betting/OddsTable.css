@@ -830,36 +830,50 @@ body,
   box-shadow: 0 3px 8px rgba(139, 92, 246, 0.4);
 }
 
-/* Desktop Optimizations */
+/* Desktop Optimizations - Complete Revamp */
 @media (min-width: 769px) {
   .mini-odds-table {
-    font-size: 1.05em !important;
-    table-layout: auto !important;
-    background: linear-gradient(135deg, rgba(15, 11, 26, 0.95), rgba(26, 16, 37, 0.92)) !important;
-    border: 2px solid rgba(139, 92, 246, 0.3) !important;
-    border-radius: 14px !important;
-    overflow: hidden !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    font-size: 1em !important;
+    table-layout: fixed !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    width: 100% !important;
   }
   
   .mini-odds-table th {
-    padding: 16px 24px !important;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1)) !important;
-    border-bottom: 2px solid rgba(139, 92, 246, 0.3) !important;
-    color: rgba(255, 255, 255, 0.85) !important;
-    font-size: 0.75em !important;
-    letter-spacing: 1.5px !important;
+    padding: 14px 20px !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.12)) !important;
+    border-bottom: 2px solid rgba(139, 92, 246, 0.4) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.8em !important;
+    letter-spacing: 1.2px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
   }
   
   .mini-odds-table th:first-child {
-    min-width: 240px !important;
-    padding-left: 32px !important;
+    min-width: 160px !important;
+    padding-left: 24px !important;
     text-align: left !important;
   }
   
+  .mini-odds-table th:last-child {
+    min-width: 100px !important;
+    text-align: center !important;
+  }
+  
   .mini-odds-table tbody tr {
-    border-bottom: 1px solid rgba(139, 92, 246, 0.15) !important;
-    transition: all 0.2s ease !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.1) !important;
+    transition: all 0.15s ease !important;
+    background: rgba(15, 11, 26, 0.3) !important;
+  }
+  
+  .mini-odds-table tbody tr:hover {
+    background: rgba(139, 92, 246, 0.08) !important;
   }
   
   .mini-odds-table tbody tr:last-child {
@@ -867,11 +881,14 @@ body,
   }
   
   .mini-odds-table td {
-    padding: 22px 20px !important;
+    padding: 16px 20px !important;
+    font-size: 0.95em !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    text-align: center !important;
   }
   
   .mini-odds-table td:first-child {
-    min-width: 220px !important;
+    min-width: 160px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -888,25 +905,54 @@ body,
   }
   
   .mini-odds-cell {
-    font-size: 1.15em !important;
-    font-weight: 800 !important;
+    font-size: 1em !important;
+    font-weight: 700 !important;
+    font-family: 'SF Mono', 'Roboto Mono', monospace !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  .mini-odds-cell.positive {
+    color: #10b981 !important;
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.2) !important;
+  }
+  
+  .mini-odds-cell.negative {
+    color: #ef4444 !important;
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.2) !important;
   }
   
   .mini-book-cell {
-    min-width: 220px !important;
+    min-width: 160px !important;
     white-space: nowrap !important;
-    gap: 14px !important;
+    gap: 12px !important;
+    text-align: left !important;
+    font-weight: 600 !important;
   }
   
   .mini-book-logo {
-    width: 26px !important;
-    height: 26px !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 4px !important;
   }
   
   .add-pick-btn {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 1.3em !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.2em !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+    border: none !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .add-pick-btn:hover {
+    transform: scale(1.08) !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
   }
 }
 
