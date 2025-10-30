@@ -835,15 +835,35 @@ body,
   .mini-odds-table {
     font-size: 1.05em !important;
     table-layout: auto !important;
+    background: linear-gradient(135deg, rgba(15, 11, 26, 0.95), rgba(26, 16, 37, 0.92)) !important;
+    border: 2px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
   }
   
   .mini-odds-table th {
-    padding: 18px 20px !important;
+    padding: 16px 24px !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1)) !important;
+    border-bottom: 2px solid rgba(139, 92, 246, 0.3) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.75em !important;
+    letter-spacing: 1.5px !important;
   }
   
   .mini-odds-table th:first-child {
-    min-width: 220px !important;
-    padding-left: 28px !important;
+    min-width: 240px !important;
+    padding-left: 32px !important;
+    text-align: left !important;
+  }
+  
+  .mini-odds-table tbody tr {
+    border-bottom: 1px solid rgba(139, 92, 246, 0.15) !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .mini-odds-table tbody tr:last-child {
+    border-bottom: none !important;
   }
   
   .mini-odds-table td {
@@ -1603,8 +1623,8 @@ body,
   /* MATCH Column */
   .odds-table-card.revamp .odds-grid th:nth-child(2),
   .odds-table-card.revamp .odds-grid td:nth-child(2) {
-    width: 25%;
-    min-width: 180px;
+    width: 30%;
+    min-width: 220px;
     text-align: left;
     white-space: normal;
   }
@@ -1612,8 +1632,8 @@ body,
   /* TEAM / LINE Column - Combined, increased for better readability */
   .odds-table-card.revamp .odds-grid th:nth-child(3),
   .odds-table-card.revamp .odds-grid td:nth-child(3) {
-    width: 25%;
-    min-width: 180px;
+    width: 20%;
+    min-width: 150px;
     text-align: left;
     font-weight: 600;
     font-size: 1.02em;
