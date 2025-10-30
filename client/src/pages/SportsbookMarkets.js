@@ -1580,43 +1580,114 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         hasPlatinum={hasPlatinum}
       />
       
+      {/* Desktop Section Selector - Centered Above Container */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr 1fr',
+        gap: '10px',
+        maxWidth: '400px',
+        margin: '0 auto 24px auto',
+        padding: '0 24px'
+      }}>
+        <button 
+          className={`desktop-section-btn ${getCurrentSectionId() === 'game' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('game')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '12px 16px',
+            background: getCurrentSectionId() === 'game' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
+            border: getCurrentSectionId() === 'game' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
+            borderRadius: '10px',
+            color: getCurrentSectionId() === 'game' ? 'white' : 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <BarChart3 size={18} />
+          Straight Bets
+        </button>
+        <button 
+          className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('props')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '12px 16px',
+            background: getCurrentSectionId() === 'props' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
+            border: getCurrentSectionId() === 'props' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
+            borderRadius: '10px',
+            color: getCurrentSectionId() === 'props' ? 'white' : 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <Target size={18} />
+          Player Props
+        </button>
+        <button 
+          className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('arbitrage')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '12px 16px',
+            background: getCurrentSectionId() === 'arbitrage' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
+            border: getCurrentSectionId() === 'arbitrage' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
+            borderRadius: '10px',
+            color: getCurrentSectionId() === 'arbitrage' ? 'white' : 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <Zap size={18} />
+          Arbitrage
+        </button>
+        <button 
+          className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
+          onClick={() => handleSectionChange('middles')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '12px 16px',
+            background: getCurrentSectionId() === 'middles' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
+            border: getCurrentSectionId() === 'middles' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
+            borderRadius: '10px',
+            color: getCurrentSectionId() === 'middles' ? 'white' : 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <Activity size={18} />
+          Middles
+        </button>
+      </div>
+
       {/* Desktop Sidebar + Main Content Layout */}
       <div className="sportsbook-markets-container">
         {/* Desktop Filters Sidebar (visible on desktop only) */}
         <aside className="desktop-filters-sidebar">
           <div className="desktop-filters-card">
-            {/* Section Selector Buttons */}
-            <div className="desktop-section-buttons">
-              <button 
-                className={`desktop-section-btn ${getCurrentSectionId() === 'game' ? 'active' : ''}`}
-                onClick={() => handleSectionChange('game')}
-              >
-                <BarChart3 size={18} />
-                Straight Bets
-              </button>
-              <button 
-                className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
-                onClick={() => handleSectionChange('props')}
-              >
-                <Target size={18} />
-                Player Props
-              </button>
-              <button 
-                className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
-                onClick={() => handleSectionChange('arbitrage')}
-              >
-                <Zap size={18} />
-                Arbitrage
-              </button>
-              <button 
-                className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
-                onClick={() => handleSectionChange('middles')}
-              >
-                <Activity size={18} />
-                Middles
-              </button>
-            </div>
-
             <div className="desktop-filters-header">
               <svg className="desktop-filters-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
