@@ -16,13 +16,17 @@
   
   /* Container - Modern card design with vibrant colors */
   tr.desktop-mini-wrap .mini-odds-container {
-    background: linear-gradient(135deg, rgba(15, 11, 26, 0.85), rgba(26, 16, 37, 0.8)) !important;
-    border: 2px solid rgba(139, 92, 246, 0.4) !important;
-    border-radius: 14px !important;
+    background: linear-gradient(135deg, rgba(15, 11, 26, 0.9), rgba(26, 16, 37, 0.85), rgba(15, 11, 26, 0.88)) !important;
+    border: 2px solid rgba(139, 92, 246, 0.5) !important;
+    border-radius: 16px !important;
     padding: 0 !important;
     margin: 0 auto !important;
     max-width: 100% !important;
-    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 
+      0 8px 32px rgba(139, 92, 246, 0.25),
+      0 0 20px rgba(139, 92, 246, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -1px 0 rgba(139, 92, 246, 0.1) !important;
     backdrop-filter: blur(12px) !important;
     overflow: hidden !important;
   }
@@ -51,7 +55,7 @@
   
   /* Header row - Vibrant gradient */
   tr.desktop-mini-wrap .mini-odds-table thead {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(124, 58, 237, 0.18)) !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.22)) !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table thead tr {
@@ -61,22 +65,29 @@
   tr.desktop-mini-wrap .mini-odds-table th {
     padding: 16px 20px !important;
     background: transparent !important;
-    border-bottom: 2px solid rgba(139, 92, 246, 0.4) !important;
+    border-bottom: 2px solid rgba(139, 92, 246, 0.5) !important;
     font-size: 0.75em !important;
     font-weight: 700 !important;
-    letter-spacing: 1.3px !important;
-    color: rgba(255, 255, 255, 0.95) !important;
+    letter-spacing: 1.4px !important;
+    color: #e9d5ff !important;
     text-transform: uppercase !important;
     text-align: center !important;
+    text-shadow: 0 2px 4px rgba(139, 92, 246, 0.2) !important;
+  }
+  
+  tr.desktop-mini-wrap .mini-odds-table th:first-child {
+    width: 20% !important;
+    min-width: 140px !important;
+    padding-left: 24px !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(2),
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(3) {
-    width: 25% !important;
+    width: 22% !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table th:last-child {
-    width: 20% !important;
+    width: 18% !important;
     padding-right: 24px !important;
   }
   
@@ -86,19 +97,20 @@
   }
   
   tr.desktop-mini-wrap .mini-odds-table tbody tr {
-    background: rgba(15, 11, 26, 0.3) !important;
+    background: rgba(15, 11, 26, 0.4) !important;
     border: none !important;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
-    transition: all 0.2s ease !important;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.25) !important;
+    transition: all 0.25s ease !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table tbody tr:nth-child(even) {
-    background: rgba(139, 92, 246, 0.06) !important;
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.05)) !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table tbody tr:hover {
-    background: rgba(139, 92, 246, 0.15) !important;
-    transform: translateX(2px) !important;
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.15)) !important;
+    transform: translateX(3px) !important;
+    box-shadow: inset 4px 0 0 rgba(139, 92, 246, 0.3) !important;
   }
   
   tr.desktop-mini-wrap .mini-odds-table tbody tr:last-child {
