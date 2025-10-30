@@ -7,7 +7,17 @@
     gap: 0;
     max-width: 100%;
     margin: 0 auto;
-    padding: 48px 24px 0 24px;
+    padding: 0 24px;
+  }
+
+  /* Centered header above filter and odds table */
+  .sportsbook-markets-container > div:first-child {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 24px;
+    padding-top: 48px;
   }
 
   /* Inner flex container for filter + odds */
