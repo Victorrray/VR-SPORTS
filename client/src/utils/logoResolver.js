@@ -374,9 +374,16 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
     
     const teamCode = teamCodeMap[slug];
     if (teamCode) {
-      // Use the correct ESPN CDN format with combiner wrapper for better image handling
-      // Format: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{sport}/500/scoreboard/{team_code}.png&h=1000&w=1000
-      const url = `https://a.espncdn.com/combiner/i?img=/i/teamlogos/${leagueCode}/500/scoreboard/${teamCode}.png&h=1000&w=1000`;
+      let url;
+      
+      // College football uses different path structure
+      if (leagueCode === 'college-football') {
+        // Format for college football: https://a.espncdn.com/i/teamlogos/ncaa/500/{team_code}.png
+        url = `https://a.espncdn.com/i/teamlogos/ncaa/500/${teamCode}.png`;
+      } else {
+        // Format for other sports: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{sport}/500/scoreboard/{team_code}.png&h=1000&w=1000
+        url = `https://a.espncdn.com/combiner/i?img=/i/teamlogos/${leagueCode}/500/scoreboard/${teamCode}.png&h=1000&w=1000`;
+      }
       
       if (process.env.NODE_ENV === 'development') {
         console.log(`🏈 Logo URL for ${teamName} (${slug}):`, url, {
