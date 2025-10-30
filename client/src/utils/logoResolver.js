@@ -137,7 +137,7 @@ const ESPN_TEAM_IDS = {
   "winnipeg-jets": "32",
 };
 
-export function resolveTeamLogo({ league, teamName, apiLogo, teamId }) {
+export function resolveTeamLogo({ league, teamName, apiLogo }) {
   // 1) If API already gives a usable URL, prefer it
   if (apiLogo && typeof apiLogo === "string") return apiLogo;
 
@@ -158,18 +158,6 @@ export function resolveTeamLogo({ league, teamName, apiLogo, teamId }) {
     };
     
     const leagueCode = leagueMap[league.toLowerCase()] || league.toLowerCase();
-    
-    // SPECIAL HANDLING FOR COLLEGE FOOTBALL (NCAAF)
-    // College football uses numeric team IDs directly in the URL
-    if (league.toLowerCase() === 'ncaaf' && teamId) {
-      const url = `https://a.espncdn.com/i/teamlogos/ncaa/500/${teamId}.png`;
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🏈 College Football Logo URL for ${teamName} (ID: ${teamId}):`, url);
-      }
-      
-      return url;
-    }
     
     // Map team names to ESPN team codes (used in scoreboard URLs)
     const teamCodeMap = {

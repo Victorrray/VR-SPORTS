@@ -952,17 +952,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       playerPropsMode: showPlayerProps
     });
     
-    // Clear API cache to force fresh data fetch
-    console.log('🗑️ Clearing API cache for filter refresh');
-    if (window.localStorage) {
-      const keys = Object.keys(window.localStorage);
-      keys.forEach(key => {
-        if (key.includes('api-cache') || key.includes('market-cache') || key.includes('markets-')) {
-          window.localStorage.removeItem(key);
-        }
-      });
-    }
-    
     // Update state - this will trigger useMarketsWithCache to re-fetch data
     setPicked(newPicked);
     setSelectedDate(newDate);
@@ -978,16 +967,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Close modal immediately so user sees the new data loading
     setMobileFiltersOpen(false);
 
-    // Trigger data refresh after filters are applied
-    // The state changes above will trigger the useEffect in useMarkets hook
-    // which will call fetchMarkets with the new parameters
+    // Trigger data refresh after filters are applied (state updates trigger useMarketsWithCache)
     setTimeout(() => {
       console.log('🔄 Triggering refresh after filter application');
       if (refreshMarkets) {
         refreshMarkets();
       }
       setFiltersLoading(false);
-    }, 150); // Wait for state updates to propagate through React
+    }, 100); // Reduced timeout - state updates already queued
   };
 
   const resetDraftFilters = () => {
@@ -1593,109 +1580,44 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         hasPlatinum={hasPlatinum}
       />
       
-      {/* Desktop Section Selector - Centered Above Container */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr 1fr',
-        gap: '10px',
-        maxWidth: '400px',
-        margin: '0 auto 24px auto',
-        padding: '0 24px'
-      }}>
-        <button 
-          className={`desktop-section-btn ${getCurrentSectionId() === 'game' ? 'active' : ''}`}
-          onClick={() => handleSectionChange('game')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '12px 16px',
-            background: getCurrentSectionId() === 'game' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
-            border: getCurrentSectionId() === 'game' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
-            borderRadius: '10px',
-            color: getCurrentSectionId() === 'game' ? 'white' : 'rgba(255, 255, 255, 0.7)',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <BarChart3 size={18} />
-          Straight Bets
-        </button>
-        <button 
-          className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
-          onClick={() => handleSectionChange('props')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '12px 16px',
-            background: getCurrentSectionId() === 'props' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
-            border: getCurrentSectionId() === 'props' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
-            borderRadius: '10px',
-            color: getCurrentSectionId() === 'props' ? 'white' : 'rgba(255, 255, 255, 0.7)',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <Target size={18} />
-          Player Props
-        </button>
-        <button 
-          className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
-          onClick={() => handleSectionChange('arbitrage')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '12px 16px',
-            background: getCurrentSectionId() === 'arbitrage' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
-            border: getCurrentSectionId() === 'arbitrage' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
-            borderRadius: '10px',
-            color: getCurrentSectionId() === 'arbitrage' ? 'white' : 'rgba(255, 255, 255, 0.7)',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <Zap size={18} />
-          Arbitrage
-        </button>
-        <button 
-          className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
-          onClick={() => handleSectionChange('middles')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '12px 16px',
-            background: getCurrentSectionId() === 'middles' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(139, 92, 246, 0.08)',
-            border: getCurrentSectionId() === 'middles' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
-            borderRadius: '10px',
-            color: getCurrentSectionId() === 'middles' ? 'white' : 'rgba(255, 255, 255, 0.7)',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            whiteSpace: 'nowrap'
-          }}
-        >
-          <Activity size={18} />
-          Middles
-        </button>
+      {/* Desktop Section Selector - Centered above filter and odds table */}
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 24px 16px 24px', maxWidth: '1800px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', width: 'fit-content' }}>
+          <button 
+            className={`desktop-section-btn ${getCurrentSectionId() === 'game' ? 'active' : ''}`}
+            onClick={() => handleSectionChange('game')}
+            style={{ padding: '12px 20px' }}
+          >
+            <BarChart3 size={18} />
+            Straight Bets
+          </button>
+          <button 
+            className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
+            onClick={() => handleSectionChange('props')}
+            style={{ padding: '12px 20px' }}
+          >
+            <Target size={18} />
+            Player Props
+          </button>
+          <button 
+            className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
+            onClick={() => handleSectionChange('arbitrage')}
+            style={{ padding: '12px 20px' }}
+          >
+            <Zap size={18} />
+            Arbitrage
+          </button>
+          <button 
+            className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
+            onClick={() => handleSectionChange('middles')}
+            style={{ padding: '12px 20px' }}
+          >
+            <Activity size={18} />
+            Middles
+          </button>
+        </div>
       </div>
-
+      
       {/* Desktop Sidebar + Main Content Layout */}
       <div className="sportsbook-markets-container">
         {/* Desktop Filters Sidebar (visible on desktop only) */}
