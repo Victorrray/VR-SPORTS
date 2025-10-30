@@ -859,7 +859,7 @@ body,
   }
   
   .mini-odds-table th:first-child {
-    min-width: 160px !important;
+    min-width: 200px !important;
     padding-left: 24px !important;
     text-align: left !important;
     padding-right: 20px !important;
@@ -897,7 +897,7 @@ body,
   }
   
   .mini-odds-table td:first-child {
-    min-width: 160px !important;
+    min-width: 200px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
