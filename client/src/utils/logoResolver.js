@@ -223,13 +223,47 @@ export function resolveTeamLogo({ league, teamName, apiLogo }) {
       'san-antonio-spurs': 'sa',
       'toronto-raptors': 'tor',
       'utah-jazz': 'uta',
-      'washington-wizards': 'wsh'
+      'washington-wizards': 'wsh',
+      // NHL Teams - CORRECTED with proper 3-letter abbreviations
+      'anaheim-ducks': 'ana',
+      'arizona-coyotes': 'ari',
+      'boston-bruins': 'bos',
+      'buffalo-sabres': 'buf',
+      'calgary-flames': 'cgy',
+      'carolina-hurricanes': 'car',
+      'chicago-blackhawks': 'chi',
+      'colorado-avalanche': 'col',
+      'columbus-blue-jackets': 'cbj',
+      'dallas-stars': 'dal',
+      'detroit-red-wings': 'det',
+      'edmonton-oilers': 'edm',
+      'florida-panthers': 'fla',
+      'los-angeles-kings': 'lak',
+      'minnesota-wild': 'min',
+      'montreal-canadiens': 'mtl',
+      'nashville-predators': 'nsh',
+      'new-jersey-devils': 'njd',
+      'new-york-islanders': 'nyi',
+      'new-york-rangers': 'nyr',
+      'ottawa-senators': 'ott',
+      'philadelphia-flyers': 'phi',
+      'pittsburgh-penguins': 'pit',
+      'san-jose-sharks': 'sjs',
+      'seattle-kraken': 'sea',
+      'st-louis-blues': 'stl',
+      'tampa-bay-lightning': 'tbl',
+      'toronto-maple-leafs': 'tor',
+      'vancouver-canucks': 'van',
+      'vegas-golden-knights': 'vgk',
+      'washington-capitals': 'wsh',
+      'winnipeg-jets': 'wpg'
     };
     
     const teamCode = teamCodeMap[slug];
     if (teamCode) {
-      // Use the correct ESPN CDN format: /i/teamlogos/{sport}/{size}/scoreboard/{team_code}.png
-      const url = `https://a.espncdn.com/i/teamlogos/${leagueCode}/500/scoreboard/${teamCode}.png`;
+      // Use the correct ESPN CDN format with combiner wrapper for better image handling
+      // Format: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{sport}/500/scoreboard/{team_code}.png&h=1000&w=1000
+      const url = `https://a.espncdn.com/combiner/i?img=/i/teamlogos/${leagueCode}/500/scoreboard/${teamCode}.png&h=1000&w=1000`;
       
       if (process.env.NODE_ENV === 'development') {
         console.log(`🏈 Logo URL for ${teamName} (${slug}):`, url, {

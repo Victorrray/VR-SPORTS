@@ -1107,27 +1107,28 @@ export default function OddsTable({
                   console.log(`🔍 DFS DEBUG: Found over/under outcomes:`, { over: overOutcome, under: underOutcome });
                   
                   if (overOutcome && underOutcome && overOutcome.point !== undefined) {
-                    // Normalize market key to combine regular and alternate markets
-                    // e.g., player_rush_attempts_alternate -> player_rush_attempts
-                    const normalizedMarketKey = market.key.replace(/_alternate$/, '');
+                    // Keep market key as-is to separate standard and alternate lines
+                    // e.g., player_rush_yds and player_rush_yds_alternate will be separate rows
+                    const isAlternate = market.key.endsWith('_alternate');
                     
-                    // Group by player + market type WITHOUT point value
-                    // This combines all lines (regular + alternate) for the same player/stat
-                    const basePropKey = `${game.id}-${normalizedMarketKey}-${playerName}`;
-                    console.log(`Creating combined prop for ${playerName}: ${normalizedMarketKey} line ${overOutcome.point} (from ${market.key})`);
+                    // Group by player + market type + line value
+                    // This keeps standard lines (70.5) separate from alternate lines (99.5)
+                    const basePropKey = `${game.id}-${market.key}-${playerName}-${overOutcome.point}`;
+                    console.log(`Creating combined prop for ${playerName}: ${market.key} line ${overOutcome.point} (${isAlternate ? 'ALTERNATE' : 'STANDARD'})`);
                     
                     if (!propGroups.has(basePropKey)) {
                       propGroups.set(basePropKey, {
                         key: basePropKey,
                         game,
                         mkt: { 
-                          key: normalizedMarketKey, 
-                          name: formatMarketName(normalizedMarketKey)
+                          key: market.key, 
+                          name: formatMarketName(market.key)
                         },
                         playerName: playerName,
                         point: overOutcome.point,
                         sport: game.sport_key,
                         isPlayerProp: true,
+                        isAlternate: isAlternate,
                         overBooks: [],
                         underBooks: []
                       });
@@ -3020,9 +3021,22 @@ export default function OddsTable({
                             : ((row.mkt?.key || '') !== 'h2h' && row.out?.point ? ` ${formatLine(row.out.point, row.mkt.key, 'game')}` : '')}
                         </span>
                       </div>
-                      <span style={{ opacity:.9 }}>
-                        {formatMarket(row.mkt?.key || '')}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9 }}>
+                        <span>{formatMarket(row.mkt?.key || '')}</span>
+                        {row.isAlternate && (
+                          <span style={{
+                            fontSize: '0.75em',
+                            fontWeight: '700',
+                            background: 'rgba(139, 92, 246, 0.3)',
+                            color: '#a78bfa',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(139, 92, 246, 0.5)'
+                          }}>
+                            ALT
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td>
