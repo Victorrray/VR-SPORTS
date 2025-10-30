@@ -1,7 +1,7 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, Star, Activity, RefreshCw, Search } from 'lucide-react';
+import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, BarChart4, Star, Activity, RefreshCw, Search } from 'lucide-react';
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 import { optimizedStorage } from "../utils/storageOptimizer";
@@ -1902,7 +1902,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           )}
           {getCurrentSectionId() === 'game' && (
             <>
-              <BarChart3 size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
+              <BarChart4 size={24} color="#a78bfa" style={{ flexShrink: 0 }} />
               Straight Bets
             </>
           )}
