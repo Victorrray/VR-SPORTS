@@ -1580,49 +1580,43 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         hasPlatinum={hasPlatinum}
       />
       
-      {/* Desktop Section Selector - Centered above filter and odds table */}
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 24px 16px 24px', maxWidth: '1800px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', width: 'fit-content' }}>
-          <button 
-            className={`desktop-section-btn ${getCurrentSectionId() === 'game' ? 'active' : ''}`}
-            onClick={() => handleSectionChange('game')}
-            style={{ padding: '12px 20px' }}
-          >
-            <BarChart3 size={18} />
-            Straight Bets
-          </button>
-          <button 
-            className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
-            onClick={() => handleSectionChange('props')}
-            style={{ padding: '12px 20px' }}
-          >
-            <Target size={18} />
-            Player Props
-          </button>
-          <button 
-            className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
-            onClick={() => handleSectionChange('arbitrage')}
-            style={{ padding: '12px 20px' }}
-          >
-            <Zap size={18} />
-            Arbitrage
-          </button>
-          <button 
-            className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
-            onClick={() => handleSectionChange('middles')}
-            style={{ padding: '12px 20px' }}
-          >
-            <Activity size={18} />
-            Middles
-          </button>
-        </div>
-      </div>
-      
       {/* Desktop Sidebar + Main Content Layout */}
       <div className="sportsbook-markets-container">
         {/* Desktop Filters Sidebar (visible on desktop only) */}
         <aside className="desktop-filters-sidebar">
           <div className="desktop-filters-card">
+            {/* Section Selector Buttons */}
+            <div className="desktop-section-buttons">
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'game' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('game')}
+              >
+                <BarChart3 size={18} />
+                Straight Bets
+              </button>
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'props' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('props')}
+              >
+                <Target size={18} />
+                Player Props
+              </button>
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('arbitrage')}
+              >
+                <Zap size={18} />
+                Arbitrage
+              </button>
+              <button 
+                className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
+                onClick={() => handleSectionChange('middles')}
+              >
+                <Activity size={18} />
+                Middles
+              </button>
+            </div>
+
             <div className="desktop-filters-header">
               <svg className="desktop-filters-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
