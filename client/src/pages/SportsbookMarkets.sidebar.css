@@ -40,12 +40,12 @@
     padding-top: 0;
   }
 
-  /* Sidebar card styling - BIGGER */
+  /* Sidebar card styling - COMPACT */
   .desktop-filters-card {
     background: linear-gradient(135deg, rgba(15, 11, 26, 0.98), rgba(26, 16, 37, 0.95));
     border: 1px solid rgba(139, 92, 246, 0.3);
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 16px;
+    padding: 16px;
     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
     overflow: visible !important;
   }
@@ -54,9 +54,9 @@
   .desktop-section-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 24px;
-    padding-bottom: 24px;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
     border-bottom: 1px solid rgba(139, 92, 246, 0.2);
   }
 
@@ -64,13 +64,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: 6px;
+    padding: 10px 12px;
     background: rgba(139, 92, 246, 0.08);
     border: 1px solid rgba(139, 92, 246, 0.2);
-    border-radius: 10px;
+    border-radius: 8px;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -95,18 +95,18 @@
     flex-shrink: 0;
   }
 
-  /* Sidebar header - BIGGER */
+  /* Sidebar header - COMPACT */
   .desktop-filters-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
     border-bottom: 1px solid rgba(139, 92, 246, 0.25);
   }
 
   .desktop-filters-header h3 {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.95);
     margin: 0;
@@ -114,13 +114,13 @@
 
   .desktop-filters-icon {
     color: rgba(139, 92, 246, 0.9);
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
-  /* Filter sections - BIGGER SPACING */
+  /* Filter sections - COMPACT SPACING */
   .desktop-filter-section {
-    margin-bottom: 28px;
+    margin-bottom: 16px;
     position: relative;
     overflow: visible !important;
   }
@@ -130,25 +130,25 @@
   }
 
   .desktop-filter-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.65);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .desktop-filter-label svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     color: rgba(139, 92, 246, 0.7);
   }
 
   .desktop-filter-label span {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   /* Main content area */
@@ -185,7 +185,7 @@
     scrollbar-width: none;
   }
 
-  /* Filter controls styling - BIGGER */
+  /* Filter controls styling - COMPACT */
   .desktop-filter-section .sport-multi-select,
   .desktop-filter-section .date-picker,
   .desktop-filter-section select,
@@ -193,10 +193,10 @@
     width: 100%;
     background: rgba(15, 11, 26, 0.7);
     border: 2px solid rgba(139, 92, 246, 0.4);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 10px;
+    padding: 10px 12px;
     color: rgba(255, 255, 255, 0.95);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: all 0.2s ease;
   }
 
