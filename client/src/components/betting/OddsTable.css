@@ -417,7 +417,7 @@ body,
   background: color-mix(in srgb, #10182c 94%, transparent);
   border-right: 1px solid #24304a;
 }
-.odds-table-card.revamp .odds-row:hover { background: color-mix(in srgb, var(--accent) 14%, transparent) !important; }
+/* Hover effect removed for desktop view */
 .odds-table-card.revamp .ev-col.positive { color: var(--success); }
 .odds-table-card.revamp .ev-col.negative { color: var(--danger); }
 .odds-table-card.revamp .odds-grid tbody tr td:first-child { border-top-left-radius: 14px; border-bottom-left-radius: 14px; }
@@ -500,7 +500,10 @@ body,
   font-weight: 800;
 }
 
-.odds-row:hover { background: rgba(78,123,255,.17) !important; cursor: pointer; transition: background .18s; }
+/* Hover effect removed for desktop view */
+@media (max-width: 768px) {
+  .odds-row:hover { background: rgba(78,123,255,.17) !important; cursor: pointer; transition: background .18s; }
+}
 .odds-row.expanded { background: rgba(47,92,255,.24) !important; }
 
 /* ---- Desktop Expanded mini-table (DESKTOP ONLY - 769px and up) ---- */
@@ -738,9 +741,7 @@ body,
   position: relative;
 }
 
-.mini-odds-table tbody tr:hover {
-  background: rgba(139, 92, 246, 0.08);
-}
+/* Hover effect removed for desktop view */
 
 .mini-odds-table tbody tr:last-child {
   border-bottom: none;
@@ -1588,10 +1589,7 @@ body,
     padding-right: 20px;
   }
 
-  .odds-table-card.revamp .odds-grid tbody tr.odds-row:hover td {
-    background: linear-gradient(90deg, rgba(72, 109, 255, 0.15), rgba(72, 109, 255, 0.08));
-    transition: all 0.2s ease;
-  }
+  /* Hover effect removed for desktop view */
 
   /* EV % Column */
   .odds-table-card.revamp .odds-grid th:first-child,
