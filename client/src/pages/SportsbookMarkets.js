@@ -1583,11 +1583,31 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       {/* Desktop Sidebar + Main Content Layout */}
       <div className="sportsbook-markets-container">
         {/* Centered Section Header */}
-        <div style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: '700', color: 'rgba(255, 255, 255, 0.95)', marginBottom: '24px', paddingTop: '48px' }}>
-          {getCurrentSectionId() === 'game' && '📊 Straight Bets'}
-          {getCurrentSectionId() === 'props' && '🎯 Player Props'}
-          {getCurrentSectionId() === 'arbitrage' && '⚡ Arbitrage'}
-          {getCurrentSectionId() === 'middles' && '📈 Middles'}
+        <div style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: '700', color: 'rgba(255, 255, 255, 0.95)', marginBottom: '24px', paddingTop: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+          {getCurrentSectionId() === 'game' && (
+            <>
+              <BarChart4 size={32} color="#a78bfa" style={{ flexShrink: 0 }} />
+              Straight Bets
+            </>
+          )}
+          {getCurrentSectionId() === 'props' && (
+            <>
+              <Target size={32} color="#a78bfa" style={{ flexShrink: 0 }} />
+              Player Props
+            </>
+          )}
+          {getCurrentSectionId() === 'arbitrage' && (
+            <>
+              <Zap size={32} color="#a78bfa" style={{ flexShrink: 0 }} />
+              Arbitrage
+            </>
+          )}
+          {getCurrentSectionId() === 'middles' && (
+            <>
+              <Activity size={32} color="#a78bfa" style={{ flexShrink: 0 }} />
+              Middles
+            </>
+          )}
         </div>
 
         {/* Inner container for filter and odds table */}
