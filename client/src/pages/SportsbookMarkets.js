@@ -952,6 +952,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       playerPropsMode: showPlayerProps
     });
     
+    // Clear API cache to force fresh data fetch
+    console.log('🗑️ Clearing API cache for filter refresh');
+    if (window.localStorage) {
+      const keys = Object.keys(window.localStorage);
+      keys.forEach(key => {
+        if (key.includes('api-cache') || key.includes('market-cache') || key.includes('markets-')) {
+          window.localStorage.removeItem(key);
+        }
+      });
+    }
+    
     // Update state - this will trigger useMarketsWithCache to re-fetch data
     setPicked(newPicked);
     setSelectedDate(newDate);
@@ -967,14 +978,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Close modal immediately so user sees the new data loading
     setMobileFiltersOpen(false);
 
-    // Trigger data refresh after filters are applied (state updates trigger useMarketsWithCache)
+    // Trigger data refresh after filters are applied
+    // The state changes above will trigger the useEffect in useMarkets hook
+    // which will call fetchMarkets with the new parameters
     setTimeout(() => {
       console.log('🔄 Triggering refresh after filter application');
       if (refreshMarkets) {
         refreshMarkets();
       }
       setFiltersLoading(false);
-    }, 100); // Reduced timeout - state updates already queued
+    }, 150); // Wait for state updates to propagate through React
   };
 
   const resetDraftFilters = () => {

@@ -456,12 +456,15 @@ const getTeamLogoForGame = (game = {}, teamName = '') => {
   
   let logoUrl = '';
   let isHomeTeam = false;
+  let teamId = null;
   
   // Check if this is home or away team
   if (key === homeKey) {
     isHomeTeam = true;
+    teamId = game?.home_team_id;
   } else if (key === awayKey) {
     isHomeTeam = false;
+    teamId = game?.away_team_id;
   }
   
   // Extract league from sport_key (e.g., "americanfootball_nfl" -> "nfl")
@@ -471,7 +474,8 @@ const getTeamLogoForGame = (game = {}, teamName = '') => {
   logoUrl = resolveTeamLogo({
     league: league,
     teamName: teamName,
-    apiLogo: null
+    apiLogo: null,
+    teamId: teamId
   });
   
   // Debug logging to see what logos we're resolving
@@ -482,6 +486,7 @@ const getTeamLogoForGame = (game = {}, teamName = '') => {
       league: league,
       home_team: game?.home_team,
       away_team: game?.away_team,
+      teamId: teamId,
       resolved_logo: logoUrl,
       isHomeTeam
     });

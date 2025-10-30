@@ -23,6 +23,92 @@ const {
   DEFAULT_BOOK_STATE
 } = require('../config/constants');
 
+// ESPN Team ID Cache - stores team name to ESPN ID mappings
+const espnTeamIdCache = new Map();
+
+/**
+ * Fetch ESPN team ID for college football teams
+ * Uses ESPN API to get the numeric team ID needed for logo resolution
+ */
+async function getESPNTeamId(teamName, sportKey) {
+  if (!teamName || sportKey !== 'americanfootball_ncaaf') {
+    return null;
+  }
+
+  // Check cache first
+  const cacheKey = `${sportKey}-${teamName}`;
+  if (espnTeamIdCache.has(cacheKey)) {
+    return espnTeamIdCache.get(cacheKey);
+  }
+
+  try {
+    // Fetch all college football teams from ESPN
+    const response = await axios.get('https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams', {
+      timeout: 10000
+    });
+
+    if (response.data && response.data.sports && response.data.sports[0] && response.data.sports[0].leagues) {
+      const teams = response.data.sports[0].leagues[0].teams || [];
+      
+      // Build a map of team names to IDs
+      teams.forEach(teamObj => {
+        const team = teamObj.team;
+        if (team && team.id) {
+          // Store multiple variations of the team name for matching
+          const variations = [
+            team.displayName,
+            team.shortDisplayName,
+            team.name,
+            team.location,
+            team.nickname
+          ];
+          
+          variations.forEach(variation => {
+            if (variation) {
+              const normalizedKey = `${sportKey}-${variation.toLowerCase()}`;
+              espnTeamIdCache.set(normalizedKey, team.id);
+            }
+          });
+        }
+      });
+
+      // Try to find the team ID
+      const normalizedTeamName = teamName.toLowerCase();
+      for (const [key, id] of espnTeamIdCache.entries()) {
+        if (key.startsWith(sportKey) && key.includes(normalizedTeamName)) {
+          return id;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`⚠️ Failed to fetch ESPN team ID for ${teamName}:`, err.message);
+  }
+
+  return null;
+}
+
+/**
+ * Enrich games with ESPN team IDs for college football
+ */
+async function enrichGamesWithTeamIds(games, sportKey) {
+  if (sportKey !== 'americanfootball_ncaaf' || !Array.isArray(games)) {
+    return games;
+  }
+
+  console.log(`🎓 Enriching ${games.length} college football games with ESPN team IDs...`);
+
+  for (const game of games) {
+    if (!game.home_team_id && game.home_team) {
+      game.home_team_id = await getESPNTeamId(game.home_team, sportKey);
+    }
+    if (!game.away_team_id && game.away_team) {
+      game.away_team_id = await getESPNTeamId(game.away_team, sportKey);
+    }
+  }
+
+  return games;
+}
+
 // Sport-specific market support from TheOddsAPI
 const SPORT_MARKET_SUPPORT = {
   'americanfootball_nfl': [
@@ -311,6 +397,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           const sportGames = responseData || [];
           console.log(`Got ${sportGames.length} games for ${sport}`);
+          
+          // Enrich college football games with ESPN team IDs for logo resolution
+          if (sport === 'americanfootball_ncaaf' && sportGames.length > 0) {
+            await enrichGamesWithTeamIds(sportGames, sport);
+          }
+          
           allGames.push(...sportGames);
         } catch (sportErr) {
           console.warn(`Failed to fetch games for sport ${sport}:`, sportErr.response?.status, sportErr.response?.data || sportErr.message);
