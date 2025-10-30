@@ -844,7 +844,7 @@ body,
   }
   
   .mini-odds-table th {
-    padding: 14px 20px !important;
+    padding: 16px 20px !important;
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.12)) !important;
     border-bottom: 2px solid rgba(139, 92, 246, 0.4) !important;
     color: rgba(255, 255, 255, 0.9) !important;
@@ -853,17 +853,23 @@ body,
     font-weight: 700 !important;
     text-transform: uppercase !important;
     text-align: center !important;
+    height: 50px !important;
+    display: table-cell !important;
+    vertical-align: middle !important;
   }
   
   .mini-odds-table th:first-child {
     min-width: 160px !important;
     padding-left: 24px !important;
     text-align: left !important;
+    padding-right: 20px !important;
   }
   
   .mini-odds-table th:last-child {
     min-width: 100px !important;
     text-align: center !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
   
   .mini-odds-table tbody tr {
@@ -885,6 +891,9 @@ body,
     font-size: 0.95em !important;
     color: rgba(255, 255, 255, 0.85) !important;
     text-align: center !important;
+    height: 50px !important;
+    display: table-cell !important;
+    vertical-align: middle !important;
   }
   
   .mini-odds-table td:first-child {
@@ -892,11 +901,21 @@ body,
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
+    text-align: left !important;
+    padding-left: 24px !important;
+    padding-right: 20px !important;
   }
   
   .mini-odds-table td:nth-child(2),
   .mini-odds-table td:nth-child(3) {
     min-width: 150px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  
+  .mini-odds-table td:last-child {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
   
   .mini-odds-container {
