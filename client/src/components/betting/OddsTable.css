@@ -1145,8 +1145,8 @@ body,
 
   /* Mobile card styling - iPhone 15 Pro optimized */
   .mobile-odds-card {
-    background: linear-gradient(135deg, #1a2347 0%, #0f1626 100%);
-    border: 1px solid #2a3356;
+    background: linear-gradient(135deg, rgba(88, 28, 135, 0.3) 0%, rgba(59, 13, 110, 0.25) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
     border-radius: 16px;
     padding: 16px;
     margin: 0 auto 12px auto;
@@ -1168,13 +1168,13 @@ body,
     top: 0;
     left: 0;
     right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(61, 126, 255, 0.3), transparent);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.4), transparent);
   }
   
   .mobile-odds-card:hover { 
-    border-color: #3a4366; 
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border-color: rgba(139, 92, 246, 0.5); 
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
     transform: translateY(-2px);
   }
   .mobile-odds-card.as-button { cursor: pointer; }
@@ -1275,7 +1275,7 @@ body,
     transform: translateY(-1px);
     box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
   }
-  .mobile-odds-card.as-button .mob-top { padding-bottom: 10px; border-bottom: 1px solid #2a3356; margin-bottom: 8px; }
+  .mobile-odds-card.as-button .mob-top { padding-bottom: 10px; border-bottom: 1px solid rgba(139, 92, 246, 0.2); margin-bottom: 8px; }
 
   /* Team name - iPhone 15 Pro optimized */
   .mob-team { 
