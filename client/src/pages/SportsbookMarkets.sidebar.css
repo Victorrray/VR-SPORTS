@@ -33,10 +33,10 @@
   .desktop-filters-sidebar {
     width: 360px;
     flex-shrink: 0;
-    position: relative;
+    position: static;
     height: fit-content;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
+    max-height: none;
+    overflow-y: visible;
     overflow-x: visible !important;
     padding-top: 0;
   }
