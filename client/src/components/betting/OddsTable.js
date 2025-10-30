@@ -4009,14 +4009,14 @@ export default function OddsTable({
       </table>
 
       {totalPages > 1 && (
-        <div className="pagination-bar" style={{ display:"flex", justifyContent:"center", alignItems:"center", gap:".4em", margin:"2em 0" }}>
-          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1} style={{ padding:"0.45em 1.2em", borderRadius:8, border:"none", background: page===1?"#aaa":"var(--accent)", color:"#fff", fontWeight:600 }}>Prev</button>
+        <div className="pagination-bar" style={{ display:"flex", justifyContent:"center", alignItems:"center", gap:"0.6em", margin:"2.5em 0", padding:"1.5em", background:"linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))", borderRadius:"12px", border:"1px solid rgba(139, 92, 246, 0.2)" }}>
+          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page===1} style={{ padding:"0.6em 1.4em", borderRadius:"10px", border:"none", background: page===1?"rgba(139, 92, 246, 0.3)":"linear-gradient(135deg, #8b5cf6, #7c3aed)", color:"#fff", fontWeight:700, cursor:page===1?"not-allowed":"pointer", opacity:page===1?0.5:1, transition:"all 0.2s ease", fontSize:"0.95em" }}>← Prev</button>
           {Array.from({length:Math.min(5,totalPages)}).map((_,i)=>{
             const num = Math.max(1, page-2)+i;
             if (num>totalPages) return null;
-            return <button key={num} onClick={()=>setPage(num)} disabled={num===page} style={{ padding:"0.45em 1.1em", borderRadius:8, border:"none", background:num===page?"var(--accent)":"#222c", color:"#fff", fontWeight:600 }}>{num}</button>;
+            return <button key={num} onClick={()=>setPage(num)} disabled={num===page} style={{ padding:"0.6em 1em", borderRadius:"10px", border:num===page?"2px solid #8b5cf6":"1px solid rgba(139, 92, 246, 0.3)", background:num===page?"linear-gradient(135deg, #8b5cf6, #7c3aed)":"rgba(139, 92, 246, 0.08)", color:num===page?"#fff":"rgba(255, 255, 255, 0.8)", fontWeight:num===page?700:600, cursor:"pointer", transition:"all 0.2s ease", fontSize:"0.95em", minWidth:"2.5em" }}>{num}</button>;
           })}
-          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages} style={{ padding:"0.45em 1.2em", borderRadius:8, border:"none", background: page===totalPages?"#aaa":"var(--accent)", color:"#fff", fontWeight:600 }}>Next</button>
+          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page===totalPages} style={{ padding:"0.6em 1.4em", borderRadius:"10px", border:"none", background: page===totalPages?"rgba(139, 92, 246, 0.3)":"linear-gradient(135deg, #8b5cf6, #7c3aed)", color:"#fff", fontWeight:700, cursor:page===totalPages?"not-allowed":"pointer", opacity:page===totalPages?0.5:1, transition:"all 0.2s ease", fontSize:"0.95em" }}>Next →</button>
         </div>
       )}
     </div>

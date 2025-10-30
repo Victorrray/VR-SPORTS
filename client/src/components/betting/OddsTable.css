@@ -100,8 +100,17 @@ body,
   .devig-col { width: 16%; }
 }
 
-/* Mobile responsive enhancements */
-@media (max-width: 480px) {
+/* Mobile responsive enhancements - UPSCALED 5% */
+@media (max-width: 768px) {
+  /* Upscale mobile odds table by 5% */
+  .odds-table-card,
+  .odds-grid,
+  .odds-grid th,
+  .odds-grid td,
+  .odds-grid tbody tr,
+  .mobile-card-row {
+    font-size: 1.05em !important;
+  }
   .odds-table-card {
     margin: 0 var(--mobile-gutter);
     border-radius: 16px;
