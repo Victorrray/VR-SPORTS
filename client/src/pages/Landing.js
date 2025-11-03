@@ -60,7 +60,6 @@ const QUICK_ACTIONS = [
 
 // Stats for social proof
 const STATS = [
-  { number: "50K+", label: "Active Users" },
   { number: "15+", label: "Sportsbooks" },
   { number: "4.2%", label: "Avg Edge" },
   { number: "24/7", label: "Live Updates" }
@@ -87,22 +86,10 @@ const FEATURES = [
     color: "#f59e0b"
   },
   {
-    icon: BarChart3,
-    title: "Advanced Analytics",
-    description: "Track your betting performance with detailed stats, ROI tracking, and insights.",
-    color: "#3b82f6"
-  },
-  {
     icon: Zap,
     title: "Arbitrage Detection",
     description: "Automatically find arbitrage opportunities across sportsbooks for guaranteed profits.",
     color: "#ec4899"
-  },
-  {
-    icon: Shield,
-    title: "Line Movement Alerts",
-    description: "Get notified when odds shift significantly so you can capitalize on market movements.",
-    color: "#14b8a6"
   }
 ];
 
