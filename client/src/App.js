@@ -28,6 +28,7 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 import PlanGuard from "./components/guards/PlanGuard";
 import MyPicks from './pages/MyPicks';
 import Scores from './pages/Scores';
+import ThemeDemo from './pages/ThemeDemo';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import BillingSuccess from './pages/BillingSuccess';
@@ -137,6 +138,7 @@ function AppRoutes() {
               <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
               <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
               <Route path="/scores" element={<Scores />} />
+              <Route path="/theme-demo" element={<ThemeDemo />} />
               <Route path="/billing/success" element={<BillingSuccess />} />
               <Route path="/billing/cancel" element={<BillingCancel />} />
               <Route path="/terms" element={<Terms />} />
