@@ -3,6 +3,7 @@ import { ChevronRight, Zap, TrendingUp, Shield, Smartphone, Gauge } from 'lucide
 import '../styles/theme-demo.css';
 
 const themes = [
+  // Dark Themes
   {
     name: 'Purple (Current)',
     id: 'purple',
@@ -13,6 +14,7 @@ const themes = [
     surface: '#1a1025',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
   },
   {
     name: 'Blue Electric',
@@ -24,6 +26,7 @@ const themes = [
     surface: '#161b22',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
   },
   {
     name: 'Neon Green',
@@ -35,6 +38,7 @@ const themes = [
     surface: '#143d2e',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
   },
   {
     name: 'Crimson Red',
@@ -46,6 +50,7 @@ const themes = [
     surface: '#2a1010',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
   },
   {
     name: 'Gold Premium',
@@ -57,6 +62,7 @@ const themes = [
     surface: '#2a1f0f',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
   },
   {
     name: 'Teal Aqua',
@@ -68,6 +74,7 @@ const themes = [
     surface: '#143d38',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
   },
   {
     name: 'Indigo Deep',
@@ -79,6 +86,7 @@ const themes = [
     surface: '#1a1840',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
   },
   {
     name: 'Pink Magenta',
@@ -90,6 +98,104 @@ const themes = [
     surface: '#2a1025',
     text: '#ffffff',
     textSecondary: 'rgba(255, 255, 255, 0.7)',
+    mode: 'dark',
+  },
+  // Light Themes
+  {
+    name: 'Purple Light',
+    id: 'purple-light',
+    primary: '#8b5cf6',
+    secondary: '#7c3aed',
+    accent: '#a78bfa',
+    background: '#ffffff',
+    surface: '#f5f3ff',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
+  },
+  {
+    name: 'Blue Light',
+    id: 'blue-light',
+    primary: '#0ea5e9',
+    secondary: '#0284c7',
+    accent: '#06b6d4',
+    background: '#ffffff',
+    surface: '#f0f9ff',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
+  },
+  {
+    name: 'Green Light',
+    id: 'green-light',
+    primary: '#10b981',
+    secondary: '#059669',
+    accent: '#34d399',
+    background: '#ffffff',
+    surface: '#f0fdf4',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
+  },
+  {
+    name: 'Red Light',
+    id: 'red-light',
+    primary: '#ef4444',
+    secondary: '#dc2626',
+    accent: '#f87171',
+    background: '#ffffff',
+    surface: '#fef2f2',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
+  },
+  {
+    name: 'Amber Light',
+    id: 'amber-light',
+    primary: '#f59e0b',
+    secondary: '#d97706',
+    accent: '#fbbf24',
+    background: '#ffffff',
+    surface: '#fffbeb',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
+  },
+  {
+    name: 'Teal Light',
+    id: 'teal-light',
+    primary: '#14b8a6',
+    secondary: '#0d9488',
+    accent: '#2dd4bf',
+    background: '#ffffff',
+    surface: '#f0fdfa',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
+  },
+  {
+    name: 'Indigo Light',
+    id: 'indigo-light',
+    primary: '#6366f1',
+    secondary: '#4f46e5',
+    accent: '#818cf8',
+    background: '#ffffff',
+    surface: '#f5f3ff',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
+  },
+  {
+    name: 'Rose Light',
+    id: 'rose-light',
+    primary: '#ec4899',
+    secondary: '#db2777',
+    accent: '#f472b6',
+    background: '#ffffff',
+    surface: '#fff5f7',
+    text: '#1f2937',
+    textSecondary: 'rgba(31, 41, 55, 0.7)',
+    mode: 'light',
   },
 ];
 
@@ -302,6 +408,11 @@ function FullPagePreview({ theme }) {
 
 export default function ThemeDemo() {
   const [selectedTheme, setSelectedTheme] = useState(null);
+  const [modeFilter, setModeFilter] = useState('all'); // 'all', 'dark', 'light'
+
+  const filteredThemes = modeFilter === 'all' 
+    ? themes 
+    : themes.filter(t => t.mode === modeFilter);
 
   if (selectedTheme) {
     return (
@@ -334,9 +445,32 @@ export default function ThemeDemo() {
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <div style={{ marginBottom: '60px' }}>
           <h1 style={{ fontSize: '2.5em', fontWeight: 800, marginBottom: '12px' }}>Theme Gallery</h1>
-          <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '1.1em' }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '1.1em', marginBottom: '24px' }}>
             Explore different color palettes and themes for VR-Odds landing page
           </p>
+          
+          {/* Mode Filter Tabs */}
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
+            {['all', 'dark', 'light'].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setModeFilter(mode)}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  background: modeFilter === mode ? '#8b5cf6' : 'rgba(139, 92, 246, 0.2)',
+                  color: '#fff',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {mode === 'all' ? 'All Themes' : `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{
@@ -344,7 +478,7 @@ export default function ThemeDemo() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
           gap: '24px'
         }}>
-          {themes.map((theme) => (
+          {filteredThemes.map((theme) => (
             <div
               key={theme.id}
               onClick={() => setSelectedTheme(theme)}
