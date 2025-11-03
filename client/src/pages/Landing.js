@@ -43,13 +43,6 @@ const QUICK_ACTIONS = [
     color: "var(--accent)"
   },
   {
-    title: "Live Scores", 
-    description: "Real-time scores with betting context",
-    icon: Activity,
-    link: "/scores",
-    color: "var(--success)"
-  },
-  {
     title: "Analytics",
     description: "Advanced betting analytics", 
     icon: BarChart3,
