@@ -272,14 +272,12 @@ export default function Landing() {
       <section className="features-section-new animate-on-scroll">
         <div className="section-container">
           <div className="section-header">
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '40px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              <h2 className="section-title" style={{ margin: 0, display: 'block', maxWidth: '400px', lineHeight: '1.2' }}>
-                Everything You<br />Need to <span className="gradient-text">Win<br />More</span>
-              </h2>
-              <p className="section-subtitle" style={{ margin: 0, maxWidth: '300px', textAlign: 'left', paddingTop: '20px' }}>
-                Powerful tools designed for serious sports bettors
-              </p>
-            </div>
+            <h2 className="section-title">
+              Everything You Need to <span className="gradient-text">Win More</span>
+            </h2>
+            <p className="section-subtitle">
+              Powerful tools designed for serious sports bettors
+            </p>
           </div>
 
           <div className="features-grid-new">
@@ -306,14 +304,12 @@ export default function Landing() {
       }}>
         <div className="section-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="section-header" style={{ marginBottom: '60px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '40px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              <h2 className="section-title" style={{ margin: 0, display: 'block', maxWidth: '400px', lineHeight: '1.2' }}>
-                Compare<br />Odds Across<br /><span className="gradient-text">39+<br />Bookmakers</span>
-              </h2>
-              <p className="section-subtitle" style={{ margin: 0, maxWidth: '300px', textAlign: 'left', paddingTop: '20px' }}>
-                Access the most comprehensive sportsbook coverage in the industry
-              </p>
-            </div>
+            <h2 className="section-title">
+              Compare Odds Across <span className="gradient-text">39+ Bookmakers</span>
+            </h2>
+            <p className="section-subtitle">
+              Access the most comprehensive sportsbook coverage in the industry
+            </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
