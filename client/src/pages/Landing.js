@@ -23,7 +23,8 @@ import {
   Check,
   ChevronRight,
   Flame,
-  AlertCircle
+  AlertCircle,
+  Gamepad2
 } from 'lucide-react';
 
 // Components
@@ -126,6 +127,40 @@ const TESTIMONIALS = [
     rating: 5
   }
 ];
+
+// Bookmakers showcase
+const BOOKMAKERS = {
+  'Top Tier': [
+    { name: 'DraftKings', key: 'draftkings' },
+    { name: 'FanDuel', key: 'fanduel' },
+    { name: 'BetMGM', key: 'betmgm' },
+    { name: 'Caesars', key: 'caesars' }
+  ],
+  'DFS Apps': [
+    { name: 'PrizePicks', key: 'prizepicks', isDFS: true },
+    { name: 'Underdog', key: 'underdog', isDFS: true },
+    { name: 'DK Pick6', key: 'pick6', isDFS: true },
+    { name: 'Dabble', key: 'dabble_au', isDFS: true }
+  ],
+  'Major Operators': [
+    { name: 'ESPN BET', key: 'espnbet' },
+    { name: 'Fanatics', key: 'fanatics' },
+    { name: 'Hard Rock', key: 'hardrock' },
+    { name: 'PointsBet', key: 'pointsbetus' },
+    { name: 'BetRivers', key: 'betrivers' },
+    { name: 'WynnBET', key: 'wynnbet' },
+    { name: 'Unibet', key: 'unibet_us' }
+  ],
+  'Sharp Books': [
+    { name: 'Pinnacle', key: 'pinnacle' },
+    { name: 'NoVig', key: 'novig' }
+  ],
+  'Exchanges': [
+    { name: 'ProphetX', key: 'prophetx', isExchange: true },
+    { name: 'ReBet', key: 'rebet', isExchange: true },
+    { name: 'BetOpenly', key: 'betopenly', isExchange: true }
+  ]
+};
 
 // Landing Page Component for non-authenticated users
 export default function Landing() {
@@ -271,6 +306,119 @@ export default function Landing() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Bookmakers Showcase Section */}
+      <section className="bookmakers-section animate-on-scroll" style={{
+        padding: '80px 20px',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(139, 92, 246, 0.05) 100%)'
+      }}>
+        <div className="section-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div className="section-header" style={{ marginBottom: '60px' }}>
+            <h2 className="section-title">
+              Compare Odds Across <span className="gradient-text">39+ Bookmakers</span>
+            </h2>
+            <p className="section-subtitle">
+              Access the most comprehensive sportsbook coverage in the industry
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
+            {Object.entries(BOOKMAKERS).map(([category, books]) => (
+              <div key={category}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '24px'
+                }}>
+                  {category === 'DFS Apps' && <Gamepad2 size={24} color="#8b5cf6" />}
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: 'var(--text-primary)',
+                    margin: 0
+                  }}>
+                    {category}
+                  </h3>
+                  <span style={{
+                    fontSize: '14px',
+                    color: 'var(--text-secondary)',
+                    fontWeight: '500'
+                  }}>
+                    ({books.length} {books.length === 1 ? 'book' : 'books'})
+                  </span>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gap: '12px'
+                }}>
+                  {books.map((book, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        background: 'rgba(139, 92, 246, 0.08)',
+                        border: '1px solid rgba(139, 92, 246, 0.2)',
+                        borderRadius: '10px',
+                        padding: '14px 16px',
+                        textAlign: 'center',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '50px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
+                        e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(139, 92, 246, 0.08)';
+                        e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.2)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                      }}
+                    >
+                      <span style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: 'var(--text-primary)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
+                        {book.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            marginTop: '60px',
+            padding: '24px',
+            background: 'rgba(139, 92, 246, 0.1)',
+            border: '1px solid rgba(139, 92, 246, 0.2)',
+            borderRadius: '12px',
+            textAlign: 'center'
+          }}>
+            <p style={{
+              fontSize: '14px',
+              color: 'var(--text-secondary)',
+              margin: 0,
+              lineHeight: '1.6'
+            }}>
+              <strong style={{ color: 'var(--text-primary)' }}>Free users</strong> can compare DraftKings, FanDuel, and Caesars. 
+              <br />
+              <strong style={{ color: 'var(--text-primary)' }}>Platinum users</strong> get access to all 39+ bookmakers including DFS apps, sharp books, and exchanges.
+            </p>
           </div>
         </div>
       </section>
