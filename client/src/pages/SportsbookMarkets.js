@@ -303,6 +303,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [draftMinMiddleProbability, setDraftMinMiddleProbability] = useState(15);
   const [draftMaxMiddleStake, setDraftMaxMiddleStake] = useState(1000);
   
+  // Data Points filter state for odds table
+  const [dataPoints, setDataPoints] = useState(10);
+  const [draftDataPoints, setDraftDataPoints] = useState(10);
+  
   // Refresh cooldown state
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -949,6 +953,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       books: newBooks,
       playerPropsBooks: newPlayerPropsBooks,
       markets: newMarkets,
+      dataPoints: draftDataPoints,
       playerPropsMode: showPlayerProps
     });
     
@@ -958,6 +963,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedBooks(newBooks);
     setSelectedPlayerPropsBooks(newPlayerPropsBooks);
     setMarketKeys(newMarkets);
+    setDataPoints(draftDataPoints);
     
     // Save mode-specific sportsbook selections to localStorage
     optimizedStorage.set('userSelectedSportsbooks', newBooks);
@@ -1010,6 +1016,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setDraftSelectedPlayerPropsBooks(defaultPlayerPropsSportsbooks);
     setDraftMarketKeys(defaultMarkets);
     setDraftSelectedPlayerPropMarkets(defaultPlayerProps);
+    setDraftDataPoints(10);
     
     // Reset applied state
     setPicked(defaultSports);
@@ -1018,6 +1025,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedPlayerPropsBooks(defaultPlayerPropsSportsbooks);
     setMarketKeys(defaultMarkets);
     setSelectedPlayerPropMarkets(defaultPlayerProps);
+    setDataPoints(10);
   };
 
   // Market categories for organization
@@ -1564,6 +1572,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     );
   };
 
+
   return (
     <div className="sportsbook-markets">
       <SEOHelmet
@@ -2101,6 +2110,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               betSlipCount={bets.length}
               onOpenBetSlip={openBetSlip}
               searchQuery={debouncedQuery}
+              dataPoints={dataPoints}
             />
           </div>
         ) : null
@@ -2141,14 +2151,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             bookFilter={effectiveSelectedBooks}
             marketFilter={marketKeys} // Use selected markets, empty array shows all
             evMin={minEV === "" ? null : Number(minEV)}
-          loading={filtersLoading || marketsLoading}
-          error={error || marketsError}
-          oddsFormat={oddsFormat}
-          allCaps={false}
-          onAddBet={addBet}
-          betSlipCount={bets.length}
-          onOpenBetSlip={openBetSlip}
-        />
+            loading={filtersLoading || marketsLoading}
+            error={error || marketsError}
+            oddsFormat={oddsFormat}
+            allCaps={false}
+            onAddBet={addBet}
+            betSlipCount={bets.length}
+            onOpenBetSlip={openBetSlip}
+            dataPoints={dataPoints}
+          />
         </div>
       ) : null}
       </div>
@@ -2443,6 +2454,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </div>
 
               {/* Straight Bets Filters */}
+              {/* Data Points Slider */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <span>📊 Data Points</span>
+                  <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700 }}>{draftDataPoints}</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="3" 
+                  max="10" 
+                  value={draftDataPoints}
+                  onChange={(e) => setDraftDataPoints(parseInt(e.target.value, 10))}
+                  style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)' }}
+                />
+              </div>
+
               {/* Date Filter */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>

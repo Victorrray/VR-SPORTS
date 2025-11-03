@@ -223,6 +223,7 @@ export default function Scores() {
 
   // Sort: LIVE first, then scheduled by start, then finals last (by start desc)
   const sorted = useMemo(() => {
+    if (!Array.isArray(games)) return [];
     const live = [];
     const sched = [];
     const finals = [];
@@ -241,6 +242,7 @@ export default function Scores() {
 
   // Pull global week if present (will be the same on all NFL games)
   const weekInfo = useMemo(() => {
+    if (!Array.isArray(games) || games.length === 0) return null;
     const g = games.find(Boolean);
     if (!g) return null;
     return {
