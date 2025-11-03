@@ -197,11 +197,105 @@ const themes = [
     textSecondary: 'rgba(31, 41, 55, 0.7)',
     mode: 'light',
   },
+  // Premium Themes
+  {
+    name: 'Neo Purple',
+    id: 'neo-purple',
+    primary: '#7C3AED',
+    secondary: '#9F7AEA',
+    accent: '#E9D8FD',
+    background: '#1E1B4B',
+    surface: '#F5F3FF',
+    text: '#ffffff',
+    textSecondary: 'rgba(255, 255, 255, 0.8)',
+    positive: '#10B981',
+    negative: '#EF4444',
+    mode: 'dark',
+    premium: true,
+  },
+  {
+    name: 'Vegas Night',
+    id: 'vegas-night',
+    primary: '#00FF88',
+    secondary: '#1DB954',
+    accent: '#FFBB00',
+    background: '#121212',
+    surface: '#0A0A0A',
+    text: '#F5F5F5',
+    textSecondary: 'rgba(245, 245, 245, 0.7)',
+    positive: '#00FF88',
+    negative: '#FF4444',
+    mode: 'dark',
+    premium: true,
+  },
+  {
+    name: 'Skyline',
+    id: 'skyline',
+    primary: '#38BDF8',
+    secondary: '#0F172A',
+    accent: '#38BDF8',
+    background: '#F8FAFC',
+    surface: '#1E293B',
+    text: '#0F172A',
+    textSecondary: 'rgba(15, 23, 42, 0.7)',
+    positive: '#22C55E',
+    negative: '#EF4444',
+    mode: 'light',
+    premium: true,
+  },
+  {
+    name: 'Golden Edge',
+    id: 'golden-edge',
+    primary: '#FACC15',
+    secondary: '#FDE68A',
+    accent: '#FDE68A',
+    background: '#0C0A09',
+    surface: '#1F2937',
+    text: '#F9FAFB',
+    textSecondary: 'rgba(249, 250, 251, 0.8)',
+    positive: '#22C55E',
+    negative: '#DC2626',
+    mode: 'dark',
+    premium: true,
+  },
+  {
+    name: 'Slate Mode',
+    id: 'slate-mode',
+    primary: '#3B82F6',
+    secondary: '#10B981',
+    accent: '#F59E0B',
+    background: '#111827',
+    surface: '#1F2937',
+    text: '#F9FAFB',
+    textSecondary: 'rgba(249, 250, 251, 0.8)',
+    positive: '#10B981',
+    negative: '#EF4444',
+    mode: 'dark',
+    premium: true,
+  },
 ];
 
 function ThemeCard({ theme }) {
   return (
-    <div className="theme-card">
+    <div className="theme-card" style={{ position: 'relative' }}>
+      {theme.premium && (
+        <div style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
+          color: '#fff',
+          padding: '4px 12px',
+          borderRadius: '20px',
+          fontSize: '0.7em',
+          fontWeight: 700,
+          zIndex: 10,
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
+        }}>
+          ⭐ Premium
+        </div>
+      )}
       <div className="theme-preview" style={{ background: theme.background }}>
         <div className="preview-content">
           <div className="preview-header">
@@ -408,10 +502,12 @@ function FullPagePreview({ theme }) {
 
 export default function ThemeDemo() {
   const [selectedTheme, setSelectedTheme] = useState(null);
-  const [modeFilter, setModeFilter] = useState('all'); // 'all', 'dark', 'light'
+  const [modeFilter, setModeFilter] = useState('all'); // 'all', 'dark', 'light', 'premium'
 
   const filteredThemes = modeFilter === 'all' 
     ? themes 
+    : modeFilter === 'premium'
+    ? themes.filter(t => t.premium)
     : themes.filter(t => t.mode === modeFilter);
 
   if (selectedTheme) {
@@ -450,8 +546,8 @@ export default function ThemeDemo() {
           </p>
           
           {/* Mode Filter Tabs */}
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '40px' }}>
-            {['all', 'dark', 'light'].map((mode) => (
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '40px', flexWrap: 'wrap' }}>
+            {['all', 'dark', 'light', 'premium'].map((mode) => (
               <button
                 key={mode}
                 onClick={() => setModeFilter(mode)}
@@ -467,7 +563,7 @@ export default function ThemeDemo() {
                   textTransform: 'capitalize'
                 }}
               >
-                {mode === 'all' ? 'All Themes' : `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`}
+                {mode === 'all' ? 'All Themes' : mode === 'premium' ? '⭐ Premium' : `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode`}
               </button>
             ))}
           </div>
