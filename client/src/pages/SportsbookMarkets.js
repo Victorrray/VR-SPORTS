@@ -1830,6 +1830,23 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               <>
                 <div className="desktop-filter-section">
                   <div className="desktop-filter-label">
+                    <span>📊</span> Data Points
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <input 
+                      type="range" 
+                      min="3" 
+                      max="10" 
+                      value={draftDataPoints}
+                      onChange={(e) => setDraftDataPoints(parseInt(e.target.value, 10))}
+                      style={{ flex: 1, height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)' }}
+                    />
+                    <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700, minWidth: '30px', textAlign: 'center' }}>{draftDataPoints}</span>
+                  </div>
+                </div>
+
+                <div className="desktop-filter-section">
+                  <div className="desktop-filter-label">
                     <span>📅</span> Date
                   </div>
                   <DatePicker
