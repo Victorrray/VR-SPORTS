@@ -285,9 +285,11 @@ export default function Landing() {
       <section className="features-section-new animate-on-scroll">
         <div className="section-container">
           <div className="section-header">
-            <h2 className="section-title">
-              Everything You Need to <span className="gradient-text">Win More</span>
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <h2 className="section-title" style={{ margin: 0, display: 'inline' }}>
+                Everything You Need to <span className="gradient-text">Win More</span>
+              </h2>
+            </div>
             <p className="section-subtitle">
               Powerful tools designed for serious sports bettors
             </p>
@@ -317,9 +319,11 @@ export default function Landing() {
       }}>
         <div className="section-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="section-header" style={{ marginBottom: '60px' }}>
-            <h2 className="section-title">
-              Compare Odds Across <span className="gradient-text">39+ Bookmakers</span>
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <h2 className="section-title" style={{ margin: 0, display: 'inline' }}>
+                Compare Odds Across <span className="gradient-text">39+ Bookmakers</span>
+              </h2>
+            </div>
             <p className="section-subtitle">
               Access the most comprehensive sportsbook coverage in the industry
             </p>
@@ -430,9 +434,11 @@ export default function Landing() {
       }}>
         <div className="section-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="section-header" style={{ marginBottom: '60px' }}>
-            <h2 className="section-title">
-              How It <span className="gradient-text">Works</span>
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <h2 className="section-title" style={{ margin: 0, display: 'inline' }}>
+                How It <span className="gradient-text">Works</span>
+              </h2>
+            </div>
             <p className="section-subtitle">
               Start finding +EV bets in 3 simple steps
             </p>
@@ -521,9 +527,11 @@ export default function Landing() {
       <section className="social-proof animate-on-scroll" style={{ padding: '80px 20px' }}>
         <div className="section-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div className="section-header" style={{ marginBottom: '60px' }}>
-            <h2 className="section-title">
-              Trusted by <span className="gradient-text">Winning Bettors</span>
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <h2 className="section-title" style={{ margin: 0, display: 'inline' }}>
+                Trusted by <span className="gradient-text">Winning Bettors</span>
+              </h2>
+            </div>
             <p className="section-subtitle">
               See what real users are saying
             </p>
@@ -572,8 +580,8 @@ export default function Landing() {
       }}>
         <div className="section-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div className="section-header" style={{ marginBottom: '60px', textAlign: 'center' }}>
-            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', fontSize: '32px' }}>
-              Frequently Asked <span className="gradient-text">FAQ</span>
+            <h2 className="section-title" style={{ margin: 0, display: 'inline' }}>
+              <span className="gradient-text">FAQ</span>
             </h2>
           </div>
 
@@ -632,9 +640,11 @@ export default function Landing() {
       <section className="pricing-section-landing animate-on-scroll">
         <div className="section-container">
           <div className="section-header">
-            <h2 className="section-title">
-              Choose Your <span className="gradient-text">Winning Plan</span>
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <h2 className="section-title" style={{ margin: 0, display: 'inline' }}>
+                Choose Your <span className="gradient-text">Winning Plan</span>
+              </h2>
+            </div>
             <p className="section-subtitle">
               Both plans include access to 25+ sportsbooks.
             </p>
