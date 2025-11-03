@@ -11,7 +11,6 @@ export default function Footer({ className }) {
       links: [
         { to: '/', label: 'Home' },
         { to: '/sportsbooks', label: 'Live Odds' },
-        { to: '/scores', label: 'Scores' },
         { to: '/subscribe', label: 'Pricing' },
       ],
     },

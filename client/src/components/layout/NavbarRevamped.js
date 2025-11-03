@@ -46,7 +46,6 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
     { label: "Home", to: "/", icon: Home },
     { label: "Odds", to: "/sportsbooks", icon: BarChart3, requiresAuth: true },
     { label: "Picks", to: "/picks", icon: TrendingUp, requiresAuth: true },
-    { label: "Scores", to: "/scores", icon: Shield, requiresAuth: true },
   ];
 
   // Don't filter - show all links but handle clicks for protected routes

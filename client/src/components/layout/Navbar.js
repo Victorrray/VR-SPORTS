@@ -31,7 +31,6 @@ export default function Navbar({ onOpenMobileSearch }) {
     { label: "Home", to: "/" },
     { label: "Odds", to: "/sportsbooks" },
     { label: "Picks", to: "/picks" },
-    { label: "Scores", to: "/scores" },
     ...(user ? [
       { label: "My Sportsbooks", to: "/my-sportsbooks" },
       { label: "My Account", to: "/account" },

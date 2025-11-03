@@ -1,0 +1,11 @@
+#!/bin/bash
+# Auto-commit changes after merge
+cd "$(git rev-parse --show-toplevel)"
+
+# Check if there are any changes
+if ! git diff-index --quiet HEAD --; then
+  echo "📝 Auto-committing changes after merge..."
+  git add .
+  git commit -m "auto: post-merge changes" --no-verify
+  git push
+fi
