@@ -90,10 +90,7 @@ export function usePlan() {
     fetchPlan();
   }, [user?.id, authLoading]);
 
-  // Refresh plan when page becomes visible (user returns to tab)
-  // DISABLED: Causing unwanted re-renders and mode resets
-  // Users can manually refresh using the refresh button instead
-  /*
+  // Refresh plan when page becomes visible (user returns to tab) and periodically
   useEffect(() => {
     if (!user) return;
 
@@ -104,10 +101,20 @@ export function usePlan() {
       }
     };
 
+    // Refresh plan every 30 seconds while page is visible
+    const planRefreshInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        console.log('🔄 Periodic plan refresh (30s interval)');
+        fetchPlan();
+      }
+    }, 30000); // 30 seconds
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(planRefreshInterval);
+    };
   }, [user?.id]);
-  */
 
   const refreshPlan = async () => {
     if (!user) return null;

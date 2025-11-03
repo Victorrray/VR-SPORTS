@@ -64,26 +64,6 @@ export default function Account() {
     meError: error
   });
 
-  // Manual refresh function
-  const handleRefreshPlan = async () => {
-    console.log('🔄 Manually refreshing plan data...');
-    try {
-      if (refresh && typeof refresh === 'function') {
-        await refresh();
-        console.log('✅ Plan refresh successful');
-        setSuccess('Plan refreshed! Check back in a moment.');
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        console.warn('⚠️ Refresh function not available');
-        setError('Refresh not available. Please try refreshing the page.');
-      }
-    } catch (error) {
-      console.error('❌ Plan refresh failed:', error);
-      setError('Failed to refresh plan data. Please try again.');
-      setTimeout(() => setError(''), 3000);
-    }
-  };
-
   // Load profile (username) and sportsbooks
   useEffect(() => {
     async function load() {
@@ -416,54 +396,23 @@ export default function Account() {
           <div className="user-info-grid">
             <div className="user-avatar-section">
               <div className="avatar">{initialsFromEmail(email)}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div className={`status-badge ${me?.plan === 'platinum' ? 'platinum' : me?.plan === 'gold' ? 'gold' : 'guest'}`}>
-                  {me?.plan === 'platinum' ? (
-                    <>
-                      <Crown size={12} />
-                      <span>Platinum</span>
-                    </>
-                  ) : me?.plan === 'gold' ? (
-                    <>
-                      <Crown size={12} />
-                      <span>Gold</span>
-                    </>
-                  ) : (
-                    <>
-                      <User size={12} />
-                      <span>Guest</span>
-                    </>
-                  )}
-                </div>
-                <button
-                  onClick={handleRefreshPlan}
-                  title="Refresh your plan status"
-                  style={{
-                    background: 'rgba(139, 92, 246, 0.2)',
-                    border: '1px solid rgba(139, 92, 246, 0.4)',
-                    borderRadius: '6px',
-                    padding: '6px 10px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '12px',
-                    color: 'var(--accent)',
-                    fontWeight: '600',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = 'rgba(139, 92, 246, 0.3)';
-                    e.target.style.borderColor = 'rgba(139, 92, 246, 0.6)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = 'rgba(139, 92, 246, 0.2)';
-                    e.target.style.borderColor = 'rgba(139, 92, 246, 0.4)';
-                  }}
-                >
-                  <RefreshCw size={14} />
-                  Refresh
-                </button>
+              <div className={`status-badge ${me?.plan === 'platinum' ? 'platinum' : me?.plan === 'gold' ? 'gold' : 'guest'}`}>
+                {me?.plan === 'platinum' ? (
+                  <>
+                    <Crown size={12} />
+                    <span>Platinum</span>
+                  </>
+                ) : me?.plan === 'gold' ? (
+                  <>
+                    <Crown size={12} />
+                    <span>Gold</span>
+                  </>
+                ) : (
+                  <>
+                    <User size={12} />
+                    <span>Guest</span>
+                  </>
+                )}
               </div>
             </div>
 
