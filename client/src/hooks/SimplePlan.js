@@ -34,7 +34,10 @@ export function usePlan() {
       console.log('🔐 Session user:', session?.user?.id);
       
       const headers = { 
-        'x-user-id': user.id
+        'x-user-id': user.id,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       };
       
       // Add auth token if available
@@ -44,7 +47,7 @@ export function usePlan() {
       
       console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token, tokenPrefix: token?.substring(0, 20) });
       
-      const res = await axios.get(`${API_BASE_URL}/api/me`, { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/me?t=${Date.now()}`, { headers });
       
       console.log('✅ Plan API response:', res.data);
       console.log('✅ Plan value:', res.data.plan);
@@ -109,10 +112,23 @@ export function usePlan() {
   const refreshPlan = async () => {
     if (!user) return null;
     
-    console.log('🔄 Manual plan refresh triggered');
+    console.log('🔄 Manual plan refresh triggered for user:', user.id);
+    // Force a fresh fetch by clearing any browser cache
     await fetchPlan();
+    console.log('✅ Plan refresh complete, new plan:', plan);
     return plan;
   };
+
+  // Listen for plan update events from admin panel
+  useEffect(() => {
+    const handlePlanUpdate = () => {
+      console.log('📢 Plan update event received, refreshing...');
+      fetchPlan();
+    };
+
+    window.addEventListener('planUpdated', handlePlanUpdate);
+    return () => window.removeEventListener('planUpdated', handlePlanUpdate);
+  }, [user?.id]);
 
   return { 
     plan, 

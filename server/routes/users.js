@@ -18,6 +18,13 @@ router.get('/me', async (req, res) => {
   const userId = req.headers['x-user-id'];
   const supabase = req.app.locals.supabase;
   
+  // Set cache-busting headers to ensure fresh responses
+  res.set({
+    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  });
+  
   if (!userId) {
     return res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
   }
@@ -40,6 +47,7 @@ router.get('/me', async (req, res) => {
 
     // Platinum or grandfathered = unlimited
     if (data.plan === 'platinum' || data.grandfathered) {
+      console.log(`✅ User ${userId} has platinum plan`);
       return res.json({
         plan: 'platinum',
         remaining: null,
@@ -54,6 +62,7 @@ router.get('/me', async (req, res) => {
     const used = data.api_request_count || 0;
     const remaining = Math.max(0, limit - used);
 
+    console.log(`📊 User ${userId} plan: ${data.plan || 'free'}`);
     res.json({
       plan: data.plan || 'free', // null becomes 'free' for display
       remaining,
