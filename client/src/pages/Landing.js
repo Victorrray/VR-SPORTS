@@ -571,9 +571,9 @@ export default function Landing() {
         background: 'linear-gradient(180deg, rgba(139, 92, 246, 0.05) 0%, transparent 100%)'
       }}>
         <div className="section-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div className="section-header" style={{ marginBottom: '60px' }}>
-            <h2 className="section-title">
-              Frequently Asked <span className="gradient-text">Questions</span>
+          <div className="section-header" style={{ marginBottom: '60px', textAlign: 'center' }}>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', fontSize: '32px' }}>
+              Frequently Asked <span className="gradient-text">FAQ</span>
             </h2>
           </div>
 
