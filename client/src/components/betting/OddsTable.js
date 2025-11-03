@@ -3813,9 +3813,7 @@ export default function OddsTable({
                 </tr>
 
                 {/* Desktop/Tablet mini-table (hide on mobile via CSS) */}
-                {expandedRows[row.key] && ((mode === "props" && bookFilter && bookFilter.length > 0) 
-                  ? (row.selectedBooks && row.selectedBooks.length > 0)
-                  : (row.allBooks && row.allBooks.length > 0)) && (
+                {expandedRows[row.key] && (row.allBooks && row.allBooks.length > 0) && (
                   <tr className="desktop-mini-wrap">
                     <td colSpan={8}>
                       <div className="mini-odds-container">
