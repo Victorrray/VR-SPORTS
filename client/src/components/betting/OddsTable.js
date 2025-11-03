@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import './OddsTable.css';
 import { useBetSlip } from '../../contexts/BetSlipContext';
-import { TrendingUp, TrendingDown, Trophy } from 'lucide-react';
+import { TrendingUp, TrendingDown, Trophy, ChevronDown } from 'lucide-react';
 import { getBestLink, supportsDeepLinking } from '../../utils/deepLinkBuilder';
 import { useMe } from '../../hooks/useMe';
 import EnhancedLoadingSpinner from '../common/EnhancedLoadingSpinner';
@@ -2902,7 +2902,18 @@ export default function OddsTable({
                 <tr className={`odds-row${expandedRows[row.key] ? " expanded" : ""}`} onClick={()=>toggleRow(row.key)} style={{ cursor:"pointer" }}>
                   <td className={`ev-col ${ev && ev > 0 ? 'positive' : 'negative'}`}>
                     <div className="ev-col-content">
-                      {typeof ev === "number" ? (<span className="ev-chip">{ev.toFixed(2)}%</span>) : ""}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {typeof ev === "number" ? (<span className="ev-chip">{ev.toFixed(2)}%</span>) : ""}
+                        <ChevronDown 
+                          size={18} 
+                          style={{ 
+                            transition: 'transform 0.2s ease',
+                            transform: expandedRows[row.key] ? 'rotate(180deg)' : 'rotate(0deg)',
+                            opacity: 0.6,
+                            flexShrink: 0
+                          }} 
+                        />
+                      </div>
                       <button 
                         className="desktop-add-pick-btn"
                         onClick={(e) => {
