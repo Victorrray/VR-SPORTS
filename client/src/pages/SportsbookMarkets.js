@@ -1826,7 +1826,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             )}
 
             {/* Straight Bets Filters */}
-            {!showPlayerProps && !showArbitrage && (
+            {!showPlayerProps && !showArbitrage && !showMiddles && (
               <>
                 <div className="desktop-filter-section">
                   <div className="desktop-filter-label">
