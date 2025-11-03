@@ -184,6 +184,14 @@ function getPlayerPropsMetrics() {
 }
 
 /**
+ * Clear plan cache for a specific user
+ */
+function clearUserPlanCache(userId) {
+  planCache.delete(userId);
+  console.log(`🗑️ Cleared plan cache for user: ${userId}`);
+}
+
+/**
  * Clear all caches (useful for testing)
  */
 function clearAllCaches() {
@@ -204,6 +212,7 @@ module.exports = {
   // Plan caching
   getCachedPlan,
   setCachedPlan,
+  clearUserPlanCache,
   
   // Player props caching
   setPlayerPropsCacheEntry,

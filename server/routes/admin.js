@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { ADMIN_API_KEY } = require('../config/constants');
+const { clearUserPlanCache } = require('../services/cache');
 
 /**
  * Middleware: Verify admin API key
@@ -74,7 +75,9 @@ router.post('/set-plan', requireAdminKey, async (req, res) => {
       const userData = userUsage.get(userId) || { api_request_count: 0, plan: 'free' };
       userData.plan = plan;
       userUsage.set(userId, userData);
-      return res.json({ ok: true, userId, plan });
+      // Clear plan cache so user sees update immediately
+      clearUserPlanCache(userId);
+      return res.json({ ok: true, userId, plan, cacheCleared: true });
     }
 
     const { error } = await supabase.from("users").update({ plan }).eq("id", userId);
@@ -82,8 +85,11 @@ router.post('/set-plan', requireAdminKey, async (req, res) => {
       return res.status(500).json({ error: "SET_PLAN_FAILED", detail: error.message });
     }
 
-    console.log(`✅ Admin set plan for user: ${userId} to ${plan}`);
-    res.json({ ok: true, userId, plan });
+    // Clear plan cache so user sees update immediately
+    clearUserPlanCache(userId);
+
+    console.log(`✅ Admin set plan for user: ${userId} to ${plan} (cache cleared)`);
+    res.json({ ok: true, userId, plan, cacheCleared: true });
   } catch (error) {
     console.error('set-plan error:', error);
     res.status(500).json({ error: 'SET_PLAN_FAILED', detail: error.message });

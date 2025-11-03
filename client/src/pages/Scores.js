@@ -187,10 +187,13 @@ export default function Scores() {
     };
   }, [dropdownOpen]);
 
-  // First load + dynamic auto refresh based on live games
+  // First load when sport changes
   useEffect(() => {
     load();
-    
+  }, [sport]);
+
+  // Auto refresh interval - separate effect to avoid infinite loop
+  useEffect(() => {
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -206,7 +209,7 @@ export default function Scores() {
         intervalRef.current = null;
       }
     };
-  }, [sport, liveGamesCount]);
+  }, [liveGamesCount]);
 
   // Manual refresh + spin animation
   const handleRefresh = async () => {
