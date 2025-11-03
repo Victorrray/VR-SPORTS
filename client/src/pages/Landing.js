@@ -417,7 +417,7 @@ export default function Landing() {
             }}>
               <strong style={{ color: 'var(--text-primary)' }}>Free users</strong> can compare DraftKings, FanDuel, and Caesars. 
               <br />
-              <strong style={{ color: 'var(--text-primary)' }}>Platinum users</strong> get access to all 39+ bookmakers including DFS apps, sharp books, and exchanges.
+              <strong style={{ color: 'var(--text-primary)' }}>Gold & Platinum users</strong> get access to all 39+ bookmakers including DFS apps, sharp books, and exchanges.
             </p>
           </div>
         </div>
