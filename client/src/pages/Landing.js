@@ -70,7 +70,7 @@ const FEATURES = [
   {
     icon: Eye,
     title: "Real-Time Odds Comparison",
-    description: "Compare odds across 15+ major sportsbooks instantly. Never miss the best line again.",
+    description: "Compare odds across 39+ sportsbooks instantly. Never miss the best line again.",
     color: "#8b5cf6"
   },
   {
