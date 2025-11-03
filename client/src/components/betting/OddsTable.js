@@ -752,6 +752,10 @@ export default function OddsTable({
   const [page, setPage] = useState(1);
   // Always default to sorting by highest EV (desc) unless explicitly overridden
   const [sort, setSort] = useState(initialSort || { key: "ev", dir: "desc" });
+  const [dataPoints, setDataPoints] = useState(() => {
+    if (typeof window === 'undefined') return 7;
+    return parseInt(localStorage.getItem('dataPoints') || '7', 10);
+  });
   
   // Log sorting information for debugging
   useEffect(() => {
@@ -762,6 +766,14 @@ export default function OddsTable({
   useEffect(() => {
     setExpandedRows({});
   }, [games]);
+
+  // Save dataPoints to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dataPoints', dataPoints.toString());
+    }
+  }, [dataPoints]);
+
   const [oddsFormatState, setOddsFormat] = useState(() => {
     if (typeof window === 'undefined') return 'american';
     return localStorage.getItem('oddsFormat') || 'american';
@@ -2760,6 +2772,22 @@ export default function OddsTable({
 
   return (
     <div className={`odds-table-card revamp${allCaps ? ' all-caps' : ''}`}>
+      {/* Data Points Slider (only for straight bets, not props) */}
+      {mode !== "props" && (
+        <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:16, padding:'12px', background:'rgba(139, 92, 246, 0.08)', borderRadius:8, border:'1px solid rgba(139, 92, 246, 0.2)' }}>
+          <span style={{ opacity:.9, fontWeight:700, fontSize:'0.92em', minWidth:'100px' }}>Data Points:</span>
+          <input 
+            type="range" 
+            min="3" 
+            max="10" 
+            value={dataPoints}
+            onChange={(e) => setDataPoints(parseInt(e.target.value, 10))}
+            style={{ flex:1, height:'6px', borderRadius:'3px', background:'rgba(139, 92, 246, 0.3)', outline:'none', cursor:'pointer' }}
+          />
+          <span style={{ opacity:.9, fontWeight:700, fontSize:'0.92em', minWidth:'40px', textAlign:'right', color:'var(--accent)' }}>{dataPoints}</span>
+        </div>
+      )}
+
       {/* format toggle (uncontrolled) */}
       {!oddsFormatProp && (
         <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginBottom:8 }}>
@@ -3887,8 +3915,9 @@ export default function OddsTable({
                               });
 
                               // For player props, show more books for better EV calculations and line shopping
+                              // For straight bets, use the dataPoints slider value
                               // Filter out locked/stale markets to avoid showing unavailable bets
-                              const maxDesktopBooks = mode === "props" ? 20 : MINI_TABLE_PRIORITY_BOOKS.length;
+                              const maxDesktopBooks = mode === "props" ? 20 : dataPoints;
                               const allBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop];
                               
                               // All books should already be filtered (locked ones are skipped at row level)
