@@ -1515,60 +1515,29 @@ export default function OddsTable({
             return bookDecimal > bestDecimal ? book : best;
           }) : null;
           
-          // Choose the side with better EV for the main display
-          // For DFS apps, compare BOTH sides to market and show the better value
+          // Find the ABSOLUTE BEST book across both sides (best odds overall)
+          let primaryBook;
           let showOver;
-          const primaryBookKey = bestOverBook?.bookmaker?.key || bestUnderBook?.bookmaker?.key || '';
-          const isDFSPrimaryBook = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(primaryBookKey.toLowerCase());
           
-          if (isDFSPrimaryBook && bestOverBook && bestUnderBook) {
-            // For DFS: Compare each side to market consensus
-            // Calculate market consensus for each side (excluding DFS books)
-            const nonDFSOverBooks = propData.overBooks.filter(b => {
-              const key = (b.bookmaker?.key || b.book || '').toLowerCase();
-              return !['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(key);
-            });
-            const nonDFSUnderBooks = propData.underBooks.filter(b => {
-              const key = (b.bookmaker?.key || b.book || '').toLowerCase();
-              return !['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(key);
-            });
+          if (bestOverBook && bestUnderBook) {
+            // Compare odds directly - pick the book with best odds
+            const overDec = americanToDecimal(bestOverBook.price);
+            const underDec = americanToDecimal(bestUnderBook.price);
             
-            // Calculate average market odds for each side
-            const avgOverOdds = nonDFSOverBooks.length > 0 
-              ? nonDFSOverBooks.reduce((sum, b) => sum + (b.price || 0), 0) / nonDFSOverBooks.length 
-              : null;
-            const avgUnderOdds = nonDFSUnderBooks.length > 0 
-              ? nonDFSUnderBooks.reduce((sum, b) => sum + (b.price || 0), 0) / nonDFSUnderBooks.length 
-              : null;
-            
-            // DFS pays +100 (even money), so compare to market
-            // If market is -120, DFS +100 is good value
-            // If market is -102, DFS +100 is bad value
-            const overValue = avgOverOdds ? Math.abs(avgOverOdds) - 100 : 0; // Higher = better DFS value
-            const underValue = avgUnderOdds ? Math.abs(avgUnderOdds) - 100 : 0;
-            
-            showOver = overValue > underValue;
-            console.log(`🎯 DFS SIDE SELECTION: ${propData.playerName} - Over market: ${avgOverOdds?.toFixed(0)}, Under market: ${avgUnderOdds?.toFixed(0)} -> Show ${showOver ? 'Over' : 'Under'} (better value)`, {
-              overValue: overValue.toFixed(1),
-              underValue: underValue.toFixed(1)
-            });
-          } else if (overEV !== null && underEV !== null && Math.abs(overEV - underEV) > 0.1) {
-            // Clear EV difference - choose the better EV
-            showOver = overEV > underEV;
+            if (overDec > underDec) {
+              primaryBook = bestOverBook;
+              showOver = true;
+              console.log(`🎯 BEST ODDS: Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key} beats Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key}`);
+            } else {
+              primaryBook = bestUnderBook;
+              showOver = false;
+              console.log(`🎯 BEST ODDS: Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key} beats Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key}`);
+            }
           } else {
-            // EVs are similar or both null - compare odds directly
-            // Better odds = higher positive number or lower negative number (closer to 0)
-            const overOdds = bestOverBook?.price || 0;
-            const underOdds = bestUnderBook?.price || 0;
-            
-            // Convert to decimal for fair comparison
-            const overDec = americanToDecimal(overOdds);
-            const underDec = americanToDecimal(underOdds);
-            
-            showOver = overDec > underDec;
-            console.log(`🎯 EV similar, comparing odds: Over ${overOdds} (${overDec.toFixed(3)}) vs Under ${underOdds} (${underDec.toFixed(3)}) -> Show ${showOver ? 'Over' : 'Under'}`);
+            // Only one side available
+            primaryBook = bestOverBook || bestUnderBook;
+            showOver = !!bestOverBook;
           }
-          const primaryBook = showOver ? bestOverBook : bestUnderBook;
           
           console.log(`🎯 PRIMARY BOOK SELECTED: ${propData.playerName}`, {
             showOver: showOver,
