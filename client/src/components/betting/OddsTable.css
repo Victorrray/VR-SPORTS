@@ -1619,15 +1619,9 @@ body,
     }
   }
 
-  /* Show more indicator */
+  /* Show more indicator - replaced with View All Books button */
   .mini-swipe::after {
-    content: 'Swipe to see all books';
-    display: block;
-    text-align: center;
-    font-size: 0.75em;
-    color: rgba(61, 126, 255, 0.7);
-    margin-top: 6px;
-    padding: 4px;
+    display: none;
   }
 }
 

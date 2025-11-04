@@ -750,6 +750,7 @@ export default function OddsTable({
     }
   };
   const [expandedRows, setExpandedRows] = useState({});
+  const [expandedMiniTables, setExpandedMiniTables] = useState({});
   const [page, setPage] = useState(1);
   // Always default to sorting by highest EV (desc) unless explicitly overridden
   const [sort, setSort] = useState(initialSort || { key: "ev", dir: "desc" });
@@ -762,6 +763,7 @@ export default function OddsTable({
   // Reset expanded rows when games change to ensure clean state
   useEffect(() => {
     setExpandedRows({});
+    setExpandedMiniTables({});
   }, [games]);
 
   // Save dataPoints to localStorage
@@ -798,6 +800,7 @@ export default function OddsTable({
   };
 
   const toggleRow = key => setExpandedRows(exp => ({ ...exp, [key]: !exp[key] }));
+  const toggleMiniTable = key => setExpandedMiniTables(exp => ({ ...exp, [key]: !exp[key] }));
 
   // Add debug logging for input data
   useEffect(() => {
@@ -3977,8 +3980,10 @@ export default function OddsTable({
                               const maxDesktopBooks = mode === "props" ? 20 : dataPoints;
                               const allBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop];
                               
-                              // All books should already be filtered (locked ones are skipped at row level)
-                              const displayBooks = allBooks.slice(0, maxDesktopBooks);
+                              // Check if mini table is expanded to show all books
+                              const isMiniTableExpanded = expandedMiniTables[row.key];
+                              const displayBooks = isMiniTableExpanded ? allBooks : allBooks.slice(0, maxDesktopBooks);
+                              const hasMoreBooks = allBooks.length > maxDesktopBooks;
 
                               return (
                                 <>
@@ -4042,18 +4047,72 @@ export default function OddsTable({
                                 </tr>
                                   ))}
                                   
-                                  {/* Show book count for player props - add as last row */}
-                                  {mode === "props" && displayBooks.length > 0 && (
+                                  {/* Show book count or View All Books button */}
+                                  {displayBooks.length > 0 && (
                                     <tr>
                                       <td colSpan={mode === "props" ? 5 : 3} style={{
                                         textAlign: 'center',
-                                        padding: '8px',
+                                        padding: '12px 8px',
                                         fontSize: '11px',
                                         color: 'var(--text-secondary)',
                                         borderTop: '1px solid var(--border-color)',
                                         background: 'var(--bg-secondary)'
                                       }}>
-                                        Showing {displayBooks.length} available book{displayBooks.length !== 1 ? 's' : ''}
+                                        {hasMoreBooks && !isMiniTableExpanded ? (
+                                          <button
+                                            onClick={() => toggleMiniTable(row.key)}
+                                            style={{
+                                              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                                              color: '#fff',
+                                              border: 'none',
+                                              padding: '8px 16px',
+                                              borderRadius: '6px',
+                                              cursor: 'pointer',
+                                              fontSize: '12px',
+                                              fontWeight: '600',
+                                              transition: 'all 0.2s ease',
+                                              boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                              e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.5)';
+                                              e.target.style.transform = 'translateY(-1px)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                              e.target.style.boxShadow = '0 2px 8px rgba(139, 92, 246, 0.3)';
+                                              e.target.style.transform = 'translateY(0)';
+                                            }}
+                                          >
+                                            View All {allBooks.length} Books
+                                          </button>
+                                        ) : hasMoreBooks && isMiniTableExpanded ? (
+                                          <button
+                                            onClick={() => toggleMiniTable(row.key)}
+                                            style={{
+                                              background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+                                              color: '#fff',
+                                              border: 'none',
+                                              padding: '8px 16px',
+                                              borderRadius: '6px',
+                                              cursor: 'pointer',
+                                              fontSize: '12px',
+                                              fontWeight: '600',
+                                              transition: 'all 0.2s ease',
+                                              boxShadow: '0 2px 8px rgba(107, 114, 128, 0.3)'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                              e.target.style.boxShadow = '0 4px 12px rgba(107, 114, 128, 0.5)';
+                                              e.target.style.transform = 'translateY(-1px)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                              e.target.style.boxShadow = '0 2px 8px rgba(107, 114, 128, 0.3)';
+                                              e.target.style.transform = 'translateY(0)';
+                                            }}
+                                          >
+                                            Show Less
+                                          </button>
+                                        ) : (
+                                          <>Showing {displayBooks.length} available book{displayBooks.length !== 1 ? 's' : ''}</>
+                                        )}
                                       </td>
                                     </tr>
                                   )}
