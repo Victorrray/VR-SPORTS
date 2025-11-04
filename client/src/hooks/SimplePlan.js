@@ -87,6 +87,7 @@ export function usePlan() {
     }
     
     console.log('🔄 User changed - fetching plan for:', user.id);
+    console.log('🔄 Current plan state:', plan);
     fetchPlan();
   }, [user?.id, authLoading]);
 
@@ -162,6 +163,15 @@ export function useMe() {
     calls_made: 0,
     unlimited: false
   };
+
+  // Debug logging for useMe hook
+  console.log('🎯 useMe hook - returning me object:', {
+    plan: me.plan,
+    unlimited: me.unlimited,
+    rawPlan: plan,
+    loading: authLoading || planLoading,
+    userId: user?.id
+  });
 
   return {
     me,
