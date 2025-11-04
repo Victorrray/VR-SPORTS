@@ -299,6 +299,11 @@
   .desktop-filter-section .ms-select-all label {
     color: rgba(255, 255, 255, 0.95) !important;
     font-weight: 600 !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
   }
 
   .desktop-filter-section .ms-content {
@@ -315,6 +320,11 @@
   .desktop-filters-sidebar .ms-menu .ms-select-all label {
     color: rgba(255, 255, 255, 0.95) !important;
     font-weight: 600 !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
   }
   
   .desktop-filters-sidebar .ms-menu .ms-content {
