@@ -72,13 +72,12 @@ export function AuthProvider({ children }) {
   const signIn = async (email, password) => {
     console.log('🔐 Signing in user...');
     
-    // Clear cache before sign in
+    // Clear ONLY plan-related cache (NOT user preferences like bankroll/sportsbooks)
     try {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
       localStorage.removeItem('plan');
-      localStorage.removeItem('userProfile');
-      console.log('✅ Cleared cache before sign in');
+      console.log('✅ Cleared plan cache before sign in (preserved bankroll & sportsbooks)');
     } catch (e) {
       console.warn('⚠️ Could not clear cache:', e);
     }
@@ -86,20 +85,19 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     
-    console.log('✅ Sign in successful, cache cleared');
+    console.log('✅ Sign in successful, plan cache cleared');
     return data;
   };
 
   const signUp = async (email, password, metadata = {}) => {
     console.log('📝 Signing up user...');
     
-    // Clear cache before sign up
+    // Clear ONLY plan-related cache (NOT user preferences like bankroll/sportsbooks)
     try {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
       localStorage.removeItem('plan');
-      localStorage.removeItem('userProfile');
-      console.log('✅ Cleared cache before sign up');
+      console.log('✅ Cleared plan cache before sign up (preserved bankroll & sportsbooks)');
     } catch (e) {
       console.warn('⚠️ Could not clear cache:', e);
     }
@@ -111,7 +109,7 @@ export function AuthProvider({ children }) {
     });
     if (error) throw error;
     
-    console.log('✅ Sign up successful, cache cleared');
+    console.log('✅ Sign up successful, plan cache cleared');
     return data;
   };
 

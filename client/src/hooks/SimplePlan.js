@@ -187,9 +187,9 @@ export function usePlan() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user?.id]);
 
-  // Auto-clear cache on page load/mount
+  // Auto-clear plan cache on page load/mount (preserve user preferences)
   useEffect(() => {
-    console.log('🧹 Clearing cache on component mount');
+    console.log('🧹 Clearing plan cache on component mount (preserving bankroll & sportsbooks)');
     try {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');

@@ -12,22 +12,21 @@ const BillingSuccess = () => {
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    // Clear cache immediately on success page load
-    console.log('🎉 Payment successful - clearing cache and refreshing plan');
+    // Clear plan cache immediately on success page load (preserve user preferences)
+    console.log('🎉 Payment successful - clearing plan cache and refreshing');
     
     try {
-      // Clear all plan-related cache
+      // Clear ONLY plan-related cache (NOT user preferences like bankroll/sportsbooks)
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
       localStorage.removeItem('plan');
-      localStorage.removeItem('userProfile');
       
-      // Clear sessionStorage
+      // Clear sessionStorage plan cache
       sessionStorage.removeItem('userPlan');
       sessionStorage.removeItem('me');
       sessionStorage.removeItem('plan');
       
-      console.log('✅ Cache cleared after successful payment');
+      console.log('✅ Plan cache cleared after successful payment (preserved bankroll & sportsbooks)');
     } catch (e) {
       console.warn('⚠️ Could not clear cache:', e);
     }

@@ -58,18 +58,17 @@ export async function clearAllCaches() {
 }
 
 /**
- * Clear plan-related caches only
+ * Clear plan-related caches only (preserves user preferences like bankroll & sportsbooks)
  */
 export function clearPlanCache() {
-  console.log('🧹 Clearing plan cache...');
+  console.log('🧹 Clearing plan cache (preserving bankroll & sportsbooks)...');
   
   try {
     localStorage.removeItem('userPlan');
     localStorage.removeItem('me');
     localStorage.removeItem('plan');
     localStorage.removeItem('planData');
-    localStorage.removeItem('userProfile');
-    console.log('✅ Plan cache cleared');
+    console.log('✅ Plan cache cleared (bankroll & sportsbooks preserved)');
   } catch (e) {
     console.warn('⚠️ Could not clear plan cache:', e);
   }
