@@ -332,6 +332,7 @@
   z-index: 1000;
   animation: slideDown 0.2s ease;
   overflow: hidden;
+  pointer-events: auto;
 }
 
 @keyframes slideDown {
@@ -410,6 +411,8 @@
   text-decoration: none;
   transition: all 0.2s ease;
   border-left: 3px solid transparent;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .dropdownItem:hover {
@@ -449,6 +452,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  pointer-events: auto;
 }
 
 .upgradeBtn:hover {
@@ -472,6 +476,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  pointer-events: auto;
 }
 
 .logoutBtn:hover {
