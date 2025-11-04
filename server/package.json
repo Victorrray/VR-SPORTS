@@ -20,6 +20,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^7.2.0",
     "helmet": "^7.1.0",
+    "iconv-lite": "^0.6.3",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "serverless-http": "^4.0.0",
