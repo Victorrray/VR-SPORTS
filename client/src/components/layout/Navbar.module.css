@@ -398,7 +398,7 @@
   }
   
   .hamburger {
-    display: flex;
+    display: flex !important;
     order: 1;
   }
   
@@ -582,9 +582,9 @@
   transform: translateY(-4px) scale(1.02);
 }
 
-/* Hamburger improvements */
+/* Hamburger improvements - hidden on desktop, shown on mobile */
 .hamburger {
-  display: none;
+  display: none !important;
   flex-direction: column;
   justify-content: center;
   width: 44px;
