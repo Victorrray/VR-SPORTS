@@ -311,10 +311,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Auto-refresh toggle state (default: enabled)
+  // Auto-refresh toggle state (default: disabled)
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(() => {
     const saved = localStorage.getItem('autoRefreshEnabled');
-    return saved !== null ? saved === 'true' : true; // Default to enabled
+    return saved !== null ? saved === 'true' : false; // Default to disabled
   });
   
   // Toggle auto-refresh and save to localStorage
