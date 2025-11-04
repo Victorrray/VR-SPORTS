@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { 
-  Search, User, ChevronDown, CreditCard, Settings, Menu, X,
+  Search, User, ChevronDown, CreditCard, Settings,
   Home, BarChart3, TrendingUp, LogOut, Bell, Zap, Shield
 } from "lucide-react";
 import { useAuth } from "../../hooks/SimpleAuth";
@@ -18,7 +18,6 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
   const profile = auth?.profile;
   const { me } = useMe();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
   const [q, setQ] = useState("");
@@ -142,19 +141,8 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
           })}
         </div>
 
-        {/* Right Section: Search + User Menu + Mobile Menu (non-landing) */}
+        {/* Right Section: Search + User Menu */}
         <div className={styles.navRight}>
-          {/* Mobile Menu Button (on non-landing pages) */}
-          {!isLandingPage && (
-            <button
-              className={styles.hamburger}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle Menu"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          )}
-
           {/* User Section - Hide on login/signup pages */}
           {!isLoginPage && !user ? (
             <Link to="/login" className={styles.loginBtn}>
@@ -265,85 +253,6 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
           )}
         </div>
       </nav>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className={styles.mobileMenu}>
-          <div className={styles.mobileMenuContent}>
-            {/* Mobile Navigation Links */}
-            {filteredNavLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`${styles.mobileNavLink} ${isActive(link.to) ? styles.active : ""}`}
-                  onClick={(e) => {
-                    handleNavClick(link, e);
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <Icon size={20} />
-                  <span>{link.label}</span>
-                </Link>
-              );
-            })}
-
-            <div className={styles.mobileDivider} />
-
-            {/* Mobile User Section */}
-            {!user ? (
-              <Link
-                to="/login"
-                className={styles.mobileLoginBtn}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <User size={20} />
-                Sign In
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/my-sportsbooks"
-                  className={styles.mobileNavLink}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Settings size={20} />
-                  My Sportsbooks
-                </Link>
-
-                <Link
-                  to="/account"
-                  className={styles.mobileNavLink}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <User size={20} />
-                  Account
-                </Link>
-
-                <Link
-                  to="/subscribe"
-                  className={styles.mobileNavLink}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Zap size={20} />
-                  Subscription
-                </Link>
-
-                <div className={styles.mobileDivider} />
-
-                <button
-                  className={styles.mobileLogoutBtn}
-                  onClick={handleLogout}
-                >
-                  <LogOut size={20} />
-                  Sign Out
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </>
   );
 }
