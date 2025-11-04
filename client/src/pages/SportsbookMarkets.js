@@ -1565,6 +1565,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Force a re-render by updating the table nonce
     setTableNonce(prev => prev + 1);
+    
+    // Scroll to top to show the section header
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
 
@@ -1997,8 +2000,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         condition2: isArbitrageMode && !hasPlatinum
       })}
       
-      {/* Show API error display for connection issues */}
-      {marketsError && !marketsError.includes('Authentication required') ? (
+      {/* Show loading state while plan data is loading */}
+      {meLoading && (isArbitrageMode || isMiddlesMode) ? (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          padding: '24px',
+          textAlign: 'center'
+        }}>
+          <div className="loading-spinner" style={{ marginBottom: '16px' }} />
+          <p style={{ color: 'var(--text-secondary)' }}>Loading your plan information...</p>
+        </div>
+      ) : (marketsError && !marketsError.includes('Authentication required')) ? (
         <ApiErrorDisplay 
           error={marketsError} 
           onRetry={() => window.location.reload()} 
