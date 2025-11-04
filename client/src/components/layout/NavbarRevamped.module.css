@@ -607,10 +607,6 @@
 }
 
 /* Responsive Design */
-/* Hamburger visible on desktop when not on landing page */
-.navRight .hamburger {
-  display: flex;
-}
 
 @media (max-width: 1024px) {
   .navbar {
