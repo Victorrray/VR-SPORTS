@@ -106,7 +106,7 @@ export function usePlan() {
     fetchPlan();
   }, [user?.id, authLoading]);
 
-  // Refresh plan when page becomes visible (user returns to tab) and periodically
+  // Refresh plan when page becomes visible (user returns to tab)
   useEffect(() => {
     if (!user) return;
 
@@ -117,18 +117,9 @@ export function usePlan() {
       }
     };
 
-    // Refresh plan every 30 seconds while page is visible
-    const planRefreshInterval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        console.log('🔄 Periodic plan refresh (30s interval)');
-        fetchPlan();
-      }
-    }, 30000); // 30 seconds
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearInterval(planRefreshInterval);
     };
   }, [user?.id]);
 
