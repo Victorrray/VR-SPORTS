@@ -753,10 +753,6 @@ export default function OddsTable({
   const [page, setPage] = useState(1);
   // Always default to sorting by highest EV (desc) unless explicitly overridden
   const [sort, setSort] = useState(initialSort || { key: "ev", dir: "desc" });
-  const [dataPoints, setDataPoints] = useState(() => {
-    if (typeof window === 'undefined') return 7;
-    return parseInt(localStorage.getItem('dataPoints') || '7', 10);
-  });
   
   // Log sorting information for debugging
   useEffect(() => {

@@ -73,49 +73,12 @@ function getSportFromLeague(league) {
  * @param {Object} bet - Bet object from My Picks
  * @param {Array} espnGames - Array of ESPN game data
  * @returns {Object} {status, actualPayout, confidence}
+ * 
+ * NOTE: This function is disabled because ESPN API service was removed.
  */
 function validateSingleBet(bet, espnGames) {
-  try {
-    const { homeTeam, awayTeam } = parseGameTeams(bet.game);
-    if (!homeTeam || !awayTeam) {
-      console.log(`Could not parse teams from: ${bet.game}`);
-      return { status: null, confidence: 0 };
-    }
-
-    // Find matching game in ESPN data
-    const espnGame = findGameByTeams(espnGames, homeTeam, awayTeam);
-    if (!espnGame) {
-      console.log(`No ESPN game found for: ${bet.game}`);
-      return { status: null, confidence: 0 };
-    }
-
-    // Validate the bet
-    const result = validateBet(espnGame, bet.market, bet.selection);
-    if (!result) {
-      console.log(`Could not validate bet: ${bet.market} - ${bet.selection}`);
-      return { status: null, confidence: 0 };
-    }
-
-    // Calculate actual payout for winning bets
-    let actualPayout = null;
-    if (result === 'won') {
-      actualPayout = bet.potential || bet.stake * 1.91; // Default to -110 odds if no potential
-    } else {
-      actualPayout = 0;
-    }
-
-    console.log(`Bet validation result for ${bet.game}: ${result}`);
-    return {
-      status: result,
-      actualPayout,
-      confidence: 95, // High confidence for ESPN data
-      espnGameId: espnGame.id
-    };
-
-  } catch (error) {
-    console.error('Error validating bet:', error);
-    return { status: null, confidence: 0 };
-  }
+  console.warn('⚠️ Bet validation is currently disabled - ESPN API service has been removed');
+  return { status: null, confidence: 0 };
 }
 
 /**
