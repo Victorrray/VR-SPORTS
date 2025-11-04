@@ -331,7 +331,7 @@
   border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 12px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
+  z-index: 10000;
   animation: slideDown 0.2s ease;
   overflow: hidden;
   pointer-events: auto;
