@@ -5,16 +5,13 @@ import { BrowserRouter } from "react-router-dom";
 // Initialize storage before app renders
 import "./utils/storageInit";
 
-// Initialize cache utilities (exposes window.cacheUtils)
-import "./utils/cacheUtils";
-
 import App from "./App";
 import "./index.css";
 
-// Auto-refresh when Service Worker updates
+// Unregister service workers to simplify caching
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    window.location.reload();
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(registration => registration.unregister());
   });
 }
 

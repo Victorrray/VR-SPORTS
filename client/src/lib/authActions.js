@@ -151,28 +151,8 @@ export async function signOut({
     
     updateProgress(cleanupSteps[currentStep].name, 'completed');
 
-    // Step 4: Clear service worker caches (non-blocking)
+    // Step 4: Redirect
     currentStep = 3;
-    updateProgress(cleanupSteps[currentStep].name);
-    
-    if ('caches' in window) {
-      try {
-        const keys = await caches.keys();
-        await Promise.allSettled(keys.map(k => caches.delete(k)));
-        if (debugAuth) console.log('🔐 signOut: Service worker caches cleared');
-        steps.push({ step: 'caches', success: true });
-      } catch (cacheError) {
-        console.warn('🔐 signOut: Cache clearing failed:', cacheError);
-        steps.push({ step: 'caches', success: false, error: cacheError.message });
-      }
-    } else {
-      steps.push({ step: 'caches', success: true, skipped: true });
-    }
-    
-    updateProgress(cleanupSteps[currentStep].name, 'completed');
-
-    // Step 5: Redirect
-    currentStep = 4;
     updateProgress(cleanupSteps[currentStep].name);
     
     if (debugAuth) console.log('🔐 signOut: Redirecting to:', redirectPath);
