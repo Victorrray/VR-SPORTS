@@ -1,7 +1,7 @@
 // Service Worker for OddSightSeer Platform
-const CACHE_NAME = 'oddssightseer-v1.0.1';
-const STATIC_CACHE = 'oddssightseer-static-v1.0.1';
-const API_CACHE = 'oddssightseer-api-v1.0.1';
+const CACHE_NAME = 'oddssightseer-v1.0.2';
+const STATIC_CACHE = 'oddssightseer-static-v1.0.2';
+const API_CACHE = 'oddssightseer-api-v1.0.2';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -41,16 +41,18 @@ self.addEventListener('activate', (event) => {
   
   event.waitUntil(
     caches.keys().then(cacheNames => {
+      console.log('🧹 SW: Found caches:', cacheNames);
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
-            console.log('Deleting old cache:', cacheName);
+          // Delete ALL old caches, keep only current version
+          if (cacheName !== STATIC_CACHE && cacheName !== API_CACHE && cacheName !== CACHE_NAME) {
+            console.log('🧹 SW: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('Service Worker activated');
+      console.log('✅ SW: Activated and ready to serve');
       return self.clients.claim();
     })
   );
