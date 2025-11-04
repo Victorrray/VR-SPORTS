@@ -15,7 +15,7 @@ const { API_KEY } = require('../config/constants');
  * Returns list of available sports with Supabase caching
  * Also fetches NCAA team logos from ESPN
  */
-router.get('/sports', requireUser, checkPlanAccess, async (_req, res) => {
+router.get('/sports', requireUser, checkPlanAccess, async (req, res) => {
   try {
     const supabase = req.app.locals.supabase;
 
