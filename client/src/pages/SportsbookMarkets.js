@@ -1556,20 +1556,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       searchParams.delete('mode'); // Remove mode param for game odds
     }
     
-    // Use navigate with replace to update URL without page reload
-    const newUrl = `${location.pathname}?${searchParams.toString()}`;
-    console.log(`🔄 Navigating to: ${newUrl}`);
-    navigate(newUrl, { replace: true });
+    // Build the new URL
+    const newUrl = searchParams.toString() ? `${location.pathname}?${searchParams.toString()}` : location.pathname;
+    console.log(`🔄 Updating URL to: ${newUrl}`);
+    
+    // Use window.history.replaceState directly to avoid navigation issues
+    window.history.replaceState(null, '', newUrl);
     
     // Force a re-render by updating the table nonce
     setTableNonce(prev => prev + 1);
-    
-    // Use replace state to avoid breaking browser history
-    window.history.replaceState(
-      null, 
-      '', 
-      searchParams.toString() ? `${location.pathname}?${searchParams.toString()}` : location.pathname
-    );
   };
 
 
