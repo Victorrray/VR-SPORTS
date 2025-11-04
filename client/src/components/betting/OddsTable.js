@@ -635,6 +635,7 @@ export default function OddsTable({
   betSlipCount = 0,
   onOpenBetSlip = null,
   searchQuery = "", // Add search query prop
+  dataPoints = 10, // Minimum number of sportsbooks for a bet to be shown
 }) {
   
   // Get user plan information for free trial restrictions
@@ -2284,6 +2285,24 @@ export default function OddsTable({
       console.log('🔍 SEARCH FILTER: Rows after search:', r.length);
     }
     
+    // Apply Data Points filter - filter bets by minimum number of available sportsbooks
+    if (typeof dataPoints === 'number' && dataPoints > 0) {
+      console.log(`🔍 DATA POINTS FILTER: Filtering for minimum ${dataPoints} sportsbooks`);
+      r = r.filter(row => {
+        // Count unique sportsbooks that have this specific bet
+        const allBooks = row.allBooks || [];
+        const uniqueBooks = new Set(allBooks.map(b => (b.bookmaker?.key || b.book || '').toLowerCase()));
+        const bookCount = uniqueBooks.size;
+        
+        const hasEnoughBooks = bookCount >= dataPoints;
+        if (!hasEnoughBooks) {
+          console.log(`🔍 DATA POINTS FILTER: Filtering out ${row.playerName || row.out?.name} - only ${bookCount} books (need ${dataPoints})`);
+        }
+        return hasEnoughBooks;
+      });
+      console.log(`🔍 DATA POINTS FILTER: ${r.length} rows after filtering`);
+    }
+    
     // Apply EV filter if specified, but always show DFS app bets
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
@@ -2387,7 +2406,7 @@ export default function OddsTable({
       // If both locked or both unlocked, use normal sorting
       return sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b);
     });
-  }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap, searchQuery, mode]);
+  }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap, searchQuery, mode, dataPoints]);
 
   const totalPages = Math.ceil(rows.length / pageSize);
   const paginatedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page, pageSize]);
