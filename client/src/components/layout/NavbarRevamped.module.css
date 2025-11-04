@@ -491,6 +491,7 @@
   -webkit-backdrop-filter: blur(4px);
   z-index: 99;
   animation: fadeIn 0.2s ease;
+  pointer-events: auto;
 }
 
 @keyframes fadeIn {
@@ -515,6 +516,8 @@
   border-radius: 0 16px 16px 0;
   overflow-y: auto;
   animation: slideInLeft 0.3s ease;
+  z-index: 100;
+  pointer-events: auto;
 }
 
 @keyframes slideInLeft {
