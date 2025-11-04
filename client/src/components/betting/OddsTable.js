@@ -2787,25 +2787,9 @@ export default function OddsTable({
 
   return (
     <div className={`odds-table-card revamp${allCaps ? ' all-caps' : ''}`}>
-      {/* Filters Menu - Data Points + Odds Format */}
+      {/* Filters Menu - Odds Format */}
       {!oddsFormatProp && (
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, marginBottom:16, padding:'12px', background:'rgba(139, 92, 246, 0.08)', borderRadius:8, border:'1px solid rgba(139, 92, 246, 0.2)' }}>
-          {/* Data Points Slider (only for straight bets, not props) */}
-          {mode !== "props" && (
-            <div style={{ display:'flex', alignItems:'center', gap:12, flex:1 }}>
-              <span style={{ opacity:.9, fontWeight:700, fontSize:'0.92em', minWidth:'100px' }}>Data Points:</span>
-              <input 
-                type="range" 
-                min="3" 
-                max="10" 
-                value={dataPoints}
-                onChange={(e) => setDataPoints(parseInt(e.target.value, 10))}
-                style={{ flex:1, height:'6px', borderRadius:'3px', background:'rgba(139, 92, 246, 0.3)', outline:'none', cursor:'pointer' }}
-              />
-              <span style={{ opacity:.9, fontWeight:700, fontSize:'0.92em', minWidth:'40px', textAlign:'right', color:'var(--accent)' }}>{dataPoints}</span>
-            </div>
-          )}
-
           {/* Odds Format Toggle */}
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <span style={{ opacity:.8, fontWeight:700, fontSize:'0.92em' }}>Odds:</span>
