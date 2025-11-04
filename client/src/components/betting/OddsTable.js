@@ -3405,13 +3405,35 @@ export default function OddsTable({
 
                             const normalizeBookKeyForEntry = (entry) => normalizeBookKey(entry?.bookmaker?.key || entry?.book || '');
 
+                            // Find best odds across all books for this market
+                            const findBestOdds = (books) => {
+                              if (!books || books.length === 0) return null;
+                              
+                              return books.reduce((best, current) => {
+                                const currentOdds = current.price ?? current.odds;
+                                const bestOdds = best.price ?? best.odds;
+                                
+                                if (!currentOdds || !bestOdds) return best;
+                                
+                                // Convert to decimal for comparison
+                                const currentDec = currentOdds > 0 ? (currentOdds / 100) + 1 : (100 / Math.abs(currentOdds)) + 1;
+                                const bestDec = bestOdds > 0 ? (bestOdds / 100) + 1 : (100 / Math.abs(bestOdds)) + 1;
+                                
+                                return currentDec > bestDec ? current : best;
+                              });
+                            };
+
+                            const bestOddsBook = findBestOdds(dedupedBooks);
+                            const bestOddsKey = bestOddsBook ? normalizeBookKey(bestOddsBook.bookmaker?.key || bestOddsBook.book) : null;
+
                             const topEntry = row.bk ? {
                               price: row.out?.price,
                               odds: row.out?.price,
                               book: row.bk?.title,
                               bookmaker: row.bk,
                               market: row.mkt,
-                              point: row.out?.point
+                              point: row.out?.point,
+                              isBestOdds: bestOddsKey && normalizeBookKey(row.bk?.key) === bestOddsKey
                             } : null;
 
                             const orderedBooks = [];
@@ -3424,6 +3446,27 @@ export default function OddsTable({
                               seenBookKeys.add(key);
                               orderedBooks.push(entry);
                             };
+
+                            // Sort combined books to put best odds first
+                            const sortedCombined = combinedBooks.slice().sort((a, b) => {
+                              const aKey = normalizeBookKeyForEntry(a);
+                              const bKey = normalizeBookKeyForEntry(b);
+                              
+                              // Best odds book goes first
+                              if (aKey === bestOddsKey && bKey !== bestOddsKey) return -1;
+                              if (bKey === bestOddsKey && aKey !== bestOddsKey) return 1;
+                              
+                              // Then sort by priority and odds
+                              const aPriority = getMiniTablePriorityIndex(a.bookmaker?.key || a.book);
+                              const bPriority = getMiniTablePriorityIndex(b.bookmaker?.key || b.book);
+                              const safeAPriority = aPriority === -1 ? 999 : aPriority;
+                              const safeBPriority = bPriority === -1 ? 999 : bPriority;
+                              
+                              if (safeAPriority !== safeBPriority) {
+                                return safeAPriority - safeBPriority;
+                              }
+                              return oddsCompare(a, b);
+                            });
 
                             pushEntry(topEntry);
                             
@@ -3472,7 +3515,13 @@ export default function OddsTable({
                             //   }
                             // }
                             
-                            combinedBooks.forEach(pushEntry);
+                            sortedCombined.forEach(book => {
+                              const entry = {
+                                ...book,
+                                isBestOdds: normalizeBookKeyForEntry(book) === bestOddsKey
+                              };
+                              pushEntry(entry);
+                            });
 
                             let cols = orderedBooks;
                             
@@ -3742,12 +3791,18 @@ export default function OddsTable({
                                       // Regular books show two odds columns (home/away)
                                       <>
                                         <div className="mini-odds-col">
-                                          <div className="mini-swipe-odds">
+                                          <div className={`mini-swipe-odds ${ob.isBestOdds ? 'best-odds' : ''}`}>
+                                            {ob.isBestOdds && (
+                                              <span className="best-odds-indicator" title="Best odds available">●</span>
+                                            )}
                                             {formatOdds(Number(grab(ob, true)))}
                                           </div>
                                         </div>
                                         <div className="mini-odds-col">
-                                          <div className="mini-swipe-odds">
+                                          <div className={`mini-swipe-odds ${ob.isBestOdds ? 'best-odds' : ''}`}>
+                                            {ob.isBestOdds && (
+                                              <span className="best-odds-indicator" title="Best odds available">●</span>
+                                            )}
                                             {formatOdds(Number(grab(ob, false)))}
                                           </div>
                                         </div>
