@@ -1,15 +1,19 @@
 /**
  * Bet Validation Service
  * Automatically validates bet results using ESPN API data
+ * 
+ * NOTE: ESPN API service has been removed. This file is kept for reference
+ * but the validation functions are disabled until the ESPN API service is restored.
  */
 
-import {
-  fetchESPNScoreboard,
-  findGameByTeams,
-  validateBet,
-  getDateRange,
-  formatESPNDate
-} from './espnApi.js';
+// Import removed - ESPN API service no longer available
+// import {
+//   fetchESPNScoreboard,
+//   findGameByTeams,
+//   validateBet,
+//   getDateRange,
+//   formatESPNDate
+// } from './espnApi.js';
 
 const LS_KEY = "oss_my_picks_v1";
 
@@ -117,125 +121,18 @@ function validateSingleBet(bet, espnGames) {
 /**
  * Validate all pending bets
  * @returns {Promise<Object>} Validation results
+ * 
+ * NOTE: This function is disabled because ESPN API service was removed.
+ * The Scores page has been removed from the application.
  */
 export async function validateAllBets() {
-  try {
-    // Load picks from localStorage
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return { validated: 0, updated: 0, errors: [] };
-
-    const picks = JSON.parse(raw);
-    const pendingBets = picks.filter(p => !p.status || p.status === 'pending');
-
-    if (pendingBets.length === 0) {
-      return { validated: 0, updated: 0, errors: [], message: 'No pending bets to validate' };
-    }
-
-    console.log(`Validating ${pendingBets.length} pending bets...`);
-
-    // Group bets by sport for efficient API calls
-    const betsBySport = {};
-    pendingBets.forEach(bet => {
-      const sport = getSportFromLeague(bet.league);
-      console.log(`Debug: bet object:`, bet);
-      console.log(`Debug: bet.league="${bet.league}", mapped sport="${sport}"`);
-      if (!betsBySport[sport]) {
-        betsBySport[sport] = [];
-      }
-      betsBySport[sport].push(bet);
-    });
-
-    const validationResults = [];
-    const errors = [];
-
-    // Validate each sport group
-    for (const [sport, sportBets] of Object.entries(betsBySport)) {
-      try {
-        console.log(`Fetching ${sport} games for validation...`);
-        
-        // Get recent games (last 7 days)
-        const dates = getDateRange(7);
-        let allGames = [];
-
-        // Fetch games for each date
-        for (const date of dates) {
-          try {
-            const scoreboard = await fetchESPNScoreboard(sport, date);
-            if (scoreboard?.events) {
-              allGames = allGames.concat(scoreboard.events);
-            }
-          } catch (dateError) {
-            console.warn(`Error fetching ${sport} games for ${date}:`, dateError);
-          }
-        }
-
-        // Also fetch today's games without date filter
-        try {
-          const todayScoreboard = await fetchESPNScoreboard(sport);
-          if (todayScoreboard?.events) {
-            allGames = allGames.concat(todayScoreboard.events);
-          }
-        } catch (todayError) {
-          console.warn(`Error fetching today's ${sport} games:`, todayError);
-        }
-
-        console.log(`Found ${allGames.length} ${sport} games to check`);
-
-        // Validate each bet for this sport
-        for (const bet of sportBets) {
-          const result = validateSingleBet(bet, allGames);
-          validationResults.push({
-            betId: bet.id,
-            ...result
-          });
-        }
-
-      } catch (sportError) {
-        console.error(`Error validating ${sport} bets:`, sportError);
-        errors.push(`Failed to validate ${sport} bets: ${sportError.message}`);
-      }
-    }
-
-    // Update picks with validation results
-    let updatedCount = 0;
-    const updatedPicks = picks.map(pick => {
-      const validation = validationResults.find(v => v.betId === pick.id);
-      
-      if (validation && validation.status && validation.confidence > 80) {
-        updatedCount++;
-        return {
-          ...pick,
-          status: validation.status,
-          actualPayout: validation.actualPayout,
-          settledDate: new Date().toISOString(),
-          validatedBy: 'ESPN API',
-          validationConfidence: validation.confidence,
-          espnGameId: validation.espnGameId
-        };
-      }
-      
-      return pick;
-    });
-
-    // Save updated picks
-    localStorage.setItem(LS_KEY, JSON.stringify(updatedPicks));
-
-    return {
-      validated: validationResults.filter(v => v.status).length,
-      updated: updatedCount,
-      errors,
-      message: `Successfully validated ${updatedCount} bets`
-    };
-
-  } catch (error) {
-    console.error('Error in validateAllBets:', error);
-    return {
-      validated: 0,
-      updated: 0,
-      errors: [error.message],
-      message: 'Validation failed'
-    };
-  }
+  console.warn('⚠️ Bet validation is currently disabled - ESPN API service has been removed');
+  return {
+    validated: 0,
+    updated: 0,
+    errors: ['ESPN API service has been removed'],
+    message: 'Bet validation is currently unavailable'
+  };
 }
 
 /**
