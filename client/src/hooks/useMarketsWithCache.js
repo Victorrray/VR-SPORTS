@@ -9,7 +9,7 @@ import { useCachedOdds } from './useCachedOdds';
  * and falls back to direct API calls for other sports
  */
 export const useMarketsWithCache = (sports = [], regions = [], markets = [], options = {}) => {
-  const { enabled = true, date = null } = options;
+  const { enabled = true, date = null, autoRefresh = true } = options;
   
   // Determine if we should use cached data
   // DISABLED: Now using Supabase caching in main /api/odds endpoint instead
