@@ -1055,6 +1055,12 @@ body,
   color: rgba(255, 255, 255, 0.95);
   white-space: nowrap;
   letter-spacing: 0.5px;
+  position: relative;
+}
+
+/* Remove white circle indicators from odds cells */
+.mini-odds-cell::before {
+  display: none !important;
 }
 
 .mini-pick-col {
