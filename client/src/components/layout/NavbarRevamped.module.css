@@ -321,9 +321,9 @@
 
 /* User Dropdown Menu */
 .userDropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
+  position: fixed;
+  top: auto;
+  right: 16px;
   width: 320px;
   background: rgba(10, 6, 18, 0.98);
   backdrop-filter: blur(24px);
@@ -335,6 +335,7 @@
   animation: slideDown 0.2s ease;
   overflow: hidden;
   pointer-events: auto;
+  top: 70px;
 }
 
 @keyframes slideDown {
