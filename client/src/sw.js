@@ -74,30 +74,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // /api/me should always fetch fresh (never cache)
+  // /api/me should bypass service worker completely - let browser handle it
   if (url.pathname.includes('/api/me')) {
-    console.log('🔄 SW: Bypassing cache for /api/me - fetching fresh plan data');
-    event.respondWith(
-      fetch(request).then(response => {
-        console.log('✅ SW: /api/me response received:', response.status);
-        return response;
-      }).catch((error) => {
-        console.error('❌ SW: /api/me fetch failed:', error);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Offline', 
-            message: 'Cannot fetch plan data offline',
-            plan: 'free'
-          }),
-          {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-      })
-    );
-    return;
+    console.log('🔄 SW: Bypassing service worker for /api/me - letting browser handle');
+    return; // Don't intercept, let browser make the request directly
   }
 
   // Handle static assets
