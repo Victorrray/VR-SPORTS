@@ -12,6 +12,30 @@ const BillingSuccess = () => {
   const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
+    // Clear cache immediately on success page load
+    console.log('🎉 Payment successful - clearing cache and refreshing plan');
+    
+    try {
+      // Clear all plan-related cache
+      localStorage.removeItem('userPlan');
+      localStorage.removeItem('me');
+      localStorage.removeItem('plan');
+      localStorage.removeItem('userProfile');
+      
+      // Clear sessionStorage
+      sessionStorage.removeItem('userPlan');
+      sessionStorage.removeItem('me');
+      sessionStorage.removeItem('plan');
+      
+      console.log('✅ Cache cleared after successful payment');
+    } catch (e) {
+      console.warn('⚠️ Could not clear cache:', e);
+    }
+    
+    // Trigger plan refresh event so useMe hook refetches
+    console.log('📢 Dispatching planUpdated event');
+    window.dispatchEvent(new Event('planUpdated'));
+    
     // Simple timeout to show success state
     const timer = setTimeout(() => {
       setLoading(false);

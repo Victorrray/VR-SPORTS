@@ -70,18 +70,48 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signIn = async (email, password) => {
+    console.log('🔐 Signing in user...');
+    
+    // Clear cache before sign in
+    try {
+      localStorage.removeItem('userPlan');
+      localStorage.removeItem('me');
+      localStorage.removeItem('plan');
+      localStorage.removeItem('userProfile');
+      console.log('✅ Cleared cache before sign in');
+    } catch (e) {
+      console.warn('⚠️ Could not clear cache:', e);
+    }
+    
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    
+    console.log('✅ Sign in successful, cache cleared');
     return data;
   };
 
   const signUp = async (email, password, metadata = {}) => {
+    console.log('📝 Signing up user...');
+    
+    // Clear cache before sign up
+    try {
+      localStorage.removeItem('userPlan');
+      localStorage.removeItem('me');
+      localStorage.removeItem('plan');
+      localStorage.removeItem('userProfile');
+      console.log('✅ Cleared cache before sign up');
+    } catch (e) {
+      console.warn('⚠️ Could not clear cache:', e);
+    }
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: metadata }
     });
     if (error) throw error;
+    
+    console.log('✅ Sign up successful, cache cleared');
     return data;
   };
 

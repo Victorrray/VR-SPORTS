@@ -165,6 +165,40 @@ export function usePlan() {
     return () => window.removeEventListener('planUpdated', handlePlanUpdate);
   }, [user?.id]);
 
+  // Listen for visibility changes and clear cache when returning to tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ Page became visible - clearing cache and refreshing plan');
+        // Clear plan cache
+        try {
+          localStorage.removeItem('userPlan');
+          localStorage.removeItem('me');
+          localStorage.removeItem('plan');
+        } catch (e) {
+          console.warn('⚠️ Could not clear cache:', e);
+        }
+        // Refresh plan data
+        fetchPlan();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user?.id]);
+
+  // Auto-clear cache on page load/mount
+  useEffect(() => {
+    console.log('🧹 Clearing cache on component mount');
+    try {
+      localStorage.removeItem('userPlan');
+      localStorage.removeItem('me');
+      localStorage.removeItem('plan');
+    } catch (e) {
+      console.warn('⚠️ Could not clear cache on mount:', e);
+    }
+  }, []);
+
   return { 
     plan, 
     planLoading,
