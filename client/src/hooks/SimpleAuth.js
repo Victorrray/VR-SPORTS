@@ -114,10 +114,26 @@ export function AuthProvider({ children }) {
   };
 
   const signOut = async () => {
+    console.log('🔐 Signing out user...');
+    
+    // Clear plan cache on sign out (preserve user preferences like bankroll/sportsbooks)
+    try {
+      localStorage.removeItem('userPlan');
+      localStorage.removeItem('me');
+      localStorage.removeItem('plan');
+      sessionStorage.removeItem('userPlan');
+      sessionStorage.removeItem('me');
+      sessionStorage.removeItem('plan');
+      console.log('✅ Plan cache cleared on sign out (preserved bankroll & sportsbooks)');
+    } catch (e) {
+      console.warn('⚠️ Could not clear cache on sign out:', e);
+    }
+    
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setUser(null);
     setSession(null);
+    console.log('✅ Sign out completed');
   };
 
   const setUsername = async (username) => {

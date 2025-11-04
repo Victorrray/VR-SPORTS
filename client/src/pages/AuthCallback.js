@@ -15,6 +15,20 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // Clear plan cache for OAuth users (preserve user preferences)
+        console.log('🧹 AuthCallback: Clearing plan cache for OAuth user');
+        try {
+          localStorage.removeItem('userPlan');
+          localStorage.removeItem('me');
+          localStorage.removeItem('plan');
+          sessionStorage.removeItem('userPlan');
+          sessionStorage.removeItem('me');
+          sessionStorage.removeItem('plan');
+          console.log('✅ Plan cache cleared for OAuth user (preserved bankroll & sportsbooks)');
+        } catch (e) {
+          console.warn('⚠️ Could not clear cache:', e);
+        }
+
         const { data } = await supabase.auth.getSession();
         if (!data.session) {
           setStatus('Authentication failed. Redirecting to login...');
