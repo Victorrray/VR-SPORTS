@@ -273,10 +273,6 @@
 }
 
 .planLabel {
-  display: none;
-}
-
-.planBadge:hover .planLabel {
   display: inline;
 }
 
