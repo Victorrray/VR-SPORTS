@@ -66,9 +66,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle API requests
-  if (url.pathname.startsWith('/api/')) {
+  // Handle API requests (but NOT /api/me - always fetch fresh for plan data)
+  if (url.pathname.startsWith('/api/') && !url.pathname.includes('/api/me')) {
     event.respondWith(handleApiRequest(request));
+    return;
+  }
+  
+  // /api/me should always fetch fresh (never cache)
+  if (url.pathname.includes('/api/me')) {
+    event.respondWith(
+      fetch(request).catch(() => {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Offline', 
+            message: 'Cannot fetch plan data offline',
+            plan: 'free'
+          }),
+          {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      })
+    );
     return;
   }
 
