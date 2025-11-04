@@ -1825,8 +1825,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               </>
             )}
 
-            {/* Data Points Slider - Always show for straight bets */}
-            {!showPlayerProps && (
+            {/* Data Points Slider - Show for straight bets and player props */}
+            {(showPlayerProps || (!showArbitrage && !showMiddles)) && (
               <div className="desktop-filter-section">
                 <div className="desktop-filter-label">
                   <span>📊</span> Data Points
