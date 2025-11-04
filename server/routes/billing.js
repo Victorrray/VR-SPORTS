@@ -43,10 +43,12 @@ router.post('/webhook',
         if (event.type === 'checkout.session.completed') {
           const session = event.data.object;
           const userId = session.metadata?.userId;
+          const planFromMetadata = session.metadata?.plan;
           
           console.log(`🔍 Processing checkout.session.completed:`, {
             sessionId: session.id,
             userId: userId,
+            plan: planFromMetadata,
             hasSubscription: !!session.subscription,
             supabaseConnected: !!supabase
           });
@@ -112,12 +114,15 @@ router.post('/webhook',
             endDate: subscriptionEndDate.toISOString()
           });
           
+          // Use the plan from metadata, default to 'platinum' if not specified
+          const planToSet = planFromMetadata || 'platinum';
+          
           // Update user plan and subscription end date in Supabase
-          console.log(`🔍 About to update Supabase for user: ${userId}`);
+          console.log(`🔍 About to update Supabase for user: ${userId} with plan: ${planToSet}`);
           const { error } = await supabase
             .from('users')
             .update({ 
-              plan: 'gold',
+              plan: planToSet,
               subscription_end_date: subscriptionEndDate.toISOString(),
               grandfathered: false,  // Paying users are not grandfathered
               stripe_customer_id: subscription.customer,
@@ -130,7 +135,7 @@ router.post('/webhook',
             throw error;
           }
           
-          console.log(`✅ Plan set to gold via webhook: ${userId}, expires: ${subscriptionEndDate}`);
+          console.log(`✅ Plan set to ${planToSet} via webhook: ${userId}, expires: ${subscriptionEndDate}`);
         }
         
         // Handle subscription cancellation/deletion
