@@ -176,7 +176,7 @@ async function handleStaticRequest(request) {
   try {
     const u = new URL(request.url);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') {
-      return fetch(request);
+      return fetch(request).catch(() => new Response('Not Found', { status: 404 }));
     }
   } catch (_) {}
 
@@ -194,11 +194,13 @@ async function handleStaticRequest(request) {
     }
     return response;
   } catch (error) {
+    console.warn('Service Worker: fetch failed for', request.url, error);
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
       return cache.match('/') || new Response('Offline');
     }
-    throw error;
+    // For non-navigation requests, return a 503 Service Unavailable response
+    return new Response('Service Unavailable', { status: 503 });
   }
 }
 

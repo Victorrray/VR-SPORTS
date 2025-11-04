@@ -153,11 +153,13 @@ async function handleStaticRequest(request) {
     }
     return response;
   } catch (error) {
+    console.warn('Service Worker: fetch failed for', request.url, error);
     // Return offline page for navigation requests
     if (request.mode === 'navigate') {
       return cache.match('/') || new Response('Offline');
     }
-    throw error;
+    // For non-navigation requests, return a 503 Service Unavailable response
+    return new Response('Service Unavailable', { status: 503 });
   }
 }
 
