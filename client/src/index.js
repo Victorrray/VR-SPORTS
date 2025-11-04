@@ -5,6 +5,9 @@ import { BrowserRouter } from "react-router-dom";
 // Initialize storage before app renders
 import "./utils/storageInit";
 
+// Initialize cache utilities (exposes window.cacheUtils)
+import "./utils/cacheUtils";
+
 import App from "./App";
 import "./index.css";
 

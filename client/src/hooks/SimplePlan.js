@@ -33,11 +33,16 @@ export function usePlan() {
       console.log('🔐 Session token available:', !!token);
       console.log('🔐 Session user:', session?.user?.id);
       
+      // Generate unique cache buster
+      const cacheBuster = Date.now();
+      
       const headers = { 
         'x-user-id': user.id,
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
-        'Expires': '0'
+        'Expires': '0',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Cache-Buster': cacheBuster.toString()
       };
       
       // Add auth token if available
@@ -45,15 +50,25 @@ export function usePlan() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token, tokenPrefix: token?.substring(0, 20) });
+      console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token, cacheBuster });
       
-      const res = await axios.get(`${API_BASE_URL}/api/me?t=${Date.now()}`, { headers });
+      // Use axios config to prevent caching
+      const res = await axios.get(`${API_BASE_URL}/api/me?t=${cacheBuster}&_=${cacheBuster}`, { 
+        headers,
+        // Prevent axios from caching
+        timeout: 10000,
+        // Force fresh request
+        validateStatus: function (status) {
+          return status >= 200 && status < 300;
+        }
+      });
       
       console.log('✅ Plan API response:', res.data);
       console.log('✅ Plan value:', res.data.plan);
       console.log('✅ Unlimited:', res.data.unlimited);
       console.log('✅ Used:', res.data.used);
       console.log('✅ Remaining:', res.data.remaining);
+      console.log('✅ Response headers:', res.headers);
       
       // Validate response
       if (!res.data || !res.data.plan) {
@@ -121,6 +136,18 @@ export function usePlan() {
     if (!user) return null;
     
     console.log('🔄 Manual plan refresh triggered for user:', user.id);
+    
+    // Clear any cached data
+    try {
+      // Clear localStorage cache
+      localStorage.removeItem('userPlan');
+      localStorage.removeItem('me');
+      localStorage.removeItem('plan');
+      console.log('✅ Cleared localStorage cache');
+    } catch (e) {
+      console.warn('⚠️ Could not clear localStorage:', e);
+    }
+    
     // Force a fresh fetch by clearing any browser cache
     await fetchPlan();
     console.log('✅ Plan refresh complete, new plan:', plan);
