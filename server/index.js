@@ -47,17 +47,27 @@ app.locals.userUsage = new Map(); // In-memory usage tracking
 // Middleware setup
 // CORS configuration
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'https://oddsightseer.com',
-    'https://www.oddsightseer.com',
-    process.env.FRONTEND_URL || 'http://localhost:3000'
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'https://oddsightseer.com',
+      'https://www.oddsightseer.com',
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+
+    // Allow Render frontend deployments
+    if (!origin || allowedOrigins.includes(origin) || origin.includes('.onrender.com')) {
+      callback(null, true);
+    } else {
+      console.log('🚫 CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id', 'Cache-Control', 'Pragma', 'Expires'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 };
 
