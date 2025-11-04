@@ -22,6 +22,20 @@ export default function AuthCallback() {
           return;
         }
 
+        const userId = data.session.user?.id;
+        console.log('🔐 AuthCallback: User authenticated:', userId);
+
+        // Check if user has a username (for OAuth users who might not have one yet)
+        console.log('🔍 AuthCallback: Checking if user has username...');
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', userId)
+          .single();
+
+        const hasUsername = profileData?.username;
+        console.log('🔍 AuthCallback: User has username:', hasUsername);
+
         // Get intent from URL params or localStorage
         const urlIntent = searchParams.get('intent');
         const urlReturnTo = searchParams.get('returnTo');
@@ -30,15 +44,24 @@ export default function AuthCallback() {
         debugLog('AUTH_CALLBACK', 'Processing auth callback', {
           urlIntent,
           urlReturnTo,
-          storedIntent
+          storedIntent,
+          hasUsername
         });
 
         // Determine final intent and returnTo
         const finalIntent = urlIntent || storedIntent?.intent;
-        const finalReturnTo = urlReturnTo || storedIntent?.returnTo || '/app';
+        let finalReturnTo = urlReturnTo || storedIntent?.returnTo || '/app';
 
         // Clear stored intent since we're processing it
         localStorage.removeItem('pricingIntent');
+
+        // If user doesn't have a username, redirect to account page to set it up
+        if (!hasUsername) {
+          console.log('📝 AuthCallback: User needs to set username, redirecting to account...');
+          setStatus('Setting up your profile...');
+          navigate('/account?setup=username', { replace: true });
+          return;
+        }
 
         // Route based on intent
         if (finalIntent === 'upgrade') {

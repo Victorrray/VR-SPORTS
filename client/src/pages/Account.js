@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/SimpleAuth";
 import { useMe } from "../hooks/useMe";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle, RefreshCw, AlertOctagon } from "lucide-react";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
@@ -29,6 +29,7 @@ export default function Account() {
   const { user, signOut } = useAuth();
   const { me, refresh } = useMe();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -49,6 +50,17 @@ export default function Account() {
   const [editingUN, setEditingUN] = useState(false);
   const [value, setValue] = useState("");
   const [status, setStatus] = useState("idle"); // idle|checking|ok|invalid|taken|saving|saved|error|locked
+
+  // Auto-open username setup if redirected from OAuth
+  useEffect(() => {
+    const setupUsername = searchParams.get('setup');
+    if (setupUsername === 'username' && !username) {
+      console.log('📝 Auto-opening username setup for OAuth user');
+      setEditingUN(true);
+      setValue("");
+      setStatus("idle");
+    }
+  }, [searchParams, username]);
 
   // Sportsbook selection
   const [selectedBooks, setSelectedBooks] = useState([]);
