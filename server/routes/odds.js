@@ -189,9 +189,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           console.log(`🎯 Game odds bookmakers for ${sport}: ${bookmakerList}`);
           
-          // Check Supabase cache first
+          // Check Supabase cache first (but skip if player props are requested - they need fresh data)
           let supabaseCachedData = null;
-          if (supabase && oddsCacheService) {
+          const hasPlayerProps = playerPropMarkets.length > 0;
+          
+          if (supabase && oddsCacheService && !hasPlayerProps) {
             try {
               const cachedOdds = await oddsCacheService.getCachedOdds(sport, {
                 markets: marketsToFetch
@@ -207,6 +209,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             } catch (cacheErr) {
               console.warn(`⚠️ Supabase cache error for ${sport}:`, cacheErr.message);
             }
+          } else if (hasPlayerProps) {
+            console.log(`⏭️ Skipping Supabase cache for ${sport} - player props requested (need fresh data)`);
           }
           
           // Use Supabase cache if available
