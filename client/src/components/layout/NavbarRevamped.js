@@ -101,18 +101,8 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
   return (
     <>
       <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
-        {/* Left Section: Logo + Mobile Menu (on landing page) */}
+        {/* Left Section: Logo */}
         <div className={styles.navLeft}>
-          {isLandingPage && (
-            <button
-              className={styles.hamburger}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle Menu"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          )}
-
           <Link to="/" className={styles.brand}>
             <div className={styles.brandLogo}>
               <span className={styles.logoText}>ODD</span>
