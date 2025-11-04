@@ -19,6 +19,8 @@ ORDER BY ordinal_position;
 SELECT 
   constraint_name,
   constraint_type,
+  table_name
+FROM information_schema.table_constraints
   table_name,
   column_name
 FROM information_schema.constraint_column_usage
