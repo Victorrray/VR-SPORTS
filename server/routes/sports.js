@@ -55,7 +55,6 @@ router.get('/sports', requireUser, checkPlanAccess, async (req, res) => {
         { key: "americanfootball_ncaaf", title: "NCAAF", active: true, group: "Major US Sports" },
         { key: "basketball_nba", title: "NBA", active: true, group: "Major US Sports" },
         { key: "basketball_ncaab", title: "NCAAB", active: true, group: "Major US Sports" },
-        { key: "baseball_mlb", title: "MLB", active: true, group: "Major US Sports" },
         { key: "icehockey_nhl", title: "NHL", active: true, group: "Major US Sports" },
         
         // Soccer
@@ -78,6 +77,7 @@ router.get('/sports', requireUser, checkPlanAccess, async (req, res) => {
     
     // Filter unwanted sports
     const excludedSports = [
+      'baseball_mlb', // MLB is out of season - completely delisted
       'americanfootball_ncaaf_championship_winner',
       'americanfootball_nfl_super_bowl_winner',
       'baseball_mlb_world_series_winner',
@@ -140,35 +140,8 @@ router.get('/sports', requireUser, checkPlanAccess, async (req, res) => {
       console.warn('⚠️ Failed to fetch NCAA team logos:', ncaaErr.message);
     }
     
-    // Step 4c: Fetch MLB team logos from ESPN (for baseball)
-    console.log('⚾ Fetching MLB team logos from ESPN');
+    // MLB is out of season - skip team logos fetching
     let mlbTeamLogos = {};
-    try {
-      const mlbResponse = await axios.get(
-        'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams',
-        { timeout: 10000 }
-      );
-      
-      if (mlbResponse.data?.sports?.[0]?.leagues?.[0]?.teams) {
-        const teams = mlbResponse.data.sports[0].leagues[0].teams;
-        teams.forEach(teamWrapper => {
-          const team = teamWrapper.team;
-          if (team && team.id && team.logos && team.logos.length > 0) {
-            mlbTeamLogos[team.id] = {
-              id: team.id,
-              name: team.displayName || team.name,
-              abbreviation: team.abbreviation,
-              logo: team.logos[0].href,
-              color: team.color,
-              alternateColor: team.alternateColor
-            };
-          }
-        });
-        console.log(`✅ Fetched ${Object.keys(mlbTeamLogos).length} MLB team logos`);
-      }
-    } catch (mlbErr) {
-      console.warn('⚠️ Failed to fetch MLB team logos:', mlbErr.message);
-    }
     
     // Step 4d: Fetch NHL team logos from ESPN (for hockey)
     console.log('🏒 Fetching NHL team logos from ESPN');
@@ -381,8 +354,7 @@ router.get('/scores', enforceUsage, async (req, res) => {
       basketball_wnba: "wnba",
       icehockey_nhl: "nhl",
       soccer_epl: "eng.1",
-      soccer_uefa_champs_league: "uefa.champions",
-      baseball_mlb: "mlb"
+      soccer_uefa_champs_league: "uefa.champions"
     };
     const leagueSlug = LEAGUE[sport] || "nfl";
     
