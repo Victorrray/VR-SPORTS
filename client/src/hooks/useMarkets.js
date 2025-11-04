@@ -619,7 +619,7 @@ useEffect(() => {
   }
   
   stableFetch.current();
-}, [sports, regions, markets, fetchMarkets, enabled]);
+}, [sports, regions, markets, enabled]);
 
   // Memoize the return value to prevent unnecessary re-renders
   return useMemo(() => ({
