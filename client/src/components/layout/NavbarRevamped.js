@@ -101,8 +101,20 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
   return (
     <>
       <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
-        {/* Left Section: Logo */}
+        {/* Left Section: Hamburger + Logo */}
         <div className={styles.navLeft}>
+          <button 
+            className={styles.hamburger}
+            aria-label="Menu"
+            onClick={() => {
+              // Mobile menu toggle - can be expanded later
+              console.log('Mobile menu clicked');
+            }}
+          >
+            <span style={{ width: '24px', height: '2px', background: 'currentColor', borderRadius: '2px' }} />
+            <span style={{ width: '24px', height: '2px', background: 'currentColor', borderRadius: '2px' }} />
+            <span style={{ width: '24px', height: '2px', background: 'currentColor', borderRadius: '2px' }} />
+          </button>
           <Link to="/" className={styles.brand}>
             <div className={styles.brandLogo}>
               <span className={styles.logoText}>ODD</span>
