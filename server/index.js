@@ -72,6 +72,13 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// ============================================================================
+// STRIPE WEBHOOK - MUST be before express.json() to access raw body stream
+// ============================================================================
+const bodyParser = require('body-parser');
+const billingRoutes = require('./routes/billing');
+app.use('/api/billing', bodyParser.raw({ type: 'application/json' }), billingRoutes);
+
 // Body parsing with size limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

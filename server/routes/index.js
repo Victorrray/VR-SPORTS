@@ -12,6 +12,9 @@ const oddsRoutes = require('./odds');
 
 /**
  * Register all routes with the Express app
+ * 
+ * NOTE: Billing routes are registered separately in index.js BEFORE express.json()
+ * to allow raw body access for Stripe webhook signature verification
  */
 function registerRoutes(app) {
   // Health check routes
@@ -27,8 +30,8 @@ function registerRoutes(app) {
   // Sports routes
   app.use('/api', sportsRoutes);
   
-  // Billing routes
-  app.use('/api/billing', billingRoutes);
+  // Billing routes - REGISTERED SEPARATELY in index.js before express.json()
+  // app.use('/api/billing', billingRoutes);
   
   // Odds routes
   app.use('/api/odds', oddsRoutes);
