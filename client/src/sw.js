@@ -1,7 +1,7 @@
 // Service Worker for OddSightSeer Platform
-const CACHE_NAME = 'oddssightseer-v1.0.0';
-const STATIC_CACHE = 'oddssightseer-static-v1';
-const API_CACHE = 'oddssightseer-api-v1';
+const CACHE_NAME = 'oddssightseer-v1.0.1';
+const STATIC_CACHE = 'oddssightseer-static-v1.0.1';
+const API_CACHE = 'oddssightseer-api-v1.0.1';
 
 // Assets to cache on install
 const STATIC_ASSETS = [
@@ -74,8 +74,13 @@ self.addEventListener('fetch', (event) => {
   
   // /api/me should always fetch fresh (never cache)
   if (url.pathname.includes('/api/me')) {
+    console.log('🔄 SW: Bypassing cache for /api/me - fetching fresh plan data');
     event.respondWith(
-      fetch(request).catch(() => {
+      fetch(request).then(response => {
+        console.log('✅ SW: /api/me response received:', response.status);
+        return response;
+      }).catch((error) => {
+        console.error('❌ SW: /api/me fetch failed:', error);
         return new Response(
           JSON.stringify({ 
             error: 'Offline', 
