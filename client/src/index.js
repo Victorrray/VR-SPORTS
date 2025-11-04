@@ -11,20 +11,10 @@ import "./utils/cacheUtils";
 import App from "./App";
 import "./index.css";
 
-// Auto-update Service Worker and refresh page when new version is available
+// Auto-refresh when Service Worker updates
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    console.log('🔄 New Service Worker activated - refreshing page for updates');
     window.location.reload();
-  });
-
-  navigator.serviceWorker.ready.then(registration => {
-    // Check for updates every 5 seconds
-    setInterval(() => {
-      registration.update().catch(err => {
-        console.warn('⚠️ SW update check failed:', err);
-      });
-    }, 5000);
   });
 }
 
