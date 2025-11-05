@@ -3990,7 +3990,15 @@ export default function OddsTable({
                                             normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(p.bookmaker?.key) &&
                                             (book.outcomeName === 'Over' || String(book.line || '').includes('Over'))
                                           );
-                                          return overBook ? formatOdds(Number(overBook.price ?? overBook.odds ?? 0)) : '-';
+                                          // Check if this is the best odds for Over
+                                          const isBestOver = overBook && row.allBooks && row.allBooks.some(book => 
+                                            book.outcomeName === 'Over' && americanToDecimal(book.price) < americanToDecimal(overBook.price)
+                                          ) === false;
+                                          return overBook ? (
+                                            <span style={isBestOver ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px', display: 'inline-block' } : {}}>
+                                              {formatOdds(Number(overBook.price ?? overBook.odds ?? 0))}
+                                            </span>
+                                          ) : '-';
                                         })()}
                                       </td>
                                       <td className="mini-odds-cell">
@@ -3999,7 +4007,15 @@ export default function OddsTable({
                                             normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(p.bookmaker?.key) &&
                                             (book.outcomeName === 'Under' || String(book.line || '').includes('Under'))
                                           );
-                                          return underBook ? formatOdds(Number(underBook.price ?? underBook.odds ?? 0)) : '-';
+                                          // Check if this is the best odds for Under
+                                          const isBestUnder = underBook && row.allBooks && row.allBooks.some(book => 
+                                            book.outcomeName === 'Under' && americanToDecimal(book.price) < americanToDecimal(underBook.price)
+                                          ) === false;
+                                          return underBook ? (
+                                            <span style={isBestUnder ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px', display: 'inline-block' } : {}}>
+                                              {formatOdds(Number(underBook.price ?? underBook.odds ?? 0))}
+                                            </span>
+                                          ) : '-';
                                         })()}
                                       </td>
                                     </>
