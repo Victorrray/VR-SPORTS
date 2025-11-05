@@ -10,7 +10,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [expandedBets, setExpandedBets] = useState({});
   const [userPerformance, setUserPerformance] = useState(null);
-  const { addBet, openBetSlip } = useBetSlip();
+  const { addBet, openBetSlip, bets } = useBetSlip();
 
   // Only process data when on home page
   const isHomePage = location.pathname === '/' || location.pathname === '/home';
@@ -362,6 +362,9 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     // Use actual user performance data if available
     const actualPerformance = getPerformanceSummary();
     
+    // Calculate total bets: historical bets + current pending bets in bet slip
+    const totalBetsCount = (actualPerformance.totalBets || 0) + (bets?.length || 0);
+    
     // Always set dashboard data, even if no recommended bets
     const dashboardDataToSet = {
       todayOpportunities: filteredGames.length,
@@ -373,7 +376,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
           ? (recommendedBets.reduce((sum, bet) => sum + parseFloat(bet.edge), 0) / recommendedBets.length).toFixed(1)
           : '0.0'),
         roi: actualPerformance.roi || '0.0',
-        totalBets: actualPerformance.totalBets || 0,
+        totalBets: totalBetsCount,
         netProfit: actualPerformance.netProfit || 0,
         currentStreak: actualPerformance.currentStreak || 0,
         streakType: actualPerformance.streakType
@@ -412,7 +415,7 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
 
     console.log('Setting dashboard data:', dashboardDataToSet);
     setDashboardData(dashboardDataToSet);
-  }, [games, isHomePage]);
+  }, [games, isHomePage, bets]);
 
 
   const StatCard = ({ icon: Icon, title, value, subtitle, color = 'var(--accent)' }) => (
