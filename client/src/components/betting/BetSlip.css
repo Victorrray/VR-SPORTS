@@ -541,7 +541,8 @@
 .bet-amount-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0px;
+  margin-top: 12px;
 }
 
 .amount-input-group {
