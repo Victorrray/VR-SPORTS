@@ -1533,12 +1533,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const handleSectionChange = (sectionId) => {
     console.log(`🔄 Changing section to: ${sectionId}`, { hasPlatinum, userPlan: me?.plan });
     
-    // Update all mode states based on the selected section
-    setShowPlayerProps(sectionId === 'props');
-    setShowArbitrage(sectionId === 'arbitrage');
-    setShowMiddles(sectionId === 'middles');
-    
-    // Update URL to persist mode selection
+    // Update URL to persist mode selection FIRST
     const searchParams = new URLSearchParams(location.search);
     if (sectionId === 'props') {
       searchParams.set('mode', 'props');
@@ -1556,6 +1551,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Use window.history.replaceState directly to avoid navigation issues
     window.history.replaceState(null, '', newUrl);
+    
+    // Update all mode states based on the selected section
+    setShowPlayerProps(sectionId === 'props');
+    setShowArbitrage(sectionId === 'arbitrage');
+    setShowMiddles(sectionId === 'middles');
     
     // Force a re-render by updating the table nonce
     setTableNonce(prev => prev + 1);
