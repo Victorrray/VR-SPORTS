@@ -594,7 +594,7 @@ useEffect(() => {
     }
     activeRequest.current = null;
   };
-}, [enabled, autoRefresh, fetchMarkets, refreshMarkets]);
+}, [enabled, autoRefresh, fetchMarkets, refreshMarkets, paramsKey]);
 
 useEffect(() => {
   if (games) {
