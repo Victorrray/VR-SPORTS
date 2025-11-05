@@ -3969,7 +3969,17 @@ export default function OddsTable({
                               // For straight bets, use the dataPoints slider value
                               // Filter out locked/stale markets to avoid showing unavailable bets
                               const maxDesktopBooks = mode === "props" ? 20 : dataPoints;
-                              const allBooks = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop];
+                              const allBooksUnsorted = [...sortedPrioritizedDesktop, ...sortedFallbackDesktop];
+                              
+                              // Ensure main card book is always at the top
+                              const mainBookKey = normalizeBookKey(row.bk?.key || row.bk?.title);
+                              const mainBook = allBooksUnsorted.find(book => 
+                                normalizeBookKey(book.bookmaker?.key || book.book) === mainBookKey
+                              );
+                              const otherBooks = allBooksUnsorted.filter(book => 
+                                normalizeBookKey(book.bookmaker?.key || book.book) !== mainBookKey
+                              );
+                              const allBooks = mainBook ? [mainBook, ...otherBooks] : allBooksUnsorted;
                               
                               // Check if mini table is expanded to show all books
                               const isMiniTableExpanded = expandedMiniTables[row.key];
