@@ -837,9 +837,9 @@
 }
 
 .bet-amount-section {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
 }
 
 .summary-value {
