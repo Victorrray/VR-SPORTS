@@ -487,7 +487,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       setShowArbitrage(false);
       setShowMiddles(false);
     }
-  }, [location.search, meLoading, showPlayerProps, showArbitrage, showMiddles]); // Include mode states to prevent infinite loops
+  }, [location.search, meLoading]); // Only depend on URL and loading state, not mode states
 
   // Listen for changes to user's sportsbook selections
   useEffect(() => {
