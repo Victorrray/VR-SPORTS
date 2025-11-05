@@ -19,6 +19,7 @@ export default function MySportsbooks() {
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [bankroll, setBankroll] = useState(bankrollManager.getBankroll());
   const [showBankrollModal, setShowBankrollModal] = useState(false);
+  const [bankrollNotification, setBankrollNotification] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -123,17 +124,20 @@ export default function MySportsbooks() {
         const savedValue = localStorage.getItem('userBankroll');
         console.log('Verified saved bankroll in localStorage:', savedValue);
         
-        // Show success feedback
-        alert('Bankroll saved successfully!');
+        // Show success notification
+        setBankrollNotification('success');
+        setTimeout(() => setBankrollNotification(''), 3000);
       } catch (error) {
         console.error('Failed to save bankroll from modal:', error);
-        alert('Error saving bankroll: ' + error.message);
+        setBankrollNotification('error');
+        setTimeout(() => setBankrollNotification(''), 3000);
       }
       
       setShowBankrollModal(false);
     } else {
       console.error('Invalid bankroll:', validation.error);
-      alert('Invalid bankroll: ' + validation.error);
+      setBankrollNotification('error');
+      setTimeout(() => setBankrollNotification(''), 3000);
     }
   };
 
@@ -230,6 +234,31 @@ export default function MySportsbooks() {
       </div>
 
       {showBankrollModal && <BankrollModal />}
+
+      {/* Bankroll Notification Toast */}
+      {bankrollNotification && (
+        <div className={`bankroll-toast bankroll-toast-${bankrollNotification}`}>
+          <div className="toast-content">
+            {bankrollNotification === 'success' ? (
+              <>
+                <svg className="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Bankroll saved successfully!</span>
+              </>
+            ) : (
+              <>
+                <svg className="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Error saving bankroll</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="bankroll-section">
         <div className="bankroll-card">
