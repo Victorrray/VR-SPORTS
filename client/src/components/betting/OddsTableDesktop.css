@@ -105,6 +105,32 @@
     vertical-align: middle !important;
   }
   
+  /* Column width alignment with main table */
+  tr.desktop-mini-wrap .mini-odds-table th:nth-child(1),
+  tr.desktop-mini-wrap .mini-odds-table td:nth-child(1) {
+    width: 22% !important; /* Line column - matches TEAM/LINE */
+  }
+  
+  tr.desktop-mini-wrap .mini-odds-table th:nth-child(2),
+  tr.desktop-mini-wrap .mini-odds-table td:nth-child(2) {
+    width: 15% !important; /* Sportsbook - matches BOOK */
+  }
+  
+  tr.desktop-mini-wrap .mini-odds-table th:nth-child(3),
+  tr.desktop-mini-wrap .mini-odds-table td:nth-child(3) {
+    width: 15% !important; /* Over - matches ODDS */
+  }
+  
+  tr.desktop-mini-wrap .mini-odds-table th:nth-child(4),
+  tr.desktop-mini-wrap .mini-odds-table td:nth-child(4) {
+    width: 15% !important; /* Under - matches ODDS */
+  }
+  
+  tr.desktop-mini-wrap .mini-odds-table th:nth-child(5),
+  tr.desktop-mini-wrap .mini-odds-table td:nth-child(5) {
+    width: 33% !important; /* Add Pick - remaining space */
+  }
+
   /* Sportsbook cell - Left aligned */
   tr.desktop-mini-wrap .mini-book-cell,
   tr.desktop-mini-wrap .mini-odds-table td.mini-book-cell {
