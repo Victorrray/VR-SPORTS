@@ -1,8 +1,8 @@
-/* My Sportsbooks Page Styles */
+/* My Sportsbooks Page Styles - Modern Redesign */
 .sportsbooks-page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 3rem 2rem;
   background: var(--bg-body);
   min-height: 100vh;
   color: var(--text);
@@ -14,9 +14,9 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  margin-bottom: 3.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.15);
 }
 
 .back-button {
@@ -54,46 +54,51 @@
 
 .header-text h1 {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   color: var(--text);
+  letter-spacing: -0.5px;
 }
 
 .header-text p {
-  margin: 0.25rem 0 0 0;
+  margin: 0.5rem 0 0 0;
   color: var(--text-muted);
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 400;
 }
 
 /* Bankroll Section */
 .bankroll-section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .bankroll-card {
-  background: var(--card-bg);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: var(--card-shadow);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.04) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.2);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
 }
 
 .bankroll-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .bankroll-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.1));
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.2));
+  border-radius: 16px;
   color: var(--accent);
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
 }
 
 .bankroll-info h3 {
@@ -378,19 +383,21 @@
 }
 
 .selection-summary {
-  margin-bottom: 2rem;
+  margin-bottom: 3.5rem;
 }
 
 .summary-card {
-  background: var(--bg-elev);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 16px;
-  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.25);
+  border-radius: 20px;
+  padding: 2.5rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 1.5rem;
-  box-shadow: var(--card-shadow);
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .summary-actions {
@@ -402,7 +409,8 @@
 .summary-stats {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 3rem;
+  flex: 1;
 }
 
 .stat-item {
@@ -410,43 +418,48 @@
 }
 
 .stat-number {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent);
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
 }
 
 .stat-divider {
-  width: 1px;
-  height: 40px;
-  background: rgba(139, 92, 246, 0.2);
+  width: 2px;
+  height: 50px;
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.3) 50%, rgba(139, 92, 246, 0.1) 100%);
 }
 
 .save-button {
-  background: linear-gradient(135deg, var(--accent) 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 2rem;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  gap: 0.75rem;
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+  letter-spacing: 0.3px;
 }
 
 .save-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.45);
 }
 
 .save-button:disabled {
@@ -456,6 +469,7 @@
 
 .save-button.saved {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
 }
 
 .spinner {
@@ -475,72 +489,80 @@
 .sportsbooks-sections {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 3rem;
+  margin-bottom: 3rem;
 }
 
 .section {
-  background: var(--bg-elev);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: var(--card-shadow);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(124, 58, 237, 0.02) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.15);
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.12);
 }
 
 .section-header svg {
   color: var(--accent);
+  width: 24px;
+  height: 24px;
 }
 
 .section-header h3 {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--text);
 }
 
 .section-count {
   color: var(--text-muted);
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
 }
 
 .sportsbooks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
 }
 
 .sportsbook-card {
-  background: rgba(139, 92, 246, 0.05);
-  border: 2px solid rgba(139, 92, 246, 0.1);
-  border-radius: 12px;
-  padding: 1rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.04) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.15);
+  border-radius: 14px;
+  padding: 1.25rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .sportsbook-card:hover {
-  border-color: rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.1);
-  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.4);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.08) 100%);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(139, 92, 246, 0.15);
 }
 
 .sportsbook-card.selected {
   border-color: var(--accent);
-  background: rgba(139, 92, 246, 0.15);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(124, 58, 237, 0.12) 100%);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25);
 }
 
 .sportsbook-info {
@@ -589,32 +611,37 @@
 }
 
 .help-card {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 1.5rem;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .help-card svg {
   color: var(--accent);
   flex-shrink: 0;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  width: 28px;
+  height: 28px;
 }
 
 .help-content h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: var(--text);
 }
 
 .help-content p {
   margin: 0;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 /* Mobile Responsive */
