@@ -343,6 +343,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     }
     
     // Step 2: Fetch quarter/half/period markets if requested
+    console.log('🔍 STEP 2 CHECK: quarterMarkets.length =', quarterMarkets.length, 'quarterMarkets =', quarterMarkets);
     if (quarterMarkets.length > 0) {
       console.log('🎯 Step 2: Fetching quarter/half/period markets:', quarterMarkets);
       
@@ -517,6 +518,19 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     }
     
     console.log(`📊 Final response: ${allGames.length} total games/events (including ${allGames.filter(g => g.bookmakers?.some(b => dfsApps.includes(b.key))).length} with player props)`);
+    
+    // Debug: Count markets in response
+    const marketCounts = {};
+    allGames.forEach(game => {
+      game.bookmakers?.forEach(book => {
+        book.markets?.forEach(market => {
+          marketCounts[market.key] = (marketCounts[market.key] || 0) + 1;
+        });
+      });
+    });
+    console.log('📊 FINAL MARKETS IN RESPONSE:', Object.keys(marketCounts).sort().join(', '));
+    console.log('📊 MARKET COUNTS:', marketCounts);
+    
     res.json(allGames);
   } catch (err) {
     console.error('Odds error:', err);
