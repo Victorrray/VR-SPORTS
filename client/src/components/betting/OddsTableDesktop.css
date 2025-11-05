@@ -125,7 +125,7 @@
     vertical-align: middle !important;
   }
   
-  /* Sportsbook cell - Clean design with subtle background */
+  /* Sportsbook cell - Clean design */
   tr.desktop-mini-wrap .mini-book-cell,
   tr.desktop-mini-wrap .mini-odds-table td.mini-book-cell {
     padding: 16px 20px 16px 24px !important;
@@ -133,16 +133,11 @@
     font-size: 0.9em !important;
     font-weight: 600 !important;
     color: rgba(255, 255, 255, 0.9) !important;
-    background: rgba(139, 92, 246, 0.04) !important;
+    background: transparent !important;
     border: none !important;
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
-    transition: all 0.2s ease !important;
-  }
-  
-  tr.desktop-mini-wrap .mini-odds-table tbody tr:hover .mini-book-cell {
-    background: rgba(139, 92, 246, 0.08) !important;
   }
   
   tr.desktop-mini-wrap .mini-book-cell span {
@@ -164,26 +159,19 @@
     flex-shrink: 0 !important;
   }
   
-  /* Odds cells - Enhanced styling with subtle backgrounds */
+  /* Odds cells - NO BOXES */
   tr.desktop-mini-wrap .mini-odds-cell,
   tr.desktop-mini-wrap .mini-odds-table td.mini-odds-cell {
     font-size: 0.9em !important;
     font-weight: 600 !important;
     letter-spacing: 0.2px !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     font-family: 'SF Mono', 'Roboto Mono', monospace !important;
-    padding: 8px 12px !important;
-    background: rgba(139, 92, 246, 0.08) !important;
-    border: 1px solid rgba(139, 92, 246, 0.2) !important;
-    border-radius: 6px !important;
-    box-shadow: 0 2px 4px rgba(139, 92, 246, 0.1) !important;
-    transition: all 0.2s ease !important;
-  }
-  
-  tr.desktop-mini-wrap .mini-odds-table tbody tr:hover .mini-odds-cell {
-    background: rgba(139, 92, 246, 0.15) !important;
-    border-color: rgba(139, 92, 246, 0.4) !important;
-    box-shadow: 0 4px 8px rgba(139, 92, 246, 0.2) !important;
+    padding: 6px 10px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
   
   /* Pick column */
