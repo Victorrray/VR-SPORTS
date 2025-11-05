@@ -4,14 +4,12 @@ import { useAuth } from "../hooks/SimpleAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle, RefreshCw, AlertOctagon } from "lucide-react";
+import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle, RefreshCw } from "lucide-react";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
 import { AVAILABLE_SPORTSBOOKS } from '../constants/sportsbooks';
-import EmergencySignOut from '../components/auth/EmergencySignOut';
 import { withApiBase } from '../config/api';
 import "./Account.css";
-import "../components/auth/emergency-signout.css";
 
 function initialsFromEmail(email = "") {
   const name = (email || "").split("@")[0] || "U";
@@ -525,14 +523,6 @@ export default function Account() {
         <div className="card-header">
           <Shield size={20} />
           <h2>Security & Access</h2>
-          <div className="emergency-icon-container" title="Emergency Sign Out">
-            <AlertOctagon 
-              size={16} 
-              color="#ef4444" 
-              className="emergency-icon"
-              onClick={() => document.getElementById('emergency-signout-modal').showModal()}
-            />
-          </div>
         </div>
         
         <div className="security-actions">
@@ -572,24 +562,6 @@ export default function Account() {
               </small>
             </div>
           </button>
-          
-          {/* Emergency Sign Out Modal */}
-          <dialog id="emergency-signout-modal" className="emergency-modal">
-            <div className="emergency-modal-content">
-              <div className="emergency-header">
-                <AlertOctagon size={20} color="#ef4444" />
-                <h3>Emergency Sign Out</h3>
-              </div>
-              <p>Use this option only if normal sign out doesn't work.</p>
-              <EmergencySignOut />
-              <button 
-                className="emergency-modal-close" 
-                onClick={() => document.getElementById('emergency-signout-modal').close()}
-              >
-                Cancel
-              </button>
-            </div>
-          </dialog>
         </div>
       </section>
 
