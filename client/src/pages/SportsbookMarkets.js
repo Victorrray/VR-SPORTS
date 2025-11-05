@@ -1261,8 +1261,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const getAutoSelectedMarkets = (selectedSports) => {
     const relevantMarkets = getRelevantMarkets(selectedSports);
     // Filter out header items and only return actual market keys
+    // Include both core and special (period) markets
     return relevantMarkets
-      .filter(market => !market.isHeader)
+      .filter(market => !market.isHeader && (market.category === 'core' || market.category === 'special'))
       .map(market => market.key);
   };
 
