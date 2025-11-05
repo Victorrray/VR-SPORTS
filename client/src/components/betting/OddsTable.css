@@ -1700,9 +1700,6 @@ body,
     min-width: 60px;
     text-align: center;
     position: static;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   /* MATCH Column */
@@ -1712,8 +1709,6 @@ body,
     min-width: 220px;
     text-align: left;
     white-space: normal;
-    display: flex;
-    align-items: center;
   }
 
   /* TEAM / LINE Column - Combined, increased for better readability */
