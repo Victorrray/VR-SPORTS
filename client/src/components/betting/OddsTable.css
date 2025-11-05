@@ -475,6 +475,16 @@ body,
 .ev-col { font-weight: 700; }
 .ev-col.positive { color: var(--success) !important; }
 .ev-col.negative { color: var(--danger) !important; }
+
+/* Desktop only: Add vertical border between EV and MATCH columns */
+@media (min-width: 769px) {
+  .odds-grid thead tr th.ev-col {
+    border-right: 2.5px solid #334c;
+  }
+  .odds-grid tbody tr td.ev-col {
+    border-right: 1px solid rgba(139, 92, 246, 0.2);
+  }
+}
 .ev-col .ev-chip {
   display: inline-block;
   padding: .16em .42em;
