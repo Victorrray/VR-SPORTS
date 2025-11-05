@@ -3717,7 +3717,7 @@ export default function OddsTable({
                                       // Combined Over/Under props - show both columns
                                       <>
                                         <div className="mini-odds-col">
-                                          <div className="mini-swipe-odds">
+                                          <div className="mini-swipe-odds" style={ob.isBestOdds ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px' } : {}}>
                                             {(() => {
                                               // Find Over odds for this bookmaker from allBooks (unfiltered)
                                               const overBook = (row.allBooks || []).find(book => 
@@ -3731,7 +3731,7 @@ export default function OddsTable({
                                           </div>
                                         </div>
                                         <div className="mini-odds-col">
-                                          <div className="mini-swipe-odds">
+                                          <div className="mini-swipe-odds" style={ob.isBestOdds ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px' } : {}}>
                                             {(() => {
                                               // Find Under odds for this bookmaker from allBooks (unfiltered)
                                               const underBook = (row.allBooks || []).find(book => 
@@ -3749,7 +3749,7 @@ export default function OddsTable({
                                       // Regular props - show single odds column
                                       <>
                                         <div className="mini-odds-col">
-                                          <div className="mini-swipe-odds">
+                                          <div className="mini-swipe-odds" style={ob.isBestOdds ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px' } : {}}>
                                             {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
                                             {(() => {
                                               // Debug logging for bet limits
@@ -3793,18 +3793,12 @@ export default function OddsTable({
                                       // Regular books show two odds columns (home/away)
                                       <>
                                         <div className="mini-odds-col">
-                                          <div className={`mini-swipe-odds ${ob.isBestOdds ? 'best-odds' : ''}`}>
-                                            {ob.isBestOdds && (
-                                              <span className="best-odds-indicator" title="Best odds available">●</span>
-                                            )}
+                                          <div className="mini-swipe-odds" style={ob.isBestOdds ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px' } : {}}>
                                             {formatOdds(Number(grab(ob, true)))}
                                           </div>
                                         </div>
                                         <div className="mini-odds-col">
-                                          <div className={`mini-swipe-odds ${ob.isBestOdds ? 'best-odds' : ''}`}>
-                                            {ob.isBestOdds && (
-                                              <span className="best-odds-indicator" title="Best odds available">●</span>
-                                            )}
+                                          <div className="mini-swipe-odds" style={ob.isBestOdds ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px' } : {}}>
                                             {formatOdds(Number(grab(ob, false)))}
                                           </div>
                                         </div>
@@ -4056,7 +4050,10 @@ export default function OddsTable({
                                         fontSize: '11px',
                                         color: 'var(--text-secondary)',
                                         borderTop: '1px solid var(--border-color)',
-                                        background: 'var(--bg-secondary)'
+                                        background: 'var(--bg-secondary)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
                                       }}>
                                         {hasMoreBooks && !isMiniTableExpanded ? (
                                           <button
