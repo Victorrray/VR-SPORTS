@@ -3992,7 +3992,7 @@ export default function OddsTable({
                                           );
                                           // Check if this is the best odds for Over
                                           const isBestOver = overBook && row.allBooks && row.allBooks.some(book => 
-                                            book.outcomeName === 'Over' && americanToDecimal(book.price) < americanToDecimal(overBook.price)
+                                            book.outcomeName === 'Over' && americanToDecimal(book.price) > americanToDecimal(overBook.price)
                                           ) === false;
                                           return overBook ? (
                                             <span style={isBestOver ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px', display: 'inline-block' } : {}}>
@@ -4009,7 +4009,7 @@ export default function OddsTable({
                                           );
                                           // Check if this is the best odds for Under
                                           const isBestUnder = underBook && row.allBooks && row.allBooks.some(book => 
-                                            book.outcomeName === 'Under' && americanToDecimal(book.price) < americanToDecimal(underBook.price)
+                                            book.outcomeName === 'Under' && americanToDecimal(book.price) > americanToDecimal(underBook.price)
                                           ) === false;
                                           return underBook ? (
                                             <span style={isBestUnder ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px', display: 'inline-block' } : {}}>
