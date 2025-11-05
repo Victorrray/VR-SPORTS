@@ -453,31 +453,41 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const mode = searchParams.get('mode');
     const urlQuery = searchParams.get('q');
     
+    console.log('🔍 URL Initialization - mode:', mode, 'query:', urlQuery);
+    
     // Set search query from URL if present
     if (urlQuery && urlQuery !== query) {
       console.log('🔍 Setting search query from URL:', urlQuery);
       setQuery(urlQuery);
     }
     
-    if (mode === 'arbitrage') {
+    // Only update mode if it's different from current state to avoid unnecessary re-renders
+    const currentMode = showPlayerProps ? 'props' : showArbitrage ? 'arbitrage' : showMiddles ? 'middles' : 'game';
+    
+    if (mode === 'arbitrage' && currentMode !== 'arbitrage') {
       console.log('🔍 Initializing arbitrage mode from URL parameter');
       setShowPlayerProps(false);
       setShowArbitrage(true);
       setShowMiddles(false);
       // Note: Non-platinum users will see the upgrade message instead of being redirected
-    } else if (mode === 'props') {
+    } else if (mode === 'props' && currentMode !== 'props') {
       console.log('🎯 Initializing player props mode from URL parameter');
       setShowPlayerProps(true);
       setShowArbitrage(false);
       setShowMiddles(false);
-    } else if (mode === 'middles') {
+    } else if (mode === 'middles' && currentMode !== 'middles') {
       console.log('🎪 Initializing middles mode from URL parameter');
       setShowPlayerProps(false);
       setShowArbitrage(false);
       setShowMiddles(true);
       // Note: Non-platinum users will see the upgrade message instead of being redirected
+    } else if (!mode && currentMode !== 'game') {
+      console.log('🎮 Initializing game mode (no mode parameter)');
+      setShowPlayerProps(false);
+      setShowArbitrage(false);
+      setShowMiddles(false);
     }
-  }, [location.search, meLoading]); // Only run when URL parameters or loading state changes
+  }, [location.search, meLoading, showPlayerProps, showArbitrage, showMiddles]); // Include mode states to prevent infinite loops
 
   // Listen for changes to user's sportsbook selections
   useEffect(() => {
@@ -1532,6 +1542,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Handle section change from SectionMenu
   const handleSectionChange = (sectionId) => {
     console.log(`🔄 Changing section to: ${sectionId}`, { hasPlatinum, userPlan: me?.plan });
+    
+    // Check if user has access to premium features
+    if ((sectionId === 'arbitrage' || sectionId === 'middles') && !hasPlatinum) {
+      console.warn(`⚠️ User tried to access ${sectionId} but doesn't have platinum plan`);
+      return; // Don't change section if user doesn't have access
+    }
     
     // Update URL to persist mode selection FIRST
     const searchParams = new URLSearchParams(location.search);
