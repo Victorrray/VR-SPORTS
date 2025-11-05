@@ -1639,15 +1639,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 Player Props
               </button>
               <button 
-                className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''}`}
+                className={`desktop-section-btn ${getCurrentSectionId() === 'arbitrage' ? 'active' : ''} ${!hasPlatinum ? 'disabled' : ''}`}
                 onClick={() => handleSectionChange('arbitrage')}
+                disabled={!hasPlatinum}
+                title={!hasPlatinum ? 'Requires Platinum Plan' : ''}
               >
                 <Zap size={18} />
                 Arbitrage
               </button>
               <button 
-                className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''}`}
+                className={`desktop-section-btn ${getCurrentSectionId() === 'middles' ? 'active' : ''} ${!hasPlatinum ? 'disabled' : ''}`}
                 onClick={() => handleSectionChange('middles')}
+                disabled={!hasPlatinum}
+                title={!hasPlatinum ? 'Requires Platinum Plan' : ''}
               >
                 <Activity size={18} />
                 Middles
