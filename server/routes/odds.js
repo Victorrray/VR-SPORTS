@@ -342,7 +342,83 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       console.log(`Filtered to ${allowedBookmakers.length} allowed bookmakers for user plan: ${userProfile.plan}`);
     }
     
-    // Step 2: Fetch player props if requested
+    // Step 2: Fetch quarter/half/period markets if requested
+    if (quarterMarkets.length > 0) {
+      console.log('🎯 Step 2: Fetching quarter/half/period markets:', quarterMarkets);
+      
+      const userProfile = req.__userProfile || { plan: 'free' };
+      const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+      
+      // For game odds, filter out DFS apps (they only have player props)
+      const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
+      const bookmakerList = gameOddsBookmakers.join(',');
+      
+      console.log(`🎯 Quarter/Period markets bookmakers: ${bookmakerList}`);
+      
+      for (const sport of sportsArray) {
+        try {
+          // Verify quarter markets are supported for this sport
+          const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
+          const supportedQuarterMarkets = quarterMarkets.filter(m => supportedForSport.includes(m));
+          
+          if (supportedQuarterMarkets.length === 0) {
+            console.log(`⏭️ No supported quarter/period markets for ${sport}. Supported: ${supportedForSport.join(', ')}`);
+            continue;
+          }
+          
+          console.log(`🎯 Fetching quarter/period markets for ${sport}: ${supportedQuarterMarkets.join(', ')}`);
+          
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${supportedQuarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          
+          console.log(`🌐 API call for quarter/period markets - ${sport}`);
+          const response = await axios.get(url);
+          const quarterMarketData = response.data || [];
+          
+          // Log quota information
+          const quotaRemaining = response.headers['x-requests-remaining'];
+          const quotaUsed = response.headers['x-requests-used'];
+          const quotaLast = response.headers['x-requests-last'];
+          console.log(`📊 Quarter Markets Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
+          
+          console.log(`✅ Got ${quarterMarketData.length} games with quarter/period markets for ${sport}`);
+          
+          // Merge quarter market data with existing games
+          quarterMarketData.forEach(quarterGame => {
+            const existingGame = allGames.find(g => g.id === quarterGame.id);
+            if (existingGame && existingGame.bookmakers) {
+              // Merge bookmakers and markets
+              quarterGame.bookmakers.forEach(qBookmaker => {
+                const existingBookmaker = existingGame.bookmakers.find(b => b.key === qBookmaker.key);
+                if (existingBookmaker && existingBookmaker.markets) {
+                  // Add quarter markets to existing bookmaker
+                  const existingMarketKeys = existingBookmaker.markets.map(m => m.key);
+                  qBookmaker.markets.forEach(qMarket => {
+                    if (!existingMarketKeys.includes(qMarket.key)) {
+                      existingBookmaker.markets.push(qMarket);
+                    }
+                  });
+                  console.log(`  📝 Merged ${qBookmaker.markets.length} quarter markets for ${qBookmaker.key}`);
+                } else if (!existingBookmaker) {
+                  // Add new bookmaker with quarter markets
+                  existingGame.bookmakers.push(qBookmaker);
+                  console.log(`  ➕ Added new bookmaker ${qBookmaker.key} with quarter markets`);
+                }
+              });
+            } else if (!existingGame) {
+              // Game doesn't exist yet, add it
+              allGames.push(quarterGame);
+              console.log(`  ➕ Added new game ${quarterGame.id} with quarter markets`);
+            }
+          });
+        } catch (sportErr) {
+          console.warn(`⚠️ Failed to fetch quarter/period markets for ${sport}:`, sportErr.response?.status, sportErr.response?.data || sportErr.message);
+        }
+      }
+      
+      console.log(`✅ Quarter/period markets merge complete`);
+    }
+    
+    // Step 3: Fetch player props if requested
     // NOTE: Player props must be fetched using /events/{eventId}/odds endpoint, one event at a time
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
       console.log('🎯 Fetching player props for markets:', playerPropMarkets);
