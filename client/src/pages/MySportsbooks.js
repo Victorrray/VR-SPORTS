@@ -227,8 +227,8 @@ export default function MySportsbooks() {
       <div className="page-header">
         <div className="header-content">
           <div className="header-text">
-            <h1>My Sportsbooks</h1>
-            <p>Customize which sportsbooks to include in your odds comparisons</p>
+            <h1>My Books</h1>
+            <p>Manage your books</p>
           </div>
         </div>
       </div>
