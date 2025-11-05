@@ -1,6 +1,6 @@
 :root {
   /* Core palette - Purple Brand Design */
-  --bg-body: #0a0612;
+  --bg-body: #0f0a18;
   --bg-elev: #0f0b1a;
   --bg-elev-2: #1a1025;
   --bg-elev-3: #221430;
@@ -35,7 +35,7 @@
 }
 
 .theme-modern {
-  --bg-body: #0a0612;
+  --bg-body: #0f0a18;
   --bg-elev: #0f0b1a;
   --bg-elev-2: #1a1025;
   --bg-elev-3: #221430;
@@ -81,7 +81,7 @@
 
 /* Deep Purple (purple/violet) */
 .theme-purple {
-  --bg-body: #0a0612;
+  --bg-body: #0f0a18;
   --bg-elev: #0f0b1a;
   --bg-elev-2: #1a1025;
   --bg-elev-3: #221430;
