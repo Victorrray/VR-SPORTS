@@ -14,6 +14,17 @@ const Subscribe = () => {
   // Check if user has an active subscription
   const hasActivePlan = plan?.plan === 'gold' || plan?.plan === 'platinum';
 
+  // Calculate next renewal date (30 days from today)
+  const getNextRenewalDate = () => {
+    const today = new Date();
+    const nextRenewal = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return nextRenewal.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
   if (planLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -37,9 +48,11 @@ const Subscribe = () => {
           {/* Header */}
           <div style={{
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             gap: '16px',
-            marginBottom: '32px'
+            marginBottom: '32px',
+            position: 'relative'
           }}>
             <button
               onClick={() => navigate('/account')}
@@ -50,12 +63,15 @@ const Subscribe = () => {
                 cursor: 'pointer',
                 padding: '8px',
                 display: 'flex',
-                alignItems: 'center'
+                alignItems: 'center',
+                position: 'absolute',
+                left: 0,
+                top: 0
               }}
             >
               <ArrowLeft size={20} />
             </button>
-            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700' }}>My Subscription</h1>
+            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700', textAlign: 'center' }}>My Subscription</h1>
           </div>
 
           {/* Active Plan Card */}
@@ -125,6 +141,26 @@ const Subscribe = () => {
                   </div>
                   <div style={{ fontSize: '18px', fontWeight: '600' }}>
                     Monthly (Auto-renews)
+                  </div>
+                </div>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '16px',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%)',
+                borderRadius: '12px',
+                border: '1px solid rgba(16, 185, 129, 0.2)'
+              }}>
+                <Calendar size={20} color="#10b981" />
+                <div>
+                  <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                    Next Renewal Date
+                  </div>
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: '#10b981' }}>
+                    {getNextRenewalDate()}
                   </div>
                 </div>
               </div>
