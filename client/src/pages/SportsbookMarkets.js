@@ -1836,7 +1836,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     max="10" 
                     value={draftDataPoints}
                     onChange={(e) => setDraftDataPoints(parseInt(e.target.value, 10))}
-                    style={{ flex: 1, height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)' }}
+                    style={{ flex: 1, height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)', WebkitAppearance: 'none', appearance: 'none', padding: '0' }}
                   />
                   <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700, minWidth: '30px', textAlign: 'center' }}>{draftDataPoints}</span>
                 </div>
@@ -2499,7 +2499,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   max="10" 
                   value={draftDataPoints}
                   onChange={(e) => setDraftDataPoints(parseInt(e.target.value, 10))}
-                  style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)' }}
+                  style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)', WebkitAppearance: 'none', appearance: 'none', padding: '0' }}
                 />
               </div>
 
