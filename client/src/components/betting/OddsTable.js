@@ -3407,7 +3407,7 @@ export default function OddsTable({
 
                             const normalizeBookKeyForEntry = (entry) => normalizeBookKey(entry?.bookmaker?.key || entry?.book || '');
 
-                            // Find best odds across all books for this market
+                            // Find best odds across ALL books for this market (not just displayed ones)
                             const findBestOdds = (books) => {
                               if (!books || books.length === 0) return null;
                               
@@ -3425,7 +3425,8 @@ export default function OddsTable({
                               });
                             };
 
-                            const bestOddsBook = findBestOdds(dedupedBooks);
+                            // Use ALL books from row.allBooks to find true best odds, not just displayed books
+                            const bestOddsBook = findBestOdds(row.allBooks || dedupedBooks);
                             const bestOddsKey = bestOddsBook ? normalizeBookKey(bestOddsBook.bookmaker?.key || bestOddsBook.book) : null;
 
                             const topEntry = row.bk ? {
