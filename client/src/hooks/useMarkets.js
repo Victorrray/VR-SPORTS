@@ -132,6 +132,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
   
   // Store the last successful fetch time
   const lastFetchTime = useRef(0);
+  const lastSuccessfulFetchTime = useRef(0); // Track when we got actual data
   const COOLDOWN_MS = 10_000; // Reduced from 30s to 10s for faster sports switching
   // Track if we have an active request
   const activeRequest = useRef(null);
@@ -140,6 +141,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
   const stableFetch = useRef(null);
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 5000; // 5 seconds between retries
+  const EMPTY_RESULT_RETRY_DELAY = 3000; // 3 seconds retry for empty results
 
   // Debounced fetch function with enhanced error handling and retry logic
   const fetchMarkets = useMemoizedCallback(debounce(async (isRetry = false) => {
@@ -490,7 +492,23 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       
       // Update last fetch time and reset retry counter on success
       lastFetchTime.current = Date.now();
-      retryCount.current = 0;
+      
+      // If we got empty results, retry sooner instead of applying full cooldown
+      if (preparedData.length === 0) {
+        console.log('⚠️ useMarkets: Got empty results, will retry sooner');
+        retryCount.current += 1;
+        if (retryCount.current < MAX_RETRIES) {
+          // Schedule a retry in 3 seconds instead of waiting for cooldown
+          setTimeout(() => {
+            console.log(`🔄 useMarkets: Retrying after empty result (${retryCount.current}/${MAX_RETRIES})`);
+            fetchMarkets(true);
+          }, EMPTY_RESULT_RETRY_DELAY);
+        }
+      } else {
+        // Only reset retry counter if we got actual data
+        retryCount.current = 0;
+        lastSuccessfulFetchTime.current = Date.now();
+      }
       
     } catch (err) {
       console.error('🔍 useMarkets: Fetch error:', err);
