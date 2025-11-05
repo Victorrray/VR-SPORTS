@@ -638,19 +638,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const filteredGames = useMemo(() => {
     if (!Array.isArray(marketGames)) return [];
     
-    // If no date filter is selected, return all games
+    // First, filter by sport (picked sports)
+    let sportFilteredGames = marketGames;
+    if (picked && picked.length > 0) {
+      sportFilteredGames = marketGames.filter(game => picked.includes(game.sport_key));
+      console.log(`🏆 Sport filter (${picked.join(', ')}) - showing:`, sportFilteredGames.length, 'of', marketGames.length, 'total');
+    }
+    
+    // If no date filter is selected, return sport-filtered games
     if (!selectedDate || selectedDate === "") {
-      console.log('🗓️ No date filter - showing all games:', marketGames.length);
-      return marketGames;
+      console.log('🗓️ No date filter - showing all games:', sportFilteredGames.length);
+      return sportFilteredGames;
     }
     
     // Filter for live games only
     if (selectedDate === "live") {
-      const liveGames = marketGames.filter(game => {
+      const liveGames = sportFilteredGames.filter(game => {
         const isLive = game.commence_time && new Date(game.commence_time) <= new Date();
         return isLive;
       });
-      console.log('🔴 Live games filter - showing:', liveGames.length, 'of', marketGames.length);
+      console.log('🔴 Live games filter - showing:', liveGames.length, 'of', sportFilteredGames.length);
       return liveGames;
     }
     
@@ -661,7 +668,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     nextDay.setDate(selectedDateObj.getDate() + 1);
     const now = new Date();
     
-    const dateFilteredGames = marketGames.filter(game => {
+    const dateFilteredGames = sportFilteredGames.filter(game => {
       if (!game.commence_time) return false;
       
       const gameTime = new Date(game.commence_time);
@@ -671,9 +678,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       return isOnSelectedDate && hasNotStarted;
     });
     
-    console.log(`🗓️ Date filter (${selectedDate}) - showing:`, dateFilteredGames.length, 'upcoming games of', marketGames.length, 'total');
+    console.log(`🗓️ Date filter (${selectedDate}) - showing:`, dateFilteredGames.length, 'upcoming games of', sportFilteredGames.length, 'total');
     return dateFilteredGames;
-  }, [marketGames, selectedDate]);
+  }, [marketGames, selectedDate, picked]);
 
   // Arbitrage games filter - includes LIVE games for arbitrage detection
   // Arbitrage opportunities only exist when games are actively being traded
