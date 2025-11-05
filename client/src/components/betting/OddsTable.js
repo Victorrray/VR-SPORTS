@@ -2816,7 +2816,6 @@ export default function OddsTable({
             <th className="team-line-col">Team / Line</th>
             <th className="book-col">Book</th>
             <th className="odds-col">Odds</th>
-            <th className="devig-col">De-Vig</th>
           </tr>
         </thead>
         <tbody>
@@ -3068,12 +3067,11 @@ export default function OddsTable({
                       })()}
                     </span>
                   </td>
-                  <td>{fair != null ? (Number(fair) > 0 ? `+${fair}` : `${fair}`) : ''}</td>
                 </tr>
 
                 {/* ----- Mobile card (click to expand) ----- */}
                 <tr className="mobile-card-row" aria-hidden={false}>
-                  <td colSpan={6}>
+                  <td colSpan={5}>
                     <div
                       className={`mobile-odds-card as-button ${expandedRows[row.key] ? 'expanded' : ''}`}
                       onClick={()=>toggleRow(row.key)}
