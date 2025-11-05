@@ -3985,10 +3985,22 @@ export default function OddsTable({
                                         {p.point || p.line || '-'}
                                       </td>
                                       <td className="mini-odds-cell">
-                                        {formatOdds(Number(p.price ?? p.odds ?? 0))}
+                                        {(() => {
+                                          const overBook = (row.allBooks || []).find(book => 
+                                            normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(p.bookmaker?.key) &&
+                                            (book.outcomeName === 'Over' || String(book.line || '').includes('Over'))
+                                          );
+                                          return overBook ? formatOdds(Number(overBook.price ?? overBook.odds ?? 0)) : '-';
+                                        })()}
                                       </td>
                                       <td className="mini-odds-cell">
-                                        {formatOdds(Number(p.price ?? p.odds ?? 0))}
+                                        {(() => {
+                                          const underBook = (row.allBooks || []).find(book => 
+                                            normalizeBookKey(book.bookmaker?.key) === normalizeBookKey(p.bookmaker?.key) &&
+                                            (book.outcomeName === 'Under' || String(book.line || '').includes('Under'))
+                                          );
+                                          return underBook ? formatOdds(Number(underBook.price ?? underBook.odds ?? 0)) : '-';
+                                        })()}
                                       </td>
                                     </>
                                   ) : (
