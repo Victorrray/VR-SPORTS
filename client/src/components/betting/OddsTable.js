@@ -4095,7 +4095,7 @@ export default function OddsTable({
                                   {/* Show book count or View All Books button */}
                                   {displayBooks.length > 0 && (
                                     <tr>
-                                      <td colSpan={mode === "props" ? 5 : 3} style={{
+                                      <td colSpan={mode === "props" ? 5 : 4} style={{
                                         textAlign: 'center',
                                         padding: '12px 8px',
                                         fontSize: '11px',
