@@ -277,7 +277,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     { key: 'americanfootball_ncaaf', title: 'NCAA' },
     { key: 'basketball_nba', title: 'NBA' },
     { key: 'basketball_ncaab', title: 'NCAA Basketball' },
-    { key: 'baseball_mlb', title: 'MLB' },
     { key: 'icehockey_nhl', title: 'NHL' }
   ];
 
@@ -344,7 +343,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const sportsForMode = isPlayerPropsMode 
     ? (picked.length > 0 ? picked : ["americanfootball_nfl"]) 
     : isArbitrageMode
-    ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "baseball_mlb", "icehockey_nhl"])
+    ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
     : picked;
     
   // Log the sports being used for the current mode
@@ -893,7 +892,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           });
           
           // Filter to only major US sports
-          const majorUSsports = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl'];
+          const majorUSsports = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl'];
           const filteredSports = sports.filter(sport => majorUSsports.includes(sport.key));
           
           console.log('🏈 Filtered sports:', { 
@@ -1335,11 +1334,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       else if (sport === 'americanfootball_nfl' || sport === 'americanfootball_ncaaf' || sport.includes('football')) {
         sportCategories.set('football', ['passing', 'rushing', 'receiving', 'touchdowns', 'combination', 'defense', 'kicking']);
         console.log(`🏈 Adding football player prop categories for sport: ${sport}`);
-      } 
-      // Handle baseball sports
-      else if (sport === 'baseball_mlb' || sport.includes('baseball')) {
-        sportCategories.set('baseball', ['batting', 'pitching']);
-        console.log(`⚾ Adding baseball player prop categories for sport: ${sport}`);
       } 
       // Handle hockey sports
       else if (sport === 'icehockey_nhl' || sport.includes('hockey')) {
@@ -2025,7 +2019,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
       ) : (marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
-          sport={picked.length > 0 ? picked : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl']}
+          sport={picked.length > 0 ? picked : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
           games={filteredGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
@@ -2065,7 +2059,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </div>
       ) : isMiddlesMode && hasPlatinum ? (
         <MiddlesDetector 
-          sport={['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'baseball_mlb', 'icehockey_nhl']}
+          sport={['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
           games={[]}
           bookFilter={effectiveSelectedBooks}
           compact={false}
