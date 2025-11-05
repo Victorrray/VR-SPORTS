@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/SimpleAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
-import { Save, Check, AlertCircle, DollarSign, Star, TrendingUp, Settings } from 'lucide-react';
+import { Save, Check, AlertCircle, DollarSign, Star, TrendingUp, Settings, Zap } from 'lucide-react';
 import { optimizedStorage } from '../utils/storageOptimizer';
 import { bankrollManager } from '../utils/bankrollManager';
 import SportMultiSelect from '../components/betting/SportMultiSelect';
@@ -218,6 +218,13 @@ export default function MySportsbooks() {
   const dfsApps = availableSportsbooks.filter(book => book.isDFS);
   const popularBooks = availableSportsbooks.filter(book => book.popular && !book.isDFS);
   const otherBooks = availableSportsbooks.filter(book => !book.popular && !book.isDFS);
+  
+  // Exchanges
+  const exchanges = [
+    { key: 'novig', name: 'NoVig', isExchange: true },
+    { key: 'prophetx', name: 'ProphetX', isExchange: true },
+    { key: 'betopenly', name: 'BetOpenly', isExchange: true }
+  ];
 
   const getSelectedCount = () => selectedBooks.length;
   const getTotalAvailable = () => availableSportsbooks.length;
@@ -427,6 +434,40 @@ export default function MySportsbooks() {
                   </div>
                   <div className="selection-indicator">
                     {selectedBooks.includes(book.key) && <Check size={16} />}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Exchanges Section */}
+        {me?.plan === 'platinum' && (
+          <div className="section">
+            <div className="section-header">
+              <Zap size={20} />
+              <h3>Exchanges</h3>
+              <span className="section-count">({exchanges.length})</span>
+            </div>
+            <div className="sportsbooks-grid">
+              {exchanges.map(exchange => (
+                <div 
+                  key={exchange.key}
+                  className={`sportsbook-card ${selectedBooks.includes(exchange.key) ? 'selected' : ''}`}
+                  onClick={() => {
+                    if (selectedBooks.includes(exchange.key)) {
+                      setSelectedBooks(selectedBooks.filter(b => b !== exchange.key));
+                    } else {
+                      setSelectedBooks([...selectedBooks, exchange.key]);
+                    }
+                  }}
+                >
+                  <div className="sportsbook-info">
+                    <div className="sportsbook-name">{exchange.name}</div>
+                    <div className="popular-badge">Exchange</div>
+                  </div>
+                  <div className="selection-indicator">
+                    {selectedBooks.includes(exchange.key) && <Check size={16} />}
                   </div>
                 </div>
               ))}
