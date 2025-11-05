@@ -3934,6 +3934,12 @@ export default function OddsTable({
                               const compareOdds = (a, b) => toDec(b.price ?? b.odds) - toDec(a.price ?? a.odds);
 
                               const sortedPrioritizedDesktop = prioritizedDesktop.slice().sort((a, b) => {
+                                // Pin the main card's book to the top
+                                const aIsMainBook = normalizeBookKey(a.bookmaker?.key || a.book) === normalizeBookKey(row.bk?.key || row.bk?.title);
+                                const bIsMainBook = normalizeBookKey(b.bookmaker?.key || b.book) === normalizeBookKey(row.bk?.key || row.bk?.title);
+                                if (aIsMainBook && !bIsMainBook) return -1;
+                                if (!aIsMainBook && bIsMainBook) return 1;
+                                
                                 const aPriority = getMiniTablePriorityIndex(a.bookmaker?.key || a.book);
                                 const bPriority = getMiniTablePriorityIndex(b.bookmaker?.key || b.book);
                                 const safeAPriority = aPriority === -1 ? 999 : aPriority;
@@ -3945,6 +3951,12 @@ export default function OddsTable({
                               });
 
                               const sortedFallbackDesktop = fallbackDesktop.slice().sort((a, b) => {
+                                // Pin the main card's book to the top
+                                const aIsMainBook = normalizeBookKey(a.bookmaker?.key || a.book) === normalizeBookKey(row.bk?.key || row.bk?.title);
+                                const bIsMainBook = normalizeBookKey(b.bookmaker?.key || b.book) === normalizeBookKey(row.bk?.key || row.bk?.title);
+                                if (aIsMainBook && !bIsMainBook) return -1;
+                                if (!aIsMainBook && bIsMainBook) return 1;
+                                
                                 const aPriority = getBookPriority(a.bookmaker?.key || a.book);
                                 const bPriority = getBookPriority(b.bookmaker?.key || b.book);
                                 if (aPriority !== bPriority) {
