@@ -3005,20 +3005,6 @@ export default function OddsTable({
                         </span>
                       )}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {mode !== "props" && (row.mkt?.key || '') !== 'h2h' && (
-                          (() => {
-                            const teamLogo = getTeamLogoForGame(row.game, row.out?.name);
-                            return teamLogo ? (
-                              <img
-                                src={teamLogo}
-                                alt={`${row.out?.name} logo`}
-                                className="desktop-team-logo"
-                                loading="lazy"
-                                onError={(e) => { e.target.style.display = 'none'; }}
-                              />
-                            ) : null;
-                          })()
-                        )}
                         <span 
                           style={{ fontWeight:800 }}
                           title={mode === "props" ? getYesBetExplanation(row.mkt?.key, row.out?.name) : null}
