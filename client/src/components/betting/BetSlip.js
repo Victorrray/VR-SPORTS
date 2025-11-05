@@ -609,19 +609,19 @@ const BetSlip = ({ isOpen, onClose, bets = [], onUpdateBet, onRemoveBet, onClear
                       </label>
                       <span className="setting-hint">Automatically set recommended amounts</span>
                     </div>
+                    
+                    {hasUnappliedChanges && (
+                      <div className="settings-actions">
+                        <button 
+                          className="apply-settings-btn"
+                          onClick={applySettings}
+                        >
+                          <Calculator size={14} />
+                          Apply & Recalculate Bets
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  
-                  {hasUnappliedChanges && (
-                    <div className="settings-actions">
-                      <button 
-                        className="apply-settings-btn"
-                        onClick={applySettings}
-                      >
-                        <Calculator size={14} />
-                        Apply & Recalculate Bets
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>

@@ -278,7 +278,6 @@
 
 .settings-actions {
   padding-top: 16px;
-  border-top: 1px solid var(--border);
   display: flex;
   justify-content: center;
 }
