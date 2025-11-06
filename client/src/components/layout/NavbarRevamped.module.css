@@ -35,11 +35,6 @@
   margin: 1rem 0;
 }
 
-.navbar.scrolled {
-  background: var(--navbar-bg);
-  box-shadow: var(--navbar-shadow);
-  padding: 1rem 2.5rem;
-}
 
 /* Left Section: Logo + Mobile Menu */
 .navLeft {

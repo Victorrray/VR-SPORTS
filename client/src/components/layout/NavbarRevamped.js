@@ -22,16 +22,6 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
   const [q, setQ] = useState("");
-  const [scrolled, setScrolled] = useState(false);
-
-  // Track scroll position for navbar effects
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const isActive = (path) => location.pathname === path;
 
