@@ -217,11 +217,6 @@ export default function Landing() {
       
       {/* Hero Section - Revamped */}
       <section className="hero-revamp">
-        <div className="hero-background-effects">
-          <div className="gradient-orb orb-1"></div>
-          <div className="gradient-orb orb-2"></div>
-        </div>
-        
         <div className="hero-container">
           <div className="hero-badge-new">
             <Sparkles size={14} />
