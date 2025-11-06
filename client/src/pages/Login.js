@@ -115,7 +115,7 @@ export default function Login() {
     <main className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1 className="login-title">Welcome to OddSightSeer</h1>
+          <h1 className="login-title">Welcome Back</h1>
           <p className="login-subtitle">Find profitable betting opportunities</p>
         </div>
 
