@@ -9,7 +9,7 @@ import "./SectionMenu.css";
 export default function SectionMenu({ 
   currentSection = "game", 
   onSectionChange,
-  hasPlatinum = true // Temporarily set to true to show all options
+  hasPlatinum = false
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -79,11 +79,9 @@ export default function SectionMenu({
       {isOpen && (
         <div className="section-dropdown">
           {sections.map(section => {
-            // Skip platinum-required sections if user doesn't have platinum
-            if (section.requiresPlatinum && !hasPlatinum) return null;
-            
             const isActive = section.id === currentSection;
-            const isDisabled = section.disabled;
+            const isPlatinumRequired = section.requiresPlatinum && !hasPlatinum;
+            const isDisabled = section.disabled || isPlatinumRequired;
             
             return (
               <button
@@ -92,6 +90,7 @@ export default function SectionMenu({
                 onClick={() => !isDisabled && handleSectionChange(section.id)}
                 aria-current={isActive}
                 disabled={isDisabled}
+                title={isPlatinumRequired ? 'Requires Platinum Plan' : ''}
                 style={{
                   opacity: isDisabled ? 0.5 : 1,
                   cursor: isDisabled ? 'not-allowed' : 'pointer'
