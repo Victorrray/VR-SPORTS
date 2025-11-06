@@ -19,6 +19,7 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
   const { me } = useMe();
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
   const [q, setQ] = useState("");
   const [scrolled, setScrolled] = useState(false);
@@ -106,10 +107,8 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
           <button 
             className={styles.hamburger}
             aria-label="Menu"
-            onClick={() => {
-              // Mobile menu toggle - can be expanded later
-              console.log('Mobile menu clicked');
-            }}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <span style={{ width: '24px', height: '2px', background: 'currentColor', borderRadius: '2px' }} />
             <span style={{ width: '24px', height: '2px', background: 'currentColor', borderRadius: '2px' }} />
@@ -255,6 +254,88 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
           )}
         </div>
       </nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className={styles.mobileMenu} onClick={() => setMobileMenuOpen(false)}>
+          <div className={styles.mobileMenuContent} onClick={(e) => e.stopPropagation()}>
+            {/* Mobile Navigation Links */}
+            {filteredNavLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`${styles.mobileNavLink} ${isActive(link.to) ? styles.active : ""}`}
+                  onClick={() => {
+                    handleNavClick(link, { preventDefault: () => {} });
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <Icon size={20} />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+
+            <div className={styles.mobileDivider} />
+
+            {/* Mobile User Section */}
+            {!isLoginPage && !user ? (
+              <Link 
+                to="/login" 
+                className={styles.mobileLoginBtn}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <User size={18} />
+                <span>Sign In</span>
+              </Link>
+            ) : !isLoginPage && user && (
+              <>
+                <Link
+                  to="/my-sportsbooks"
+                  className={styles.mobileNavLink}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Settings size={20} />
+                  <span>My Sportsbooks</span>
+                </Link>
+
+                <Link
+                  to="/account"
+                  className={styles.mobileNavLink}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <User size={20} />
+                  <span>Account Settings</span>
+                </Link>
+
+                <Link
+                  to="/subscribe"
+                  className={styles.mobileNavLink}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Zap size={20} />
+                  <span>Subscription</span>
+                </Link>
+
+                <div className={styles.mobileDivider} />
+
+                <button
+                  className={styles.mobileLogoutBtn}
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut size={18} />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
