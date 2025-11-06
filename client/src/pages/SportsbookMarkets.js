@@ -364,12 +364,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Function to get all compatible markets for the selected sports
   const getAllCompatibleMarkets = (sports) => {
-    // Core markets that work across all sports
-    const coreMarkets = ['h2h', 'spreads', 'totals'];
-    
     // If no sports selected or in player props mode, return default
     if (!sports || sports.length === 0) {
-      return coreMarkets;
+      return getAutoSelectedMarkets([]);
     }
     
     // For player props mode, return the selected player prop markets
@@ -382,8 +379,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       return marketKeys;
     }
     
-    // Fallback to core markets
-    return coreMarkets;
+    // Fallback to auto-selected markets (includes core + period markets)
+    return getAutoSelectedMarkets(sports);
   };
 
   const { 
