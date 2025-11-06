@@ -27,25 +27,61 @@ const {
 const SPORT_MARKET_SUPPORT = {
   'americanfootball_nfl': [
     'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals'
+    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+    'h2h_h1', 'h2h_h2', 'spreads_h1', 'spreads_h2', 'totals_h1', 'totals_h2',
+    'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+    'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+    'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+    'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
+    'alternate_spreads_h1', 'alternate_spreads_h2', 'alternate_totals_h1', 'alternate_totals_h2',
+    'team_totals_h1', 'team_totals_h2', 'alternate_team_totals_h1', 'alternate_team_totals_h2'
   ],
   'americanfootball_ncaaf': [
-    'h2h', 'spreads', 'totals', 'h2h_lay'
+    'h2h', 'spreads', 'totals', 'h2h_lay',
+    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+    'h2h_h1', 'h2h_h2', 'spreads_h1', 'spreads_h2', 'totals_h1', 'totals_h2'
   ],
   'basketball_nba': [
     'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals'
+    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+    'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
+    'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
+    'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
+    'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
   ],
   'basketball_ncaab': [
-    'h2h', 'spreads', 'totals', 'h2h_lay'
+    'h2h', 'spreads', 'totals', 'h2h_lay',
+    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4'
   ],
   'baseball_mlb': [
     'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals'
+    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+    'h2h_1st_1_innings', 'h2h_1st_3_innings', 'h2h_1st_5_innings', 'h2h_1st_7_innings',
+    'spreads_1st_1_innings', 'spreads_1st_3_innings', 'spreads_1st_5_innings', 'spreads_1st_7_innings',
+    'totals_1st_1_innings', 'totals_1st_3_innings', 'totals_1st_5_innings', 'totals_1st_7_innings',
+    'alternate_spreads_1st_1_innings', 'alternate_spreads_1st_3_innings', 'alternate_spreads_1st_5_innings', 'alternate_spreads_1st_7_innings',
+    'alternate_totals_1st_1_innings', 'alternate_totals_1st_3_innings', 'alternate_totals_1st_5_innings', 'alternate_totals_1st_7_innings'
   ],
   'icehockey_nhl': [
     'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals'
+    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
+    'h2h_p1', 'h2h_p2', 'h2h_p3',
+    'spreads_p1', 'spreads_p2', 'spreads_p3',
+    'totals_p1', 'totals_p2', 'totals_p3',
+    'alternate_spreads_p1', 'alternate_spreads_p2', 'alternate_spreads_p3',
+    'alternate_totals_p1', 'alternate_totals_p2', 'alternate_totals_p3',
+    'team_totals_p1', 'team_totals_p2', 'team_totals_p3',
+    'alternate_team_totals_p1', 'alternate_team_totals_p2', 'alternate_team_totals_p3'
   ],
   'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
@@ -312,50 +348,63 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           console.log(`🎯 Fetching quarter/period markets for ${sport}: ${supportedQuarterMarkets.join(', ')}`);
           
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${supportedQuarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          // Batch markets into smaller requests (max 5 markets per request to avoid API limits)
+          const marketBatches = [];
+          for (let i = 0; i < supportedQuarterMarkets.length; i += 5) {
+            marketBatches.push(supportedQuarterMarkets.slice(i, i + 5));
+          }
           
-          console.log(`🌐 API call for quarter/period markets - ${sport}`);
-          const response = await axios.get(url);
-          const quarterMarketData = response.data || [];
+          console.log(`📦 Splitting ${supportedQuarterMarkets.length} markets into ${marketBatches.length} batches`);
           
-          // Log quota information
-          const quotaRemaining = response.headers['x-requests-remaining'];
-          const quotaUsed = response.headers['x-requests-used'];
-          const quotaLast = response.headers['x-requests-last'];
-          console.log(`📊 Quarter Markets Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
-          
-          console.log(`✅ Got ${quarterMarketData.length} games with quarter/period markets for ${sport}`);
-          
-          // Merge quarter market data with existing games
-          quarterMarketData.forEach(quarterGame => {
-            const existingGame = allGames.find(g => g.id === quarterGame.id);
-            if (existingGame && existingGame.bookmakers) {
-              // Merge bookmakers and markets
-              quarterGame.bookmakers.forEach(qBookmaker => {
-                const existingBookmaker = existingGame.bookmakers.find(b => b.key === qBookmaker.key);
-                if (existingBookmaker && existingBookmaker.markets) {
-                  // Add quarter markets to existing bookmaker
-                  const existingMarketKeys = existingBookmaker.markets.map(m => m.key);
-                  qBookmaker.markets.forEach(qMarket => {
-                    if (!existingMarketKeys.includes(qMarket.key)) {
-                      existingBookmaker.markets.push(qMarket);
+          for (let batchIdx = 0; batchIdx < marketBatches.length; batchIdx++) {
+            const batch = marketBatches[batchIdx];
+            console.log(`🌐 API call for quarter/period markets batch ${batchIdx + 1}/${marketBatches.length} - ${sport}: ${batch.join(',')}`);
+            
+            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${batch.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+            
+            try {
+              const response = await axios.get(url);
+              const quarterMarketData = response.data || [];
+              
+              // Log quota information
+              const quotaRemaining = response.headers['x-requests-remaining'];
+              const quotaUsed = response.headers['x-requests-used'];
+              const quotaLast = response.headers['x-requests-last'];
+              console.log(`📊 Quarter Markets Batch ${batchIdx + 1} Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
+              
+              console.log(`✅ Got ${quarterMarketData.length} games with quarter/period markets for ${sport} batch ${batchIdx + 1}`);
+              
+              // Merge quarter market data with existing games
+              quarterMarketData.forEach(quarterGame => {
+                const existingGame = allGames.find(g => g.id === quarterGame.id);
+                if (existingGame && existingGame.bookmakers) {
+                  // Merge bookmakers and markets
+                  quarterGame.bookmakers.forEach(qBookmaker => {
+                    const existingBookmaker = existingGame.bookmakers.find(b => b.key === qBookmaker.key);
+                    if (existingBookmaker && existingBookmaker.markets) {
+                      // Add quarter markets to existing bookmaker
+                      const existingMarketKeys = existingBookmaker.markets.map(m => m.key);
+                      qBookmaker.markets.forEach(qMarket => {
+                        if (!existingMarketKeys.includes(qMarket.key)) {
+                          existingBookmaker.markets.push(qMarket);
+                        }
+                      });
+                    } else if (!existingBookmaker) {
+                      // Add new bookmaker with quarter markets
+                      existingGame.bookmakers.push(qBookmaker);
                     }
                   });
-                  console.log(`  📝 Merged ${qBookmaker.markets.length} quarter markets for ${qBookmaker.key}`);
-                } else if (!existingBookmaker) {
-                  // Add new bookmaker with quarter markets
-                  existingGame.bookmakers.push(qBookmaker);
-                  console.log(`  ➕ Added new bookmaker ${qBookmaker.key} with quarter markets`);
+                } else if (!existingGame) {
+                  // Game doesn't exist yet, add it
+                  allGames.push(quarterGame);
                 }
               });
-            } else if (!existingGame) {
-              // Game doesn't exist yet, add it
-              allGames.push(quarterGame);
-              console.log(`  ➕ Added new game ${quarterGame.id} with quarter markets`);
+            } catch (batchErr) {
+              console.warn(`⚠️ Failed to fetch batch ${batchIdx + 1} for ${sport}:`, batchErr.response?.status, batchErr.response?.data?.message || batchErr.message);
             }
-          });
+          }
         } catch (sportErr) {
-          console.warn(`⚠️ Failed to fetch quarter/period markets for ${sport}:`, sportErr.response?.status, sportErr.response?.data || sportErr.message);
+          console.warn(`⚠️ Failed to process quarter/period markets for ${sport}:`, sportErr.message);
         }
       }
       
