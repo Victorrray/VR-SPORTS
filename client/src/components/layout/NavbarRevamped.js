@@ -91,7 +91,7 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
 
   return (
     <>
-      <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ""}`}>
+      <nav className={styles.navbar}>
         {/* Left Section: Hamburger + Logo */}
         <div className={styles.navLeft}>
           <button 
