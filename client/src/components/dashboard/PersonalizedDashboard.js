@@ -567,9 +567,6 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
             <BarChart3 size={20} />
             <h3>Recent Performance</h3>
           </div>
-          <div className="section-subtitle">
-            Your betting history and current opportunities
-          </div>
         </div>
 
         {/* Performance Stats */}

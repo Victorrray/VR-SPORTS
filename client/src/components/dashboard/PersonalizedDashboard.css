@@ -88,6 +88,7 @@
 
 .section-header {
   margin-bottom: 24px;
+  text-align: center;
 }
 
 .section-title {
@@ -95,6 +96,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 8px;
+  justify-content: center;
 }
 
 .section-title h3 {
