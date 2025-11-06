@@ -1,7 +1,7 @@
 .section-menu-container {
   position: fixed;
   right: calc(50% - 160px); /* Position with spacing */
-  bottom: 116px; /* Moved up by additional 5% */
+  bottom: 76px; /* Closer to mobile nav bar */
   z-index: 1011; /* Match z-index with filter button */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */

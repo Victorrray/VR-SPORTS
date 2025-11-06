@@ -1,7 +1,7 @@
 .filter-menu-container {
   position: fixed;
   left: calc(50% - 160px); /* Position with spacing */
-  bottom: 116px; /* Moved up by additional 5% */
+  bottom: 76px; /* Closer to mobile nav bar */
   z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
   display: block !important; /* Force display */
   pointer-events: auto !important; /* Ensure clickability */
