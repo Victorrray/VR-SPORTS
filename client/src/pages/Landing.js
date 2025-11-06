@@ -198,7 +198,7 @@ export default function Landing() {
   const webAppSchema = generateSchemaMarkup('WebApplication');
 
   return (
-    <div className="landing-page-revamp" style={{ background: 'var(--bg-primary)' }}>
+    <div className="landing-page-revamp" style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 50%, var(--bg-primary) 100%)' }}>
       <SEOHelmet
         title="OddSightSeer — Find +EV Bets & Compare Sportsbook Odds"
         description="Find +EV bets with real-time odds comparison across 15+ major sportsbooks. Spot arbitrage opportunities, track line movement, and maximize your betting edge."
