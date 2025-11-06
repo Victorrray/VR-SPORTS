@@ -362,6 +362,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     me: me
   });
 
+  // Market categories for organization
+  const MARKET_CATEGORIES = {
+    core: { title: 'Core Markets', icon: Target, description: 'Essential betting markets' },
+    alternates: { title: 'Alternate Lines', icon: BarChart3, description: 'Additional line options' },
+    team: { title: 'Team-Specific', icon: Users, description: 'Individual team markets' },
+    special: { title: 'Special Markets', icon: Star, description: 'Unique betting options' }
+  };
+
   // Function to organize markets by category
   const organizeMarketsByCategory = (markets) => {
     const organized = [];
@@ -1127,14 +1135,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setMarketKeys(defaultMarkets);
     setSelectedPlayerPropMarkets(defaultPlayerProps);
     setDataPoints(10);
-  };
-
-  // Market categories for organization
-  const MARKET_CATEGORIES = {
-    core: { title: 'Core Markets', icon: Target, description: 'Essential betting markets' },
-    alternates: { title: 'Alternate Lines', icon: BarChart3, description: 'Additional line options' },
-    team: { title: 'Team-Specific', icon: Users, description: 'Individual team markets' },
-    special: { title: 'Special Markets', icon: Star, description: 'Unique betting options' }
   };
 
   // Core markets that are guaranteed to work - now with categories
