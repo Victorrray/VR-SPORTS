@@ -115,6 +115,7 @@ export default function Login() {
     <main className="login-container">
       <div className="login-header">
           <h1 className="login-title">Welcome Back</h1>
+          <p className="login-subtitle">Find profitable betting opportunities</p>
         </div>
 
         <div className="tab-switcher">
