@@ -141,11 +141,12 @@
     font-size: 0.95em !important;
     font-weight: 600 !important;
     color: rgba(255, 255, 255, 0.95) !important;
-    background: transparent !important;
+    background: rgba(88, 28, 135, 0.2) !important;
     border: none !important;
     display: flex !important;
     align-items: center !important;
     gap: 10px !important;
+    height: 100% !important;
   }
   
   tr.desktop-mini-wrap .mini-book-cell span {
