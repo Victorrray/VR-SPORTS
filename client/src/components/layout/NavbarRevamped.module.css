@@ -23,18 +23,19 @@
   padding: 1rem 2.5rem;
   position: relative;
   top: auto;
-  left: auto;
-  transform: none;
+  left: 50%;
+  transform: translateX(-50%);
   min-height: 60px;
   z-index: 9999;
   backdrop-filter: blur(24px);
   border: 2px solid rgba(255, 255, 255, 0.1);
   color: var(--navbar-text);
   transition: none;
-  border-radius: 0;
-  width: 100%;
-  max-width: 100%;
+  border-radius: 50px;
+  width: 90%;
+  max-width: 1200px;
   overflow: visible;
+  margin: 1rem auto;
 }
 
 .navbar.scrolled {
