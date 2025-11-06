@@ -113,7 +113,8 @@ export default function Login() {
 
   return (
     <main className="login-container">
-      <div className="login-header">
+      <div className="login-card">
+        <div className="login-header">
           <h1 className="login-title">Welcome Back</h1>
           <p className="login-subtitle">Find profitable betting opportunities</p>
         </div>
@@ -265,6 +266,7 @@ export default function Login() {
           By continuing you agree to our <Link to="/terms" className="terms-link">Terms</Link> and{" "}
           <Link to="/privacy" className="terms-link">Privacy</Link>.
         </p>
+      </div>
     </main>
   );
 }
