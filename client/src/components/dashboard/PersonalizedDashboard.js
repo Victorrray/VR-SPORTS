@@ -121,9 +121,29 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     }
     console.log('User selected sportsbooks:', userSelectedBooks);
 
+    // Check if user has "Live Games" selected in date filter
+    let selectedDateFilter = 'all'; // default
+    try {
+      const storedDateFilter = localStorage.getItem('selectedDateFilter');
+      if (storedDateFilter) {
+        selectedDateFilter = storedDateFilter.toLowerCase();
+      }
+    } catch (error) {
+      console.error('Error reading date filter:', error);
+    }
+    
+    const showLiveGamesOnly = selectedDateFilter === 'live games';
+    console.log('📅 Date filter:', selectedDateFilter, '| Show live games only:', showLiveGamesOnly);
+
     const todayDate = new Date().toISOString().split('T')[0];
     const todaysGames = games.filter(game => {
       if (!game.commence_time) return false;
+      
+      // If user hasn't selected "Live Games" specifically, exclude live games
+      if (!showLiveGamesOnly && game.isLive) {
+        return false;
+      }
+      
       const gameDate = new Date(game.commence_time).toISOString().split('T')[0];
       return gameDate === todayDate;
     });
