@@ -992,3 +992,146 @@ Filtered to 35 allowed bookmakers for user plan: platinum
   "userId": "anonymous",
   "ip": "::1"
 }
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:49 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "0ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:50 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "0ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:51 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "0ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:52 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "0ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:53 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "0ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:54 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "1ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:55 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "1ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:56 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "1ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:57 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "0ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:58 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "1ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:13:59 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "1ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:14:00 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "1ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: false supabase: true
+🔐 authenticate: No token or supabase available
+2025-11-06 11:14:01 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/ws",
+  "status": 404,
+  "duration": "1ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}

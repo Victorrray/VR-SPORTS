@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, Zap, Crown, Sparkles, ArrowRight, Star, Shield, Clock, Award, BarChart2, TrendingUp, CheckCircle } from 'lucide-react';
 import { useMe } from '../../hooks/useMe';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../utils/supabase';
 import './NewPricing.css';
 
 const NewPricing = () => {
