@@ -370,6 +370,77 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     special: { title: 'Special Markets', icon: Star, description: 'Unique betting options' }
   };
 
+  // Core markets that are guaranteed to work - now with categories
+  const CORE_MARKETS_BY_SPORT = {
+    americanfootball: [
+      // Core Markets
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
+      { key: 'spreads', title: 'Spreads', description: 'Point spreads', category: 'core' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total points', category: 'core' },
+      // Alternate Lines
+      { key: 'alternate_spreads', title: 'Alt Spreads', description: 'All available point spreads', category: 'alternates' },
+      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
+      // Team-Specific
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
+      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
+    ],
+    basketball: [
+      // Core Markets
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
+      { key: 'spreads', title: 'Spreads', description: 'Point spreads', category: 'core' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total points', category: 'core' },
+      // Alternate Lines
+      { key: 'alternate_spreads', title: 'Alt Spreads', description: 'All available point spreads', category: 'alternates' },
+      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
+      // Team-Specific
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
+      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
+    ],
+    baseball: [
+      // Core Markets
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
+      { key: 'spreads', title: 'Run Line', description: 'Run line spreads', category: 'core' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total runs', category: 'core' },
+      // Alternate Lines
+      { key: 'alternate_spreads', title: 'Alt Run Lines', description: 'All available run lines', category: 'alternates' },
+      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available run totals', category: 'alternates' },
+      // Team-Specific
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific run totals', category: 'team' }
+    ],
+    hockey: [
+      // Core Markets
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
+      { key: 'spreads', title: 'Puck Line', description: 'Puck line spreads', category: 'core' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total goals', category: 'core' },
+      // Alternate Lines
+      { key: 'alternate_spreads', title: 'Alt Puck Lines', description: 'All available puck lines', category: 'alternates' },
+      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available goal totals', category: 'alternates' },
+      // Team-Specific
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' }
+    ],
+    soccer: [
+      // Core Markets
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
+      { key: 'h2h_3_way', title: '3-Way Moneyline', description: 'Win/Draw/Loss including ties', category: 'core' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under total goals', category: 'core' },
+      // Alternate Lines
+      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available goal totals', category: 'alternates' },
+      // Team-Specific
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' },
+      // Special Markets
+      { key: 'draw_no_bet', title: 'Draw No Bet', description: 'Win/Loss excluding draws', category: 'special' },
+      { key: 'btts', title: 'Both Teams to Score', description: 'Yes/No both teams score', category: 'special' }
+    ],
+    default: [
+      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
+      { key: 'spreads', title: 'Spreads', description: 'Point spreads', category: 'core' },
+      { key: 'totals', title: 'Totals', description: 'Over/Under totals', category: 'core' }
+    ]
+  };
+
+  // Use core markets for now - period markets will be added when server supports them
+  const MARKETS_BY_SPORT = CORE_MARKETS_BY_SPORT;
+
   // Function to organize markets by category
   const organizeMarketsByCategory = (markets) => {
     const organized = [];
@@ -1136,77 +1207,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setSelectedPlayerPropMarkets(defaultPlayerProps);
     setDataPoints(10);
   };
-
-  // Core markets that are guaranteed to work - now with categories
-  const CORE_MARKETS_BY_SPORT = {
-    americanfootball: [
-      // Core Markets
-      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
-      { key: 'spreads', title: 'Spreads', description: 'Point spreads', category: 'core' },
-      { key: 'totals', title: 'Totals', description: 'Over/Under total points', category: 'core' },
-      // Alternate Lines
-      { key: 'alternate_spreads', title: 'Alt Spreads', description: 'All available point spreads', category: 'alternates' },
-      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
-      // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
-      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
-    ],
-    basketball: [
-      // Core Markets
-      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
-      { key: 'spreads', title: 'Spreads', description: 'Point spreads', category: 'core' },
-      { key: 'totals', title: 'Totals', description: 'Over/Under total points', category: 'core' },
-      // Alternate Lines
-      { key: 'alternate_spreads', title: 'Alt Spreads', description: 'All available point spreads', category: 'alternates' },
-      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
-      // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
-      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
-    ],
-    baseball: [
-      // Core Markets
-      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
-      { key: 'spreads', title: 'Run Line', description: 'Run line spreads', category: 'core' },
-      { key: 'totals', title: 'Totals', description: 'Over/Under total runs', category: 'core' },
-      // Alternate Lines
-      { key: 'alternate_spreads', title: 'Alt Run Lines', description: 'All available run lines', category: 'alternates' },
-      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available run totals', category: 'alternates' },
-      // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific run totals', category: 'team' }
-    ],
-    hockey: [
-      // Core Markets
-      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
-      { key: 'spreads', title: 'Puck Line', description: 'Puck line spreads', category: 'core' },
-      { key: 'totals', title: 'Totals', description: 'Over/Under total goals', category: 'core' },
-      // Alternate Lines
-      { key: 'alternate_spreads', title: 'Alt Puck Lines', description: 'All available puck lines', category: 'alternates' },
-      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available goal totals', category: 'alternates' },
-      // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' }
-    ],
-    soccer: [
-      // Core Markets
-      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
-      { key: 'h2h_3_way', title: '3-Way Moneyline', description: 'Win/Draw/Loss including ties', category: 'core' },
-      { key: 'totals', title: 'Totals', description: 'Over/Under total goals', category: 'core' },
-      // Alternate Lines
-      { key: 'alternate_totals', title: 'Alt Totals', description: 'All available goal totals', category: 'alternates' },
-      // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' },
-      // Special Markets
-      { key: 'draw_no_bet', title: 'Draw No Bet', description: 'Win/Loss excluding draws', category: 'special' },
-      { key: 'btts', title: 'Both Teams to Score', description: 'Yes/No both teams score', category: 'special' }
-    ],
-    default: [
-      { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
-      { key: 'spreads', title: 'Spreads', description: 'Point spreads', category: 'core' },
-      { key: 'totals', title: 'Totals', description: 'Over/Under totals', category: 'core' }
-    ]
-  };
-
-  // Use core markets for now - period markets will be added when server supports them
-  const MARKETS_BY_SPORT = CORE_MARKETS_BY_SPORT;
 
   // Function to get available markets for the markets filter dropdown
   const getAvailableMarkets = (selectedSports) => {
