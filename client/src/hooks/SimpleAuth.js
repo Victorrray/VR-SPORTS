@@ -11,7 +11,7 @@ export function AuthProvider({ children }) {
 
   // Fetch user profile from profiles table
   const fetchProfile = async (userId) => {
-    if (!userId) return;
+    if (!userId || !supabase) return;
     
     try {
       const { data, error } = await supabase
@@ -38,6 +38,12 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, running in demo mode');
+      setAuthLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -66,10 +72,11 @@ export function AuthProvider({ children }) {
       setAuthLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, []);
 
   const signIn = async (email, password) => {
+    if (!supabase) throw new Error('Supabase not configured');
     console.log('🔐 Signing in user...');
     
     // Clear ONLY plan-related cache (NOT user preferences like bankroll/sportsbooks)
@@ -90,6 +97,7 @@ export function AuthProvider({ children }) {
   };
 
   const signUp = async (email, password, metadata = {}) => {
+    if (!supabase) throw new Error('Supabase not configured');
     console.log('📝 Signing up user...');
     
     // Clear ONLY plan-related cache (NOT user preferences like bankroll/sportsbooks)
@@ -114,6 +122,7 @@ export function AuthProvider({ children }) {
   };
 
   const signOut = async () => {
+    if (!supabase) throw new Error('Supabase not configured');
     console.log('🔐 Signing out user...');
     
     // Clear plan cache on sign out (preserve user preferences like bankroll/sportsbooks)
@@ -140,6 +149,10 @@ export function AuthProvider({ children }) {
     if (!user) {
       console.error('❌ setUsername: No user signed in');
       return { error: { message: 'Not signed in' } };
+    }
+    if (!supabase) {
+      console.error('❌ setUsername: Supabase not configured');
+      return { error: { message: 'Database not available' } };
     }
     
     console.log('🔄 setUsername: Attempting to set username:', username, 'for user:', user.id);
@@ -192,6 +205,7 @@ export function AuthProvider({ children }) {
   };
 
   const signInWithGoogle = async () => {
+    if (!supabase) throw new Error('Supabase not configured');
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -203,6 +217,7 @@ export function AuthProvider({ children }) {
   };
 
   const signInWithApple = async () => {
+    if (!supabase) throw new Error('Supabase not configured');
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: {
@@ -224,7 +239,7 @@ export function AuthProvider({ children }) {
     setUsername,
     signInWithGoogle,
     signInWithApple,
-    isSupabaseEnabled: true
+    isSupabaseEnabled: !!supabase
   };
 
   return (
