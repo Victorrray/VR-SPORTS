@@ -235,7 +235,7 @@ export default function Landing() {
           </h1>
           
           <p className="hero-subtitle-new">
-            Compare live odds across 15+ sportsbooks, find +EV bets with 4.2% average edge, and track your performance with advanced analytics. Real bettors. Real results.
+            Compare live odds across 15+ sportsbooks, find +EV bets with 4.2% average edge, and track your performance with advanced analytics.
           </p>
 
           {/* CTA Buttons */}
