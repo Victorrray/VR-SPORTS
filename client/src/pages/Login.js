@@ -189,36 +189,45 @@ export default function Login() {
           </button>
         )}
 
-        <div style={{ display: 'flex', gap: '12px', marginTop: '16px', marginBottom: '16px' }}>
+        {/* OR Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '24px 0', opacity: 0.6 }}>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.2)' }}></div>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: 'rgba(255, 255, 255, 0.5)' }}>OR</span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.2)' }}></div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
           <button
             onClick={() => signInWithGoogle?.()}
             style={{
               flex: 1,
-              padding: '12px 16px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: '8px',
+              padding: '16px 20px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '12px',
               cursor: 'pointer',
-              fontWeight: '500',
-              fontSize: '14px',
-              color: 'rgba(255, 255, 255, 0.9)',
-              transition: 'all 0.2s ease',
+              fontWeight: '600',
+              fontSize: '15px',
+              color: '#000000',
+              transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px'
+              gap: '10px'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.target.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+              e.target.style.background = 'rgba(255, 255, 255, 1)';
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.05)';
-              e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+              e.target.style.background = 'rgba(255, 255, 255, 0.95)';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
             }}
           >
-            <Chrome size={16} />
-            Continue with Google
+            <Chrome size={18} />
+            Google
           </button>
           {/* Apple login disabled for now - enable when provider is configured
           <button
