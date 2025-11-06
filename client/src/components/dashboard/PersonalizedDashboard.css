@@ -218,7 +218,7 @@
 .bet-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   padding: 20px 24px;
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(6, 182, 212, 0.02) 100%);
   border-bottom: 1px solid rgba(139, 92, 246, 0.1);
@@ -227,6 +227,7 @@
 
 .bet-header .edge-badge {
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .matchup-info {

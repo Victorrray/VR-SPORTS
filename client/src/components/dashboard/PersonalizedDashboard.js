@@ -560,14 +560,14 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
                       <span className="game-time">{bet.isLive ? 'LIVE' : bet.gameTime}</span>
                     </div>
                   </div>
+                  <div className={`edge-badge ${bet.confidence.toLowerCase()}`}>
+                    +{bet.edge}% EV
+                  </div>
                 </div>
                 
                 <div className="bet-selection">
                   <div className="market-info">
                     <div className="market-type">{bet.marketDetail}</div>
-                  </div>
-                  <div className={`edge-badge ${bet.confidence.toLowerCase()}`}>
-                    +{bet.edge}% EV
                   </div>
                 </div>
                 
