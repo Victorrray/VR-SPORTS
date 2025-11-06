@@ -1,0 +1,1271 @@
+✅ OddsCacheService initialized
+⚠️ SENTRY_DSN not set - error tracking disabled
+🚀 Feature Flags: { ENABLE_PLAYER_PROPS_V2: true, NODE_ENV: undefined }
+2025-11-06 10:56:33 [[32minfo[39m]: ✅ Server running on http://localhost:10000 {
+  "service": "vr-odds-api",
+  "port": "10000"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: true user: false
+⚠️ authenticate: Token verification error: invalid JWT: unable to parse or verify signature, token is malformed: token contains an invalid number of segments
+📍 Odds router received request: { path: '/', method: 'GET', url: '/?sports=americanfootball_nfl' }
+💎 Demo user - granting Platinum access
+🔍 /api/odds called with: {
+  sports: 'americanfootball_nfl',
+  regions: 'us',
+  markets: 'h2h,spreads,totals',
+  date: undefined,
+  userId: 'demo-user'
+}
+🎯 Sport-specific market filtering:
+  americanfootball_nfl: h2h, spreads, totals
+📊 Market separation:
+  Base markets: [ 'h2h', 'spreads', 'totals' ]
+  Quarter/Half/Period markets: []
+🎯 Game odds bookmakers for americanfootball_nfl: pinnacle,prophet_exchange,rebet,draftkings,fanduel,betmgm,caesars,williamhill_us,pointsbet,bovada,mybookie,betonline,unibet,betrivers,novig,fliff,hardrock,hardrockbet,espnbet,fanatics,wynnbet,superbook,twinspires,betfred_us,circasports,lowvig,barstool,foxbet,betopenly,prophetx
+📦 Supabase cache HIT for americanfootball_nfl: 896 cached entries
+✅ Using 29 games from Supabase cache
+💰 Saved API call for americanfootball_nfl using Supabase cache
+Filtered to 35 allowed bookmakers for user plan: platinum
+🔍 STEP 2 CHECK: quarterMarkets.length = 0 quarterMarkets = []
+📊 Final response: 29 total games/events (including 0 with player props)
+📊 FINAL MARKETS IN RESPONSE: h2h, spreads, totals
+📊 MARKET COUNTS: { totals: 282, spreads: 310, h2h: 304 }
+2025-11-06 10:56:49 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/",
+  "status": 200,
+  "duration": "269ms",
+  "userId": "demo-user",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:14 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "274ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "316ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "336ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "348ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "71ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "52ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "83ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "56ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "43ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "68ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "51ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "74ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "47ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "48ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "43ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "63ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "63ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:15 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "49ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "45ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "62ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "60ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "44ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "49ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "58ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "60ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "69ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "45ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "65ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "56ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "49ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "75ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "41ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:16 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "58ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "46ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "65ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "58ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "44ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "49ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "57ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "63ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "85ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "107ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "78ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/sports",
+  "status": 404,
+  "duration": "55ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "102ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/sports",
+  "status": 404,
+  "duration": "57ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "112ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "111ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "116ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "156ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "50ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "53ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "98ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "108ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:17 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "86ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "50ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "152ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "52ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "112ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "117ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "112ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "120ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "67ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "95ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "105ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "77ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "109ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "113ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "66ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "95ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "97ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "49ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "109ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "123ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "67ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "114ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "130ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "52ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "104ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "112ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "53ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "87ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "116ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "57ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "50ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "121ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "137ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "97ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "128ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "75ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "123ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "139ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:18 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "49ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: Checking token: true supabase: true
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:19 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "86ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:19 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "102ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:19 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "53ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: Checking token: true supabase: true
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+🔐 authenticate: getUser result - error: false user: true
+✅ authenticate: User authenticated: 54276b6c-5255-4117-be95-70c22132591c
+2025-11-06 10:57:19 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/odds",
+  "status": 404,
+  "duration": "47ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:19 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "106ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
+✅ User 54276b6c-5255-4117-be95-70c22132591c has platinum plan
+2025-11-06 10:57:19 [[32minfo[39m]: API Request {
+  "service": "vr-odds-api",
+  "method": "GET",
+  "path": "/me",
+  "status": 200,
+  "duration": "125ms",
+  "userId": "anonymous",
+  "ip": "::1"
+}
