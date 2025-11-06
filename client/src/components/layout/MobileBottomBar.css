@@ -19,7 +19,7 @@
   z-index: 1000;
   display: none;
   box-sizing: border-box;
-  padding-top: 8px;
+  padding-top: 0;
   padding-left: 16px;
   padding-right: 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
@@ -112,7 +112,7 @@
   overflow: hidden;
   width: calc(100% - 40px);
   max-width: 380px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .mobile-nav::before {
