@@ -26,62 +26,22 @@ const {
 // Sport-specific market support from TheOddsAPI
 const SPORT_MARKET_SUPPORT = {
   'americanfootball_nfl': [
-    'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
-    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
-    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
-    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
-    'h2h_h1', 'h2h_h2', 'spreads_h1', 'spreads_h2', 'totals_h1', 'totals_h2',
-    'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
-    'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
-    'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
-    'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
-    'alternate_spreads_h1', 'alternate_spreads_h2', 'alternate_totals_h1', 'alternate_totals_h2',
-    'team_totals_h1', 'team_totals_h2', 'alternate_team_totals_h1', 'alternate_team_totals_h2'
+    'h2h', 'spreads', 'totals'
   ],
   'americanfootball_ncaaf': [
-    'h2h', 'spreads', 'totals', 'h2h_lay',
-    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
-    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
-    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
-    'h2h_h1', 'h2h_h2', 'spreads_h1', 'spreads_h2', 'totals_h1', 'totals_h2'
+    'h2h', 'spreads', 'totals'
   ],
   'basketball_nba': [
-    'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
-    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
-    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
-    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
-    'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4',
-    'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
-    'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
-    'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4'
+    'h2h', 'spreads', 'totals'
   ],
   'basketball_ncaab': [
-    'h2h', 'spreads', 'totals', 'h2h_lay',
-    'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
-    'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
-    'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4'
+    'h2h', 'spreads', 'totals'
   ],
   'baseball_mlb': [
-    'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
-    'h2h_1st_1_innings', 'h2h_1st_3_innings', 'h2h_1st_5_innings', 'h2h_1st_7_innings',
-    'spreads_1st_1_innings', 'spreads_1st_3_innings', 'spreads_1st_5_innings', 'spreads_1st_7_innings',
-    'totals_1st_1_innings', 'totals_1st_3_innings', 'totals_1st_5_innings', 'totals_1st_7_innings',
-    'alternate_spreads_1st_1_innings', 'alternate_spreads_1st_3_innings', 'alternate_spreads_1st_5_innings', 'alternate_spreads_1st_7_innings',
-    'alternate_totals_1st_1_innings', 'alternate_totals_1st_3_innings', 'alternate_totals_1st_5_innings', 'alternate_totals_1st_7_innings'
+    'h2h', 'spreads', 'totals'
   ],
   'icehockey_nhl': [
-    'h2h', 'spreads', 'totals', 'h2h_lay',
-    'alternate_spreads', 'alternate_totals', 'h2h_3_way', 'team_totals', 'alternate_team_totals',
-    'h2h_p1', 'h2h_p2', 'h2h_p3',
-    'spreads_p1', 'spreads_p2', 'spreads_p3',
-    'totals_p1', 'totals_p2', 'totals_p3',
-    'alternate_spreads_p1', 'alternate_spreads_p2', 'alternate_spreads_p3',
-    'alternate_totals_p1', 'alternate_totals_p2', 'alternate_totals_p3',
-    'team_totals_p1', 'team_totals_p2', 'team_totals_p3',
-    'alternate_team_totals_p1', 'alternate_team_totals_p2', 'alternate_team_totals_p3'
+    'h2h', 'spreads', 'totals'
   ],
   'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
@@ -322,8 +282,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     }
     
     // Step 2: Fetch quarter/half/period markets if requested
+    // NOTE: TheOddsAPI does NOT support period markets through the /odds endpoint
+    // All attempts to fetch h2h_q1, spreads_q1, totals_h1, h2h_p1, etc. return 422 errors
+    // These markets are listed in their documentation but not actually available
     console.log('🔍 STEP 2 CHECK: quarterMarkets.length =', quarterMarkets.length, 'quarterMarkets =', quarterMarkets);
-    if (quarterMarkets.length > 0) {
+    if (quarterMarkets.length > 0 && false) { // Disabled - TheOddsAPI doesn't support these markets
       console.log('🎯 Step 2: Fetching quarter/half/period markets:', quarterMarkets);
       
       const userProfile = req.__userProfile || { plan: 'free' };
