@@ -414,10 +414,10 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: 70px;
-  padding: 16px 24px;
+  min-height: 80px;
+  padding: 18px 24px;
   background: transparent;
-  gap: 6px;
+  gap: 4px;
   border-right: none;
 }
 
@@ -428,27 +428,28 @@
 .odds-label,
 .confidence-label {
   font-size: 10px;
-  color: rgba(167, 139, 250, 0.65);
+  color: rgba(167, 139, 250, 0.7);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .odds-value {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 900;
   color: #10b981;
   line-height: 1;
-  margin-bottom: 0;
+  margin-bottom: 2px;
   text-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 .bookmaker {
   font-size: 12px;
-  color: rgba(167, 139, 250, 0.7);
-  font-weight: 500;
+  color: rgba(167, 139, 250, 0.75);
+  font-weight: 600;
   margin-top: 0;
+  text-align: center;
 }
 
 .confidence-level {
