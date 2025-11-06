@@ -116,3 +116,14 @@
   background: rgba(244, 63, 94, 0.18);
   border-color: rgba(244, 63, 94, 0.35);
 }
+
+/* Main Content Padding for Fixed Navbar */
+.main-content {
+  padding-top: 120px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 100px;
+  }
+}
