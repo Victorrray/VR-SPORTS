@@ -116,9 +116,7 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
           </button>
           <Link to="/" className={styles.brand}>
             <div className={styles.brandLogo}>
-              <span className={styles.logoText}>ODD</span>
-              <span className={styles.logoAccent}>SIGHT</span>
-              <span className={styles.logoText}>SEER</span>
+              <span className={styles.logoText}>OS</span>
             </div>
           </Link>
         </div>

@@ -1,8 +1,8 @@
 /* Modern Revamped Navigation Bar */
 
 :root {
-  --navbar-bg: #1a1a1a;
-  --navbar-bg-scrolled: #0f0f0f;
+  --navbar-bg: linear-gradient(135deg, rgba(26, 20, 40, 0.95) 0%, rgba(20, 15, 35, 0.95) 100%);
+  --navbar-bg-scrolled: linear-gradient(135deg, rgba(26, 20, 40, 0.98) 0%, rgba(20, 15, 35, 0.98) 100%);
   --navbar-border: rgba(255, 255, 255, 0.1);
   --navbar-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   --navbar-shadow-scrolled: 0 12px 48px rgba(0, 0, 0, 0.4);
@@ -21,22 +21,25 @@
   background: var(--navbar-bg);
   box-shadow: var(--navbar-shadow);
   padding: 1rem 2.5rem;
-  position: sticky;
+  position: fixed;
   top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   min-height: 60px;
   z-index: 9999;
   backdrop-filter: blur(24px);
   border: 2px solid rgba(255, 255, 255, 0.1);
   color: var(--navbar-text);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: none;
   border-radius: 50px;
-  margin: 0 20px;
-  max-width: calc(100% - 40px);
+  width: 90%;
+  max-width: 1200px;
+  overflow: visible;
 }
 
 .navbar.scrolled {
-  background: var(--navbar-bg-scrolled);
-  box-shadow: var(--navbar-shadow-scrolled);
+  background: var(--navbar-bg);
+  box-shadow: var(--navbar-shadow);
   padding: 1rem 2.5rem;
 }
 
@@ -58,6 +61,12 @@
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 8px;
+  margin-left: auto;
+  align-self: center;
+  height: 40px;
+  width: 40px;
+  justify-content: center;
+  align-items: center;
 }
 
 .hamburger:hover {
@@ -75,6 +84,7 @@
   cursor: pointer;
   border: none;
   flex-shrink: 0;
+  outline: none;
 }
 
 .brand:focus {
@@ -87,6 +97,11 @@
   border-radius: 50%;
 }
 
+.brand:active {
+  outline: none;
+  text-decoration: none;
+}
+
 .brandLogo {
   display: flex;
   align-items: center;
@@ -97,7 +112,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: white;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -105,7 +120,7 @@
 }
 
 .logoText {
-  color: #1a1a1a;
+  color: white;
   font-size: 20px;
   font-weight: 900;
 }
@@ -139,18 +154,27 @@
   white-space: nowrap;
   border: none;
   background: none;
+  outline: none;
 }
 
 .navLink:hover {
   color: var(--navbar-text-hover);
   background: none;
   transform: none;
+  outline: none;
+}
+
+.navLink:active {
+  outline: none;
+  text-decoration: none;
 }
 
 .navLink.active {
   color: var(--navbar-text-hover);
   background: none;
   box-shadow: none;
+  outline: none;
+  text-decoration: none;
 }
 
 .navLink span {
@@ -168,6 +192,7 @@
   align-items: center;
   gap: 1.5rem;
   min-width: 0;
+  flex-shrink: 0;
 }
 
 /* Search Container */
@@ -222,12 +247,15 @@
 .loginBtn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  width: 40px;
+  height: 40px;
   background: linear-gradient(135deg, var(--navbar-accent), #a78bfa);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 50%;
   text-decoration: none;
   cursor: pointer;
   font-weight: 600;
@@ -238,6 +266,10 @@
 .loginBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);
+}
+
+.loginBtn span {
+  display: none;
 }
 
 /* User Section */

@@ -64,6 +64,13 @@ const SPORT_MARKET_SUPPORT = {
  * GET /api/odds
  * Main odds endpoint - returns game odds with optional player props
  */
+
+// Debug: Log all requests to this router
+router.use((req, res, next) => {
+  console.log('📍 Odds router received request:', { path: req.path, method: req.method, url: req.url });
+  next();
+});
+
 router.get('/', requireUser, checkPlanAccess, async (req, res) => {
   try {
     const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american", date } = req.query;

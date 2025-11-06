@@ -132,8 +132,9 @@
 }
 
 .gradient-grid {
+  max-height: 1000px;
   position: absolute;
-  inset: 0;
+  inset: -100px 0 0 0;
   background-image: 
     linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);

@@ -301,10 +301,9 @@ const Pricing = ({ onUpgrade }) => {
             <div className="pricing-display-simple">
               <div className="price-main-simple">
                 <span className="currency-simple">$</span>
-                <span className="amount-simple">25</span>
+                <div className="amount-simple">25</div>
                 <span className="period-simple">/month</span>
               </div>
-              <div className="savings-note">Save 40% vs daily subscriptions</div>
             </div>
 
             {/* Benefits List - Simplified */}

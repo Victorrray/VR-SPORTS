@@ -58,8 +58,8 @@ const corsOptions = {
       process.env.FRONTEND_URL
     ].filter(Boolean);
 
-    // Allow Render frontend deployments
-    if (!origin || allowedOrigins.includes(origin) || origin.includes('.onrender.com')) {
+    // Allow Render frontend deployments and local preview ports
+    if (!origin || allowedOrigins.includes(origin) || origin.includes('.onrender.com') || origin.includes('127.0.0.1')) {
       callback(null, true);
     } else {
       console.log('🚫 CORS blocked origin:', origin);
