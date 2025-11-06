@@ -22,9 +22,6 @@
   box-shadow: var(--navbar-shadow);
   padding: 1rem 2.5rem;
   position: relative;
-  top: auto;
-  left: 50%;
-  transform: translateX(-50%);
   min-height: 60px;
   z-index: 9999;
   backdrop-filter: blur(24px);
@@ -35,7 +32,7 @@
   width: 90%;
   max-width: 1200px;
   overflow: visible;
-  margin: 1rem auto;
+  margin: 1rem 0;
 }
 
 .navbar.scrolled {
