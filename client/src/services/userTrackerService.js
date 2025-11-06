@@ -50,8 +50,23 @@ export function getUserStats() {
  */
 export function calculateUserStats() {
   try {
-    const picks = optimizedStorage.get(PICKS_KEY);
-    if (!picks) return getUserStats();
+    // Try to get picks from optimized storage first
+    let picks = optimizedStorage.get(PICKS_KEY);
+    
+    // If not found, check localStorage for placed_bets (from BetSlip)
+    if (!picks || picks.length === 0) {
+      try {
+        const placedBets = JSON.parse(localStorage.getItem('placed_bets') || '[]');
+        if (placedBets.length > 0) {
+          picks = placedBets;
+          console.log('📊 Loaded', picks.length, 'bets from placed_bets');
+        }
+      } catch (e) {
+        console.error('Error reading placed_bets:', e);
+      }
+    }
+    
+    if (!picks || picks.length === 0) return getUserStats();
     
     const totalBets = picks.length;
     const wonBets = picks.filter(p => p.status === 'won').length;
