@@ -282,11 +282,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     }
     
     // Step 2: Fetch quarter/half/period markets if requested
-    // NOTE: TheOddsAPI does NOT support period markets through the /odds endpoint
-    // All attempts to fetch h2h_q1, spreads_q1, totals_h1, h2h_p1, etc. return 422 errors
-    // These markets are listed in their documentation but not actually available
+    // NOTE: Period markets require /events/{eventId}/odds endpoint (one call per game)
+    // This is much more expensive, so we're strategic:
+    // - Only fetch for top 5 games per sport
+    // - Only fetch selected period markets (not all variants)
+    // - Cache for 24 hours
     console.log('🔍 STEP 2 CHECK: quarterMarkets.length =', quarterMarkets.length, 'quarterMarkets =', quarterMarkets);
-    if (quarterMarkets.length > 0 && false) { // Disabled - TheOddsAPI doesn't support these markets
+    if (quarterMarkets.length > 0) {
       console.log('🎯 Step 2: Fetching quarter/half/period markets:', quarterMarkets);
       
       const userProfile = req.__userProfile || { plan: 'free' };
@@ -298,80 +300,88 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       
       console.log(`🎯 Quarter/Period markets bookmakers: ${bookmakerList}`);
       
+      // Strategic approach: Only fetch for top 5 games per sport using /events/{eventId}/odds
+      const MAX_GAMES_FOR_PERIOD_MARKETS = 5;
+      const PERIOD_MARKET_CACHE_HOURS = 24;
+      
       for (const sport of sportsArray) {
         try {
-          // Verify quarter markets are supported for this sport
-          const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
-          const supportedQuarterMarkets = quarterMarkets.filter(m => supportedForSport.includes(m));
+          // Get top games for this sport (first 5)
+          const sportGames = allGames.filter(g => g.sport_key === sport).slice(0, MAX_GAMES_FOR_PERIOD_MARKETS);
           
-          if (supportedQuarterMarkets.length === 0) {
-            console.log(`⏭️ No supported quarter/period markets for ${sport}. Supported: ${supportedForSport.join(', ')}`);
+          if (sportGames.length === 0) {
+            console.log(`⏭️ No games found for ${sport}`);
             continue;
           }
           
-          console.log(`🎯 Fetching quarter/period markets for ${sport}: ${supportedQuarterMarkets.join(', ')}`);
+          console.log(`🎯 Fetching period markets for top ${sportGames.length} ${sport} games using /events/{eventId}/odds`);
           
-          // Batch markets into smaller requests (max 5 markets per request to avoid API limits)
-          const marketBatches = [];
-          for (let i = 0; i < supportedQuarterMarkets.length; i += 5) {
-            marketBatches.push(supportedQuarterMarkets.slice(i, i + 5));
-          }
-          
-          console.log(`📦 Splitting ${supportedQuarterMarkets.length} markets into ${marketBatches.length} batches`);
-          
-          for (let batchIdx = 0; batchIdx < marketBatches.length; batchIdx++) {
-            const batch = marketBatches[batchIdx];
-            console.log(`🌐 API call for quarter/period markets batch ${batchIdx + 1}/${marketBatches.length} - ${sport}: ${batch.join(',')}`);
-            
-            const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${batch.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
-            
+          // Fetch period markets for each game individually
+          for (const game of sportGames) {
             try {
-              const response = await axios.get(url);
-              const quarterMarketData = response.data || [];
+              const eventId = game.id;
+              const cacheKey = `period_markets_${sport}_${eventId}`;
               
-              // Log quota information
-              const quotaRemaining = response.headers['x-requests-remaining'];
-              const quotaUsed = response.headers['x-requests-used'];
-              const quotaLast = response.headers['x-requests-last'];
-              console.log(`📊 Quarter Markets Batch ${batchIdx + 1} Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
-              
-              console.log(`✅ Got ${quarterMarketData.length} games with quarter/period markets for ${sport} batch ${batchIdx + 1}`);
-              
-              // Merge quarter market data with existing games
-              quarterMarketData.forEach(quarterGame => {
-                const existingGame = allGames.find(g => g.id === quarterGame.id);
-                if (existingGame && existingGame.bookmakers) {
-                  // Merge bookmakers and markets
-                  quarterGame.bookmakers.forEach(qBookmaker => {
-                    const existingBookmaker = existingGame.bookmakers.find(b => b.key === qBookmaker.key);
-                    if (existingBookmaker && existingBookmaker.markets) {
-                      // Add quarter markets to existing bookmaker
+              // Check cache first
+              const cached = await getCachedResponse(cacheKey, PERIOD_MARKET_CACHE_HOURS * 60 * 60 * 1000);
+              if (cached) {
+                console.log(`📦 Period markets cache HIT for ${eventId}`);
+                // Merge cached data
+                if (cached.bookmakers) {
+                  cached.bookmakers.forEach(cBookmaker => {
+                    const existingBookmaker = game.bookmakers.find(b => b.key === cBookmaker.key);
+                    if (existingBookmaker && cBookmaker.markets) {
                       const existingMarketKeys = existingBookmaker.markets.map(m => m.key);
-                      qBookmaker.markets.forEach(qMarket => {
-                        if (!existingMarketKeys.includes(qMarket.key)) {
-                          existingBookmaker.markets.push(qMarket);
+                      cBookmaker.markets.forEach(cMarket => {
+                        if (!existingMarketKeys.includes(cMarket.key)) {
+                          existingBookmaker.markets.push(cMarket);
                         }
                       });
-                    } else if (!existingBookmaker) {
-                      // Add new bookmaker with quarter markets
-                      existingGame.bookmakers.push(qBookmaker);
                     }
                   });
-                } else if (!existingGame) {
-                  // Game doesn't exist yet, add it
-                  allGames.push(quarterGame);
                 }
-              });
-            } catch (batchErr) {
-              console.warn(`⚠️ Failed to fetch batch ${batchIdx + 1} for ${sport}:`, batchErr.response?.status, batchErr.response?.data?.message || batchErr.message);
+                continue;
+              }
+              
+              // Fetch from API
+              const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${quarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}`;
+              
+              console.log(`🌐 Fetching period markets for event ${eventId}`);
+              const response = await axios.get(url);
+              const eventData = response.data || {};
+              
+              console.log(`📊 Period Markets Quota - Remaining: ${response.headers['x-requests-remaining']}, Used: ${response.headers['x-requests-used']}`);
+              
+              // Cache the result
+              if (eventData.bookmakers) {
+                await setCachedResponse(cacheKey, eventData, PERIOD_MARKET_CACHE_HOURS * 60 * 60 * 1000);
+              }
+              
+              // Merge period market data with existing game
+              if (eventData.bookmakers) {
+                eventData.bookmakers.forEach(pBookmaker => {
+                  const existingBookmaker = game.bookmakers.find(b => b.key === pBookmaker.key);
+                  if (existingBookmaker && pBookmaker.markets) {
+                    const existingMarketKeys = existingBookmaker.markets.map(m => m.key);
+                    pBookmaker.markets.forEach(pMarket => {
+                      if (!existingMarketKeys.includes(pMarket.key)) {
+                        existingBookmaker.markets.push(pMarket);
+                      }
+                    });
+                    console.log(`✅ Merged ${pBookmaker.markets.length} period markets for ${pBookmaker.key}`);
+                  }
+                });
+              }
+            } catch (gameErr) {
+              console.warn(`⚠️ Failed to fetch period markets for event ${game.id}:`, gameErr.response?.status, gameErr.response?.data?.message || gameErr.message);
             }
           }
         } catch (sportErr) {
-          console.warn(`⚠️ Failed to process quarter/period markets for ${sport}:`, sportErr.message);
+          console.warn(`⚠️ Failed to process period markets for ${sport}:`, sportErr.message);
         }
       }
       
-      console.log(`✅ Quarter/period markets merge complete`);
+      console.log(`✅ Period markets fetch complete`);
     }
     
     // Step 3: Fetch player props if requested

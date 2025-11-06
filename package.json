@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js",
+    "start": "node server/index.js",
     "scan:secrets": "npx gitleaks detect --no-banner --redact || true",
     "test": "jest",
     "test:unit": "jest --testPathPatterns='server/__tests__' --coverage",
