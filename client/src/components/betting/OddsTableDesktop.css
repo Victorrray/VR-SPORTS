@@ -110,7 +110,7 @@
   /* Column width alignment with main table */
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(1),
   tr.desktop-mini-wrap .mini-odds-table td:nth-child(1) {
-    width: 22% !important; /* Line column - matches TEAM/LINE */
+    width: 10% !important; /* EV % - matches main table EV % */
   }
   
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(2),
@@ -130,7 +130,7 @@
   
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(5),
   tr.desktop-mini-wrap .mini-odds-table td:nth-child(5) {
-    width: 33% !important; /* Add Pick - remaining space */
+    width: 45% !important; /* Add Pick - remaining space */
   }
 
   /* Sportsbook cell - Left aligned */

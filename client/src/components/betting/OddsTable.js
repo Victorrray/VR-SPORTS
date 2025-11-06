@@ -3887,10 +3887,10 @@ export default function OddsTable({
                         <table className="mini-odds-table">
                           <thead>
                             <tr>
+                              <th>EV %</th>
                               <th>Sportsbook</th>
                               {mode === "props" ? (
                                 <>
-                                  <th>Line</th>
                                   <th>Over</th>
                                   <th>Under</th>
                                 </>
@@ -3990,6 +3990,9 @@ export default function OddsTable({
                                 <>
                                   {displayBooks.map((p, i) => (
                                 <tr key={p._rowId || i}>
+                                  <td className="mini-odds-cell" style={{ fontSize: '0.9em', color: 'rgba(255,255,255,0.8)', fontWeight: '700' }}>
+                                    {ev ? `${(ev * 100).toFixed(1)}%` : '-'}
+                                  </td>
                                   <td className="mini-book-cell">
                                     {logos[p.bookmaker?.key] && (
                                       <img 
