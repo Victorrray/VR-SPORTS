@@ -17,7 +17,7 @@
 
 .pricing-section {
   padding: 3rem 0;
-  background: var(--bg-darker);
+  background: transparent;
   min-height: 100vh;
   display: flex;
   align-items: center;
