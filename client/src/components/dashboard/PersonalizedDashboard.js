@@ -659,6 +659,11 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
                       <span>Sportsbook Comparison</span>
                     </div>
                     <div className="odds-grid">
+                      <div className="odds-grid-header">
+                        <div className="header-cell">SPORTSBOOK</div>
+                        <div className="header-cell">LINE</div>
+                        <div className="header-cell"></div>
+                      </div>
                       {bet.allBooks.slice(0, 6).map((book, bookIndex) => (
                         <div key={bookIndex} className="odds-row">
                           <div className="book-name">{book.name}</div>
