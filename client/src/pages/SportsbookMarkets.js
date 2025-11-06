@@ -1061,27 +1061,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
       // Team-Specific
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
-      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' },
-      // Quarter Markets
-      { key: 'h2h_q1', title: '1st Quarter Moneyline', description: '1st quarter winner', category: 'special' },
-      { key: 'h2h_q2', title: '2nd Quarter Moneyline', description: '2nd quarter winner', category: 'special' },
-      { key: 'h2h_q3', title: '3rd Quarter Moneyline', description: '3rd quarter winner', category: 'special' },
-      { key: 'h2h_q4', title: '4th Quarter Moneyline', description: '4th quarter winner', category: 'special' },
-      { key: 'spreads_q1', title: '1st Quarter Spreads', description: '1st quarter spreads', category: 'special' },
-      { key: 'spreads_q2', title: '2nd Quarter Spreads', description: '2nd quarter spreads', category: 'special' },
-      { key: 'spreads_q3', title: '3rd Quarter Spreads', description: '3rd quarter spreads', category: 'special' },
-      { key: 'spreads_q4', title: '4th Quarter Spreads', description: '4th quarter spreads', category: 'special' },
-      { key: 'totals_q1', title: '1st Quarter Totals', description: '1st quarter over/under', category: 'special' },
-      { key: 'totals_q2', title: '2nd Quarter Totals', description: '2nd quarter over/under', category: 'special' },
-      { key: 'totals_q3', title: '3rd Quarter Totals', description: '3rd quarter over/under', category: 'special' },
-      { key: 'totals_q4', title: '4th Quarter Totals', description: '4th quarter over/under', category: 'special' },
-      // Half Markets
-      { key: 'h2h_h1', title: '1st Half Moneyline', description: '1st half winner', category: 'special' },
-      { key: 'h2h_h2', title: '2nd Half Moneyline', description: '2nd half winner', category: 'special' },
-      { key: 'spreads_h1', title: '1st Half Spreads', description: '1st half spreads', category: 'special' },
-      { key: 'spreads_h2', title: '2nd Half Spreads', description: '2nd half spreads', category: 'special' },
-      { key: 'totals_h1', title: '1st Half Totals', description: '1st half over/under', category: 'special' },
-      { key: 'totals_h2', title: '2nd Half Totals', description: '2nd half over/under', category: 'special' }
+      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
     ],
     basketball: [
       // Core Markets
@@ -1093,20 +1073,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
       // Team-Specific
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
-      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' },
-      // Quarter Markets
-      { key: 'h2h_q1', title: '1st Quarter Moneyline', description: '1st quarter winner', category: 'special' },
-      { key: 'h2h_q2', title: '2nd Quarter Moneyline', description: '2nd quarter winner', category: 'special' },
-      { key: 'h2h_q3', title: '3rd Quarter Moneyline', description: '3rd quarter winner', category: 'special' },
-      { key: 'h2h_q4', title: '4th Quarter Moneyline', description: '4th quarter winner', category: 'special' },
-      { key: 'spreads_q1', title: '1st Quarter Spreads', description: '1st quarter spreads', category: 'special' },
-      { key: 'spreads_q2', title: '2nd Quarter Spreads', description: '2nd quarter spreads', category: 'special' },
-      { key: 'spreads_q3', title: '3rd Quarter Spreads', description: '3rd quarter spreads', category: 'special' },
-      { key: 'spreads_q4', title: '4th Quarter Spreads', description: '4th quarter spreads', category: 'special' },
-      { key: 'totals_q1', title: '1st Quarter Totals', description: '1st quarter over/under', category: 'special' },
-      { key: 'totals_q2', title: '2nd Quarter Totals', description: '2nd quarter over/under', category: 'special' },
-      { key: 'totals_q3', title: '3rd Quarter Totals', description: '3rd quarter over/under', category: 'special' },
-      { key: 'totals_q4', title: '4th Quarter Totals', description: '4th quarter over/under', category: 'special' }
+      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
     ],
     baseball: [
       // Core Markets
@@ -1117,20 +1084,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_spreads', title: 'Alt Run Lines', description: 'All available run lines', category: 'alternates' },
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available run totals', category: 'alternates' },
       // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific run totals', category: 'team' },
-      // Innings Markets
-      { key: 'h2h_1st_1_innings', title: '1st Inning Moneyline', description: '1st inning winner', category: 'special' },
-      { key: 'h2h_1st_3_innings', title: '1st 3 Innings Moneyline', description: 'First 3 innings winner', category: 'special' },
-      { key: 'h2h_1st_5_innings', title: '1st 5 Innings Moneyline', description: 'First 5 innings winner', category: 'special' },
-      { key: 'h2h_1st_7_innings', title: '1st 7 Innings Moneyline', description: 'First 7 innings winner', category: 'special' },
-      { key: 'spreads_1st_1_innings', title: '1st Inning Spreads', description: '1st inning spreads', category: 'special' },
-      { key: 'spreads_1st_3_innings', title: '1st 3 Innings Spreads', description: 'First 3 innings spreads', category: 'special' },
-      { key: 'spreads_1st_5_innings', title: '1st 5 Innings Spreads', description: 'First 5 innings spreads', category: 'special' },
-      { key: 'spreads_1st_7_innings', title: '1st 7 Innings Spreads', description: 'First 7 innings spreads', category: 'special' },
-      { key: 'totals_1st_1_innings', title: '1st Inning Totals', description: '1st inning over/under', category: 'special' },
-      { key: 'totals_1st_3_innings', title: '1st 3 Innings Totals', description: 'First 3 innings over/under', category: 'special' },
-      { key: 'totals_1st_5_innings', title: '1st 5 Innings Totals', description: 'First 5 innings over/under', category: 'special' },
-      { key: 'totals_1st_7_innings', title: '1st 7 Innings Totals', description: 'First 7 innings over/under', category: 'special' }
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific run totals', category: 'team' }
     ],
     hockey: [
       // Core Markets
@@ -1141,17 +1095,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_spreads', title: 'Alt Puck Lines', description: 'All available puck lines', category: 'alternates' },
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available goal totals', category: 'alternates' },
       // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' },
-      // Period Markets
-      { key: 'h2h_p1', title: '1st Period Moneyline', description: '1st period winner', category: 'special' },
-      { key: 'h2h_p2', title: '2nd Period Moneyline', description: '2nd period winner', category: 'special' },
-      { key: 'h2h_p3', title: '3rd Period Moneyline', description: '3rd period winner', category: 'special' },
-      { key: 'spreads_p1', title: '1st Period Spreads', description: '1st period spreads', category: 'special' },
-      { key: 'spreads_p2', title: '2nd Period Spreads', description: '2nd period spreads', category: 'special' },
-      { key: 'spreads_p3', title: '3rd Period Spreads', description: '3rd period spreads', category: 'special' },
-      { key: 'totals_p1', title: '1st Period Totals', description: '1st period over/under', category: 'special' },
-      { key: 'totals_p2', title: '2nd Period Totals', description: '2nd period over/under', category: 'special' },
-      { key: 'totals_p3', title: '3rd Period Totals', description: '3rd period over/under', category: 'special' }
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' }
     ],
     soccer: [
       // Core Markets
@@ -1258,9 +1202,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const getAutoSelectedMarkets = (selectedSports) => {
     const relevantMarkets = getRelevantMarkets(selectedSports);
     // Filter out header items and only return actual market keys
-    // Include both core and special (period) markets
+    // Include core, alternates, and team markets (period markets not supported by API)
     return relevantMarkets
-      .filter(market => !market.isHeader && (market.category === 'core' || market.category === 'special'))
+      .filter(market => !market.isHeader && (market.category === 'core' || market.category === 'alternates' || market.category === 'team'))
       .map(market => market.key);
   };
 
