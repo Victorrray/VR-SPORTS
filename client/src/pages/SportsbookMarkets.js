@@ -362,6 +362,48 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     me: me
   });
 
+  // Function to get relevant markets based on selected sports
+  const getRelevantMarkets = (selectedSports) => {
+    if (!selectedSports || selectedSports.length === 0) {
+      return organizeMarketsByCategory(MARKETS_BY_SPORT.default);
+    }
+
+    // If multiple sports selected, combine all relevant markets
+    const allMarkets = new Map();
+    
+    // Always include default markets for better compatibility
+    MARKETS_BY_SPORT.default.forEach(market => {
+      allMarkets.set(market.key, market);
+    });
+    
+    selectedSports.forEach(sport => {
+      let sportCategory = 'default';
+      
+      if (sport.includes('football')) sportCategory = 'americanfootball';
+      else if (sport.includes('basketball')) sportCategory = 'basketball';
+      else if (sport.includes('baseball')) sportCategory = 'baseball';
+      else if (sport.includes('hockey')) sportCategory = 'hockey';
+      else if (sport.includes('soccer')) sportCategory = 'soccer';
+      
+      const markets = MARKETS_BY_SPORT[sportCategory] || MARKETS_BY_SPORT.default;
+      markets.forEach(market => {
+        allMarkets.set(market.key, market);
+      });
+    });
+
+    return organizeMarketsByCategory(Array.from(allMarkets.values()));
+  };
+
+  // Function to auto-select all relevant markets for selected sports
+  const getAutoSelectedMarkets = (selectedSports) => {
+    const relevantMarkets = getRelevantMarkets(selectedSports);
+    // Filter out header items and only return actual market keys
+    // Include core, alternates, and team markets (period markets not supported by API)
+    return relevantMarkets
+      .filter(market => !market.isHeader && (market.category === 'core' || market.category === 'alternates' || market.category === 'team'))
+      .map(market => market.key);
+  };
+
   // Function to get all compatible markets for the selected sports
   const getAllCompatibleMarkets = (sports) => {
     // If no sports selected or in player props mode, return default
@@ -1164,48 +1206,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     });
 
     return organized;
-  };
-
-  // Function to get relevant markets based on selected sports
-  const getRelevantMarkets = (selectedSports) => {
-    if (!selectedSports || selectedSports.length === 0) {
-      return organizeMarketsByCategory(MARKETS_BY_SPORT.default);
-    }
-
-    // If multiple sports selected, combine all relevant markets
-    const allMarkets = new Map();
-    
-    // Always include default markets for better compatibility
-    MARKETS_BY_SPORT.default.forEach(market => {
-      allMarkets.set(market.key, market);
-    });
-    
-    selectedSports.forEach(sport => {
-      let sportCategory = 'default';
-      
-      if (sport.includes('football')) sportCategory = 'americanfootball';
-      else if (sport.includes('basketball')) sportCategory = 'basketball';
-      else if (sport.includes('baseball')) sportCategory = 'baseball';
-      else if (sport.includes('hockey')) sportCategory = 'hockey';
-      else if (sport.includes('soccer')) sportCategory = 'soccer';
-      
-      const markets = MARKETS_BY_SPORT[sportCategory] || MARKETS_BY_SPORT.default;
-      markets.forEach(market => {
-        allMarkets.set(market.key, market);
-      });
-    });
-
-    return organizeMarketsByCategory(Array.from(allMarkets.values()));
-  };
-
-  // Function to auto-select all relevant markets for selected sports
-  const getAutoSelectedMarkets = (selectedSports) => {
-    const relevantMarkets = getRelevantMarkets(selectedSports);
-    // Filter out header items and only return actual market keys
-    // Include core, alternates, and team markets (period markets not supported by API)
-    return relevantMarkets
-      .filter(market => !market.isHeader && (market.category === 'core' || market.category === 'alternates' || market.category === 'team'))
-      .map(market => market.key);
   };
 
   // Function to get available markets for the markets filter dropdown
