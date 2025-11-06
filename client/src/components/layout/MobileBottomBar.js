@@ -22,7 +22,7 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
     { 
       key: "sportsbooks", 
       label: "Odds", 
-      icon: TrendingUp, 
+      icon: BarChart3, 
       href: "/sportsbooks",
       badge: null
     },
@@ -36,7 +36,7 @@ export default function MobileBottomBar({ onFilterClick, active = "sportsbooks",
     { 
       key: "picks", 
       label: "Picks", 
-      icon: BarChart3, 
+      icon: TrendingUp, 
       href: "/picks",
       badge: null
     },
