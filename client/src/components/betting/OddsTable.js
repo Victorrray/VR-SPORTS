@@ -4050,10 +4050,12 @@ export default function OddsTable({
                                       <td className="mini-odds-cell">
                                         {(() => {
                                           const homeOdds = Number(grab(p, true));
-                                          // Check if this is the best odds for home team
-                                          const isBestHome = (row.allBooks || []).some(book => 
-                                            americanToDecimal(Number(grab(book, true))) > americanToDecimal(homeOdds)
-                                          ) === false;
+                                          // Check if this is the best odds for home team (higher decimal = better odds)
+                                          const homeDecimal = americanToDecimal(homeOdds);
+                                          const isBestHome = (row.allBooks || []).every(book => {
+                                            const bookHomeOdds = americanToDecimal(Number(grab(book, true)));
+                                            return bookHomeOdds <= homeDecimal;
+                                          });
                                           return (
                                             <span style={isBestHome ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px', display: 'inline-block' } : {}}>
                                               {formatOdds(homeOdds)}
@@ -4081,10 +4083,12 @@ export default function OddsTable({
                                       <td className="mini-odds-cell">
                                         {(() => {
                                           const awayOdds = Number(grab(p, false));
-                                          // Check if this is the best odds for away team
-                                          const isBestAway = (row.allBooks || []).some(book => 
-                                            americanToDecimal(Number(grab(book, false))) > americanToDecimal(awayOdds)
-                                          ) === false;
+                                          // Check if this is the best odds for away team (higher decimal = better odds)
+                                          const awayDecimal = americanToDecimal(awayOdds);
+                                          const isBestAway = (row.allBooks || []).every(book => {
+                                            const bookAwayOdds = americanToDecimal(Number(grab(book, false)));
+                                            return bookAwayOdds <= awayDecimal;
+                                          });
                                           return (
                                             <span style={isBestAway ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px', display: 'inline-block' } : {}}>
                                               {formatOdds(awayOdds)}
