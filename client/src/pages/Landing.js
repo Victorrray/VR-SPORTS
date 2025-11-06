@@ -220,7 +220,6 @@ export default function Landing() {
         <div className="hero-background-effects">
           <div className="gradient-orb orb-1"></div>
           <div className="gradient-orb orb-2"></div>
-          <div className="gradient-grid"></div>
         </div>
         
         <div className="hero-container">
