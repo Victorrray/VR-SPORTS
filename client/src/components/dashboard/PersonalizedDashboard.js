@@ -53,15 +53,39 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     }
   }, [games?.length, isHomePage]);
 
-  // Update callback dependency to include isHomePage
+  // Helper function to get cached recommended bets
+  const getCachedRecommendedBets = () => {
+    try {
+      const cached = localStorage.getItem('cached_recommended_bets');
+      if (cached) {
+        const bets = JSON.parse(cached);
+        // Return up to 3 cached bets
+        return Array.isArray(bets) ? bets.slice(0, 3) : [];
+      }
+    } catch (error) {
+      console.error('Error retrieving cached bets:', error);
+    }
+    return [];
+  };
+
+  // Helper function to save recommended bets to cache
+  const cacheRecommendedBets = (bets) => {
+    try {
+      localStorage.setItem('cached_recommended_bets', JSON.stringify(bets.slice(0, 5)));
+    } catch (error) {
+      console.error('Error caching recommended bets:', error);
+    }
+  };
 
   const generateDashboardData = useCallback(() => {
     if (!isHomePage || !games || games.length === 0) {
-      // No real games available - show empty state
-      console.log('No games data available from API');
+      // No real games available - try to show cached bets
+      console.log('No games data available from API, checking cache...');
+      const cachedBets = getCachedRecommendedBets();
+      
       setDashboardData({
-        todayOpportunities: 0,
-        highEvBets: 0,
+        todayOpportunities: cachedBets.length,
+        highEvBets: cachedBets.length,
         favoriteLeagues: [],
         recentPerformance: {
           winRate: '0.0',
@@ -69,13 +93,13 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
           roi: '0.0',
           totalBets: 0
         },
-        recommendedBets: [],
-        alerts: [{
+        recommendedBets: cachedBets,
+        alerts: cachedBets.length === 0 ? [{
           type: 'info',
           message: 'No games available today. Check back later for betting opportunities.',
           icon: Clock,
           color: 'var(--info)'
-        }]
+        }] : []
       });
       return;
     }
@@ -414,6 +438,13 @@ export default function PersonalizedDashboard({ games, userPreferences = {} }) {
     }
 
     console.log('Setting dashboard data:', dashboardDataToSet);
+    
+    // Cache the recommended bets for fallback display
+    if (recommendedBets.length > 0) {
+      cacheRecommendedBets(recommendedBets);
+      console.log('✅ Cached', recommendedBets.length, 'recommended bets');
+    }
+    
     setDashboardData(dashboardDataToSet);
   }, [games, isHomePage, bets]);
 
