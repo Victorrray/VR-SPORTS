@@ -4,7 +4,7 @@
   margin: 0 auto;
   padding: 2rem 1rem 140px;
   min-height: 100vh;
-  background: var(--bg-body);
+  background: transparent;
 }
 
 /* Header Section */
