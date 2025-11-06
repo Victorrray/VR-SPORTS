@@ -362,6 +362,52 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     me: me
   });
 
+  // Function to organize markets by category
+  const organizeMarketsByCategory = (markets) => {
+    const organized = [];
+    const categorizedMarkets = {};
+
+    // Group markets by category
+    markets.forEach(market => {
+      const category = market.category || 'core';
+      if (!categorizedMarkets[category]) {
+        categorizedMarkets[category] = [];
+      }
+      categorizedMarkets[category].push(market);
+    });
+
+    // Add category headers and markets in logical order
+    const categoryOrder = ['core', 'alternates', 'team', 'special'];
+    
+    categoryOrder.forEach(categoryKey => {
+      if (categorizedMarkets[categoryKey] && categorizedMarkets[categoryKey].length > 0) {
+        const categoryInfo = MARKET_CATEGORIES[categoryKey];
+        
+        // Safety check: skip if category info is not defined
+        if (!categoryInfo) {
+          console.warn(`Category "${categoryKey}" not found in MARKET_CATEGORIES`);
+          return;
+        }
+        
+        // Add category header
+        organized.push({
+          key: `${categoryKey}_header`,
+          title: categoryInfo.title,
+          isHeader: true,
+          icon: categoryInfo.icon,
+          description: categoryInfo.description
+        });
+        
+        // Add markets in this category
+        categorizedMarkets[categoryKey].forEach(market => {
+          organized.push(market);
+        });
+      }
+    });
+
+    return organized;
+  };
+
   // Function to get relevant markets based on selected sports
   const getRelevantMarkets = (selectedSports) => {
     if (!selectedSports || selectedSports.length === 0) {
@@ -1161,52 +1207,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Use core markets for now - period markets will be added when server supports them
   const MARKETS_BY_SPORT = CORE_MARKETS_BY_SPORT;
-
-  // Function to organize markets by category
-  const organizeMarketsByCategory = (markets) => {
-    const organized = [];
-    const categorizedMarkets = {};
-
-    // Group markets by category
-    markets.forEach(market => {
-      const category = market.category || 'core';
-      if (!categorizedMarkets[category]) {
-        categorizedMarkets[category] = [];
-      }
-      categorizedMarkets[category].push(market);
-    });
-
-    // Add category headers and markets in logical order
-    const categoryOrder = ['core', 'alternates', 'team', 'special'];
-    
-    categoryOrder.forEach(categoryKey => {
-      if (categorizedMarkets[categoryKey] && categorizedMarkets[categoryKey].length > 0) {
-        const categoryInfo = MARKET_CATEGORIES[categoryKey];
-        
-        // Safety check: skip if category info is not defined
-        if (!categoryInfo) {
-          console.warn(`Category "${categoryKey}" not found in MARKET_CATEGORIES`);
-          return;
-        }
-        
-        // Add category header
-        organized.push({
-          key: `${categoryKey}_header`,
-          title: categoryInfo.title,
-          isHeader: true,
-          icon: categoryInfo.icon,
-          description: categoryInfo.description
-        });
-        
-        // Add markets in this category
-        categorizedMarkets[categoryKey].forEach(market => {
-          organized.push(market);
-        });
-      }
-    });
-
-    return organized;
-  };
 
   // Function to get available markets for the markets filter dropdown
   const getAvailableMarkets = (selectedSports) => {
