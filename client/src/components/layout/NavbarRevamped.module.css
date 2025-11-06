@@ -322,21 +322,26 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
-  background: white;
-  border: 2px solid white;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.04));
+  border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 50px;
-  color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.95);
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   pointer-events: auto;
   font-weight: 500;
   font-size: 0.95rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
 }
 
 .userButton:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.08));
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.2);
+  color: #ffffff;
 }
 
 .userAvatar {
