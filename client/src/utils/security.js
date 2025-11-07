@@ -51,50 +51,21 @@ export const secureFetch = async (url, options = {}) => {
     try {
       const { getAccessToken, getAccessTokenSync, supabase } = await import('../lib/supabase');
       
-      console.log('🔐 secureFetch: Attempting to get access token...');
-      
-      // Debug: Check what's in localStorage
-      try {
-        const sbAuth = localStorage.getItem('sb-oddsightseer-auth');
-        console.log('🔐 secureFetch: localStorage sb-oddsightseer-auth exists:', !!sbAuth);
-        if (sbAuth) {
-          try {
-            const parsed = JSON.parse(sbAuth);
-            console.log('🔐 secureFetch: localStorage has token:', !!parsed?.session?.access_token);
-          } catch (e) {
-            console.warn('🔐 secureFetch: Could not parse localStorage');
-          }
-        }
-      } catch (e) {
-        console.warn('🔐 secureFetch: Could not check localStorage');
-      }
-      
       // Get the access token from Supabase session
       let accessToken = null;
       
       // Try sync version first (faster, checks localStorage)
       if (getAccessTokenSync && typeof getAccessTokenSync === 'function') {
-        console.log('🔐 secureFetch: Trying sync token getter...');
         accessToken = getAccessTokenSync();
-        if (accessToken) {
-          console.log('🔐 secureFetch: ✅ Got token from sync getter');
-        } else {
-          console.warn('🔐 secureFetch: Sync getter returned null');
-        }
       }
       
       // If sync didn't work, try async version
       if (!accessToken && getAccessToken && typeof getAccessToken === 'function') {
-        console.log('🔐 secureFetch: Sync failed, trying async token getter...');
         accessToken = await getAccessToken();
-        console.log('🔐 secureFetch: Async getter returned:', accessToken ? '✅ token found' : '❌ no token');
       }
 
       if (accessToken) {
         headers['Authorization'] = `Bearer ${accessToken}`;
-        console.log('🔐 secureFetch: ✅ Added Authorization header');
-      } else {
-        console.warn('⚠️ secureFetch: No access token available - requests may fail');
       }
       
       // Get user ID from session for x-user-id header
@@ -108,7 +79,6 @@ export const secureFetch = async (url, options = {}) => {
 
       if (session?.user?.id) {
         headers['x-user-id'] = session.user.id;
-        console.log('🔐 secureFetch: Added x-user-id header:', session.user.id);
       }
 
       // Fallback: check stored session snapshots for user id (custom persistence)
@@ -120,7 +90,6 @@ export const secureFetch = async (url, options = {}) => {
             const storedId = parsed?.user?.id;
             if (storedId) {
               headers['x-user-id'] = storedId;
-              console.log('🔐 secureFetch: Added x-user-id from localStorage:', storedId);
             }
           }
         } catch (_) {}
@@ -134,7 +103,6 @@ export const secureFetch = async (url, options = {}) => {
             const sessionData = JSON.parse(demoSession);
             if (sessionData.id) {
               headers['x-user-id'] = sessionData.id;
-              console.log('🔐 secureFetch: Added x-user-id from demo session:', sessionData.id);
             }
           }
         } catch (_) {}
@@ -167,18 +135,7 @@ export const secureFetch = async (url, options = {}) => {
   }
 
   try {
-    console.log('🔐 secureFetch: Final headers being sent:', {
-      hasAuth: !!headers['Authorization'],
-      authPrefix: headers['Authorization']?.substring(0, 30),
-      hasUserId: !!headers['x-user-id'],
-      userId: headers['x-user-id'],
-      url: url,
-      method: method
-    });
-    
     const response = await fetch(url, secureOptions);
-    
-    console.log('🔐 secureFetch: Response status:', response.status);
     
     // Check for security-related errors
     if (response.status === 403) {

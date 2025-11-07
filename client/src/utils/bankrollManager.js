@@ -11,14 +11,6 @@ export const bankrollManager = {
     try {
       const saved = localStorage.getItem(BANKROLL_STORAGE_KEY);
       
-      // Debug logging to help diagnose issues
-      console.log('Retrieving bankroll:', { 
-        saved, 
-        type: typeof saved,
-        parsed: saved ? Number(saved) : null,
-        default: DEFAULT_BANKROLL 
-      });
-      
       // Ensure we have a valid number
       const parsedValue = saved ? Number(saved) : null;
       if (saved && !isNaN(parsedValue)) {
@@ -39,13 +31,6 @@ export const bankrollManager = {
       if (isNaN(numericAmount) || numericAmount < 0) {
         throw new Error('Invalid bankroll amount');
       }
-      
-      // Debug logging to help diagnose issues
-      console.log('Setting bankroll:', { 
-        amount, 
-        numericAmount,
-        stringValue: numericAmount.toString() 
-      });
       
       // Store as string to ensure consistency
       localStorage.setItem(BANKROLL_STORAGE_KEY, numericAmount.toString());
