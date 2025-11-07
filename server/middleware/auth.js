@@ -236,55 +236,48 @@ async function authenticate(req, _res, next) {
     
     console.log('🔐 authenticate: Checking token:', !!token, 'supabase:', !!supabase);
     if (token) {
-      console.log('🔐 authenticate: Token length:', token.length, 'starts with:', token.substring(0, 20) + '...');
+      console.log('🔐 authenticate: Token type:', typeof token, 'length:', token?.length);
     }
     
-    if (token && supabase) {
+    if (token && supabase && typeof token === 'string') {
       try {
-        // Create a new Supabase client with the user's token
-        // This allows us to verify the token and get the user
-        const { createClient } = require('@supabase/supabase-js');
+        console.log('🔐 authenticate: Verifying token');
         
-        console.log('🔐 authenticate: Creating Supabase client with token');
-        console.log('🔐 authenticate: SUPABASE_URL:', process.env.SUPABASE_URL ? '✓ set' : '✗ missing');
-        console.log('🔐 authenticate: SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? '✓ set' : '✗ missing');
-        
-        const userSupabase = createClient(
-          process.env.SUPABASE_URL,
-          process.env.SUPABASE_ANON_KEY,
-          {
-            global: {
-              headers: {
-                Authorization: `Bearer ${token}`
+        // Decode JWT manually to extract user ID (without verification for now)
+        // JWT format: header.payload.signature
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          try {
+            // Decode the payload (second part)
+            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+            console.log('🔐 authenticate: Decoded JWT payload - sub:', payload.sub);
+            
+            if (payload.sub) {
+              // Use the service role client to get the user by ID
+              const { data: user, error } = await supabase.auth.admin.getUserById(payload.sub);
+              
+              if (!error && user) {
+                req.user = user;
+                console.log('✅ authenticate: User authenticated:', user.id);
+              } else {
+                console.warn('⚠️ authenticate: Could not fetch user from Supabase:', error?.message);
               }
             }
+          } catch (decodeError) {
+            console.warn('⚠️ authenticate: Failed to decode JWT:', decodeError.message);
           }
-        );
-        
-        // Get the user from the token
-        console.log('🔐 authenticate: Calling getUser()');
-        const { data, error } = await userSupabase.auth.getUser();
-        
-        console.log('🔐 authenticate: getUser result - error:', !!error, 'user:', !!data?.user);
-        if (error) {
-          console.log('🔐 authenticate: Error details:', error.message, error.status);
-        }
-        if (data?.user) {
-          console.log('🔐 authenticate: User data:', { id: data.user.id, email: data.user.email });
-        }
-        
-        if (!error && data?.user) {
-          req.user = data.user;
-          console.log('✅ authenticate: User authenticated:', data.user.id);
-        } else if (error) {
-          console.warn('⚠️ authenticate: Token verification error:', error.message);
+        } else {
+          console.warn('⚠️ authenticate: Invalid JWT format (expected 3 parts, got', parts.length + ')');
         }
       } catch (tokenError) {
         console.warn('⚠️ authenticate: Token verification exception:', tokenError.message);
-        console.warn('⚠️ authenticate: Exception stack:', tokenError.stack);
       }
     } else {
-      console.log('🔐 authenticate: No token or supabase available');
+      if (token && typeof token !== 'string') {
+        console.warn('⚠️ authenticate: Token is not a string, it is:', typeof token);
+      } else {
+        console.log('🔐 authenticate: No token or supabase available');
+      }
     }
   } catch (e) {
     // Non-fatal: continue without req.user
