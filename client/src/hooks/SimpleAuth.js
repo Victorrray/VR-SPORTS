@@ -46,12 +46,34 @@ export function AuthProvider({ children }) {
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('🔐 Initial session check:', {
+        hasSession: !!session,
+        hasToken: !!session?.access_token,
+        userId: session?.user?.id,
+        expiresAt: session?.expires_at,
+        sessionKeys: session ? Object.keys(session) : []
+      });
+      
+      // Log what's in localStorage
+      try {
+        const stored = localStorage.getItem('sb-oddsightseer-auth');
+        console.log('📦 localStorage sb-oddsightseer-auth:', stored ? 'EXISTS' : 'MISSING');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          console.log('📦 Stored session keys:', Object.keys(parsed));
+          console.log('📦 Stored session.session keys:', parsed.session ? Object.keys(parsed.session) : 'NO SESSION');
+        }
+      } catch (e) {
+        console.warn('⚠️ Could not check localStorage:', e.message);
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         console.log('👤 Initial session found, fetching profile for user:', session.user.id);
         fetchProfile(session.user.id);
       } else {
+        console.log('⚠️ No initial session found');
         setProfile(null);
       }
       setAuthLoading(false);
@@ -59,7 +81,19 @@ export function AuthProvider({ children }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('🔐 Auth state changed:', _event);
+      console.log('🔐 Auth state changed:', _event, {
+        hasSession: !!session,
+        hasToken: !!session?.access_token,
+        userId: session?.user?.id
+      });
+      
+      // Log what's being stored
+      if (session?.access_token) {
+        console.log('✅ Session has access token, should be persisted to localStorage');
+      } else {
+        console.warn('⚠️ Session has NO access token');
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
