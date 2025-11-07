@@ -26,6 +26,22 @@ export default function Login() {
   const navigate = useNavigate();
   const next = search.get("next") || search.get("returnTo") || "/";
   
+  // Validate auth context is available
+  if (!auth) {
+    return (
+      <main className="login-container">
+        <div className="login-card">
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-primary)' }}>
+            <h2>Authentication Unavailable</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '12px' }}>
+              The authentication system is not available. Please refresh the page and try again.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+  
   const DEBUG_PRICING = process.env.NODE_ENV === 'development';
 
   // Save intent to localStorage on mount to survive OAuth redirects
@@ -80,6 +96,19 @@ export default function Login() {
     }
     setErr("");
     try {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setErr("Please enter a valid email address.");
+        return;
+      }
+      
+      // Validate password length
+      if (pw.length < 6) {
+        setErr("Password must be at least 6 characters.");
+        return;
+      }
+      
       // Handle Remember Me functionality by storing preference
       if (rememberMe) {
         optimizedStorage.set('vr-odds-remember-me', true, { priority: 'high' });
@@ -198,7 +227,13 @@ export default function Login() {
 
         <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
           <button
-            onClick={() => signInWithGoogle?.()}
+            onClick={() => {
+              if (!signInWithGoogle) {
+                setErr("Google sign-in is not available. Please try again.");
+                return;
+              }
+              signInWithGoogle();
+            }}
             style={{
               flex: 1,
               padding: '16px 20px',

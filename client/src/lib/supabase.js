@@ -155,9 +155,20 @@ export async function getAccessToken() {
   }
 }
 
+// In-memory token cache to avoid repeated lookups
+let cachedToken = null;
+let cachedTokenExpiry = 0;
+
 // Synchronous token getter for quick access (checks localStorage and client state)
 export function getAccessTokenSync() {
   try {
+    // Check in-memory cache first (valid for 1 minute)
+    const now = Date.now();
+    if (cachedToken && cachedTokenExpiry > now) {
+      console.log('✅ getAccessTokenSync: Got token from memory cache');
+      return cachedToken;
+    }
+    
     // Check primary storage key
     const storedSession = localStorage.getItem('sb-oddsightseer-auth');
     if (storedSession) {
@@ -165,6 +176,9 @@ export function getAccessTokenSync() {
       const token = parsed?.session?.access_token;
       if (token) {
         console.log('✅ getAccessTokenSync: Got token from localStorage (sb-oddsightseer-auth)');
+        // Cache the token
+        cachedToken = token;
+        cachedTokenExpiry = now + 60000; // Cache for 1 minute
         return token;
       }
     }
@@ -179,6 +193,9 @@ export function getAccessTokenSync() {
           const token = parsed?.session?.access_token || parsed?.access_token;
           if (token) {
             console.log(`✅ getAccessTokenSync: Got token from localStorage (${key})`);
+            // Cache the token
+            cachedToken = token;
+            cachedTokenExpiry = now + 60000; // Cache for 1 minute
             return token;
           }
         } catch (_) {}
@@ -190,6 +207,9 @@ export function getAccessTokenSync() {
       const token = supabaseClient.auth.session?.access_token;
       if (token) {
         console.log('✅ getAccessTokenSync: Got token from Supabase client internal session');
+        // Cache the token
+        cachedToken = token;
+        cachedTokenExpiry = now + 60000; // Cache for 1 minute
         return token;
       }
     }
@@ -198,6 +218,12 @@ export function getAccessTokenSync() {
   }
   console.warn('⚠️ getAccessTokenSync: No token found in any location');
   return null;
+}
+
+// Clear token cache when user logs out
+export function clearTokenCache() {
+  cachedToken = null;
+  cachedTokenExpiry = 0;
 }
 
 // Helper for auth redirects

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, clearTokenCache } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
@@ -21,8 +21,13 @@ export function AuthProvider({ children }) {
         .single();
       
       if (error) {
-        console.warn('⚠️ Error fetching profile:', error.message);
         // Profile doesn't exist yet - this is normal for new users
+        if (error.code === 'PGRST116') {
+          console.log('ℹ️ Profile does not exist yet (new user):', userId);
+          setProfile(null);
+          return;
+        }
+        console.warn('⚠️ Error fetching profile:', error.message, error.code);
         setProfile(null);
         return;
       }
@@ -109,6 +114,36 @@ export function AuthProvider({ children }) {
     return () => subscription?.unsubscribe();
   }, []);
 
+  // Monitor session expiry and refresh token before it expires
+  useEffect(() => {
+    if (!session?.expires_at || !supabase) return;
+
+    const checkTokenExpiry = () => {
+      const expiresAt = new Date(session.expires_at * 1000);
+      const now = new Date();
+      const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+      const fiveMinutesMs = 5 * 60 * 1000;
+
+      if (timeUntilExpiry < fiveMinutesMs && timeUntilExpiry > 0) {
+        console.log('🔄 Token expiring soon, refreshing...');
+        supabase.auth.refreshSession().then(({ data, error }) => {
+          if (error) {
+            console.warn('⚠️ Token refresh failed:', error.message);
+          } else {
+            console.log('✅ Token refreshed successfully');
+            clearTokenCache(); // Clear cache to force new token retrieval
+          }
+        });
+      }
+    };
+
+    // Check token expiry every minute
+    const interval = setInterval(checkTokenExpiry, 60000);
+    checkTokenExpiry(); // Check immediately on mount
+
+    return () => clearInterval(interval);
+  }, [session?.expires_at, supabase]);
+
   const signIn = async (email, password) => {
     if (!supabase) throw new Error('Supabase not configured');
     console.log('🔐 Signing in user...');
@@ -158,6 +193,10 @@ export function AuthProvider({ children }) {
   const signOut = async () => {
     if (!supabase) throw new Error('Supabase not configured');
     console.log('🔐 Signing out user...');
+    
+    // Clear token cache first
+    clearTokenCache();
+    console.log('✅ Token cache cleared');
     
     // Clear plan cache on sign out (preserve user preferences like bankroll/sportsbooks)
     try {
