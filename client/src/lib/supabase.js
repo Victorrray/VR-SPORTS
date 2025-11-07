@@ -82,12 +82,7 @@ if (isConfigValid && typeof window !== 'undefined') {
   console.error('❌ Supabase configuration invalid - auth will not work');
 }
 
-// Require Supabase to be configured
-if (!supabaseClient && typeof window !== 'undefined') {
-  throw new Error('Supabase is not configured. Please set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY environment variables.');
-}
-
-// Export the client
+// Export the client (may be null if not configured - that's OK for demo mode)
 export const supabase = supabaseClient;
 
 // Export a lightweight accessor for the current access token
