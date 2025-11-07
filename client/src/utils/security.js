@@ -49,13 +49,17 @@ export const secureFetch = async (url, options = {}) => {
   const headers = { ...(options.headers || {}) };
   if (backendAPI) {
     try {
-      const { getAccessToken, supabase } = require('../lib/supabase');
+      const { getAccessToken, supabase } = await import('../lib/supabase');
       
       // Get the access token from Supabase session
-      let accessToken = await getAccessToken?.();
+      let accessToken = null;
+      if (getAccessToken && typeof getAccessToken === 'function') {
+        accessToken = await getAccessToken();
+      }
 
       if (accessToken) {
         headers['Authorization'] = `Bearer ${accessToken}`;
+        console.log('🔐 secureFetch: Added Authorization header');
       } else {
         console.warn('⚠️ secureFetch: No access token available');
       }
