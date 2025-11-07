@@ -231,7 +231,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
   const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
   const [selectedDate, setSelectedDate] = useState(""); // Empty string = "All Dates" (no date filtering)
-  const [marketKeys, setMarketKeys] = useState([]); // Start empty to allow filtering by specific markets like quarters
+  // Initialize marketKeys with default markets - CRITICAL: must not be empty or API calls will be skipped
+  const [marketKeys, setMarketKeys] = useState(() => {
+    const saved = localStorage.getItem('selectedMarkets');
+    if (saved && Array.isArray(JSON.parse(saved)) && JSON.parse(saved).length > 0) {
+      return JSON.parse(saved);
+    }
+    // Default to core markets - REQUIRED for API calls to work
+    return ["h2h", "spreads", "totals"];
+  });
   // All available player prop markets
   const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState([
     // Football markets (NFL and NCAAF)
