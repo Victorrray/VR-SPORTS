@@ -2,23 +2,30 @@
 
 // Disable service worker on localhost for development (prevents CSP conflicts)
 if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+  console.log('SW: Localhost detected - disabling service worker');
+  
   self.addEventListener('install', (event) => {
-    console.log('SW: Localhost detected, skipping installation');
-    self.skipWaiting();
+    console.log('SW: Localhost - skipping install');
+    event.waitUntil(self.skipWaiting());
   });
   
   self.addEventListener('activate', (event) => {
-    console.log('SW: Localhost detected, unregistering');
-    event.waitUntil(self.registration.unregister());
+    console.log('SW: Localhost - unregistering');
+    event.waitUntil(
+      self.registration.unregister().then(() => self.clients.claim())
+    );
   });
   
-  // No-op fetch handler for localhost
-  self.addEventListener('fetch', () => {});
+  self.addEventListener('fetch', (event) => {
+    // On localhost, don't intercept - let browser handle everything
+    // This prevents CSP conflicts with external resources
+  });
   
-  // Exit early - don't load the rest of the SW code
-  throw new Error('Service Worker disabled on localhost');
-}
-
+  // Stop processing - don't load production SW code
+  self.skipWaiting();
+} else {
+  // Production code - only runs on non-localhost
+  
 const CACHE_NAME = 'oddssightseer-v1.0.0';
 const STATIC_CACHE = 'oddssightseer-static-v1';
 const API_CACHE = 'oddssightseer-api-v1';
@@ -303,3 +310,5 @@ self.addEventListener('message', (event) => {
     );
   }
 });
+
+} // End of production-only code block
