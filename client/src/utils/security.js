@@ -53,6 +53,22 @@ export const secureFetch = async (url, options = {}) => {
       
       console.log('🔐 secureFetch: Attempting to get access token...');
       
+      // Debug: Check what's in localStorage
+      try {
+        const sbAuth = localStorage.getItem('sb-oddsightseer-auth');
+        console.log('🔐 secureFetch: localStorage sb-oddsightseer-auth exists:', !!sbAuth);
+        if (sbAuth) {
+          try {
+            const parsed = JSON.parse(sbAuth);
+            console.log('🔐 secureFetch: localStorage has token:', !!parsed?.session?.access_token);
+          } catch (e) {
+            console.warn('🔐 secureFetch: Could not parse localStorage');
+          }
+        }
+      } catch (e) {
+        console.warn('🔐 secureFetch: Could not check localStorage');
+      }
+      
       // Get the access token from Supabase session
       let accessToken = null;
       
@@ -62,6 +78,8 @@ export const secureFetch = async (url, options = {}) => {
         accessToken = getAccessTokenSync();
         if (accessToken) {
           console.log('🔐 secureFetch: ✅ Got token from sync getter');
+        } else {
+          console.warn('🔐 secureFetch: Sync getter returned null');
         }
       }
       

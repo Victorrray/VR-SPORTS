@@ -95,6 +95,19 @@ export function AuthProvider({ children }) {
       // Log what's being stored
       if (session?.access_token) {
         console.log('✅ Session has access token, should be persisted to localStorage');
+        // Verify it's actually being persisted
+        setTimeout(() => {
+          const stored = localStorage.getItem('sb-oddsightseer-auth');
+          console.log('📦 After auth change, localStorage sb-oddsightseer-auth exists:', !!stored);
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              console.log('📦 Stored session has token:', !!parsed?.session?.access_token);
+            } catch (e) {
+              console.warn('📦 Could not parse stored session');
+            }
+          }
+        }, 100);
       } else {
         console.warn('⚠️ Session has NO access token');
       }
