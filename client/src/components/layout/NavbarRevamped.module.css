@@ -94,33 +94,24 @@
   text-decoration: none;
 }
 
-.brandLogo {
-  display: flex;
-  align-items: center;
-  gap: 0;
+.brandText {
   font-weight: 900;
-  font-size: 0;
-  letter-spacing: 0.8px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.logoText {
+  font-size: 1.3rem;
+  letter-spacing: -0.5px;
   color: white;
-  font-size: 20px;
-  font-weight: 900;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.2s ease;
 }
 
-.logoAccent {
-  color: #1a1a1a;
-  font-weight: 900;
-  display: none;
+.brand:hover .brandText {
+  background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Center Section: Navigation Links */

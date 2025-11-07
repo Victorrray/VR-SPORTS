@@ -105,9 +105,7 @@ export default function NavbarRevamped({ onOpenMobileSearch }) {
             <span style={{ width: '24px', height: '2px', background: 'currentColor', borderRadius: '2px' }} />
           </button>
           <Link to="/" className={styles.brand}>
-            <div className={styles.brandLogo}>
-              <span className={styles.logoText}>OS</span>
-            </div>
+            <span className={styles.brandText}>OddSightSeer</span>
           </Link>
         </div>
 
