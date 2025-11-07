@@ -49,7 +49,7 @@ export const secureFetch = async (url, options = {}) => {
   const headers = { ...(options.headers || {}) };
   if (backendAPI) {
     try {
-      const { getAccessToken } = require('../lib/supabase');
+      const { getAccessToken, supabase } = require('../lib/supabase');
       
       // Get the access token from Supabase session
       let accessToken = await getAccessToken?.();
