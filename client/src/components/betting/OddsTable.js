@@ -2047,16 +2047,33 @@ export default function OddsTable({
       
       if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Minimum 3 books for reliable EV
         const fairDec = 1 / consensusProb;
-        const ev = calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
+        const fairLine = decimalToAmerican(fairDec);
+        const ev = calculateEV(userOdds, fairLine, bookmakerKey);
+        
+        // Debug: Verify the calculation
+        const userDec = userOdds > 0 ? (userOdds / 100) + 1 : (100 / Math.abs(userOdds)) + 1;
+        const fairDecCheck = fairLine > 0 ? (fairLine / 100) + 1 : (100 / Math.abs(fairLine)) + 1;
+        const evCheck = ((userDec / fairDecCheck) - 1) * 100;
+        
         console.log(`✅ EV CALC SUCCESS for ${row.playerName || 'unknown'} ${row.mkt?.key || 'unknown'}:`, {
           bookmakerKey,
           isDFSApp,
           userOdds,
           consensusProb: consensusProb.toFixed(4),
-          fairLine: decimalToAmerican(fairDec),
+          fairLine,
+          userDec: userDec.toFixed(4),
+          fairDecCheck: fairDecCheck.toFixed(4),
           ev: ev?.toFixed(2) + '%',
+          evCheck: evCheck.toFixed(2) + '%',
           uniqCnt
         });
+        
+        // Sanity check: if EV is showing as the implied probability, return the correct calculation
+        if (Math.abs(ev - (consensusProb * 100)) < 1) {
+          console.warn(`⚠️ EV CALCULATION ERROR: Returning implied probability instead of EV! Recalculating...`);
+          return evCheck;
+        }
+        
         return ev;
       }
       
