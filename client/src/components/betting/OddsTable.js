@@ -1458,20 +1458,22 @@ export default function OddsTable({
             console.log(`🎯 FILTER DEBUG START: ${propData.playerName}`, {
               rawFilter: bookFilter,
               normalizedFilter: normalizedFilter,
-              allOverBooksKeys: propData.overBooks.map(b => b.bookmaker?.key || b.book),
-              allUnderBooksKeys: propData.underBooks.map(b => b.bookmaker?.key || b.book)
+              allOverBooksKeys: propData.overBooks.map(b => ({ key: b.bookmaker?.key || b.book, price: b.price })),
+              allUnderBooksKeys: propData.underBooks.map(b => ({ key: b.bookmaker?.key || b.book, price: b.price }))
             });
             
             overBooksToUse = propData.overBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              const matches = normalizedFilter.includes(bookKey);
-              console.log(`  🎯 Over book check: "${bookKey}" in filter? ${matches}`);
+              const hasValidPrice = b.price && b.price !== 0;
+              const matches = normalizedFilter.includes(bookKey) && hasValidPrice;
+              console.log(`  🎯 Over book check: "${bookKey}" in filter? ${normalizedFilter.includes(bookKey)}, hasValidPrice? ${hasValidPrice}, final match? ${matches}`);
               return matches;
             });
             underBooksToUse = propData.underBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              const matches = normalizedFilter.includes(bookKey);
-              console.log(`  🎯 Under book check: "${bookKey}" in filter? ${matches}`);
+              const hasValidPrice = b.price && b.price !== 0;
+              const matches = normalizedFilter.includes(bookKey) && hasValidPrice;
+              console.log(`  🎯 Under book check: "${bookKey}" in filter? ${normalizedFilter.includes(bookKey)}, hasValidPrice? ${hasValidPrice}, final match? ${matches}`);
               return matches;
             });
             
