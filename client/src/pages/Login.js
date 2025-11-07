@@ -26,22 +26,6 @@ export default function Login() {
   const navigate = useNavigate();
   const next = search.get("next") || search.get("returnTo") || "/";
   
-  // Validate auth context is available
-  if (!auth) {
-    return (
-      <main className="login-container">
-        <div className="login-card">
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-primary)' }}>
-            <h2>Authentication Unavailable</h2>
-            <p style={{ color: 'var(--text-secondary)', marginTop: '12px' }}>
-              The authentication system is not available. Please refresh the page and try again.
-            </p>
-          </div>
-        </div>
-      </main>
-    );
-  }
-  
   const DEBUG_PRICING = process.env.NODE_ENV === 'development';
 
   // Save intent to localStorage on mount to survive OAuth redirects
@@ -139,6 +123,22 @@ export default function Login() {
       setErr(err.message || "Authentication failed. Please try again.");
     }
   };
+
+  // Validate auth context is available (after all hooks)
+  if (!auth) {
+    return (
+      <main className="login-container">
+        <div className="login-card">
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-primary)' }}>
+            <h2>Authentication Unavailable</h2>
+            <p style={{ color: 'var(--text-secondary)', marginTop: '12px' }}>
+              The authentication system is not available. Please refresh the page and try again.
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="login-container">
