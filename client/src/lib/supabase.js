@@ -202,8 +202,27 @@ if (!supabaseClient && typeof window !== 'undefined') {
 export const supabase = supabaseClient;
 
 // Export a lightweight accessor for the current access token
-export function getAccessToken() {
-  return currentAccessToken;
+export async function getAccessToken() {
+  // First try the cached value
+  if (currentAccessToken) {
+    return currentAccessToken;
+  }
+  
+  // If no cached token, try to get it from the current session
+  try {
+    if (supabaseClient?.auth?.getSession) {
+      const { data } = await supabaseClient.auth.getSession();
+      const token = data?.session?.access_token;
+      if (token) {
+        currentAccessToken = token;
+        return token;
+      }
+    }
+  } catch (e) {
+    if (!isProd) console.error('Error getting access token from session:', e);
+  }
+  
+  return null;
 }
 
 // Helper for auth redirects
