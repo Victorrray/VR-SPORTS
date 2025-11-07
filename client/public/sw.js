@@ -1,31 +1,23 @@
 // Service Worker for OddSightSeer Platform
 
-// Disable service worker on localhost for development (prevents CSP conflicts)
+// CRITICAL: Disable service worker on localhost for development
+// This prevents CSP conflicts and allows external resources to load
 if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
-  console.log('SW: Localhost detected - disabling service worker');
+  console.log('🔧 SW: Localhost mode - service worker disabled');
   
-  self.addEventListener('install', (event) => {
-    console.log('SW: Localhost - skipping install');
-    event.waitUntil(self.skipWaiting());
-  });
+  // Immediately unregister and don't process any more code
+  self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+  self.addEventListener('activate', e => e.waitUntil(self.registration.unregister()));
+  self.addEventListener('fetch', () => {}); // No-op - let browser handle everything
   
-  self.addEventListener('activate', (event) => {
-    console.log('SW: Localhost - unregistering');
-    event.waitUntil(
-      self.registration.unregister().then(() => self.clients.claim())
-    );
-  });
-  
-  self.addEventListener('fetch', (event) => {
-    // On localhost, don't intercept - let browser handle everything
-    // This prevents CSP conflicts with external resources
-  });
-  
-  // Stop processing - don't load production SW code
-  self.skipWaiting();
-} else {
-  // Production code - only runs on non-localhost
-  
+  // Exit here - production code below will NOT execute
+  throw new Error('SW disabled on localhost');
+}
+
+// ============================================
+// PRODUCTION CODE ONLY - Does not run on localhost
+// ============================================
+
 const CACHE_NAME = 'oddssightseer-v1.0.0';
 const STATIC_CACHE = 'oddssightseer-static-v1';
 const API_CACHE = 'oddssightseer-api-v1';
@@ -310,5 +302,3 @@ self.addEventListener('message', (event) => {
     );
   }
 });
-
-} // End of production-only code block
