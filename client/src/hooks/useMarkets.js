@@ -5,7 +5,6 @@ import { useMemoizedCallback } from './useMemoizedCallback';
 import { withApiBase } from '../config/api';
 import { useQuotaHandler } from './useQuotaHandler';
 import { secureFetch } from '../utils/security';
-import { cacheManager } from '../utils/cacheManager';
 
 // Global event emitter for API usage updates
 export const apiUsageEvents = new EventTarget();
@@ -461,11 +460,6 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       
       // Update cache
       APICache.set(cacheKey, preparedData, 2 * 60 * 1000); // 2 minutes cache for odds data
-      try {
-        setCacheStats(cacheManager.getStats());
-      } catch (_) {
-        // stats optional
-      }
       
       // Extract unique bookmakers with their display names
       const bookmakerMap = new Map();

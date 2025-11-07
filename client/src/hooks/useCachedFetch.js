@@ -1,11 +1,61 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { oddsCacheManager } from '../utils/cacheManager';
 import { withApiBase } from '../config/api';
 
 // Global authentication failure tracking
 let lastAuthFailure = 0;
 const AUTH_RETRY_COOLDOWN = 30000; // 30 seconds between auth retries
+
+// Simple in-memory cache for odds data
+const simpleCache = new Map();
+
+const oddsCacheManager = {
+  generateKey: (url, params) => {
+    const paramStr = params ? JSON.stringify(params) : '';
+    return `${url}:${paramStr}`;
+  },
+  get: (key) => {
+    const item = simpleCache.get(key);
+    if (!item) return null;
+    if (Date.now() > item.expiry) {
+      simpleCache.delete(key);
+      return null;
+    }
+    return item.data;
+  },
+  set: (key, data, ttl = 5 * 60 * 1000) => {
+    simpleCache.set(key, { data, expiry: Date.now() + ttl });
+  },
+  cacheOdds: (key, data) => {
+    simpleCache.set(key, { data, expiry: Date.now() + 5 * 60 * 1000 });
+  },
+  getOddsWithFallback: (key, maxAge = 600000) => {
+    const item = simpleCache.get(key);
+    if (!item) return null;
+    if (Date.now() - item.timestamp > maxAge) return null;
+    return item.data;
+  },
+  delete: (key) => {
+    simpleCache.delete(key);
+  },
+  subscribe: (key, callback) => {
+    // Simple subscription - just return unsubscribe function
+    return () => {};
+  },
+  getBatch: (keys) => {
+    const results = [];
+    const missing = [];
+    keys.forEach((key, idx) => {
+      const cached = oddsCacheManager.get(key);
+      if (cached) {
+        results.push({ index: idx, data: cached });
+      } else {
+        missing.push({ index: idx, key });
+      }
+    });
+    return { results, missing };
+  }
+};
 
 // Enhanced fetch hook with intelligent caching
 export const useCachedFetch = (url, options = {}) => {
