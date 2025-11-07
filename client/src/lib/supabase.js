@@ -155,7 +155,7 @@ export async function getAccessToken() {
   }
 }
 
-// Synchronous token getter for quick access (checks localStorage only)
+// Synchronous token getter for quick access (checks localStorage and client state)
 export function getAccessTokenSync() {
   try {
     // Check primary storage key
@@ -164,7 +164,7 @@ export function getAccessTokenSync() {
       const parsed = JSON.parse(storedSession);
       const token = parsed?.session?.access_token;
       if (token) {
-        console.log('✅ getAccessTokenSync: Got token from localStorage');
+        console.log('✅ getAccessTokenSync: Got token from localStorage (sb-oddsightseer-auth)');
         return token;
       }
     }
@@ -178,15 +178,25 @@ export function getAccessTokenSync() {
           const parsed = JSON.parse(stored);
           const token = parsed?.session?.access_token || parsed?.access_token;
           if (token) {
-            console.log(`✅ getAccessTokenSync: Got token from ${key}`);
+            console.log(`✅ getAccessTokenSync: Got token from localStorage (${key})`);
             return token;
           }
         } catch (_) {}
       }
     }
+    
+    // Last resort: try to get from Supabase client's internal session (synchronously if available)
+    if (supabaseClient && supabaseClient.auth.session) {
+      const token = supabaseClient.auth.session?.access_token;
+      if (token) {
+        console.log('✅ getAccessTokenSync: Got token from Supabase client internal session');
+        return token;
+      }
+    }
   } catch (e) {
     console.warn('⚠️ getAccessTokenSync error:', e.message);
   }
+  console.warn('⚠️ getAccessTokenSync: No token found in any location');
   return null;
 }
 
