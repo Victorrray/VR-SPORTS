@@ -53,20 +53,23 @@ export const secureFetch = async (url, options = {}) => {
       
       // Try to get the access token from the cached value first (most reliable)
       let accessToken = await getAccessToken?.();
+      console.log('🔐 secureFetch: getAccessToken returned:', typeof accessToken, 'length:', accessToken?.length, 'value:', accessToken?.substring(0, 50));
       
       // If no cached token, try to get it from the current session
       if (!accessToken) {
         try {
           const result = await supabase?.auth?.getSession?.();
           accessToken = result?.data?.session?.access_token;
+          console.log('🔐 secureFetch: getSession returned token:', typeof accessToken, 'length:', accessToken?.length);
         } catch (e) {
           console.error('Error getting session:', e);
         }
       }
 
       if (accessToken) {
+        console.log('🔐 secureFetch: Token before header:', typeof accessToken, 'length:', accessToken.length);
         headers['Authorization'] = `Bearer ${accessToken}`;
-        console.log('🔐 secureFetch: Added Authorization header');
+        console.log('🔐 secureFetch: Added Authorization header with token length:', accessToken.length);
       } else {
         console.warn('⚠️ secureFetch: No access token available');
       }
