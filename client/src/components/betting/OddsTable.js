@@ -1632,7 +1632,25 @@ export default function OddsTable({
             return;
           }
           
-          propsRows.push(propData);
+          // NEW: If a bookFilter is applied, verify the selected bookmaker actually has this bet
+          let hasSelectedBookmakerBet = true;
+          if (bookFilter && bookFilter.length > 0) {
+            // Check if any of the selected bookmakers have this specific bet
+            const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+            const hasSelectedBook = propData.selectedBooks && propData.selectedBooks.some(book => {
+              const bookKey = String(book?.bookmaker?.key || book?.book || '').toLowerCase();
+              return normalizedFilter.includes(bookKey);
+            });
+            
+            if (!hasSelectedBook) {
+              console.log(`🎯 FILTERING OUT: Regular prop not available on selected bookmaker(s) - ${propKey}`);
+              hasSelectedBookmakerBet = false;
+            }
+          }
+          
+          if (hasSelectedBookmakerBet) {
+            propsRows.push(propData);
+          }
         }
       });
       
@@ -1931,7 +1949,23 @@ export default function OddsTable({
           const minimumBooksRequired = (isSpreadMarket || isTotalMarket) ? 2 : 3;
           const hasMinimumBooks = uniqueBooksWithOdds.size >= minimumBooksRequired;
 
-          if (hasValidOdds && hasMinimumBooks) {
+          // NEW: If a bookFilter is applied, verify the selected bookmaker actually has this bet
+          let hasSelectedBookmakerBet = true;
+          if (bookFilter && bookFilter.length > 0) {
+            // Check if any of the selected bookmakers have this specific bet
+            const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+            const hasSelectedBook = selectedBooks.some(book => {
+              const bookKey = String(book?.bookmaker?.key || book?.book || '').toLowerCase();
+              return normalizedFilter.includes(bookKey);
+            });
+            
+            if (!hasSelectedBook) {
+              console.log(`🎯 FILTERING OUT: Bet not available on selected bookmaker(s) - ${mktKey} ${groupKey}`);
+              hasSelectedBookmakerBet = false;
+            }
+          }
+
+          if (hasValidOdds && hasMinimumBooks && hasSelectedBookmakerBet) {
             gameRows.push(gameRow);
           }
         });
