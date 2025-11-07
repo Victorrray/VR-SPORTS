@@ -234,54 +234,28 @@ async function authenticate(req, _res, next) {
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
     const supabase = req.app.locals.supabase;
     
-    console.log('🔐 authenticate: Checking token:', !!token, 'supabase:', !!supabase);
-    if (token) {
-      console.log('🔐 authenticate: Token type:', typeof token, 'length:', token?.length);
-    }
-    
     if (token && supabase && typeof token === 'string') {
       try {
-        console.log('🔐 authenticate: Verifying token');
-        
-        // Decode JWT manually to extract user ID (without verification for now)
-        // JWT format: header.payload.signature
+        // Decode JWT to extract user ID
         const parts = token.split('.');
         if (parts.length === 3) {
-          try {
-            // Decode the payload (second part)
-            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-            console.log('🔐 authenticate: Decoded JWT payload - sub:', payload.sub);
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+          
+          if (payload.sub) {
+            // Fetch user from Supabase using service role
+            const { data: user, error } = await supabase.auth.admin.getUserById(payload.sub);
             
-            if (payload.sub) {
-              // Use the service role client to get the user by ID
-              const { data: user, error } = await supabase.auth.admin.getUserById(payload.sub);
-              
-              if (!error && user) {
-                req.user = user;
-                console.log('✅ authenticate: User authenticated:', user.id);
-              } else {
-                console.warn('⚠️ authenticate: Could not fetch user from Supabase:', error?.message);
-              }
+            if (!error && user) {
+              req.user = user;
             }
-          } catch (decodeError) {
-            console.warn('⚠️ authenticate: Failed to decode JWT:', decodeError.message);
           }
-        } else {
-          console.warn('⚠️ authenticate: Invalid JWT format (expected 3 parts, got', parts.length + ')');
         }
-      } catch (tokenError) {
-        console.warn('⚠️ authenticate: Token verification exception:', tokenError.message);
-      }
-    } else {
-      if (token && typeof token !== 'string') {
-        console.warn('⚠️ authenticate: Token is not a string, it is:', typeof token);
-      } else {
-        console.log('🔐 authenticate: No token or supabase available');
+      } catch (e) {
+        // Token verification failed - continue without req.user
       }
     }
   } catch (e) {
     // Non-fatal: continue without req.user
-    console.warn('❌ Auth middleware error:', e.message);
   }
   next();
 }

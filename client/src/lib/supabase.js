@@ -54,18 +54,11 @@ if (!isProd && typeof window !== 'undefined') {
   setTimeout(() => diagnoseAuthIssues(), 1000);
 }
 
-// Create Supabase client with error boundary
+// Create Supabase client
 let supabaseClient = null;
-let currentAccessToken = null;
 
 if (isConfigValid && typeof window !== 'undefined') {
   try {
-    if (!isProd) {
-      console.log('🔌 Creating Supabase client with URL:',
-        SUPABASE_URL.replace(/\/\/([^:]+:)[^@]+@/, '//$1:*****@')
-      );
-    }
-
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: true,
@@ -81,126 +74,17 @@ if (isConfigValid && typeof window !== 'undefined') {
         },
       },
     });
-
-    // Test connection and setup auth state listener
-    supabaseClient.auth.getSession()
-      .then(({ data, error }) => {
-        if (error && !isProd) {
-          console.error('🔴 Supabase auth error:', error.message);
-        }
-        currentAccessToken = data?.session?.access_token || null;
-        if (!isProd) {
-          if (data?.session) {
-            console.log('🟢 Supabase connected successfully');
-            console.log('🔐 Initial token cached:', currentAccessToken ? '✓ set' : '✗ missing');
-          }
-          else console.log('🔐 No active session - user not authenticated');
-        }
-      })
-      .catch(err => { if (!isProd) console.error('🔴 Supabase connection test failed:', err.message); });
-
-    // Keep a lightweight token cache in sync
-    try {
-      supabaseClient.auth.onAuthStateChange((_event, session) => {
-        const newToken = session?.access_token || null;
-        currentAccessToken = newToken;
-        if (!isProd) {
-          console.log('🔄 Auth state changed:', _event, session ? 'authenticated' : 'not authenticated');
-          if (newToken) console.log('🔐 Token updated in cache');
-        }
-      });
-    } catch {}
+    if (!isProd) console.log('✅ Supabase client initialized');
   } catch (error) {
     console.error('❌ Failed to initialize Supabase:', error);
   }
 } else if (typeof window !== 'undefined') {
-  if (!isProd) console.warn('⚠️ Supabase client not initialized - invalid config or server-side rendering');
+  console.error('❌ Supabase configuration invalid - auth will not work');
 }
 
-// Demo mode fallback for when Supabase is not configured
-const createDemoAuth = () => {
-  if (!isProd) console.log('🎭 Setting up demo authentication fallback');
-
-  return {
-    // Mock auth methods for demo mode
-    signUp: async (email, password) => {
-      const demoUser = {
-        id: 'demo-' + Date.now(),
-        email,
-        created_at: new Date().toISOString(),
-        user_metadata: { username: email.split('@')[0] }
-      };
-
-      localStorage.setItem('demo-auth-session', JSON.stringify(demoUser));
-      localStorage.setItem('sb-session', JSON.stringify({ user: demoUser }));
-
-      return { data: { user: demoUser }, error: null };
-    },
-
-    signInWithPassword: async (email, password) => {
-      const demoUser = {
-        id: 'demo-' + Date.now(),
-        email,
-        created_at: new Date().toISOString(),
-        user_metadata: { username: email.split('@')[0] }
-      };
-
-      localStorage.setItem('demo-auth-session', JSON.stringify(demoUser));
-      localStorage.setItem('sb-session', JSON.stringify({ user: demoUser }));
-
-      return { data: { user: demoUser, session: { user: demoUser } }, error: null };
-    },
-
-    signOut: async () => {
-      localStorage.removeItem('demo-auth-session');
-      localStorage.removeItem('sb-session');
-      return { error: null };
-    },
-
-    getSession: async () => {
-      const demoSession = localStorage.getItem('demo-auth-session');
-      if (demoSession) {
-        const user = JSON.parse(demoSession);
-        return {
-          data: { session: { user, access_token: 'demo-token' } },
-          error: null
-        };
-      }
-      return { data: { session: null }, error: null };
-    },
-
-    onAuthStateChange: (callback) => {
-      // Mock auth state change listener
-      const checkSession = () => {
-        const demoSession = localStorage.getItem('demo-auth-session');
-        callback('SIGNED_IN', demoSession ? { user: JSON.parse(demoSession) } : null);
-      };
-
-      checkSession(); // Initial check
-      window.addEventListener('storage', checkSession); // Listen for changes
-
-      return {
-        data: { subscription: { unsubscribe: () => window.removeEventListener('storage', checkSession) } }
-      };
-    },
-
-    updateUser: async (data) => {
-      const currentSession = localStorage.getItem('demo-auth-session');
-      if (currentSession) {
-        const user = JSON.parse(currentSession);
-        const updatedUser = { ...user, ...data };
-        localStorage.setItem('demo-auth-session', JSON.stringify(updatedUser));
-        return { data: { user: updatedUser }, error: null };
-      }
-      return { data: null, error: { message: 'No user session' } };
-    }
-  };
-};
-
-// Use demo auth if Supabase is not configured
+// Require Supabase to be configured
 if (!supabaseClient && typeof window !== 'undefined') {
-  if (!isProd) console.log('🎭 Using demo authentication mode');
-  supabaseClient = createDemoAuth();
+  throw new Error('Supabase is not configured. Please set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY environment variables.');
 }
 
 // Export the client
@@ -208,35 +92,13 @@ export const supabase = supabaseClient;
 
 // Export a lightweight accessor for the current access token
 export async function getAccessToken() {
-  // First try the cached value
-  if (currentAccessToken) {
-    if (!isProd) console.log('🔐 getAccessToken: Returning cached token');
-    return currentAccessToken;
-  }
-  
-  if (!isProd) console.log('🔐 getAccessToken: No cached token, fetching from session');
-  
-  // If no cached token, try to get it from the current session
   try {
-    if (supabaseClient?.auth?.getSession) {
-      const { data } = await supabaseClient.auth.getSession();
-      const token = data?.session?.access_token;
-      if (token) {
-        currentAccessToken = token;
-        if (!isProd) console.log('🔐 getAccessToken: Token fetched and cached');
-        return token;
-      } else {
-        if (!isProd) console.warn('⚠️ getAccessToken: Session exists but no token');
-      }
-    } else {
-      if (!isProd) console.warn('⚠️ getAccessToken: Supabase client not available');
-    }
+    const { data } = await supabaseClient.auth.getSession();
+    return data?.session?.access_token || null;
   } catch (e) {
-    if (!isProd) console.error('❌ getAccessToken: Error getting session:', e.message);
+    console.error('❌ getAccessToken error:', e.message);
+    return null;
   }
-  
-  if (!isProd) console.warn('⚠️ getAccessToken: Returning null - no token available');
-  return null;
 }
 
 // Helper for auth redirects
