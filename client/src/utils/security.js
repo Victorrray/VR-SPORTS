@@ -51,17 +51,23 @@ export const secureFetch = async (url, options = {}) => {
     try {
       const { getAccessToken, supabase } = await import('../lib/supabase');
       
+      console.log('🔐 secureFetch: Attempting to get access token...');
+      
       // Get the access token from Supabase session
       let accessToken = null;
       if (getAccessToken && typeof getAccessToken === 'function') {
+        console.log('🔐 secureFetch: getAccessToken is a function, calling it...');
         accessToken = await getAccessToken();
+        console.log('🔐 secureFetch: getAccessToken returned:', accessToken ? '✅ token found' : '❌ no token');
+      } else {
+        console.warn('⚠️ secureFetch: getAccessToken is not a function:', typeof getAccessToken);
       }
 
       if (accessToken) {
         headers['Authorization'] = `Bearer ${accessToken}`;
-        console.log('🔐 secureFetch: Added Authorization header');
+        console.log('🔐 secureFetch: ✅ Added Authorization header');
       } else {
-        console.warn('⚠️ secureFetch: No access token available');
+        console.warn('⚠️ secureFetch: No access token available - requests may fail');
       }
       
       // Get user ID from session for x-user-id header

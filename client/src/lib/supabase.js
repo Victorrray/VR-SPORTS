@@ -93,8 +93,42 @@ export const supabase = supabaseClient;
 // Export a lightweight accessor for the current access token
 export async function getAccessToken() {
   try {
-    const { data } = await supabaseClient.auth.getSession();
-    return data?.session?.access_token || null;
+    if (!supabaseClient) {
+      console.warn('⚠️ getAccessToken: Supabase client not initialized');
+      return null;
+    }
+    
+    // Try to get session from Supabase
+    const { data, error } = await supabaseClient.auth.getSession();
+    
+    if (error) {
+      console.warn('⚠️ getAccessToken: Error getting session:', error.message);
+    }
+    
+    const token = data?.session?.access_token;
+    
+    if (token) {
+      console.log('✅ getAccessToken: Got token from Supabase session');
+      return token;
+    }
+    
+    // Fallback: check localStorage for session
+    try {
+      const storedSession = localStorage.getItem('sb-oddsightseer-auth');
+      if (storedSession) {
+        const parsed = JSON.parse(storedSession);
+        const storedToken = parsed?.session?.access_token;
+        if (storedToken) {
+          console.log('✅ getAccessToken: Got token from localStorage');
+          return storedToken;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ getAccessToken: Could not parse stored session');
+    }
+    
+    console.warn('⚠️ getAccessToken: No token available');
+    return null;
   } catch (e) {
     console.error('❌ getAccessToken error:', e.message);
     return null;
