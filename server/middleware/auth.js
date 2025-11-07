@@ -235,12 +235,20 @@ async function authenticate(req, _res, next) {
     const supabase = req.app.locals.supabase;
     
     console.log('🔐 authenticate: Checking token:', !!token, 'supabase:', !!supabase);
+    if (token) {
+      console.log('🔐 authenticate: Token length:', token.length, 'starts with:', token.substring(0, 20) + '...');
+    }
     
     if (token && supabase) {
       try {
         // Create a new Supabase client with the user's token
         // This allows us to verify the token and get the user
         const { createClient } = require('@supabase/supabase-js');
+        
+        console.log('🔐 authenticate: Creating Supabase client with token');
+        console.log('🔐 authenticate: SUPABASE_URL:', process.env.SUPABASE_URL ? '✓ set' : '✗ missing');
+        console.log('🔐 authenticate: SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? '✓ set' : '✗ missing');
+        
         const userSupabase = createClient(
           process.env.SUPABASE_URL,
           process.env.SUPABASE_ANON_KEY,
@@ -254,9 +262,16 @@ async function authenticate(req, _res, next) {
         );
         
         // Get the user from the token
+        console.log('🔐 authenticate: Calling getUser()');
         const { data, error } = await userSupabase.auth.getUser();
         
         console.log('🔐 authenticate: getUser result - error:', !!error, 'user:', !!data?.user);
+        if (error) {
+          console.log('🔐 authenticate: Error details:', error.message, error.status);
+        }
+        if (data?.user) {
+          console.log('🔐 authenticate: User data:', { id: data.user.id, email: data.user.email });
+        }
         
         if (!error && data?.user) {
           req.user = data.user;
@@ -266,6 +281,7 @@ async function authenticate(req, _res, next) {
         }
       } catch (tokenError) {
         console.warn('⚠️ authenticate: Token verification exception:', tokenError.message);
+        console.warn('⚠️ authenticate: Exception stack:', tokenError.stack);
       }
     } else {
       console.log('🔐 authenticate: No token or supabase available');
