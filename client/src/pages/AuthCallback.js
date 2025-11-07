@@ -1,7 +1,7 @@
 // Auth callback handler for Supabase OAuth flows
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+import { supabase } from '../lib/supabase';
 import { debugLog, debugRedirectDecision, debugIntentPersistence } from '../lib/debug';
 
 const DEBUG_PRICING = process.env.NODE_ENV === 'development' || 

@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabase'; // consolidated client
+import { supabase } from '../lib/supabase'; // consolidated client
 
 export async function isUsernameAvailable(candidate: string) {
   const v = candidate.trim();

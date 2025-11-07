@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Star, Zap, Loader2, Crown, Sparkles, ArrowRight } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '../../lib/supabase';
 import { useMe } from '../../hooks/useMe';
 import { debugLog, debugPricingClick, debugCheckoutResult, debugPlanUpdate } from '../../lib/debug';
 import './Pricing-Simple.css';

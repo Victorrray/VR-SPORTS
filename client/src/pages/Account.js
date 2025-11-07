@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../hooks/SimpleAuth";
 import { useMe } from "../hooks/useMe";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "../utils/supabase";
+import { supabase } from '../lib/supabase';
 import { User, Lock, Eye, EyeOff, Save, BookOpen, Check, AlertCircle, Mail, Settings, Shield, Key, LogOut, Crown, Zap, CreditCard, X, Twitter, Instagram, MessageCircle, RefreshCw } from "lucide-react";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import SportMultiSelect from "../components/betting/SportMultiSelect";

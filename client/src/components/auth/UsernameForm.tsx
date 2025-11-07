@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { isUsernameAvailable, setUsername } from '../../services/profile';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '../../lib/supabase';
 
 export default function UsernameForm() {
   const [value, setValue] = useState('');
