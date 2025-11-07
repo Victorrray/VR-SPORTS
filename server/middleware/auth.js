@@ -234,28 +234,25 @@ async function authenticate(req, _res, next) {
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
     const supabase = req.app.locals.supabase;
     
-    if (token && supabase && typeof token === 'string') {
-      try {
-        // Decode JWT to extract user ID
-        const parts = token.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-          
-          if (payload.sub) {
-            // Fetch user from Supabase using service role
-            const { data: user, error } = await supabase.auth.admin.getUserById(payload.sub);
-            
-            if (!error && user) {
-              req.user = user;
-            }
-          }
-        }
-      } catch (e) {
-        // Token verification failed - continue without req.user
+    if (!token || !supabase) {
+      return next();
+    }
+    
+    try {
+      // Use getUser() to verify the token - this is the correct Supabase method
+      const { data, error } = await supabase.auth.getUser(token);
+      
+      if (!error && data?.user) {
+        req.user = data.user;
+        console.log(`✅ JWT verified: ${data.user.id}`);
+      } else if (error) {
+        console.warn(`⚠️ JWT verification failed: ${error.message}`);
       }
+    } catch (tokenError) {
+      console.warn(`⚠️ JWT verification exception: ${tokenError.message}`);
     }
   } catch (e) {
-    // Non-fatal: continue without req.user
+    console.warn(`❌ Auth middleware error: ${e.message}`);
   }
   next();
 }
