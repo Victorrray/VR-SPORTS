@@ -5,7 +5,6 @@ import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield,
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 import { optimizedStorage } from "../utils/storageOptimizer";
-import { smartCache } from "../utils/enhancedCache";
 import MobileBottomBar from "../components/layout/MobileBottomBar";
 import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
 import MobileSearchModal from "../components/modals/MobileSearchModal";
@@ -1005,21 +1004,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     if (isPlayerPropsMode && filteredGames.length > 0) {
       // Prefetch player props data for faster loading
       const prefetchPlayerProps = async () => {
-        const cacheKey = `player-props:${picked.join(',')}:${selectedDate}`;
-        
-        try {
-          await smartCache.prefetch(cacheKey, async () => {
-            console.log('🎯 Prefetching player props data...');
-            // This will be handled by the useMarkets hook, but we're warming the cache
-            return { prefetched: true, timestamp: Date.now() };
-          }, {
-            type: 'LIVE',
-            priority: 'high',
-            customTTL: 10000 // 10 seconds for live player props
-          });
-        } catch (error) {
-          console.warn('Failed to prefetch player props:', error);
-        }
+        // Cache prefetching handled by useMarkets hook
       };
 
       // Debounce prefetching to avoid excessive requests
