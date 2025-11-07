@@ -49,18 +49,27 @@ export const secureFetch = async (url, options = {}) => {
   const headers = { ...(options.headers || {}) };
   if (backendAPI) {
     try {
-      const { getAccessToken, supabase } = await import('../lib/supabase');
+      const { getAccessToken, getAccessTokenSync, supabase } = await import('../lib/supabase');
       
       console.log('🔐 secureFetch: Attempting to get access token...');
       
       // Get the access token from Supabase session
       let accessToken = null;
-      if (getAccessToken && typeof getAccessToken === 'function') {
-        console.log('🔐 secureFetch: getAccessToken is a function, calling it...');
+      
+      // Try sync version first (faster, checks localStorage)
+      if (getAccessTokenSync && typeof getAccessTokenSync === 'function') {
+        console.log('🔐 secureFetch: Trying sync token getter...');
+        accessToken = getAccessTokenSync();
+        if (accessToken) {
+          console.log('🔐 secureFetch: ✅ Got token from sync getter');
+        }
+      }
+      
+      // If sync didn't work, try async version
+      if (!accessToken && getAccessToken && typeof getAccessToken === 'function') {
+        console.log('🔐 secureFetch: Sync failed, trying async token getter...');
         accessToken = await getAccessToken();
-        console.log('🔐 secureFetch: getAccessToken returned:', accessToken ? '✅ token found' : '❌ no token');
-      } else {
-        console.warn('⚠️ secureFetch: getAccessToken is not a function:', typeof getAccessToken);
+        console.log('🔐 secureFetch: Async getter returned:', accessToken ? '✅ token found' : '❌ no token');
       }
 
       if (accessToken) {

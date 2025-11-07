@@ -112,27 +112,82 @@ export async function getAccessToken() {
       return token;
     }
     
-    // Fallback: check localStorage for session
+    // Fallback 1: check localStorage for session with correct key
     try {
       const storedSession = localStorage.getItem('sb-oddsightseer-auth');
       if (storedSession) {
         const parsed = JSON.parse(storedSession);
         const storedToken = parsed?.session?.access_token;
         if (storedToken) {
-          console.log('✅ getAccessToken: Got token from localStorage');
+          console.log('✅ getAccessToken: Got token from localStorage (sb-oddsightseer-auth)');
           return storedToken;
         }
       }
     } catch (e) {
-      console.warn('⚠️ getAccessToken: Could not parse stored session');
+      console.warn('⚠️ getAccessToken: Could not parse sb-oddsightseer-auth');
     }
     
-    console.warn('⚠️ getAccessToken: No token available');
+    // Fallback 2: check for alternate storage keys
+    try {
+      const altKeys = ['sb-session', 'supabase.auth.token', 'sb-auth-session'];
+      for (const key of altKeys) {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            const altToken = parsed?.session?.access_token || parsed?.access_token;
+            if (altToken) {
+              console.log(`✅ getAccessToken: Got token from localStorage (${key})`);
+              return altToken;
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ getAccessToken: Could not check alternate storage keys');
+    }
+    
+    console.warn('⚠️ getAccessToken: No token available in any storage location');
     return null;
   } catch (e) {
     console.error('❌ getAccessToken error:', e.message);
     return null;
   }
+}
+
+// Synchronous token getter for quick access (checks localStorage only)
+export function getAccessTokenSync() {
+  try {
+    // Check primary storage key
+    const storedSession = localStorage.getItem('sb-oddsightseer-auth');
+    if (storedSession) {
+      const parsed = JSON.parse(storedSession);
+      const token = parsed?.session?.access_token;
+      if (token) {
+        console.log('✅ getAccessTokenSync: Got token from localStorage');
+        return token;
+      }
+    }
+    
+    // Check alternate keys
+    const altKeys = ['sb-session', 'supabase.auth.token', 'sb-auth-session'];
+    for (const key of altKeys) {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          const token = parsed?.session?.access_token || parsed?.access_token;
+          if (token) {
+            console.log(`✅ getAccessTokenSync: Got token from ${key}`);
+            return token;
+          }
+        } catch (_) {}
+      }
+    }
+  } catch (e) {
+    console.warn('⚠️ getAccessTokenSync error:', e.message);
+  }
+  return null;
 }
 
 // Helper for auth redirects
