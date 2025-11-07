@@ -238,8 +238,23 @@ async function authenticate(req, _res, next) {
     
     if (token && supabase) {
       try {
-        // Use the token to get the user - this creates a client with the token
-        const { data, error } = await supabase.auth.getUser(token);
+        // Create a new Supabase client with the user's token
+        // This allows us to verify the token and get the user
+        const { createClient } = require('@supabase/supabase-js');
+        const userSupabase = createClient(
+          process.env.SUPABASE_URL,
+          process.env.SUPABASE_ANON_KEY,
+          {
+            global: {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
+          }
+        );
+        
+        // Get the user from the token
+        const { data, error } = await userSupabase.auth.getUser();
         
         console.log('🔐 authenticate: getUser result - error:', !!error, 'user:', !!data?.user);
         
