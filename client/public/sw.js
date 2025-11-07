@@ -1,4 +1,24 @@
 // Service Worker for OddSightSeer Platform
+
+// Disable service worker on localhost for development (prevents CSP conflicts)
+if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+  self.addEventListener('install', (event) => {
+    console.log('SW: Localhost detected, skipping installation');
+    self.skipWaiting();
+  });
+  
+  self.addEventListener('activate', (event) => {
+    console.log('SW: Localhost detected, unregistering');
+    event.waitUntil(self.registration.unregister());
+  });
+  
+  // No-op fetch handler for localhost
+  self.addEventListener('fetch', () => {});
+  
+  // Exit early - don't load the rest of the SW code
+  throw new Error('Service Worker disabled on localhost');
+}
+
 const CACHE_NAME = 'oddssightseer-v1.0.0';
 const STATIC_CACHE = 'oddssightseer-static-v1';
 const API_CACHE = 'oddssightseer-api-v1';
