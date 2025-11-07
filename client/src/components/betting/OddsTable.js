@@ -3412,15 +3412,44 @@ export default function OddsTable({
                             const findBestOdds = (books) => {
                               if (!books || books.length === 0) return null;
                               
+                              // For game mode, we need to find the best odds for the CURRENT outcome (row.out)
+                              // For props, we just compare the single odds value
+                              if (mode === "props") {
+                                return books.reduce((best, current) => {
+                                  const currentOdds = current.price ?? current.odds;
+                                  const bestOdds = best.price ?? best.odds;
+                                  
+                                  if (!currentOdds || !bestOdds) return best;
+                                  
+                                  // Convert to decimal for comparison
+                                  const currentDec = currentOdds > 0 ? (currentOdds / 100) + 1 : (100 / Math.abs(currentOdds)) + 1;
+                                  const bestDec = bestOdds > 0 ? (bestOdds / 100) + 1 : (100 / Math.abs(bestOdds)) + 1;
+                                  
+                                  return currentDec > bestDec ? current : best;
+                                });
+                              }
+                              
+                              // For game mode (spreads/totals/moneyline), find best odds for the specific outcome
                               return books.reduce((best, current) => {
-                                const currentOdds = current.price ?? current.odds;
-                                const bestOdds = best.price ?? best.odds;
+                                // Find the odds for the current outcome from this book
+                                const currentOutcomeOdds = (() => {
+                                  if (!current.market || !Array.isArray(current.market.outcomes)) return null;
+                                  const outcome = current.market.outcomes.find(o => o.name === row.out.name);
+                                  return outcome ? (outcome.price ?? outcome.odds) : null;
+                                })();
                                 
-                                if (!currentOdds || !bestOdds) return best;
+                                // Find the odds for the current outcome from the best book so far
+                                const bestOutcomeOdds = (() => {
+                                  if (!best.market || !Array.isArray(best.market.outcomes)) return null;
+                                  const outcome = best.market.outcomes.find(o => o.name === row.out.name);
+                                  return outcome ? (outcome.price ?? outcome.odds) : null;
+                                })();
+                                
+                                if (!currentOutcomeOdds || !bestOutcomeOdds) return best;
                                 
                                 // Convert to decimal for comparison
-                                const currentDec = currentOdds > 0 ? (currentOdds / 100) + 1 : (100 / Math.abs(currentOdds)) + 1;
-                                const bestDec = bestOdds > 0 ? (bestOdds / 100) + 1 : (100 / Math.abs(bestOdds)) + 1;
+                                const currentDec = currentOutcomeOdds > 0 ? (currentOutcomeOdds / 100) + 1 : (100 / Math.abs(currentOutcomeOdds)) + 1;
+                                const bestDec = bestOutcomeOdds > 0 ? (bestOutcomeOdds / 100) + 1 : (100 / Math.abs(bestOutcomeOdds)) + 1;
                                 
                                 return currentDec > bestDec ? current : best;
                               });
