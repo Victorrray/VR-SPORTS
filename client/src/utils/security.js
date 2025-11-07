@@ -50,23 +50,34 @@ export const secureFetch = async (url, options = {}) => {
   if (backendAPI) {
     try {
       const { getAccessToken, supabase } = require('../lib/supabase');
-      const cached = getAccessToken?.();
-
-      // Always attempt to resolve the current session so we can attach the user id
-      let session = null;
-      try {
-        const result = await supabase?.auth?.getSession?.();
-        session = result?.data?.session;
-      } catch (e) {
-        console.error('Error getting session:', e);
+      
+      // Try to get the access token from the cached value first (most reliable)
+      let accessToken = getAccessToken?.();
+      
+      // If no cached token, try to get it from the current session
+      if (!accessToken) {
+        try {
+          const result = await supabase?.auth?.getSession?.();
+          accessToken = result?.data?.session?.access_token;
+        } catch (e) {
+          console.error('Error getting session:', e);
+        }
       }
 
-      const accessToken = session?.access_token || cached;
       if (accessToken) {
         headers['Authorization'] = `Bearer ${accessToken}`;
         console.log('🔐 secureFetch: Added Authorization header');
       } else {
         console.warn('⚠️ secureFetch: No access token available');
+      }
+      
+      // Get user ID from session for x-user-id header
+      let session = null;
+      try {
+        const result = await supabase?.auth?.getSession?.();
+        session = result?.data?.session;
+      } catch (e) {
+        // Silently fail - we already have the token
       }
 
       if (session?.user?.id) {
