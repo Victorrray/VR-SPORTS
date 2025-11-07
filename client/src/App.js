@@ -125,7 +125,7 @@ function AppRoutes() {
               <Route path="/" element={user ? <Dashboard /> : <Landing />} />
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
-              <Route path="/sportsbooks" element={<PrivateRoute><PlanGuard requiresPaidPlan={true}><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PlanGuard></PrivateRoute>} />
+              <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
