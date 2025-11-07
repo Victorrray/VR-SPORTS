@@ -52,7 +52,7 @@ export const secureFetch = async (url, options = {}) => {
       const { getAccessToken, supabase } = require('../lib/supabase');
       
       // Try to get the access token from the cached value first (most reliable)
-      let accessToken = getAccessToken?.();
+      let accessToken = await getAccessToken?.();
       
       // If no cached token, try to get it from the current session
       if (!accessToken) {
