@@ -90,7 +90,10 @@ if (isConfigValid && typeof window !== 'undefined') {
         }
         currentAccessToken = data?.session?.access_token || null;
         if (!isProd) {
-          if (data?.session) console.log('🟢 Supabase connected successfully');
+          if (data?.session) {
+            console.log('🟢 Supabase connected successfully');
+            console.log('🔐 Initial token cached:', currentAccessToken ? '✓ set' : '✗ missing');
+          }
           else console.log('🔐 No active session - user not authenticated');
         }
       })
@@ -99,9 +102,11 @@ if (isConfigValid && typeof window !== 'undefined') {
     // Keep a lightweight token cache in sync
     try {
       supabaseClient.auth.onAuthStateChange((_event, session) => {
-        currentAccessToken = session?.access_token || null;
+        const newToken = session?.access_token || null;
+        currentAccessToken = newToken;
         if (!isProd) {
           console.log('🔄 Auth state changed:', _event, session ? 'authenticated' : 'not authenticated');
+          if (newToken) console.log('🔐 Token updated in cache');
         }
       });
     } catch {}
@@ -205,8 +210,11 @@ export const supabase = supabaseClient;
 export async function getAccessToken() {
   // First try the cached value
   if (currentAccessToken) {
+    if (!isProd) console.log('🔐 getAccessToken: Returning cached token');
     return currentAccessToken;
   }
+  
+  if (!isProd) console.log('🔐 getAccessToken: No cached token, fetching from session');
   
   // If no cached token, try to get it from the current session
   try {
@@ -215,13 +223,19 @@ export async function getAccessToken() {
       const token = data?.session?.access_token;
       if (token) {
         currentAccessToken = token;
+        if (!isProd) console.log('🔐 getAccessToken: Token fetched and cached');
         return token;
+      } else {
+        if (!isProd) console.warn('⚠️ getAccessToken: Session exists but no token');
       }
+    } else {
+      if (!isProd) console.warn('⚠️ getAccessToken: Supabase client not available');
     }
   } catch (e) {
-    if (!isProd) console.error('Error getting access token from session:', e);
+    if (!isProd) console.error('❌ getAccessToken: Error getting session:', e.message);
   }
   
+  if (!isProd) console.warn('⚠️ getAccessToken: Returning null - no token available');
   return null;
 }
 
