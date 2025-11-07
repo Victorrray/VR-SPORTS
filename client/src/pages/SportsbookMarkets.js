@@ -1955,9 +1955,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         marketsError: marketsError,
         authRequired: marketsError && marketsError.includes('Authentication required'),
         isArbitrageMode,
+        isPlayerPropsMode,
+        isMiddlesMode,
         hasPlatinum,
-        condition1: isArbitrageMode && hasPlatinum,
-        condition2: isArbitrageMode && !hasPlatinum
+        isOverQuota,
+        hasGoldOrBetter,
+        meLoading,
+        filteredGamesLength: filteredGames?.length || 0,
+        showPlayerProps,
+        showArbitrage,
+        showMiddles
       })}
       
       {/* Show loading state while plan data is loading */}
