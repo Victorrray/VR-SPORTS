@@ -872,13 +872,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   }, [marketsLoading, filteredGames.length]);
 
   // Auto-select all relevant markets when sports change (draft state)
+  // Track if user has explicitly selected markets in the modal
+  const [userHasSelectedMarkets, setUserHasSelectedMarkets] = useState(false);
+  
   useEffect(() => {
     if (draftPicked && draftPicked.length > 0) {
-      const autoSelectedMarkets = getAutoSelectedMarkets(draftPicked);
-      setDraftMarketKeys(autoSelectedMarkets);
-      console.log('🎯 Auto-selected draft markets for sports:', draftPicked, '→', autoSelectedMarkets);
+      // Only auto-select if user hasn't explicitly selected markets yet
+      if (!userHasSelectedMarkets) {
+        const autoSelectedMarkets = getAutoSelectedMarkets(draftPicked);
+        setDraftMarketKeys(autoSelectedMarkets);
+        console.log('🎯 Auto-selected draft markets for sports:', draftPicked, '→', autoSelectedMarkets);
+      } else {
+        // User has made a selection - respect it (even if it's empty = "all markets")
+        console.log('🎯 User has selected markets - keeping selection:', draftMarketKeys);
+      }
     }
-  }, [draftPicked]);
+  }, [draftPicked, userHasSelectedMarkets]);
 
   // Auto-update draft player prop markets when draft sports change
   useEffect(() => {
@@ -1103,6 +1112,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       setDraftSelectedBooks([...selectedBooks]);
       setDraftMarketKeys([...marketKeys]);
       setDraftSelectedPlayerPropMarkets([...selectedPlayerPropMarkets]);
+      // Reset the flag when modal opens so auto-selection works if user hasn't changed markets
+      setUserHasSelectedMarkets(false);
       // Arbitrage states don't need syncing as they're internal to the component
     }
   }, [mobileFiltersOpen]); // Only depend on modal open state
@@ -1832,7 +1843,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   <SportMultiSelect
                     list={getAvailableMarkets(draftPicked)}
                     selected={draftMarketKeys || []}
-                    onChange={setDraftMarketKeys}
+                    onChange={(newMarkets) => {
+                      setDraftMarketKeys(newMarkets);
+                      setUserHasSelectedMarkets(true); // Mark that user has made a selection
+                      console.log('🎯 User selected markets:', newMarkets.length > 0 ? newMarkets : 'ALL MARKETS (empty array)');
+                    }}
                     placeholderText="Select markets..."
                     allLabel="All Markets"
                     enableCategories={true}
@@ -2514,7 +2529,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 <SportMultiSelect
                   list={getAvailableMarkets(draftPicked)}
                   selected={draftMarketKeys || []}
-                  onChange={setDraftMarketKeys}
+                  onChange={(newMarkets) => {
+                    setDraftMarketKeys(newMarkets);
+                    setUserHasSelectedMarkets(true); // Mark that user has made a selection
+                    console.log('🎯 User selected markets (mobile):', newMarkets.length > 0 ? newMarkets : 'ALL MARKETS (empty array)');
+                  }}
                   placeholderText="Select markets..."
                   allLabel="All Markets"
                   enableCategories={true}
