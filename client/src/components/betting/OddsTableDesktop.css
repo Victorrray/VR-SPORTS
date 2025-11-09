@@ -25,6 +25,9 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     backdrop-filter: blur(8px) !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
   
   /* Remove accent bar */
@@ -43,6 +46,7 @@
     border-collapse: collapse !important;
     font-size: 0.95em !important;
     background: transparent !important;
+    margin: 0 auto !important;
   }
   
   /* Header row - Subtle background */

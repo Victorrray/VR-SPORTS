@@ -4227,7 +4227,8 @@ export default function OddsTable({
                                         background: 'var(--bg-secondary)',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        justifyContent: 'center'
+                                        justifyContent: 'center',
+                                        width: '100%'
                                       }}>
                                         {hasMoreBooks && !isMiniTableExpanded ? (
                                           <button
