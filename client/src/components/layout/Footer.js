@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Twitter, Instagram, Mail, TrendingUp } from "lucide-react";
+import { Twitter, Instagram, Mail, Circle } from "lucide-react";
 import styles from "./Footer.module.css";
 
 export default function Footer({ className }) {
@@ -43,7 +43,7 @@ export default function Footer({ className }) {
         <div className={styles.topSection}>
           <div className={styles.brandSection}>
             <Link to="/" className={styles.brand}>
-              <TrendingUp size={24} className={styles.brandIcon} />
+              <Circle size={24} className={styles.brandIcon} fill="currentColor" />
               <div className={styles.brandText}>
                 <span className={styles.brandLogo}>Odd</span>
                 <span className={styles.brandLogoAccent}>Sight</span>
