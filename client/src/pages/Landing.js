@@ -30,6 +30,7 @@ import {
 // Components
 import EdgeCalculator from '../components/betting/EdgeCalculator';
 import Pricing from '../components/billing/Pricing';
+import HeroSection from '../components/landing/HeroSection';
 
 // Styles
 import '../styles/landing-revamp.css';
@@ -215,33 +216,8 @@ export default function Landing() {
       )}
 
       
-      {/* Hero Section - Revamped */}
-      <section className="hero-revamp">
-        <div className="hero-container">
-          <div className="hero-badge-new">
-            <Sparkles size={14} />
-            <span>Trusted by Serious Sports Bettors</span>
-          </div>
-          
-          <h1 className="hero-title-new">
-            Turn $100 Into
-            <span className="gradient-text"> $2,400+ in 30 Days</span>
-          </h1>
-          
-          <p className="hero-subtitle-new">
-            Compare live odds across 15+ sportsbooks, find +EV bets with 4.2% average edge, and track your performance with advanced analytics.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="hero-cta-group" style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={() => navigate('/login')} className="cta-btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <TrendingUp size={20} />
-              Get Started Today
-              <ArrowRight size={20} />
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Responsive with Device Mockup */}
+      <HeroSection />
 
       {/* Stats Section */}
       <section className="stats-section animate-on-scroll">

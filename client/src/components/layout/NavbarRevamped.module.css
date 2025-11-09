@@ -333,12 +333,12 @@
 }
 
 .userAvatar {
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, var(--navbar-accent), #a78bfa);
+  background: transparent;
   border-radius: 6px;
   color: white;
 }
