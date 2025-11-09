@@ -3984,7 +3984,6 @@ export default function OddsTable({
                         <table className="mini-odds-table">
                           <thead>
                             <tr>
-                              <th>EV %</th>
                               <th>Sportsbook</th>
                               {mode === "props" ? (
                                 <>

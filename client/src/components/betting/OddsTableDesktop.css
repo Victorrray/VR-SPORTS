@@ -114,27 +114,22 @@
   /* Column width alignment with main table */
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(1),
   tr.desktop-mini-wrap .mini-odds-table td:nth-child(1) {
-    width: 10% !important; /* EV % - matches main table EV % */
+    width: 20% !important; /* Sportsbook - matches BOOK */
   }
   
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(2),
   tr.desktop-mini-wrap .mini-odds-table td:nth-child(2) {
-    width: 15% !important; /* Sportsbook - matches BOOK */
+    width: 20% !important; /* Over/Home - matches ODDS */
   }
   
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(3),
   tr.desktop-mini-wrap .mini-odds-table td:nth-child(3) {
-    width: 15% !important; /* Over - matches ODDS */
+    width: 20% !important; /* Under/Away - matches ODDS */
   }
   
   tr.desktop-mini-wrap .mini-odds-table th:nth-child(4),
   tr.desktop-mini-wrap .mini-odds-table td:nth-child(4) {
-    width: 15% !important; /* Under - matches ODDS */
-  }
-  
-  tr.desktop-mini-wrap .mini-odds-table th:nth-child(5),
-  tr.desktop-mini-wrap .mini-odds-table td:nth-child(5) {
-    width: 45% !important; /* Add Pick - remaining space */
+    width: 40% !important; /* Add Pick - remaining space */
   }
 
   /* Sportsbook cell - Left aligned */
