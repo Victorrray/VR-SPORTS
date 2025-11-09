@@ -22,6 +22,10 @@ const getSupabaseConfig = () => {
       'REACT_APP_SUPABASE_ANON_KEY': !!process.env.REACT_APP_SUPABASE_ANON_KEY,
       'VITE_SUPABASE_ANON_KEY': !!viteEnv?.VITE_SUPABASE_ANON_KEY,
     });
+    console.log('📋 Raw env values:', {
+      'process.env.REACT_APP_SUPABASE_URL': process.env.REACT_APP_SUPABASE_URL?.substring(0, 40),
+      'process.env.REACT_APP_SUPABASE_ANON_KEY': process.env.REACT_APP_SUPABASE_ANON_KEY?.substring(0, 20),
+    });
   }
 
   return {

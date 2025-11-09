@@ -310,28 +310,26 @@
 .userButton {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(139, 92, 246, 0.04));
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 50px;
-  color: rgba(255, 255, 255, 0.95);
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--navbar-accent), #a78bfa);
+  border: none;
+  border-radius: 50%;
+  color: white;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   pointer-events: auto;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.95rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
 }
 
 .userButton:hover {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.08));
-  border-color: rgba(139, 92, 246, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.2);
-  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(139, 92, 246, 0.3);
 }
 
 .userAvatar {
