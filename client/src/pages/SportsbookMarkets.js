@@ -1494,11 +1494,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Handle section change from SectionMenu
   const handleSectionChange = (sectionId) => {
-    console.log(`🔄 Changing section to: ${sectionId}`, { hasPlatinum, userPlan: me?.plan });
+    console.log(`🔄 Changing section to: ${sectionId}`, { hasPlatinum, userPlan: me?.plan, meLoading, userId: user?.id });
     
-    // Check if user has access to premium features
+    // Check if user is authenticated
+    if (!user) {
+      console.warn(`⚠️ User not authenticated, redirecting to login`);
+      navigate('/login');
+      return;
+    }
+    
+    // Check if user has access to premium features (arbitrage/middles require platinum)
     if ((sectionId === 'arbitrage' || sectionId === 'middles') && !hasPlatinum) {
-      console.warn(`⚠️ User tried to access ${sectionId} but doesn't have platinum plan`);
+      console.warn(`⚠️ User tried to access ${sectionId} but doesn't have platinum plan. Plan: ${me?.plan}`);
+      // Show alert to user
+      alert(`${sectionId === 'arbitrage' ? 'Arbitrage' : 'Middles'} detection requires a Platinum plan. Please upgrade to access this feature.`);
       return; // Don't change section if user doesn't have access
     }
     
