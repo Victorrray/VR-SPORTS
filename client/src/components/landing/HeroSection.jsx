@@ -1,5 +1,5 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useActiveBreakpoint } from 'figma:react';
 
 function PrimaryButtonDesktop() {
   const navigate = useNavigate();
@@ -185,7 +185,14 @@ function Hero1Mobile() {
 }
 
 function HeroSection() {
-  const { width } = useActiveBreakpoint();
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (width < 800) {
     return <Hero1Mobile />;
   }
