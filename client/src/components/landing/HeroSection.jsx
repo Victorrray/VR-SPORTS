@@ -1,203 +1,101 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Sparkles } from 'lucide-react';
-
-function PrimaryButtonDesktop() {
-  const navigate = useNavigate();
-  return (
-    <button onClick={() => navigate('/login')} className="px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all text-center font-semibold flex items-center gap-2">
-      Get started
-      <ArrowRight className="w-4 h-4" />
-    </button>
-  );
-}
-
-function SecondaryButtonDesktop() {
-  const navigate = useNavigate();
-  return (
-    <button onClick={() => { const el = document.querySelector('.features-section-new'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="box-border content-stretch flex gap-[8px] items-center justify-center overflow-visible px-[16px] py-[12px] relative rounded-[12px] shrink-0" data-name="Secondary button">
-      <div aria-hidden="true" className="absolute border-2 border-[rgba(255,255,255,0.15)] border-solid inset-0 pointer-events-none rounded-[12px]" />
-      <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-nowrap text-white tracking-[-0.09px]">
-        <p className="leading-[1.45] whitespace-pre">See Live Demo</p>
-      </div>
-    </button>
-  );
-}
-
-function ButtonsDesktop() {
-  return (
-    <div className="content-end cursor-pointer flex flex-wrap gap-[16px] items-end justify-center relative shrink-0" data-name="Buttons">
-      <PrimaryButtonDesktop />
-      <SecondaryButtonDesktop />
-    </div>
-  );
-}
-
-function TextDesktop() {
-  return (
-    <div className="content-stretch flex flex-col gap-[48px] items-center relative shrink-0 w-full" data-name="Text">
-      <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[1.1] not-italic relative shrink-0 text-[64px] text-center text-white tracking-[-1.28px] w-[740px]">
-        <h1 className="block mb-0">A bold headline</h1>
-        <h1 className="block">that delivers</h1>
-      </div>
-      <ButtonsDesktop />
-    </div>
-  );
-}
-
-function Hero1Desktop() {
-  return (
-    <section className="relative size-full" data-name="Hero 1">
-      <div className="flex flex-col items-center size-full">
-        <div className="box-border content-stretch flex flex-col gap-[120px] items-center pb-0 pt-[120px] px-[64px] relative size-full">
-          <TextDesktop />
-          <div aria-hidden="true" className="h-[599px] pointer-events-none relative rounded-[32px] shrink-0 w-[922px]" data-name="Device frame" role="presentation">
-            <div aria-hidden="true" className="absolute border-8 border-solid border-white inset-0 rounded-[32px] shadow-[0px_0px_4.4px_0px_rgba(0,0,0,0.06),0px_5px_19px_0px_rgba(0,0,0,0.08)]" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PrimaryButtonTablet() {
-  const navigate = useNavigate();
-  return (
-    <button onClick={() => navigate('/login')} className="bg-white box-border content-stretch flex gap-[8px] items-center justify-center overflow-visible px-[16px] py-[12px] relative rounded-[12px] shrink-0" data-name="Primary button">
-      <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-black text-nowrap tracking-[-0.09px]">
-        <p className="leading-[1.45] whitespace-pre">Get Started Today</p>
-      </div>
-    </button>
-  );
-}
-
-function SecondaryButtonTablet() {
-  return (
-    <button onClick={() => { const el = document.querySelector('.features-section-new'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="box-border content-stretch flex gap-[8px] items-center justify-center overflow-visible px-[16px] py-[12px] relative rounded-[12px] shrink-0" data-name="Secondary button">
-      <div aria-hidden="true" className="absolute border-2 border-[rgba(255,255,255,0.15)] border-solid inset-0 pointer-events-none rounded-[12px]" />
-      <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-nowrap text-white tracking-[-0.09px]">
-        <p className="leading-[1.45] whitespace-pre">See Live Demo</p>
-      </div>
-    </button>
-  );
-}
-
-function ButtonsTablet() {
-  return (
-    <div className="content-end cursor-pointer flex flex-wrap gap-[16px] items-end justify-center relative shrink-0" data-name="Buttons">
-      <PrimaryButtonTablet />
-      <SecondaryButtonTablet />
-    </div>
-  );
-}
-
-function TextTablet() {
-  return (
-    <div className="content-stretch flex flex-col gap-[40px] items-center relative shrink-0 w-full" data-name="Text">
-      <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[1.1] not-italic relative shrink-0 text-[56px] text-center text-white tracking-[-1.12px] w-[672px]">
-        <h1 className="block mb-0">A bold headline</h1>
-        <h1 className="block">that delivers</h1>
-      </div>
-      <ButtonsTablet />
-    </div>
-  );
-}
-
-function Hero1Tablet() {
-  return (
-    <section className="relative size-full" data-name="Hero 1">
-      <div className="flex flex-col items-center size-full">
-        <div className="box-border content-stretch flex flex-col gap-[96px] items-center pb-0 pt-[96px] px-[64px] relative size-full">
-          <TextTablet />
-          <div aria-hidden="true" className="aspect-[608/395] pointer-events-none relative rounded-[24px] shrink-0 w-full" data-name="Device frame" role="presentation">
-            <div aria-hidden="true" className="absolute border-8 border-solid border-white inset-0 rounded-[24px] shadow-[0px_0px_4.4px_0px_rgba(0,0,0,0.06),0px_5px_19px_0px_rgba(0,0,0,0.08)]" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PrimaryButtonMobile() {
-  const navigate = useNavigate();
-  return (
-    <button onClick={() => navigate('/login')} className="bg-white relative rounded-[12px] shrink-0 w-full" data-name="Primary button">
-      <div className="flex flex-row items-center justify-center size-full">
-        <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[16px] py-[12px] relative w-full">
-          <div className="basis-0 flex flex-col font-['Inter:Medium',sans-serif] font-medium grow justify-center leading-[0] min-h-px min-w-px not-italic overflow-ellipsis overflow-hidden relative shrink-0 text-[16px] text-black text-center text-nowrap tracking-[-0.08px]">
-            <p className="[white-space-collapse:collapse] leading-[1.45] overflow-ellipsis overflow-hidden">Get Started Today</p>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-function SecondaryButtonMobile() {
-  return (
-    <button onClick={() => { const el = document.querySelector('.features-section-new'); el?.scrollIntoView({ behavior: 'smooth' }); }} className="relative rounded-[12px] shrink-0 w-full" data-name="Secondary button">
-      <div aria-hidden="true" className="absolute border-2 border-[rgba(255,255,255,0.15)] border-solid inset-0 pointer-events-none rounded-[12px]" />
-      <div className="flex flex-row items-center justify-center size-full">
-        <div className="box-border content-stretch flex gap-[8px] items-center justify-center px-[16px] py-[12px] relative w-full">
-          <div className="basis-0 flex flex-col font-['Inter:Medium',sans-serif] font-medium grow justify-center leading-[0] min-h-px min-w-px not-italic overflow-ellipsis overflow-hidden relative shrink-0 text-[18px] text-center text-nowrap text-white tracking-[-0.09px]">
-            <p className="[white-space-collapse:collapse] leading-[1.45] overflow-ellipsis overflow-hidden">See Live Demo</p>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-function ButtonsMobile() {
-  return (
-    <div className="content-stretch cursor-pointer flex flex-col gap-[12px] items-end justify-center relative shrink-0 w-full" data-name="Buttons">
-      <PrimaryButtonMobile />
-      <SecondaryButtonMobile />
-    </div>
-  );
-}
-
-function TextMobile() {
-  return (
-    <div className="content-stretch flex flex-col gap-[40px] items-center relative shrink-0 w-full" data-name="Text">
-      <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[1.1] not-italic relative shrink-0 text-[44px] text-center text-white tracking-[-0.88px] w-full">
-        <h1 className="block mb-0">A bold headline</h1>
-        <h1 className="block">that delivers</h1>
-      </div>
-      <ButtonsMobile />
-    </div>
-  );
-}
-
-function Hero1Mobile() {
-  return (
-    <section className="relative size-full" data-name="Hero 1">
-      <div className="flex flex-col items-center size-full">
-        <div className="box-border content-stretch flex flex-col gap-[64px] items-center px-[24px] py-[64px] relative size-full">
-          <TextMobile />
-          <div aria-hidden="true" className="aspect-[311/202] pointer-events-none relative rounded-[16px] shrink-0 w-full" data-name="Device frame" role="presentation">
-            <div aria-hidden="true" className="absolute border-8 border-solid border-white inset-0 rounded-[16px] shadow-[0px_0px_4.4px_0px_rgba(0,0,0,0.06),0px_5px_19px_0px_rgba(0,0,0,0.08)]" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+import { useNavigate } from 'react-router-dom';
 
 export function Hero() {
-  const [width, setWidth] = useState(window.innerWidth);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  return (
+    <section className="relative container mx-auto px-4 pt-20 md:pt-32 pb-20 md:pb-32 overflow-hidden">
+      {/* Background gradient orbs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute right-[10%] top-[20%] w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute right-[5%] top-[40%] w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute right-[15%] top-[10%] w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl"></div>
+      </div>
 
-  if (width < 800) {
-    return <Hero1Mobile />;
-  }
-  if (width < 1280) {
-    return <Hero1Tablet />;
-  }
-  return <Hero1Desktop />;
+      <div className="relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center max-w-7xl mx-auto">
+        {/* Left Content */}
+        <div>
+          {/* Large Headline */}
+          <h1 className="text-white mb-4 md:mb-6 leading-[1.1] font-bold" style={{fontSize: 'clamp(2.5rem, 8vw, 5rem)'}}>
+            Bet smarter,<br />
+            <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+              Win more.
+            </span>
+          </h1>
+          
+          {/* Subheading */}
+          <p className="text-white/60 text-base md:text-lg mb-6 md:mb-8 max-w-lg leading-relaxed font-medium">
+            Find positive expected value opportunities across 15+ sportsbooks.
+            Make data-driven decisions with real-time odds comparison and AI-powered analytics.
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 md:gap-6">
+            <button onClick={() => navigate('/login')} className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all text-center font-semibold">
+              Get started
+            </button>
+            
+            <a href="#features" className="text-white/70 hover:text-white text-sm flex items-center gap-2 transition-colors group font-semibold">
+              See how it works
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </a>
+          </div>
+
+          {/* Announcement Banner */}
+          <div className="mt-8 md:mt-12 inline-flex items-center gap-2 text-xs md:text-sm text-white/50 font-medium">
+            <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0" />
+            <span>Now tracking live odds from 15+ major sportsbooks</span>
+            <ArrowRight className="w-3 h-3 flex-shrink-0" />
+          </div>
+        </div>
+
+        {/* Right Visual Element */}
+        <div className="relative hidden md:block">
+          {/* 3D-style floating cards */}
+          <div className="relative h-[500px]">
+            {/* Card 1 */}
+            <div className="absolute top-0 right-20 w-80 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform">
+              <div className="text-purple-400 text-xs mb-4 font-bold">POSITIVE EV BET</div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-white/60 text-sm font-semibold">Lakers vs Warriors</span>
+                  <span className="text-emerald-400 text-sm font-bold">+4.2% EV</span>
+                </div>
+                <div className="h-12 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-lg flex items-center justify-between px-4">
+                  <span className="text-white text-sm font-semibold">Lakers -5.5</span>
+                  <span className="text-white font-bold">-110</span>
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1 h-8 bg-white/5 rounded flex items-center justify-center text-xs text-white/40 font-semibold">DraftKings</div>
+                  <div className="flex-1 h-8 bg-white/5 rounded flex items-center justify-center text-xs text-white/40 font-semibold">FanDuel</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="absolute top-32 right-0 w-72 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl transform -rotate-3 hover:rotate-0 transition-transform">
+              <div className="text-cyan-400 text-xs mb-4 font-bold">WIN RATE</div>
+              <div className="text-white text-4xl mb-2 font-bold">64.2%</div>
+              <div className="flex gap-1 items-end h-24">
+                <div className="flex-1 bg-gradient-to-t from-purple-500/40 to-purple-500/20 rounded-t" style={{height: '60%'}}></div>
+                <div className="flex-1 bg-gradient-to-t from-purple-500/40 to-purple-500/20 rounded-t" style={{height: '45%'}}></div>
+                <div className="flex-1 bg-gradient-to-t from-purple-500/40 to-purple-500/20 rounded-t" style={{height: '70%'}}></div>
+                <div className="flex-1 bg-gradient-to-t from-indigo-500/60 to-indigo-500/40 rounded-t" style={{height: '85%'}}></div>
+                <div className="flex-1 bg-gradient-to-t from-indigo-500/60 to-indigo-500/40 rounded-t" style={{height: '90%'}}></div>
+                <div className="flex-1 bg-gradient-to-t from-indigo-500/60 to-indigo-500/40 rounded-t" style={{height: '100%'}}></div>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="absolute bottom-0 right-32 w-64 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-2xl p-5 shadow-2xl transform rotate-2 hover:rotate-0 transition-transform">
+              <div className="text-indigo-400 text-xs mb-3 font-bold">MONTHLY ROI</div>
+              <div className="text-white text-3xl mb-1 font-bold">+18.5%</div>
+              <div className="text-emerald-400 text-sm font-semibold">↑ Above market average</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
