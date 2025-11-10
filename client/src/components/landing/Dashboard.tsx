@@ -1,18 +1,34 @@
 import { BarChart2, TrendingUp, Crown, LogOut, User, Home, Filter, Search, ChevronDown, Calendar, DollarSign, Target, Sparkles, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, Zap, BarChart, Settings } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/SimpleAuth';
 import { PicksPage } from './PicksPage.tsx';
 import { OddsPage } from './OddsPage.tsx';
 import { AccountPage } from './AccountPage.tsx';
 import { SettingsPage } from './SettingsPage.tsx';
 
 interface DashboardProps {
-  onSignOut: () => void;
+  onSignOut?: () => void;
 }
 
 export function Dashboard({ onSignOut }: DashboardProps) {
+  const navigate = useNavigate();
+  const { user, profile, signOut } = useAuth();
+  
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [selectedSport, setSelectedSport] = useState('all');
   const [currentView, setCurrentView] = useState<'dashboard' | 'picks' | 'odds' | 'account' | 'settings'>('dashboard');
+  
+  const handleSignOut = async () => {
+    try {
+      if (signOut) {
+        await (signOut as any)();
+      }
+      navigate('/');
+    } catch (err) {
+      console.error('Sign out failed:', err);
+    }
+  };
 
   const stats = [
     { 
@@ -207,7 +223,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             {/* Sign Out */}
             <div className="p-6 border-t border-white/10">
               <button 
-                onClick={onSignOut}
+                onClick={handleSignOut}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 backdrop-blur-xl border border-red-400/30 text-red-400 rounded-xl hover:bg-red-500/20 transition-all font-bold shadow-lg shadow-red-500/10 hover:shadow-red-500/20"
               >
                 <LogOut className="w-4 h-4" />
@@ -229,7 +245,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent font-bold">OddSightSeer</span>
               </div>
               <button 
-                onClick={onSignOut}
+                onClick={handleSignOut}
                 className="flex items-center gap-2 px-3 py-2 bg-red-500/10 backdrop-blur-xl border border-red-400/30 text-red-400 rounded-lg font-bold text-sm shadow-lg shadow-red-500/10"
               >
                 <LogOut className="w-4 h-4" />
