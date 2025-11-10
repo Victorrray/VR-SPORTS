@@ -11,9 +11,9 @@ import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import { initBrowserCompat } from './utils/browserCompat';
 import DebugPanel from './components/debug/DebugPanel';
-import NavbarRevamped from './components/layout/NavbarRevamped';
-import MobileBottomBar from './components/layout/MobileBottomBar';
-import Footer from './components/layout/Footer';
+// import NavbarRevamped from './components/layout/NavbarRevamped'; // OLD - Using new Header from landing page
+// import MobileBottomBar from './components/layout/MobileBottomBar'; // OLD - Not used with new landing page
+// import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import DFSMarkets from './pages/DFSMarkets';
@@ -113,12 +113,13 @@ function AppRoutes() {
       <div className="app">
         <div className="app-layout">
           <LoadingBar />
-          <NavbarRevamped onOpenMobileSearch={() => {
+          {/* OLD NAVBAR - Commented out, using new Header from landing page */}
+          {/* <NavbarRevamped onOpenMobileSearch={() => {
             console.log('Navbar: onOpenMobileSearch called, callback exists:', !!mobileSearchCallback);
             if (mobileSearchCallback) {
               mobileSearchCallback();
             }
-          }} />
+          }} /> */}
           <main className="main-content" id="main-content" tabIndex="-1">
             <AuthDebug />
             <Routes>
@@ -144,8 +145,8 @@ function AppRoutes() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          {/* Show footer only on public landing routes when not authenticated (excluding login) */}
-          {(['/', '/pricing', '/signup'].includes(location.pathname) && !user) && <Footer />}
+          {/* OLD FOOTER - Commented out, using new Footer from landing page */}
+          {/* {(['/', '/pricing', '/signup'].includes(location.pathname) && !user) && <Footer />} */}
           
           {/* Username Setup Modal */}
           {showUsernameSetup && (
