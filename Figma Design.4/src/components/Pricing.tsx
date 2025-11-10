@@ -26,9 +26,9 @@ export function Pricing({ onLoginClick }: PricingProps) {
       <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 backdrop-blur-sm border border-purple-500/30 rounded-full mb-6">
-            <Crown className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-400 font-bold">Simple Pricing</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-6 shadow-lg">
+            <Crown className="w-4 h-4 text-white" />
+            <span className="text-white font-bold">Simple Pricing</span>
           </div>
           
           <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">
@@ -46,15 +46,12 @@ export function Pricing({ onLoginClick }: PricingProps) {
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
           {/* Gold Plan */}
-          <div className="relative overflow-hidden rounded-3xl md:rounded-[2rem] bg-gradient-to-b from-slate-900 via-yellow-950/20 to-yellow-500/20 p-8 md:p-10">
-            {/* Subtle overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-yellow-400/10"></div>
-            
+          <div className="relative overflow-hidden rounded-3xl md:rounded-[2rem] bg-gradient-to-br from-purple-500 to-purple-600 p-8 md:p-10 shadow-2xl">
             <div className="relative">
               {/* Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-full mb-6">
-                <Star className="w-3.5 h-3.5 text-yellow-400" />
-                <span className="text-yellow-400 text-xs font-bold uppercase tracking-wide">Best Value</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 rounded-full mb-6">
+                <Star className="w-3.5 h-3.5 text-white" />
+                <span className="text-white text-xs font-bold uppercase tracking-wide">Best Value</span>
               </div>
 
               {/* Plan Name */}
@@ -63,44 +60,41 @@ export function Pricing({ onLoginClick }: PricingProps) {
               {/* Price */}
               <div className="mb-2">
                 <span className="text-white text-5xl md:text-6xl font-bold">$10</span>
-                <span className="text-white/50 text-xl font-semibold ml-2">/month</span>
+                <span className="text-white/80 text-xl font-semibold ml-2">/month</span>
               </div>
-              <p className="text-white/40 mb-8 font-semibold">billed monthly</p>
+              <p className="text-white/70 mb-8 font-semibold">billed monthly</p>
 
               {/* Features */}
               <div className="space-y-4 mb-10">
                 {goldFeatures.map((feature, idx) => (
                   <div key={idx} className="flex items-center justify-between group">
                     <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-yellow-500/20 flex items-center justify-center border border-yellow-500/40">
-                        <Check className="w-3 h-3 text-yellow-400" />
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white/30 flex items-center justify-center border border-white/40">
+                        <Check className="w-3 h-3 text-white" />
                       </div>
-                      <span className={`${idx === 0 ? 'text-white font-bold' : 'text-white/80 font-semibold'}`}>
+                      <span className="text-white font-semibold">
                         {feature.text}
                       </span>
                     </div>
-                    <HelpCircle className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors cursor-help" />
+                    <HelpCircle className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors cursor-help" />
                   </div>
                 ))}
               </div>
 
               {/* CTA Button */}
-              <button className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" onClick={onLoginClick}>
+              <button className="w-full bg-white text-purple-600 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" onClick={onLoginClick}>
                 Upgrade Plan
               </button>
             </div>
           </div>
 
           {/* Platinum Plan */}
-          <div className="relative overflow-hidden rounded-3xl md:rounded-[2rem] bg-gradient-to-b from-slate-950 via-purple-950/40 to-indigo-600/30 p-8 md:p-10">
-            {/* Subtle overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/10"></div>
-            
+          <div className="relative overflow-hidden rounded-3xl md:rounded-[2rem] bg-gradient-to-br from-indigo-600 to-purple-600 p-8 md:p-10 shadow-2xl">
             <div className="relative">
               {/* Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full mb-6">
-                <Crown className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-purple-400 text-xs font-bold uppercase tracking-wide">Most Popular</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 border border-white/30 rounded-full mb-6">
+                <Crown className="w-3.5 h-3.5 text-white" />
+                <span className="text-white text-xs font-bold uppercase tracking-wide">Most Popular</span>
               </div>
 
               {/* Plan Name */}
@@ -109,29 +103,29 @@ export function Pricing({ onLoginClick }: PricingProps) {
               {/* Price */}
               <div className="mb-2">
                 <span className="text-white text-5xl md:text-6xl font-bold">$25</span>
-                <span className="text-white/50 text-xl font-semibold ml-2">/month</span>
+                <span className="text-white/80 text-xl font-semibold ml-2">/month</span>
               </div>
-              <p className="text-white/40 mb-8 font-semibold">billed monthly</p>
+              <p className="text-white/70 mb-8 font-semibold">billed monthly</p>
 
               {/* Features */}
               <div className="space-y-4 mb-10">
                 {platinumFeatures.map((feature, idx) => (
                   <div key={idx} className="flex items-center justify-between group">
                     <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/40">
-                        <Check className="w-3 h-3 text-purple-400" />
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white/30 flex items-center justify-center border border-white/40">
+                        <Check className="w-3 h-3 text-white" />
                       </div>
-                      <span className={`${idx === 0 ? 'text-white font-bold' : 'text-white/80 font-semibold'}`}>
+                      <span className="text-white font-semibold">
                         {feature.text}
                       </span>
                     </div>
-                    <HelpCircle className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors cursor-help" />
+                    <HelpCircle className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors cursor-help" />
                   </div>
                 ))}
               </div>
 
               {/* CTA Button */}
-              <button className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" onClick={onLoginClick}>
+              <button className="w-full bg-white text-indigo-600 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" onClick={onLoginClick}>
                 Upgrade Plan
               </button>
             </div>

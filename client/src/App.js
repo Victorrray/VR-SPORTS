@@ -11,6 +11,7 @@ import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import { initBrowserCompat } from './utils/browserCompat';
 import DebugPanel from './components/debug/DebugPanel';
+import { ThemeProvider } from './contexts/ThemeContext.js';
 // import NavbarRevamped from './components/layout/NavbarRevamped'; // OLD - Using new Header from landing page
 // import MobileBottomBar from './components/layout/MobileBottomBar'; // OLD - Not used with new landing page
 // import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
@@ -197,15 +198,17 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <BetSlipProvider>
-          <AccessibilityProvider>
-            <ToastProvider>
-              <ErrorBoundary>
-                <AppRoutes />
-              </ErrorBoundary>
-            </ToastProvider>
-          </AccessibilityProvider>
-        </BetSlipProvider>
+        <ThemeProvider>
+          <BetSlipProvider>
+            <AccessibilityProvider>
+              <ToastProvider>
+                <ErrorBoundary>
+                  <AppRoutes />
+                </ErrorBoundary>
+              </ToastProvider>
+            </AccessibilityProvider>
+          </BetSlipProvider>
+        </ThemeProvider>
       </AuthProvider>
     </HelmetProvider>
   );

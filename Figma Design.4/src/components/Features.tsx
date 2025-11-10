@@ -15,7 +15,7 @@ export function Features() {
       title: 'Positive EV Finder',
       description: 'Mathematical edge detection. Let our algorithm find the profitable bets for you.',
       stats: '4.2% avg edge',
-      gradient: 'from-emerald-500 to-emerald-600',
+      gradient: 'from-purple-600 to-indigo-500',
       delay: 'delay-75',
     },
     {
@@ -23,7 +23,7 @@ export function Features() {
       title: 'Player Props Analytics',
       description: 'Deep statistical analysis on player performance, trends, and matchup data.',
       stats: '10K+ props daily',
-      gradient: 'from-cyan-500 to-cyan-600',
+      gradient: 'from-indigo-500 to-indigo-600',
       delay: 'delay-150',
     },
     {
@@ -31,7 +31,7 @@ export function Features() {
       title: 'Instant Alerts',
       description: 'Get notified the moment a profitable opportunity appears. Lightning-fast notifications.',
       stats: '<0.5s alert time',
-      gradient: 'from-violet-500 to-violet-600',
+      gradient: 'from-indigo-600 to-purple-500',
       delay: 'delay-0',
     },
     {
@@ -39,7 +39,7 @@ export function Features() {
       title: 'Bankroll Management',
       description: 'Smart staking recommendations based on Kelly Criterion and your risk tolerance.',
       stats: 'Optimized sizing',
-      gradient: 'from-blue-500 to-blue-600',
+      gradient: 'from-purple-600 to-indigo-600',
       delay: 'delay-75',
     },
     {
@@ -47,7 +47,7 @@ export function Features() {
       title: 'Performance Tracking',
       description: 'Comprehensive analytics dashboard. Track every bet, analyze patterns, improve results.',
       stats: 'Full history',
-      gradient: 'from-indigo-500 to-indigo-600',
+      gradient: 'from-indigo-500 to-purple-600',
       delay: 'delay-150',
     },
   ];
@@ -56,9 +56,9 @@ export function Features() {
     <section id="features" className="container mx-auto px-4 py-16 md:py-24">
       {/* Header */}
       <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 backdrop-blur-sm border border-purple-500/30 rounded-full mb-6">
-          <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-          <span className="text-purple-400 font-bold">Powerful Features</span>
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-6 shadow-lg">
+          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+          <span className="text-white font-bold">Powerful Features</span>
         </div>
         <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">
           Everything You Need to{' '}
@@ -78,14 +78,11 @@ export function Features() {
           return (
             <div
               key={index}
-              className={`group relative bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 hover:border-white/20 hover:from-white/10 hover:to-white/5 transition-all duration-500 ${feature.delay}`}
+              className={`group relative bg-gradient-to-br ${feature.gradient} rounded-2xl md:rounded-3xl p-6 md:p-8 hover:shadow-2xl transition-all duration-500 ${feature.delay}`}
             >
-              {/* Gradient glow on hover */}
-              <div className={`absolute -inset-0.5 bg-gradient-to-br ${feature.gradient} rounded-2xl md:rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`}></div>
-              
               <div className="relative">
                 {/* Icon with animated background */}
-                <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} bg-opacity-10 mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div className="inline-flex p-4 rounded-2xl bg-white/20 border border-white/30 mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                 </div>
 
@@ -95,14 +92,14 @@ export function Features() {
                 </h3>
 
                 {/* Description */}
-                <p className="text-white/60 mb-4 font-semibold leading-relaxed">
+                <p className="text-white/80 mb-4 font-semibold leading-relaxed">
                   {feature.description}
                 </p>
 
                 {/* Stats badge */}
-                <div className={`inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r ${feature.gradient} bg-opacity-10 rounded-full border border-white/10`}>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-full border border-white/30">
                   <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                  <span className="text-white/80 text-xs md:text-sm font-bold">
+                  <span className="text-white text-xs md:text-sm font-bold">
                     {feature.stats}
                   </span>
                 </div>

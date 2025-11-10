@@ -44,9 +44,9 @@ export function FAQ() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 backdrop-blur-sm border border-indigo-500/30 rounded-full mb-6">
-            <HelpCircle className="w-4 h-4 text-indigo-400" />
-            <span className="text-indigo-400 font-bold">FAQ</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full mb-6 shadow-lg">
+            <HelpCircle className="w-4 h-4 text-white" />
+            <span className="text-white font-bold">FAQ</span>
           </div>
           
           <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">

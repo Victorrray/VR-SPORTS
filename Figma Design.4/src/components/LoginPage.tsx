@@ -3,9 +3,11 @@ import { useState } from 'react';
 
 interface LoginPageProps {
   onBack: () => void;
+  onSignUp: () => void;
+  onForgotPassword: () => void;
 }
 
-export function LoginPage({ onBack }: LoginPageProps) {
+export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -148,7 +150,7 @@ export function LoginPage({ onBack }: LoginPageProps) {
                     Login
                   </button>
                   <button
-                    onClick={() => setIsLogin(false)}
+                    onClick={onSignUp}
                     className={`flex-1 py-3 rounded-xl font-bold transition-all text-center ${
                       !isLogin
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
@@ -210,6 +212,7 @@ export function LoginPage({ onBack }: LoginPageProps) {
                       </label>
                       <button
                         type="button"
+                        onClick={onForgotPassword}
                         className="text-purple-400 hover:text-purple-300 font-semibold text-sm"
                       >
                         Forgot password?
