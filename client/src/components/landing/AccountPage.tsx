@@ -1,6 +1,9 @@
 import { User, Crown, Mail, Calendar, CreditCard, Settings, Shield, Bell, LogOut } from 'lucide-react';
+import { useAuth } from '../../hooks/SimpleAuth';
 
 export function AccountPage() {
+  const { user, profile } = useAuth();
+  
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -26,7 +29,7 @@ export function AccountPage() {
             <User className="w-10 h-10 text-purple-300" />
           </div>
           <div className="flex-1">
-            <h3 className="text-white text-xl font-bold mb-1">NotVic</h3>
+            <h3 className="text-white text-xl font-bold mb-1">{(profile as any)?.username || 'User'}</h3>
             <div className="flex items-center gap-2">
               <div className="px-3 py-1 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/30 rounded-lg backdrop-blur-xl">
                 <div className="flex items-center gap-1.5">
@@ -44,7 +47,7 @@ export function AccountPage() {
               <Mail className="w-4 h-4 text-purple-400" />
               <span className="text-white/50 text-sm font-bold uppercase tracking-wide">Email</span>
             </div>
-            <p className="text-white font-bold">notvic@example.com</p>
+            <p className="text-white font-bold">{(user as any)?.email || 'No email'}</p>
           </div>
 
           <div className="p-4 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-xl rounded-xl border border-white/10">
