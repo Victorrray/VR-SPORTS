@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Sparkles } from 'lucide-react';
 
 function PrimaryButtonDesktop() {
   const navigate = useNavigate();
   return (
-    <button onClick={() => navigate('/login')} className="bg-white box-border content-stretch flex gap-[8px] items-center justify-center overflow-visible px-[16px] py-[12px] relative rounded-[12px] shrink-0" data-name="Primary button">
-      <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-black text-center text-nowrap tracking-[-0.09px]">
-        <p className="leading-[1.45] whitespace-pre">Get Started Today</p>
-      </div>
+    <button onClick={() => navigate('/login')} className="px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all text-center font-semibold flex items-center gap-2">
+      Get started
+      <ArrowRight className="w-4 h-4" />
     </button>
   );
 }
@@ -184,7 +184,7 @@ function Hero1Mobile() {
   );
 }
 
-function HeroSection() {
+export function Hero() {
   const [width, setWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -201,5 +201,3 @@ function HeroSection() {
   }
   return <Hero1Desktop />;
 }
-
-export default HeroSection;
