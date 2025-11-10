@@ -1,6 +1,11 @@
 import { ArrowRight, Play, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/SimpleAuth';
 
 export function Hero() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   return (
     <section className="relative container mx-auto px-4 pt-20 md:pt-32 pb-20 md:pb-32 overflow-hidden">
       {/* Background gradient orbs */}
@@ -29,7 +34,10 @@ export function Hero() {
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 md:gap-6">
-            <button className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all text-center font-semibold">
+            <button 
+              onClick={() => navigate(user ? '/dashboard' : '/login')}
+              className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all text-center font-semibold"
+            >
               Get started
             </button>
             

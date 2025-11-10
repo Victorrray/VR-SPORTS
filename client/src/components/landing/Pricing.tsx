@@ -1,10 +1,12 @@
 import { Check, HelpCircle, Star, Crown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface PricingProps {
-  onLoginClick: () => void;
+  onLoginClick?: () => void;
 }
 
 export function Pricing({ onLoginClick }: PricingProps) {
+  const navigate = useNavigate();
   const goldFeatures = [
     { text: '39+ sportsbooks tracked', tooltip: 'Real-time odds from all major operators' },
     { text: 'Positive EV bet finder', tooltip: 'Algorithm identifies profitable opportunities' },
@@ -85,7 +87,10 @@ export function Pricing({ onLoginClick }: PricingProps) {
               </div>
 
               {/* CTA Button */}
-              <button className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" onClick={onLoginClick}>
+              <button 
+                className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" 
+                onClick={() => onLoginClick ? onLoginClick() : navigate('/login')}
+              >
                 Upgrade Plan
               </button>
             </div>
@@ -131,7 +136,10 @@ export function Pricing({ onLoginClick }: PricingProps) {
               </div>
 
               {/* CTA Button */}
-              <button className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" onClick={onLoginClick}>
+              <button 
+                className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" 
+                onClick={() => onLoginClick ? onLoginClick() : navigate('/login')}
+              >
                 Upgrade Plan
               </button>
             </div>

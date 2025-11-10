@@ -1,13 +1,17 @@
 import { Home, BarChart3, TrendingUp, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/SimpleAuth';
 
 interface HeaderProps {
-  onLoginClick: () => void;
-  onDashboardClick: () => void;
+  onLoginClick?: () => void;
+  onDashboardClick?: () => void;
 }
 
 export function Header({ onLoginClick, onDashboardClick }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <header className="pt-4 px-4">
@@ -26,7 +30,10 @@ export function Header({ onLoginClick, onDashboardClick }: HeaderProps) {
 
             {/* Desktop Navigation - Center */}
             <nav className="hidden lg:flex items-center gap-1">
-              <button onClick={onDashboardClick} className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-bold">
+              <button 
+                onClick={() => onDashboardClick ? onDashboardClick() : navigate(user ? '/dashboard' : '/login')}
+                className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-bold"
+              >
                 Dashboard
               </button>
               <a href="#features" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-bold">
@@ -42,10 +49,16 @@ export function Header({ onLoginClick, onDashboardClick }: HeaderProps) {
 
             {/* Desktop Buttons - Right */}
             <div className="hidden lg:flex items-center gap-3">
-              <button className="px-5 py-2.5 bg-white text-slate-900 rounded-full hover:bg-white/90 transition-all text-sm font-semibold" onClick={onLoginClick}>
+              <button 
+                className="px-5 py-2.5 bg-white text-slate-900 rounded-full hover:bg-white/90 transition-all text-sm font-semibold" 
+                onClick={() => onLoginClick ? onLoginClick() : navigate('/login')}
+              >
                 Sign In
               </button>
-              <button className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg shadow-purple-500/30 backdrop-blur-sm border border-purple-400/20 text-sm font-semibold">
+              <button 
+                className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg shadow-purple-500/30 backdrop-blur-sm border border-purple-400/20 text-sm font-semibold"
+                onClick={() => navigate('/login')}
+              >
                 Get Started →
               </button>
             </div>
@@ -64,7 +77,13 @@ export function Header({ onLoginClick, onDashboardClick }: HeaderProps) {
         {isMenuOpen && (
           <nav className="lg:hidden mt-2 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-lg shadow-purple-500/10">
             <div className="flex flex-col gap-2">
-              <button onClick={onDashboardClick} className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all font-bold text-left">
+              <button 
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onDashboardClick ? onDashboardClick() : navigate(user ? '/dashboard' : '/login');
+                }}
+                className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all font-bold text-left"
+              >
                 Dashboard
               </button>
               <a href="#features" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all font-bold">
@@ -77,10 +96,22 @@ export function Header({ onLoginClick, onDashboardClick }: HeaderProps) {
                 FAQ
               </a>
               <div className="border-t border-white/10 my-2"></div>
-              <button className="px-4 py-2 bg-white text-slate-900 hover:bg-white/90 rounded-full transition-all font-bold text-left" onClick={onLoginClick}>
+              <button 
+                className="px-4 py-2 bg-white text-slate-900 hover:bg-white/90 rounded-full transition-all font-bold text-left" 
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  onLoginClick ? onLoginClick() : navigate('/login');
+                }}
+              >
                 Sign In
               </button>
-              <button className="mt-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg shadow-purple-500/30 text-sm font-bold">
+              <button 
+                className="mt-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg shadow-purple-500/30 text-sm font-bold"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate('/login');
+                }}
+              >
                 Get Started →
               </button>
             </div>
