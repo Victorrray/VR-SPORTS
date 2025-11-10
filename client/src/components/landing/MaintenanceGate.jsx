@@ -22,6 +22,11 @@ export function MaintenanceGate({ children }) {
     }
   };
 
+  // ✅ Allow login page to bypass maintenance
+  if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+    return children;
+  }
+
   if (isUnlocked) {
     return children;
   }
