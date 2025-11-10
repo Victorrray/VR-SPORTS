@@ -1,17 +1,18 @@
 import React from 'react';
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { generateSchemaMarkup } from '../utils/seo';
-import '../styles/landing-globals.css';
+import '../styles/figma-design-2.css';
 
 // Components
-import { Header } from '../components/landing/Header';
-import { Hero } from '../components/landing/HeroSection';
-import { Stats } from '../components/landing/Stats';
-import { Features } from '../components/landing/Features';
-import { Bookmakers } from '../components/landing/Bookmakers';
-import { HowItWorks } from '../components/landing/HowItWorks';
-import { PricingSection as Pricing } from '../components/landing/PricingSection';
-import { Footer } from '../components/landing/Footer';
+import { Header } from '../components/landing/Header.tsx';
+import { Hero } from '../components/landing/Hero.tsx';
+import { Stats } from '../components/landing/Stats.tsx';
+import { Features } from '../components/landing/Features.tsx';
+import { Bookmakers } from '../components/landing/Bookmakers.tsx';
+import { HowItWorks } from '../components/landing/HowItWorks.tsx';
+import { Pricing } from '../components/landing/Pricing.tsx';
+import { FAQ } from '../components/landing/FAQ.tsx';
+import { Footer } from '../components/landing/Footer.tsx';
 import { MaintenanceGate } from '../components/landing/MaintenanceGate';
 
 // Landing Page Component for non-authenticated users
@@ -22,7 +23,7 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       <SEOHelmet
         title="OddSightSeer — Find +EV Bets & Compare Sportsbook Odds"
-        description="Find +EV bets with real-time odds comparison across 15+ major sportsbooks. Spot arbitrage opportunities, track line movement, and maximize your betting edge."
+        description="Find +EV bets with real-time odds comparison across 39+ major sportsbooks. Spot arbitrage opportunities, track line movement, and maximize your betting edge."
         path="/"
         type="website"
         schema={organizationSchema}
@@ -39,6 +40,7 @@ export default function Landing() {
         <Features />
         <HowItWorks />
         <Pricing />
+        <FAQ />
         <Footer />
       </div>
     </div>

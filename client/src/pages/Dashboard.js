@@ -1,6 +1,6 @@
 import React from 'react';
-import { RevampedDashboard } from '../components/landing/RevampedDashboard';
+import { Dashboard } from '../components/landing/Dashboard.tsx';
 
-export default function Dashboard() {
-  return <RevampedDashboard />;
+export default function DashboardPage() {
+  return <Dashboard />;
 }
