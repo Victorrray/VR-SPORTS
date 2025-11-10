@@ -1,12 +1,27 @@
 import { User, Crown, Mail, Calendar, CreditCard, Settings, Shield, Bell, LogOut } from 'lucide-react';
 
-export function AccountPage() {
+interface AccountPageProps {
+  onNavigateToSettings?: () => void;
+}
+
+export function AccountPage({ onNavigateToSettings }: AccountPageProps) {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="space-y-2">
-        <h1 className="text-white text-2xl md:text-3xl font-bold">Account Settings</h1>
-        <p className="text-white/60 font-bold">Manage your profile and subscription</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-white text-2xl md:text-3xl font-bold">Account Settings</h1>
+          <p className="text-white/60 font-bold">Manage your profile and subscription</p>
+        </div>
+        {onNavigateToSettings && (
+          <button 
+            onClick={onNavigateToSettings}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/30 text-purple-300 rounded-xl hover:from-purple-500/30 hover:to-indigo-500/30 transition-all font-bold shadow-lg shadow-purple-500/20 text-sm whitespace-nowrap self-start sm:self-auto"
+          >
+            <Settings className="w-4 h-4" />
+            Settings
+          </button>
+        )}
       </div>
 
       {/* Profile Section */}

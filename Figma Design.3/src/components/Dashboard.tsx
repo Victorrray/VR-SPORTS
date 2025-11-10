@@ -159,17 +159,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 Dashboard
               </button>
               <button 
-                onClick={() => setCurrentView('picks')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                  currentView === 'picks'
-                    ? 'bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white shadow-lg shadow-purple-500/20'
-                    : 'text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10'
-                }`}
-              >
-                <Target className="w-5 h-5" />
-                My Picks
-              </button>
-              <button 
                 onClick={() => setCurrentView('odds')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === 'odds'
@@ -181,15 +170,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 Odds
               </button>
               <button 
-                onClick={() => setCurrentView('account')}
+                onClick={() => setCurrentView('picks')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                  currentView === 'account'
+                  currentView === 'picks'
                     ? 'bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white shadow-lg shadow-purple-500/20'
                     : 'text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10'
                 }`}
               >
-                <User className="w-5 h-5" />
-                Account
+                <Target className="w-5 h-5" />
+                My Picks
               </button>
               <button 
                 onClick={() => setCurrentView('settings')}
@@ -201,6 +190,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               >
                 <Settings className="w-5 h-5" />
                 Settings
+              </button>
+              <button 
+                onClick={() => setCurrentView('account')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                  currentView === 'account'
+                    ? 'bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white shadow-lg shadow-purple-500/20'
+                    : 'text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10'
+                }`}
+              >
+                <User className="w-5 h-5" />
+                Account
               </button>
             </nav>
 
@@ -218,7 +218,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
           {/* Mobile Header */}
           <header className="lg:hidden px-4 py-4 border-b border-white/10 bg-slate-950/30 backdrop-blur-2xl">
             <div className="flex items-center justify-between">
@@ -237,7 +237,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             </div>
           </header>
 
-          <div className="px-4 lg:px-8 py-6 lg:py-8 space-y-8">
+          <div className="px-4 lg:px-8 py-6 lg:py-8 space-y-8 pb-24 lg:pb-8">
             {/* Conditional Content Rendering */}
             {currentView === 'dashboard' && (
               <>
@@ -249,37 +249,37 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                       <p className="text-white/60 font-bold">Here are your recommended picks for today</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all font-bold shadow-lg hover:shadow-purple-500/10">
+                      <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all font-bold shadow-lg hover:shadow-purple-500/10 text-sm">
                         <Calendar className="w-4 h-4" />
-                        Today
+                        <span className="hidden sm:inline">Today</span>
                         <ChevronDown className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     {stats.map((stat, idx) => (
                       <div 
                         key={idx}
-                        className="group p-6 bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent backdrop-blur-2xl border border-white/10 rounded-2xl hover:border-purple-400/40 transition-all shadow-lg hover:shadow-purple-500/20"
+                        className="group p-4 md:p-6 bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent backdrop-blur-2xl border border-white/10 rounded-xl md:rounded-2xl hover:border-purple-400/40 transition-all shadow-lg hover:shadow-purple-500/20"
                       >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="p-2.5 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl rounded-xl border border-purple-400/30 shadow-lg shadow-purple-500/20">
-                            <stat.icon className="w-5 h-5 text-purple-300" />
+                        <div className="flex items-start justify-between mb-3 md:mb-4">
+                          <div className="p-2 md:p-2.5 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl rounded-lg md:rounded-xl border border-purple-400/30 shadow-lg shadow-purple-500/20">
+                            <stat.icon className="w-4 h-4 md:w-5 md:h-5 text-purple-300" />
                           </div>
-                          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-xs backdrop-blur-xl ${
+                          <div className={`flex items-center gap-1 px-2 md:px-2.5 py-1 rounded-lg font-bold text-xs backdrop-blur-xl ${
                             stat.positive 
                               ? 'bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 shadow-lg shadow-emerald-500/10' 
                               : 'bg-red-500/20 border border-red-400/30 text-red-300 shadow-lg shadow-red-500/10'
                           }`}>
                             {stat.positive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                            {stat.change}
+                            <span className="hidden sm:inline">{stat.change}</span>
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <div className="text-white text-2xl font-bold">{stat.value}</div>
-                          <div className="text-white/50 text-sm font-bold uppercase tracking-wide">{stat.label}</div>
+                          <div className="text-white text-xl md:text-2xl font-bold">{stat.value}</div>
+                          <div className="text-white/50 text-xs md:text-sm font-bold uppercase tracking-wide">{stat.label}</div>
                         </div>
                       </div>
                     ))}
@@ -287,23 +287,23 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 </div>
 
                 {/* Filters & Search */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 relative">
+                <div className="flex flex-col gap-3">
+                  <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                     <input 
                       type="text"
                       placeholder="Search games or teams..."
-                      className="w-full pl-12 pr-4 py-3.5 bg-white/5 backdrop-blur-2xl border border-white/10 text-white placeholder:text-white/40 rounded-xl focus:outline-none focus:border-purple-400/40 focus:bg-white/10 font-bold transition-all shadow-lg"
+                      className="w-full pl-12 pr-4 py-3 md:py-3.5 bg-white/5 backdrop-blur-2xl border border-white/10 text-white placeholder:text-white/40 rounded-xl focus:outline-none focus:border-purple-400/40 focus:bg-white/10 font-bold transition-all shadow-lg text-sm"
                     />
                   </div>
-                  <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-4 py-3.5 bg-white/5 backdrop-blur-2xl border border-white/10 text-white rounded-xl hover:bg-white/10 hover:border-purple-400/30 transition-all font-bold shadow-lg">
+                  <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+                    <button className="flex items-center gap-2 px-4 py-3 bg-white/5 backdrop-blur-2xl border border-white/10 text-white rounded-xl hover:bg-white/10 hover:border-purple-400/30 transition-all font-bold shadow-lg whitespace-nowrap text-sm">
                       <Filter className="w-4 h-4" />
-                      Sport
+                      <span>Sport</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-3.5 bg-white/5 backdrop-blur-2xl border border-white/10 text-white rounded-xl hover:bg-white/10 hover:border-purple-400/30 transition-all font-bold shadow-lg">
-                      EV Range
+                    <button className="flex items-center gap-2 px-4 py-3 bg-white/5 backdrop-blur-2xl border border-white/10 text-white rounded-xl hover:bg-white/10 hover:border-purple-400/30 transition-all font-bold shadow-lg whitespace-nowrap text-sm">
+                      <span>EV Range</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
@@ -311,22 +311,22 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
                 {/* Bets Section */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-5 h-5 text-purple-400" />
                       <h2 className="text-white font-bold">Top Picks</h2>
-                      <span className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/30 rounded-lg text-purple-300 font-bold text-xs shadow-lg shadow-purple-500/10">
+                      <span className="px-2.5 md:px-3 py-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/30 rounded-lg text-purple-300 font-bold text-xs shadow-lg shadow-purple-500/10">
                         {bets.length} Available
                       </span>
                     </div>
-                    <div className="flex gap-2">
-                      <button className="px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/40 text-purple-300 rounded-lg font-bold text-sm hover:from-purple-500/30 hover:to-indigo-500/30 transition-all shadow-lg shadow-purple-500/20">
+                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+                      <button className="px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/40 text-purple-300 rounded-lg font-bold text-sm hover:from-purple-500/30 hover:to-indigo-500/30 transition-all shadow-lg shadow-purple-500/20 whitespace-nowrap">
                         All
                       </button>
-                      <button className="px-3 py-1.5 text-white/60 hover:text-white hover:bg-white/5 backdrop-blur-xl rounded-lg font-bold text-sm transition-all border border-transparent hover:border-white/10">
+                      <button className="px-3 py-1.5 text-white/60 hover:text-white hover:bg-white/5 backdrop-blur-xl rounded-lg font-bold text-sm transition-all border border-transparent hover:border-white/10 whitespace-nowrap">
                         NBA
                       </button>
-                      <button className="px-3 py-1.5 text-white/60 hover:text-white hover:bg-white/5 backdrop-blur-xl rounded-lg font-bold text-sm transition-all border border-transparent hover:border-white/10">
+                      <button className="px-3 py-1.5 text-white/60 hover:text-white hover:bg-white/5 backdrop-blur-xl rounded-lg font-bold text-sm transition-all border border-transparent hover:border-white/10 whitespace-nowrap">
                         NFL
                       </button>
                     </div>
@@ -341,6 +341,11 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                       >
                         {/* Card Header */}
                         <div className="p-5 border-b border-white/10 bg-gradient-to-br from-white/5 to-transparent">
+                          <div className="mb-3">
+                            <span className="px-2.5 py-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/30 text-purple-300 rounded-lg font-bold text-xs shadow-lg shadow-purple-500/10">
+                              {bet.sport}
+                            </span>
+                          </div>
                           <div className="flex items-start justify-between gap-4 mb-3">
                             <div className="flex-1">
                               <h3 className="text-white font-bold mb-1.5">
@@ -351,21 +356,9 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                                 {bet.time}
                               </div>
                             </div>
-                            <div className="px-3 py-1.5 bg-gradient-to-r from-amber-500/90 to-orange-500/90 backdrop-blur-xl rounded-lg shadow-lg shadow-amber-500/30 border border-amber-400/30">
+                            <div className="px-3 py-1.5 bg-gradient-to-r from-emerald-500/90 to-green-500/90 backdrop-blur-xl rounded-lg shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
                               <span className="text-white font-bold text-sm">{bet.ev}</span>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="px-2.5 py-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/30 text-purple-300 rounded-lg font-bold text-xs shadow-lg shadow-purple-500/10">
-                              {bet.sport}
-                            </span>
-                            <span className={`px-2.5 py-1 rounded-lg font-bold text-xs backdrop-blur-xl shadow-lg ${
-                              bet.confidence === 'High' 
-                                ? 'bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 shadow-emerald-500/10'
-                                : 'bg-blue-500/20 border border-blue-400/30 text-blue-300 shadow-blue-500/10'
-                            }`}>
-                              {bet.confidence} Confidence
-                            </span>
                           </div>
                         </div>
 
@@ -416,7 +409,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
             {currentView === 'picks' && <PicksPage />}
             {currentView === 'odds' && <OddsPage />}
-            {currentView === 'account' && <AccountPage />}
+            {currentView === 'account' && <AccountPage onNavigateToSettings={() => setCurrentView('settings')} />}
             {currentView === 'settings' && <SettingsPage />}
           </div>
         </main>
@@ -440,19 +433,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </span>
             </button>
             <button
-              onClick={() => setCurrentView('picks')}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
-                currentView === 'picks'
-                  ? 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40 shadow-lg shadow-purple-500/20'
-                  : 'text-white/60 hover:bg-white/10'
-              }`}
-            >
-              <Target className={`w-5 h-5 ${currentView === 'picks' ? 'text-purple-300' : ''}`} />
-              <span className={`text-xs font-bold ${currentView === 'picks' ? 'text-white' : ''}`}>
-                My Picks
-              </span>
-            </button>
-            <button
               onClick={() => setCurrentView('odds')}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
                 currentView === 'odds'
@@ -466,6 +446,19 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </span>
             </button>
             <button
+              onClick={() => setCurrentView('picks')}
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
+                currentView === 'picks'
+                  ? 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40 shadow-lg shadow-purple-500/20'
+                  : 'text-white/60 hover:bg-white/10'
+              }`}
+            >
+              <Target className={`w-5 h-5 ${currentView === 'picks' ? 'text-purple-300' : ''}`} />
+              <span className={`text-xs font-bold ${currentView === 'picks' ? 'text-white' : ''}`}>
+                My Picks
+              </span>
+            </button>
+            <button
               onClick={() => setCurrentView('account')}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
                 currentView === 'account'
@@ -476,19 +469,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               <User className={`w-5 h-5 ${currentView === 'account' ? 'text-purple-300' : ''}`} />
               <span className={`text-xs font-bold ${currentView === 'account' ? 'text-white' : ''}`}>
                 Account
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentView('settings')}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
-                currentView === 'settings'
-                  ? 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40 shadow-lg shadow-purple-500/20'
-                  : 'text-white/60 hover:bg-white/10'
-              }`}
-            >
-              <Settings className={`w-5 h-5 ${currentView === 'settings' ? 'text-purple-300' : ''}`} />
-              <span className={`text-xs font-bold ${currentView === 'settings' ? 'text-white' : ''}`}>
-                Settings
               </span>
             </button>
           </div>
