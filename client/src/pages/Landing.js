@@ -10,14 +10,15 @@ import { Stats } from '../components/landing/Stats';
 import { Features } from '../components/landing/Features';
 import { Bookmakers } from '../components/landing/Bookmakers';
 import { HowItWorks } from '../components/landing/HowItWorks';
-import { PricingSection } from '../components/landing/PricingSection';
+import { PricingSection as Pricing } from '../components/landing/PricingSection';
 import { Footer } from '../components/landing/Footer';
+import { MaintenanceGate } from '../components/landing/MaintenanceGate';
 
 // Landing Page Component for non-authenticated users
 export default function Landing() {
   const organizationSchema = generateSchemaMarkup('Organization');
 
-  return (
+  const landingContent = (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
       <SEOHelmet
         title="OddSightSeer — Find +EV Bets & Compare Sportsbook Odds"
@@ -37,9 +38,15 @@ export default function Landing() {
         <Bookmakers />
         <Features />
         <HowItWorks />
-        <PricingSection />
+        <Pricing />
         <Footer />
       </div>
     </div>
+  );
+
+  return (
+    <MaintenanceGate>
+      {landingContent}
+    </MaintenanceGate>
   );
 }
