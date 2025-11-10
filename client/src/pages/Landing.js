@@ -1,6 +1,7 @@
 import React from 'react';
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { generateSchemaMarkup } from '../utils/seo';
+import '../styles/landing-globals.css';
 
 // Components
 import { Header } from '../components/landing/Header';
