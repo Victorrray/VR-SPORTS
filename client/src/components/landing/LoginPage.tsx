@@ -1,8 +1,10 @@
 import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/SimpleAuth';
 
 interface LoginPageProps {
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function LoginPage({ onBack }: LoginPageProps) {
@@ -10,10 +12,38 @@ export function LoginPage({ onBack }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const navigate = useNavigate();
+  const auth = useAuth();
+  const { signIn, signUp } = auth || {};
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { email, password });
+    setError('');
+    setLoading(true);
+
+    try {
+      if (!signIn || !signUp) {
+        setError('Authentication service not available');
+        setLoading(false);
+        return;
+      }
+      
+      const fn = isLogin ? signIn : signUp;
+      const result = await (fn as any)(email, password);
+      
+      if (result?.error) {
+        setError(result.error.message || 'Authentication failed');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const stats = [
@@ -159,6 +189,13 @@ export function LoginPage({ onBack }: LoginPageProps) {
                   </button>
                 </div>
 
+                {/* Error Message */}
+                {error && (
+                  <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                    <p className="text-red-400 font-semibold text-sm">{error}</p>
+                  </div>
+                )}
+
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Email */}
@@ -220,9 +257,10 @@ export function LoginPage({ onBack }: LoginPageProps) {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 text-center"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 text-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLogin ? 'Login to your account' : 'Create your account'}
+                    {loading ? 'Loading...' : (isLogin ? 'Login to your account' : 'Create your account')}
                   </button>
 
                   {/* Divider */}
