@@ -51,7 +51,11 @@ function getSportName(sportKey: string): string {
 export function OddsPage() {
   // ✅ HOOKS
   const { me } = useMe();
-  const { games, loading, error, refresh } = useMarketsWithCache();
+  const { games, loading, error, refresh } = useMarketsWithCache(
+    ['americanfootball_nfl', 'basketball_nba', 'baseball_mlb', 'icehockey_nhl'],
+    ['us'],
+    ['h2h', 'spreads', 'totals']
+  );
   const { addBet } = useBetSlip();
   
   // ✅ STATE
@@ -62,29 +66,29 @@ export function OddsPage() {
 
   // ✅ TRANSFORM API DATA TO PICKS
   const topPicks = useMemo(() => {
-    if (!games || games.length === 0) return [];
+    if (!games || !Array.isArray(games) || games.length === 0) return [];
     
     const picks: any[] = [];
     
-    games.forEach(game => {
+    (games as any[]).forEach((game: any) => {
       if (!game.bookmakers) return;
       
-      game.bookmakers.forEach(bookmaker => {
+      game.bookmakers.forEach((bookmaker: any) => {
         if (!bookmaker.markets) return;
         
-        bookmaker.markets.forEach(market => {
+        bookmaker.markets.forEach((market: any) => {
           if (!market.outcomes) return;
           
-          market.outcomes.forEach(outcome => {
+          market.outcomes.forEach((outcome: any) => {
             // Collect all odds for this outcome
             const allOdds: number[] = [];
             const allBooks: any[] = [];
             
-            game.bookmakers.forEach(bk => {
-              const mkt = bk.markets.find(m => m.key === market.key);
+            game.bookmakers.forEach((bk: any) => {
+              const mkt = bk.markets.find((m: any) => m.key === market.key);
               if (!mkt) return;
               
-              const out = mkt.outcomes.find(o => 
+              const out = mkt.outcomes.find((o: any) => 
                 o.name === outcome.name && 
                 (o.point === outcome.point || (!o.point && !outcome.point))
               );
