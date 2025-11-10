@@ -5,6 +5,7 @@ import SEOHelmet from '../components/seo/SEOHelmet';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 
 // Components
+import { Header } from '../components/landing/Header';
 import PersonalizedDashboard from '../components/dashboard/PersonalizedDashboard';
 import EdgeCalculator from '../components/betting/EdgeCalculator';
 import BetSlip from '../components/betting/BetSlip';
@@ -153,14 +154,16 @@ export default function Dashboard() {
   }, [games, loading, error, enableDashboardMarkets, isDashboardPage]);
 
   return (
-    <main style={{ 
-      minHeight: '100vh', 
-      background: 'var(--bg-primary)',
-      paddingTop: '20px',
-      position: 'relative',
-      zIndex: 1
-    }}>
-      <SEOHelmet
+    <>
+      <Header />
+      <main style={{ 
+        minHeight: '100vh', 
+        background: 'var(--bg-primary)',
+        paddingTop: '20px',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <SEOHelmet
         title={PAGE_TITLES.dashboard}
         description={PAGE_DESCRIPTIONS.dashboard}
         path="/dashboard"
@@ -225,7 +228,8 @@ export default function Dashboard() {
         onPlaceBets={placeBets}
       />
 
-      <MobileBottomBar active="home" showFilter={false} />
-    </main>
+        <MobileBottomBar active="home" showFilter={false} />
+      </main>
+    </>
   );
 }

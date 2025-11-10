@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams, useLocation, Link } from "react-router-do
 import { useAuth } from "../hooks/SimpleAuth";
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, ArrowRight, Chrome } from "lucide-react";
 import { optimizedStorage } from "../utils/storageOptimizer";
+import { Header } from "../components/landing/Header";
 import "./Login-revamp.css";
 
 export default function Login() {
@@ -141,8 +142,10 @@ export default function Login() {
   }
 
   return (
-    <main className="login-container">
-      <div className="login-card">
+    <>
+      <Header />
+      <main className="login-container">
+        <div className="login-card">
         <div className="login-header">
           <h1 className="login-title">Welcome Back</h1>
           <p className="login-subtitle">Find profitable betting opportunities</p>
@@ -302,6 +305,7 @@ export default function Login() {
           <Link to="/privacy" className="terms-link">Privacy</Link>.
         </p>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
