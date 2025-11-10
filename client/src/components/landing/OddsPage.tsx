@@ -1,6 +1,7 @@
 import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext.js';
+import { useMarketsWithCache } from '../../hooks/useMarketsWithCache';
 
 export function OddsPage() {
   const { colorMode } = useTheme();
@@ -14,6 +15,14 @@ export function OddsPage() {
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('today');
+
+  // Fetch real API data
+  const { games, books, loading, error, refresh } = useMarketsWithCache(
+    selectedSport === 'all' ? ['americanfootball_nfl', 'basketball_nba', 'hockey_nhl'] : [selectedSport],
+    ['us'],
+    selectedMarket === 'all' ? ['h2h', 'spreads', 'totals'] : [selectedMarket],
+    { enabled: true, autoRefresh: true }
+  );
 
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
@@ -41,128 +50,32 @@ export function OddsPage() {
     { id: 'futures', name: 'Futures' }
   ];
 
-  const topPicks = [
-    {
-      id: 1,
-      ev: '+78.07%',
-      sport: 'NBA',
-      game: 'Celtics @ Magic',
-      team1: 'Celtics',
-      team2: 'Magic',
-      pick: 'Magic ML',
-      bestOdds: '+940',
-      bestBook: 'Pinnacle',
-      avgOdds: '+850',
-      isHot: true,
-      books: [
-        { name: 'Pinnacle', odds: '+940', ev: '+78.07%', isBest: true },
-        { name: 'DraftKings', odds: '+920', ev: '+75.2%', isBest: false },
-        { name: 'FanDuel', odds: '+880', ev: '+70.1%', isBest: false },
-        { name: 'BetMGM', odds: '+850', ev: '+67.8%', isBest: false },
-        { name: 'Caesars', odds: '+830', ev: '+65.5%', isBest: false }
-      ]
-    },
-    {
-      id: 2,
-      ev: '+35.41%',
-      sport: 'NBA',
-      game: 'Pistons @ 76ers',
-      team1: 'Pistons',
-      team2: '76ers',
-      pick: '76ers ML',
-      bestOdds: '+138',
-      bestBook: 'Pinnacle',
-      avgOdds: '+125',
-      isHot: true,
-      books: [
-        { name: 'Pinnacle', odds: '+138', ev: '+35.41%', isBest: true },
-        { name: 'BetMGM', odds: '+135', ev: '+33.2%', isBest: false },
-        { name: 'DraftKings', odds: '+130', ev: '+30.5%', isBest: false },
-        { name: 'FanDuel', odds: '+125', ev: '+28.1%', isBest: false },
-        { name: 'Caesars', odds: '+122', ev: '+26.8%', isBest: false }
-      ]
-    },
-    {
-      id: 3,
-      ev: '+8.33%',
-      sport: 'NHL',
-      game: 'Hurricanes @ Maple Leafs',
-      team1: 'Hurricanes',
-      team2: 'Maple Leafs',
-      pick: 'Maple Leafs -1.5',
-      bestOdds: '+160',
-      bestBook: 'DraftKings',
-      avgOdds: '+148',
-      isHot: false,
-      books: [
-        { name: 'DraftKings', odds: '+160', ev: '+8.33%', isBest: true },
-        { name: 'FanDuel', odds: '+155', ev: '+7.1%', isBest: false },
-        { name: 'BetMGM', odds: '+150', ev: '+6.2%', isBest: false },
-        { name: 'Caesars', odds: '+145', ev: '+5.5%', isBest: false },
-        { name: 'Pinnacle', odds: '+142', ev: '+4.8%', isBest: false }
-      ]
-    },
-    {
-      id: 4,
-      ev: '+7.50%',
-      sport: 'NHL',
-      game: 'Kraken @ Stars',
-      team1: 'Kraken',
-      team2: 'Stars',
-      pick: 'Kraken +1.5',
-      bestOdds: '+115',
-      bestBook: 'Hard Rock',
-      avgOdds: '+108',
-      isHot: false,
-      books: [
-        { name: 'Hard Rock', odds: '+115', ev: '+7.50%', isBest: true },
-        { name: 'Pinnacle', odds: '+112', ev: '+6.5%', isBest: false },
-        { name: 'DraftKings', odds: '+110', ev: '+5.8%', isBest: false },
-        { name: 'FanDuel', odds: '+108', ev: '+5.2%', isBest: false },
-        { name: 'BetMGM', odds: '+105', ev: '+4.5%', isBest: false }
-      ]
-    },
-    {
-      id: 5,
-      ev: '+6.39%',
-      sport: 'NFL',
-      game: 'Chiefs @ Broncos',
-      team1: 'Chiefs',
-      team2: 'Broncos',
-      pick: 'Broncos +3.5',
-      bestOdds: '+104',
-      bestBook: 'Pinnacle',
-      avgOdds: '+100',
-      isHot: true,
-      books: [
-        { name: 'Pinnacle', odds: '+104', ev: '+6.39%', isBest: true },
-        { name: 'DraftKings', odds: '+102', ev: '+5.5%', isBest: false },
-        { name: 'FanDuel', odds: '+100', ev: '+4.8%', isBest: false },
-        { name: 'BetMGM', odds: '-102', ev: '+3.2%', isBest: false },
-        { name: 'Caesars', odds: '-105', ev: '+2.5%', isBest: false }
-      ]
-    },
-    {
-      id: 6,
-      ev: '+5.26%',
-      sport: 'NFL',
-      game: 'Steelers @ Chargers',
-      team1: 'Steelers',
-      team2: 'Chargers',
-      pick: 'Steelers ML',
-      bestOdds: '+160',
-      bestBook: 'Pinnacle',
-      avgOdds: '+152',
-      isHot: false,
-      books: [
-        { name: 'Pinnacle', odds: '+160', ev: '+5.26%', isBest: true },
-        { name: 'BetMGM', odds: '+158', ev: '+4.8%', isBest: false },
-        { name: 'DraftKings', odds: '+155', ev: '+4.2%', isBest: false },
-        { name: 'FanDuel', odds: '+152', ev: '+3.8%', isBest: false },
-        { name: 'Caesars', odds: '+150', ev: '+3.5%', isBest: false }
-      ]
-    }
-  ];
+  // Convert API games to display format
+  const topPicks = (games as any[] || []).slice(0, 20).map((game: any, idx: number) => {
+    const team1 = game.away_team || 'Team 1';
+    const team2 = game.home_team || 'Team 2';
+    const bookmakersList = (game.bookmakers || []).slice(0, 5);
+    
+    return {
+      id: idx + 1,
+      ev: '+5.0%', // Placeholder - would need calculation
+      sport: game.sport_title?.split(' ').pop() || 'Sport',
+      game: `${team1} @ ${team2}`,
+      team1,
+      team2,
+      pick: `${team2} ML`,
+      bestOdds: bookmakersList[0]?.markets?.[0]?.outcomes?.[0]?.price?.toString() || '-110',
+      bestBook: bookmakersList[0]?.title || 'Book',
+      avgOdds: '-110',
+      isHot: idx < 3,
+      books: bookmakersList.map((book: any, bidx: number) => ({
+        name: book.title || book.key,
+        odds: book.markets?.[0]?.outcomes?.[0]?.price?.toString() || '-110',
+        ev: '+5.0%',
+        isBest: bidx === 0
+      }))
+    };
+  });
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => 
@@ -177,6 +90,8 @@ export function OddsPage() {
         <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-2xl md:text-3xl`}>
           {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
         </h2>
+        {loading && <p className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm mt-2`}>Loading live odds...</p>}
+        {error && <p className={`text-red-500 text-sm mt-2`}>Error: {error}</p>}
       </div>
 
       {/* Search & Filters Bar */}
