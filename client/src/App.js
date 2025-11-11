@@ -7,6 +7,7 @@ import { AccessibilityProvider } from './components/layout/AccessibilityProvider
 import { BetSlipProvider } from './contexts/BetSlipContext';
 import { ToastProvider } from './components/common/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
+import { ThemeProvider } from './components/providers/ThemeProvider';
 import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import { initBrowserCompat } from './utils/browserCompat';
@@ -194,17 +195,19 @@ function App() {
   
   return (
     <HelmetProvider>
-      <AuthProvider>
-        <BetSlipProvider>
-          <AccessibilityProvider>
-            <ToastProvider>
-              <ErrorBoundary>
-                <AppRoutes />
-              </ErrorBoundary>
-            </ToastProvider>
-          </AccessibilityProvider>
-        </BetSlipProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <BetSlipProvider>
+            <AccessibilityProvider>
+              <ToastProvider>
+                <ErrorBoundary>
+                  <AppRoutes />
+                </ErrorBoundary>
+              </ToastProvider>
+            </AccessibilityProvider>
+          </BetSlipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </HelmetProvider>
   );
 }
