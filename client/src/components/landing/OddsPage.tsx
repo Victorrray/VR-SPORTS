@@ -1,7 +1,16 @@
-import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
-import { useMarketsWithCache } from '../../hooks/useMarketsWithCache';
+import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
+import { useState } from 'react';
+import { useTheme } from "next-themes";
+
+const lightModeColors = {
+  text: "text-foreground",
+  textMuted: "text-muted-foreground",
+  statsCard: "bg-card",
+  statsIcon: "bg-primary/10",
+  statsIconColor: "text-primary",
+  textLight: "text-muted-foreground",
+  background: "bg-background",
+};
 
 export function OddsPage() {
   const { theme } = useTheme();
@@ -10,19 +19,17 @@ export function OddsPage() {
   const [selectedMarket, setSelectedMarket] = useState('all');
   const [selectedBetType, setSelectedBetType] = useState('straight');
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
+  const [expandedSportsbooks, setExpandedSportsbooks] = useState<number[]>([]);
   const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false);
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('today');
-
-  // Fetch real API data
-  const { games, books, loading, error, refresh } = useMarketsWithCache(
-    selectedSport === 'all' ? ['americanfootball_nfl', 'basketball_nba', 'hockey_nhl'] : [selectedSport],
-    ['us'],
-    selectedMarket === 'all' ? ['h2h', 'spreads', 'totals'] : [selectedMarket],
-    { enabled: true, autoRefresh: true }
-  );
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [sortBy, setSortBy] = useState<'ev' | 'time' | null>('ev');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
@@ -45,37 +52,215 @@ export function OddsPage() {
     { id: 'moneyline', name: 'Moneyline' },
     { id: 'spread', name: 'Spread' },
     { id: 'totals', name: 'Totals (Over/Under)' },
-    { id: 'parlays', name: 'Parlays' },
-    { id: 'teasers', name: 'Teasers' },
-    { id: 'futures', name: 'Futures' }
   ];
 
-  // Convert API games to display format
-  const topPicks = (games as any[] || []).slice(0, 20).map((game: any, idx: number) => {
-    const team1 = game.away_team || 'Team 1';
-    const team2 = game.home_team || 'Team 2';
-    const bookmakersList = (game.bookmakers || []).slice(0, 5);
-    
-    return {
-      id: idx + 1,
-      ev: '+5.0%', // Placeholder - would need calculation
-      sport: game.sport_title?.split(' ').pop() || 'Sport',
-      game: `${team1} @ ${team2}`,
-      team1,
-      team2,
-      pick: `${team2} ML`,
-      bestOdds: bookmakersList[0]?.markets?.[0]?.outcomes?.[0]?.price?.toString() || '-110',
-      bestBook: bookmakersList[0]?.title || 'Book',
+  const topPicks = [
+    {
+      id: 1,
+      ev: '+78.07%',
+      sport: 'NBA',
+      game: 'Celtics @ Magic',
+      team1: 'Celtics',
+      team2: 'Magic',
+      pick: 'Magic ML',
+      bestOdds: '+940',
+      bestBook: 'Pinnacle',
+      avgOdds: '+850',
+      isHot: true,
+      books: [
+        { name: 'Pinnacle', odds: '+940', team2Odds: '-1200', ev: '+78.07%', isBest: true },
+        { name: 'DraftKings', odds: '+920', team2Odds: '-1180', ev: '+75.2%', isBest: false },
+        { name: 'FanDuel', odds: '+880', team2Odds: '-1150', ev: '+70.1%', isBest: false },
+        { name: 'BetMGM', odds: '+850', team2Odds: '-1120', ev: '+67.8%', isBest: false },
+        { name: 'Caesars', odds: '+830', team2Odds: '-1100', ev: '+65.5%', isBest: false },
+        { name: 'BetRivers', odds: '+820', team2Odds: '-1080', ev: '+63.2%', isBest: false },
+        { name: 'PointsBet', odds: '+810', team2Odds: '-1060', ev: '+61.8%', isBest: false },
+        { name: 'Hard Rock', odds: '+800', team2Odds: '-1040', ev: '+60.5%', isBest: false },
+        { name: 'Fanatics', odds: '+790', team2Odds: '-1020', ev: '+59.1%', isBest: false },
+        { name: 'BetWay', odds: '+780', team2Odds: '-1000', ev: '+57.8%', isBest: false }
+      ]
+    },
+    {
+      id: 2,
+      ev: '+35.41%',
+      sport: 'NBA',
+      game: 'Pistons @ 76ers',
+      team1: 'Pistons',
+      team2: '76ers',
+      pick: '76ers ML',
+      bestOdds: '+138',
+      bestBook: 'Pinnacle',
+      avgOdds: '+125',
+      isHot: true,
+      books: [
+        { name: 'Pinnacle', odds: '+138', team2Odds: '-165', ev: '+35.41%', isBest: true },
+        { name: 'BetMGM', odds: '+135', team2Odds: '-162', ev: '+33.2%', isBest: false },
+        { name: 'DraftKings', odds: '+130', team2Odds: '-158', ev: '+30.5%', isBest: false },
+        { name: 'FanDuel', odds: '+125', team2Odds: '-152', ev: '+28.1%', isBest: false },
+        { name: 'Caesars', odds: '+122', team2Odds: '-148', ev: '+26.8%', isBest: false }
+      ]
+    },
+    {
+      id: 3,
+      ev: '+8.33%',
+      sport: 'NHL',
+      game: 'Hurricanes @ Maple Leafs',
+      team1: 'Hurricanes',
+      team2: 'Maple Leafs',
+      pick: 'Maple Leafs -1.5',
+      bestOdds: '+160',
+      bestBook: 'DraftKings',
+      avgOdds: '+148',
+      isHot: false,
+      books: [
+        { name: 'DraftKings', odds: '+160', team2Odds: '-195', ev: '+8.33%', isBest: true },
+        { name: 'FanDuel', odds: '+155', team2Odds: '-188', ev: '+7.1%', isBest: false },
+        { name: 'BetMGM', odds: '+150', team2Odds: '-182', ev: '+6.2%', isBest: false },
+        { name: 'Caesars', odds: '+145', team2Odds: '-175', ev: '+5.5%', isBest: false },
+        { name: 'Pinnacle', odds: '+142', team2Odds: '-172', ev: '+4.8%', isBest: false }
+      ]
+    },
+    {
+      id: 4,
+      ev: '+7.50%',
+      sport: 'NHL',
+      game: 'Kraken @ Stars',
+      team1: 'Kraken',
+      team2: 'Stars',
+      pick: 'Kraken +1.5',
+      bestOdds: '+115',
+      bestBook: 'Hard Rock',
+      avgOdds: '+108',
+      isHot: false,
+      books: [
+        { name: 'Hard Rock', odds: '+115', team2Odds: '-138', ev: '+7.50%', isBest: true },
+        { name: 'Pinnacle', odds: '+112', team2Odds: '-135', ev: '+6.5%', isBest: false },
+        { name: 'DraftKings', odds: '+110', team2Odds: '-132', ev: '+5.8%', isBest: false },
+        { name: 'FanDuel', odds: '+108', team2Odds: '-130', ev: '+5.2%', isBest: false },
+        { name: 'BetMGM', odds: '+105', team2Odds: '-125', ev: '+4.5%', isBest: false }
+      ]
+    },
+    {
+      id: 5,
+      ev: '+6.39%',
+      sport: 'NFL',
+      game: 'Chiefs @ Broncos',
+      team1: 'Chiefs',
+      team2: 'Broncos',
+      pick: 'Broncos +3.5',
+      bestOdds: '+104',
+      bestBook: 'Pinnacle',
+      avgOdds: '+100',
+      isHot: true,
+      books: [
+        { name: 'Pinnacle', odds: '+104', team2Odds: '-122', ev: '+6.39%', isBest: true },
+        { name: 'DraftKings', odds: '+102', team2Odds: '-120', ev: '+5.5%', isBest: false },
+        { name: 'FanDuel', odds: '+100', team2Odds: '-118', ev: '+4.8%', isBest: false },
+        { name: 'BetMGM', odds: '-102', team2Odds: '-115', ev: '+3.2%', isBest: false },
+        { name: 'Caesars', odds: '-105', team2Odds: '-112', ev: '+2.5%', isBest: false }
+      ]
+    },
+    {
+      id: 6,
+      ev: '+5.26%',
+      sport: 'NFL',
+      game: 'Steelers @ Chargers',
+      team1: 'Steelers',
+      team2: 'Chargers',
+      pick: 'Steelers ML',
+      bestOdds: '+160',
+      bestBook: 'Pinnacle',
+      avgOdds: '+152',
+      isHot: false,
+      books: [
+        { name: 'Pinnacle', odds: '+160', team2Odds: '-195', ev: '+5.26%', isBest: true },
+        { name: 'BetMGM', odds: '+158', team2Odds: '-192', ev: '+4.8%', isBest: false },
+        { name: 'DraftKings', odds: '+155', team2Odds: '-188', ev: '+4.2%', isBest: false },
+        { name: 'FanDuel', odds: '+152', team2Odds: '-185', ev: '+3.8%', isBest: false },
+        { name: 'Caesars', odds: '+150', team2Odds: '-182', ev: '+3.5%', isBest: false }
+      ]
+    },
+    {
+      id: 7,
+      ev: '+4.82%',
+      sport: 'NCAA Basketball',
+      game: 'Duke @ North Carolina',
+      team1: 'Duke',
+      team2: 'North Carolina',
+      pick: 'North Carolina -2.5',
+      bestOdds: '-108',
+      bestBook: 'BetMGM',
+      avgOdds: '-115',
+      isHot: true,
+      books: [
+        { name: 'BetMGM', odds: '-108', team2Odds: '-112', ev: '+4.82%', isBest: true },
+        { name: 'DraftKings', odds: '-110', team2Odds: '-110', ev: '+4.2%', isBest: false },
+        { name: 'FanDuel', odds: '-112', team2Odds: '-108', ev: '+3.8%', isBest: false },
+        { name: 'Caesars', odds: '-115', team2Odds: '-105', ev: '+3.2%', isBest: false },
+        { name: 'Pinnacle', odds: '-118', team2Odds: '-102', ev: '+2.8%', isBest: false }
+      ]
+    },
+    {
+      id: 8,
+      ev: '+4.15%',
+      sport: 'NBA',
+      game: 'Lakers @ Warriors',
+      team1: 'Lakers',
+      team2: 'Warriors',
+      pick: 'Warriors ML',
+      bestOdds: '-185',
+      bestBook: 'Pinnacle',
+      avgOdds: '-195',
+      isHot: false,
+      books: [
+        { name: 'Pinnacle', odds: '-185', team2Odds: '+158', ev: '+4.15%', isBest: true },
+        { name: 'DraftKings', odds: '-190', team2Odds: '+155', ev: '+3.5%', isBest: false },
+        { name: 'FanDuel', odds: '-195', team2Odds: '+152', ev: '+2.8%', isBest: false },
+        { name: 'BetMGM', odds: '-198', team2Odds: '+148', ev: '+2.2%', isBest: false },
+        { name: 'Caesars', odds: '-200', team2Odds: '+145', ev: '+1.8%', isBest: false }
+      ]
+    },
+    {
+      id: 9,
+      ev: '+3.67%',
+      sport: 'NHL',
+      game: 'Bruins @ Rangers',
+      team1: 'Bruins',
+      team2: 'Rangers',
+      pick: 'Over 6.5',
+      bestOdds: '+125',
+      bestBook: 'FanDuel',
+      avgOdds: '+118',
+      isHot: false,
+      books: [
+        { name: 'FanDuel', odds: '+125', team2Odds: '-152', ev: '+3.67%', isBest: true },
+        { name: 'DraftKings', odds: '+122', team2Odds: '-148', ev: '+3.2%', isBest: false },
+        { name: 'BetMGM', odds: '+120', team2Odds: '-145', ev: '+2.8%', isBest: false },
+        { name: 'Caesars', odds: '+118', team2Odds: '-142', ev: '+2.5%', isBest: false },
+        { name: 'Pinnacle', odds: '+115', team2Odds: '-138', ev: '+2.1%', isBest: false }
+      ]
+    },
+    {
+      id: 10,
+      ev: '+2.94%',
+      sport: 'NCAA Football',
+      game: 'Alabama @ Georgia',
+      team1: 'Alabama',
+      team2: 'Georgia',
+      pick: 'Alabama +7',
+      bestOdds: '-105',
+      bestBook: 'Hard Rock',
       avgOdds: '-110',
-      isHot: idx < 3,
-      books: bookmakersList.map((book: any, bidx: number) => ({
-        name: book.title || book.key,
-        odds: book.markets?.[0]?.outcomes?.[0]?.price?.toString() || '-110',
-        ev: '+5.0%',
-        isBest: bidx === 0
-      }))
-    };
-  });
+      isHot: true,
+      books: [
+        { name: 'Hard Rock', odds: '-105', team2Odds: '-115', ev: '+2.94%', isBest: true },
+        { name: 'Pinnacle', odds: '-108', team2Odds: '-112', ev: '+2.5%', isBest: false },
+        { name: 'DraftKings', odds: '-110', team2Odds: '-110', ev: '+2.1%', isBest: false },
+        { name: 'FanDuel', odds: '-110', team2Odds: '-110', ev: '+2.1%', isBest: false },
+        { name: 'BetMGM', odds: '-112', team2Odds: '-108', ev: '+1.8%', isBest: false }
+      ]
+    }
+  ];
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => 
@@ -83,102 +268,160 @@ export function OddsPage() {
     );
   };
 
+  const toggleSportsbook = (id: number) => {
+    setExpandedSportsbooks(prev => 
+      prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
+    );
+  };
+
+  const totalPages = Math.ceil(topPicks.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const sortPicks = (picks: typeof topPicks) => {
+    if (!sortBy) return picks;
+    return [...picks].sort((a, b) => {
+      if (sortBy === 'ev') {
+        const evA = parseFloat(a.ev.replace('%', ''));
+        const evB = parseFloat(b.ev.replace('%', ''));
+        return sortDirection === 'asc' ? evA - evB : evB - evA;
+      } else if (sortBy === 'time') {
+        // Mock date sorting - replace with actual game time from API
+        const timeA = new Date('2023-11-10T19:00:00Z').getTime();
+        const timeB = new Date('2023-11-10T19:00:00Z').getTime();
+        return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
+      }
+      return 0;
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Dynamic Bet Type Heading */}
       <div>
-        <h2 className={`${isLight ? text-foreground : 'text-white'} font-bold text-2xl md:text-3xl`}>
+        <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-2xl md:text-3xl`}>
           {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
         </h2>
-        {loading && <p className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} text-sm mt-2`}>Loading live odds...</p>}
-        {error && <p className={`text-red-500 text-sm mt-2`}>Error: {error}</p>}
       </div>
 
       {/* Search & Filters Bar */}
-      <div className="flex flex-col md:flex-row gap-3 items-center">
-        <div className="relative w-full md:w-64">
-          <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
-          <input 
-            type="text"
-            placeholder="Search..."
-            className={`w-full h-[44px] pl-10 pr-4 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100' : 'bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/40 focus:bg-white/10'} backdrop-blur-2xl border rounded-xl focus:outline-none font-bold transition-all shadow-lg text-sm`}
-          />
-        </div>
-        <div className="flex gap-2 overflow-x-auto overflow-y-visible pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide w-full md:w-auto">
-          {/* Sport Filter Dropdown */}
-          <div className="relative z-10">
+      <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between">
+        <div className="flex flex-col md:flex-row gap-3 md:items-center w-full md:w-auto">
+          <div className="relative w-full md:w-64">
+            <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
+            <input 
+              type="text"
+              placeholder="Search..."
+              className={`w-full h-[44px] pl-10 pr-4 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100' : 'bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/40 focus:bg-white/10'} backdrop-blur-2xl border rounded-xl focus:outline-none font-bold transition-all text-sm`}
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto overflow-y-visible pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide w-full md:w-auto">
+            {/* Single Filters Button */}
             <button 
-              onClick={() => setIsSportDropdownOpen(!isSportDropdownOpen)}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold shadow-lg whitespace-nowrap text-sm ${
-                isSportDropdownOpen || selectedSport !== 'all'
+              onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
+                isFilterMenuOpen || selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today'
                   ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/40 text-white'
                   : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
               }`}
             >
               <Filter className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {sports.find(s => s.id === selectedSport)?.name || 'Sport'}
-              </span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${isSportDropdownOpen ? 'rotate-180' : ''}`} />
+              <span>Filters</span>
+              {(selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today') && (
+                <span className={`px-1.5 py-0.5 rounded-full text-xs ${isLight ? 'bg-purple-200 text-purple-700' : 'bg-purple-500/30 text-purple-300'}`}>
+                  {[selectedSport !== 'all', selectedMarket !== 'all', selectedBetType !== 'straight', selectedDate !== 'today'].filter(Boolean).length}
+                </span>
+              )}
             </button>
-            
-            {/* Dropdown Menu */}
-            {isSportDropdownOpen && (
-              <div className={`absolute top-full left-0 mt-2 w-56 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl border rounded-xl shadow-2xl overflow-hidden z-[100]`}>
-                <div className="p-2">
-                  {sports.map((sport) => (
-                    <button
-                      key={sport.id}
-                      onClick={() => {
-                        setSelectedSport(sport.id);
-                        setIsSportDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
-                        selectedSport === sport.id
-                          ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                          : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10 hover:text-white'
-                      }`}
-                    >
-                      {sport.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+
+            <button className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-emerald-100 border-emerald-300 text-emerald-700 hover:bg-emerald-200' : 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/30 text-emerald-300 hover:from-emerald-500/30 hover:to-teal-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm`}>
+              <RefreshCw className="w-4 h-4" />
+              <span className="hidden sm:inline">Auto-Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+              currentPage === 1
+                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
+                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+            }`}
+          >
+            <ChevronRight className="w-5 h-5 rotate-180" />
+          </button>
+          
+          <div className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-white border-gray-300' : 'bg-white/5 border-white/10'} backdrop-blur-2xl border rounded-xl`}>
+            <span className={`${isLight ? 'text-gray-700' : 'text-white'} font-bold text-sm whitespace-nowrap`}>
+              {currentPage} / {totalPages}
+            </span>
           </div>
 
-          {/* Bet Type Filter Dropdown */}
-          <div className="relative z-10">
-            <button 
-              onClick={() => setIsBetTypeDropdownOpen(!isBetTypeDropdownOpen)}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold shadow-lg whitespace-nowrap text-sm ${
-                isBetTypeDropdownOpen || selectedBetType !== 'straight'
-                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/40 text-white'
-                  : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {betTypes.find(b => b.id === selectedBetType)?.name || 'Bet Type'}
-              </span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${isBetTypeDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {/* Dropdown Menu */}
-            {isBetTypeDropdownOpen && (
-              <div className={`absolute top-full left-0 mt-2 w-56 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl border rounded-xl shadow-2xl overflow-hidden z-[100]`}>
-                <div className="p-2">
+          <button 
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+              currentPage === totalPages
+                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
+                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+            }`}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Side Panel */}
+      {isFilterMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            onClick={() => setIsFilterMenuOpen(false)}
+          />
+          
+          {/* Side Panel */}
+          <div className={`fixed left-0 top-0 bottom-0 w-80 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl border-r z-50 overflow-y-auto`}>
+            <div className="p-6 space-y-6">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl`}>Filters</h3>
+                <button
+                  onClick={() => setIsFilterMenuOpen(false)}
+                  className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Bet Type Filter */}
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-sm uppercase tracking-wide mb-3 block`}>
+                  Bet Type
+                </label>
+                <div className="space-y-2">
                   {betTypes.map((betType) => (
                     <button
                       key={betType.id}
-                      onClick={() => {
-                        setSelectedBetType(betType.id);
-                        setIsBetTypeDropdownOpen(false);
-                      }}
+                      onClick={() => setSelectedBetType(betType.id)}
                       className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
                         selectedBetType === betType.id
                           ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                          : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                          : isLight ? 'text-gray-700 hover:bg-gray-100 border border-transparent' : 'text-white/70 hover:bg-white/10 hover:text-white border border-transparent'
                       }`}
                     >
                       {betType.name}
@@ -186,41 +429,48 @@ export function OddsPage() {
                   ))}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Market Type Filter Dropdown */}
-          <div className="relative z-10">
-            <button 
-              onClick={() => setIsMarketDropdownOpen(!isMarketDropdownOpen)}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold shadow-lg whitespace-nowrap text-sm ${
-                isMarketDropdownOpen || selectedMarket !== 'all'
-                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/40 text-white'
-                  : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {marketTypes.find(m => m.id === selectedMarket)?.name || 'Market Type'}
-              </span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${isMarketDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {/* Dropdown Menu */}
-            {isMarketDropdownOpen && (
-              <div className={`absolute top-full left-0 mt-2 w-56 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl border rounded-xl shadow-2xl overflow-hidden z-[100]`}>
-                <div className="p-2">
+              {/* Sport Filter */}
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-sm uppercase tracking-wide mb-3 block`}>
+                  Sport
+                </label>
+                <div className="space-y-2">
+                  {sports.map((sport) => (
+                    <button
+                      key={sport.id}
+                      onClick={() => setSelectedSport(sport.id)}
+                      className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
+                        selectedSport === sport.id
+                          ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
+                          : isLight ? 'text-gray-700 hover:bg-gray-100 border border-transparent' : 'text-white/70 hover:bg-white/10 hover:text-white border border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{sport.name}</span>
+                        <span className={`text-xs ${selectedSport === sport.id ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
+                          {sport.count}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Market Type Filter */}
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-sm uppercase tracking-wide mb-3 block`}>
+                  Market Type
+                </label>
+                <div className="space-y-2">
                   {marketTypes.map((market) => (
                     <button
                       key={market.id}
-                      onClick={() => {
-                        setSelectedMarket(market.id);
-                        setIsMarketDropdownOpen(false);
-                      }}
+                      onClick={() => setSelectedMarket(market.id)}
                       className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
                         selectedMarket === market.id
                           ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                          : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                          : isLight ? 'text-gray-700 hover:bg-gray-100 border border-transparent' : 'text-white/70 hover:bg-white/10 hover:text-white border border-transparent'
                       }`}
                     >
                       {market.name}
@@ -228,107 +478,65 @@ export function OddsPage() {
                   ))}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Date Filter Dropdown */}
-          <div className="relative z-10">
-            <button 
-              onClick={() => setIsDateDropdownOpen(!isDateDropdownOpen)}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold shadow-lg whitespace-nowrap text-sm ${
-                isDateDropdownOpen || selectedDate !== 'today'
-                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/40 text-white'
-                  : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-              }`}
-            >
-              <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                {selectedDate === 'today' ? 'Today' : selectedDate === 'tomorrow' ? 'Tomorrow' : selectedDate === 'week' ? 'This Week' : 'All Upcoming'}
-              </span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${isDateDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {/* Dropdown Menu */}
-            {isDateDropdownOpen && (
-              <div className={`absolute top-full left-0 mt-2 w-56 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl border rounded-xl shadow-2xl overflow-hidden z-[100]`}>
-                <div className="p-2">
-                  <button
-                    onClick={() => {
-                      setSelectedDate('today');
-                      setIsDateDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
-                      selectedDate === 'today'
-                        ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                        : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    Today
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedDate('tomorrow');
-                      setIsDateDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
-                      selectedDate === 'tomorrow'
-                        ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                        : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    Tomorrow
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedDate('week');
-                      setIsDateDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
-                      selectedDate === 'week'
-                        ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                        : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    This Week
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedDate('all');
-                      setIsDateDropdownOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
-                      selectedDate === 'all'
-                        ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                        : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    All Upcoming
-                  </button>
+              {/* Date Filter */}
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-sm uppercase tracking-wide mb-3 block`}>
+                  Date
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { id: 'today', name: 'Today' },
+                    { id: 'tomorrow', name: 'Tomorrow' },
+                    { id: 'week', name: 'This Week' },
+                    { id: 'all', name: 'All Upcoming' }
+                  ].map((date) => (
+                    <button
+                      key={date.id}
+                      onClick={() => setSelectedDate(date.id)}
+                      className={`w-full text-left px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
+                        selectedDate === date.id
+                          ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
+                          : isLight ? 'text-gray-700 hover:bg-gray-100 border border-transparent' : 'text-white/70 hover:bg-white/10 hover:text-white border border-transparent'
+                      }`}
+                    >
+                      {date.name}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
 
-          <button className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-emerald-100 border-emerald-300 text-emerald-700 hover:bg-emerald-200' : 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/30 text-emerald-300 hover:from-emerald-500/30 hover:to-teal-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold shadow-lg ${isLight ? '' : 'shadow-emerald-500/10'} whitespace-nowrap text-sm`}>
-            <RefreshCw className="w-4 h-4" />
-            <span className="hidden sm:inline">Auto-Refresh</span>
-          </button>
-        </div>
-      </div>
+              {/* Clear Filters Button */}
+              <button
+                onClick={() => {
+                  setSelectedSport('all');
+                  setSelectedMarket('all');
+                  setSelectedBetType('straight');
+                  setSelectedDate('today');
+                }}
+                className={`w-full px-4 py-2.5 ${isLight ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-white/5 text-white/70 hover:bg-white/10'} rounded-lg font-bold text-sm transition-all`}
+              >
+                Clear All Filters
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Odds Table */}
-      <div className={`${isLight ? 'bg-card' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden shadow-xl`}>
+      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden`}>
         {/* Table Header - Desktop Only */}
         <div className={`hidden lg:grid lg:grid-cols-12 gap-4 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
-          <div className={`col-span-2 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
-          <div className={`col-span-3 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
-          <div className={`col-span-4 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Team/Line</div>
-          <div className={`col-span-3 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Book & Odds</div>
+          <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
+          <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
+          <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Team/Line</div>
+          <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Book</div>
+          <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Odds</div>
         </div>
 
         {/* Table Rows */}
         <div className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
-          {topPicks.map((pick) => (
+          {sortPicks(topPicks).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((pick) => (
             <div key={pick.id}>
               {/* Main Row */}
               <button
@@ -360,14 +568,18 @@ export function OddsPage() {
                   </div>
 
                   {/* Team/Line */}
-                  <div className="lg:col-span-4 min-w-0">
+                  <div className="lg:col-span-3 min-w-0">
                     <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.pick}</div>
                   </div>
 
                   {/* Book & Odds */}
-                  <div className="lg:col-span-3 min-w-0">
+                  <div className="lg:col-span-2 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.bestBook}</span>
+                    </div>
+                  </div>
+                  <div className="lg:col-span-2 min-w-0">
+                    <div className="flex items-center gap-2">
                       <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.bestOdds}</span>
                     </div>
                   </div>
@@ -396,7 +608,7 @@ export function OddsPage() {
                       
                       {/* Game Info */}
                       <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
-                        Mon, Nov 10 at 7:30 PM • {pick.sport}
+                        {'Mon, Nov 10 at 7:30 PM • '}{pick.sport}
                         {pick.isHot && (
                           <span className={`inline-flex items-center gap-1 ml-2 ${isLight ? 'text-orange-600' : 'text-orange-300'}`}>
                             <Flame className="w-3 h-3" />
@@ -472,22 +684,20 @@ export function OddsPage() {
                             <th className={`text-left py-3 px-4 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide`}>Sportsbook</th>
                             <th className={`text-center py-3 px-4 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide`}>{pick.team1}</th>
                             <th className={`text-center py-3 px-4 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide`}>{pick.team2}</th>
-                            <th className={`text-right py-3 px-4 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide`}>EV</th>
                           </tr>
                         </thead>
                         <tbody className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
-                          {pick.books.map((book, idx) => (
+                          {(expandedSportsbooks.includes(pick.id) ? pick.books : pick.books.slice(0, 5)).map((book, idx) => (
                             <tr 
                               key={idx}
                               className={`transition-all ${
                                 book.isBest 
-                                  ? isLight ? 'bg-amber-50' : 'bg-gradient-to-r from-amber-500/10 to-orange-500/10'
+                                  ? isLight ? 'bg-emerald-50' : 'bg-gradient-to-r from-emerald-500/10 to-teal-500/10'
                                   : isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'
                               }`}
                             >
                               <td className="py-3 px-4">
                                 <div className="flex items-center gap-2">
-                                  {book.isBest && <Star className={`w-4 h-4 ${isLight ? 'text-amber-500 fill-amber-500' : 'text-amber-400 fill-amber-400'}`} />}
                                   <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
                                 </div>
                               </td>
@@ -495,14 +705,7 @@ export function OddsPage() {
                                 <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.odds}</span>
                               </td>
                               <td className="py-3 px-4 text-center">
-                                <span className={`${isLight ? 'text-gray-400' : 'text-white/40'} font-bold text-sm`}>-</span>
-                              </td>
-                              <td className="py-3 px-4 text-right">
-                                <span className={`font-bold text-sm ${
-                                  book.isBest ? isLight ? 'text-amber-600' : 'text-amber-400' : isLight ? 'text-emerald-600' : 'text-emerald-400'
-                                }`}>
-                                  {book.ev}
-                                </span>
+                                <span className={`${isLight ? 'text-gray-400' : 'text-white/40'} font-bold text-sm`}>{book.team2Odds}</span>
                               </td>
                             </tr>
                           ))}
@@ -511,20 +714,17 @@ export function OddsPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className={`flex flex-wrap items-center gap-3 mt-4 pt-4 border-t ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
-                      <button className={`flex items-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}>
-                        <Eye className="w-4 h-4" />
-                        <span className="hidden sm:inline">View Details</span>
-                      </button>
-                      <button className={`flex items-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}>
-                        <Bell className="w-4 h-4" />
-                        <span className="hidden sm:inline">Set Alert</span>
-                      </button>
-                      <button className={`flex items-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}>
-                        <Plus className="w-4 h-4" />
-                        <span className="hidden sm:inline">Add to Betslip</span>
-                      </button>
-                      <button className="ml-auto px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 border border-purple-400/30 text-sm">
+                    <div className={`flex flex-wrap items-center justify-center gap-3 mt-4 pt-4 border-t ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      {pick.books.length > 5 && (
+                        <button 
+                          onClick={() => toggleSportsbook(pick.id)}
+                          className={`flex items-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}
+                        >
+                          <ChevronDown className={`w-4 h-4 transition-transform ${expandedSportsbooks.includes(pick.id) ? 'rotate-180' : ''}`} />
+                          <span className="hidden sm:inline">{expandedSportsbooks.includes(pick.id) ? 'View Less' : 'View More'}</span>
+                        </button>
+                      )}
+                      <button className="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 border border-purple-400/30 text-sm">
                         Place Bet
                       </button>
                     </div>
@@ -534,14 +734,6 @@ export function OddsPage() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Load More */}
-      <div className="flex justify-center pt-4">
-        <button className={`px-8 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-purple-500' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10 text-white hover:bg-white/10 hover:border-purple-400/30'} backdrop-blur-xl border rounded-xl transition-all font-bold shadow-lg`}>
-          Load More Picks
-          <ChevronDown className="w-4 h-4 inline-block ml-2" />
-        </button>
       </div>
     </div>
   );

@@ -1,6 +1,16 @@
 import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from 'next-themes';
+import { useTheme } from "next-themes";
+
+const lightModeColors = {
+  text: "text-foreground",
+  textMuted: "text-muted-foreground",
+  statsCard: "bg-card",
+  statsIcon: "bg-primary/10",
+  statsIconColor: "text-primary",
+  textLight: "text-muted-foreground",
+  background: "bg-background",
+};
 
 export function PicksPage() {
   const { theme } = useTheme();
@@ -85,8 +95,8 @@ export function PicksPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className={`${isLight ? text-foreground : 'text-white'} text-2xl md:text-3xl font-bold mb-2`}>My Picks</h1>
-          <p className={`${isLight ? text-foregroundMuted : 'text-white/60'} font-bold`}>Expert-recommended betting opportunities with positive expected value</p>
+          <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl md:text-3xl font-bold mb-2`}>My Picks</h1>
+          <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold`}>Expert-recommended betting opportunities with positive expected value</p>
         </div>
         <div className="flex items-center gap-3">
           <button className={`flex items-center gap-2 px-4 py-2.5 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold shadow-lg ${isLight ? '' : 'hover:shadow-purple-500/10'}`}>
@@ -99,32 +109,32 @@ export function PicksPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className={`p-5 ${isLight ? 'bg-card' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl shadow-lg`}>
+        <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl shadow-lg`}>
           <div className="flex items-center gap-3 mb-2">
-            <div className={`p-2 ${isLight ? 'bg-primary/10' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-lg border`}>
-              <Sparkles className={`w-4 h-4 ${isLight ? 'text-primary' : 'text-purple-300'}`} />
+            <div className={`p-2 ${isLight ? lightModeColors.statsIcon : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-lg border`}>
+              <Sparkles className={`w-4 h-4 ${isLight ? lightModeColors.statsIconColor : 'text-purple-300'}`} />
             </div>
-            <span className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} font-bold text-sm uppercase tracking-wide`}>Today's Picks</span>
+            <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-sm uppercase tracking-wide`}>Today's Picks</span>
           </div>
-          <div className={`${isLight ? text-foreground : 'text-white'} text-2xl font-bold`}>{picks.length}</div>
+          <div className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl font-bold`}>{picks.length}</div>
         </div>
-        <div className={`p-5 ${isLight ? 'bg-card' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl shadow-lg`}>
+        <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl shadow-lg`}>
           <div className="flex items-center gap-3 mb-2">
             <div className={`p-2 ${isLight ? 'bg-emerald-100 border-emerald-200' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl rounded-lg border`}>
               <TrendingUp className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-300'}`} />
             </div>
-            <span className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} font-bold text-sm uppercase tracking-wide`}>Avg EV</span>
+            <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-sm uppercase tracking-wide`}>Avg EV</span>
           </div>
-          <div className={`${isLight ? text-foreground : 'text-white'} text-2xl font-bold`}>+6.2%</div>
+          <div className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl font-bold`}>+6.2%</div>
         </div>
-        <div className={`p-5 ${isLight ? 'bg-card' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl shadow-lg`}>
+        <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl shadow-lg`}>
           <div className="flex items-center gap-3 mb-2">
             <div className={`p-2 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/30'} backdrop-blur-xl rounded-lg border`}>
               <Target className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-300'}`} />
             </div>
-            <span className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} font-bold text-sm uppercase tracking-wide`}>High Confidence</span>
+            <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-sm uppercase tracking-wide`}>High Confidence</span>
           </div>
-          <div className={`${isLight ? text-foreground : 'text-white'} text-2xl font-bold`}>3 Picks</div>
+          <div className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl font-bold`}>3 Picks</div>
         </div>
       </div>
 
@@ -151,7 +161,7 @@ export function PicksPage() {
       </div>
 
       {/* Picks Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {picks.map((pick) => (
           <div 
             key={pick.id}
