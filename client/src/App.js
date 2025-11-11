@@ -11,7 +11,6 @@ import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import { initBrowserCompat } from './utils/browserCompat';
 import DebugPanel from './components/debug/DebugPanel';
-import { ThemeProvider } from './contexts/ThemeContext.js';
 // import NavbarRevamped from './components/layout/NavbarRevamped'; // OLD - Using new Header from landing page
 // import MobileBottomBar from './components/layout/MobileBottomBar'; // OLD - Not used with new landing page
 // import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
@@ -28,7 +27,6 @@ import LoadingBar from "./components/common/LoadingBar";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import PlanGuard from "./components/guards/PlanGuard";
 import MyPicks from './pages/MyPicks';
-import ThemeDemo from './pages/ThemeDemo';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import BillingSuccess from './pages/BillingSuccess';
@@ -138,7 +136,6 @@ function AppRoutes() {
               <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />
               <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
               <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
-              <Route path="/theme-demo" element={<ThemeDemo />} />
               <Route path="/billing/success" element={<BillingSuccess />} />
               <Route path="/billing/cancel" element={<BillingCancel />} />
               <Route path="/terms" element={<Terms />} />
@@ -198,17 +195,15 @@ function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <ThemeProvider>
-          <BetSlipProvider>
-            <AccessibilityProvider>
-              <ToastProvider>
-                <ErrorBoundary>
-                  <AppRoutes />
-                </ErrorBoundary>
-              </ToastProvider>
-            </AccessibilityProvider>
-          </BetSlipProvider>
-        </ThemeProvider>
+        <BetSlipProvider>
+          <AccessibilityProvider>
+            <ToastProvider>
+              <ErrorBoundary>
+                <AppRoutes />
+              </ErrorBoundary>
+            </ToastProvider>
+          </AccessibilityProvider>
+        </BetSlipProvider>
       </AuthProvider>
     </HelmetProvider>
   );
