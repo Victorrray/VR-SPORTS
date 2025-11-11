@@ -2,16 +2,6 @@ import { Clock, Check } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useState } from 'react';
 
-// Safe wrapper for useTheme that provides fallback
-function useSafeTheme() {
-  try {
-    return useTheme();
-  } catch (e) {
-    // Return default theme if context not available
-    return { colorMode: 'dark', theme: 'dark' };
-  }
-}
-
 export interface BetData {
   id: number;
   teams: string;
@@ -36,8 +26,8 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
   // For the hero variant, we use a fixed dark theme style
   const isHero = variant === 'hero';
   
-  // Safely get theme with fallback
-  const { colorMode } = useSafeTheme();
+  // Get theme - BetCard is only used in authenticated pages where ThemeProvider is available
+  const { colorMode } = useTheme();
   const isDark = isHero ? true : colorMode === 'dark';
 
   const handleAddToPicks = () => {
