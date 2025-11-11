@@ -10,7 +10,7 @@ import {
   LogOut,
   Lock,
 } from "lucide-react";
-import { useTheme, lightModeColors } from '../../contexts/ThemeContext.js';
+import { useTheme } from 'next-themes';
 import { useAuth } from '../../hooks/SimpleAuth';
 
 interface AccountPageProps {
@@ -20,9 +20,9 @@ interface AccountPageProps {
 export function AccountPage({
   onNavigateToSettings,
 }: AccountPageProps) {
-  const { colorMode } = useTheme();
+  const { theme } = useTheme();
   const { user, profile } = useAuth();
-  const isLight = colorMode === 'light';
+  const isLight = theme === 'light';
   
   return (
     <div className="space-y-6">

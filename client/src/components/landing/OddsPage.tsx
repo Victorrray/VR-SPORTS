@@ -1,11 +1,11 @@
 import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useTheme, lightModeColors } from '../../contexts/ThemeContext.js';
+import { useTheme } from 'next-themes';
 import { useMarketsWithCache } from '../../hooks/useMarketsWithCache';
 
 export function OddsPage() {
-  const { colorMode } = useTheme();
-  const isLight = colorMode === 'light';
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [selectedSport, setSelectedSport] = useState('all');
   const [selectedMarket, setSelectedMarket] = useState('all');
   const [selectedBetType, setSelectedBetType] = useState('straight');
@@ -87,10 +87,10 @@ export function OddsPage() {
     <div className="space-y-6">
       {/* Dynamic Bet Type Heading */}
       <div>
-        <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-2xl md:text-3xl`}>
+        <h2 className={`${isLight ? 'text-foreground' : 'text-white'} font-bold text-2xl md:text-3xl`}>
           {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
         </h2>
-        {loading && <p className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm mt-2`}>Loading live odds...</p>}
+        {loading && <p className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} text-sm mt-2`}>Loading live odds...</p>}
         {error && <p className={`text-red-500 text-sm mt-2`}>Error: {error}</p>}
       </div>
 

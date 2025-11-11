@@ -1,9 +1,9 @@
 import { Settings, Bell, Shield, Globe, Moon, Sun, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext.js';
+import { useTheme } from 'next-themes';
 
 export function SettingsPage() {
-  const { colorMode, setColorMode } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [twoFactor, setTwoFactor] = useState(false);

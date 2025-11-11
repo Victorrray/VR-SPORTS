@@ -1,10 +1,10 @@
 import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from 'next-themes';
+import { useTheme, lightModeColors } from '../contexts/ThemeContext';
 
 export function PicksPage() {
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
+  const { colorMode } = useTheme();
+  const isLight = colorMode === 'light';
   const picks = [
     {
       id: 1,
@@ -151,7 +151,7 @@ export function PicksPage() {
       </div>
 
       {/* Picks Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {picks.map((pick) => (
           <div 
             key={pick.id}
