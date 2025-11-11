@@ -7,18 +7,18 @@ export function FAQ() {
   const faqs = [
     {
       question: 'How does OddSightSeer find +EV bets?',
-      answer: 'Our proprietary algorithm scans odds across 39+ sportsbooks in real-time, calculates true probability, and identifies bets where the implied odds are in your favor. We use advanced statistical models and historical data to determine expected value.',
+      answer: 'Our proprietary algorithm scans odds across 40+ sportsbooks in real-time, calculates true probability, and identifies bets where the implied odds are in your favor. We use advanced statistical models and historical data to determine expected value.',
     },
     {
       question: 'What\'s the difference between Gold and Platinum?',
-      answer: 'Gold ($10/mo) includes access to all 39+ sportsbooks, +EV finder, and basic analytics. Platinum ($25/mo) adds arbitrage opportunities, live betting markets, advanced analytics, bankroll management tools, and priority support.',
+      answer: 'Gold ($10/mo) includes access to all 40+ sportsbooks, +EV finder, and basic analytics. Platinum ($25/mo) adds arbitrage opportunities, live betting markets, advanced analytics, bankroll management tools, and priority support.',
     },
     {
       question: 'Can I cancel my subscription anytime?',
       answer: 'Yes! Both plans are month-to-month with no long-term commitment. You can cancel anytime from your account settings. We also offer a 7-day money-back guarantee if you\'re not satisfied.',
     },
     {
-      question: 'Do I need accounts at all 39+ sportsbooks?',
+      question: 'Do I need accounts at all 40+ sportsbooks?',
       answer: 'No. During setup, you select which sportsbooks you have access to. Our algorithm will only show you opportunities available on your selected books. Most users start with 3-5 sportsbooks and expand over time.',
     },
     {
@@ -44,9 +44,9 @@ export function FAQ() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 backdrop-blur-sm border border-indigo-500/30 rounded-full mb-6">
-            <HelpCircle className="w-4 h-4 text-indigo-400" />
-            <span className="text-indigo-400 font-bold">FAQ</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full mb-6">
+            <HelpCircle className="w-4 h-4 text-white" />
+            <span className="text-white font-bold">FAQ</span>
           </div>
           
           <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">

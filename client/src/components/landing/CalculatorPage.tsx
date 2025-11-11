@@ -1,21 +1,6 @@
 import { Calculator, DollarSign, TrendingUp, Percent, Plus, X, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from "next-themes";
-
-const lightModeColors = {
-  text: "text-foreground",
-  textMuted: "text-muted-foreground",
-  statsCard: "bg-card",
-  statsIcon: "bg-primary/10",
-  statsIconColor: "text-primary",
-  textLight: "text-muted-foreground",
-  background: "bg-background",
-  logoGradient: "from-blue-500 to-cyan-500",
-  navActive: "bg-blue-50 text-blue-600",
-  navInactive: "text-gray-600 hover:text-gray-900",
-  signOutButton: "bg-red-50 border-red-300 text-red-600",
-  statsBadge: "bg-blue-50 text-blue-600",
-};
+import { useTheme, lightModeColors } from '../contexts/ThemeContext';
 
 type CalculatorMode = 'single' | 'parlay' | 'arbitrage';
 
@@ -27,7 +12,7 @@ interface ParleyLeg {
 
 export function CalculatorPage() {
   const { colorMode } = useTheme();
-  const isLight = theme === "light";
+  const isLight = colorMode === 'light';
   const [mode, setMode] = useState<CalculatorMode>('single');
   
   // Single Bet Calculator

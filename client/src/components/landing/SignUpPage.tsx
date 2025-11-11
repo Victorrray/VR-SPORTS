@@ -1,21 +1,20 @@
-import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 
-interface LoginPageProps {
+interface SignUpPageProps {
   onBack: () => void;
-  onSignUp: () => void;
-  onForgotPassword: () => void;
+  onLogin: () => void;
 }
 
-export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps) {
-  const [isLogin, setIsLogin] = useState(true);
+export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { email, password });
+    console.log('Sign up submitted:', { name, email, password });
   };
 
   const stats = [
@@ -24,19 +23,18 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
     { icon: Zap, value: '24/7', label: 'Live Updates' },
   ];
 
+  const benefits = [
+    'Real-time odds from 40+ sportsbooks',
+    'Positive EV bet identification',
+    'Live alerts on profitable opportunities',
+    'Advanced analytics dashboard',
+    'Historical performance tracking'
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
-      {/* Grid Background - Full Width */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(168, 85, 247, 0.07) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(168, 85, 247, 0.07) 1px, transparent 1px)
-          `,
-          backgroundSize: '24px 24px',
-        }}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDMpIi8+PC9nPjwvc3ZnPg==')] opacity-40"></div>
 
       {/* Floating Orbs */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -44,7 +42,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
 
       <div className="relative min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
-          {/* Left Side - Branding & Stats */}
+          {/* Left Side - Branding & Benefits */}
           <div className="hidden lg:block space-y-8">
             {/* Logo & Tagline */}
             <div className="space-y-6">
@@ -57,7 +55,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
               </button>
 
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/50">
                   <span className="text-white font-bold text-xl">OS</span>
                 </div>
                 <div>
@@ -67,14 +65,14 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
               </div>
 
               <h2 className="text-white text-4xl md:text-5xl font-bold leading-tight">
-                Find Your{' '}
+                Start Winning{' '}
                 <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-                  Winning Edge
+                  Today
                 </span>
               </h2>
 
               <p className="text-white/70 text-lg font-semibold">
-                Join thousands of bettors using data-driven insights to identify profitable opportunities across 40+ sportsbooks.
+                Join thousands of smart bettors using data-driven insights to find profitable opportunities.
               </p>
             </div>
 
@@ -95,25 +93,24 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
               ))}
             </div>
 
-            {/* Testimonial */}
+            {/* Benefits List */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/60 to-purple-900/20 backdrop-blur-sm border border-white/10 p-6">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/5"></div>
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500"></div>
-                  <div>
-                    <div className="text-white font-bold">Mike Chen</div>
-                    <div className="text-white/60 text-sm font-semibold">Professional Bettor</div>
+              <div className="relative space-y-3">
+                <h3 className="text-white font-bold mb-4">What you'll get:</h3>
+                {benefits.map((benefit, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="text-white/80 font-semibold">{benefit}</span>
                   </div>
-                </div>
-                <p className="text-white/80 font-semibold italic">
-                  "OddSightSeer helped me increase my ROI by 300%. The positive EV finder is a game-changer."
-                </p>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Right Side - Login Form */}
+          {/* Right Side - Sign Up Form */}
           <div className="w-full max-w-md mx-auto lg:mx-0">
             {/* Mobile Back Button */}
             <button 
@@ -124,7 +121,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
               <span className="font-semibold">Back to home</span>
             </button>
 
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/80 to-purple-900/30 backdrop-blur-xl border border-white/10 p-8 md:p-10">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/80 to-purple-900/30 backdrop-blur-xl border border-white/10 p-8 md:p-10 shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/10"></div>
               
               <div className="relative space-y-6">
@@ -139,39 +136,28 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                 {/* Header */}
                 <div className="text-center lg:text-left">
                   <h3 className="text-white text-3xl md:text-4xl font-bold mb-2">
-                    {isLogin ? 'Welcome back' : 'Create account'}
+                    Create your account
                   </h3>
                   <p className="text-white/60 font-semibold">
-                    {isLogin ? 'Enter your credentials to continue' : 'Start finding profitable bets today'}
+                    Start finding profitable bets in minutes
                   </p>
-                </div>
-
-                {/* Tab Toggle */}
-                <div className="flex gap-2 p-1 bg-slate-950/50 rounded-2xl border border-white/5">
-                  <button
-                    onClick={() => setIsLogin(true)}
-                    className={`flex-1 py-3 rounded-xl font-bold transition-all text-center ${
-                      isLogin
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
-                        : 'text-white/50 hover:text-white/80'
-                    }`}
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={onSignUp}
-                    className={`flex-1 py-3 rounded-xl font-bold transition-all text-center ${
-                      !isLogin
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
-                        : 'text-white/50 hover:text-white/80'
-                    }`}
-                  >
-                    Sign up
-                  </button>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <label className="text-white/90 font-bold text-sm">Full name</label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold"
+                      required
+                    />
+                  </div>
+
                   {/* Email */}
                   <div className="space-y-2">
                     <label className="text-white/90 font-bold text-sm">Email address</label>
@@ -205,36 +191,15 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
+                    <p className="text-white/40 text-xs font-semibold">Must be at least 8 characters</p>
                   </div>
-
-                  {/* Remember & Forgot */}
-                  {isLogin && (
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded bg-slate-950/50 border-white/20 text-purple-500 focus:ring-2 focus:ring-purple-500/50"
-                        />
-                        <span className="text-white/70 group-hover:text-white/90 font-semibold text-sm">
-                          Remember me
-                        </span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={onForgotPassword}
-                        className="text-purple-400 hover:text-purple-300 font-semibold text-sm"
-                      >
-                        Forgot password?
-                      </button>
-                    </div>
-                  )}
 
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center"
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 text-center"
                   >
-                    {isLogin ? 'Login to your account' : 'Create your account'}
+                    Create your account
                   </button>
 
                   {/* Divider */}
@@ -247,7 +212,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                     </div>
                   </div>
 
-                  {/* Social Login */}
+                  {/* Social Sign Up */}
                   <button
                     type="button"
                     className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-xl text-white/90 hover:bg-slate-900/70 hover:border-white/20 transition-all font-bold"
@@ -268,6 +233,18 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                     {' '}and{' '}
                     <a href="#" className="text-purple-400 hover:text-purple-300">Privacy Policy</a>
                   </p>
+
+                  {/* Login Link */}
+                  <div className="text-center pt-2">
+                    <span className="text-white/60 font-semibold text-sm">Already have an account? </span>
+                    <button
+                      type="button"
+                      onClick={onLogin}
+                      className="text-purple-400 hover:text-purple-300 font-bold text-sm"
+                    >
+                      Sign in
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>

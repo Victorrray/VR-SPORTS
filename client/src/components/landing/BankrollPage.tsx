@@ -1,22 +1,7 @@
 import { Wallet, TrendingUp, TrendingDown, DollarSign, Plus, Minus, Target, AlertCircle, Calendar, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from "next-themes";
+import { useTheme, lightModeColors } from '../contexts/ThemeContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const lightModeColors = {
-  text: "text-foreground",
-  textMuted: "text-muted-foreground",
-  statsCard: "bg-card",
-  statsIcon: "bg-primary/10",
-  statsIconColor: "text-primary",
-  textLight: "text-muted-foreground",
-  background: "bg-background",
-  logoGradient: "from-blue-500 to-cyan-500",
-  navActive: "bg-blue-50 text-blue-600",
-  navInactive: "text-gray-600 hover:text-gray-900",
-  signOutButton: "bg-red-50 border-red-300 text-red-600",
-  statsBadge: "bg-blue-50 text-blue-600",
-};
 
 interface Transaction {
   id: number;
@@ -39,7 +24,7 @@ type BankrollStrategy = 'flat' | 'kelly' | 'percentage';
 
 export function BankrollPage() {
   const { colorMode } = useTheme();
-  const isLight = theme === "light";
+  const isLight = colorMode === 'light';
   
   const [currentBankroll, setCurrentBankroll] = useState(5000);
   const [startingBankroll] = useState(3000);

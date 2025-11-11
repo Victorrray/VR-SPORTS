@@ -1,70 +1,31 @@
-import { Activity, Users, Zap, TrendingUp } from 'lucide-react';
+import { TrendingUp, Users, Award, Zap } from 'lucide-react';
 
 export function Stats() {
   const stats = [
-    { 
-      icon: Activity,
-      value: '39+', 
-      label: 'Sportsbooks',
-      description: 'Real-time monitoring',
-      gradient: 'from-purple-500 to-purple-600'
-    },
-    { 
-      icon: TrendingUp,
-      value: '4.2%', 
-      label: 'Average Edge',
-      description: 'Positive EV found',
-      gradient: 'from-indigo-500 to-indigo-600'
-    },
-    { 
-      icon: Users,
-      value: '10K+', 
-      label: 'Active Users',
-      description: 'Growing daily',
-      gradient: 'from-violet-500 to-violet-600'
-    },
-    { 
-      icon: Zap,
-      value: '24/7', 
-      label: 'Live Updates',
-      description: 'Never miss a bet',
-      gradient: 'from-fuchsia-500 to-fuchsia-600'
-    },
+    { label: 'Active Users', value: '100', icon: Users },
+    { label: 'Average Edge', value: '+4.8%', icon: TrendingUp },
+    { label: 'Daily Picks', value: '500+', icon: Zap },
   ];
 
   return (
-    <section className="container mx-auto px-4 py-12 md:py-20">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
+    <section className="py-16 md:py-24">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
+          {stats.map((stat, index) => (
             <div
               key={index}
-              className="group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+              className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 text-center w-full"
             >
-              {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-10 rounded-2xl md:rounded-3xl transition-opacity duration-300`}></div>
-              
-              <div className="relative">
-                {/* Icon */}
-                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.gradient} bg-opacity-10 mb-4`}>
-                  <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                </div>
-                
-                {/* Value */}
-                <div className={`bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent mb-2 font-bold`}>
-                  <span className="text-3xl md:text-5xl">{stat.value}</span>
-                </div>
-                
-                {/* Label */}
-                <div className="text-white mb-1 font-bold">{stat.label}</div>
-                
-                {/* Description */}
-                <div className="text-white/50 text-sm font-medium">{stat.description}</div>
+              <stat.icon className="w-8 h-8 md:w-10 md:h-10 text-purple-400 mx-auto mb-3 md:mb-4" />
+              <div className="text-white mb-1 md:mb-2 font-bold" style={{fontSize: 'clamp(1.5rem, 4vw, 2.5rem)'}}>
+                {stat.value}
+              </div>
+              <div className="text-white/60 text-xs md:text-sm font-medium">
+                {stat.label}
               </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </section>
   );

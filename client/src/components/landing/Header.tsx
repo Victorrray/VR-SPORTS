@@ -1,121 +1,128 @@
-import { Home, BarChart3, TrendingUp, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/SimpleAuth';
+import { Menu, X } from 'lucide-react';
 
 interface HeaderProps {
-  onLoginClick?: () => void;
-  onDashboardClick?: () => void;
+  onLoginClick: () => void;
+  onDashboardClick: () => void;
+  onRoadmapClick: () => void;
 }
 
-export function Header({ onLoginClick, onDashboardClick }: HeaderProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const { user } = useAuth();
+export function Header({ onLoginClick, onDashboardClick, onRoadmapClick }: HeaderProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="pt-4 px-4">
-      <div className="container mx-auto">
-        <div className="bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-full px-4 md:px-6 py-3 shadow-lg shadow-purple-500/10">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/50">
-                <span className="text-white text-xs md:text-sm font-bold">OS</span>
+    <header className="absolute top-0 left-0 right-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-20 md:h-24">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="relative group">
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 blur-xl opacity-40 group-hover:opacity-60 transition-opacity" />
+              
+              {/* Logo container */}
+              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 flex items-center justify-center transform transition-transform group-hover:scale-105">
+                <span className="text-white font-bold text-lg md:text-xl">OS</span>
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
               </div>
-              <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent text-sm md:text-base font-bold">
+            </div>
+            
+            <div className="flex flex-col">
+              <span className="bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent font-bold text-lg md:text-xl tracking-tight">
                 OddSightSeer
               </span>
+              <span className="text-xs text-white/40 font-bold tracking-wide">
+                PREMIUM ANALYTICS
+              </span>
             </div>
+          </div>
 
-            {/* Desktop Navigation - Center */}
-            <nav className="hidden lg:flex items-center gap-1">
-              <button 
-                onClick={() => onDashboardClick ? onDashboardClick() : navigate(user ? '/dashboard' : '/login')}
-                className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-bold"
-              >
-                Dashboard
-              </button>
-              <a href="#features" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-bold">
-                Features
-              </a>
-              <a href="#pricing" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-bold">
-                Pricing
-              </a>
-              <a href="#faq" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all text-sm font-bold">
-                FAQ
-              </a>
-            </nav>
-
-            {/* Desktop Buttons - Right */}
-            <div className="hidden lg:flex items-center gap-3">
-              <button 
-                className="px-5 py-2.5 bg-white text-slate-900 rounded-full hover:bg-white/90 transition-all text-sm font-semibold" 
-                onClick={() => onLoginClick ? onLoginClick() : navigate('/login')}
-              >
-                Sign In
-              </button>
-              <button 
-                className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg shadow-purple-500/30 backdrop-blur-sm border border-purple-400/20 text-sm font-semibold"
-                onClick={() => navigate('/login')}
-              >
-                Get Started →
-              </button>
-            </div>
-
-            {/* Mobile Menu Toggle */}
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="#features" className="text-white/70 hover:text-white transition-colors font-medium">
+              Features
+            </a>
             <button 
-              className="lg:hidden text-white p-1"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={onDashboardClick}
+              className="text-white/70 hover:text-white transition-colors font-medium"
             >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              Dashboard
+            </button>
+            <a href="#pricing" className="text-white/70 hover:text-white transition-colors font-medium">
+              Pricing
+            </a>
+            <a href="#faq" className="text-white/70 hover:text-white transition-colors font-medium">
+              FAQ
+            </a>
+            <button 
+              onClick={onRoadmapClick}
+              className="text-white/70 hover:text-white transition-colors font-medium"
+            >
+              Roadmap
+            </button>
+          </nav>
+
+          {/* CTA Buttons */}
+          <div className="hidden md:flex items-center gap-4">
+            <button 
+              onClick={onLoginClick}
+              className="text-white/70 hover:text-white transition-colors font-medium"
+            >
+              Login
+            </button>
+            <button className="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold">
+              Sign up
             </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-white p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <nav className="lg:hidden mt-2 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-lg shadow-purple-500/10">
-            <div className="flex flex-col gap-2">
+        {mobileMenuOpen && (
+          <div className="md:hidden">
+            <nav className="flex flex-col gap-3 px-6 py-6 bg-gradient-to-br from-slate-900/95 via-slate-900/98 to-slate-950/95 backdrop-blur-2xl border-t border-white/10 rounded-b-2xl">
+              <a href="#features" className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
+                Features
+              </a>
               <button 
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onDashboardClick ? onDashboardClick() : navigate(user ? '/dashboard' : '/login');
-                }}
-                className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all font-bold text-left"
+                onClick={onDashboardClick}
+                className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold text-left"
               >
                 Dashboard
               </button>
-              <a href="#features" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all font-bold">
-                Features
-              </a>
-              <a href="#pricing" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all font-bold">
+              <a href="#pricing" className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
                 Pricing
               </a>
-              <a href="#faq" className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all font-bold">
+              <a href="#faq" className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
                 FAQ
               </a>
-              <div className="border-t border-white/10 my-2"></div>
               <button 
-                className="px-4 py-2 bg-white text-slate-900 hover:bg-white/90 rounded-full transition-all font-bold text-left" 
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  onLoginClick ? onLoginClick() : navigate('/login');
-                }}
+                onClick={onRoadmapClick}
+                className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold text-left"
               >
-                Sign In
+                Roadmap
               </button>
-              <button 
-                className="mt-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-400 hover:to-indigo-400 transition-all shadow-lg shadow-purple-500/30 text-sm font-bold"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate('/login');
-                }}
-              >
-                Get Started →
-              </button>
-            </div>
-          </nav>
+              <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-white/10">
+                <button 
+                  onClick={onLoginClick}
+                  className="w-full px-6 py-2.5 bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-xl transition-all font-bold backdrop-blur-xl"
+                >
+                  Login
+                </button>
+                <button className="w-full px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold border border-purple-400/30">
+                  Sign up
+                </button>
+              </div>
+            </nav>
+          </div>
         )}
       </div>
     </header>

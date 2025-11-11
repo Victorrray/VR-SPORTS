@@ -1,149 +1,106 @@
-import { Check, HelpCircle, Star, Crown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Check, Crown } from 'lucide-react';
 
-interface PricingProps {
-  onLoginClick?: () => void;
-}
-
-export function Pricing({ onLoginClick }: PricingProps) {
-  const navigate = useNavigate();
-  const goldFeatures = [
-    { text: '39+ sportsbooks tracked', tooltip: 'Real-time odds from all major operators' },
-    { text: 'Positive EV bet finder', tooltip: 'Algorithm identifies profitable opportunities' },
-    { text: 'Player props analytics', tooltip: 'Deep stats on player performance' },
-    { text: 'Game lines & spreads', tooltip: 'All major betting markets covered' },
-    { text: 'Real-time odds updates', tooltip: 'Updates every second' },
-  ];
-
-  const platinumFeatures = [
-    { text: 'Everything in Gold, plus:', tooltip: 'All Gold features included' },
-    { text: 'Arbitrage opportunities', tooltip: 'Risk-free betting profits' },
-    { text: 'Live betting markets', tooltip: 'In-game betting odds' },
-    { text: 'Advanced analytics dashboard', tooltip: 'Comprehensive performance tracking' },
-    { text: 'Priority support', tooltip: '24/7 dedicated support' },
+export function Pricing() {
+  const plans = [
+    {
+      name: 'Gold',
+      price: '$10',
+      period: '/month',
+      description: 'Essential tools for serious bettors',
+      features: [
+        'Real-time odds from 40+ sportsbooks',
+        'Basic EV calculator',
+        'Up to 50 picks per day',
+        'Email alerts',
+        'Performance tracking',
+        'Mobile app access'
+      ]
+    },
+    {
+      name: 'Platinum',
+      price: '$25',
+      period: '/month',
+      description: 'Advanced analytics for professionals',
+      features: [
+        'Everything in Gold, plus:',
+        'Unlimited picks',
+        'Advanced market analysis',
+        'Kelly Criterion calculator',
+        'Instant push notifications',
+        'Priority support',
+        'API access',
+        'Custom filters & alerts'
+      ],
+      popular: true
+    }
   ];
 
   return (
     <section id="pricing" className="py-16 md:py-24">
-      <div className="container mx-auto px-4 md:px-6">
-        {/* Header */}
-        <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 backdrop-blur-sm border border-purple-500/30 rounded-full mb-6">
-            <Crown className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-400 font-bold">Simple Pricing</span>
-          </div>
-          
-          <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">
-            Choose Your{' '}
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-white mb-4 font-bold" style={{fontSize: 'clamp(2rem, 6vw, 3.5rem)'}}>
+            Simple,{' '}
             <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
-              Winning Plan
+              transparent pricing
             </span>
           </h2>
-          
-          <p className="text-white/60 text-lg font-semibold">
-            Both plans include access to 39+ sportsbooks
+          <p className="text-white/60 max-w-2xl mx-auto font-medium">
+            Choose the plan that works best for you
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
-          {/* Gold Plan */}
-          <div className="relative overflow-hidden rounded-3xl md:rounded-[2rem] bg-gradient-to-b from-slate-900 via-yellow-950/20 to-yellow-500/20 p-8 md:p-10">
-            {/* Subtle overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-yellow-400/10"></div>
-            
-            <div className="relative">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 rounded-full mb-6">
-                <Star className="w-3.5 h-3.5 text-yellow-400" />
-                <span className="text-yellow-400 text-xs font-bold uppercase tracking-wide">Best Value</span>
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+          {plans.map((plan, index) => (
+            <div
+              key={index}
+              className={`relative bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border ${
+                plan.popular ? 'border-purple-400/50' : 'border-purple-400/30'
+              } rounded-2xl p-6 md:p-8 shadow-xl ${
+                plan.popular ? 'shadow-purple-500/20' : 'shadow-purple-500/10'
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full text-xs font-bold shadow-lg shadow-purple-500/50 flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5" />
+                  Most Popular
+                </div>
+              )}
+
+              <div className="mb-6">
+                <h3 className="text-white mb-2 font-bold text-2xl md:text-3xl">
+                  {plan.name}
+                </h3>
+                <p className="text-white/60 text-sm font-medium">
+                  {plan.description}
+                </p>
               </div>
 
-              {/* Plan Name */}
-              <h3 className="text-white text-4xl md:text-5xl mb-4 font-bold">Gold</h3>
-
-              {/* Price */}
-              <div className="mb-2">
-                <span className="text-white text-5xl md:text-6xl font-bold">$10</span>
-                <span className="text-white/50 text-xl font-semibold ml-2">/month</span>
+              <div className="mb-6">
+                <span className="text-white font-bold" style={{fontSize: 'clamp(2.5rem, 6vw, 4rem)'}}>
+                  {plan.price}
+                </span>
+                <span className="text-white/60 ml-2 font-medium">
+                  {plan.period}
+                </span>
               </div>
-              <p className="text-white/40 mb-8 font-semibold">billed monthly</p>
 
-              {/* Features */}
-              <div className="space-y-4 mb-10">
-                {goldFeatures.map((feature, idx) => (
-                  <div key={idx} className="flex items-center justify-between group">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-yellow-500/20 flex items-center justify-center border border-yellow-500/40">
-                        <Check className="w-3 h-3 text-yellow-400" />
-                      </div>
-                      <span className={`${idx === 0 ? 'text-white font-bold' : 'text-white/80 font-semibold'}`}>
-                        {feature.text}
-                      </span>
-                    </div>
-                    <HelpCircle className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors cursor-help" />
-                  </div>
+              <ul className="space-y-3 mb-8">
+                {plan.features.map((feature, fIndex) => (
+                  <li key={fIndex} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-white/80 text-sm font-medium">
+                      {feature}
+                    </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
 
-              {/* CTA Button */}
-              <button 
-                className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" 
-                onClick={() => onLoginClick ? onLoginClick() : navigate('/login')}
-              >
-                Upgrade Plan
+              <button className="w-full py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center">
+                Get Started
               </button>
             </div>
-          </div>
-
-          {/* Platinum Plan */}
-          <div className="relative overflow-hidden rounded-3xl md:rounded-[2rem] bg-gradient-to-b from-slate-950 via-purple-950/40 to-indigo-600/30 p-8 md:p-10">
-            {/* Subtle overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/10"></div>
-            
-            <div className="relative">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full mb-6">
-                <Crown className="w-3.5 h-3.5 text-purple-400" />
-                <span className="text-purple-400 text-xs font-bold uppercase tracking-wide">Most Popular</span>
-              </div>
-
-              {/* Plan Name */}
-              <h3 className="text-white text-4xl md:text-5xl mb-4 font-bold">Platinum</h3>
-
-              {/* Price */}
-              <div className="mb-2">
-                <span className="text-white text-5xl md:text-6xl font-bold">$25</span>
-                <span className="text-white/50 text-xl font-semibold ml-2">/month</span>
-              </div>
-              <p className="text-white/40 mb-8 font-semibold">billed monthly</p>
-
-              {/* Features */}
-              <div className="space-y-4 mb-10">
-                {platinumFeatures.map((feature, idx) => (
-                  <div key={idx} className="flex items-center justify-between group">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/40">
-                        <Check className="w-3 h-3 text-purple-400" />
-                      </div>
-                      <span className={`${idx === 0 ? 'text-white font-bold' : 'text-white/80 font-semibold'}`}>
-                        {feature.text}
-                      </span>
-                    </div>
-                    <HelpCircle className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors cursor-help" />
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA Button */}
-              <button 
-                className="w-full bg-white text-slate-900 py-4 rounded-2xl hover:bg-white/90 transition-all font-bold shadow-lg text-center text-sm" 
-                onClick={() => onLoginClick ? onLoginClick() : navigate('/login')}
-              >
-                Upgrade Plan
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
