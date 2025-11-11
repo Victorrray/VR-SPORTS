@@ -87,7 +87,7 @@ export function OddsPage() {
     <div className="space-y-6">
       {/* Dynamic Bet Type Heading */}
       <div>
-        <h2 className={`${isLight ? 'text-foreground' : 'text-white'} font-bold text-2xl md:text-3xl`}>
+        <h2 className={`${isLight ? text-foreground : 'text-white'} font-bold text-2xl md:text-3xl`}>
           {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
         </h2>
         {loading && <p className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} text-sm mt-2`}>Loading live odds...</p>}
@@ -317,13 +317,13 @@ export function OddsPage() {
       </div>
 
       {/* Odds Table */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden shadow-xl`}>
+      <div className={`${isLight ? 'bg-card' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden shadow-xl`}>
         {/* Table Header - Desktop Only */}
         <div className={`hidden lg:grid lg:grid-cols-12 gap-4 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
-          <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
-          <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
-          <div className={`col-span-4 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Team/Line</div>
-          <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Book & Odds</div>
+          <div className={`col-span-2 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
+          <div className={`col-span-3 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
+          <div className={`col-span-4 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Team/Line</div>
+          <div className={`col-span-3 ${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Book & Odds</div>
         </div>
 
         {/* Table Rows */}

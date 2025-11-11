@@ -29,10 +29,10 @@ export function AccountPage({
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl md:text-3xl font-bold`}>
+          <h1 className={`${isLight ? text-foreground : 'text-white'} text-2xl md:text-3xl font-bold`}>
             Account Settings
           </h1>
-          <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold`}>
+          <p className={`${isLight ? text-foregroundMuted : 'text-white/60'} font-bold`}>
             Manage your profile and subscription
           </p>
         </div>
@@ -48,7 +48,7 @@ export function AccountPage({
       </div>
 
       {/* Profile Section */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
+      <div className={`${isLight ? 'bg-card' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2`}>
             <User className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
