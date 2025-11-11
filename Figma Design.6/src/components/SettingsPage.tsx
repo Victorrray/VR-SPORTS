@@ -1,25 +1,10 @@
 import { Settings, Bell, Shield, Globe, Moon, Sun, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from "next-themes";
-
-const lightModeColors = {
-  text: "text-foreground",
-  textMuted: "text-muted-foreground",
-  statsCard: "bg-card",
-  statsIcon: "bg-primary/10",
-  statsIconColor: "text-primary",
-  textLight: "text-muted-foreground",
-  background: "bg-background",
-  logoGradient: "from-blue-500 to-cyan-500",
-  navActive: "bg-blue-50 text-blue-600",
-  navInactive: "text-gray-600 hover:text-gray-900",
-  signOutButton: "bg-red-50 border-red-300 text-red-600",
-  statsBadge: "bg-blue-50 text-blue-600",
-};
+import { useTheme, lightModeColors } from '../contexts/ThemeContext';
 
 export function SettingsPage() {
   const { colorMode, setColorMode } = useTheme();
-  const isLight = theme === "light";
+  const isLight = colorMode === 'light';
   const [notifications, setNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [twoFactor, setTwoFactor] = useState(false);
@@ -110,13 +95,13 @@ export function SettingsPage() {
         <div className="space-y-4">
           <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
             <div className="flex items-center gap-3 flex-1">
-              {theme === "dark" ? (
+              {colorMode === 'dark' ? (
                 <Moon className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
               ) : (
                 <Sun className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
               )}
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>{theme === "dark" ? 'Dark Mode' : 'Light Mode'}</div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>{colorMode === 'dark' ? 'Dark Mode' : 'Light Mode'}</div>
                 <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Currently enabled</div>
               </div>
             </div>
@@ -124,7 +109,7 @@ export function SettingsPage() {
               <input 
                 type="checkbox" 
                 className="sr-only peer" 
-                checked={theme === "dark"}
+                checked={colorMode === 'dark'}
                 onChange={(e) => setColorMode(e.target.checked ? 'dark' : 'light')}
               />
               <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500`}></div>

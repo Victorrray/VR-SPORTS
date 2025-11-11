@@ -23,39 +23,28 @@ import {
   Wallet,
 } from "lucide-react";
 import { useState } from "react";
-import { PicksPage } from "./PicksPage.tsx";
-import { OddsPage } from "./OddsPage.tsx";
-import { AccountPage } from "./AccountPage.tsx";
-import { SettingsPage } from "./SettingsPage.tsx";
-import { CalculatorPage } from "./CalculatorPage.tsx";
-import { BankrollPage } from "./BankrollPage.tsx";
-import { BetCard, BetData } from "./BetCard.tsx";
-import { useTheme } from "next-themes";
-import { Toaster } from "../ui/index.ts";
-
-const lightModeColors = {
-  text: "text-foreground",
-  textMuted: "text-muted-foreground",
-  statsCard: "bg-card",
-  statsIcon: "bg-primary/10",
-  statsIconColor: "text-primary",
-  textLight: "text-muted-foreground",
-  background: "bg-background",
-  logoGradient: "from-blue-500 to-cyan-500",
-  navActive: "bg-blue-50 text-blue-600",
-  navInactive: "text-gray-600 hover:text-gray-900",
-  signOutButton: "bg-red-50 border-red-300 text-red-600",
-  statsBadge: "bg-blue-50 text-blue-600",
-};
+import { PicksPage } from "./PicksPage";
+import { OddsPage } from "./OddsPage";
+import { AccountPage } from "./AccountPage";
+import { SettingsPage } from "./SettingsPage";
+import { CalculatorPage } from "./CalculatorPage";
+import { BankrollPage } from "./BankrollPage";
+import { BetCard, BetData } from "./BetCard";
+import {
+  useTheme,
+  themeConfig,
+  lightModeColors,
+} from "../contexts/ThemeContext";
+import { Toaster } from "./ui/sonner";
 
 interface DashboardProps {
   onSignOut: () => void;
 }
 
 export function Dashboard({ onSignOut }: DashboardProps) {
-  const { theme } = useTheme();
+  const { theme, colorMode } = useTheme();
   const config = themeConfig[theme];
-  const isLight = theme === "light";
+  const isLight = colorMode === "light";
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");
   const [currentView, setCurrentView] = useState<

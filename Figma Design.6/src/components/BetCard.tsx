@@ -1,5 +1,5 @@
 import { Clock, Check } from 'lucide-react';
-import { useTheme } from "next-themes";
+import { useTheme } from '../contexts/ThemeContext';
 import { useState } from 'react';
 
 export interface BetData {
@@ -27,8 +27,11 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
   const isHero = variant === 'hero';
   
   // Only use theme context when not in hero mode (hero is always dark)
-  const { theme } = useTheme();
-  const isDark = isHero ? true : theme === 'dark';
+  let isDark = false;
+  if (!isHero) {
+    const { colorMode } = useTheme();
+    isDark = colorMode === 'dark';
+  }
 
   const handleAddToPicks = () => {
     setIsAdded(!isAdded);

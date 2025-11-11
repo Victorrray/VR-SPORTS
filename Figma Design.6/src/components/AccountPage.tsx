@@ -10,22 +10,7 @@ import {
   LogOut,
   Lock,
 } from "lucide-react";
-import { useTheme } from "next-themes";
-
-const lightModeColors = {
-  text: "text-foreground",
-  textMuted: "text-muted-foreground",
-  statsCard: "bg-card",
-  statsIcon: "bg-primary/10",
-  statsIconColor: "text-primary",
-  textLight: "text-muted-foreground",
-  background: "bg-background",
-  logoGradient: "from-blue-500 to-cyan-500",
-  navActive: "bg-blue-50 text-blue-600",
-  navInactive: "text-gray-600 hover:text-gray-900",
-  signOutButton: "bg-red-50 border-red-300 text-red-600",
-  statsBadge: "bg-blue-50 text-blue-600",
-};
+import { useTheme, lightModeColors } from '../contexts/ThemeContext';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
@@ -35,7 +20,7 @@ export function AccountPage({
   onNavigateToSettings,
 }: AccountPageProps) {
   const { colorMode } = useTheme();
-  const isLight = theme === "light";
+  const isLight = colorMode === 'light';
   
   return (
     <div className="space-y-6">
