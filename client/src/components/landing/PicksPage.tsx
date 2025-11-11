@@ -18,7 +18,7 @@ const lightModeColors = {
 };
 
 export function PicksPage({ savedPicks = [] }: { savedPicks?: any[] }) {
-  const { colorMode } = useTheme();
+  const { theme } = useTheme();
   const isLight = theme === "light";
   const picks = [
     {

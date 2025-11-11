@@ -48,13 +48,19 @@ const lightModeColors = {
   statsBadge: "bg-blue-50 text-blue-600",
 };
 
+const themeConfig = {
+  default: { background: "bg-background" },
+  "liquid-glass": { background: "bg-background" },
+  "neon-cyberpunk": { background: "bg-background" },
+};
+
 interface DashboardProps {
   onSignOut: () => void;
 }
 
 export function Dashboard({ onSignOut }: DashboardProps) {
   const { theme } = useTheme();
-  const config = themeConfig[theme];
+  const config = themeConfig[theme as keyof typeof themeConfig] || themeConfig.default;
   const isLight = theme === "light";
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");

@@ -34,7 +34,7 @@ interface AccountPageProps {
 export function AccountPage({
   onNavigateToSettings,
 }: AccountPageProps) {
-  const { colorMode } = useTheme();
+  const { theme } = useTheme();
   const isLight = theme === "light";
   
   return (
