@@ -1,6 +1,20 @@
 import { UserPlus, Settings, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-export function HowItWorks() {
+interface HowItWorksProps {
+  onGetStarted?: () => void;
+}
+
+export function HowItWorks({ onGetStarted }: HowItWorksProps = {}) {
+  const navigate = useNavigate();
+  
+  const handleGetStarted = () => {
+    if (onGetStarted) {
+      onGetStarted();
+    } else {
+      navigate('/login');
+    }
+  };
   const steps = [
     {
       number: 1,
@@ -92,7 +106,10 @@ export function HowItWorks() {
 
           {/* Bottom CTA */}
           <div className="mt-12 md:mt-16 text-center">
-            <button className="group px-8 py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-600 hover:to-indigo-600 transition-all font-bold inline-flex items-center gap-2">
+            <button 
+              onClick={handleGetStarted}
+              className="group px-8 py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full hover:from-purple-600 hover:to-indigo-600 transition-all font-bold inline-flex items-center gap-2"
+            >
               <span>Get Started Now</span>
               <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

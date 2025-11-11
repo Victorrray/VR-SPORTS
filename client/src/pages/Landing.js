@@ -49,12 +49,12 @@ export default function Landing() {
           onDashboardClick={handleDashboardClick}
           onRoadmapClick={handleRoadmapClick}
         />
-        <Hero />
+        <Hero onGetStarted={handleLoginClick} />
         <Stats />
         <Bookmakers />
         <Features />
-        <HowItWorks />
-        <Pricing onLoginClick={handleLoginClick} />
+        <HowItWorks onGetStarted={handleLoginClick} />
+        <Pricing onGetStarted={handleLoginClick} />
         <FAQ />
         <Footer 
           onRoadmapClick={handleRoadmapClick}

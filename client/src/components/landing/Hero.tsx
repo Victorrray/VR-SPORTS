@@ -1,6 +1,20 @@
 import { ArrowRight, Play, Sparkles, Clock, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-export function Hero() {
+interface HeroProps {
+  onGetStarted?: () => void;
+}
+
+export function Hero({ onGetStarted }: HeroProps = {}) {
+  const navigate = useNavigate();
+  
+  const handleGetStarted = () => {
+    if (onGetStarted) {
+      onGetStarted();
+    } else {
+      navigate('/login');
+    }
+  };
   // Mock bet data for display
   const featuredBet = {
     id: 1,
@@ -49,7 +63,10 @@ export function Hero() {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 md:gap-6">
-              <button className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold">
+              <button 
+                onClick={handleGetStarted}
+                className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold"
+              >
                 Get started
               </button>
               

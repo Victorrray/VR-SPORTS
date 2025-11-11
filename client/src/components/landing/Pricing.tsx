@@ -1,6 +1,20 @@
 import { Check, Crown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-export function Pricing() {
+interface PricingProps {
+  onGetStarted?: () => void;
+}
+
+export function Pricing({ onGetStarted }: PricingProps = {}) {
+  const navigate = useNavigate();
+  
+  const handleGetStarted = () => {
+    if (onGetStarted) {
+      onGetStarted();
+    } else {
+      navigate('/login');
+    }
+  };
   const plans = [
     {
       name: 'Gold',
@@ -96,7 +110,10 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <button className="w-full py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center">
+              <button 
+                onClick={handleGetStarted}
+                className="w-full py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center"
+              >
                 Get Started
               </button>
             </div>
