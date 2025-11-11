@@ -41,6 +41,8 @@ interface DashboardProps {
   onSignOut: () => void;
 }
 
+// Force rebuild
+
 export function Dashboard({ onSignOut }: DashboardProps) {
   const { theme, colorMode } = useTheme();
   const config = themeConfig[theme];
