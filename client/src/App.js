@@ -16,7 +16,7 @@ import DebugPanel from './components/debug/DebugPanel';
 // import MobileBottomBar from './components/layout/MobileBottomBar'; // OLD - Not used with new landing page
 // import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
 import Landing from './pages/Landing';
-import Dashboard from './pages/Dashboard';
+import { Dashboard } from './pages/Dashboard';
 import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
@@ -39,6 +39,11 @@ import "./App.css";
 import './styles/accessibility.css';
 import './styles/browserCompat.css';
 import './styles/responsive-mobile.css';
+
+// Wrapper for Dashboard to ensure it has ThemeProvider
+function DashboardWrapper(props) {
+  return <Dashboard {...props} />;
+}
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -123,8 +128,8 @@ function AppRoutes() {
           <main className="main-content" id="main-content" tabIndex="-1">
             <AuthDebug />
             <Routes>
-              <Route path="/" element={user ? <Dashboard /> : <Landing />} />
-              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/" element={user ? <DashboardWrapper /> : <Landing />} />
+              <Route path="/dashboard" element={<PrivateRoute><DashboardWrapper /></PrivateRoute>} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
               <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
