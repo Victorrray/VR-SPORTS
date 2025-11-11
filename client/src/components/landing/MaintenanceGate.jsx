@@ -59,7 +59,7 @@ export function MaintenanceGate({ children }) {
                 Under Maintenance
               </h1>
               <p className="text-white/60 font-semibold">
-                We're making improvements to OddSightSeer. We'll be back soon!
+                We're making improvements to OddSightSeer. Site will go live Friday the 14th!
               </p>
             </div>
 
