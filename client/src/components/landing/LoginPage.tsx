@@ -1,5 +1,7 @@
 import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../../hooks/SimpleAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginPageProps {
   onBack: () => void;
@@ -8,14 +10,38 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps) {
+  const navigate = useNavigate();
+  const auth = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { email, password });
+    setError('');
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        // Login flow
+        await auth?.signIn(email, password);
+        console.log('✅ Login successful');
+        navigate('/dashboard');
+      } else {
+        // Sign up flow
+        await auth?.signUp(email, password);
+        console.log('✅ Sign up successful');
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error('❌ Auth error:', err);
+      setError(err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const stats = [
@@ -229,12 +255,20 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                     </div>
                   )}
 
+                  {/* Error Message */}
+                  {error && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                      <p className="text-red-400 font-semibold text-sm">{error}</p>
+                    </div>
+                  )}
+
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLogin ? 'Login to your account' : 'Create your account'}
+                    {loading ? 'Loading...' : (isLogin ? 'Login to your account' : 'Create your account')}
                   </button>
 
                   {/* Divider */}
