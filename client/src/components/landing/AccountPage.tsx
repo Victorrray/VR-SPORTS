@@ -29,10 +29,10 @@ export function AccountPage({
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className={`${isLight ? text-foreground : 'text-white'} text-2xl md:text-3xl font-bold`}>
+          <h1 className={`${isLight ? 'text-foreground' : 'text-white'} text-2xl md:text-3xl font-bold`}>
             Account Settings
           </h1>
-          <p className={`${isLight ? text-foregroundMuted : 'text-white/60'} font-bold`}>
+          <p className={`${isLight ? 'text-muted-foreground' : 'text-white/60'} font-bold`}>
             Manage your profile and subscription
           </p>
         </div>
