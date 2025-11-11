@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "next-themes";
+import { Button, Card, CardContent, Badge } from "../ui/index.ts";
 import { PicksPage } from "./PicksPage.tsx";
 import { OddsPage } from "./OddsPage.tsx";
 import { AccountPage } from "./AccountPage.tsx";
@@ -283,12 +284,14 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   OddSightSeer
                 </span>
               </div>
-              <button
+              <Button
                 onClick={onSignOut}
-                className={`flex items-center gap-2 px-3 py-2 ${isLight ? 'bg-red-50 border-red-300 text-red-600' : 'bg-red-500/10 border-red-400/30 text-red-400'} backdrop-blur-xl border rounded-lg font-bold text-sm shadow-lg ${isLight ? '' : 'shadow-red-500/10'}`}
+                variant="destructive"
+                size="sm"
+                className="flex items-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           </header>
 
@@ -310,32 +313,31 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   {/* Stats Grid - TODO: This mock data will be sourced from My Picks page in the future */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     {stats.map((stat, idx) => (
-                      <div
-                        key={idx}
-                        className={`p-4 md:p-5 ${isLight ? 'bg-card' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent backdrop-blur-2xl border-white/10'} border rounded-xl md:rounded-2xl shadow-lg`}
-                      >
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className={`p-2 ${isLight ? 'bg-primary/10' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-lg border`}>
-                            <stat.icon className={`w-4 h-4 ${isLight ? 'text-primary' : 'text-purple-300'}`} />
+                      <Card key={idx} className="p-4 md:p-5">
+                        <CardContent className="p-0">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className={`p-2 ${isLight ? 'bg-primary/10' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-lg border`}>
+                              <stat.icon className={`w-4 h-4 ${isLight ? 'text-primary' : 'text-purple-300'}`} />
+                            </div>
+                            <span className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} font-bold text-xs md:text-sm uppercase tracking-wide`}>
+                              {stat.label}
+                            </span>
                           </div>
-                          <span className={`${isLight ? 'text-muted-foreground' : 'text-white/50'} font-bold text-xs md:text-sm uppercase tracking-wide`}>
-                            {stat.label}
-                          </span>
-                        </div>
-                        <div className={`${isLight ? 'text-foreground' : 'text-white'} text-xl md:text-2xl font-bold`}>
-                          {stat.value}
-                        </div>
-                        <div
-                          className={`flex items-center gap-1 mt-2 text-xs font-bold ${stat.positive ? "text-emerald-600" : "text-red-600"}`}
-                        >
-                          {stat.positive ? (
-                            <ArrowUpRight className="w-3 h-3" />
-                          ) : (
-                            <ArrowDownRight className="w-3 h-3" />
-                          )}
-                          <span>{stat.change}</span>
-                        </div>
-                      </div>
+                          <div className={`${isLight ? 'text-foreground' : 'text-white'} text-xl md:text-2xl font-bold`}>
+                            {stat.value}
+                          </div>
+                          <div
+                            className={`flex items-center gap-1 mt-2 text-xs font-bold ${stat.positive ? "text-emerald-600" : "text-red-600"}`}
+                          >
+                            {stat.positive ? (
+                              <ArrowUpRight className="w-3 h-3" />
+                            ) : (
+                              <ArrowDownRight className="w-3 h-3" />
+                            )}
+                            <span>{stat.change}</span>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 </div>
