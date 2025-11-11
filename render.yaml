@@ -22,7 +22,7 @@ services:
     name: my-react-frontend-021i
     env: node
     rootDir: client
-    buildCommand: npm install && npm run build
+    buildCommand: cd .. && rm -rf src && cd client && npm install && npm run build
     staticPublishPath: ./build
     plan: free
     routes:
