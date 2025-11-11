@@ -1,5 +1,5 @@
 import { ArrowRight, Play, Sparkles } from 'lucide-react';
-import { BetCard } from './BetCard';
+import { BetCard } from '../../pages/BetCard';
 
 export function Hero() {
   // TODO: Replace this mock data with a cached bet from the API
