@@ -517,3 +517,5 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     </div>
   );
 }
+
+export default Dashboard;
