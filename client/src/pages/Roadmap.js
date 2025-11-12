@@ -2,10 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SEOHelmet from '../components/seo/SEOHelmet';
 
-// Design.8 Components
-import { Header } from '../components/design8/Header';
-import { Roadmap as RoadmapComponent } from '../components/design8/Roadmap';
-import { Footer } from '../components/design8/Footer';
+// Design.8 Components - using .tsx files directly
+import { Header } from '../components/design8/Header.tsx';
+import { Roadmap as RoadmapComponent } from '../components/design8/Roadmap.tsx';
+import { Footer } from '../components/design8/Footer.tsx';
 
 export default function Roadmap() {
   const navigate = useNavigate();
