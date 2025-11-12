@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SEOHelmet from '../components/seo/SEOHelmet';
-import { ThemeProvider } from '../contexts/ThemeContext';
+import '../styles/design8.css';
 
 // Design.8 Components - using .tsx files directly
 import { Header } from '../components/design8/Header.tsx';
@@ -21,30 +21,28 @@ export default function Roadmap() {
   const handleDisclaimerClick = () => navigate('/disclaimer');
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-gray-900">
-        <SEOHelmet
-          title="Roadmap — OddSightSeer"
-          description="See what's coming next for OddSightSeer. Our product roadmap and upcoming features."
-          path="/roadmap"
-          type="website"
+    <div className="min-h-screen bg-gray-900">
+      <SEOHelmet
+        title="Roadmap — OddSightSeer"
+        description="See what's coming next for OddSightSeer. Our product roadmap and upcoming features."
+        path="/roadmap"
+        type="website"
+      />
+      <div className="relative">
+        <Header 
+          onLoginClick={handleLoginClick}
+          onDashboardClick={handleDashboardClick}
+          onSignUpClick={handleSignUpClick}
+          onRoadmapClick={handleRoadmapClick}
         />
-        <div className="relative">
-          <Header 
-            onLoginClick={handleLoginClick}
-            onDashboardClick={handleDashboardClick}
-            onSignUpClick={handleSignUpClick}
-            onRoadmapClick={handleRoadmapClick}
-          />
-          <RoadmapComponent />
-          <Footer 
-            onRoadmapClick={handleRoadmapClick}
-            onPrivacyClick={handlePrivacyClick}
-            onTermsClick={handleTermsClick}
-            onDisclaimerClick={handleDisclaimerClick}
-          />
-        </div>
+        <RoadmapComponent />
+        <Footer 
+          onRoadmapClick={handleRoadmapClick}
+          onPrivacyClick={handlePrivacyClick}
+          onTermsClick={handleTermsClick}
+          onDisclaimerClick={handleDisclaimerClick}
+        />
       </div>
-    </ThemeProvider>
+    </div>
   );
 }
