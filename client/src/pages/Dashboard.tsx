@@ -22,7 +22,7 @@ import {
   Calculator,
   Wallet,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PicksPage } from "./PicksPage";
 import { OddsPage } from "./OddsPage";
 import { AccountPage } from "./AccountPage";
@@ -36,6 +36,8 @@ import {
   lightModeColors,
 } from "../contexts/ThemeContext";
 import { Toaster } from "../components/ui";
+import { useBettingData } from "../hooks/useBettingData";
+import { calculateUserStats } from "../services/userTrackerService";
 
 interface DashboardProps {
   onSignOut: () => void;
@@ -51,90 +53,114 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll"
   >("dashboard");
   const [savedPicks, setSavedPicks] = useState<any[]>([]);
+  const [userStats, setUserStats] = useState<any>(null);
+  const [displayBets, setDisplayBets] = useState<BetData[]>([]);
+
+  const { betHistory, loading: betsLoading } = useBettingData();
+
+  // Load user stats on mount
+  useEffect(() => {
+    const stats = calculateUserStats();
+    setUserStats(stats);
+  }, []);
+
+  // Update display bets from betHistory
+  useEffect(() => {
+    if (betHistory && betHistory.length > 0) {
+      const formattedBets = betHistory.slice(0, 4).map((bet: any, idx: number) => ({
+        id: idx + 1,
+        teams: bet.teams || `${bet.away_team || 'Away'} @ ${bet.home_team || 'Home'}`,
+        time: new Date(bet.placed_at).toLocaleString(),
+        pick: bet.selections?.[0]?.team || bet.pick || 'Multiple selections',
+        odds: bet.odds || '-110',
+        sportsbook: bet.sportsbook || 'Unknown',
+        ev: bet.edge ? `+${bet.edge}%` : '+0%',
+        sport: bet.league || 'Unknown',
+        status: bet.status || 'pending',
+        confidence: bet.confidence || 'Medium',
+      }));
+      setDisplayBets(formattedBets);
+    }
+  }, [betHistory]);
 
   const addPickToMyPicks = (pick: any) => {
     setSavedPicks((prev) => [...prev, pick]);
   };
 
-  const stats = [
+  // Build stats from real user data
+  const stats = userStats ? [
     {
       label: "Win Rate",
-      value: "67.3%",
-      change: "+5.2%",
+      value: `${userStats.winRate?.toFixed(1) || 0}%`,
+      change: userStats.wonBets > 0 ? `+${userStats.wonBets} wins` : 'No wins yet',
+      positive: userStats.winRate > 50,
+      icon: Target,
+    },
+    {
+      label: "Average Edge",
+      value: `${userStats.avgEdge?.toFixed(1) || 0}%`,
+      change: userStats.avgEdge > 0 ? `+${userStats.avgEdge.toFixed(1)}%` : 'N/A',
+      positive: userStats.avgEdge > 0,
+      icon: TrendingUp,
+    },
+    {
+      label: "Total Profit",
+      value: `$${userStats.netProfit?.toFixed(2) || 0}`,
+      change: userStats.netProfit > 0 ? `+$${userStats.netProfit.toFixed(2)}` : `$${userStats.netProfit?.toFixed(2) || 0}`,
+      positive: userStats.netProfit > 0,
+      icon: DollarSign,
+    },
+    {
+      label: "Active Bets",
+      value: userStats.pendingBets?.toString() || "0",
+      change: `${userStats.totalBets || 0} total`,
+      positive: true,
+      icon: Sparkles,
+    },
+  ] : [
+    {
+      label: "Win Rate",
+      value: "—",
+      change: "No data yet",
       positive: true,
       icon: Target,
     },
     {
       label: "Average Edge",
-      value: "4.8%",
-      change: "+0.3%",
+      value: "—",
+      change: "No data yet",
       positive: true,
       icon: TrendingUp,
     },
     {
       label: "Total Profit",
-      value: "$3,247",
-      change: "+$892",
+      value: "$0",
+      change: "Start betting",
       positive: true,
       icon: DollarSign,
     },
     {
       label: "Active Bets",
-      value: "12",
-      change: "3 today",
+      value: "0",
+      change: "0 total",
       positive: true,
       icon: Sparkles,
     },
   ];
 
-  const bets: BetData[] = [
+  // Use real bets if available, otherwise show placeholder
+  const bets: BetData[] = displayBets.length > 0 ? displayBets : [
     {
       id: 1,
-      teams: "Detroit Pistons @ Philadelphia 76ers",
-      time: "Sun, Nov 10 4:41 PM PST",
-      pick: "Detroit Pistons -3.5",
-      odds: "-118",
-      sportsbook: "DraftKings",
-      ev: "+8.2%",
-      sport: "NBA",
-      status: "active",
-      confidence: "High",
-    },
-    {
-      id: 2,
-      teams: "Lakers @ Warriors",
-      time: "Sun, Nov 10 7:00 PM PST",
-      pick: "Over 228.5",
-      odds: "-110",
-      sportsbook: "FanDuel",
-      ev: "+6.5%",
-      sport: "NBA",
-      status: "active",
-      confidence: "Medium",
-    },
-    {
-      id: 3,
-      teams: "Cowboys @ Giants",
-      time: "Sun, Nov 10 1:00 PM EST",
-      pick: "Cowboys -7.5",
-      odds: "-115",
-      sportsbook: "BetMGM",
-      ev: "+5.8%",
-      sport: "NFL",
-      status: "active",
-      confidence: "High",
-    },
-    {
-      id: 4,
-      teams: "Celtics @ Heat",
-      time: "Mon, Nov 11 7:30 PM EST",
-      pick: "Celtics ML",
-      odds: "-125",
-      sportsbook: "Caesars",
-      ev: "+4.3%",
-      sport: "NBA",
-      status: "upcoming",
-      confidence: "Medium",
+      teams: "No bets placed yet",
+      time: "Start exploring odds to place your first bet",
+      pick: "—",
+      odds: "—",
+      sportsbook: "—",
+      ev: "—",
+      sport: "—",
+      status: "pending",
+      confidence: "—",
     },
   ];
 
@@ -368,7 +394,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     </p>
                   </div>
 
-                  {/* Stats Grid - TODO: This mock data will be sourced from My Picks page in the future */}
+                  {/* Stats Grid - Real data from user betting history */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     {stats.map((stat, idx) => (
                       <div
@@ -413,7 +439,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     </span>
                   </div>
 
-                  {/* Bet Cards Grid - TODO: Mock data - will be replaced with actual data from API */}
+                  {/* Bet Cards Grid - Real data from user betting history */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {bets.map((bet) => (
                       <BetCard key={bet.id} bet={bet} />
