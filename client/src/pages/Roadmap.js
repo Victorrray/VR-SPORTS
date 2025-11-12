@@ -1,25 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SEOHelmet from '../components/seo/SEOHelmet';
-import { generateSchemaMarkup } from '../utils/seo';
 
 // Design.8 Components
 import { Header } from '../components/design8/Header';
-import { Hero } from '../components/design8/Hero';
-import { Stats } from '../components/design8/Stats';
-import { Features } from '../components/design8/Features';
-import { Bookmakers } from '../components/design8/Bookmakers';
-import { HowItWorks } from '../components/design8/HowItWorks';
-import { Pricing } from '../components/design8/Pricing';
-import { FAQ } from '../components/design8/FAQ';
+import { Roadmap as RoadmapComponent } from '../components/design8/Roadmap';
 import { Footer } from '../components/design8/Footer';
 
-// Landing Page Component for non-authenticated users
-export default function Landing() {
+export default function Roadmap() {
   const navigate = useNavigate();
-  const organizationSchema = generateSchemaMarkup('Organization');
 
-  // Navigation callbacks for Design.8 components
+  // Navigation callbacks
   const handleLoginClick = () => navigate('/login');
   const handleSignUpClick = () => navigate('/signup');
   const handleDashboardClick = () => navigate('/dashboard');
@@ -29,13 +20,12 @@ export default function Landing() {
   const handleDisclaimerClick = () => navigate('/disclaimer');
 
   return (
-    <div className="min-h-screen bg-gray-900" id="top">
+    <div className="min-h-screen bg-gray-900">
       <SEOHelmet
-        title="OddSightSeer — Find +EV Bets & Compare Sportsbook Odds"
-        description="Find +EV bets with real-time odds comparison across 39+ major sportsbooks. Spot arbitrage opportunities, track line movement, and maximize your betting edge."
-        path="/"
+        title="Roadmap — OddSightSeer"
+        description="See what's coming next for OddSightSeer. Our product roadmap and upcoming features."
+        path="/roadmap"
         type="website"
-        schema={organizationSchema}
       />
       <div className="relative">
         <Header 
@@ -44,13 +34,7 @@ export default function Landing() {
           onSignUpClick={handleSignUpClick}
           onRoadmapClick={handleRoadmapClick}
         />
-        <Hero />
-        <Stats />
-        <Bookmakers />
-        <Features />
-        <HowItWorks />
-        <Pricing onLoginClick={handleLoginClick} />
-        <FAQ />
+        <RoadmapComponent />
         <Footer 
           onRoadmapClick={handleRoadmapClick}
           onPrivacyClick={handlePrivacyClick}
