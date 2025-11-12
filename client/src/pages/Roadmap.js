@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SEOHelmet from '../components/seo/SEOHelmet';
+import { ThemeProvider } from '../contexts/ThemeContext';
 
 // Design.8 Components - using .tsx files directly
 import { Header } from '../components/design8/Header.tsx';
@@ -20,28 +21,30 @@ export default function Roadmap() {
   const handleDisclaimerClick = () => navigate('/disclaimer');
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <SEOHelmet
-        title="Roadmap — OddSightSeer"
-        description="See what's coming next for OddSightSeer. Our product roadmap and upcoming features."
-        path="/roadmap"
-        type="website"
-      />
-      <div className="relative">
-        <Header 
-          onLoginClick={handleLoginClick}
-          onDashboardClick={handleDashboardClick}
-          onSignUpClick={handleSignUpClick}
-          onRoadmapClick={handleRoadmapClick}
+    <ThemeProvider>
+      <div className="min-h-screen bg-gray-900">
+        <SEOHelmet
+          title="Roadmap — OddSightSeer"
+          description="See what's coming next for OddSightSeer. Our product roadmap and upcoming features."
+          path="/roadmap"
+          type="website"
         />
-        <RoadmapComponent />
-        <Footer 
-          onRoadmapClick={handleRoadmapClick}
-          onPrivacyClick={handlePrivacyClick}
-          onTermsClick={handleTermsClick}
-          onDisclaimerClick={handleDisclaimerClick}
-        />
+        <div className="relative">
+          <Header 
+            onLoginClick={handleLoginClick}
+            onDashboardClick={handleDashboardClick}
+            onSignUpClick={handleSignUpClick}
+            onRoadmapClick={handleRoadmapClick}
+          />
+          <RoadmapComponent />
+          <Footer 
+            onRoadmapClick={handleRoadmapClick}
+            onPrivacyClick={handlePrivacyClick}
+            onTermsClick={handleTermsClick}
+            onDisclaimerClick={handleDisclaimerClick}
+          />
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }

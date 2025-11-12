@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { generateSchemaMarkup } from '../utils/seo';
+import { ThemeProvider } from '../contexts/ThemeContext';
 
 // Design.8 Components - using .tsx files directly
 import { Header } from '../components/design8/Header.tsx';
@@ -29,35 +30,37 @@ export default function Landing() {
   const handleDisclaimerClick = () => navigate('/disclaimer');
 
   return (
-    <div className="min-h-screen bg-gray-900" id="top">
-      <SEOHelmet
-        title="OddSightSeer — Find +EV Bets & Compare Sportsbook Odds"
-        description="Find +EV bets with real-time odds comparison across 39+ major sportsbooks. Spot arbitrage opportunities, track line movement, and maximize your betting edge."
-        path="/"
-        type="website"
-        schema={organizationSchema}
-      />
-      <div className="relative">
-        <Header 
-          onLoginClick={handleLoginClick}
-          onDashboardClick={handleDashboardClick}
-          onSignUpClick={handleSignUpClick}
-          onRoadmapClick={handleRoadmapClick}
+    <ThemeProvider>
+      <div className="min-h-screen bg-gray-900" id="top">
+        <SEOHelmet
+          title="OddSightSeer — Find +EV Bets & Compare Sportsbook Odds"
+          description="Find +EV bets with real-time odds comparison across 39+ major sportsbooks. Spot arbitrage opportunities, track line movement, and maximize your betting edge."
+          path="/"
+          type="website"
+          schema={organizationSchema}
         />
-        <Hero />
-        <Stats />
-        <Bookmakers />
-        <Features />
-        <HowItWorks />
-        <Pricing onLoginClick={handleLoginClick} />
-        <FAQ />
-        <Footer 
-          onRoadmapClick={handleRoadmapClick}
-          onPrivacyClick={handlePrivacyClick}
-          onTermsClick={handleTermsClick}
-          onDisclaimerClick={handleDisclaimerClick}
-        />
+        <div className="relative">
+          <Header 
+            onLoginClick={handleLoginClick}
+            onDashboardClick={handleDashboardClick}
+            onSignUpClick={handleSignUpClick}
+            onRoadmapClick={handleRoadmapClick}
+          />
+          <Hero />
+          <Stats />
+          <Bookmakers />
+          <Features />
+          <HowItWorks />
+          <Pricing onLoginClick={handleLoginClick} />
+          <FAQ />
+          <Footer 
+            onRoadmapClick={handleRoadmapClick}
+            onPrivacyClick={handlePrivacyClick}
+            onTermsClick={handleTermsClick}
+            onDisclaimerClick={handleDisclaimerClick}
+          />
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
