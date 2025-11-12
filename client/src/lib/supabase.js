@@ -89,6 +89,12 @@ if (isConfigValid && typeof window !== 'undefined') {
 // Export the client (may be null if not configured - that's OK for demo mode)
 export const supabase = supabaseClient;
 
+// Export db as alias for supabase (for backward compatibility)
+export const db = supabaseClient;
+
+// Export flag indicating if Supabase is enabled
+export const isSupabaseEnabled = isConfigValid && supabaseClient !== null;
+
 // Export a lightweight accessor for the current access token
 export async function getAccessToken() {
   try {
