@@ -1,6 +1,6 @@
 import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 
 export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
@@ -305,7 +305,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
         const evB = parseFloat(b.ev.replace('%', ''));
         return sortDirection === 'asc' ? evA - evB : evB - evA;
       } else if (sortBy === 'time') {
-        // Mock date sorting - replace with actual game time from API
+        // TODO: Replace with actual game time from API - use commence_time from odds data
+        // This should sort by the actual game start time from the API
         const timeA = new Date('2023-11-10T19:00:00Z').getTime();
         const timeB = new Date('2023-11-10T19:00:00Z').getTime();
         return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
@@ -398,7 +399,10 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
             />
           </div>
           <div className="flex gap-2 overflow-x-auto overflow-y-visible pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide w-full md:w-auto">
-            {/* Single Filters Button */}
+            {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date
+                - Shows purple/active styling when filters are applied or panel is open
+                - Displays a badge with count of active filters when any non-default filters are selected
+                - Default filters: All Sports, All Markets, Straight Bets, Today */}
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
               className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
@@ -409,6 +413,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
             >
               <Filter className="w-4 h-4" />
               <span>Filters</span>
+              {/* Badge showing number of active filters */}
               {(selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today') && (
                 <span className={`px-1.5 py-0.5 rounded-full text-xs ${isLight ? 'bg-purple-200 text-purple-700' : 'bg-purple-500/30 text-purple-300'}`}>
                   {[selectedSport !== 'all', selectedMarket !== 'all', selectedBetType !== 'straight', selectedDate !== 'today'].filter(Boolean).length}
@@ -416,6 +421,9 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
               )}
             </button>
 
+            {/* Auto-Refresh Button - Toggles automatic refreshing of odds data
+                - Will automatically fetch latest odds at regular intervals when enabled
+                - TODO: Functionality to be implemented with real-time API updates */}
             <button className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-emerald-100 border-emerald-300 text-emerald-700 hover:bg-emerald-200' : 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/30 text-emerald-300 hover:from-emerald-500/30 hover:to-teal-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm`}>
               <RefreshCw className="w-4 h-4" />
               <span className="hidden sm:inline">Auto-Refresh</span>
@@ -618,41 +626,45 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                   onClick={() => toggleRow(pick.id)}
                   className={`w-full p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all text-left`}
                 >
-                  {/* Desktop Layout */}
+                  {/* Desktop Layout - Grid format for larger screens */}
                   <div className="hidden lg:grid lg:grid-cols-12 gap-3 lg:gap-4 items-center">
-                    {/* EV Badge */}
+                    {/* EV Badge - Shows expected value percentage */}
                     <div className="lg:col-span-2">
                       <div className={`inline-flex items-center gap-2 px-1.5 py-0.5 lg:px-2 lg:py-0.5 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-xl shadow-lg whitespace-nowrap text-[14px]`}>
                         <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-xs lg:text-sm`}>{pick.ev}</span>
                       </div>
                     </div>
 
-                    {/* Match Info */}
+                    {/* Match Info - Game details, sport badge, and time */}
                     <div className="lg:col-span-3 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {/* Sport Badge */}
                         <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
                           {pick.sport}
                         </span>
                       </div>
+                      {/* Game Matchup */}
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.game}</div>
-                      {/* TODO: Mock date - will be replaced with actual game time from API */}
+                      {/* Game Time - TODO: Mock date - will be replaced with actual game time from API */}
                       <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
                         <Clock className="w-3 h-3" />
                         Sun, Nov 10 7:00 PM PST
                       </div>
                     </div>
 
-                    {/* Team/Line */}
+                    {/* Team/Line - Recommended pick (spread, total, moneyline, etc.) */}
                     <div className="lg:col-span-3 min-w-0">
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.pick}</div>
                     </div>
 
-                    {/* Book & Odds */}
+                    {/* Book - Best sportsbook for this pick */}
                     <div className="lg:col-span-2 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.bestBook}</span>
                       </div>
                     </div>
+                    
+                    {/* Odds - Best available odds for this pick */}
                     <div className="lg:col-span-2 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.bestOdds}</span>
@@ -660,12 +672,12 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                     </div>
                   </div>
 
-                  {/* Mobile Layout */}
+                  {/* Mobile Layout - Stacked format for smaller screens */}
                   <div className="lg:hidden space-y-4">
                     {/* Header - Teams and EV */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        {/* Teams */}
+                        {/* Teams - Display both teams with avatar initials */}
                         <div className="space-y-2 mb-3">
                           <div className="flex items-center gap-2">
                             <div className={`w-8 h-8 rounded-full ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} border flex items-center justify-center flex-shrink-0`}>
@@ -681,17 +693,19 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </div>
                         </div>
                         
-                        {/* Game Info */}
+                        {/* Game Info - Date, time, and sport */}
                         <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
                           {`Mon, Nov 10 at 7:30 PM • ${pick.sport}`}
                         </div>
                       </div>
 
-                      {/* EV and Add Button */}
+                      {/* EV and Add Button - Right column showing value and action button */}
                       <div className="flex flex-col gap-2 flex-shrink-0">
+                        {/* EV Badge */}
                         <div className={`px-3 py-2 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-2xl shadow-lg text-center`}>
                           <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{pick.ev}</span>
                         </div>
+                        {/* Add to My Picks Button */}
                         <div 
                           onClick={(e) => {
                             e.stopPropagation();

@@ -2,7 +2,8 @@ import { ArrowRight, Play, Sparkles } from 'lucide-react';
 import { BetCard } from './BetCard';
 
 export function Hero() {
-  // TODO: Replace this mock data with a cached bet from the API
+  // TODO: Replace this with a cached bet from the API - fetch from /api/bets/featured or similar
+  // This should pull the highest EV bet from the current day or most recent bet
   const featuredBet = {
     id: 1,
     teams: "Detroit Pistons @ Philadelphia 76ers",
@@ -73,7 +74,7 @@ export function Hero() {
             {/* Bet Card Preview */}
             <div className="relative h-[500px] flex items-center justify-center">
               <div className="w-full max-w-[500px]">
-                <BetCard bet={featuredBet} variant="hero" />
+                <BetCard bet={featuredBet} variant="hero" showActions={false} />
               </div>
             </div>
           </div>

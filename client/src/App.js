@@ -30,6 +30,7 @@ import PlanGuard from "./components/guards/PlanGuard";
 import MyPicks from './pages/MyPicks';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import Design8Dashboard from './pages/Design8Dashboard';
 import BillingSuccess from './pages/BillingSuccess';
 import BillingCancel from './pages/BillingCancel';
 import Subscribe from './pages/Subscribe';
@@ -137,6 +138,7 @@ function AppRoutes() {
               <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />
               <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
               <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
+              <Route path="/design8" element={<PrivateRoute><Design8Dashboard /></PrivateRoute>} />
               <Route path="/billing/success" element={<BillingSuccess />} />
               <Route path="/billing/cancel" element={<BillingCancel />} />
               <Route path="/terms" element={<Terms />} />

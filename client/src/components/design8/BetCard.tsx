@@ -1,5 +1,5 @@
 import { Clock, Check } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useState } from 'react';
 
 export interface BetData {
@@ -18,20 +18,18 @@ export interface BetData {
 interface BetCardProps {
   bet: BetData;
   variant?: 'default' | 'hero'; // 'hero' for landing page display
+  showActions?: boolean; // Control whether to show action buttons
 }
 
-export function BetCard({ bet, variant = 'default' }: BetCardProps) {
+export function BetCard({ bet, variant = 'default', showActions = true }: BetCardProps) {
   const [isAdded, setIsAdded] = useState(false);
+  const { colorMode } = useTheme();
   
   // For the hero variant, we use a fixed dark theme style
   const isHero = variant === 'hero';
   
-  // Only use theme context when not in hero mode (hero is always dark)
-  let isDark = false;
-  if (!isHero) {
-    const { colorMode } = useTheme();
-    isDark = colorMode === 'dark';
-  }
+  // Determine if dark mode - hero is always dark, otherwise use theme context
+  const isDark = isHero ? true : colorMode === 'dark';
 
   const handleAddToPicks = () => {
     setIsAdded(!isAdded);
@@ -133,32 +131,34 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2">
-          <button className={`px-3 py-2 ${
-            isHero || isDark
-              ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
-              : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-          } backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}>
-            Compare Odds
-          </button>
-          <button 
-            onClick={handleAddToPicks}
-            className={`px-3 py-2 ${
-              isAdded 
-                ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 border-emerald-400/30' 
-                : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
-            } text-white rounded-lg transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
-          >
-            {isAdded ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                Added
-              </>
-            ) : (
-              'Place Bet'
-            )}
-          </button>
-        </div>
+        {showActions && (
+          <div className="grid grid-cols-2 gap-2">
+            <button className={`px-3 py-2 ${
+              isHero || isDark
+                ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
+                : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+            } backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}>
+              Compare Odds
+            </button>
+            <button 
+              onClick={handleAddToPicks}
+              className={`px-3 py-2 ${
+                isAdded 
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 border-emerald-400/30' 
+                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
+              } text-white rounded-lg transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
+            >
+              {isAdded ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  Added
+                </>
+              ) : (
+                'Place Bet'
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

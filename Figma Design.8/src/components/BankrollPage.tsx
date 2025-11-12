@@ -26,58 +26,32 @@ export function BankrollPage() {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   
-  const [currentBankroll, setCurrentBankroll] = useState(5000);
-  const [startingBankroll] = useState(3000);
-  const [strategy, setStrategy] = useState<BankrollStrategy>('flat');
+  const [currentBankroll, setCurrentBankroll] = useState(0);
+  const [startingBankroll, setStartingBankroll] = useState(0);
+  const [strategy, setStrategy] = useState<BankrollStrategy>('kelly');
   const [flatBetAmount, setFlatBetAmount] = useState('50');
   const [percentageBet, setPercentageBet] = useState('2');
   const [kellyFraction, setKellyFraction] = useState('0.5');
   const [showAddFunds, setShowAddFunds] = useState(false);
   const [fundAmount, setFundAmount] = useState('');
+  const [showSetup, setShowSetup] = useState(true);
+  const [initialBankrollInput, setInitialBankrollInput] = useState('');
 
-  // Mock transaction history
-  const transactions: Transaction[] = [
-    { id: 1, type: 'deposit', amount: 3000, date: '2024-11-01', description: 'Initial deposit' },
-    { id: 2, type: 'win', amount: 450, date: '2024-11-05', description: 'NBA - Lakers ML' },
-    { id: 3, type: 'loss', amount: -100, date: '2024-11-06', description: 'NFL - Cowboys spread' },
-    { id: 4, type: 'win', amount: 320, date: '2024-11-08', description: 'NHL - Bruins ML' },
-    { id: 5, type: 'deposit', amount: 1000, date: '2024-11-09', description: 'Additional deposit' },
-    { id: 6, type: 'win', amount: 280, date: '2024-11-10', description: 'NBA - Celtics spread' },
-    { id: 7, type: 'win', amount: 150, date: '2024-11-11', description: 'NFL - Chiefs Over' },
-  ];
-
-  // Mock bankroll history for chart
-  const bankrollHistory = [
-    { date: 'Nov 1', balance: 3000 },
-    { date: 'Nov 2', balance: 3200 },
-    { date: 'Nov 3', balance: 3150 },
-    { date: 'Nov 4', balance: 3400 },
-    { date: 'Nov 5', balance: 3850 },
-    { date: 'Nov 6', balance: 3750 },
-    { date: 'Nov 7', balance: 3900 },
-    { date: 'Nov 8', balance: 4220 },
-    { date: 'Nov 9', balance: 5220 },
-    { date: 'Nov 10', balance: 5500 },
-    { date: 'Nov 11', balance: 5000 },
-  ];
-
-  // Mock betting history
-  const bettingHistory: BetHistory[] = [
-    { id: 1, date: '2024-11-11', game: 'Chiefs @ Broncos', stake: 100, result: 'pending', profit: 0 },
-    { id: 2, date: '2024-11-10', game: 'Celtics @ Magic', stake: 50, result: 'win', profit: 45 },
-    { id: 3, date: '2024-11-09', game: 'Lakers @ Warriors', stake: 50, result: 'win', profit: 55 },
-    { id: 4, date: '2024-11-08', game: 'Bruins @ Rangers', stake: 75, result: 'win', profit: 68 },
-    { id: 5, date: '2024-11-07', game: 'Cowboys @ Giants', stake: 100, result: 'loss', profit: -100 },
-  ];
+  // Empty arrays for transactions and history when starting fresh
+  const transactions: Transaction[] = [];
+  const bankrollHistory = currentBankroll > 0 ? [{ date: 'Today', balance: currentBankroll }] : [];
+  const bettingHistory: BetHistory[] = [];
 
   const totalProfit = currentBankroll - startingBankroll;
-  const roi = ((totalProfit / startingBankroll) * 100);
+  const roi = startingBankroll > 0 ? ((totalProfit / startingBankroll) * 100) : 0;
   const wins = bettingHistory.filter(b => b.result === 'win').length;
   const losses = bettingHistory.filter(b => b.result === 'loss').length;
   const winRate = wins + losses > 0 ? (wins / (wins + losses)) * 100 : 0;
 
   // Calculate recommended bet size based on strategy
   const getRecommendedBet = () => {
+    if (currentBankroll === 0) return 0;
+    
     switch (strategy) {
       case 'flat':
         return parseFloat(flatBetAmount) || 0;
@@ -85,8 +59,9 @@ export function BankrollPage() {
         return (currentBankroll * (parseFloat(percentageBet) / 100)) || 0;
       case 'kelly':
         // Simplified Kelly: (edge / odds) * bankroll * kelly fraction
-        // Using mock values: 5% edge, -110 odds
-        const edge = 0.05;
+        // TODO: Replace mock values with real edge data from user's bets
+        // Should calculate edge from actual user bet history
+        const edge = 0.05; // Mock value - replace with real edge from API
         const kellyPercent = edge * parseFloat(kellyFraction);
         return currentBankroll * kellyPercent;
       default:
@@ -95,6 +70,16 @@ export function BankrollPage() {
   };
 
   const recommendedBet = getRecommendedBet();
+
+  const handleSetupBankroll = () => {
+    const amount = parseFloat(initialBankrollInput);
+    if (!isNaN(amount) && amount > 0) {
+      setCurrentBankroll(amount);
+      setStartingBankroll(amount);
+      setInitialBankrollInput('');
+      setShowSetup(false);
+    }
+  };
 
   const handleAddFunds = (type: 'deposit' | 'withdrawal') => {
     const amount = parseFloat(fundAmount);
@@ -113,6 +98,65 @@ export function BankrollPage() {
 
   return (
     <div className="space-y-6">
+      {/* Setup Modal - Shows when bankroll is 0 */}
+      {currentBankroll === 0 && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`max-w-md w-full p-8 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-purple-500/20 via-indigo-500/20 to-purple-500/20 border-purple-400/30'} backdrop-blur-2xl border rounded-3xl`}>
+            <div className="text-center mb-6">
+              <div className={`inline-flex p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border-purple-400/40'} backdrop-blur-xl rounded-full border mb-4`}>
+                <Wallet className={`w-12 h-12 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+              </div>
+              <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-2xl mb-2`}>
+                Set Your Starting Bankroll
+              </h2>
+              <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold text-sm`}>
+                Enter the amount you want to start with for bankroll tracking
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-sm mb-2 block`}>
+                  Initial Bankroll Amount ($)
+                </label>
+                <input
+                  type="number"
+                  value={initialBankrollInput}
+                  onChange={(e) => setInitialBankrollInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSetupBankroll()}
+                  placeholder="e.g., 1000"
+                  autoFocus
+                  className={`w-full px-4 py-4 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400' : 'bg-white/5 border-white/10 text-white placeholder:text-white/40'} border rounded-xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-purple-400/40`}
+                />
+              </div>
+
+              <button
+                onClick={handleSetupBankroll}
+                disabled={!initialBankrollInput || parseFloat(initialBankrollInput) <= 0}
+                className={`w-full px-6 py-4 ${
+                  !initialBankrollInput || parseFloat(initialBankrollInput) <= 0
+                    ? isLight ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 text-white/40 cursor-not-allowed'
+                    : isLight ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700' : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
+                } rounded-xl transition-all font-bold text-lg flex items-center justify-center gap-2`}
+              >
+                <Wallet className="w-5 h-5" />
+                Start Tracking
+              </button>
+
+              <div className={`p-4 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-xl`}>
+                <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-xs mb-1 flex items-center gap-2`}>
+                  <AlertCircle className="w-3 h-3" />
+                  Important
+                </div>
+                <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold`}>
+                  Only use money you can afford to lose. This should be a dedicated betting budget separate from your living expenses.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-2xl md:text-3xl mb-2`}>
@@ -302,6 +346,16 @@ export function BankrollPage() {
               </label>
               <div className="space-y-2">
                 <button
+                  onClick={() => setStrategy('kelly')}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                    strategy === 'kelly'
+                      ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
+                      : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  Kelly Criterion
+                </button>
+                <button
                   onClick={() => setStrategy('flat')}
                   className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                     strategy === 'flat'
@@ -320,16 +374,6 @@ export function BankrollPage() {
                   }`}
                 >
                   Percentage of Bankroll
-                </button>
-                <button
-                  onClick={() => setStrategy('kelly')}
-                  className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                    strategy === 'kelly'
-                      ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
-                      : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
-                  }`}
-                >
-                  Kelly Criterion
                 </button>
               </div>
             </div>
@@ -395,61 +439,30 @@ export function BankrollPage() {
               <div className={`${isLight ? 'text-purple-700' : 'text-purple-400'} text-2xl font-bold`}>
                 ${recommendedBet.toFixed(2)}
               </div>
-              <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold mt-1`}>
-                {((recommendedBet / currentBankroll) * 100).toFixed(2)}% of bankroll
-              </div>
+              {currentBankroll > 0 && (
+                <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold mt-1`}>
+                  {((recommendedBet / currentBankroll) * 100).toFixed(2)}% of bankroll
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Recent Transactions */}
+        {/* Recent Activity - Populates from user's bets placed via My Picks */}
         <div className={`p-6 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
           <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg mb-4`}>
             Recent Activity
           </h3>
 
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            {transactions.slice().reverse().map((transaction) => (
-              <div
-                key={transaction.id}
-                className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      transaction.type === 'deposit' ? isLight ? 'bg-emerald-100 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'
-                      : transaction.type === 'withdrawal' ? isLight ? 'bg-red-100 border-red-200' : 'bg-red-500/10 border-red-400/20'
-                      : transaction.type === 'win' ? isLight ? 'bg-blue-100 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'
-                      : isLight ? 'bg-gray-100 border-gray-200' : 'bg-gray-500/10 border-gray-400/20'
-                    } border`}>
-                      {transaction.type === 'deposit' && <Plus className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />}
-                      {transaction.type === 'withdrawal' && <Minus className={`w-4 h-4 ${isLight ? 'text-red-600' : 'text-red-400'}`} />}
-                      {transaction.type === 'win' && <ArrowUpRight className={`w-4 h-4 ${isLight ? 'text-blue-600' : 'text-blue-400'}`} />}
-                      {transaction.type === 'loss' && <ArrowDownRight className={`w-4 h-4 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} />}
-                    </div>
-                    <div>
-                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
-                        {transaction.description}
-                      </div>
-                      <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold mt-1`}>
-                        {new Date(transaction.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                  <div className={`font-bold text-sm ${
-                    transaction.amount >= 0 
-                      ? 'text-emerald-600' 
-                      : 'text-red-600'
-                  }`}>
-                    {transaction.amount >= 0 ? '+' : ''}${Math.abs(transaction.amount).toLocaleString()}
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Empty State - Will be populated by bets placed from My Picks */}
+          <div className="flex flex-col items-center justify-center py-12 px-4">
+            <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
+              <Activity className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+            </div>
+            <h4 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg mb-2`}>No Activity Yet</h4>
+            <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-center text-sm max-w-md`}>
+              Your betting activity will appear here when you place bets from My Picks. Track deposits, withdrawals, wins, and losses.
+            </p>
           </div>
         </div>
       </div>

@@ -22,7 +22,7 @@ import {
   Calculator,
   Wallet,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PicksPage } from "./PicksPage";
 import { OddsPage } from "./OddsPage";
 import { AccountPage } from "./AccountPage";
@@ -51,90 +51,159 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll"
   >("dashboard");
   const [savedPicks, setSavedPicks] = useState<any[]>([]);
+  const [userStats, setUserStats] = useState<any>(null);
+  const [displayBets, setDisplayBets] = useState<BetData[]>([]);
+
+  // Load user stats on mount
+  useEffect(() => {
+    // TODO: Replace with real API call to fetch user stats
+    // For now, using placeholder data structure
+    const placeholderStats = {
+      winRate: 67.3,
+      avgEdge: 4.8,
+      netProfit: 3247,
+      pendingBets: 12,
+      wonBets: 8,
+      totalBets: 12,
+    };
+    setUserStats(placeholderStats);
+  }, []);
+
+  // Load user bets on mount
+  useEffect(() => {
+    // TODO: Replace with real API call to fetch user's recent bets
+    // For now, using placeholder data structure
+    const placeholderBets: BetData[] = [
+      {
+        id: 1,
+        teams: "Detroit Pistons @ Philadelphia 76ers",
+        time: "Sun, Nov 10 4:41 PM PST",
+        pick: "Detroit Pistons -3.5",
+        odds: "-118",
+        sportsbook: "DraftKings",
+        ev: "+8.2%",
+        sport: "NBA",
+        status: "active",
+        confidence: "High",
+      },
+      {
+        id: 2,
+        teams: "Lakers @ Warriors",
+        time: "Sun, Nov 10 7:00 PM PST",
+        pick: "Over 228.5",
+        odds: "-110",
+        sportsbook: "FanDuel",
+        ev: "+6.5%",
+        sport: "NBA",
+        status: "active",
+        confidence: "Medium",
+      },
+      {
+        id: 3,
+        teams: "Cowboys @ Giants",
+        time: "Sun, Nov 10 1:00 PM EST",
+        pick: "Cowboys -7.5",
+        odds: "-115",
+        sportsbook: "BetMGM",
+        ev: "+5.8%",
+        sport: "NFL",
+        status: "active",
+        confidence: "High",
+      },
+      {
+        id: 4,
+        teams: "Celtics @ Heat",
+        time: "Mon, Nov 11 7:30 PM EST",
+        pick: "Celtics ML",
+        odds: "-125",
+        sportsbook: "Caesars",
+        ev: "+4.3%",
+        sport: "NBA",
+        status: "upcoming",
+        confidence: "Medium",
+      },
+    ];
+    setDisplayBets(placeholderBets);
+  }, []);
 
   const addPickToMyPicks = (pick: any) => {
     setSavedPicks((prev) => [...prev, pick]);
   };
 
-  const stats = [
+  // Build stats from real user data
+  const stats = userStats ? [
     {
       label: "Win Rate",
-      value: "67.3%",
-      change: "+5.2%",
+      value: `${userStats.winRate?.toFixed(1) || 0}%`,
+      change: userStats.wonBets > 0 ? `+${userStats.wonBets} wins` : 'No wins yet',
+      positive: userStats.winRate > 50,
+      icon: Target,
+    },
+    {
+      label: "Average Edge",
+      value: `${userStats.avgEdge?.toFixed(1) || 0}%`,
+      change: userStats.avgEdge > 0 ? `+${userStats.avgEdge.toFixed(1)}%` : 'N/A',
+      positive: userStats.avgEdge > 0,
+      icon: TrendingUp,
+    },
+    {
+      label: "Total Profit",
+      value: `$${userStats.netProfit?.toFixed(2) || 0}`,
+      change: userStats.netProfit > 0 ? `+$${userStats.netProfit.toFixed(2)}` : `$${userStats.netProfit?.toFixed(2) || 0}`,
+      positive: userStats.netProfit > 0,
+      icon: DollarSign,
+    },
+    {
+      label: "Active Bets",
+      value: userStats.pendingBets?.toString() || "0",
+      change: `${userStats.totalBets || 0} total`,
+      positive: true,
+      icon: Sparkles,
+    },
+  ] : [
+    {
+      label: "Win Rate",
+      value: "—",
+      change: "No data yet",
       positive: true,
       icon: Target,
     },
     {
       label: "Average Edge",
-      value: "4.8%",
-      change: "+0.3%",
+      value: "—",
+      change: "No data yet",
       positive: true,
       icon: TrendingUp,
     },
     {
       label: "Total Profit",
-      value: "$3,247",
-      change: "+$892",
+      value: "$0",
+      change: "Start betting",
       positive: true,
       icon: DollarSign,
     },
     {
       label: "Active Bets",
-      value: "12",
-      change: "3 today",
+      value: "0",
+      change: "0 total",
       positive: true,
       icon: Sparkles,
     },
   ];
 
-  const bets: BetData[] = [
+  // Use real bets if available
+  const bets: BetData[] = displayBets.length > 0 ? displayBets : [
     {
       id: 1,
-      teams: "Detroit Pistons @ Philadelphia 76ers",
-      time: "Sun, Nov 10 4:41 PM PST",
-      pick: "Detroit Pistons -3.5",
-      odds: "-118",
-      sportsbook: "DraftKings",
-      ev: "+8.2%",
-      sport: "NBA",
-      status: "active",
-      confidence: "High",
-    },
-    {
-      id: 2,
-      teams: "Lakers @ Warriors",
-      time: "Sun, Nov 10 7:00 PM PST",
-      pick: "Over 228.5",
-      odds: "-110",
-      sportsbook: "FanDuel",
-      ev: "+6.5%",
-      sport: "NBA",
-      status: "active",
-      confidence: "Medium",
-    },
-    {
-      id: 3,
-      teams: "Cowboys @ Giants",
-      time: "Sun, Nov 10 1:00 PM EST",
-      pick: "Cowboys -7.5",
-      odds: "-115",
-      sportsbook: "BetMGM",
-      ev: "+5.8%",
-      sport: "NFL",
-      status: "active",
-      confidence: "High",
-    },
-    {
-      id: 4,
-      teams: "Celtics @ Heat",
-      time: "Mon, Nov 11 7:30 PM EST",
-      pick: "Celtics ML",
-      odds: "-125",
-      sportsbook: "Caesars",
-      ev: "+4.3%",
-      sport: "NBA",
-      status: "upcoming",
-      confidence: "Medium",
+      teams: "No bets placed yet",
+      time: "Start exploring odds to place your first bet",
+      pick: "—",
+      odds: "—",
+      sportsbook: "—",
+      ev: "—",
+      sport: "—",
+      status: "pending",
+      confidence: "—",
     },
   ];
 
