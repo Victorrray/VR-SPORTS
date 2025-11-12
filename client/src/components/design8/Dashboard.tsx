@@ -36,6 +36,8 @@ import {
   lightModeColors,
 } from "../../contexts/ThemeContext";
 import { Toaster } from "./ui/sonner";
+import { useBettingData } from "../../hooks/useBettingData";
+import { calculateUserStats } from "../../services/userTrackerService";
 
 interface DashboardProps {
   onSignOut: () => void;
@@ -54,77 +56,32 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [userStats, setUserStats] = useState<any>(null);
   const [displayBets, setDisplayBets] = useState<BetData[]>([]);
 
+  const { betHistory, loading: betsLoading } = useBettingData();
+
   // Load user stats on mount
   useEffect(() => {
-    // TODO: Replace with real API call to fetch user stats
-    // For now, using placeholder data structure
-    const placeholderStats = {
-      winRate: 67.3,
-      avgEdge: 4.8,
-      netProfit: 3247,
-      pendingBets: 12,
-      wonBets: 8,
-      totalBets: 12,
-    };
-    setUserStats(placeholderStats);
+    const stats = calculateUserStats();
+    setUserStats(stats);
   }, []);
 
-  // Load user bets on mount
+  // Update display bets from betHistory
   useEffect(() => {
-    // TODO: Replace with real API call to fetch user's recent bets
-    // For now, using placeholder data structure
-    const placeholderBets: BetData[] = [
-      {
-        id: 1,
-        teams: "Detroit Pistons @ Philadelphia 76ers",
-        time: "Sun, Nov 10 4:41 PM PST",
-        pick: "Detroit Pistons -3.5",
-        odds: "-118",
-        sportsbook: "DraftKings",
-        ev: "+8.2%",
-        sport: "NBA",
-        status: "active",
-        confidence: "High",
-      },
-      {
-        id: 2,
-        teams: "Lakers @ Warriors",
-        time: "Sun, Nov 10 7:00 PM PST",
-        pick: "Over 228.5",
-        odds: "-110",
-        sportsbook: "FanDuel",
-        ev: "+6.5%",
-        sport: "NBA",
-        status: "active",
-        confidence: "Medium",
-      },
-      {
-        id: 3,
-        teams: "Cowboys @ Giants",
-        time: "Sun, Nov 10 1:00 PM EST",
-        pick: "Cowboys -7.5",
-        odds: "-115",
-        sportsbook: "BetMGM",
-        ev: "+5.8%",
-        sport: "NFL",
-        status: "active",
-        confidence: "High",
-      },
-      {
-        id: 4,
-        teams: "Celtics @ Heat",
-        time: "Mon, Nov 11 7:30 PM EST",
-        pick: "Celtics ML",
-        odds: "-125",
-        sportsbook: "Caesars",
-        ev: "+4.3%",
-        sport: "NBA",
-        status: "upcoming",
-        confidence: "Medium",
-      },
-    ];
-    setDisplayBets(placeholderBets);
-  }, []);
+    if (betHistory && betHistory.length > 0) {
+      const formattedBets = betHistory.slice(0, 4).map((bet: any, idx: number) => ({
+        id: idx + 1,
+        teams: bet.teams || `${bet.away_team || 'Away'} @ ${bet.home_team || 'Home'}`,
+        time: new Date(bet.placed_at).toLocaleString(),
+        pick: bet.selections?.[0]?.team || bet.pick || 'Multiple selections',
+        odds: bet.odds || '-110',
+        sportsbook: bet.sportsbook || 'Unknown',
+        ev: bet.edge ? `+${bet.edge}%` : '+0%',
+        sport: bet.league || 'Unknown',
+        status: bet.status || 'pending',
+        confidence: bet.confidence || 'Medium',
+      }));
+      setDisplayBets(formattedBets);
+    }
+  }, [betHistory]);
 
   const addPickToMyPicks = (pick: any) => {
     setSavedPicks((prev) => [...prev, pick]);
