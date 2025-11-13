@@ -1,0 +1,113 @@
+/* Desktop Header Component Styles */
+
+.desktop-header {
+  display: none; /* Hidden by default, shown in desktop media query */
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.04) 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(139, 92, 246, 0.25);
+  margin-bottom: 32px;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.12);
+}
+
+.desktop-filters {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.desktop-filter-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.desktop-filter-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.desktop-filter-button:active {
+  transform: translateY(0);
+}
+
+.desktop-section-selector {
+  display: flex;
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: 12px;
+  padding: 8px;
+  border: 2px solid rgba(139, 92, 246, 0.2);
+  gap: 6px;
+}
+
+.desktop-section-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.desktop-section-option:hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.desktop-section-option.active {
+  background: var(--accent);
+  color: white;
+}
+
+.section-icon {
+  opacity: 0.8;
+}
+
+.desktop-section-option.active .section-icon {
+  opacity: 1;
+}
+
+.desktop-section-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #4b5563;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.desktop-section-option.disabled:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: none;
+  box-shadow: none;
+}
+
+.desktop-section-option.disabled .section-icon {
+  opacity: 0.5;
+  color: #4b5563;
+}
+
+/* Show desktop header on larger screens */
+@media (min-width: 769px) {
+  .desktop-header {
+    display: flex;
+  }
+}

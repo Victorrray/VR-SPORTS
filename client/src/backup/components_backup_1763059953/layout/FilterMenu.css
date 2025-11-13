@@ -1,0 +1,83 @@
+.filter-menu-container {
+  position: fixed;
+  left: calc(50% - 160px); /* Position with spacing */
+  bottom: 76px; /* Closer to mobile nav bar */
+  z-index: 1011; /* Higher than mobile-bottom-bar (1000) */
+  display: block !important; /* Force display */
+  pointer-events: auto !important; /* Ensure clickability */
+  max-width: 140px; /* Match the width of the bottom nav bar sections */
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(26, 20, 40, 0.95) 0%, rgba(20, 15, 35, 0.95) 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  min-height: 44px;
+  width: 100%;
+  max-width: 140px;
+  padding-right: 24px;
+  backdrop-filter: blur(24px);
+}
+
+.filter-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.filter-button:active {
+  transform: translateY(0);
+}
+
+.filter-icon {
+  animation: rotateFilter 1s ease-in-out;
+}
+
+@keyframes rotateFilter {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .filter-menu-container {
+    /* Keep the same positioning as desktop to maintain gap */
+    left: calc(50% - 160px);
+    bottom: 116px;
+    display: block !important; /* Force display on mobile */
+  }
+  
+  .filter-button {
+    padding: 8px 14px;
+    font-size: 13px;
+    min-height: 40px;
+    display: flex !important; /* Force display on mobile */
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .filter-menu-container {
+    bottom: 116px; /* Moved up by additional 5% */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Offset by half width to truly center */
+    margin-left: -55px; /* Half of button width to center it */
+    width: 110px;
+  }
+  
+  .filter-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

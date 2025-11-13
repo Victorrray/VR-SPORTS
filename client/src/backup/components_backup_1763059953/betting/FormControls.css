@@ -1,0 +1,100 @@
+/* FormControls.css - Consistent styling for form elements */
+
+/* Base styles for all form controls */
+.form-control {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--bg-elev) 80%, transparent),
+    color-mix(in srgb, var(--bg-elev-2) 90%, transparent)
+  );
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Select element styling */
+select.form-control {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 40px; /* Space for the dropdown arrow */
+  cursor: pointer;
+}
+
+/* Input element styling */
+input.form-control {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Number input - hide spinners */
+input[type="number"].form-control::-webkit-outer-spin-button,
+input[type="number"].form-control::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"].form-control {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Hover state */
+.form-control:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.form-control:hover::before {
+  opacity: 0.05;
+}
+
+/* Focus state */
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* Disabled state */
+.form-control:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Form group - for label + control combinations */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .form-control {
+    font-size: 16px;
+    padding: 14px 14px;
+  }
+  
+  select.form-control {
+    padding-right: 40px;
+  }
+}

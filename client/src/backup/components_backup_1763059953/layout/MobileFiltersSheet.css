@@ -1,0 +1,424 @@
+.mfs-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 6, 18, 0.7);
+  backdrop-filter: var(--backdrop-blur-light);
+  -webkit-backdrop-filter: var(--backdrop-blur-light);
+  z-index: 2000;
+  display: none;
+  animation: backdropFadeIn 0.5s ease;
+}
+
+.mfs-backdrop.closing {
+  animation: backdropFadeOut 0.5s ease forwards;
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes backdropFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.mfs-sheet {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-bottom: none;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--card-shadow-hover);
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: visible;
+  animation: sheetSlideUp 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.mfs-sheet.closing {
+  animation: sheetSlideDown 0.5s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  pointer-events: none; /* Prevent interactions during closing animation */
+}
+
+@keyframes sheetSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes sheetSlideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+.mfs-sheet::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+.mfs-grabber {
+  width: 48px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--text-muted);
+  opacity: 0.4;
+  margin: 12px auto 8px auto;
+  transition: all 0.3s ease;
+}
+
+.mfs-sheet:hover .mfs-grabber {
+  opacity: 0.6;
+  width: 56px;
+}
+.mfs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mfs-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mfs-title-icon {
+  color: var(--accent);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 30%, transparent));
+}
+
+.mfs-title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.mfs-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mfs-close:hover {
+  background: var(--bg-elev-3);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+.mfs-content {
+  padding: 20px 20px 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+.mfs-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mfs-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mfs-content::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+.mfs-content::-webkit-scrollbar-thumb:hover {
+  opacity: 0.8;
+}
+
+/* Filter content styling */
+.mfs-content .filter-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mfs-content .filter-group {
+  margin-bottom: 16px;
+}
+
+.mfs-content .filter-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Date picker styling */
+.mfs-content .date-picker-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.mfs-content .date-input {
+  width: 100%;
+  max-width: 200px;
+  padding: 12px 16px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.mfs-content .date-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
+  background: var(--bg-elev-3);
+}
+
+.mfs-content .date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.mfs-content .date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Filter actions styling */
+.mfs-content .filter-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mfs-content .filter-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.mfs-content .apply-btn {
+  background: var(--accent-gradient);
+  color: white;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.mfs-content .apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.mfs-content .reset-btn {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+}
+
+.mfs-content .reset-btn:hover {
+  background: var(--bg-elev-3);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.mfs-content .filter-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mfs-content .filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mfs-content .filter-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mfs-content .filter-option:hover {
+  background: var(--bg-elev-3);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.mfs-content .filter-option.active {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mfs-content .filter-option input[type="checkbox"],
+.mfs-content .filter-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.mfs-content .filter-option label {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.mfs-content .filter-option.active label {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Range inputs */
+.mfs-content .filter-range {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mfs-content .range-input {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-elev-2);
+  border-radius: 3px;
+  outline: none;
+  appearance: none;
+}
+
+.mfs-content .range-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--accent-gradient);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.mfs-content .range-input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--accent-gradient);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Make dropdowns open upward inside the sheet */
+.mfs-content .ms-menu {
+  top: auto !important;
+  bottom: 110% !important;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 12px !important;
+  backdrop-filter: var(--backdrop-blur) !important;
+  -webkit-backdrop-filter: var(--backdrop-blur) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+@media (max-width: 720px) {
+  .mfs-backdrop { display: block; }
+  
+  .mfs-sheet {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+  
+  .mfs-header {
+    padding: 12px 16px;
+  }
+  
+  .mfs-content {
+    padding: 16px 16px 12px;
+  }
+  
+  .mfs-content .filter-option {
+    padding: 10px 14px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .mfs-sheet,
+  .mfs-sheet.closing,
+  .mfs-backdrop,
+  .mfs-backdrop.closing,
+  .mfs-close,
+  .mfs-grabber,
+  .mfs-content .filter-option {
+    transition: none;
+    animation: none;
+  }
+  
+  /* For users who prefer reduced motion, we'll use opacity instead */
+  .mfs-backdrop.closing {
+    opacity: 0;
+  }
+  
+  .mfs-sheet.closing {
+    opacity: 0;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .mfs-sheet {
+    border: 2px solid #fff;
+    background: #000;
+  }
+  
+  .mfs-content .filter-option {
+    border: 2px solid #fff;
+    background: #000;
+  }
+  
+  .mfs-content .filter-option.active {
+    background: #fff;
+    color: #000;
+  }
+}

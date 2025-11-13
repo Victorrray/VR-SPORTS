@@ -1,0 +1,559 @@
+/* ============== Base Styles ============== */
+.ms-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.ms-wrap.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ============== Toggle Button ============== */
+.ms-toggle {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 12px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--bg-elev) 80%, transparent), color-mix(in srgb, var(--bg-elev-2) 90%, transparent));
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ms-toggle-label {
+  flex: 1;
+  text-align: left;
+}
+
+.ms-toggle-arrow {
+  flex-shrink: 0;
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-toggle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: -1;
+}
+
+.ms-toggle:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.ms-toggle:hover::before {
+  opacity: 0.05;
+}
+
+.ms-toggle:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* ============== Menu & Dropdown ============== */
+.ms-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-elev) 95%, transparent), color-mix(in srgb, var(--bg-elev-2) 98%, transparent));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 12px;
+  margin-top: 8px;
+  max-height: 400px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--accent) 15%, #000);
+  backdrop-filter: blur(12px);
+  animation: slideDown 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ms-menu::-webkit-scrollbar { width: 6px; }
+.ms-menu::-webkit-scrollbar-track { background: color-mix(in srgb, var(--bg-elev) 30%, transparent); border-radius: 3px; }
+.ms-menu::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+.ms-menu::-webkit-scrollbar-thumb:hover { background: var(--accent-hover); }
+
+/* ============== Search ============== */
+.ms-search-container {
+  padding: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  background: color-mix(in srgb, var(--bg-elev) 50%, transparent);
+}
+
+.ms-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ms-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-secondary);
+  z-index: 1;
+}
+
+.ms-search-input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  background: var(--bg-elev-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.ms-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.ms-search-clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-search-clear:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+}
+
+/* ============== Content & Items ============== */
+.ms-select-all {
+  padding: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.ms-select-all label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 600;
+  gap: 12px;
+}
+
+.ms-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.ms-category {
+  margin-bottom: 16px;
+}
+
+.ms-category:last-child {
+  margin-bottom: 0;
+}
+
+.ms-category-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ms-category-items,
+.ms-simple-list {
+  padding: 4px 0;
+}
+
+.ms-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  margin: 2px 8px;
+  user-select: none;
+}
+
+.ms-item:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.ms-item.ms-selected {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, transparent), color-mix(in srgb, var(--accent) 8%, transparent));
+  border-left: 3px solid var(--accent);
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.ms-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.ms-item span {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ============== Mobile Search ============== */
+.ms-mobile-search {
+  padding: 16px 20px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  background: color-mix(in srgb, var(--bg-elev) 50%, transparent);
+}
+
+.ms-mobile-search .ms-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ms-mobile-search .ms-search-icon {
+  position: absolute;
+  left: 16px;
+  color: var(--text-secondary);
+  z-index: 1;
+}
+
+.ms-mobile-search .ms-search-input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  background: var(--bg-elev-2);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.ms-mobile-search .ms-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.ms-mobile-search .ms-search-clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ms-mobile-search .ms-search-clear:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+}
+
+.ms-mobile-category-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 12px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+}
+
+/* ============== Portal & Mobile Sheet ============== */
+.ms-menu-portal {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-elev) 95%, transparent), color-mix(in srgb, var(--bg-elev-2) 98%, transparent));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--accent) 20%, #000);
+  backdrop-filter: blur(16px);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUpReverse {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ms-menu-portal[data-align="up"] {
+  border-radius: 12px 12px 8px 8px;
+  animation: slideUpReverse 0.3s ease-out;
+}
+
+.ms-menu-portal[data-align="down"] {
+  border-radius: 8px 8px 12px 12px;
+}
+
+.ms-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ms-mobile-sheet {
+  width: 100%;
+  max-height: 80vh;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-elev) 95%, transparent), color-mix(in srgb, var(--bg-elev-2) 98%, transparent));
+  border-radius: 20px 20px 0 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow: 0 -10px 40px color-mix(in srgb, var(--accent) 15%, #000);
+  backdrop-filter: blur(12px);
+  animation: slideUpSheet 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUpSheet {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.ms-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.ms-mobile-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ms-mobile-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.ms-mobile-close:hover {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+}
+
+.ms-mobile-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.ms-mobile-option {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.ms-mobile-option:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.ms-mobile-option.ms-mobile-all {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.ms-mobile-checkbox {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 16px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ms-mobile-checkbox::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 20%, transparent), color-mix(in srgb, var(--accent) 10%, transparent));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ms-mobile-option:hover .ms-mobile-checkbox::before {
+  opacity: 1;
+}
+
+.ms-mobile-checkbox.ms-checked {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 40%, transparent);
+  transform: scale(1.05);
+}
+
+.ms-mobile-label {
+  flex: 1;
+  font-size: 16px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.ms-mobile-divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  margin: 8px 24px;
+}
+
+.ms-mobile-footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.ms-mobile-done {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ms-mobile-done:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* ============== Responsive Design ============== */
+@media (max-width: 600px) {
+  .ms-wrap { width: 100%; min-width: 0; font-size: 1.08em; }
+  .ms-toggle { font-size: 18px; padding: 14px 14px; border-radius: 9px; }
+  .ms-menu {
+    min-width: 0;
+    width: calc(100vw - 48px);
+    left: 50%;
+    transform: translateX(-50%);
+    right: auto;
+    border-radius: 0 0 14px 14px;
+    font-size: 1.13em;
+    box-shadow: 0 7px 28px #000b;
+  }
+  .ms-menu li { padding: 14px 16px; font-size: 1.08em; position: relative; }
+  .ms-menu li.ms-selected {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, transparent), color-mix(in srgb, var(--accent) 8%, transparent));
+    border-left: 3px solid var(--accent);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .ms-menu li.ms-selected::after { content: "✓"; position: absolute; right: 16px; color: var(--accent); font-weight: bold; font-size: 14px; }
+  .ms-menu input[type="checkbox"] { width: 1.33em; height: 1.33em; margin-right: 13px; }
+  .ms-menu.ms-menu-portal { max-width: calc(100vw - 24px); }
+}
+
+@media (min-width: 1024px) {
+  .ms-menu { right: auto; width: 720px; grid-template-columns: repeat(3, minmax(200px, 1fr)); max-height: none; overflow: visible; }
+}
+
+@media (min-width: 1440px) {
+  .ms-menu { width: 900px; grid-template-columns: repeat(4, minmax(200px, 1fr)); }
+}
+
+/* ============== Portal Override ============== */
+.ms-menu.ms-menu-portal {
+  position: fixed;
+  z-index: 2000;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  transform: none;
+  width: auto;
+  max-height: 70vh;
+  overflow: auto;
+  border-radius: 12px;
+}
+
+.ms-menu:not(.ms-menu-portal) {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}

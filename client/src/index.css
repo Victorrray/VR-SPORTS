@@ -1,144 +1,57 @@
-/* src/index.css */
-@import url('./styles/theme.css');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.6%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.6%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 9.0%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --primary: 0 0% 9.0%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9.0%;
+    --ring: 0 0% 3.7%;
+  }
+
+  .dark {
+    --background: 0 0% 3.6%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.6%;
+    --popover-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 98%;
+    --accent-foreground: 0 0% 9.0%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 9.0%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9.0%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --ring: 0 0% 83.3%;
+  }
+}
+
+* {
+  @apply border-border;
+}
 
 body {
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-  background: linear-gradient(135deg, #0f0a18 0%, #1a0f2e 50%, #0f0a18 100%);
-  background-attachment: fixed;
-  color: var(--text);
-  margin: 0;
-  padding: 0;
-}
-
-/* Sticky footer layout */
-html, body { min-height: 100%; }
-#root { min-height: 100%; }
-.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
-.app-body { flex: 1 0 auto; display: flex; flex-direction: column; }
-
-/* Base links and buttons */
-a { color: var(--accent); text-decoration: none; }
-a:hover { color: #fff; }
-button { font-family: inherit; }
-
-/* Accessible focus styles */
-:focus-visible {
-  outline: none;
-  box-shadow: var(--ring);
-  border-radius: 10px;
-}
-
-/* Utility buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
-  padding: 0.7em 1.2em;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: transform 0.12s, box-shadow 0.15s, background 0.18s;
-}
-.btn-primary { background: var(--accent-gradient); color: #fff; box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 25%, transparent); }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 35%, transparent); }
-.btn-ghost { background: transparent; color: var(--text); }
-.btn-ghost:hover { background: rgba(255,255,255,0.06); }
-
-/* Large button size for prominent actions */
-.btn-lg { padding: 0.9em 1.4em; font-size: 1.02em; }
-
-/* Danger (red) button variant */
-.btn-danger {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--danger) 92%, #a00) 0%, color-mix(in srgb, var(--danger) 82%, #700) 100%);
-  color: #fff;
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--danger) 35%, transparent);
-}
-.btn-danger:hover { transform: translateY(-1px); box-shadow: 0 10px 24px color-mix(in srgb, var(--danger) 45%, transparent); }
-
-/* ---- Sportsbooks two-column layout ---- */
-.market-container.two-col {
-  display: flex;
-  align-items: flex-start;
-  gap: 28px; /* visual space between sidebar and table */
-  /* Center the layout and keep generous side padding that scales with screen */
-  max-width: 1920px; /* allow a bit more room for the table */
-  margin: 0 auto;
-  padding-left: clamp(24px, 6vw, 72px);
-  padding-right: clamp(24px, 6vw, 72px);
-}
-
-/* On very wide screens, add a touch more left padding so the sidebar never hugs the edge */
-/* Extra-large screens: allow a touch more breathing room automatically via clamp above */
-.filters-sidebar {
-  flex: 0 0 320px;
-  max-width: 400px;
-  background: color-mix(in srgb, var(--bg-elev-2) 92%, transparent);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 16px;
-  /* Symmetric padding to visually center content inside the panel */
-  padding: 18px 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-  position: sticky;
-  /* Align with odds table top spacing and remain sticky */
-  margin-top: 3em;
-  top: 3em;
-}
-.filters-sidebar .filter-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  /* Constrain and center the stack for balanced look */
-  max-width: 300px;
-  margin: 0 auto;
-}
-.filters-sidebar .filter-group { display: flex; flex-direction: column; gap: 6px; }
-.filters-sidebar .filter-label { font-size: 0.9em; opacity: 0.85; }
-.filters-sidebar input[type="text"],
-.filters-sidebar input[type="date"],
-.filters-sidebar input:not([type]) {
-  background: var(--bg-elev);
-  color: var(--text);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  padding: 8px 10px;
-  width: 100%;
-  text-align: center; /* center text in search/date bars */
-}
-.filters-sidebar input::placeholder { text-align: center; }
-.filters-sidebar .filter-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-  justify-content: center;
-}
-.filters-sidebar .filters-meta {
-  margin-top: 2px;
-  opacity: 0.85;
-  text-align: center;
-}
-.table-area { flex: 1 1 auto; min-width: 0; }
-/* Align tops of sidebar and table in two-column layout */
-/* (Reverted) keep default top spacing on table card */
-
-/* Make sidebar dropdowns roughly match sidebar width */
-.filters-sidebar .ms-wrap { width: 100%; }
-.filters-sidebar .ms-toggle { width: 100%; }
-.filters-sidebar .ms-menu {
-  width: 100% !important;
-  min-width: 0;
-  left: 0;
-  right: 0;
-  transform: none;
-  grid-template-columns: 1fr;
-}
-
-@media (max-width: 960px) {
-  .market-container.two-col { flex-direction: column; }
-  .filters-sidebar { position: static; width: 100%; max-width: none; }
-}
-/* Hide sidebar filters on smaller phones; use bottom Filters sheet instead */
-@media (max-width: 720px) {
-  .filters-sidebar { display: none; }
+  @apply bg-background text-foreground;
 }

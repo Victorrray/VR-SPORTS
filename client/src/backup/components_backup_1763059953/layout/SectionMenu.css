@@ -1,0 +1,214 @@
+.section-menu-container {
+  position: fixed;
+  right: calc(50% - 160px); /* Position with spacing */
+  bottom: 76px; /* Closer to mobile nav bar */
+  z-index: 1011; /* Match z-index with filter button */
+  display: block !important; /* Force display */
+  pointer-events: auto !important; /* Ensure clickability */
+  max-width: 140px; /* Match the width of the bottom nav bar sections */
+}
+
+.section-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(26, 20, 40, 0.95) 0%, rgba(20, 15, 35, 0.95) 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  min-height: 44px;
+  width: 100%;
+  max-width: 140px;
+  padding-left: 24px;
+  backdrop-filter: blur(24px);
+}
+
+.section-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.section-button:active {
+  transform: translateY(0);
+}
+
+.section-button-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.section-icon {
+  color: white;
+  opacity: 0.9;
+}
+
+.section-name {
+  white-space: nowrap;
+}
+
+.section-emoji {
+  font-size: 16px;
+}
+
+.section-chevron {
+  transition: transform 0.3s ease;
+}
+
+.section-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.section-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px); /* Position above the button instead of below */
+  right: 0; /* Align to the right edge of the button */
+  width: 280px;
+  background: linear-gradient(135deg, #0f0b1a, #1a1025);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3); /* Shadow direction adjusted */
+  animation: fadeInUp 0.2s ease; /* New animation for upward opening */
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section-option:last-child {
+  border-bottom: none;
+}
+
+.section-option:hover {
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.section-option.active {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.section-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.section-option.disabled:hover {
+  background: transparent !important;
+}
+
+.section-option.disabled .section-option-name {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.section-option.disabled .section-option-description {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.section-option.disabled .section-option-emoji {
+  opacity: 0.4;
+}
+
+.section-option-emoji {
+  font-size: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.section-option-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-option-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.section-option-description {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.section-active-indicator {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .section-menu-container {
+    /* Keep the same positioning as desktop to maintain gap */
+    right: calc(50% - 160px);
+    bottom: 116px;
+    display: block !important; /* Force display on mobile */
+  }
+  
+  .section-button {
+    padding: 8px 14px;
+    font-size: 13px;
+    min-height: 40px;
+    display: flex !important; /* Force display on mobile */
+    width: 100%;
+  }
+  
+  .section-dropdown {
+    right: 0;
+    width: 250px;
+    bottom: calc(100% + 8px); /* Ensure it opens upward on mobile */
+  }
+}
+
+@media (max-width: 380px) {
+  .section-menu-container {
+    bottom: 116px; /* Moved up by additional 5% */
+    right: 50%; /* Center horizontally */
+    left: auto; /* Reset left positioning */
+    transform: translateX(50%); /* Offset by half width to truly center */
+    margin-right: -55px; /* Half of button width to center it */
+    width: 110px;
+  }
+  
+  .section-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .section-dropdown {
+    width: 220px;
+  }
+}

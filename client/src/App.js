@@ -16,10 +16,12 @@ import DebugPanel from './components/debug/DebugPanel';
 // import MobileBottomBar from './components/layout/MobileBottomBar'; // OLD - Not used with new landing page
 // import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
 import Landing from './pages/Landing';
-import Dashboard from './pages/Dashboard';
+import DashboardPage from './pages/DashboardPage';
 import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import ForgotPassword from './pages/ForgotPassword';
 import Account from './pages/Account';
 import UsagePlan from './pages/UsagePlan';
 import MySportsbooks from './pages/MySportsbooks';
@@ -31,6 +33,7 @@ import MyPicks from './pages/MyPicks';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Roadmap from './pages/Roadmap';
+import Disclaimer from './pages/Disclaimer';
 import Design8Dashboard from './pages/Design8Dashboard';
 import BillingSuccess from './pages/BillingSuccess';
 import BillingCancel from './pages/BillingCancel';
@@ -125,12 +128,13 @@ function AppRoutes() {
           <main className="main-content" id="main-content" tabIndex="-1">
             <AuthDebug />
             <Routes>
-              <Route path="/" element={user ? <Dashboard /> : <Landing />} />
-              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/" element={user ? <DashboardPage /> : <Landing />} />
+              <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
               <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Landing />} />
@@ -145,6 +149,7 @@ function AppRoutes() {
               <Route path="/billing/cancel" element={<BillingCancel />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

@@ -1,0 +1,252 @@
+.market-explorer {
+  background: rgba(26, 16, 37, 0.8);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.market-explorer-header {
+  margin-bottom: 20px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.header-title h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.game-name {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.market-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 8px;
+}
+
+.market-explorer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.search-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.category-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.category-filters button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-filters button:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: white;
+}
+
+.category-filters button.active {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
+}
+
+.markets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.market-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.market-item:hover {
+  background: rgba(139, 92, 246, 0.05);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.market-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.market-name {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.market-key {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  font-family: monospace;
+}
+
+.market-bookmakers {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bookmaker-count {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.bookmaker-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.bookmaker-tag {
+  padding: 2px 6px;
+  background: rgba(139, 92, 246, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+  color: #a78bfa;
+  text-transform: uppercase;
+}
+
+.bookmaker-more {
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.market-explorer-empty,
+.market-explorer-loading,
+.market-explorer-error,
+.no-markets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+.market-explorer-loading .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 6px;
+  color: #a78bfa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: rgba(139, 92, 246, 0.3);
+}
+
+/* Scrollbar styling */
+.markets-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.markets-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.markets-list::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 4px;
+}
+
+.markets-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.7);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .market-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .market-bookmakers {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

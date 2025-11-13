@@ -1,21 +1,8 @@
-import { ArrowRight, Play, Sparkles, Clock, Check } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Play, Sparkles } from 'lucide-react';
+import { BetCard } from '../BetCard';
 
-interface HeroProps {
-  onGetStarted?: () => void;
-}
-
-export function Hero({ onGetStarted }: HeroProps = {}) {
-  const navigate = useNavigate();
-  
-  const handleGetStarted = () => {
-    if (onGetStarted) {
-      onGetStarted();
-    } else {
-      navigate('/login');
-    }
-  };
-  // Mock bet data for display
+export function Hero() {
+  // TODO: Replace this mock data with a cached bet from the API
   const featuredBet = {
     id: 1,
     teams: "Detroit Pistons @ Philadelphia 76ers",
@@ -33,13 +20,16 @@ export function Hero({ onGetStarted }: HeroProps = {}) {
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Grid Background - Full Width */}
       <div 
-        className="absolute inset-0 z-0 left-1/2 -translate-x-1/2 w-screen"
+        className="absolute inset-0 z-0 left-1/2 -translate-x-1/2 w-screen overflow-visible"
         style={{
           backgroundImage: `
             linear-gradient(to right, rgba(168, 85, 247, 0.07) 1px, transparent 1px),
             linear-gradient(to bottom, rgba(168, 85, 247, 0.07) 1px, transparent 1px)
           `,
           backgroundSize: '24px 24px',
+          backgroundPosition: 'center center',
+          minWidth: '100vw',
+          minHeight: '100%',
         }}
       />
       
@@ -63,10 +53,7 @@ export function Hero({ onGetStarted }: HeroProps = {}) {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 md:gap-6">
-              <button 
-                onClick={handleGetStarted}
-                className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold"
-              >
+              <button className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold">
                 Get started
               </button>
               
@@ -86,51 +73,10 @@ export function Hero({ onGetStarted }: HeroProps = {}) {
 
           {/* Right Visual Element */}
           <div className="relative hidden md:block">
-            {/* Bet Card Preview - Static mock to avoid ThemeProvider issues */}
+            {/* Bet Card Preview */}
             <div className="relative h-[500px] flex items-center justify-center">
-              <div className="w-full max-w-[500px] bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border border-white/10 backdrop-blur-2xl rounded-xl overflow-hidden hover:border-purple-400/40 transition-all">
-                {/* Card Header */}
-                <div className="p-3 border-b border-white/10 bg-gradient-to-br from-white/5 to-transparent">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-white/60 uppercase">{featuredBet.sport}</span>
-                    </div>
-                    <span className="text-xs font-medium text-green-400">+{featuredBet.ev}</span>
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-4 space-y-4">
-                  {/* Teams */}
-                  <div>
-                    <p className="text-sm text-white/60 mb-1">{featuredBet.teams}</p>
-                    <p className="text-xs text-white/40 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {featuredBet.time}
-                    </p>
-                  </div>
-
-                  {/* Pick */}
-                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                    <p className="text-xs text-white/60 mb-1">Pick</p>
-                    <p className="text-lg font-semibold text-white">{featuredBet.pick}</p>
-                  </div>
-
-                  {/* Bottom Row */}
-                  <div className="flex items-center justify-between pt-2">
-                    <div>
-                      <p className="text-xs text-white/60">{featuredBet.sportsbook}</p>
-                      <p className="text-lg font-bold text-white">{featuredBet.odds}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-white/60">Confidence</p>
-                      <p className="text-lg font-semibold text-yellow-400 flex items-center gap-1 justify-end">
-                        <Check className="w-4 h-4" />
-                        {featuredBet.confidence}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className="w-full max-w-[500px]">
+                <BetCard bet={featuredBet} variant="hero" showActions={false} />
               </div>
             </div>
           </div>

@@ -1,0 +1,194 @@
+.username-setup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.username-setup-modal {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-elev) 95%, transparent),
+    color-mix(in srgb, var(--bg-elev-2) 98%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--accent) 15%, #000);
+  backdrop-filter: blur(12px);
+}
+
+.username-setup-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.username-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-radius: 50%;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.username-setup-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.username-setup-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.username-setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.username-input-group {
+  position: relative;
+}
+
+.username-input {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg-elev) 50%, transparent);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.username-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.username-input.error {
+  border-color: var(--error);
+}
+
+.username-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.username-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.username-requirements {
+  background: color-mix(in srgb, var(--bg-elev) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.username-requirements h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.username-requirements ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.username-requirements li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.username-requirements li.valid {
+  color: var(--success);
+}
+
+.username-requirements li svg {
+  flex-shrink: 0;
+}
+
+.username-submit-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.username-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.username-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.username-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 480px) {
+  .username-setup-modal {
+    padding: 24px;
+    margin: 20px;
+  }
+  
+  .username-setup-header h2 {
+    font-size: 20px;
+  }
+  
+  .username-icon {
+    width: 48px;
+    height: 48px;
+  }
+}

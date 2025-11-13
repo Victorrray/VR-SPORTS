@@ -1,0 +1,282 @@
+/* Middles Detector Styles - Enhanced Premium Design */
+@import './ArbitrageDetector.css'; /* Import all the enhanced arbitrage styles */
+
+/* Middle Scanner Panel Styles */
+.middle-scanner-panel {
+  background: linear-gradient(135deg, rgba(15, 11, 26, 0.95), rgba(30, 22, 52, 0.95));
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+}
+
+.scanner-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.scanner-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-bottom: 8px;
+}
+
+.scanner-icon {
+  font-size: 28px;
+}
+
+.scanner-subtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  margin: 0;
+}
+
+.scanner-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.control-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-input,
+.control-select {
+  background: rgba(30, 22, 52, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.control-input:focus,
+.control-select:focus {
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.6);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.control-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.control-select {
+  cursor: pointer;
+}
+
+.control-select option {
+  background: rgba(30, 22, 52, 0.95);
+  color: #ffffff;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .middle-scanner-panel {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .scanner-title {
+    font-size: 20px;
+  }
+  
+  .scanner-controls {
+    gap: 16px;
+  }
+  
+  .control-input,
+  .control-select {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Middle-specific enhancements */
+.middle-info {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(124, 58, 237, 0.04));
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.middle-range,
+.gap-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.middle-range strong,
+.gap-info strong {
+  color: #a78bfa;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.middle-range,
+.gap-info {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Enhanced middle card styling */
+.arbitrage-card .middle-info {
+  position: relative;
+}
+
+.arbitrage-card .middle-info::before {
+  content: '🎪';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1.5rem;
+  opacity: 0.6;
+}
+
+/* Middle-specific profit display */
+.arbitrage-card .profit-percentage {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.arbitrage-card .profit-icon {
+  color: #f59e0b;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
+}
+
+/* Middle scanner header customization */
+.controls-header h3 {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Middle-specific execute button */
+.arbitrage-card .execute-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+}
+
+.arbitrage-card .execute-btn:hover {
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+  border-color: rgba(245, 158, 11, 0.6);
+}
+
+.arbitrage-card .execute-btn::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+/* Middle card top border */
+.arbitrage-card::before {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+}
+
+/* Middle-specific market type badge */
+.arbitrage-card .market-type {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+
+/* Enhanced meta items for middles */
+.arbitrage-card .meta-item {
+  background: rgba(245, 158, 11, 0.05);
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.1);
+}
+
+/* Mobile responsiveness for middle info */
+@media (max-width: 768px) {
+  .middle-info {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .middle-range,
+  .gap-info {
+    text-align: center;
+  }
+}
+
+/* Compact mode adjustments */
+.arbitrage-detector.compact .middle-info {
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.arbitrage-detector.compact .middle-info::before {
+  font-size: 1.2rem;
+  top: -6px;
+  right: -6px;
+}
+
+/* Empty state customization for middles */
+.arbitrage-detector .empty-state .empty-icon {
+  color: #f59e0b;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+}
+
+/* Loading state for middles */
+.arbitrage-detector .loading-state .spinning {
+  color: #f59e0b;
+}
+
+/* Control group focus states for middle theme */
+.control-group input:focus,
+.control-group select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.control-group input:hover,
+.control-group select:hover {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+/* Enhanced bet cards for middle opportunities */
+.arbitrage-card .bet-card::before {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.arbitrage-card .bet-card:hover {
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+}
