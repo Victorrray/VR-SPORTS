@@ -1,5 +1,7 @@
 import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../hooks/SimpleAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginPageProps {
   onBack: () => void;
@@ -12,10 +14,32 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { email, password });
+    setError('');
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        // Login
+        await signIn(email, password);
+        navigate('/dashboard');
+      } else {
+        // Sign up
+        await signUp(email, password);
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed. Please try again.');
+      console.error('Auth error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const stats = [
@@ -207,6 +231,13 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                     </div>
                   </div>
 
+                  {/* Error Message */}
+                  {error && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                      <p className="text-red-400 font-semibold text-sm">{error}</p>
+                    </div>
+                  )}
+
                   {/* Remember & Forgot */}
                   {isLogin && (
                     <div className="flex items-center justify-between">
@@ -232,9 +263,17 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center"
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLogin ? 'Login to your account' : 'Create your account'}
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        {isLogin ? 'Signing in...' : 'Creating account...'}
+                      </span>
+                    ) : (
+                      isLogin ? 'Login to your account' : 'Create your account'
+                    )}
                   </button>
 
                   {/* Divider */}
