@@ -8,6 +8,7 @@ export default function Roadmap() {
   const navigate = useNavigate();
 
   const handleLoginClick = () => navigate('/login');
+  const handleSignUpClick = () => navigate('/signup');
   const handleDashboardClick = () => navigate('/dashboard');
   const handleRoadmapClick = () => navigate('/roadmap');
   const handlePrivacyClick = () => navigate('/privacy');
@@ -19,6 +20,7 @@ export default function Roadmap() {
       <div className="relative">
         <Header 
           onLoginClick={handleLoginClick} 
+          onSignUpClick={handleSignUpClick}
           onDashboardClick={handleDashboardClick}
           onRoadmapClick={handleRoadmapClick}
         />
