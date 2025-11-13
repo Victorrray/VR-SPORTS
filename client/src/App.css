@@ -1,3 +1,6 @@
+/* Import Design.9 Tailwind v4 CSS utilities */
+@import './styles/design9-tailwind.css';
+
 /* Loading Fallback Styles */
 .loading-fallback {
   display: flex;
