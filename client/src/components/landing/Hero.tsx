@@ -1,7 +1,11 @@
 import { ArrowRight, Play, Sparkles } from 'lucide-react';
 import { BetCard } from '../BetCard';
 
-export function Hero() {
+interface HeroProps {
+  onGetStarted?: () => void;
+}
+
+export function Hero({ onGetStarted }: HeroProps = {}) {
   // TODO: Replace this mock data with a cached bet from the API
   const featuredBet = {
     id: 1,
@@ -53,7 +57,10 @@ export function Hero() {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 md:gap-6">
-              <button className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold">
+              <button 
+                onClick={onGetStarted}
+                className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold"
+              >
                 Get started
               </button>
               

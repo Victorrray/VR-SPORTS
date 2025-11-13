@@ -14,6 +14,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const handleLoginClick = () => navigate('/login');
+  const handleSignUpClick = () => navigate('/signup');
   const handleDashboardClick = () => navigate('/dashboard');
   const handleRoadmapClick = () => navigate('/roadmap');
   const handlePrivacyClick = () => navigate('/privacy');
@@ -26,15 +27,16 @@ export default function Landing() {
         <div className="relative">
           <Header 
             onLoginClick={handleLoginClick} 
+            onSignUpClick={handleSignUpClick}
             onDashboardClick={handleDashboardClick}
             onRoadmapClick={handleRoadmapClick}
           />
-          <Hero />
+          <Hero onGetStarted={handleSignUpClick} />
           <Stats />
           <Bookmakers />
           <Features />
-          <HowItWorks />
-          <Pricing />
+          <HowItWorks onGetStarted={handleSignUpClick} />
+          <Pricing onGetStarted={handleSignUpClick} />
           <FAQ />
           <Footer 
             onRoadmapClick={handleRoadmapClick}
