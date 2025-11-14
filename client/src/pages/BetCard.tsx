@@ -51,11 +51,13 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
           : 'border-gray-200 bg-gray-50/50'
       }`}>
         <div className="mb-2">
-          <span className={`px-3 py-1 ${
+          <span 
+            style={{ borderRadius: '9999px' }}
+            className={`px-3 py-1 inline-block ${
             isHero || isDark
               ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
-          } backdrop-blur-xl border rounded-lg font-bold text-xs`}>
+          } backdrop-blur-xl border font-bold text-xs`}>
             {bet.sport}
           </span>
         </div>
@@ -71,11 +73,13 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
               {bet.time}
             </div>
           </div>
-          <div className={`px-3 py-1.5 ${
+          <div 
+            style={{ borderRadius: '9999px' }}
+            className={`px-3 py-1.5 ${
             isHero || isDark
               ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30' 
               : 'bg-emerald-100 border-emerald-300'
-          } backdrop-blur-xl rounded-lg border`}>
+          } backdrop-blur-xl border`}>
             <span className={`${isHero || isDark ? 'text-white' : 'text-emerald-700'} font-bold text-xs`}>
               {bet.ev}
             </span>
@@ -131,20 +135,23 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2">
-          <button className={`px-3 py-2 ${
+          <button 
+            style={{ borderRadius: '12px' }}
+            className={`px-3 py-2 ${
             isHero || isDark
               ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
               : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-          } backdrop-blur-xl border rounded-xl transition-all font-bold text-xs text-center`}>
+          } backdrop-blur-xl border transition-all font-bold text-xs text-center`}>
             Compare Odds
           </button>
           <button 
             onClick={handleAddToPicks}
+            style={{ borderRadius: '12px' }}
             className={`px-3 py-2 ${
               isAdded 
                 ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 border-emerald-400/30' 
                 : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
-            } text-white rounded-xl transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
+            } text-white transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
           >
             {isAdded ? (
               <>
