@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/SimpleAuth';
 import { Hero } from '../components/landing/Hero';
 import { Stats } from '../components/landing/Stats';
 import { Features } from '../components/landing/Features';
@@ -12,10 +13,17 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleLoginClick = () => navigate('/login');
   const handleSignUpClick = () => navigate('/signup');
-  const handleDashboardClick = () => navigate('/dashboard');
+  const handleDashboardClick = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
   const handleRoadmapClick = () => navigate('/roadmap');
   const handlePrivacyClick = () => navigate('/privacy');
   const handleTermsClick = () => navigate('/terms');
