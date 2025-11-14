@@ -581,7 +581,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             e.stopPropagation();
                             toggleRow(pick.id);
                           }}
-                          className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}
+                          className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-xs text-center`}
                         >
                           Compare Odds
                         </button>
@@ -590,7 +590,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             e.stopPropagation();
                             onAddPick(pick);
                           }}
-                          className="px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30 text-white rounded-lg transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5"
+                          className="px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30 text-white rounded-xl transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5"
                         >
                           Place Bet
                         </button>
