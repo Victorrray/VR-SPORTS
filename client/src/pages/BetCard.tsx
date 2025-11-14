@@ -51,11 +51,11 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
           : 'border-gray-200 bg-gray-50/50'
       }`}>
         <div className="mb-2">
-          <span className={`px-2 py-0.5 ${
+          <span className={`px-3 py-1 ${
             isHero || isDark
               ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
-          } backdrop-blur-xl border rounded-full font-bold text-xs`}>
+          } backdrop-blur-xl border rounded-lg font-bold text-xs`}>
             {bet.sport}
           </span>
         </div>
@@ -71,11 +71,11 @@ export function BetCard({ bet, variant = 'default' }: BetCardProps) {
               {bet.time}
             </div>
           </div>
-          <div className={`px-2.5 py-1 ${
+          <div className={`px-3 py-1.5 ${
             isHero || isDark
               ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30' 
               : 'bg-emerald-100 border-emerald-300'
-          } backdrop-blur-xl rounded-full border`}>
+          } backdrop-blur-xl rounded-lg border`}>
             <span className={`${isHero || isDark ? 'text-white' : 'text-emerald-700'} font-bold text-xs`}>
               {bet.ev}
             </span>
