@@ -1,6 +1,6 @@
 import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight, X } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 
 export function PicksPage({ savedPicks = [] }: { savedPicks?: any[] }) {

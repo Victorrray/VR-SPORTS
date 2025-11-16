@@ -1,5 +1,5 @@
 import { Crown, Check, ArrowLeft, Sparkles, Zap, Rocket } from 'lucide-react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 
 interface ChangePlanPageProps {

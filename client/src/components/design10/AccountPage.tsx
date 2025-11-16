@@ -10,7 +10,7 @@ import {
   LogOut,
   Lock,
 } from "lucide-react";
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
