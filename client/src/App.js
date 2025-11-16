@@ -19,7 +19,7 @@ import Landing from './pages/Landing';
 import DashboardPage from './pages/DashboardPage';
 import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
-import { LoginPage as Login } from './components/design10/LoginPage';
+import { LoginPageWrapper as Login } from './components/design10/LoginPageWrapper';
 import { SignUpPage as SignUp } from './components/design10/SignUpPage';
 import { ForgotPasswordPage as ForgotPassword } from './components/design10/ForgotPasswordPage';
 import { AccountPage as Account } from './components/design10/AccountPage';
