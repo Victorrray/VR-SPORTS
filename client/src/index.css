@@ -1,10 +1,14 @@
+/* Design.10 - Integrated Figma Design System */
+@import './styles/design10.css';
+@import './styles/design10-globals.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Design.9 CSS Variables */
+    /* Design.10 CSS Variables */
     --spacing: .25rem;
     --container-md: 28rem;
     --container-lg: 32rem;
