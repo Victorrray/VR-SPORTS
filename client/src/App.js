@@ -29,7 +29,7 @@ import AuthCallback from './pages/AuthCallback';
 import LoadingBar from "./components/common/LoadingBar";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import PlanGuard from "./components/guards/PlanGuard";
-import MyPicks from './pages/MyPicks';
+import { PicksPage as MyPicks } from './components/design10/PicksPage';
 import { Terms } from './components/design10/Terms';
 import { Privacy } from './components/design10/Privacy';
 import { Roadmap } from './components/design10/Roadmap';
