@@ -5,6 +5,8 @@ import SportMultiSelect from "../components/betting/SportMultiSelect";
 import useDebounce from "../hooks/useDebounce";
 import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
+import { Button } from "../components/design10/ui/button";
+import { Card } from "../components/design10/ui/card";
 
 // Only these 3 DFS apps
 const DFS_KEYS = ["prizepicks", "underdog", "pick6"];

@@ -18,6 +18,8 @@ import DatePicker from "../components/common/DatePicker";
 import OddsTable from "../components/betting/OddsTable";
 import ArbitrageDetector from "../components/betting/ArbitrageDetector";
 import MiddlesDetector from "../components/betting/MiddlesDetector";
+import { Button } from "../components/design10/ui/button";
+import { Card } from "../components/design10/ui/card";
 import AuthRequired from "../components/auth/AuthRequired";
 import ApiErrorDisplay from "../components/common/ApiErrorDisplay";
 import useDebounce from "../hooks/useDebounce";

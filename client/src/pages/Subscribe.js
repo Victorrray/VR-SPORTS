@@ -5,6 +5,9 @@ import { usePlan } from '../hooks/SimplePlan';
 import Pricing from '../components/billing/Pricing';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { CreditCard, Calendar, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Button } from '../components/design10/ui/button';
+import { Card } from '../components/design10/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/design10/ui/dialog';
 
 const Subscribe = () => {
   const navigate = useNavigate();

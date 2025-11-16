@@ -6,6 +6,9 @@ import { Crown, Zap, TrendingUp, Shield, Check, ArrowLeft, Calendar, CreditCard,
 import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { withApiBase } from '../config/api';
 import { secureFetch } from '../utils/security';
+import { Button } from '../components/design10/ui/button';
+import { Card } from '../components/design10/ui/card';
+import { Progress } from '../components/design10/ui/progress';
 import './UsagePlan.css';
 
 export default function UsagePlan() {

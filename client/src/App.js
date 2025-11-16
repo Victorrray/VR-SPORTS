@@ -34,7 +34,6 @@ import { Terms } from './components/design10/Terms';
 import { Privacy } from './components/design10/Privacy';
 import { Roadmap } from './components/design10/Roadmap';
 import { Disclaimer } from './components/design10/Disclaimer';
-import Design8Dashboard from './pages/Design8Dashboard';
 import BillingSuccess from './pages/BillingSuccess';
 import BillingCancel from './pages/BillingCancel';
 import Subscribe from './pages/Subscribe';
@@ -144,7 +143,6 @@ function AppRoutes() {
               <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
               <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
               <Route path="/roadmap" element={<Roadmap />} />
-              <Route path="/design8" element={<PrivateRoute><Design8Dashboard /></PrivateRoute>} />
               <Route path="/billing/success" element={<BillingSuccess />} />
               <Route path="/billing/cancel" element={<BillingCancel />} />
               <Route path="/terms" element={<Terms />} />
