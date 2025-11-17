@@ -3,7 +3,12 @@ import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 
-export function PicksPage({ savedPicks = [] }: { savedPicks?: any[] }) {
+interface PicksPageProps {
+  savedPicks?: any[];
+  onRemovePick?: (pickId: number) => void;
+}
+
+export function PicksPage({ savedPicks = [], onRemovePick }: PicksPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const [showFilters, setShowFilters] = useState(false);
@@ -257,7 +262,14 @@ export function PicksPage({ savedPicks = [] }: { savedPicks?: any[] }) {
               </div>
               
               <button
-                onClick={() => toast.success('Bet removed from My Picks')}
+                onClick={() => {
+                  if (onRemovePick) {
+                    onRemovePick(pick.id);
+                    toast.success('Bet removed from My Picks');
+                  } else {
+                    toast.success('Bet removed from My Picks');
+                  }
+                }}
                 className={`w-full px-3 py-2 ${isLight ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100' : 'bg-red-500/10 border-red-400/30 text-red-400 hover:bg-red-500/20'} backdrop-blur-xl border rounded-lg transition-all font-bold text-xs`}
               >
                 Remove Pick

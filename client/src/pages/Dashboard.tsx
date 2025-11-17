@@ -68,6 +68,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     setSavedPicks((prev) => [...prev, pick]);
   };
 
+  const removePickFromMyPicks = (pickId: number) => {
+    setSavedPicks((prev) => prev.filter(pick => pick.id !== pickId));
+  };
+
   const stats = [
     {
       label: "Win Rate",
@@ -388,7 +392,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </>
             )}
 
-            {currentView === "picks" && <PicksPage savedPicks={savedPicks} />}
+            {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} />}
             {currentView === "odds" && <OddsPage onAddPick={addPickToMyPicks} />}
             {currentView === "account" && (
               <AccountPage
