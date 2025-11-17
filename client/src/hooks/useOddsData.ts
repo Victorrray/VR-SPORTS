@@ -102,6 +102,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       console.log('📊 Fetching odds data from:', endpoint);
 
       const response = await apiClient.get(endpoint);
+      
+      console.log('📦 API Response:', response.data);
+      console.log('📦 Response type:', typeof response.data);
+      console.log('📦 Is array?:', Array.isArray(response.data));
+      if (response.data && typeof response.data === 'object') {
+        console.log('📦 Response keys:', Object.keys(response.data));
+      }
 
       if (response.data && Array.isArray(response.data)) {
         setPicks(response.data);
