@@ -174,11 +174,12 @@ export function getAccessTokenSync() {
       return cachedToken;
     }
     
-    // Check primary storage key
+    // Check primary storage key - Supabase stores the token at top level, not nested
     const storedSession = localStorage.getItem('sb-oddsightseer-auth');
     if (storedSession) {
       const parsed = JSON.parse(storedSession);
-      const token = parsed?.session?.access_token;
+      // Try multiple paths: top-level access_token, nested session.access_token
+      const token = parsed?.access_token || parsed?.session?.access_token;
       if (token) {
         console.log('✅ getAccessTokenSync: Got token from localStorage (sb-oddsightseer-auth)');
         // Cache the token
@@ -195,7 +196,7 @@ export function getAccessTokenSync() {
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          const token = parsed?.session?.access_token || parsed?.access_token;
+          const token = parsed?.access_token || parsed?.session?.access_token;
           if (token) {
             console.log(`✅ getAccessTokenSync: Got token from localStorage (${key})`);
             // Cache the token
