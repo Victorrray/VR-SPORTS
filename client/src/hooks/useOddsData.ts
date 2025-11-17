@@ -46,10 +46,22 @@ export interface UseOddsDataResult {
 function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
   if (!Array.isArray(games)) return [];
   
+  // Log first game structure to debug
+  if (games.length > 0) {
+    console.log('📋 First game structure:', games[0]);
+    console.log('📋 First game keys:', Object.keys(games[0]));
+  }
+  
   return games.map((game, idx) => {
     const team1 = game.away_team || 'Team A';
     const team2 = game.home_team || 'Team B';
     const bookmakers = game.bookmakers || [];
+    
+    // Log first game's bookmakers
+    if (idx === 0) {
+      console.log(`📋 First game bookmakers:`, bookmakers);
+      console.log(`📋 First game bookmakers length:`, bookmakers.length);
+    }
     
     // Get best odds from all bookmakers
     let bestOdds = '-110';
@@ -100,7 +112,9 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       }
     });
     
-    console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}`);
+    if (idx === 0) {
+      console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}`);
+    }
     
     return {
       id: game.id || idx + 1,
