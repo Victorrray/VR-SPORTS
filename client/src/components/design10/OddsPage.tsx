@@ -1074,7 +1074,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
 
         {/* Table Rows */}
         <div className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
-          {isLoading ? (
+          {(() => { console.log('🔍 Rendering table - isLoading:', isLoading, 'filteredPicks.length:', filteredPicks.length); return isLoading; })() ? (
             Array.from({ length: itemsPerPage }, (_, index) => <SkeletonRow key={index} />)
           ) : filteredPicks.length > 0 ? (
             sortPicks(filteredPicks).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((pick) => (
