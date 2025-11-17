@@ -378,8 +378,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     if (!sortBy) return picks;
     return [...picks].sort((a, b) => {
       if (sortBy === 'ev') {
-        const evA = parseFloat(a.ev.replace('%', ''));
-        const evB = parseFloat(b.ev.replace('%', ''));
+        const evA = parseFloat((a.ev || '0%').replace('%', ''));
+        const evB = parseFloat((b.ev || '0%').replace('%', ''));
         return sortDirection === 'asc' ? evA - evB : evB - evA;
       } else if (sortBy === 'time') {
         // Mock date sorting - replace with actual game time from API
