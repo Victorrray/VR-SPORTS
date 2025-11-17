@@ -37,6 +37,7 @@ import {
 } from "../contexts/ThemeContext";
 import { Toaster } from "../components/ui/sonner";
 import { useRecommendedPicks } from "../hooks/useRecommendedPicks";
+import { useUserStats } from "../hooks/useUserStats";
 
 interface DashboardProps {
   onSignOut: () => void;
@@ -60,6 +61,9 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     enabled: true,
   });
 
+  // Fetch user stats from database
+  const userStats = useUserStats();
+
   const addPickToMyPicks = (pick: any) => {
     setSavedPicks((prev) => [...prev, pick]);
   };
@@ -67,28 +71,28 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const stats = [
     {
       label: "Win Rate",
-      value: "67.3%",
+      value: userStats.loading ? "—" : userStats.winRate,
       change: "+5.2%",
       positive: true,
       icon: Target,
     },
     {
       label: "Average Edge",
-      value: "4.8%",
+      value: userStats.loading ? "—" : userStats.averageEdge,
       change: "+0.3%",
       positive: true,
       icon: TrendingUp,
     },
     {
       label: "Total Profit",
-      value: "$3,247",
+      value: userStats.loading ? "—" : userStats.totalProfit,
       change: "+$892",
       positive: true,
       icon: DollarSign,
     },
     {
       label: "Active Bets",
-      value: "12",
+      value: userStats.loading ? "—" : userStats.activeBets.toString(),
       change: "3 today",
       positive: true,
       icon: Sparkles,
