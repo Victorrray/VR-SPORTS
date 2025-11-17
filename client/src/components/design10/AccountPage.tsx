@@ -71,7 +71,7 @@ export function AccountPage({
               NotVic
             </h3>
             <div className="flex items-center gap-2">
-              <div className={`px-3 py-1 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-lg backdrop-blur-xl`}>
+              <div className={`px-3 py-1 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-full backdrop-blur-xl`}>
                 <div className="flex items-center gap-1.5">
                   <Crown className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
                   <span className={`${isLight ? 'text-amber-700' : 'text-amber-400'} font-bold text-sm`}>
