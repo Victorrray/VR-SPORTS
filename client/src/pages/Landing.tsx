@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/SimpleAuth';
-import { Hero } from '../components/landing/Hero';
-import { Stats } from '../components/landing/Stats';
-import { Features } from '../components/landing/Features';
-import { Header } from '../components/landing/Header';
-import { Bookmakers } from '../components/landing/Bookmakers';
-import { HowItWorks } from '../components/landing/HowItWorks';
-import { Pricing } from '../components/landing/Pricing';
-import { FAQ } from '../components/landing/FAQ';
-import { Footer } from '../components/landing/Footer';
+import { Hero } from '../components/design10/Hero';
+import { Stats } from '../components/design10/Stats';
+import { Features } from '../components/design10/Features';
+import { Header } from '../components/design10/Header';
+import { Bookmakers } from '../components/design10/Bookmakers';
+import { HowItWorks } from '../components/design10/HowItWorks';
+import { Pricing } from '../components/design10/Pricing';
+import { FAQ } from '../components/design10/FAQ';
+import { Footer } from '../components/design10/Footer';
 import { ThemeProvider } from '../contexts/ThemeContext';
 
 export default function Landing() {
@@ -39,19 +39,14 @@ export default function Landing() {
             onDashboardClick={handleDashboardClick}
             onRoadmapClick={handleRoadmapClick}
           />
-          <Hero onGetStarted={handleSignUpClick} />
+          <Hero />
           <Stats />
           <Bookmakers />
           <Features />
-          <HowItWorks onGetStarted={handleSignUpClick} />
-          <Pricing onGetStarted={handleSignUpClick} />
+          <HowItWorks />
+          <Pricing />
           <FAQ />
-          <Footer 
-            onRoadmapClick={handleRoadmapClick}
-            onPrivacyClick={handlePrivacyClick}
-            onTermsClick={handleTermsClick}
-            onDisclaimerClick={handleDisclaimerClick}
-          />
+          <Footer />
         </div>
       </div>
     </ThemeProvider>
