@@ -68,7 +68,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           : isDark
           ? 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10 hover:border-purple-400/40'
           : 'bg-white border-gray-200 hover:border-purple-300'
-      } backdrop-blur-2xl border rounded-xl overflow-hidden transition-all`}
+      } backdrop-blur-2xl border rounded-xl transition-all`}
     >
       {/* Card Header */}
       <div className={`p-3 ${
