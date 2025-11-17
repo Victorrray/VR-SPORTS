@@ -264,11 +264,14 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           {/* Books Table */}
           <div className="space-y-2">
             {/* Table Header */}
-            <div className={`grid grid-cols-4 gap-2 px-3 py-2 ${
+            <div className={`grid gap-3 px-4 py-3 ${
               isHero || isDark
                 ? 'bg-purple-500/20 border-purple-400/30' 
                 : 'bg-purple-100 border-purple-200'
-            } border rounded-lg`}>
+            } border rounded-lg`}
+            style={{
+              gridTemplateColumns: '1fr 1fr 1fr 0.8fr'
+            }}>
               <div className={`${isHero || isDark ? 'text-purple-300' : 'text-purple-700'} font-bold text-xs`}>
                 Book
               </div>
@@ -287,11 +290,14 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             {(showAllBooks ? sportsbookOdds : sportsbookOdds.slice(0, 5)).map((book, idx) => (
               <div 
                 key={idx}
-                className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${
+                className={`grid gap-3 px-4 py-3 ${
                   isHero || isDark
                     ? 'bg-white/5 border-white/10' 
                     : 'bg-white border-gray-200'
                 } border rounded-lg items-center`}
+                style={{
+                  gridTemplateColumns: '1fr 1fr 1fr 0.8fr'
+                }}
               >
                 <div className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-sm`}>
                   {book.name}
