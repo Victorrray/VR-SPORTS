@@ -667,7 +667,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                 <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl`}>Filters</h3>
                 <button
                   onClick={() => setIsFilterMenuOpen(false)}
-                  className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                  className={`p-2 -mt-2 -mr-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
                 >
                   <ChevronRight className="w-5 h-5 lg:block hidden" />
                   <span className="lg:hidden text-lg">✕</span>
