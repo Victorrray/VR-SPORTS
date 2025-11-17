@@ -2,7 +2,7 @@ import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, R
 import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
-import { useOddsData } from '../../hooks/useOddsData';
+import { useOddsData, type OddsPick } from '../../hooks/useOddsData';
 
 export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const { colorMode } = useTheme();
@@ -365,8 +365,6 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     );
   };
 
-  const totalPages = Math.ceil(topPicks.length / itemsPerPage);
-
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -379,7 +377,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     }
   };
 
-  const sortPicks = (picks: typeof topPicks) => {
+  const sortPicks = (picks: OddsPick[]) => {
     if (!sortBy) return picks;
     return [...picks].sort((a, b) => {
       if (sortBy === 'ev') {
@@ -398,6 +396,9 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
 
   // Use API picks or fallback to empty array if loading/error
   const filteredPicks = apiPicks && apiPicks.length > 0 ? apiPicks : [];
+  
+  // Calculate total pages after filteredPicks is defined
+  const totalPages = Math.ceil(filteredPicks.length / itemsPerPage);
   
   // Update loading state based on API loading
   useEffect(() => {
