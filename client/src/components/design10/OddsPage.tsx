@@ -1147,7 +1147,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             Sun, Nov 10 7:00 PM PST
                           </div>
                         </div>
-                        <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-lg border`}>
+                        <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-xl border`}>
                           <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
                             {pick.ev}
                           </span>
@@ -1158,7 +1158,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                     {/* Card Content */}
                     <div className="p-3 space-y-2.5">
                       {/* Pick Display */}
-                      <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-lg`}>
+                      <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-xl`}>
                         
                         <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
                           {pick.pick}
@@ -1166,7 +1166,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                       </div>
 
                       {/* Odds & Sportsbook */}
-                      <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-lg border`}>
+                      <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
                         <div>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
                             Sportsbook
@@ -1192,7 +1192,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             e.stopPropagation();
                             toggleRow(pick.id);
                           }}
-                          className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}
+                          className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-xs text-center`}
                         >
                           Compare Odds
                         </button>
@@ -1210,7 +1210,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             addedPicks.includes(pick.id)
                               ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed'
                               : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
-                          } text-white rounded-lg transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
+                          } text-white rounded-xl transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
                         >
                           {addedPicks.includes(pick.id) ? (
                             <>
