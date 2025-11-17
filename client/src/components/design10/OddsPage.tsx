@@ -2,6 +2,7 @@ import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, R
 import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
+import { useOddsData } from '../../hooks/useOddsData';
 
 export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const { colorMode } = useTheme();
@@ -31,13 +32,16 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const [addedPicks, setAddedPicks] = useState<number[]>([]); // Track which picks have been added
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Simulate initial data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Fetch odds data from API
+  const { picks: apiPicks, loading: apiLoading, error: apiError, refetch } = useOddsData({
+    sport: selectedSport,
+    date: selectedDate,
+    marketType: selectedMarket,
+    betType: selectedBetType,
+    sportsbooks: selectedSportsbooks,
+    limit: 50,
+    enabled: true,
+  });
 
   // Show toast when filters change
   useEffect(() => {
@@ -134,7 +138,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     }
   ];
 
-  const topPicks = [
+  // Mock data - now using API via useOddsData hook
+  /* const topPicks = [
     {
       id: 1,
       ev: '+78.07%',
@@ -340,7 +345,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
         { name: 'BetMGM', odds: '-112', team2Odds: '-108', ev: '+1.8%', isBest: false }
       ]
     }
-  ];
+  ]; */
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => 
@@ -391,14 +396,18 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     });
   };
 
-  // Filter picks based on selections - simulating filtering
-  const filteredPicks = topPicks.filter(pick => {
-    if (selectedSport !== 'all' && pick.sport.toLowerCase() !== selectedSport.toLowerCase().replace('-', ' ')) {
-      return false;
+  // Use API picks or fallback to empty array if loading/error
+  const filteredPicks = apiPicks && apiPicks.length > 0 ? apiPicks : [];
+  
+  // Update loading state based on API loading
+  useEffect(() => {
+    setIsLoading(apiLoading);
+    if (apiError) {
+      toast.error('Failed to load odds', {
+        description: apiError
+      });
     }
-    // Add more filter logic as needed
-    return true;
-  });
+  }, [apiLoading, apiError]);
 
   // Skeleton Loader Component
   const SkeletonRow = () => (
