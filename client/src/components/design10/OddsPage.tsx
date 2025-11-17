@@ -403,12 +403,13 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   // Update loading state based on API loading
   useEffect(() => {
     setIsLoading(apiLoading);
+    console.log('🔍 OddsPage - apiLoading:', apiLoading, 'apiPicks:', apiPicks?.length, 'filteredPicks:', filteredPicks.length);
     if (apiError) {
       toast.error('Failed to load odds', {
         description: apiError
       });
     }
-  }, [apiLoading, apiError]);
+  }, [apiLoading, apiError, apiPicks]);
 
   // Skeleton Loader Component
   const SkeletonRow = () => (
