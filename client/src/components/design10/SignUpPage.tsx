@@ -4,9 +4,12 @@ import { useState } from 'react';
 interface SignUpPageProps {
   onBack: () => void;
   onLogin: () => void;
+  onTerms?: () => void;
+  onPrivacy?: () => void;
+  onGoogleSignUp?: () => void;
 }
 
-export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
+export function SignUpPage({ onBack, onLogin, onTerms, onPrivacy, onGoogleSignUp }: SignUpPageProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,9 +48,6 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
         }}
       />
 
-      {/* Floating Orbs */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
       <div className="relative min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
@@ -191,6 +191,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                   {/* Social Sign Up */}
                   <button
                     type="button"
+                    onClick={onGoogleSignUp}
                     className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-xl text-white/90 hover:bg-slate-900/70 hover:border-white/20 transition-all font-bold"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -205,9 +206,21 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                   {/* Terms */}
                   <p className="text-center text-white/40 text-xs font-semibold">
                     By continuing, you agree to our{' '}
-                    <a href="#" className="text-purple-400 hover:text-purple-300">Terms of Service</a>
+                    <button
+                      type="button"
+                      onClick={onTerms}
+                      className="text-purple-400 hover:text-purple-300 font-semibold"
+                    >
+                      Terms of Service
+                    </button>
                     {' '}and{' '}
-                    <a href="#" className="text-purple-400 hover:text-purple-300">Privacy Policy</a>
+                    <button
+                      type="button"
+                      onClick={onPrivacy}
+                      className="text-purple-400 hover:text-purple-300 font-semibold"
+                    >
+                      Privacy Policy
+                    </button>
                   </p>
 
                   {/* Login Link */}

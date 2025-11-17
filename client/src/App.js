@@ -20,7 +20,7 @@ import DashboardPage from './pages/DashboardPage';
 import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
 import { LoginPageWrapper as Login } from './components/design10/LoginPageWrapper';
-import { SignUpPage as SignUp } from './components/design10/SignUpPage';
+import { SignUpPageWrapper as SignUp } from './components/design10/SignUpPageWrapper';
 import { ForgotPasswordPage as ForgotPassword } from './components/design10/ForgotPasswordPage';
 import { AccountPage as Account } from './components/design10/AccountPage';
 import UsagePlan from './pages/UsagePlan';
