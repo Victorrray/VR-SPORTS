@@ -645,18 +645,18 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
       </div>
 
       {/* Filter Side Panel */}
-      {isFilterMenuOpen && (
+      {(isFilterMenuOpen || true) && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - Mobile only */}
           <div 
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed lg:hidden inset-0 bg-black/30 backdrop-blur-sm z-40"
             onClick={() => setIsFilterMenuOpen(false)}
           />
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
-          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-16 left-0 right-0 lg:w-80 lg:h-auto h-auto ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-50 lg:rounded-none rounded-t-3xl animate-in slide-in-from-bottom lg:slide-in-from-left duration-300 flex flex-col`}>
+          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-16 left-0 right-0 lg:w-80 lg:h-screen lg:overflow-y-auto h-auto ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-50 lg:z-30 lg:rounded-none rounded-t-3xl ${isFilterMenuOpen ? 'animate-in slide-in-from-bottom lg:slide-in-from-left' : 'hidden lg:flex'} duration-300 flex flex-col`}>
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
+            <div className={`sticky top-0 lg:top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
               {/* Drag Handle - Mobile Only */}
               <div className="lg:hidden flex justify-center -mt-3 mb-2">
                 <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
