@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../utils/apiClient';
+import { useAuth } from './SimpleAuth';
 
 export interface OddsBook {
   name: string;
@@ -52,12 +53,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
     enabled = true,
   } = options;
 
+  const { user, authLoading } = useAuth();
   const [picks, setPicks] = useState<OddsPick[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchOddsData = async () => {
-    if (!enabled) {
+    if (!enabled || !user || authLoading) {
       setLoading(false);
       return;
     }
@@ -106,7 +108,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
   useEffect(() => {
     fetchOddsData();
-  }, [sport, date, marketType, betType, sportsbooks.join(','), limit, enabled]);
+  }, [sport, date, marketType, betType, sportsbooks.join(','), limit, enabled, user, authLoading]);
 
   return {
     picks,
