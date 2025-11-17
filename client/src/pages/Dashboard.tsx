@@ -103,23 +103,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       className={`min-h-screen ${isLight ? lightModeColors.background : config.background} relative overflow-hidden`}
     >
       <Toaster richColors position="top-center" />
-      {/* Animated Background Orbs - Only for solid-gradient theme in dark mode */}
-      {theme === "solid-gradient" && !isLight && (
-        <>
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
-          <div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl"
-          ></div>
-          <div
-            className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl"
-          ></div>
-        </>
-      )}
-
-      {/* Background Pattern - Only for solid-gradient theme in dark mode */}
-      {theme === "solid-gradient" && !isLight && (
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDMpIi8+PC9nPjwvc3ZnPg==')] opacity-40"></div>
-      )}
 
       <div className="relative flex">
         {/* Sidebar */}
