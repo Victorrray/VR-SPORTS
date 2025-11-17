@@ -117,12 +117,13 @@ export async function getAccessToken() {
       return token;
     }
     
-    // Fallback 1: check localStorage for session with correct key
+    // Fallback 1: check localStorage
     try {
       const storedSession = localStorage.getItem('sb-oddsightseer-auth');
       if (storedSession) {
         const parsed = JSON.parse(storedSession);
-        const storedToken = parsed?.session?.access_token;
+        // Try top-level first, then nested
+        const storedToken = parsed?.access_token || parsed?.session?.access_token;
         if (storedToken) {
           console.log('✅ getAccessToken: Got token from localStorage (sb-oddsightseer-auth)');
           return storedToken;
