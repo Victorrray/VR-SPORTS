@@ -51,21 +51,38 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
     const team2 = game.home_team || 'Team B';
     const bookmakers = game.bookmakers || [];
     
-    // Get best odds from first bookmaker's first market
+    // Get best odds from all bookmakers
     let bestOdds = '-110';
     let bestBook = 'N/A';
     let ev = '0%';
+    const booksArray: any[] = [];
     
-    if (bookmakers.length > 0 && bookmakers[0].markets && bookmakers[0].markets.length > 0) {
-      const firstMarket = bookmakers[0].markets[0];
-      if (firstMarket.outcomes && firstMarket.outcomes.length > 0) {
-        bestOdds = String(firstMarket.outcomes[0].odds);
-        bestBook = bookmakers[0].title || bookmakers[0].key;
+    // Find h2h market (moneyline) from all bookmakers
+    bookmakers.forEach((bm, bmIdx) => {
+      const h2hMarket = bm.markets?.find((m: any) => m.key === 'h2h');
+      if (h2hMarket && h2hMarket.outcomes && h2hMarket.outcomes.length > 0) {
+        // Get the first outcome (usually the away team)
+        const odds = h2hMarket.outcomes[0].odds;
+        const bookName = bm.title || bm.key;
+        
+        booksArray.push({
+          name: bookName,
+          odds: String(odds),
+          team2Odds: h2hMarket.outcomes[1]?.odds ? String(h2hMarket.outcomes[1].odds) : '-110',
+          ev: '0%',
+          isBest: bmIdx === 0
+        });
+        
+        // Set best odds from first bookmaker
+        if (bmIdx === 0) {
+          bestOdds = String(odds);
+          bestBook = bookName;
+        }
       }
-    }
+    });
     
     return {
-      id: idx + 1,
+      id: game.id || idx + 1,
       ev: ev,
       sport: game.sport_title || 'Unknown',
       game: `${team1} @ ${team2}`,
@@ -76,12 +93,12 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       bestBook,
       avgOdds: bestOdds,
       isHot: false,
-      books: bookmakers.map(bm => ({
+      books: booksArray.length > 0 ? booksArray : bookmakers.map(bm => ({
         name: bm.title || bm.key,
-        odds: bm.markets?.[0]?.outcomes?.[0]?.odds ? String(bm.markets[0].outcomes[0].odds) : '-110',
-        team2Odds: bm.markets?.[0]?.outcomes?.[1]?.odds ? String(bm.markets[0].outcomes[1].odds) : '-110',
+        odds: '-110',
+        team2Odds: '-110',
         ev: '0%',
-        isBest: bm === bookmakers[0]
+        isBest: false
       }))
     };
   });
