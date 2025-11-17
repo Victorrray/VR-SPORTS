@@ -57,29 +57,50 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
     let ev = '0%';
     const booksArray: any[] = [];
     
-    // Find h2h market (moneyline) from all bookmakers
+    // Find odds from all bookmakers - try h2h first, then spreads, then any market
     bookmakers.forEach((bm, bmIdx) => {
-      const h2hMarket = bm.markets?.find((m: any) => m.key === 'h2h');
-      if (h2hMarket && h2hMarket.outcomes && h2hMarket.outcomes.length > 0) {
-        // Get the first outcome (usually the away team)
-        const odds = h2hMarket.outcomes[0].odds;
-        const bookName = bm.title || bm.key;
+      let marketToUse = null;
+      const bookName = bm.title || bm.key;
+      
+      // Try to find h2h market first
+      if (bm.markets && Array.isArray(bm.markets)) {
+        marketToUse = bm.markets.find((m: any) => m.key === 'h2h');
         
-        booksArray.push({
-          name: bookName,
-          odds: String(odds),
-          team2Odds: h2hMarket.outcomes[1]?.odds ? String(h2hMarket.outcomes[1].odds) : '-110',
-          ev: '0%',
-          isBest: bmIdx === 0
-        });
+        // If no h2h, try spreads
+        if (!marketToUse) {
+          marketToUse = bm.markets.find((m: any) => m.key === 'spreads');
+        }
         
-        // Set best odds from first bookmaker
-        if (bmIdx === 0) {
-          bestOdds = String(odds);
-          bestBook = bookName;
+        // If still nothing, use first available market
+        if (!marketToUse && bm.markets.length > 0) {
+          marketToUse = bm.markets[0];
+        }
+      }
+      
+      if (marketToUse && marketToUse.outcomes && marketToUse.outcomes.length > 0) {
+        // Get the first outcome (usually the away team for h2h, or the first side for spreads)
+        const odds = marketToUse.outcomes[0].odds;
+        const team2Odds = marketToUse.outcomes[1]?.odds || '-110';
+        
+        if (odds !== undefined && odds !== null) {
+          booksArray.push({
+            name: bookName,
+            odds: String(odds),
+            team2Odds: String(team2Odds),
+            ev: '0%',
+            isBest: bmIdx === 0
+          });
+          
+          // Set best odds from first bookmaker with valid odds
+          if (bmIdx === 0 && bestOdds === '-110') {
+            bestOdds = String(odds);
+            bestBook = bookName;
+          }
         }
       }
     });
+    
+    console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}`);
     
     return {
       id: game.id || idx + 1,
