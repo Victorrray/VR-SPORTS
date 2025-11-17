@@ -239,7 +239,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                   : 'bg-gray-100 border-gray-200'
               } backdrop-blur-xl border rounded-full`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
-                  {bet.odds.includes('+') ? `+${parseInt(bet.odds) - 15}` : `${parseInt(bet.odds) + 15}`}
+                  {formatOdds(String(parseInt(bet.odds) + 15))}
                 </span>
               </div>
             </div>
@@ -255,7 +255,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                   : 'bg-gray-100 border-gray-200'
               } backdrop-blur-xl border rounded-full`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
-                  {bet.odds.includes('+') ? `+${parseInt(bet.odds) - 8}` : `${parseInt(bet.odds) + 8}`}
+                  {formatOdds(String(parseInt(bet.odds) + 8))}
                 </span>
               </div>
             </div>
