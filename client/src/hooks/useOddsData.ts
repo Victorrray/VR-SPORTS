@@ -42,6 +42,51 @@ export interface UseOddsDataResult {
   refetch: () => void;
 }
 
+// Transform TheOddsAPI format to OddsPick format
+function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
+  if (!Array.isArray(games)) return [];
+  
+  return games.map((game, idx) => {
+    const team1 = game.away_team || 'Team A';
+    const team2 = game.home_team || 'Team B';
+    const bookmakers = game.bookmakers || [];
+    
+    // Get best odds from first bookmaker's first market
+    let bestOdds = '-110';
+    let bestBook = 'N/A';
+    let ev = '0%';
+    
+    if (bookmakers.length > 0 && bookmakers[0].markets && bookmakers[0].markets.length > 0) {
+      const firstMarket = bookmakers[0].markets[0];
+      if (firstMarket.outcomes && firstMarket.outcomes.length > 0) {
+        bestOdds = String(firstMarket.outcomes[0].odds);
+        bestBook = bookmakers[0].title || bookmakers[0].key;
+      }
+    }
+    
+    return {
+      id: idx + 1,
+      ev: ev,
+      sport: game.sport_title || 'Unknown',
+      game: `${team1} @ ${team2}`,
+      team1,
+      team2,
+      pick: `${team1} ML`,
+      bestOdds,
+      bestBook,
+      avgOdds: bestOdds,
+      isHot: false,
+      books: bookmakers.map(bm => ({
+        name: bm.title || bm.key,
+        odds: bm.markets?.[0]?.outcomes?.[0]?.odds ? String(bm.markets[0].outcomes[0].odds) : '-110',
+        team2Odds: bm.markets?.[0]?.outcomes?.[1]?.odds ? String(bm.markets[0].outcomes[1].odds) : '-110',
+        ev: '0%',
+        isBest: bm === bookmakers[0]
+      }))
+    };
+  });
+}
+
 export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult {
   const {
     sport = 'all',
@@ -111,11 +156,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       }
 
       if (response.data && Array.isArray(response.data)) {
-        setPicks(response.data);
-        console.log('✅ Odds data fetched successfully:', response.data.length, 'picks');
+        const transformedPicks = transformOddsApiToOddsPick(response.data);
+        setPicks(transformedPicks);
+        console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
-        setPicks(response.data.picks);
-        console.log('✅ Odds data fetched successfully:', response.data.picks.length, 'picks');
+        const transformedPicks = transformOddsApiToOddsPick(response.data.picks);
+        setPicks(transformedPicks);
+        console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
       } else {
         console.warn('⚠️ Unexpected response format:', response.data);
         setError('Invalid response format from API');
