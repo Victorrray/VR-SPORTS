@@ -68,11 +68,28 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       setLoading(true);
       setError(null);
 
-      // Build query parameters
+      // Build query parameters - match backend API expectations
       const params = new URLSearchParams();
-      if (sport && sport !== 'all') params.append('sport', sport);
+      
+      // Map frontend filters to backend parameter names
+      // Default sports if not specified
+      const sportsList = sport && sport !== 'all' 
+        ? sport 
+        : 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl';
+      params.append('sports', sportsList);
+      
+      // Backend expects 'markets' not 'marketType'
+      const marketsList = marketType && marketType !== 'all'
+        ? marketType
+        : 'h2h,spreads,totals';
+      params.append('markets', marketsList);
+      
+      // Add other parameters the backend expects
+      params.append('regions', 'us');
+      params.append('oddsFormat', 'american');
+      
+      // Optional: date, betType, sportsbooks (if backend supports them)
       if (date && date !== 'all') params.append('date', date);
-      if (marketType && marketType !== 'all') params.append('marketType', marketType);
       if (betType && betType !== 'all') params.append('betType', betType);
       if (sportsbooks && sportsbooks.length > 0) {
         params.append('sportsbooks', sportsbooks.join(','));
