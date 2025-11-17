@@ -46,19 +46,27 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
   // Mock sportsbook data - In production, this would come from API
   const sportsbookOdds = [
     { name: 'Pinnacle', odds: bet.odds, team2Odds: '-195' },
-    { name: 'DraftKings', odds: '+135', team2Odds: '-162' },
-    { name: 'FanDuel', odds: '+130', team2Odds: '-158' },
-    { name: 'BetMGM', odds: '+125', team2Odds: '-152' },
-    { name: 'Caesars', odds: '+122', team2Odds: '-148' },
-    { name: 'BetRivers', odds: '+120', team2Odds: '-145' },
-    { name: 'Hard Rock', odds: '+118', team2Odds: '-142' },
-    { name: 'Fanatics', odds: '+115', team2Odds: '-138' }
+    { name: 'DraftKings', odds: '+140', team2Odds: '-160' },
+    { name: 'FanDuel', odds: '+135', team2Odds: '-155' },
+    { name: 'BetMGM', odds: '+130', team2Odds: '-150' },
+    { name: 'Caesars', odds: '+125', team2Odds: '-145' },
+    { name: 'BetRivers', odds: '+120', team2Odds: '-140' },
+    { name: 'Hard Rock', odds: '+118', team2Odds: '-138' },
+    { name: 'Fanatics', odds: '+115', team2Odds: '-135' }
   ];
 
   // Extract team names from the teams string
   const teamNames = bet.teams.split(' @ ');
   const team1 = teamNames[0] || 'Team 1';
   const team2 = teamNames[1] || 'Team 2';
+
+  // Format odds with proper sign
+  const formatOdds = (oddsStr: string) => {
+    if (!oddsStr) return '';
+    const odds = parseInt(oddsStr);
+    if (odds > 0) return `+${odds}`;
+    return `${odds}`; // Already has minus sign
+  };
 
   return (
     <div
@@ -150,7 +158,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               Odds
             </div>
             <div className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold`}>
-              {bet.odds}
+              {formatOdds(bet.odds)}
             </div>
           </div>
         </div>
@@ -215,7 +223,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                   : 'bg-emerald-100 border-emerald-300'
               } backdrop-blur-xl border rounded-full`}>
                 <span className={`${isHero || isDark ? 'text-emerald-400' : 'text-emerald-700'} font-bold text-base`}>
-                  {bet.odds}
+                  {formatOdds(bet.odds)}
                 </span>
               </div>
             </div>
@@ -291,12 +299,12 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 <div className={`${
                   isHero || isDark ? 'text-emerald-400' : 'text-emerald-600'
                 } font-bold text-sm text-center`}>
-                  {book.odds}
+                  {formatOdds(book.odds)}
                 </div>
                 <div className={`${
-                  isHero || isDark ? 'text-white/60' : 'text-gray-600'
+                  isHero || isDark ? 'text-emerald-400' : 'text-emerald-600'
                 } font-bold text-sm text-center`}>
-                  {book.team2Odds}
+                  {formatOdds(book.team2Odds)}
                 </div>
                 <div className="flex justify-end">
                   <button
