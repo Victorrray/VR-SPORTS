@@ -83,6 +83,15 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       let marketToUse = null;
       const bookName = bm.title || bm.key;
       
+      // Debug first bookmaker
+      if (idx === 0 && bmIdx === 0) {
+        console.log(`📚 First bookmaker: ${bookName}, markets:`, bm.markets?.length || 0);
+        if (bm.markets && bm.markets.length > 0) {
+          console.log(`📚 First market key: ${bm.markets[0].key}`);
+          console.log(`📚 First market outcomes:`, bm.markets[0].outcomes);
+        }
+      }
+      
       // Try to find h2h market first
       if (bm.markets && Array.isArray(bm.markets)) {
         marketToUse = bm.markets.find((m: any) => m.key === 'h2h');
@@ -117,6 +126,14 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
             bestOdds = String(odds);
             bestBook = bookName;
           }
+          
+          if (idx === 0 && bmIdx === 0) {
+            console.log(`✅ Found odds for ${bookName}: ${odds}`);
+          }
+        }
+      } else {
+        if (idx === 0 && bmIdx === 0) {
+          console.log(`❌ No outcomes found for ${bookName}`);
         }
       }
     });
