@@ -95,13 +95,18 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
         }
       }
       
-      // Try to find h2h market first
+      // Try to find h2h market first (moneyline)
       if (bm.markets && Array.isArray(bm.markets)) {
         marketToUse = bm.markets.find((m: any) => m.key === 'h2h');
         
         // If no h2h, try spreads
         if (!marketToUse) {
           marketToUse = bm.markets.find((m: any) => m.key === 'spreads');
+        }
+        
+        // If no spreads, try totals (last resort)
+        if (!marketToUse) {
+          marketToUse = bm.markets.find((m: any) => m.key === 'totals');
         }
         
         // If still nothing, use first available market
@@ -111,7 +116,7 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       }
       
       if (marketToUse && marketToUse.outcomes && marketToUse.outcomes.length > 0) {
-        // Get the first outcome (usually the away team for h2h, or the first side for spreads)
+        // Get the first outcome (usually the away team for h2h, or the first side for spreads/totals)
         const odds = marketToUse.outcomes[0].odds;
         const team2Odds = marketToUse.outcomes[1]?.odds || '-110';
         
@@ -131,7 +136,11 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
           }
           
           if (idx === 0 && bmIdx === 0) {
-            console.log(`✅ Found odds for ${bookName}: ${odds}`);
+            console.log(`✅ Found odds for ${bookName}: ${odds} (market: ${marketToUse.key})`);
+          }
+        } else {
+          if (idx === 0 && bmIdx === 0) {
+            console.log(`⚠️ Market found but no odds for ${bookName}`);
           }
         }
       } else {
