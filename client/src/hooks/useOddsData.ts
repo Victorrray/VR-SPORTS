@@ -133,12 +133,27 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       
       if (marketToUse && marketToUse.outcomes && marketToUse.outcomes.length > 0) {
         // Get the first outcome (usually the away team for h2h, or the first side for spreads/totals)
-        const odds = marketToUse.outcomes[0].odds;
-        const team2Odds = marketToUse.outcomes[1]?.odds || '-110';
+        const outcome0 = marketToUse.outcomes[0];
+        const outcome1 = marketToUse.outcomes[1];
         
         if (idx === 0 && bmIdx === 0) {
-          console.log(`🔍 Outcome 0:`, marketToUse.outcomes[0]);
-          console.log(`🔍 Outcome 1:`, marketToUse.outcomes[1]);
+          console.log(`🔍 Outcome 0 FULL:`, outcome0);
+          console.log(`🔍 Outcome 0 keys:`, Object.keys(outcome0));
+          console.log(`🔍 Outcome 1 FULL:`, outcome1);
+          if (outcome1) {
+            console.log(`🔍 Outcome 1 keys:`, Object.keys(outcome1));
+          }
+        }
+        
+        // Try different property names for odds
+        const odds = outcome0.odds !== undefined ? outcome0.odds : 
+                     outcome0.price !== undefined ? outcome0.price :
+                     outcome0.value !== undefined ? outcome0.value : undefined;
+        const team2Odds = outcome1 ? (outcome1.odds !== undefined ? outcome1.odds :
+                                       outcome1.price !== undefined ? outcome1.price :
+                                       outcome1.value !== undefined ? outcome1.value : '-110') : '-110';
+        
+        if (idx === 0 && bmIdx === 0) {
           console.log(`🔍 Extracted odds: ${odds}, team2Odds: ${team2Odds}`);
         }
         
