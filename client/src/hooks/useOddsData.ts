@@ -23,6 +23,8 @@ export interface OddsPick {
   avgOdds: string;
   isHot: boolean;
   books: OddsBook[];
+  gameTime?: string;  // ISO 8601 format (e.g., "2025-11-18T19:00:00Z")
+  commenceTime?: string;  // Alias for gameTime
 }
 
 export interface UseOddsDataOptions {
@@ -229,7 +231,9 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       bestBook,
       avgOdds: bestOdds,
       isHot: false,
-      books: finalBooks
+      books: finalBooks,
+      gameTime: game.commence_time || game.gameTime || undefined,
+      commenceTime: game.commence_time || game.gameTime || undefined
     };
   });
 }

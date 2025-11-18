@@ -20,6 +20,36 @@ function getSportLabel(sportKey: string): string {
   return sportMap[sportKey] || sportKey.toUpperCase();
 }
 
+// Helper function to format game time
+function formatGameTime(gameTime?: string): string {
+  if (!gameTime) return 'TBD';
+  
+  try {
+    const date = new Date(gameTime);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'TBD';
+    }
+    
+    // Format: "Mon, Nov 18 7:00 PM PST"
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZoneName: 'short'
+    };
+    
+    return date.toLocaleString('en-US', options);
+  } catch (error) {
+    console.error('Error formatting game time:', error);
+    return 'TBD';
+  }
+}
+
 export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
@@ -1119,10 +1149,10 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                       </div>
                       {/* Game Matchup */}
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.game}</div>
-                      {/* Game Time - TODO: Mock date - will be replaced with actual game time from API */}
+                      {/* Game Time */}
                       <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
                         <Clock className="w-3 h-3" />
-                        Sun, Nov 10 7:00 PM PST
+                        {formatGameTime(pick.gameTime)}
                       </div>
                     </div>
 
@@ -1162,7 +1192,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </h3>
                           <div className={`flex items-center gap-1.5 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold`}>
                             <Clock className="w-3 h-3" />
-                            Sun, Nov 10 7:00 PM PST
+                            {formatGameTime(pick.gameTime)}
                           </div>
                         </div>
                         <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-xl border`}>
