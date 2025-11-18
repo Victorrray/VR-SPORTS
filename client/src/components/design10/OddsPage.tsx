@@ -50,6 +50,26 @@ function formatGameTime(gameTime?: string): string {
   }
 }
 
+// Helper function to format odds with proper +/- signs
+function formatOdds(odds?: string): string {
+  if (!odds) return '-';
+  
+  try {
+    const oddsNum = parseInt(odds, 10);
+    
+    // If it's a positive number, add the + sign
+    if (oddsNum > 0) {
+      return `+${oddsNum}`;
+    }
+    
+    // If it's negative or zero, just return as is
+    return String(oddsNum);
+  } catch (error) {
+    console.error('Error formatting odds:', error);
+    return odds;
+  }
+}
+
 export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
@@ -1171,7 +1191,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                     {/* Odds - Best available odds for this pick */}
                     <div className="lg:col-span-2 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.bestOdds}</span>
+                        <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{formatOdds(pick.bestOdds)}</span>
                       </div>
                     </div>
                   </div>
@@ -1228,7 +1248,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             Odds
                           </div>
                           <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                            {pick.bestOdds}
+                            {formatOdds(pick.bestOdds)}
                           </div>
                         </div>
                       </div>
@@ -1288,7 +1308,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>
-                              {pick.bestOdds}
+                              {formatOdds(pick.bestOdds)}
                             </span>
                           </div>
                         </div>
@@ -1300,7 +1320,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 15}` : `${parseInt(pick.bestOdds) + 15}`}
+                              {formatOdds(String(parseInt(pick.bestOdds) + (pick.bestOdds.includes('+') ? -15 : 15)))}
                             </span>
                           </div>
                         </div>
@@ -1312,7 +1332,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 8}` : `${parseInt(pick.bestOdds) + 8}`}
+                              {formatOdds(String(parseInt(pick.bestOdds) + (pick.bestOdds.includes('+') ? -8 : 8)))}
                             </span>
                           </div>
                         </div>
@@ -1335,8 +1355,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg items-center`}
                           >
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{book.odds}</div>
-                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{book.team2Odds}</div>
+                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{formatOdds(book.odds)}</div>
+                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{formatOdds(book.team2Odds)}</div>
                             <div className="flex justify-end">
                               <button
                                 onClick={(e) => {
