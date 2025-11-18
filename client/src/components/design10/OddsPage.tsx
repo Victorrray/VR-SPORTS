@@ -4,6 +4,22 @@ import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 import { useOddsData, type OddsPick } from '../../hooks/useOddsData';
 
+// Helper function to convert sport key to display label
+function getSportLabel(sportKey: string): string {
+  const sportMap: { [key: string]: string } = {
+    'americanfootball_nfl': 'NFL',
+    'americanfootball_ncaaf': 'NCAAF',
+    'basketball_nba': 'NBA',
+    'basketball_ncaab': 'NCAAB',
+    'baseball_mlb': 'MLB',
+    'icehockey_nhl': 'NHL',
+    'soccer_epl': 'EPL',
+    'mma_mixed_martial_arts': 'MMA',
+    'boxing_boxing': 'BOXING',
+  };
+  return sportMap[sportKey] || sportKey.toUpperCase();
+}
+
 export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
@@ -1098,7 +1114,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {/* Sport Badge */}
                         <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
-                          {pick.sport}
+                          {getSportLabel(pick.sport)}
                         </span>
                       </div>
                       {/* Game Matchup */}
@@ -1136,7 +1152,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                     <div className={`p-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
                       <div className="mb-2">
                         <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
-                          {pick.sport}
+                          {getSportLabel(pick.sport)}
                         </span>
                       </div>
                       <div className="flex items-start justify-between gap-3 mb-2">
