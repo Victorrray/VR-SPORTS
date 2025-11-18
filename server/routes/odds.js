@@ -220,11 +220,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               console.log(`📚 First game bookmakers count: ${firstGame.bookmakers ? firstGame.bookmakers.length : 0}`);
               if (firstGame.bookmakers && firstGame.bookmakers.length > 0) {
                 const firstBook = firstGame.bookmakers[0];
+                console.log(`📚 First bookmaker FULL OBJECT:`, JSON.stringify(firstBook, null, 2).substring(0, 500));
                 console.log(`📚 First bookmaker: ${firstBook.key || firstBook.title}`);
                 console.log(`📊 First bookmaker markets: ${firstBook.markets ? firstBook.markets.length : 0}`);
                 if (firstBook.markets && firstBook.markets.length > 0) {
                   console.log(`📊 First market: ${firstBook.markets[0].key}`);
                   console.log(`📊 First market outcomes: ${firstBook.markets[0].outcomes ? firstBook.markets[0].outcomes.length : 0}`);
+                  console.log(`📊 First market FULL:`, JSON.stringify(firstBook.markets[0], null, 2).substring(0, 500));
                 }
               }
             }
