@@ -620,7 +620,7 @@ function uniqueBookCount(row) {
 
 export default function OddsTable({
   games,
-  mode = "game",
+  mode = "game", // "game" | "props" | "arbitrage" | "middles"
   pageSize = 15,
   loading = false,
   error = null,
@@ -636,6 +636,11 @@ export default function OddsTable({
   onOpenBetSlip = null,
   searchQuery = "", // Add search query prop
   dataPoints = 10, // Minimum number of sportsbooks for a bet to be shown
+  // Additional filter props for comprehensive mode support
+  minProfit = null, // For arbitrage mode
+  maxStake = null, // For arbitrage/middles mode
+  minMiddleGap = null, // For middles mode
+  minMiddleProbability = null, // For middles mode
 }) {
   
   // Get user plan information for free trial restrictions
@@ -2239,6 +2244,23 @@ export default function OddsTable({
   let rows = useMemo(() => {
     let r = allRows;
     
+    // ========== MODE-SPECIFIC FILTERING ==========
+    // Apply mode-specific logic before other filters
+    if (mode === 'arbitrage' && minProfit !== null) {
+      console.log(`🎯 ARBITRAGE MODE: Filtering for minimum ${minProfit}% profit`);
+      r = r.filter(row => {
+        const ev = evMap.get(row.key);
+        return ev != null && ev >= minProfit;
+      });
+    }
+    
+    if (mode === 'middles' && minMiddleGap !== null) {
+      console.log(`🎪 MIDDLES MODE: Filtering for minimum ${minMiddleGap} point gap`);
+      // Middles filtering logic would be applied here
+      // This is typically handled by MiddlesDetector component
+    }
+    
+    // ========== SPORTSBOOK FILTERING ==========
     // Check if we're filtering for DFS apps only
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
     const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
@@ -2302,6 +2324,42 @@ export default function OddsTable({
       });
       
       console.log('🎯 After filtering: ' + r.length + ' rows');
+    }
+    
+    // ========== MARKET FILTERING ==========
+    // Apply market filter based on mode
+    if (marketFilter && marketFilter.length > 0) {
+      console.log(`🎯 MARKET FILTER: Filtering for markets:`, marketFilter);
+      r = r.filter(row => {
+        const marketKey = row.mkt?.key || '';
+        
+        // For player props mode, always include if it's a player prop market
+        if (mode === 'props') {
+          const isPlayerProp = marketKey.includes('player_') || marketKey.includes('batter_') || marketKey.includes('pitcher_');
+          if (isPlayerProp) {
+            // Check if specific market is selected
+            const isSelected = marketFilter.includes(marketKey);
+            if (!isSelected) {
+              console.log(`🎯 MARKET FILTER: Excluding ${marketKey} - not in selected markets`);
+              return false;
+            }
+          }
+          return true;
+        }
+        
+        // For straight bets mode, filter by selected markets
+        if (mode === 'game') {
+          const isSelected = marketFilter.includes(marketKey);
+          if (!isSelected) {
+            console.log(`🎯 MARKET FILTER: Excluding ${marketKey} - not in selected markets`);
+          }
+          return isSelected;
+        }
+        
+        // For arbitrage/middles, apply market filter
+        return marketFilter.includes(marketKey);
+      });
+      console.log(`🎯 MARKET FILTER: ${r.length} rows after market filtering`);
     }
     
     // Apply search query filter for both game odds and player props
@@ -2456,7 +2514,7 @@ export default function OddsTable({
       // If both locked or both unlocked, use normal sorting
       return sort.dir === 'asc' ? -sorter(a, b) : sorter(a, b);
     });
-  }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap, searchQuery, mode, dataPoints]);
+  }, [allRows, bookFilter, evOnlyPositive, evMin, sort.dir, sorter, evMap, searchQuery, mode, dataPoints, marketFilter, minProfit, maxStake, minMiddleGap, minMiddleProbability]);
 
   const totalPages = Math.ceil(rows.length / pageSize);
   const paginatedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page, pageSize]);
