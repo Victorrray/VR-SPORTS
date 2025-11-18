@@ -97,21 +97,37 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       
       // Try to find h2h market first (moneyline)
       if (bm.markets && Array.isArray(bm.markets)) {
+        if (idx === 0 && bmIdx === 0) {
+          console.log(`🔎 Available markets for ${bookName}:`, bm.markets.map((m: any) => m.key));
+        }
+        
         marketToUse = bm.markets.find((m: any) => m.key === 'h2h');
+        if (idx === 0 && bmIdx === 0 && marketToUse) {
+          console.log(`✅ Found h2h market`);
+        }
         
         // If no h2h, try spreads
         if (!marketToUse) {
           marketToUse = bm.markets.find((m: any) => m.key === 'spreads');
+          if (idx === 0 && bmIdx === 0 && marketToUse) {
+            console.log(`✅ Found spreads market (h2h not available)`);
+          }
         }
         
         // If no spreads, try totals (last resort)
         if (!marketToUse) {
           marketToUse = bm.markets.find((m: any) => m.key === 'totals');
+          if (idx === 0 && bmIdx === 0 && marketToUse) {
+            console.log(`✅ Found totals market (h2h and spreads not available)`);
+          }
         }
         
         // If still nothing, use first available market
         if (!marketToUse && bm.markets.length > 0) {
           marketToUse = bm.markets[0];
+          if (idx === 0 && bmIdx === 0) {
+            console.log(`✅ Using first available market: ${marketToUse.key}`);
+          }
         }
       }
       
