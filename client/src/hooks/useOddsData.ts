@@ -83,10 +83,13 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       let marketToUse = null;
       const bookName = bm.title || bm.key;
       
-      // Debug first bookmaker
+      // Debug first bookmaker - log entire structure
       if (idx === 0 && bmIdx === 0) {
+        console.log(`📚 FIRST BOOKMAKER FULL OBJECT:`, bm);
+        console.log(`📚 First bookmaker keys:`, Object.keys(bm));
         console.log(`📚 First bookmaker: ${bookName}, markets:`, bm.markets?.length || 0);
         if (bm.markets && bm.markets.length > 0) {
+          console.log(`📚 First market:`, bm.markets[0]);
           console.log(`📚 First market key: ${bm.markets[0].key}`);
           console.log(`📚 First market outcomes:`, bm.markets[0].outcomes);
         }
