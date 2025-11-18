@@ -209,8 +209,25 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             }
           } else {
             console.log(`🌐 API call for ${sport}`);
+            console.log(`🔗 URL: ${url.substring(0, 150)}...`);
             const response = await axios.get(url);
             responseData = response.data;
+            
+            // Debug: Log first game's bookmakers structure
+            if (responseData && responseData.length > 0) {
+              const firstGame = responseData[0];
+              console.log(`🎮 First game from API: ${firstGame.away_team} @ ${firstGame.home_team}`);
+              console.log(`📚 First game bookmakers count: ${firstGame.bookmakers ? firstGame.bookmakers.length : 0}`);
+              if (firstGame.bookmakers && firstGame.bookmakers.length > 0) {
+                const firstBook = firstGame.bookmakers[0];
+                console.log(`📚 First bookmaker: ${firstBook.key || firstBook.title}`);
+                console.log(`📊 First bookmaker markets: ${firstBook.markets ? firstBook.markets.length : 0}`);
+                if (firstBook.markets && firstBook.markets.length > 0) {
+                  console.log(`📊 First market: ${firstBook.markets[0].key}`);
+                  console.log(`📊 First market outcomes: ${firstBook.markets[0].outcomes ? firstBook.markets[0].outcomes.length : 0}`);
+                }
+              }
+            }
             
             // Log quota information from response headers
             const quotaRemaining = response.headers['x-requests-remaining'];
