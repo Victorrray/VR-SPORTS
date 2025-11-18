@@ -120,6 +120,12 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
         const odds = marketToUse.outcomes[0].odds;
         const team2Odds = marketToUse.outcomes[1]?.odds || '-110';
         
+        if (idx === 0 && bmIdx === 0) {
+          console.log(`🔍 Outcome 0:`, marketToUse.outcomes[0]);
+          console.log(`🔍 Outcome 1:`, marketToUse.outcomes[1]);
+          console.log(`🔍 Extracted odds: ${odds}, team2Odds: ${team2Odds}`);
+        }
+        
         if (odds !== undefined && odds !== null) {
           booksArray.push({
             name: bookName,
@@ -140,7 +146,7 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
           }
         } else {
           if (idx === 0 && bmIdx === 0) {
-            console.log(`⚠️ Market found but no odds for ${bookName}`);
+            console.log(`⚠️ Market found but no odds for ${bookName}, odds value: ${odds}`);
           }
         }
       } else {
