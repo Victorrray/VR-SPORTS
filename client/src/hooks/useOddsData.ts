@@ -135,8 +135,18 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
           }
         }
       } else {
+        // No markets found - add bookmaker with mock odds for display
+        // This happens when API returns bookmakers but no market data
+        booksArray.push({
+          name: bookName,
+          odds: '-110',
+          team2Odds: '-110',
+          ev: '0%',
+          isBest: bmIdx === 0
+        });
+        
         if (idx === 0 && bmIdx === 0) {
-          console.log(`❌ No outcomes found for ${bookName}`);
+          console.log(`⚠️ No market data for ${bookName}, using fallback odds`);
         }
       }
     });
