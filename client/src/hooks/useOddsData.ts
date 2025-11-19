@@ -180,9 +180,50 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
         }
       }
     });
-    
+
+    // After collecting all bookmaker odds, compute a simple EV% based on
+    // the best price vs the average price across all books for this side.
+    const numericOdds = booksArray
+      .map(b => parseInt(b.odds, 10))
+      .filter(o => !isNaN(o));
+
+    if (numericOdds.length > 0) {
+      // Convert American odds to implied probability
+      const toProb = (american: number) => {
+        if (american > 0) {
+          return 100 / (american + 100);
+        }
+        return -american / (-american + 100);
+      };
+
+      const probs = numericOdds.map(toProb);
+      const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
+
+      const bestOddsNum = parseInt(bestOdds, 10);
+      if (!isNaN(bestOddsNum)) {
+        const bestProb = toProb(bestOddsNum);
+        // Positive EV when bestProb < avgProb (better price than market average)
+        const edge = ((avgProb - bestProb) / bestProb) * 100;
+        const roundedEdge = Math.round(edge * 100) / 100;
+        ev = `${roundedEdge.toFixed(2)}%`;
+
+        // Apply per-book EVs relative to the same fair (average) probability
+        booksArray.forEach(b => {
+          const o = parseInt(b.odds, 10);
+          if (!isNaN(o)) {
+            const p = toProb(o);
+            const bookEdge = ((avgProb - p) / p) * 100;
+            const roundedBookEdge = Math.round(bookEdge * 100) / 100;
+            b.ev = `${roundedBookEdge.toFixed(2)}%`;
+          } else {
+            b.ev = '0%';
+          }
+        });
+      }
+    }
+
     if (idx === 0) {
-      console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}`);
+      console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}, EV: ${ev}`);
     }
 
     return {
