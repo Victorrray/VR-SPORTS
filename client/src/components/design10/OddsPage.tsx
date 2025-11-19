@@ -1268,7 +1268,20 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!addedPicks.includes(pick.id)) {
-                              onAddPick(pick);
+                              // Transform pick data to match PicksPage format
+                              const formattedPick = {
+                                id: pick.id || Date.now(),
+                                teams: pick.game || 'Unknown Game',
+                                time: formatGameTime(pick.gameTime),
+                                pick: pick.pick || 'Unknown Pick',
+                                odds: pick.bestOdds || '-',
+                                sportsbook: pick.bestBook || 'Unknown Book',
+                                ev: pick.ev || '0%',
+                                sport: getSportLabel(pick.sport),
+                                confidence: 'High',
+                                analysis: `${pick.pick} - ${pick.bestBook} at ${pick.bestOdds} with ${pick.ev} expected value`
+                              };
+                              onAddPick(formattedPick);
                               setAddedPicks([...addedPicks, pick.id]);
                               toast.success('Bet added to My Picks!');
                             }
@@ -1364,12 +1377,12 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                                   onAddPick({
                                     id: Date.now(),
                                     teams: pick.game,
-                                    time: 'Sun, Nov 10 7:00 PM PST',
+                                    time: formatGameTime(pick.gameTime),
                                     pick: pick.pick,
                                     odds: book.odds,
                                     sportsbook: book.name,
                                     ev: book.ev,
-                                    sport: pick.sport,
+                                    sport: getSportLabel(pick.sport),
                                     confidence: 'High',
                                     analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
                                   });
@@ -1472,12 +1485,12 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                                       onAddPick({
                                         id: Date.now(),
                                         teams: pick.game,
-                                        time: 'Sun, Nov 10 7:00 PM PST',
+                                        time: formatGameTime(pick.gameTime),
                                         pick: pick.pick,
                                         odds: book.odds,
                                         sportsbook: book.name,
                                         ev: book.ev,
-                                        sport: pick.sport,
+                                        sport: getSportLabel(pick.sport),
                                         confidence: 'High',
                                         analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
                                       });
