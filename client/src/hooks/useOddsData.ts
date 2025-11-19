@@ -45,6 +45,13 @@ export interface UseOddsDataResult {
 }
 
 // Transform TheOddsAPI format to OddsPick format
+// Normalize American odds so positive numbers always have a leading '+'
+function normalizeAmericanOdds(raw: any): string {
+  const n = parseInt(String(raw), 10);
+  if (isNaN(n)) return String(raw ?? '');
+  return n > 0 ? `+${n}` : String(n);
+}
+
 function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
   if (!Array.isArray(games)) return [];
   
@@ -153,15 +160,15 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
         if (odds !== undefined && odds !== null) {
           booksArray.push({
             name: bookName,
-            odds: String(odds),
-            team2Odds: String(team2Odds),
+            odds: normalizeAmericanOdds(odds),
+            team2Odds: normalizeAmericanOdds(team2Odds),
             ev: '0%',
             isBest: bmIdx === 0
           });
           
           // Set best odds from first bookmaker with valid odds
           if (bmIdx === 0 && bestOdds === '-110') {
-            bestOdds = String(odds);
+            bestOdds = normalizeAmericanOdds(odds);
             bestBook = bookName;
           }
           
