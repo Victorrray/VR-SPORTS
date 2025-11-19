@@ -188,7 +188,8 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
     return {
       id: game.id || idx + 1,
       ev: ev,
-      sport: game.sport_title || 'Unknown',
+      // Use sport_key in lowercase so UI helpers (getSportLabel) can map to clean league labels like NFL/NBA
+      sport: (game.sport_key || game.sport_title || 'Unknown').toLowerCase(),
       game: `${team1} @ ${team2}`,
       team1,
       team2,
