@@ -22,7 +22,7 @@ import {
   Calculator,
   Wallet,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PicksPage } from "../components/design10/PicksPage";
 import { OddsPage } from "../components/design10/OddsPage";
 import { AccountPage } from "../components/design10/AccountPage";
@@ -52,7 +52,27 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [currentView, setCurrentView] = useState<
     "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll"
   >("dashboard");
-  const [savedPicks, setSavedPicks] = useState<any[]>([]);
+  
+  // Initialize savedPicks from localStorage
+  const [savedPicks, setSavedPicks] = useState<any[]>(() => {
+    try {
+      const stored = localStorage.getItem('my_picks_v1');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error loading picks from localStorage:', error);
+      return [];
+    }
+  });
+
+  // Persist savedPicks to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('my_picks_v1', JSON.stringify(savedPicks));
+      console.log('✅ Picks saved to localStorage:', savedPicks.length);
+    } catch (error) {
+      console.error('Error saving picks to localStorage:', error);
+    }
+  }, [savedPicks]);
 
   // Fetch recommended picks from API
   const { picks: recommendedPicks, loading: picksLoading } = useRecommendedPicks({
@@ -65,11 +85,21 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const userStats = useUserStats();
 
   const addPickToMyPicks = (pick: any) => {
-    setSavedPicks((prev) => [...prev, pick]);
+    console.log('📌 Adding pick to My Picks:', pick);
+    setSavedPicks((prev) => {
+      const updated = [...prev, pick];
+      console.log('📌 Updated savedPicks:', updated);
+      return updated;
+    });
   };
 
-  const removePickFromMyPicks = (pickId: number) => {
-    setSavedPicks((prev) => prev.filter(pick => pick.id !== pickId));
+  const removePickFromMyPicks = (pickId: number | string) => {
+    console.log('🗑️ Removing pick from My Picks:', pickId);
+    setSavedPicks((prev) => {
+      const updated = prev.filter(pick => pick.id !== pickId);
+      console.log('🗑️ Updated savedPicks after removal:', updated);
+      return updated;
+    });
   };
 
   const stats = [
