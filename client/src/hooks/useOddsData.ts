@@ -44,15 +44,6 @@ export interface UseOddsDataResult {
   refetch: () => void;
 }
 
-// Mock bookmakers for fallback when API doesn't return bookmakers
-const MOCK_BOOKMAKERS = [
-  { name: 'DraftKings', odds: '-110', team2Odds: '-110' },
-  { name: 'FanDuel', odds: '-105', team2Odds: '-115' },
-  { name: 'BetMGM', odds: '-108', team2Odds: '-112' },
-  { name: 'Caesars', odds: '-110', team2Odds: '-110' },
-  { name: 'Pinnacle', odds: '-102', team2Odds: '-102' }
-];
-
 // Transform TheOddsAPI format to OddsPick format
 function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
   if (!Array.isArray(games)) return [];
@@ -183,18 +174,9 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
           }
         }
       } else {
-        // No markets found - add bookmaker with mock odds for display
-        // This happens when API returns bookmakers but no market data
-        booksArray.push({
-          name: bookName,
-          odds: '-110',
-          team2Odds: '-110',
-          ev: '0%',
-          isBest: bmIdx === 0
-        });
-        
+        // No markets found for this bookmaker - skip adding mock odds
         if (idx === 0 && bmIdx === 0) {
-          console.log(`⚠️ No market data for ${bookName}, using fallback odds`);
+          console.log(`⚠️ No market data for ${bookName}, skipping bookmaker (no fallback odds)`);
         }
       }
     });
@@ -202,23 +184,7 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
     if (idx === 0) {
       console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}`);
     }
-    
-    // Use mock bookmakers if no real bookmakers found (fallback for API issues)
-    const finalBooks = booksArray.length > 0 ? booksArray : MOCK_BOOKMAKERS.map((mock, i) => ({
-      name: mock.name,
-      odds: mock.odds,
-      team2Odds: mock.team2Odds,
-      ev: '0%',
-      isBest: i === 0
-    }));
-    
-    // If we're using fallback, set best odds from mock
-    if (booksArray.length === 0) {
-      bestOdds = MOCK_BOOKMAKERS[0].odds;
-      bestBook = MOCK_BOOKMAKERS[0].name;
-      console.log(`⚠️ Using mock bookmakers for ${team1} @ ${team2}`);
-    }
-    
+
     return {
       id: game.id || idx + 1,
       ev: ev,
@@ -231,7 +197,7 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       bestBook,
       avgOdds: bestOdds,
       isHot: false,
-      books: finalBooks,
+      books: booksArray,
       gameTime: game.commence_time || game.gameTime || undefined,
       commenceTime: game.commence_time || game.gameTime || undefined
     };

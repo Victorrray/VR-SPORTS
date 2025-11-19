@@ -451,9 +451,15 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
         const evB = parseFloat((b.ev || '0%').replace('%', ''));
         return sortDirection === 'asc' ? evA - evB : evB - evA;
       } else if (sortBy === 'time') {
-        // Mock date sorting - replace with actual game time from API
-        const timeA = new Date('2023-11-10T19:00:00Z').getTime();
-        const timeB = new Date('2023-11-10T19:00:00Z').getTime();
+        // Use real game time from API (commenceTime/gameTime)
+        const timeA = new Date(a.commenceTime || a.gameTime || '').getTime();
+        const timeB = new Date(b.commenceTime || b.gameTime || '').getTime();
+
+        // Handle invalid dates gracefully by pushing them to the end
+        if (isNaN(timeA) && isNaN(timeB)) return 0;
+        if (isNaN(timeA)) return 1;
+        if (isNaN(timeB)) return -1;
+
         return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
       }
       return 0;
