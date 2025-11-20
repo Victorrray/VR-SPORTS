@@ -1,5 +1,5 @@
 import { Palette } from 'lucide-react';
-import { useTheme, themeConfig, ThemeType } from '../contexts/ThemeContext';
+import { useTheme, themeConfig, ThemeType } from '../../contexts/ThemeContext';
 
 export function ThemeSelector() {
   const { theme, setTheme } = useTheme();

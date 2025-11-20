@@ -1,6 +1,6 @@
 import { Wallet, TrendingUp, TrendingDown, DollarSign, Plus, Minus, Target, AlertCircle, Calendar, ArrowUpRight, ArrowDownRight, Activity, Settings, X } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Transaction {

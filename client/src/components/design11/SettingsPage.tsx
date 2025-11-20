@@ -1,6 +1,6 @@
 import { Settings, Bell, Shield, Globe, Moon, Sun, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 
 interface SettingsPageProps {
   onNavigateToChangePlan?: () => void;
