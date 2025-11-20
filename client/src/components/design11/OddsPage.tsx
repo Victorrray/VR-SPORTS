@@ -2,73 +2,6 @@ import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, R
 import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
-import { useOddsData, type OddsPick } from '../../hooks/useOddsData';
-
-// Helper function to convert sport key to display label
-function getSportLabel(sportKey: string): string {
-  const sportMap: { [key: string]: string } = {
-    'americanfootball_nfl': 'NFL',
-    'americanfootball_ncaaf': 'NCAAF',
-    'basketball_nba': 'NBA',
-    'basketball_ncaab': 'NCAAB',
-    'baseball_mlb': 'MLB',
-    'icehockey_nhl': 'NHL',
-    'soccer_epl': 'EPL',
-    'mma_mixed_martial_arts': 'MMA',
-    'boxing_boxing': 'BOXING',
-  };
-  return sportMap[sportKey] || sportKey.toUpperCase();
-}
-
-// Helper function to format game time
-function formatGameTime(gameTime?: string): string {
-  if (!gameTime) return 'TBD';
-  
-  try {
-    const date = new Date(gameTime);
-    
-    // Check if date is valid
-    if (isNaN(date.getTime())) {
-      return 'TBD';
-    }
-    
-    // Format: "Mon, Nov 18 7:00 PM PST"
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZoneName: 'short'
-    };
-    
-    return date.toLocaleString('en-US', options);
-  } catch (error) {
-    console.error('Error formatting game time:', error);
-    return 'TBD';
-  }
-}
-
-// Helper function to format odds with proper +/- signs
-function formatOdds(odds?: string): string {
-  if (!odds) return '-';
-  
-  try {
-    const oddsNum = parseInt(odds, 10);
-    
-    // If it's a positive number, add the + sign
-    if (oddsNum > 0) {
-      return `+${oddsNum}`;
-    }
-    
-    // If it's negative or zero, just return as is
-    return String(oddsNum);
-  } catch (error) {
-    console.error('Error formatting odds:', error);
-    return odds;
-  }
-}
 
 export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const { colorMode } = useTheme();
@@ -98,16 +31,13 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const [addedPicks, setAddedPicks] = useState<number[]>([]); // Track which picks have been added
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Fetch odds data from API
-  const { picks: apiPicks, loading: apiLoading, error: apiError, refetch } = useOddsData({
-    sport: selectedSport,
-    date: selectedDate,
-    marketType: selectedMarket,
-    betType: selectedBetType,
-    sportsbooks: selectedSportsbooks,
-    limit: 50,
-    enabled: true,
-  });
+  // Simulate initial data loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Show toast when filters change
   useEffect(() => {
@@ -204,8 +134,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     }
   ];
 
-  // Mock data - now using API via useOddsData hook
-  /* const topPicks = [
+  const topPicks = [
     {
       id: 1,
       ev: '+78.07%',
@@ -411,7 +340,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
         { name: 'BetMGM', odds: '-112', team2Odds: '-108', ev: '+1.8%', isBest: false }
       ]
     }
-  ]; */
+  ];
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => 
@@ -431,6 +360,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     );
   };
 
+  const totalPages = Math.ceil(topPicks.length / itemsPerPage);
+
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -443,45 +374,31 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
     }
   };
 
-  const sortPicks = (picks: OddsPick[]) => {
+  const sortPicks = (picks: typeof topPicks) => {
     if (!sortBy) return picks;
     return [...picks].sort((a, b) => {
       if (sortBy === 'ev') {
-        const evA = parseFloat((a.ev || '0%').replace('%', ''));
-        const evB = parseFloat((b.ev || '0%').replace('%', ''));
+        const evA = parseFloat(a.ev.replace('%', ''));
+        const evB = parseFloat(b.ev.replace('%', ''));
         return sortDirection === 'asc' ? evA - evB : evB - evA;
       } else if (sortBy === 'time') {
-        // Use real game time from API (commenceTime/gameTime)
-        const timeA = new Date(a.commenceTime || a.gameTime || '').getTime();
-        const timeB = new Date(b.commenceTime || b.gameTime || '').getTime();
-
-        // Handle invalid dates gracefully by pushing them to the end
-        if (isNaN(timeA) && isNaN(timeB)) return 0;
-        if (isNaN(timeA)) return 1;
-        if (isNaN(timeB)) return -1;
-
+        // Mock date sorting - replace with actual game time from API
+        const timeA = new Date('2023-11-10T19:00:00Z').getTime();
+        const timeB = new Date('2023-11-10T19:00:00Z').getTime();
         return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
       }
       return 0;
     });
   };
 
-  // Use API picks or fallback to empty array if loading/error
-  const filteredPicks = apiPicks && apiPicks.length > 0 ? apiPicks : [];
-  
-  // Calculate total pages after filteredPicks is defined
-  const totalPages = Math.ceil(filteredPicks.length / itemsPerPage);
-  
-  // Update loading state based on API loading
-  useEffect(() => {
-    setIsLoading(apiLoading);
-    console.log('🔍 OddsPage - apiLoading:', apiLoading, 'apiPicks:', apiPicks?.length, 'filteredPicks:', filteredPicks.length);
-    if (apiError) {
-      toast.error('Failed to load odds', {
-        description: apiError
-      });
+  // Filter picks based on selections - simulating filtering
+  const filteredPicks = topPicks.filter(pick => {
+    if (selectedSport !== 'all' && pick.sport.toLowerCase() !== selectedSport.toLowerCase().replace('-', ' ')) {
+      return false;
     }
-  }, [apiLoading, apiError, apiPicks]);
+    // Add more filter logic as needed
+    return true;
+  });
 
   // Skeleton Loader Component
   const SkeletonRow = () => (
@@ -555,44 +472,43 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
           <ChevronDown className={`w-6 h-6 transition-transform ${isBetTypeDropdownOpen ? 'rotate-180' : ''}`} />
         </button>
 
-        {/* Dropdown Menu */}
+        {/* Dropdown Menu - Positioned relative to button */}
         {isBetTypeDropdownOpen && (
-          <>
-            {/* Backdrop */}
-            <div 
-              className="fixed inset-0 z-30" 
-              onClick={() => setIsBetTypeDropdownOpen(false)}
-            />
-            
-            {/* Dropdown */}
-            <div className={`absolute top-full left-0 mt-2 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40`}>
-              {betTypes.map((betType) => (
-                <button
-                  key={betType.id}
-                  onClick={() => {
-                    setSelectedBetType(betType.id);
-                    setIsBetTypeDropdownOpen(false);
-                  }}
-                  className={`w-full px-4 py-3 text-left font-bold transition-all flex items-center justify-between ${
-                    selectedBetType === betType.id
-                      ? isLight 
-                        ? 'bg-purple-50 text-purple-700' 
-                        : 'bg-purple-500/10 text-purple-300'
-                      : isLight 
-                        ? 'text-gray-700 hover:bg-gray-50' 
-                        : 'text-white/80 hover:bg-white/5'
-                  }`}
-                >
-                  <span>{betType.name}</span>
-                  {selectedBetType === betType.id && (
-                    <Check className="w-5 h-5" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </>
+          <div className={`absolute top-full mt-2 left-0 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
+            {betTypes.map((betType) => (
+              <button
+                key={betType.id}
+                onClick={() => {
+                  setSelectedBetType(betType.id);
+                  setIsBetTypeDropdownOpen(false);
+                }}
+                className={`w-full px-4 py-3 text-left font-bold transition-all flex items-center justify-between ${
+                  selectedBetType === betType.id
+                    ? isLight 
+                      ? 'bg-purple-50 text-purple-700' 
+                      : 'bg-purple-500/10 text-purple-300'
+                    : isLight 
+                      ? 'text-gray-700 hover:bg-gray-50' 
+                      : 'text-white/80 hover:bg-white/5'
+                }`}
+              >
+                <span>{betType.name}</span>
+                {selectedBetType === betType.id && (
+                  <Check className="w-5 h-5" />
+                )}
+              </button>
+            ))}
+          </div>
         )}
       </div>
+
+      {/* Backdrop - Rendered outside relative container */}
+      {isBetTypeDropdownOpen && (
+        <div 
+          className="fixed inset-0 z-30" 
+          onClick={() => setIsBetTypeDropdownOpen(false)}
+        />
+      )}
 
       {/* Bet Type Quick Filters */}
       
@@ -623,12 +539,6 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
             >
               <Filter className="w-4 h-4" />
               <span>Filters</span>
-              {/* Badge showing number of active filters */}
-              {(selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today') && (
-                <span className={`px-1.5 py-0.5 rounded-full text-xs ${isLight ? 'bg-purple-200 text-purple-700' : 'bg-purple-500/30 text-purple-300'}`}>
-                  {[selectedSport !== 'all', selectedMarket !== 'all', selectedBetType !== 'straight', selectedDate !== 'today'].filter(Boolean).length}
-                </span>
-              )}
             </button>
 
             {/* Auto-Refresh Button - Toggles automatic refreshing of odds data
@@ -730,16 +640,16 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
       {/* Filter Side Panel */}
       {isFilterMenuOpen && (
         <>
-          {/* Backdrop - Mobile only */}
+          {/* Backdrop */}
           <div 
-            className="fixed lg:hidden inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
             onClick={() => setIsFilterMenuOpen(false)}
           />
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
-          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-16 left-0 right-0 lg:w-80 h-screen lg:overflow-y-auto ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-50 lg:rounded-none rounded-t-3xl animate-in slide-in-from-bottom lg:slide-in-from-left duration-300 flex flex-col`}>
+          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-16 left-0 right-0 lg:w-80 lg:h-auto h-auto ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-50 lg:rounded-none rounded-t-3xl animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 flex flex-col`}>
             {/* Sticky Header */}
-            <div className={`sticky top-0 lg:top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
               {/* Drag Handle - Mobile Only */}
               <div className="lg:hidden flex justify-center -mt-3 mb-2">
                 <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -750,15 +660,15 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                 <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl`}>Filters</h3>
                 <button
                   onClick={() => setIsFilterMenuOpen(false)}
-                  className={`p-2 -mt-2 -mr-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                  className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
                 >
                   <ChevronRight className="w-5 h-5 lg:block hidden" />
                   <span className="lg:hidden text-lg">✕</span>
                 </button>
               </div>
               
-              {/* Apply and Reset Buttons */}
-              <div className="flex gap-2">
+              {/* Apply and Reset Buttons - Mobile Only */}
+              <div className="flex lg:hidden gap-2">
                 <button
                   onClick={() => {
                     setIsFilterMenuOpen(false);
@@ -845,62 +755,91 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${dateExpanded ? 'rotate-180' : ''}`} />
                 </button>
+                
+                {/* Desktop Inline Dropdown */}
                 {dateExpanded && (
-                  <>
-                    {/* Backdrop */}
-                    <div 
-                      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-                      onClick={() => setDateExpanded(false)}
-                    />
-                    
-                    {/* Bottom Drawer */}
-                    <div className={`fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
-                      {/* Drag Handle */}
-                      <div className="flex justify-center pt-3 pb-2">
-                        <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
-                      </div>
-                      
-                      {/* Header */}
-                      <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
-                        <div className="flex items-center justify-between">
-                          <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Date</h3>
-                          <button
-                            onClick={() => setDateExpanded(false)}
-                            className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
-                          >
-                            <span className="text-lg">✕</span>
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/* Options */}
-                      <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
-                        {[
-                          { id: 'today', name: 'Today' },
-                          { id: 'tomorrow', name: 'Tomorrow' },
-                          { id: 'week', name: 'This Week' },
-                          { id: 'all', name: 'All Upcoming' }
-                        ].map((date) => (
-                          <button
-                            key={date.id}
-                            onClick={() => {
-                              setSelectedDate(date.id);
-                              setDateExpanded(false);
-                            }}
-                            className={`w-full text-left px-6 py-4 font-bold transition-all ${
-                              selectedDate === date.id
-                                ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
-                                : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
-                            }`}
-                          >
-                            {date.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden`}>
+                    {[
+                      { id: 'today', name: 'Today' },
+                      { id: 'tomorrow', name: 'Tomorrow' },
+                      { id: 'week', name: 'This Week' },
+                      { id: 'all', name: 'All Upcoming' }
+                    ].map((date) => (
+                      <button
+                        key={date.id}
+                        onClick={() => {
+                          setSelectedDate(date.id);
+                          setDateExpanded(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 font-bold transition-all ${
+                          selectedDate === date.id
+                            ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                            : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                        }`}
+                      >
+                        {date.name}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
+
+              {/* Date Drawer - Mobile Only */}
+              {dateExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    onClick={() => setDateExpanded(false)}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Date</h3>
+                        <button
+                          onClick={() => setDateExpanded(false)}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options */}
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                      {[
+                        { id: 'today', name: 'Today' },
+                        { id: 'tomorrow', name: 'Tomorrow' },
+                        { id: 'week', name: 'This Week' },
+                        { id: 'all', name: 'All Upcoming' }
+                      ].map((date) => (
+                        <button
+                          key={date.id}
+                          onClick={() => {
+                            setSelectedDate(date.id);
+                            setDateExpanded(false);
+                          }}
+                          className={`w-full text-left px-6 py-4 font-bold transition-all ${
+                            selectedDate === date.id
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          {date.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Sport Filter */}
               <div className="relative">
@@ -916,62 +855,88 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                   <span>{sports.find(s => s.id === selectedSport)?.name}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sportExpanded ? 'rotate-180' : ''}`} />
                 </button>
+                
+                {/* Desktop Inline Dropdown */}
                 {sportExpanded && (
-                  <>
-                    {/* Backdrop */}
-                    <div 
-                      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-                      onClick={() => setSportExpanded(false)}
-                    />
-                    
-                    {/* Bottom Drawer */}
-                    <div className={`fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
-                      {/* Drag Handle */}
-                      <div className="flex justify-center pt-3 pb-2">
-                        <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
-                      </div>
-                      
-                      {/* Header */}
-                      <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
-                        <div className="flex items-center justify-between">
-                          <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sport</h3>
-                          <button
-                            onClick={() => setSportExpanded(false)}
-                            className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
-                          >
-                            <span className="text-lg">✕</span>
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/* Options */}
-                      <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
-                        {sports.map((sport) => (
-                          <button
-                            key={sport.id}
-                            onClick={() => {
-                              setSelectedSport(sport.id);
-                              setSportExpanded(false);
-                            }}
-                            className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
-                              selectedSport === sport.id
-                                ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
-                                : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
-                            }`}
-                          >
-                            <span>{sport.name}</span>
-                            <span className={`text-xs ${selectedSport === sport.id ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
-                              {sport.count}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden`}>
+                    {sports.map((sport) => (
+                      <button
+                        key={sport.id}
+                        onClick={() => {
+                          setSelectedSport(sport.id);
+                          setSportExpanded(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                          selectedSport === sport.id
+                            ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                            : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                        }`}
+                      >
+                        <span>{sport.name}</span>
+                        <span className={`text-xs ${selectedSport === sport.id ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
+                          {sport.count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
 
-              {/* Bet Type Filter */}
+              {/* Sport Drawer - Mobile Only */}
+              {sportExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    onClick={() => setSportExpanded(false)}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sport</h3>
+                        <button
+                          onClick={() => setSportExpanded(false)}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options */}
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                      {sports.map((sport) => (
+                        <button
+                          key={sport.id}
+                          onClick={() => {
+                            setSelectedSport(sport.id);
+                            setSportExpanded(false);
+                          }}
+                          className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                            selectedSport === sport.id
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          <span>{sport.name}</span>
+                          <span className={`text-xs ${selectedSport === sport.id ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
+                            {sport.count}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Market Type Filter */}
               <div className="relative">
                 <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
@@ -986,57 +951,81 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                   <span>{marketTypes.find(m => m.id === selectedMarket)?.name}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${marketExpanded ? 'rotate-180' : ''}`} />
                 </button>
+                
+                {/* Desktop Inline Dropdown */}
                 {marketExpanded && (
-                  <>
-                    {/* Backdrop */}
-                    <div 
-                      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-                      onClick={() => setMarketExpanded(false)}
-                    />
-                    
-                    {/* Bottom Drawer */}
-                    <div className={`fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
-                      {/* Drag Handle */}
-                      <div className="flex justify-center pt-3 pb-2">
-                        <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
-                      </div>
-                      
-                      {/* Header */}
-                      <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
-                        <div className="flex items-center justify-between">
-                          <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Market Type</h3>
-                          <button
-                            onClick={() => setMarketExpanded(false)}
-                            className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
-                          >
-                            <span className="text-lg">✕</span>
-                          </button>
-                        </div>
-                      </div>
-                      
-                      {/* Options */}
-                      <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
-                        {marketTypes.map((market) => (
-                          <button
-                            key={market.id}
-                            onClick={() => {
-                              setSelectedMarket(market.id);
-                              setMarketExpanded(false);
-                            }}
-                            className={`w-full text-left px-6 py-4 font-bold transition-all ${
-                              selectedMarket === market.id
-                                ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
-                                : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
-                            }`}
-                          >
-                            {market.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden`}>
+                    {marketTypes.map((market) => (
+                      <button
+                        key={market.id}
+                        onClick={() => {
+                          setSelectedMarket(market.id);
+                          setMarketExpanded(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 font-bold transition-all ${
+                          selectedMarket === market.id
+                            ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                            : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                        }`}
+                      >
+                        {market.name}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
+
+              {/* Market Type Drawer - Mobile Only */}
+              {marketExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    onClick={() => setMarketExpanded(false)}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Market Type</h3>
+                        <button
+                          onClick={() => setMarketExpanded(false)}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options */}
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                      {marketTypes.map((market) => (
+                        <button
+                          key={market.id}
+                          onClick={() => {
+                            setSelectedMarket(market.id);
+                            setMarketExpanded(false);
+                          }}
+                          className={`w-full text-left px-6 py-4 font-bold transition-all ${
+                            selectedMarket === market.id
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          {market.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Sportsbooks Filter */}
               <div className="relative">
@@ -1059,72 +1048,148 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sportsbooksExpanded ? 'rotate-180' : ''}`} />
                 </button>
+                
+                {/* Desktop Inline Dropdown */}
                 {sportsbooksExpanded && (
-                  <>
-                    {/* Backdrop */}
-                    <div 
-                      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-                      onClick={() => setSportsbooksExpanded(false)}
-                    />
-                    
-                    {/* Bottom Drawer */}
-                    <div className={`fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
-                      {/* Drag Handle */}
-                      <div className="flex justify-center pt-3 pb-2">
-                        <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
-                      </div>
-                      
-                      {/* Header */}
-                      <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
-                        <div className="flex items-center justify-between">
-                          <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sportsbooks</h3>
-                          <button
-                            onClick={() => setSportsbooksExpanded(false)}
-                            className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
-                          >
-                            <span className="text-lg">✕</span>
-                          </button>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden max-h-80 overflow-y-auto`}>
+                    {sportsbooksByTier.map((tierGroup, tierIndex) => (
+                      <div key={tierIndex}>
+                        {/* Tier Header */}
+                        <div className={`px-4 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider sticky top-0`}>
+                          {tierGroup.tier}
                         </div>
-                      </div>
-                      
-                      {/* Options - Grouped by Tier */}
-                      <div className="overflow-y-auto max-h-[calc(70vh-80px)]">
-                        {sportsbooksByTier.map((tierGroup, tierIndex) => (
-                          <div key={tierIndex}>
-                            {/* Tier Header */}
-                            <div className={`px-6 py-3 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider sticky top-0`}>
-                              {tierGroup.tier}
-                            </div>
-                            {/* Sportsbooks in this tier */}
-                            {tierGroup.books.map((book) => (
-                              <button
-                                key={book.id}
-                                onClick={() => toggleSportsbookFilter(book.id)}
-                                className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
-                                  selectedSportsbooks.includes(book.id)
-                                    ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
-                                    : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
-                                }`}
-                              >
-                                <span>{book.name}</span>
-                                {selectedSportsbooks.includes(book.id) && (
-                                  <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
-                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  </div>
-                                )}
-                              </button>
-                            ))}
-                          </div>
+                        {/* Sportsbooks in this tier */}
+                        {tierGroup.books.map((book) => (
+                          <button
+                            key={book.id}
+                            onClick={() => toggleSportsbookFilter(book.id)}
+                            className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                              selectedSportsbooks.includes(book.id)
+                                ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                                : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                            }`}
+                          >
+                            <span>{book.name}</span>
+                            {selectedSportsbooks.includes(book.id) && (
+                              <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
+                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            )}
+                          </button>
                         ))}
                       </div>
-                    </div>
-                  </>
+                    ))}
+                  </div>
                 )}
               </div>
 
-              {/* Clear Filters Button */}
+              {/* Sportsbooks Drawer - Mobile Only */}
+              {sportsbooksExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    onClick={() => setSportsbooksExpanded(false)}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sportsbooks</h3>
+                        <button
+                          onClick={() => setSportsbooksExpanded(false)}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options - Grouped by Tier */}
+                    <div className="overflow-y-auto max-h-[calc(70vh-80px)]">
+                      {sportsbooksByTier.map((tierGroup, tierIndex) => (
+                        <div key={tierIndex}>
+                          {/* Tier Header */}
+                          <div className={`px-6 py-3 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider sticky top-0`}>
+                            {tierGroup.tier}
+                          </div>
+                          {/* Sportsbooks in this tier */}
+                          {tierGroup.books.map((book) => (
+                            <button
+                              key={book.id}
+                              onClick={() => toggleSportsbookFilter(book.id)}
+                              className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                                selectedSportsbooks.includes(book.id)
+                                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                                  : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                              }`}
+                            >
+                              <span>{book.name}</span>
+                              {selectedSportsbooks.includes(book.id) && (
+                                <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
+                                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Desktop Apply & Reset Buttons */}
+              <div className="hidden lg:block pt-4 space-y-3">
+                {/* Apply Button */}
+                <button
+                  onClick={() => {
+                    setIsFilterMenuOpen(false);
+                    toast.success('Filters applied', {
+                      description: 'Odds updated based on your filter selection'
+                    });
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-lg font-bold text-sm transition-all text-center ${
+                    isLight 
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700' 
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
+                  }`}
+                >
+                  Apply Filters
+                </button>
+
+                {/* Reset Button */}
+                <button
+                  onClick={() => {
+                    setSelectedSport('all');
+                    setSelectedMarket('all');
+                    setSelectedBetType('straight');
+                    setSelectedDate('today');
+                    setSelectedSportsbooks([]);
+                    toast.success('Filters reset', {
+                      description: 'All filters have been cleared'
+                    });
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-lg font-bold text-sm transition-all text-center ${
+                    isLight 
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  Reset All Filters
+                </button>
+              </div>
               
             </div>
             {/* End Scrollable Content */}
@@ -1137,8 +1202,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
       <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden`}>
         {/* Table Header - Desktop Only */}
         <div className={`hidden lg:grid lg:grid-cols-12 gap-4 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
-          <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
-          <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
+          <div className={`col-span-1 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
+          <div className={`col-span-4 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
           <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Team/Line</div>
           <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Book</div>
           <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Odds</div>
@@ -1146,7 +1211,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
 
         {/* Table Rows */}
         <div className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
-          {(() => { console.log('🔍 Rendering table - isLoading:', isLoading, 'filteredPicks.length:', filteredPicks.length); return isLoading; })() ? (
+          {isLoading ? (
             Array.from({ length: itemsPerPage }, (_, index) => <SkeletonRow key={index} />)
           ) : filteredPicks.length > 0 ? (
             sortPicks(filteredPicks).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((pick) => (
@@ -1159,26 +1224,26 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                   {/* Desktop Layout - Grid format for larger screens */}
                   <div className="hidden lg:grid lg:grid-cols-12 gap-3 lg:gap-4 items-center">
                     {/* EV Badge - Shows expected value percentage */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-1">
                       <div className={`inline-flex items-center gap-2 px-1.5 py-0.5 lg:px-2 lg:py-0.5 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-xl shadow-lg whitespace-nowrap text-[14px]`}>
                         <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-xs lg:text-sm`}>{pick.ev}</span>
                       </div>
                     </div>
 
                     {/* Match Info - Game details, sport badge, and time */}
-                    <div className="lg:col-span-3 min-w-0">
+                    <div className="lg:col-span-4 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {/* Sport Badge */}
-                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
-                          {getSportLabel(pick.sport)}
+                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
+                          {pick.sport}
                         </span>
                       </div>
                       {/* Game Matchup */}
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.game}</div>
-                      {/* Game Time */}
+                      {/* Game Time - TODO: Mock date - will be replaced with actual game time from API */}
                       <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
                         <Clock className="w-3 h-3" />
-                        {formatGameTime(pick.gameTime)}
+                        Sun, Nov 10 7:00 PM PST
                       </div>
                     </div>
 
@@ -1197,7 +1262,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                     {/* Odds - Best available odds for this pick */}
                     <div className="lg:col-span-2 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{formatOdds(pick.bestOdds)}</span>
+                        <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.bestOdds}</span>
                       </div>
                     </div>
                   </div>
@@ -1207,8 +1272,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                     {/* Card Header */}
                     <div className={`p-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
                       <div className="mb-2">
-                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
-                          {getSportLabel(pick.sport)}
+                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
+                          {pick.sport}
                         </span>
                       </div>
                       <div className="flex items-start justify-between gap-3 mb-2">
@@ -1218,10 +1283,10 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </h3>
                           <div className={`flex items-center gap-1.5 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold`}>
                             <Clock className="w-3 h-3" />
-                            {formatGameTime(pick.gameTime)}
+                            Sun, Nov 10 7:00 PM PST
                           </div>
                         </div>
-                        <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-xl border`}>
+                        <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-lg border`}>
                           <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
                             {pick.ev}
                           </span>
@@ -1232,7 +1297,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                     {/* Card Content */}
                     <div className="p-3 space-y-2.5">
                       {/* Pick Display */}
-                      <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-xl`}>
+                      <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-lg`}>
                         
                         <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
                           {pick.pick}
@@ -1240,7 +1305,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                       </div>
 
                       {/* Odds & Sportsbook */}
-                      <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
+                      <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-lg border`}>
                         <div>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
                             Sportsbook
@@ -1254,7 +1319,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             Odds
                           </div>
                           <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                            {formatOdds(pick.bestOdds)}
+                            {pick.bestOdds}
                           </div>
                         </div>
                       </div>
@@ -1266,7 +1331,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             e.stopPropagation();
                             toggleRow(pick.id);
                           }}
-                          className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-xs text-center`}
+                          className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}
                         >
                           Compare Odds
                         </button>
@@ -1274,20 +1339,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!addedPicks.includes(pick.id)) {
-                              // Transform pick data to match PicksPage format
-                              const formattedPick = {
-                                id: pick.id || Date.now(),
-                                teams: pick.game || 'Unknown Game',
-                                time: formatGameTime(pick.gameTime),
-                                pick: pick.pick || 'Unknown Pick',
-                                odds: pick.bestOdds || '-',
-                                sportsbook: pick.bestBook || 'Unknown Book',
-                                ev: pick.ev || '0%',
-                                sport: getSportLabel(pick.sport),
-                                confidence: 'High',
-                                analysis: `${pick.pick} - ${pick.bestBook} at ${pick.bestOdds} with ${pick.ev} expected value`
-                              };
-                              onAddPick(formattedPick);
+                              onAddPick(pick);
                               setAddedPicks([...addedPicks, pick.id]);
                               toast.success('Bet added to My Picks!');
                             }
@@ -1297,7 +1349,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             addedPicks.includes(pick.id)
                               ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed'
                               : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
-                          } text-white rounded-xl transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
+                          } text-white rounded-lg transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
                         >
                           {addedPicks.includes(pick.id) ? (
                             <>
@@ -1327,7 +1379,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>
-                              {formatOdds(pick.bestOdds)}
+                              {pick.bestOdds}
                             </span>
                           </div>
                         </div>
@@ -1339,7 +1391,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {formatOdds(String(parseInt(pick.bestOdds) + (pick.bestOdds.includes('+') ? -15 : 15)))}
+                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 15}` : `${parseInt(pick.bestOdds) + 15}`}
                             </span>
                           </div>
                         </div>
@@ -1351,7 +1403,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {formatOdds(String(parseInt(pick.bestOdds) + (pick.bestOdds.includes('+') ? -8 : 8)))}
+                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 8}` : `${parseInt(pick.bestOdds) + 8}`}
                             </span>
                           </div>
                         </div>
@@ -1374,8 +1426,8 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                             className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg items-center`}
                           >
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{formatOdds(book.odds)}</div>
-                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{formatOdds(book.team2Odds)}</div>
+                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{book.odds}</div>
+                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{book.team2Odds}</div>
                             <div className="flex justify-end">
                               <button
                                 onClick={(e) => {
@@ -1383,12 +1435,12 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                                   onAddPick({
                                     id: Date.now(),
                                     teams: pick.game,
-                                    time: formatGameTime(pick.gameTime),
+                                    time: 'Sun, Nov 10 7:00 PM PST',
                                     pick: pick.pick,
                                     odds: book.odds,
                                     sportsbook: book.name,
                                     ev: book.ev,
-                                    sport: getSportLabel(pick.sport),
+                                    sport: pick.sport,
                                     confidence: 'High',
                                     analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
                                   });
@@ -1491,12 +1543,12 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                                       onAddPick({
                                         id: Date.now(),
                                         teams: pick.game,
-                                        time: formatGameTime(pick.gameTime),
+                                        time: 'Sun, Nov 10 7:00 PM PST',
                                         pick: pick.pick,
                                         odds: book.odds,
                                         sportsbook: book.name,
                                         ev: book.ev,
-                                        sport: getSportLabel(pick.sport),
+                                        sport: pick.sport,
                                         confidence: 'High',
                                         analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
                                       });
