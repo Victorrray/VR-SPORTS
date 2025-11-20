@@ -1,5 +1,5 @@
 import { Building2, Gamepad2, TrendingUp, Repeat } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 export function Bookmakers() {
   const categories = [

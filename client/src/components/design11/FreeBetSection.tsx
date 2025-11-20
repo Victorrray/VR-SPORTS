@@ -1,6 +1,6 @@
 import { BetCard, BetData } from './BetCard';
 import { ArrowDown } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 export function FreeBetSection() {
   // Sample free bet of the day
