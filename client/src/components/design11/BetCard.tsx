@@ -21,11 +21,12 @@ interface BetCardProps {
   variant?: 'default' | 'hero'; // 'hero' for landing page display
   showActions?: boolean; // Control whether to show action buttons
   onAddPick?: (bet: BetData) => void; // Callback to add pick to My Picks
+  expandedByDefault?: boolean; // Open compare odds section by default on desktop
 }
 
-export function BetCard({ bet, variant = 'default', showActions = true, onAddPick }: BetCardProps) {
+export function BetCard({ bet, variant = 'default', showActions = true, onAddPick, expandedByDefault = false }: BetCardProps) {
   const [isAdded, setIsAdded] = useState(false);
-  const [isCompareExpanded, setIsCompareExpanded] = useState(false);
+  const [isCompareExpanded, setIsCompareExpanded] = useState(expandedByDefault && variant !== 'hero');
   const [showAllBooks, setShowAllBooks] = useState(false);
   
   // For the hero variant, we use a fixed dark theme style

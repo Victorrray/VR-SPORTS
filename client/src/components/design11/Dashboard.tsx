@@ -420,7 +420,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   {/* Bet Cards Grid - TODO: Mock data - will be replaced with actual data from API */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4 items-start">
                     {bets.map((bet) => (
-                      <BetCard key={bet.id} bet={bet} onAddPick={addPickToMyPicks} />
+                      <BetCard key={bet.id} bet={bet} onAddPick={addPickToMyPicks} expandedByDefault />
                     ))}
                   </div>
                 </div>
