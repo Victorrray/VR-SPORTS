@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Dashboard } from './Dashboard';
+import { Dashboard } from '../components/design11/Dashboard';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { useAuth } from '../hooks/SimpleAuth';
 
