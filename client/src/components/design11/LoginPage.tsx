@@ -5,17 +5,23 @@ interface LoginPageProps {
   onBack: () => void;
   onSignUp: () => void;
   onForgotPassword: () => void;
+  onLogin?: (email: string, password: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps) {
+export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoading = false }: LoginPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { email, password });
+    if (isLogin && onLogin) {
+      await onLogin(email, password);
+    } else {
+      onSignUp();
+    }
   };
 
   const stats = [

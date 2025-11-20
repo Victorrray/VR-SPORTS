@@ -1,15 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/SimpleAuth';
-import { Hero } from '../components/design10/Hero';
-import { Stats } from '../components/design10/Stats';
-import { Features } from '../components/design10/Features';
-import { Header } from '../components/design10/Header';
-import { Bookmakers } from '../components/design10/Bookmakers';
-import { HowItWorks } from '../components/design10/HowItWorks';
-import { Pricing } from '../components/design10/Pricing';
-import { FAQ } from '../components/design10/FAQ';
-import { Footer } from '../components/design10/Footer';
-import { ThemeProvider } from '../contexts/ThemeContext';
+import { Hero } from '../components/design11/Hero';
+import { Stats } from '../components/design11/Stats';
+import { Features } from '../components/design11/Features';
+import { Header } from '../components/design11/Header';
+import { Bookmakers } from '../components/design11/Bookmakers';
+import { HowItWorks } from '../components/design11/HowItWorks';
+import { Pricing } from '../components/design11/Pricing';
+import { FAQ } from '../components/design11/FAQ';
+import { Footer } from '../components/design11/Footer';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -30,25 +29,23 @@ export default function Landing() {
   const handleDisclaimerClick = () => navigate('/disclaimer');
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-gray-900" id="top">
-        <div className="relative">
-          <Header 
-            onLoginClick={handleLoginClick} 
-            onSignUpClick={handleSignUpClick}
-            onDashboardClick={handleDashboardClick}
-            onRoadmapClick={handleRoadmapClick}
-          />
-          <Hero />
-          <Stats />
-          <Bookmakers />
-          <Features />
-          <HowItWorks />
-          <Pricing />
-          <FAQ />
-          <Footer />
-        </div>
+    <div className="min-h-screen bg-gray-900" id="top">
+      <div className="relative">
+        <Header 
+          onLoginClick={handleLoginClick} 
+          onSignUpClick={handleSignUpClick}
+          onDashboardClick={handleDashboardClick}
+          onRoadmapClick={handleRoadmapClick}
+        />
+        <Hero />
+        <Stats />
+        <Bookmakers />
+        <Features />
+        <HowItWorks />
+        <Pricing />
+        <FAQ />
+        <Footer />
       </div>
-    </ThemeProvider>
+    </div>
   );
 }

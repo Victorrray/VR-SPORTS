@@ -4,17 +4,21 @@ import { useState } from 'react';
 interface SignUpPageProps {
   onBack: () => void;
   onLogin: () => void;
+  onSignUp?: (email: string, password: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
+export function SignUpPage({ onBack, onLogin, onSignUp, isLoading = false }: SignUpPageProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Sign up submitted:', { name, email, password });
+    if (onSignUp) {
+      await onSignUp(email, password);
+    }
   };
 
   const stats = [
