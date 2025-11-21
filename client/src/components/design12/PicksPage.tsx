@@ -29,83 +29,8 @@ export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[
     setSelectedSportsbooks([]);
   };
 
-  const picks = [
-    {
-      id: 1,
-      teams: 'Detroit Pistons @ Philadelphia 76ers',
-      time: 'Sun, Nov 10 4:41 PM PST',
-      pick: 'Detroit Pistons -3.5',
-      odds: '-118',
-      sportsbook: 'DraftKings',
-      ev: '+8.2%',
-      sport: 'NBA',
-      confidence: 'High',
-      analysis: 'Strong value play with Pistons covering spread in 4 of last 5 matchups'
-    },
-    {
-      id: 2,
-      teams: 'Lakers @ Warriors',
-      time: 'Sun, Nov 10 7:00 PM PST',
-      pick: 'Over 228.5',
-      odds: '-110',
-      sportsbook: 'FanDuel',
-      ev: '+6.5%',
-      sport: 'NBA',
-      confidence: 'Medium',
-      analysis: 'Both teams averaging 115+ PPG, pace favors over'
-    },
-    {
-      id: 3,
-      teams: 'Cowboys @ Giants',
-      time: 'Sun, Nov 10 1:00 PM EST',
-      pick: 'Cowboys -7.5',
-      odds: '-115',
-      sportsbook: 'BetMGM',
-      ev: '+5.8%',
-      sport: 'NFL',
-      confidence: 'High',
-      analysis: 'Cowboys dominant ATS on road, Giants struggling defensively'
-    },
-    {
-      id: 4,
-      teams: 'Celtics @ Heat',
-      time: 'Mon, Nov 11 7:30 PM EST',
-      pick: 'Celtics ML',
-      odds: '-125',
-      sportsbook: 'Caesars',
-      ev: '+4.3%',
-      sport: 'NBA',
-      confidence: 'Medium',
-      analysis: 'Celtics strong road record, Heat missing key players'
-    },
-    {
-      id: 5,
-      teams: 'Chiefs @ Bills',
-      time: 'Sun, Nov 10 4:25 PM EST',
-      pick: 'Under 47.5',
-      odds: '-108',
-      sportsbook: 'DraftKings',
-      ev: '+7.1%',
-      sport: 'NFL',
-      confidence: 'High',
-      analysis: 'Elite defenses, weather conditions favor under'
-    },
-    {
-      id: 6,
-      teams: 'Bucks @ Nets',
-      time: 'Sun, Nov 10 6:00 PM EST',
-      pick: 'Bucks -4.5',
-      odds: '-112',
-      sportsbook: 'FanDuel',
-      ev: '+5.2%',
-      sport: 'NBA',
-      confidence: 'Medium',
-      analysis: 'Bucks on 3-game win streak, Nets injury concerns'
-    }
-  ];
-
-  // Combine default picks with saved picks
-  const allPicks = [...savedPicks, ...picks];
+  // Use only saved picks (no mock data)
+  const allPicks = savedPicks;
 
   return (
     <div className="space-y-6">
