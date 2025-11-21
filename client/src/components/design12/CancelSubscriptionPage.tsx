@@ -1,7 +1,7 @@
 import { AlertCircle, ArrowLeft, ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface CancelSubscriptionPageProps {
   onBack: () => void;

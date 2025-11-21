@@ -62,7 +62,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false npm install --legacy-peer-deps && react-scripts build",
+    "build": "CI=false npm install --legacy-peer-deps && npm i baseline-browser-mapping@latest -D && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -89,6 +89,7 @@
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^1.0.0",
     "http-proxy-middleware": "^3.0.5",
     "postcss": "^8.5.5",
     "tailwindcss": "^3.4.17",
