@@ -1,6 +1,7 @@
 import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useOddsData } from '../../hooks/useOddsData';
 import { toast } from 'sonner';
 
 export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
@@ -22,7 +23,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const itemsPerPage = 10;
   const [sortBy, setSortBy] = useState<'ev' | 'time' | null>('ev');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [isLoading, setIsLoading] = useState(true);
   const [dateExpanded, setDateExpanded] = useState(false);
   const [sportExpanded, setSportExpanded] = useState(false);
   const [betTypeExpanded, setBetTypeExpanded] = useState(false);
@@ -31,13 +31,18 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [addedPicks, setAddedPicks] = useState<number[]>([]); // Track which picks have been added
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Simulate initial data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Fetch real odds data from API
+  const { picks: apiPicks, loading: apiLoading, error: apiError, refetch } = useOddsData({
+    sport: selectedSport,
+    marketType: selectedMarket,
+    betType: selectedBetType,
+    sportsbooks: selectedSportsbooks,
+    enabled: true
+  });
+
+  // Use API picks, fallback to empty array
+  const topPicks = apiPicks || [];
+  const isLoading = apiLoading;
 
   // Show toast when filters change
   useEffect(() => {
@@ -133,9 +138,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       ]
     }
   ];
-
-  // No mock data - only show real odds from API
-  const topPicks: any[] = [];
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => 
@@ -363,16 +365,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 - TODO: Functionality to be implemented with real-time API updates */}
             <button 
               onClick={() => {
-                setIsLoading(true);
+                refetch();
                 toast.success('Refreshing odds...', {
                   description: 'Fetching latest odds data'
                 });
-                setTimeout(() => {
-                  setIsLoading(false);
-                  toast.success('Odds refreshed', {
-                    description: 'All odds are now up to date'
-                  });
-                }, 2000);
               }}
               disabled={isLoading}
               className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
