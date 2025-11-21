@@ -233,6 +233,14 @@ body,
 
 .desktop-matchup-league {
   opacity: 0.85;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85em;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 6px;
 }
 
 .odds-table-card {
