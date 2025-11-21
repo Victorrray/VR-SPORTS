@@ -37,7 +37,7 @@ import {
   useTheme,
   themeConfig,
   lightModeColors,
-} from "../contexts/ThemeContext";
+} from "../../contexts/ThemeContext";
 import { Toaster } from "./ui/sonner";
 import { BetSlip } from "./BetSlip";
 import { toast } from "sonner";
