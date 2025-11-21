@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../contexts/ThemeContext';
 import { toast } from 'sonner';
 
-export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
+export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const [selectedSport, setSelectedSport] = useState('all');
@@ -357,6 +357,15 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
   const toggleSportsbookFilter = (bookId: string) => {
     setSelectedSportsbooks(prev =>
       prev.includes(bookId) ? prev.filter(id => id !== bookId) : [...prev, bookId]
+    );
+  };
+
+  // Check if a pick has been added
+  const isPickAdded = (pickData: any, bookName: string) => {
+    return savedPicks.some(savedPick => 
+      savedPick.pick === pickData.pick && 
+      savedPick.sportsbook === bookName &&
+      savedPick.teams === pickData.game
     );
   };
 
@@ -1052,35 +1061,29 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                 {/* Desktop Inline Dropdown */}
                 {sportsbooksExpanded && (
                   <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden max-h-80 overflow-y-auto`}>
-                    {sportsbooksByTier.map((tierGroup, tierIndex) => (
-                      <div key={tierIndex}>
-                        {/* Tier Header */}
-                        <div className={`px-4 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider sticky top-0`}>
-                          {tierGroup.tier}
-                        </div>
-                        {/* Sportsbooks in this tier */}
-                        {tierGroup.books.map((book) => (
-                          <button
-                            key={book.id}
-                            onClick={() => toggleSportsbookFilter(book.id)}
-                            className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
-                              selectedSportsbooks.includes(book.id)
-                                ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
-                                : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
-                            }`}
-                          >
-                            <span>{book.name}</span>
-                            {selectedSportsbooks.includes(book.id) && (
-                              <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
-                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    ))}
+                    {sportsbooksByTier
+                      .flatMap(tierGroup => tierGroup.books)
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((book) => (
+                        <button
+                          key={book.id}
+                          onClick={() => toggleSportsbookFilter(book.id)}
+                          className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                            selectedSportsbooks.includes(book.id)
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          <span>{book.name}</span>
+                          {selectedSportsbooks.includes(book.id) && (
+                            <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
+                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
                   </div>
                 )}
               </div>
@@ -1201,9 +1204,9 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
       {/* Odds Table */}
       <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden`}>
         {/* Table Header - Desktop Only */}
-        <div className={`hidden lg:grid lg:grid-cols-12 gap-4 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
-          <div className={`col-span-1 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
-          <div className={`col-span-4 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
+        <div className={`hidden lg:grid lg:grid-cols-12 gap-4 lg:gap-6 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
+          <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
+          <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
           <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Team/Line</div>
           <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Book</div>
           <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Odds</div>
@@ -1217,21 +1220,21 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
             sortPicks(filteredPicks).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((pick) => (
               <div key={pick.id}>
                 {/* Main Row */}
-                <button
+                <div
                   onClick={() => toggleRow(pick.id)}
-                  className={`w-full p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all text-left`}
+                  className={`w-full p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all cursor-pointer`}
                 >
                   {/* Desktop Layout - Grid format for larger screens */}
-                  <div className="hidden lg:grid lg:grid-cols-12 gap-3 lg:gap-4 items-center">
+                  <div className="hidden lg:grid lg:grid-cols-12 gap-4 lg:gap-6 items-center">
                     {/* EV Badge - Shows expected value percentage */}
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-2">
                       <div className={`inline-flex items-center gap-2 px-1.5 py-0.5 lg:px-2 lg:py-0.5 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-xl shadow-lg whitespace-nowrap text-[14px]`}>
                         <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-xs lg:text-sm`}>{pick.ev}</span>
                       </div>
                     </div>
 
                     {/* Match Info - Game details, sport badge, and time */}
-                    <div className="lg:col-span-4 min-w-0">
+                    <div className="lg:col-span-3 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {/* Sport Badge */}
                         <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
@@ -1339,7 +1342,17 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                           onClick={(e) => {
                             e.stopPropagation();
                             if (!addedPicks.includes(pick.id)) {
-                              onAddPick(pick);
+                              onAddPick({
+                                id: Date.now(),
+                                teams: pick.game,
+                                time: 'Sun, Nov 10 7:00 PM PST',
+                                pick: pick.pick,
+                                odds: pick.bestOdds,
+                                sportsbook: pick.bestBook,
+                                ev: pick.ev,
+                                sport: pick.sport,
+                                confidence: 'High'
+                              });
                               setAddedPicks([...addedPicks, pick.id]);
                               toast.success('Bet added to My Picks!');
                             }
@@ -1363,7 +1376,7 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                       </div>
                     </div>
                   </div>
-                </button>
+                </div>
 
                 {/* Expanded Section - Books Comparison */}
                 {expandedRows.includes(pick.id) && (
@@ -1537,29 +1550,34 @@ export function OddsPage({ onAddPick }: { onAddPick: (pick: any) => void }) {
                                   <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm`}>{book.team2Odds}</span>
                                 </td>
                                 <td className="py-2 px-3 text-right">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onAddPick({
-                                        id: Date.now(),
-                                        teams: pick.game,
-                                        time: 'Sun, Nov 10 7:00 PM PST',
-                                        pick: pick.pick,
-                                        odds: book.odds,
-                                        sportsbook: book.name,
-                                        ev: book.ev,
-                                        sport: pick.sport,
-                                        confidence: 'High',
-                                        analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
-                                      });
-                                      toast.success('Added to My Picks', {
-                                        description: `${pick.pick} at ${book.name} has been added to your picks`
-                                      });
-                                    }}
-                                    className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all"
-                                  >
-                                    <Plus className="w-4 h-4 text-white" />
-                                  </button>
+                                  {isPickAdded(pick, book.name) ? (
+                                    <button
+                                      className="p-1.5 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg cursor-default"
+                                      disabled
+                                    >
+                                      <Check className="w-4 h-4 text-white" />
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onAddPick({
+                                          teams: pick.game,
+                                          time: 'Sun, Nov 10 7:00 PM PST',
+                                          pick: pick.pick,
+                                          odds: book.odds,
+                                          sportsbook: book.name,
+                                          ev: book.ev,
+                                          sport: pick.sport,
+                                          confidence: 'High',
+                                          analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
+                                        });
+                                      }}
+                                      className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all"
+                                    >
+                                      <Plus className="w-4 h-4 text-white" />
+                                    </button>
+                                  )}
                                 </td>
                               </tr>
                             ))}

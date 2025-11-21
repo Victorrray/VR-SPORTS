@@ -18,6 +18,7 @@ import { Disclaimer } from './components/Disclaimer';
 import { FreeBetSection } from './components/FreeBetSection';
 import { useState } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { BankrollProvider } from './contexts/BankrollContext';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'signup' | 'forgot-password' | 'dashboard' | 'roadmap' | 'privacy' | 'terms' | 'disclaimer'>('landing');
@@ -52,7 +53,9 @@ export default function App() {
   if (currentPage === 'dashboard') {
     return (
       <ThemeProvider>
-        <Dashboard onSignOut={() => setCurrentPage('landing')} />
+        <BankrollProvider>
+          <Dashboard onSignOut={() => setCurrentPage('landing')} />
+        </BankrollProvider>
       </ThemeProvider>
     );
   }

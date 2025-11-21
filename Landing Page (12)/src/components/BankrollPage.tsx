@@ -1,6 +1,7 @@
 import { Wallet, TrendingUp, TrendingDown, DollarSign, Plus, Minus, Target, AlertCircle, Calendar, ArrowUpRight, ArrowDownRight, Activity, Settings, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useBankroll } from '../contexts/BankrollContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Transaction {
@@ -20,18 +21,25 @@ interface BetHistory {
   profit: number;
 }
 
-type BankrollStrategy = 'flat' | 'kelly' | 'percentage';
-
 export function BankrollPage() {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   
-  const [currentBankroll, setCurrentBankroll] = useState(0);
-  const [startingBankroll, setStartingBankroll] = useState(0);
-  const [strategy, setStrategy] = useState<BankrollStrategy>('kelly');
-  const [flatBetAmount, setFlatBetAmount] = useState('50');
-  const [percentageBet, setPercentageBet] = useState('2');
-  const [kellyFraction, setKellyFraction] = useState('0.5');
+  const {
+    currentBankroll,
+    setCurrentBankroll,
+    startingBankroll,
+    setStartingBankroll,
+    strategy,
+    setStrategy,
+    flatBetAmount,
+    setFlatBetAmount,
+    percentageBet,
+    setPercentageBet,
+    kellyFraction,
+    setKellyFraction,
+  } = useBankroll();
+  
   const [showAddFunds, setShowAddFunds] = useState(false);
   const [fundAmount, setFundAmount] = useState('');
   const [showSetup, setShowSetup] = useState(true);
@@ -116,11 +124,7 @@ export function BankrollPage() {
             <span className="hidden md:inline">Add/Withdraw</span>
           </button>
           
-          <button
-            className={`p-2.5 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all`}
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+          
         </div>
       </div>
 

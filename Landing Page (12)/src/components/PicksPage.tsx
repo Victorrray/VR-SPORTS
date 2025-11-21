@@ -1,9 +1,9 @@
-import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight, X, Calculator } from 'lucide-react';
+import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight, X, Calculator, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../contexts/ThemeContext';
 import { toast } from 'sonner';
 
-export function PicksPage({ savedPicks = [] }: { savedPicks?: any[] }) {
+export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[], onRemovePick?: (index: number) => void }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const [showFilters, setShowFilters] = useState(false);
@@ -204,16 +204,103 @@ export function PicksPage({ savedPicks = [] }: { savedPicks?: any[] }) {
 
       {/* Picks Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {/* Empty State - Will be populated by bets added from Odds page and recommended bets */}
-        <div className={`col-span-full flex flex-col items-center justify-center py-16 px-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
-          <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
-            <Target className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+        {allPicks.length === 0 ? (
+          /* Empty State */
+          <div className={`col-span-full flex flex-col items-center justify-center py-16 px-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
+            <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
+              <Target className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+            </div>
+            <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl mb-2`}>No Picks Yet</h3>
+            <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-center max-w-md`}>
+              Your picks will appear here when you add bets from the Odds page or save recommended bets.
+            </p>
           </div>
-          <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl mb-2`}>No Picks Yet</h3>
-          <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-center max-w-md`}>
-            Your picks will appear here when you add bets from the Odds page or save recommended bets.
-          </p>
-        </div>
+        ) : (
+          /* Display Picks */
+          allPicks.map((pick, index) => (
+            <div
+              key={`pick-${index}-${pick.id}`}
+              className={`relative p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-xl hover:border-purple-400/40 transition-all group`}
+            >
+              {/* Sport Badge */}
+              <div className="mb-3">
+                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
+                  {pick.sport}
+                </span>
+              </div>
+
+              {/* Teams & Time + EV Badge */}
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold mb-1 text-sm`}>
+                    {pick.teams}
+                  </h3>
+                  <div className={`flex items-center gap-1.5 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold`}>
+                    <Clock className="w-3 h-3" />
+                    {pick.time}
+                  </div>
+                </div>
+
+                {/* EV Badge */}
+                <div className="shrink-0">
+                  <div className={`inline-flex items-center px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-lg border`}>
+                    <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
+                      {pick.ev}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pick Display */}
+              <div className={`text-center p-3 mb-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-lg`}>
+                <div className={`${isLight ? 'text-purple-600' : 'text-purple-300'} font-bold uppercase tracking-wide mb-1 text-xs`}>
+                  Pick
+                </div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                  {pick.pick}
+                </div>
+              </div>
+
+              {/* Odds & Sportsbook */}
+              <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'border-white/10'} backdrop-blur-xl rounded-lg border mb-3`}>
+                <div>
+                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
+                    Sportsbook
+                  </div>
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                    {pick.sportsbook}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
+                    Odds
+                  </div>
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                    {pick.odds}
+                  </div>
+                </div>
+              </div>
+
+              {/* Delete Button - Only show for saved picks (first items in array) */}
+              {onRemovePick && index < savedPicks.length && (
+                <button
+                  onClick={() => {
+                    onRemovePick(index);
+                    toast.success('Pick removed');
+                  }}
+                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                    isLight 
+                      ? 'bg-red-100 hover:bg-red-200 text-red-600 border border-red-300' 
+                      : 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-400/30'
+                  }`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="font-bold text-sm">Remove</span>
+                </button>
+              )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

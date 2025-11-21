@@ -39,6 +39,8 @@ import {
   lightModeColors,
 } from "../contexts/ThemeContext";
 import { Toaster } from "./ui/sonner";
+import { BetSlip } from "./BetSlip";
+import { toast } from "sonner";
 
 interface DashboardProps {
   onSignOut: () => void;
@@ -55,9 +57,36 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   >("dashboard");
   const [savedPicks, setSavedPicks] = useState<any[]>([]);
   const [previousView, setPreviousView] = useState<string>("account");
+  const [betSlipOpen, setBetSlipOpen] = useState(false);
+  const [pendingBet, setPendingBet] = useState<any>(null);
 
-  const addPickToMyPicks = (pick: any) => {
-    setSavedPicks((prev) => [...prev, pick]);
+  const openBetSlip = (betData: any) => {
+    setPendingBet(betData);
+    setBetSlipOpen(true);
+  };
+
+  const closeBetSlip = () => {
+    setBetSlipOpen(false);
+    setPendingBet(null);
+  };
+
+  const confirmBetSlip = (betAmount: number) => {
+    if (pendingBet) {
+      const pickWithAmount = {
+        ...pendingBet,
+        betAmount: betAmount,
+        id: Date.now()
+      };
+      setSavedPicks((prev) => [...prev, pickWithAmount]);
+      toast.success('Added to My Picks', {
+        description: `${pendingBet.pick} at ${pendingBet.sportsbook} has been added with $${betAmount.toFixed(2)} bet`
+      });
+    }
+    closeBetSlip();
+  };
+
+  const removePickFromMyPicks = (index: number) => {
+    setSavedPicks((prev) => prev.filter((_, i) => i !== index));
   };
 
   const stats = [
@@ -420,15 +449,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   {/* Bet Cards Grid - TODO: Mock data - will be replaced with actual data from API */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4 items-start">
                     {bets.map((bet) => (
-                      <BetCard key={bet.id} bet={bet} onAddPick={addPickToMyPicks} />
+                      <BetCard key={bet.id} bet={bet} onAddPick={openBetSlip} />
                     ))}
                   </div>
                 </div>
               </>
             )}
 
-            {currentView === "picks" && <PicksPage savedPicks={savedPicks} />}
-            {currentView === "odds" && <OddsPage onAddPick={addPickToMyPicks} />}
+            {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} />}
+            {currentView === "odds" && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} />}
             {currentView === "account" && (
               <AccountPage
                 onNavigateToSettings={() => setCurrentView("settings")}
@@ -548,6 +577,14 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           </div>
         </div>
       </div>
+
+      {/* Bet Slip */}
+      <BetSlip
+        isOpen={betSlipOpen}
+        betData={pendingBet}
+        onClose={closeBetSlip}
+        onConfirm={confirmBetSlip}
+      />
     </div>
   );
 }
