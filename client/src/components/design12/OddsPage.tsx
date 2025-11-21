@@ -369,8 +369,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     );
   };
 
-  const totalPages = Math.ceil(topPicks.length / itemsPerPage);
-
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -383,31 +381,46 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     }
   };
 
-  const sortPicks = (picks: typeof topPicks) => {
-    if (!sortBy) return picks;
-    return [...picks].sort((a, b) => {
-      if (sortBy === 'ev') {
-        const evA = parseFloat(a.ev.replace('%', ''));
-        const evB = parseFloat(b.ev.replace('%', ''));
-        return sortDirection === 'asc' ? evA - evB : evB - evA;
-      } else if (sortBy === 'time') {
-        // Mock date sorting - replace with actual game time from API
-        const timeA = new Date('2023-11-10T19:00:00Z').getTime();
-        const timeB = new Date('2023-11-10T19:00:00Z').getTime();
-        return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
-      }
-      return 0;
-    });
-  };
-
-  // Filter picks based on selections - simulating filtering
+  // Filter picks based on selections
   const filteredPicks = topPicks.filter(pick => {
+    // Filter by sport
     if (selectedSport !== 'all' && pick.sport.toLowerCase() !== selectedSport.toLowerCase().replace('-', ' ')) {
       return false;
     }
-    // Add more filter logic as needed
+    
+    // Filter by sportsbooks (if any selected, show only picks available at selected books)
+    if (selectedSportsbooks.length > 0) {
+      const hasSelectedBook = pick.books.some(book => 
+        selectedSportsbooks.some(sb => book.name.toLowerCase().includes(sb.toLowerCase()))
+      );
+      if (!hasSelectedBook) {
+        return false;
+      }
+    }
+    
     return true;
   });
+
+  // Sort filtered picks
+  const sortedPicks = [...filteredPicks].sort((a, b) => {
+    if (!sortBy) return 0;
+    
+    if (sortBy === 'ev') {
+      const aEV = parseFloat(a.ev.replace('%', ''));
+      const bEV = parseFloat(b.ev.replace('%', ''));
+      return sortDirection === 'desc' ? bEV - aEV : aEV - bEV;
+    }
+    
+    return 0;
+  });
+
+  // Paginate sorted picks
+  const paginatedPicks = sortedPicks.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  
+  const totalPages = Math.ceil(sortedPicks.length / itemsPerPage);
 
   // Skeleton Loader Component
   const SkeletonRow = () => (
@@ -1216,8 +1229,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         <div className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
           {isLoading ? (
             Array.from({ length: itemsPerPage }, (_, index) => <SkeletonRow key={index} />)
-          ) : filteredPicks.length > 0 ? (
-            sortPicks(filteredPicks).slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((pick) => (
+          ) : paginatedPicks.length > 0 ? (
+            paginatedPicks.map((pick) => (
               <div key={pick.id}>
                 {/* Main Row */}
                 <div
