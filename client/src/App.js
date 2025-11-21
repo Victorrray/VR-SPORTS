@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './hooks/SimpleAuth';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AccessibilityProvider } from './components/layout/AccessibilityProvider';
 import { BetSlipProvider } from './contexts/BetSlipContext';
+import { BankrollProvider } from './contexts/BankrollContext';
 import { ToastProvider } from './components/common/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -204,15 +205,17 @@ function App() {
     <HelmetProvider>
       <ThemeProvider>
         <AuthProvider>
-          <BetSlipProvider>
-            <AccessibilityProvider>
-              <ToastProvider>
-                <ErrorBoundary>
-                  <AppRoutes />
-                </ErrorBoundary>
-              </ToastProvider>
-            </AccessibilityProvider>
-          </BetSlipProvider>
+          <BankrollProvider>
+            <BetSlipProvider>
+              <AccessibilityProvider>
+                <ToastProvider>
+                  <ErrorBoundary>
+                    <AppRoutes />
+                  </ErrorBoundary>
+                </ToastProvider>
+              </AccessibilityProvider>
+            </BetSlipProvider>
+          </BankrollProvider>
         </AuthProvider>
       </ThemeProvider>
     </HelmetProvider>
