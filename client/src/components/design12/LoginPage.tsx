@@ -5,17 +5,21 @@ interface LoginPageProps {
   onBack: () => void;
   onSignUp: () => void;
   onForgotPassword: () => void;
+  onLogin?: (email: string, password: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps) {
+export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoading = false }: LoginPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', { email, password });
+    if (onLogin && isLogin) {
+      await onLogin(email, password);
+    }
   };
 
   const stats = [
@@ -197,9 +201,10 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword }: LoginPageProps
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 md:py-4 rounded-lg md:rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center text-sm md:text-base"
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 md:py-4 rounded-lg md:rounded-xl hover:from-purple-400 hover:to-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-center text-sm md:text-base"
                   >
-                    {isLogin ? 'Login to your account' : 'Create your account'}
+                    {isLoading ? 'Loading...' : (isLogin ? 'Login to your account' : 'Create your account')}
                   </button>
 
                   {/* Divider */}
