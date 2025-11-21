@@ -1,6 +1,6 @@
 import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight, X, Calculator, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 
 export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[], onRemovePick?: (index: number) => void }) {

@@ -1,6 +1,6 @@
 import { AlertCircle, ArrowLeft, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner@2.0.3';
 
 interface DeleteAccountPageProps {

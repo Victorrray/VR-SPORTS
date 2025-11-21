@@ -1,6 +1,6 @@
 import { ArrowRight, Play, Sparkles } from 'lucide-react';
 import { BetCard } from './BetCard';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 export function Hero() {
   // TODO: Replace this mock data with a cached bet from the API

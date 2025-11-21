@@ -1,7 +1,7 @@
 import { X, DollarSign, TrendingUp, Check, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useTheme, lightModeColors } from '../contexts/ThemeContext';
-import { useBankroll } from '../contexts/BankrollContext';
+import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useBankroll } from '../../contexts/BankrollContext';
 
 interface BetSlipProps {
   isOpen: boolean;
