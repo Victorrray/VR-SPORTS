@@ -31,12 +31,9 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
   // For the hero variant, we use a fixed dark theme style
   const isHero = variant === 'hero';
   
-  // Only use theme context when not in hero mode (hero is always dark)
-  let isDark = false;
-  if (!isHero) {
-    const { colorMode } = useTheme();
-    isDark = colorMode === 'dark';
-  }
+  // Always call the hook at the top level
+  const { colorMode } = useTheme();
+  const isDark = isHero ? true : colorMode === 'dark';
 
   const handleAddToPicks = () => {
     if (!isAdded && onAddPick) {
