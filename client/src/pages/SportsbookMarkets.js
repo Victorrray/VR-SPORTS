@@ -5,11 +5,8 @@ import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield,
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 import { optimizedStorage } from "../utils/storageOptimizer";
-import MobileBottomBar from "../components/layout/MobileBottomBar";
 import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
 import MobileSearchModal from "../components/modals/MobileSearchModal";
-import FilterMenu from "../components/layout/FilterMenu";
-import SectionMenu from "../components/layout/SectionMenu";
 import "../components/betting/FormControls.css"; // Import form controls styling
 import { useBetSlip } from "../contexts/BetSlipContext";
 import BetSlip from "../components/betting/BetSlip";
@@ -30,6 +27,7 @@ import { useMe } from '../hooks/useMe';
 import { useAuth } from '../hooks/SimpleAuth';
 import { AVAILABLE_SPORTSBOOKS, getDFSApps, getFreePlanSportsbooks } from '../constants/sportsbooks';
 import DesktopHeader from '../components/layout/DesktopHeader';
+import { Header } from '../components/design11/Header';
 import './SportsbookMarkets.css';
 import './SportsbookMarkets.desktop.css';
 import './SportsbookMarkets.sidebar.css';
@@ -1553,6 +1551,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         path="/sportsbooks"
         schema={generateSchemaMarkup('WebApplication')}
       />
+      {/* Design11 Header - Mobile & Desktop */}
+      <Header 
+        onLoginClick={() => navigate('/login')}
+        onSignUpClick={() => navigate('/signup')}
+        onDashboardClick={() => navigate('/dashboard')}
+        onRoadmapClick={() => navigate('/roadmap')}
+      />
+      
       {/* Desktop Header */}
       <DesktopHeader
         onFilterClick={() => setMobileFiltersOpen(true)}
