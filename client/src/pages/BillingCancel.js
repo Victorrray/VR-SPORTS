@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { X, ArrowLeft, AlertTriangle, CheckCircle, Loader } from 'lucide-react';
 import { useAuth } from '../hooks/SimpleAuth';
-import { Button } from '../components/design10/ui/button';
-import { Card } from '../components/design10/ui/card';
+import { Button } from '../components/design12/ui/button';
+import { Card } from '../components/design12/ui/card';
 import './BillingCancel.css';
 
 const BillingCancel = () => {

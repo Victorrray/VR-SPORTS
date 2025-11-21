@@ -23,13 +23,13 @@ import {
   Wallet,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { PicksPage } from "../components/design10/PicksPage";
-import { OddsPage } from "../components/design10/OddsPage";
-import { AccountPage } from "../components/design10/AccountPage";
-import { SettingsPage } from "../components/design10/SettingsPage";
-import { CalculatorPage } from "../components/design10/CalculatorPage";
-import { BankrollPage } from "../components/design10/BankrollPage";
-import { BetCard, BetData } from "../components/design10/BetCard";
+import { PicksPage } from "../components/design12/PicksPage";
+import { OddsPage } from "../components/design12/OddsPage";
+import { AccountPage } from "../components/design12/AccountPage";
+import { SettingsPage } from "../components/design12/SettingsPage";
+import { CalculatorPage } from "../components/design12/CalculatorPage";
+import { BankrollPage } from "../components/design12/BankrollPage";
+import { BetCard, BetData } from "../components/design12/BetCard";
 import {
   useTheme,
   themeConfig,

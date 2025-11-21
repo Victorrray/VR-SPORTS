@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/SimpleAuth';
-import { Hero } from '../components/design11/Hero';
-import { Stats } from '../components/design11/Stats';
-import { Features } from '../components/design11/Features';
-import { Header } from '../components/design11/Header';
-import { Bookmakers } from '../components/design11/Bookmakers';
-import { HowItWorks } from '../components/design11/HowItWorks';
-import { Pricing } from '../components/design11/Pricing';
-import { FAQ } from '../components/design11/FAQ';
-import { Footer } from '../components/design11/Footer';
+import { Hero } from '../components/design12/Hero';
+import { Stats } from '../components/design12/Stats';
+import { Features } from '../components/design12/Features';
+import { Header } from '../components/design12/Header';
+import { Bookmakers } from '../components/design12/Bookmakers';
+import { HowItWorks } from '../components/design12/HowItWorks';
+import { Pricing } from '../components/design12/Pricing';
+import { FAQ } from '../components/design12/FAQ';
+import { Footer } from '../components/design12/Footer';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -33,7 +33,6 @@ export default function Landing() {
       <div className="relative">
         <Header 
           onLoginClick={handleLoginClick} 
-          onSignUpClick={handleSignUpClick}
           onDashboardClick={handleDashboardClick}
           onRoadmapClick={handleRoadmapClick}
         />
