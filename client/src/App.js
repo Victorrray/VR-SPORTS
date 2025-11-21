@@ -13,8 +13,8 @@ import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import { initBrowserCompat } from './utils/browserCompat';
 import DebugPanel from './components/debug/DebugPanel';
+import MobileBottomBar from './components/layout/MobileBottomBar';
 // import NavbarRevamped from './components/layout/NavbarRevamped'; // OLD - Using new Header from landing page
-// import MobileBottomBar from './components/layout/MobileBottomBar'; // OLD - Not used with new landing page
 // import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
 import Landing from './pages/Landing';
 import DashboardPage from './pages/DashboardPage';
@@ -169,7 +169,8 @@ function AppRoutes() {
             onClose={() => setQuotaModal({ open: false, detail: null })} 
           />
           
-          {/* Mobile bottom bar is handled by individual pages */}
+          {/* Mobile Bottom Bar - Show for authenticated users */}
+          {user && <MobileBottomBar />}
         </div>
       </div>
 
