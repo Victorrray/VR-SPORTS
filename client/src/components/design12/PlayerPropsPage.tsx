@@ -490,7 +490,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                   onClick={() => {
                     setSelectedSport('all');
                     setSelectedMarket('all');
-                    setSelectedBetType('straight');
                     setSelectedDate('today');
                     setSelectedSportsbooks([]);
                     toast.success('Filters reset', {
@@ -970,7 +969,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                   onClick={() => {
                     setSelectedSport('all');
                     setSelectedMarket('all');
-                    setSelectedBetType('straight');
                     setSelectedDate('today');
                     setSelectedSportsbooks([]);
                     toast.success('Filters reset', {
@@ -983,7 +981,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       : 'bg-white/5 text-white/70 hover:bg-white/10'
                   }`}
                 >
-                  Reset All Filters
+                  Reset Filters
                 </button>
               </div>
               
