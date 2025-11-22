@@ -33,6 +33,34 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick?: (p
     { id: 'mlb', name: 'MLB' },
   ];
 
+  const sportsbooksByTier = [
+    {
+      tier: 'Tier 1 - Major US Sportsbooks',
+      books: [
+        { id: 'draftkings', name: 'DraftKings' },
+        { id: 'fanduel', name: 'FanDuel' },
+        { id: 'betmgm', name: 'BetMGM' },
+        { id: 'caesars', name: 'Caesars Sportsbook' },
+      ]
+    },
+    {
+      tier: '⭐ SECOND TIER - MAJOR OPERATORS (Tier 2)',
+      books: [
+        { id: 'espnbet', name: 'ESPN BET' },
+        { id: 'fanatics', name: 'Fanatics Sportsbook' },
+        { id: 'hardrock', name: 'Hard Rock Bet' },
+        { id: 'pointsbet', name: 'PointsBet US' },
+        { id: 'betrivers', name: 'BetRivers' },
+      ]
+    },
+    {
+      tier: '🎯 SHARP/LOW VIG BOOKS (Tier 2)',
+      books: [
+        { id: 'pinnacle', name: 'Pinnacle' },
+      ]
+    },
+  ];
+
   // Filter picks
   const filteredPicks = topPicks.filter(pick => {
     if (selectedSport !== 'all') {
@@ -53,9 +81,25 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick?: (p
     }
 
     if (selectedSportsbooks.length > 0) {
-      const hasSelectedBook = pick.books.some(book => 
-        selectedSportsbooks.some(sb => book.name.toLowerCase().includes(sb.toLowerCase()))
-      );
+      // Create a map of sportsbook IDs to names for matching
+      const sportsbookMap: Record<string, string[]> = {};
+      sportsbooksByTier.forEach(tier => {
+        tier.books.forEach(book => {
+          if (!sportsbookMap[book.id]) {
+            sportsbookMap[book.id] = [];
+          }
+          sportsbookMap[book.id].push(book.name.toLowerCase());
+        });
+      });
+
+      const hasSelectedBook = pick.books.some(book => {
+        const bookNameLower = book.name.toLowerCase();
+        return selectedSportsbooks.some(selectedId => {
+          const matchingNames = sportsbookMap[selectedId] || [];
+          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+        });
+      });
+
       if (!hasSelectedBook) {
         return false;
       }

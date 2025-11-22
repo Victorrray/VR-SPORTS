@@ -205,9 +205,25 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     
     // Filter by sportsbooks (if any selected, show only picks available at selected books)
     if (selectedSportsbooks.length > 0) {
-      const hasSelectedBook = pick.books.some(book => 
-        selectedSportsbooks.some(sb => book.name.toLowerCase().includes(sb.toLowerCase()))
-      );
+      // Create a map of sportsbook IDs to names for matching
+      const sportsbookMap: Record<string, string[]> = {};
+      sportsbooksByTier.forEach(tier => {
+        tier.books.forEach(book => {
+          if (!sportsbookMap[book.id]) {
+            sportsbookMap[book.id] = [];
+          }
+          sportsbookMap[book.id].push(book.name.toLowerCase());
+        });
+      });
+
+      const hasSelectedBook = pick.books.some(book => {
+        const bookNameLower = book.name.toLowerCase();
+        return selectedSportsbooks.some(selectedId => {
+          const matchingNames = sportsbookMap[selectedId] || [];
+          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+        });
+      });
+
       if (!hasSelectedBook) {
         return false;
       }
