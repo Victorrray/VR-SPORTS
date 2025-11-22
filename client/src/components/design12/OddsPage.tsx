@@ -44,8 +44,9 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const topPicks = apiPicks || [];
   const isLoading = apiLoading;
 
-  // Show toast when filters change
+  // Show toast when filters change and reset to page 1
   useEffect(() => {
+    setCurrentPage(1); // Reset to first page when filters change
     if (!isLoading && (selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today')) {
       toast.success('Filters applied', {
         description: 'Odds updated based on your filter selection'
@@ -180,9 +181,25 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
   // Filter picks based on selections
   const filteredPicks = topPicks.filter(pick => {
-    // Filter by sport
-    if (selectedSport !== 'all' && pick.sport.toLowerCase() !== selectedSport.toLowerCase().replace('-', ' ')) {
-      return false;
+    // Filter by sport - compare against API sport value
+    if (selectedSport !== 'all') {
+      // Map filter IDs to API sport values
+      const sportMap: Record<string, string[]> = {
+        'nfl': ['americanfootball_nfl', 'nfl'],
+        'nba': ['basketball_nba', 'nba'],
+        'nhl': ['icehockey_nhl', 'nhl'],
+        'mlb': ['baseball_mlb', 'mlb'],
+        'ncaa-football': ['americanfootball_ncaa', 'ncaa_football'],
+        'ncaa-basketball': ['basketball_ncaa', 'ncaa_basketball']
+      };
+      
+      const allowedSports = sportMap[selectedSport] || [];
+      const pickSport = pick.sport.toLowerCase();
+      const matches = allowedSports.some(sport => pickSport.includes(sport.toLowerCase()));
+      
+      if (!matches) {
+        return false;
+      }
     }
     
     // Filter by sportsbooks (if any selected, show only picks available at selected books)
