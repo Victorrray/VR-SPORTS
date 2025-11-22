@@ -2,6 +2,7 @@ import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, R
 import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useOddsData } from '../../hooks/useOddsData';
+import { PlayerPropsPage } from './PlayerPropsPage';
 import { toast } from 'sonner';
 
 export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
@@ -289,6 +290,11 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       </button>
     </div>
   );
+
+  // Show PlayerPropsPage when props are selected
+  if (selectedBetType === 'props') {
+    return <PlayerPropsPage onAddPick={onAddPick} savedPicks={savedPicks} />;
+  }
 
   return (
     <div className="space-y-6">
