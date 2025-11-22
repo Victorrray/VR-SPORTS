@@ -48,8 +48,8 @@ export function MobileBottomBar() {
 
   return (
     <>
-      {/* Mobile Bottom Navigation Bar */}
-      <div className={`fixed bottom-0 left-0 right-0 z-40 ${
+      {/* Mobile Bottom Navigation Bar - Only visible on mobile */}
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-40 ${
         isLight 
           ? 'bg-white border-t border-gray-200' 
           : 'bg-slate-900/95 border-t border-white/10'
@@ -93,8 +93,8 @@ export function MobileBottomBar() {
         </nav>
       </div>
 
-      {/* Spacer to prevent content from being hidden behind the bar */}
-      <div className="h-16" aria-hidden="true" />
+      {/* Spacer to prevent content from being hidden behind the bar - Only on mobile */}
+      <div className="md:hidden h-16" aria-hidden="true" />
     </>
   );
 }
