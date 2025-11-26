@@ -307,6 +307,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       console.log(`Filtered to ${allowedBookmakers.length} allowed bookmakers for user plan: ${userProfile.plan}`);
     }
     
+    // Filter out games that have already started (past games)
+    const now = new Date();
+    const beforeFilter = allGames.length;
+    allGames = allGames.filter((game) => {
+      if (!game.commence_time) return false;
+      const gameTime = new Date(game.commence_time);
+      return gameTime > now; // Only include future games
+    });
+    console.log(`🗑️ Filtered out ${beforeFilter - allGames.length} past games. Remaining: ${allGames.length} upcoming games`);
+    
     // Step 2: Fetch quarter/half/period markets if requested
     // NOTE: Period markets require /events/{eventId}/odds endpoint (one call per game)
     // This is much more expensive, so we're strategic:
