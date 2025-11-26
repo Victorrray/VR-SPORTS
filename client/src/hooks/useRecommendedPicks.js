@@ -25,6 +25,10 @@ export function useRecommendedPicks(options = {}) {
       setError(null);
 
       // Fetch odds data with high EV filter
+      // Only fetch today's and future games (filter out past games)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
       const params = new URLSearchParams({
         sports: 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl',
         regions: 'us',
@@ -50,7 +54,17 @@ export function useRecommendedPicks(options = {}) {
       }
 
       const data = await response.json();
-      const games = Array.isArray(data) ? data : [];
+      let games = Array.isArray(data) ? data : [];
+
+      // Filter out games that have already started or are in the past
+      const now = new Date();
+      games = games.filter((game) => {
+        if (!game.commence_time) return false;
+        const gameTime = new Date(game.commence_time);
+        return gameTime > now; // Only include future games
+      });
+
+      console.log(`📅 Filtered ${Array.isArray(data) ? data.length : 0} games down to ${games.length} upcoming games`);
 
       // Transform games into picks with EV calculation
       const recommendedPicks = games
