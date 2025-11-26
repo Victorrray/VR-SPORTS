@@ -91,6 +91,7 @@ export function useRecommendedPicks(options = {}) {
                   sport: getSportLabel(game.sport_key),
                   status: new Date(game.commence_time) <= new Date() ? 'live' : 'active',
                   confidence: ev > 10 ? 'High' : ev > 7 ? 'Medium' : 'Low',
+                  bookmakers: game.bookmakers, // Include all bookmakers for odds comparison
                 });
               }
             });

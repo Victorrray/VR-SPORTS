@@ -1,6 +1,6 @@
 import { Clock, Check, Plus, ChevronDown } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
 export interface BetData {
@@ -8,12 +8,23 @@ export interface BetData {
   teams: string;
   time: string;
   pick: string;
-  odds: string;
+  odds: string | number;
   sportsbook: string;
   ev: string;
   sport: string;
   status: string;
   confidence: string;
+  bookmakers?: Array<{
+    key: string;
+    title: string;
+    markets: Array<{
+      key: string;
+      outcomes: Array<{
+        name: string;
+        price: number;
+      }>;
+    }>;
+  }>;
 }
 
 interface BetCardProps {
@@ -47,17 +58,35 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
     setIsCompareExpanded(!isCompareExpanded);
   };
 
-  // Mock sportsbook data - In production, this would come from API
-  const sportsbookOdds = [
-    { name: 'Pinnacle', odds: bet.odds, team2Odds: '-195' },
-    { name: 'DraftKings', odds: '+135', team2Odds: '-162' },
-    { name: 'FanDuel', odds: '+130', team2Odds: '-158' },
-    { name: 'BetMGM', odds: '+125', team2Odds: '-152' },
-    { name: 'Caesars', odds: '+122', team2Odds: '-148' },
-    { name: 'BetRivers', odds: '+120', team2Odds: '-145' },
-    { name: 'Hard Rock', odds: '+118', team2Odds: '-142' },
-    { name: 'Fanatics', odds: '+115', team2Odds: '-138' }
-  ];
+  // Extract real sportsbook odds from bookmakers data
+  const sportsbookOdds = useMemo(() => {
+    if (!bet.bookmakers || bet.bookmakers.length === 0) {
+      // Fallback to empty array if no bookmakers data
+      return [];
+    }
+
+    const odds: Array<{ name: string; odds: number | string; team2Odds: number | string }> = [];
+    
+    bet.bookmakers.forEach((bookmaker) => {
+      if (bookmaker.markets && bookmaker.markets.length > 0) {
+        // Get the first market (usually h2h or spreads)
+        const market = bookmaker.markets[0];
+        if (market.outcomes && market.outcomes.length >= 2) {
+          // Get odds for both outcomes
+          const outcome1 = market.outcomes[0];
+          const outcome2 = market.outcomes[1];
+          
+          odds.push({
+            name: bookmaker.title || bookmaker.key,
+            odds: outcome1.price,
+            team2Odds: outcome2.price,
+          });
+        }
+      }
+    });
+
+    return odds;
+  }, [bet.bookmakers]);
 
   // Extract team names from the teams string
   const teamNames = bet.teams.split(' @ ');
@@ -235,7 +264,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                   : 'bg-gray-100 border-gray-200'
               } backdrop-blur-xl border rounded-xl`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
-                  {bet.odds.includes('+') ? `+${parseInt(bet.odds) - 15}` : `${parseInt(bet.odds) + 15}`}
+                  {String(bet.odds).includes('+') ? `+${parseInt(String(bet.odds)) - 15}` : `${parseInt(String(bet.odds)) + 15}`}
                 </span>
               </div>
             </div>
@@ -251,7 +280,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                   : 'bg-gray-100 border-gray-200'
               } backdrop-blur-xl border rounded-xl`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
-                  {bet.odds.includes('+') ? `+${parseInt(bet.odds) - 8}` : `${parseInt(bet.odds) + 8}`}
+                  {String(bet.odds).includes('+') ? `+${parseInt(String(bet.odds)) - 8}` : `${parseInt(String(bet.odds)) + 8}`}
                 </span>
               </div>
             </div>
