@@ -69,8 +69,8 @@ export function useRecommendedPicks(options = {}) {
             if (!market.outcomes || market.outcomes.length === 0) return;
 
             market.outcomes.forEach((outcome) => {
-              // Calculate simple EV (this is a placeholder - real EV calculation is more complex)
-              const ev = Math.random() * 15; // Random EV for demo
+              // Calculate real EV based on actual odds
+              const ev = calculateEV(outcome.price, game.bookmakers);
 
               if (ev >= minEV) {
                 picks.push({
@@ -146,4 +146,68 @@ function getSportLabel(sportKey) {
     'boxing_boxing': 'BOXING',
   };
   return sportMap[sportKey] || sportKey.toUpperCase();
+}
+
+/**
+ * Calculate real EV (Expected Value) based on actual odds from multiple bookmakers
+ * EV = (Probability of Winning * Potential Profit) - (Probability of Losing * Stake) * 100
+ * 
+ * @param {number} odds - The odds for this outcome (American format)
+ * @param {Array} bookmakers - All bookmakers with their odds for comparison
+ * @returns {number} EV percentage
+ */
+function calculateEV(odds, bookmakers) {
+  if (!odds || !bookmakers || bookmakers.length === 0) return 0;
+
+  try {
+    // Convert American odds to implied probability
+    const impliedProb = americanOddsToProb(odds);
+    
+    // Find the best odds for this outcome across all bookmakers
+    let bestOdds = odds;
+    bookmakers.forEach((book) => {
+      if (book.markets) {
+        book.markets.forEach((market) => {
+          if (market.outcomes) {
+            market.outcomes.forEach((outcome) => {
+              // Compare odds for the same outcome
+              if (outcome.price && outcome.price > bestOdds) {
+                bestOdds = outcome.price;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // Calculate actual probability from best odds
+    const actualProb = americanOddsToProb(bestOdds);
+    
+    // EV = (Actual Probability - Implied Probability) * 100
+    // If actual prob is higher than implied, there's positive EV
+    const ev = (actualProb - impliedProb) * 100;
+    
+    // Return max of 0 (no negative EV picks) and calculated EV
+    return Math.max(0, ev);
+  } catch (err) {
+    console.warn('Error calculating EV:', err);
+    return 0;
+  }
+}
+
+/**
+ * Convert American odds format to probability
+ * @param {number} americanOdds - Odds in American format (e.g., -110, +150)
+ * @returns {number} Probability as decimal (0-1)
+ */
+function americanOddsToProb(americanOdds) {
+  if (!americanOdds) return 0.5;
+  
+  if (americanOdds > 0) {
+    // Positive odds: Probability = 100 / (Odds + 100)
+    return 100 / (americanOdds + 100);
+  } else {
+    // Negative odds: Probability = -Odds / (-Odds + 100)
+    return -americanOdds / (-americanOdds + 100);
+  }
 }
