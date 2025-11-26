@@ -11,6 +11,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useAuth } from '../../hooks/SimpleAuth';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
@@ -27,6 +28,7 @@ export function AccountPage({
 }: AccountPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
+  const { user, profile } = useAuth();
   
   return (
     <div className="space-y-6 relative">
@@ -68,7 +70,7 @@ export function AccountPage({
           </div>
           <div className="flex-1">
             <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} text-xl font-bold mb-1`}>
-              NotVic
+              {profile?.username || user?.email?.split('@')[0] || 'User'}
             </h3>
             <div className="flex items-center gap-2">
               <div className={`px-3 py-1 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-lg backdrop-blur-xl`}>
@@ -92,7 +94,7 @@ export function AccountPage({
               </span>
             </div>
             <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-              notvic@example.com
+              {user?.email || 'Not available'}
             </p>
           </div>
 

@@ -1,6 +1,7 @@
 import { AlertCircle, ArrowLeft, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useAuth } from '../../hooks/SimpleAuth';
 import { toast } from 'sonner';
 
 interface DeleteAccountPageProps {
@@ -11,6 +12,7 @@ interface DeleteAccountPageProps {
 export function DeleteAccountPage({ onBack, onDelete }: DeleteAccountPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
+  const { user, profile } = useAuth();
   const [confirmText, setConfirmText] = useState('');
   const [understand, setUnderstand] = useState(false);
 
@@ -119,7 +121,7 @@ export function DeleteAccountPage({ onBack, onDelete }: DeleteAccountPageProps) 
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Username</span>
-            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>NotVic</span>
+            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{profile?.username || user?.email?.split('@')[0] || 'User'}</span>
           </div>
           <div className="flex justify-between">
             <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Member since</span>

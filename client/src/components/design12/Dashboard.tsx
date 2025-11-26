@@ -1,43 +1,50 @@
 import {
-  BarChart2,
   TrendingUp,
+  Clock,
+  Search,
+  ChevronDown,
+  Filter,
+  BarChart2,
+  Plus,
+  Zap,
+  RefreshCw,
+  Calendar,
+  Star,
+  ArrowUpRight,
+  ArrowDownRight,
+  Target,
+  Flame,
+  Trophy,
+  TrendingDown,
+  Eye,
+  Bell,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  Check,
   Crown,
   LogOut,
   User,
   Home,
-  Filter,
-  Search,
-  ChevronDown,
-  Calendar,
-  DollarSign,
-  Target,
-  Sparkles,
-  ArrowUpRight,
-  ArrowDownRight,
-  Clock,
-  CheckCircle2,
-  Zap,
-  BarChart,
   Settings,
   Calculator,
   Wallet,
+  DollarSign,
+  Sparkles,
 } from "lucide-react";
-import { useState } from "react";
-import { PicksPage } from "./PicksPage";
+import { useState, useEffect } from "react";
+import { useTheme, lightModeColors, themeConfig } from "../../contexts/ThemeContext";
+import { useAuth } from "../../hooks/SimpleAuth";
 import { OddsPage } from "./OddsPage";
 import { AccountPage } from "./AccountPage";
 import { SettingsPage } from "./SettingsPage";
 import { CalculatorPage } from "./CalculatorPage";
 import { BankrollPage } from "./BankrollPage";
+import { PicksPage } from "./PicksPage";
 import { CancelSubscriptionPage } from "./CancelSubscriptionPage";
 import { DeleteAccountPage } from "./DeleteAccountPage";
 import { ChangePlanPage } from "./ChangePlanPage";
 import { BetCard, BetData } from "./BetCard";
-import {
-  useTheme,
-  themeConfig,
-  lightModeColors,
-} from "../../contexts/ThemeContext";
 import { Toaster } from "./ui/sonner";
 import { BetSlip } from "./BetSlip";
 import { toast } from "sonner";
@@ -50,6 +57,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const { theme, colorMode } = useTheme();
   const config = themeConfig[theme];
   const isLight = colorMode === "light";
+  const { user, profile } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");
   const [currentView, setCurrentView] = useState<
@@ -247,7 +255,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   </div>
                   <div className="flex-1 text-left">
                     <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                      NotVic
+                      {profile?.username || user?.email?.split('@')[0] || 'User'}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
                       <div className={`px-2 py-0.5 ${isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-md backdrop-blur-xl`}>
@@ -394,7 +402,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="space-y-4 lg:space-y-6">
                   <div>
                     <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2`}>
-                      Welcome back, NotVic!
+                      Welcome back, {profile?.username || user?.email?.split('@')[0] || 'User'}!
                     </h1>
                     <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold text-sm md:text-base`}>
                       Here are your recommended picks for today
