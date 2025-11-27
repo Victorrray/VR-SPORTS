@@ -2,7 +2,6 @@ import React from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/SimpleAuth';
 import { usePlan } from '../../hooks/SimplePlan';
-import MobileBottomBar from '../layout/MobileBottomBar';
 
 const PlanGuard = ({ children, requiresPlatinum = false, requiresPaidPlan = false }) => {
   const { user } = useAuth();
@@ -61,7 +60,6 @@ const PlanGuard = ({ children, requiresPlatinum = false, requiresPaidPlan = fals
             Choose Your Plan
           </button>
         </div>
-        <MobileBottomBar active="odds" showFilter={false} />
       </>
     );
   }
@@ -99,7 +97,6 @@ const PlanGuard = ({ children, requiresPlatinum = false, requiresPaidPlan = fals
             Upgrade to Platinum
           </button>
         </div>
-        <MobileBottomBar active="odds" showFilter={false} />
       </>
     );
   }
