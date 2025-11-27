@@ -1,7 +1,7 @@
 import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
-import { useOddsData } from '../../hooks/useOddsData';
+import { useOddsData, getSportLabel } from '../../hooks/useOddsData';
 import { PlayerPropsPage } from './PlayerPropsPage';
 import { toast } from 'sonner';
 

@@ -44,6 +44,19 @@ export interface UseOddsDataResult {
   refetch: () => void;
 }
 
+// Map sport keys to readable league names
+function getSportLabel(sportKey: string): string {
+  const sportLabelMap: { [key: string]: string } = {
+    'americanfootball_nfl': 'NFL',
+    'americanfootball_ncaaf': 'NCAA Football',
+    'basketball_nba': 'NBA',
+    'basketball_ncaab': 'NCAA Basketball',
+    'icehockey_nhl': 'NHL',
+    'baseball_mlb': 'MLB',
+  };
+  return sportLabelMap[sportKey] || sportKey;
+}
+
 // Transform TheOddsAPI format to OddsPick format
 // Normalize American odds so positive numbers always have a leading '+'
 function normalizeAmericanOdds(raw: any): string {
@@ -236,8 +249,8 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
     return {
       id: game.id || idx + 1,
       ev: ev,
-      // Use sport_key in lowercase so UI helpers (getSportLabel) can map to clean league labels like NFL/NBA
-      sport: (game.sport_key || game.sport_title || 'Unknown').toLowerCase(),
+      // Use getSportLabel to convert sport_key to readable league name (NFL, NBA, etc.)
+      sport: getSportLabel((game.sport_key || game.sport_title || 'Unknown').toLowerCase()),
       game: `${team1} @ ${team2}`,
       team1,
       team2,
@@ -252,6 +265,9 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
     };
   });
 }
+
+// Export getSportLabel for use in components
+export { getSportLabel };
 
 export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult {
   const {
@@ -299,11 +315,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         : 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl';
       params.append('sports', sportsList);
       
-      // Backend expects 'markets' not 'marketType'
+      // Map market types to API format and backend expects 'markets' not 'marketType'
+      const marketKeyMap: { [key: string]: string } = {
+        'moneyline': 'h2h',
+        'spread': 'spreads',
+        'totals': 'totals',
+      };
       const marketsList = marketType && marketType !== 'all'
-        ? marketType
+        ? (marketKeyMap[marketType] || marketType)
         : 'h2h,spreads,totals';
       params.append('markets', marketsList);
+      console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList);
       
       // Add other parameters the backend expects
       params.append('regions', 'us');
@@ -321,6 +343,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const endpoint = `/api/odds${queryString ? `?${queryString}` : ''}`;
 
       console.log('📊 Fetching odds data from:', endpoint);
+      console.log('📊 Full filter params:', Object.fromEntries(params));
 
       const response = await apiClient.get(endpoint);
       
@@ -335,10 +358,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         const transformedPicks = transformOddsApiToOddsPick(response.data);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
+        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'Results:', transformedPicks.length);
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
         const transformedPicks = transformOddsApiToOddsPick(response.data.picks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
+        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'Results:', transformedPicks.length);
       } else {
         console.warn('⚠️ Unexpected response format:', response.data);
         setError('Invalid response format from API');
