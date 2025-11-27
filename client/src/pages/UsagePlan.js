@@ -3,7 +3,6 @@ import { useAuth } from '../hooks/SimpleAuth';
 import { useMe } from '../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { Crown, Zap, TrendingUp, Shield, Check, ArrowLeft, Calendar, CreditCard, X, AlertTriangle } from 'lucide-react';
-import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { withApiBase } from '../config/api';
 import { secureFetch } from '../utils/security';
 import { Button } from '../components/design12/ui/button';
@@ -324,8 +323,6 @@ export default function UsagePlan() {
           </div>
         </div>
       )}
-
-      <MobileBottomBar showFilter={false} />
     </div>
   );
 }

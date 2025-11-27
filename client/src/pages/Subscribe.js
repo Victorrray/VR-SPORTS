@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/SimpleAuth';
 import { usePlan } from '../hooks/SimplePlan';
 import Pricing from '../components/billing/Pricing';
-import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { CreditCard, Calendar, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
@@ -227,7 +226,6 @@ const Subscribe = () => {
             </button>
           </div>
         </div>
-        <MobileBottomBar active="profile" showFilter={false} />
       </div>
     );
   }
@@ -236,7 +234,6 @@ const Subscribe = () => {
   return (
     <div style={{ minHeight: '100vh', paddingBottom: '80px' }}>
       <Pricing />
-      <MobileBottomBar active="profile" showFilter={false} />
     </div>
   );
 };

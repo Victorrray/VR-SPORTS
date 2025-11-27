@@ -30,7 +30,6 @@ import DesktopHeader from '../components/layout/DesktopHeader';
 import { Header } from '../components/design12/Header';
 import FilterMenu from '../components/layout/FilterMenu';
 import SectionMenu from '../components/layout/SectionMenu';
-import MobileBottomBar from '../components/layout/MobileBottomBar';
 import './SportsbookMarkets.css';
 import './SportsbookMarkets.desktop.css';
 import './SportsbookMarkets.sidebar.css';
@@ -2202,16 +2201,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         currentSection={getCurrentSectionId()} 
         onSectionChange={handleSectionChange} 
         hasPlatinum={hasPlatinum} 
-      />
-      
-      {/* Mobile footer nav */}
-      <MobileBottomBar
-        onFilterClick={() => setMobileFiltersOpen(true)}
-        active="sportsbooks"
-        onSearchClick={() => setShowMobileSearch(true)}
-        currentSection={getCurrentSectionId()}
-        onSectionChange={handleSectionChange}
-        hasPlatinum={hasPlatinum}
       />
       
       <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title={isPlayerPropsMode ? "NFL Player Props" : "Filters"}>

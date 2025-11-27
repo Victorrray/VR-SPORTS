@@ -6,7 +6,6 @@ import { Save, Check, AlertCircle, DollarSign, Star, TrendingUp, Settings, Zap }
 import { optimizedStorage } from '../utils/storageOptimizer';
 import { bankrollManager } from '../utils/bankrollManager';
 import SportMultiSelect from '../components/betting/SportMultiSelect';
-import MobileBottomBar from '../components/layout/MobileBottomBar';
 import { AVAILABLE_SPORTSBOOKS, getFreePlanSportsbooks } from '../constants/sportsbooks';
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
@@ -488,8 +487,6 @@ export default function MySportsbooks() {
           </div>
         </div>
       </div>
-
-      <MobileBottomBar showFilter={false} />
     </div>
   );
 }
