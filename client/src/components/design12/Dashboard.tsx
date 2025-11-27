@@ -48,6 +48,7 @@ import { BetCard, BetData } from "./BetCard";
 import { Toaster } from "./ui/sonner";
 import { BetSlip } from "./BetSlip";
 import { toast } from "sonner";
+import { useRecommendedPicks } from "../../hooks/useRecommendedPicks";
 
 interface DashboardProps {
   onSignOut: () => void;
@@ -67,6 +68,16 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [previousView, setPreviousView] = useState<string>("account");
   const [betSlipOpen, setBetSlipOpen] = useState(false);
   const [pendingBet, setPendingBet] = useState<any>(null);
+
+  // Fetch recommended picks from API
+  const { picks: recommendedPicks, loading: picksLoading } = useRecommendedPicks({
+    limit: 4,
+    minEV: 5,
+    enabled: true,
+  });
+
+  // Use recommended picks from API, fallback to empty array if loading
+  const bets: BetData[] = recommendedPicks.length > 0 ? recommendedPicks : [];
 
   const openBetSlip = (betData: any) => {
     setPendingBet(betData);
@@ -125,57 +136,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       change: "3 today",
       positive: true,
       icon: Sparkles,
-    },
-  ];
-
-  const bets: BetData[] = [
-    {
-      id: 1,
-      teams: "Detroit Pistons @ Philadelphia 76ers",
-      time: "Sun, Nov 10 4:41 PM PST",
-      pick: "Detroit Pistons -3.5",
-      odds: "-118",
-      sportsbook: "DraftKings",
-      ev: "+8.2%",
-      sport: "NBA",
-      status: "active",
-      confidence: "High",
-    },
-    {
-      id: 2,
-      teams: "Lakers @ Warriors",
-      time: "Sun, Nov 10 7:00 PM PST",
-      pick: "Over 228.5",
-      odds: "-110",
-      sportsbook: "FanDuel",
-      ev: "+6.5%",
-      sport: "NBA",
-      status: "active",
-      confidence: "Medium",
-    },
-    {
-      id: 3,
-      teams: "Cowboys @ Giants",
-      time: "Sun, Nov 10 1:00 PM EST",
-      pick: "Cowboys -7.5",
-      odds: "-115",
-      sportsbook: "BetMGM",
-      ev: "+5.8%",
-      sport: "NFL",
-      status: "active",
-      confidence: "High",
-    },
-    {
-      id: 4,
-      teams: "Celtics @ Heat",
-      time: "Mon, Nov 11 7:30 PM EST",
-      pick: "Celtics ML",
-      odds: "-125",
-      sportsbook: "Caesars",
-      ev: "+4.3%",
-      sport: "NBA",
-      status: "upcoming",
-      confidence: "Medium",
     },
   ];
 
@@ -454,12 +414,33 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     </span>
                   </div>
 
-                  {/* Bet Cards Grid - TODO: Mock data - will be replaced with actual data from API */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4 items-start">
-                    {bets.map((bet) => (
-                      <BetCard key={bet.id} bet={bet} onAddPick={openBetSlip} />
-                    ))}
-                  </div>
+                  {/* Bet Cards Grid - Real data from API */}
+                  {picksLoading ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className={`p-4 rounded-xl ${isLight ? 'bg-gray-100' : 'bg-white/5'} animate-pulse`}
+                          style={{ height: '300px' }}
+                        />
+                      ))}
+                    </div>
+                  ) : bets.length > 0 ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4 items-start">
+                      {bets.map((bet) => (
+                        <BetCard key={bet.id} bet={bet} onAddPick={openBetSlip} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={`p-6 rounded-xl text-center ${isLight ? 'bg-gray-100' : 'bg-white/5'}`}>
+                      <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold`}>
+                        No high-value picks available at the moment
+                      </p>
+                      <p className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-sm mt-2`}>
+                        Check back soon for recommended picks with positive expected value
+                      </p>
+                    </div>
+                  )}
                 </div>
               </>
             )}
