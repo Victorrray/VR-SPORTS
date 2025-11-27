@@ -197,16 +197,23 @@ function calculateEV(odds, bookmakers) {
     // Convert American odds to implied probability
     const impliedProb = americanOddsToProb(odds);
     
-    // Find the best odds for this outcome across all bookmakers
+    // Find the BEST odds for this outcome across all bookmakers
+    // Best means highest probability (lowest risk) for the bettor
     let bestOdds = odds;
+    let bestProb = impliedProb;
+    
     bookmakers.forEach((book) => {
       if (book.markets) {
         book.markets.forEach((market) => {
           if (market.outcomes) {
             market.outcomes.forEach((outcome) => {
-              // Compare odds for the same outcome
-              if (outcome.price && outcome.price > bestOdds) {
-                bestOdds = outcome.price;
+              if (outcome.price) {
+                const outcomeProb = americanOddsToProb(outcome.price);
+                // Keep the odds with the HIGHEST probability (best for bettor)
+                if (outcomeProb > bestProb) {
+                  bestOdds = outcome.price;
+                  bestProb = outcomeProb;
+                }
               }
             });
           }
@@ -215,7 +222,7 @@ function calculateEV(odds, bookmakers) {
     });
 
     // Calculate actual probability from best odds
-    const actualProb = americanOddsToProb(bestOdds);
+    const actualProb = bestProb;
     
     // EV = (Actual Probability - Implied Probability) * 100
     // If actual prob is higher than implied, there's positive EV
