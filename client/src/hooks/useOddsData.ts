@@ -344,6 +344,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
       console.log('📊 Fetching odds data from:', endpoint);
       console.log('📊 Full filter params:', Object.fromEntries(params));
+      console.log('📊 Sport filter details:', {
+        selectedSport: sport,
+        mappedToAPI: sportsList,
+        marketFilter: marketsList,
+        isNCAAFootball: sport === 'ncaa-football'
+      });
 
       const response = await apiClient.get(endpoint);
       
@@ -359,11 +365,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'Results:', transformedPicks.length);
+        if (transformedPicks.length === 0 && sport !== 'all') {
+          console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
+        }
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
         const transformedPicks = transformOddsApiToOddsPick(response.data.picks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'Results:', transformedPicks.length);
+        if (transformedPicks.length === 0 && sport !== 'all') {
+          console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
+        }
       } else {
         console.warn('⚠️ Unexpected response format:', response.data);
         setError('Invalid response format from API');
