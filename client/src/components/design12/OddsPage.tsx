@@ -182,21 +182,20 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
   // Filter picks based on selections
   const filteredPicks = topPicks.filter(pick => {
-    // Filter by sport - compare against API sport value
+    // Filter by sport - compare against readable sport label from getSportLabel
     if (selectedSport !== 'all') {
-      // Map filter IDs to API sport values
-      const sportMap: Record<string, string[]> = {
-        'nfl': ['americanfootball_nfl', 'nfl'],
-        'nba': ['basketball_nba', 'nba'],
-        'nhl': ['icehockey_nhl', 'nhl'],
-        'mlb': ['baseball_mlb', 'mlb'],
-        'ncaa-football': ['americanfootball_ncaa', 'ncaa_football'],
-        'ncaa-basketball': ['basketball_ncaa', 'ncaa_basketball']
+      // Map filter IDs to readable sport labels (as returned by getSportLabel)
+      const sportLabelMap: Record<string, string[]> = {
+        'nfl': ['NFL'],
+        'nba': ['NBA'],
+        'nhl': ['NHL'],
+        'mlb': ['MLB'],
+        'ncaa-football': ['NCAA Football'],
+        'ncaa-basketball': ['NCAA Basketball']
       };
       
-      const allowedSports = sportMap[selectedSport] || [];
-      const pickSport = pick.sport.toLowerCase();
-      const matches = allowedSports.some(sport => pickSport.includes(sport.toLowerCase()));
+      const allowedLabels = sportLabelMap[selectedSport] || [];
+      const matches = allowedLabels.some(label => pick.sport === label);
       
       if (!matches) {
         return false;
