@@ -56,15 +56,23 @@ export function useRecommendedPicks(options = {}) {
       const data = await response.json();
       let games = Array.isArray(data) ? data : [];
 
+      console.log(`📥 API returned ${games.length} games`);
+      if (games.length > 0) {
+        console.log(`  First game: ${games[0].away_team} @ ${games[0].home_team}`);
+        console.log(`  Commence: ${games[0].commence_time}`);
+        console.log(`  Bookmakers: ${games[0].bookmakers?.length || 0}`);
+      }
+
       // Filter out games that have already started or are in the past
       const now = new Date();
+      const beforeFilter = games.length;
       games = games.filter((game) => {
         if (!game.commence_time) return false;
         const gameTime = new Date(game.commence_time);
         return gameTime > now; // Only include future games
       });
 
-      console.log(`📅 Filtered ${Array.isArray(data) ? data.length : 0} games down to ${games.length} upcoming games`);
+      console.log(`📅 Filtered ${beforeFilter} games down to ${games.length} upcoming games`);
 
       // Transform games into picks with EV calculation
       const recommendedPicks = games
@@ -122,6 +130,12 @@ export function useRecommendedPicks(options = {}) {
         .slice(0, limit);
 
       console.log(`✅ Found ${recommendedPicks.length} recommended picks`);
+      if (recommendedPicks.length > 0) {
+        console.log('  Top picks:');
+        recommendedPicks.slice(0, 3).forEach((pick, idx) => {
+          console.log(`    ${idx + 1}. ${pick.teams} - ${pick.pick} @ ${pick.sportsbook} (${pick.ev})`);
+        });
+      }
       setPicks(recommendedPicks);
     } catch (err) {
       console.error('Error fetching recommended picks:', err);

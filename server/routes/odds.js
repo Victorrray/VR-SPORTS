@@ -532,6 +532,18 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     console.log('📊 FINAL MARKETS IN RESPONSE:', Object.keys(marketCounts).sort().join(', '));
     console.log('📊 MARKET COUNTS:', marketCounts);
     
+    // Log the games being returned
+    console.log(`\n✅ RETURNING ${allGames.length} GAMES TO FRONTEND:`);
+    allGames.slice(0, 3).forEach((game, idx) => {
+      console.log(`  Game ${idx + 1}: ${game.away_team} @ ${game.home_team}`);
+      console.log(`    Commence: ${game.commence_time}`);
+      console.log(`    Bookmakers: ${game.bookmakers?.length || 0}`);
+      if (game.bookmakers?.length > 0) {
+        console.log(`    First bookmaker: ${game.bookmakers[0].key} with ${game.bookmakers[0].markets?.length || 0} markets`);
+      }
+    });
+    console.log('');
+    
     res.json(allGames);
   } catch (err) {
     console.error('Odds error:', err);
