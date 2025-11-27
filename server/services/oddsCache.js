@@ -348,11 +348,13 @@ class OddsCacheService {
   // Get cached odds from Supabase
   async getCachedOdds(sportKey, options = {}) {
     try {
+      const now = new Date().toISOString();
       let query = this.supabase
         .from('cached_odds')
         .select('*')
         .eq('sport_key', sportKey)
-        .gt('expires_at', new Date().toISOString())
+        .gt('expires_at', now)
+        .gt('commence_time', now) // Only get future games
         .order('commence_time', { ascending: true });
 
       if (options.markets && options.markets.length > 0) {
