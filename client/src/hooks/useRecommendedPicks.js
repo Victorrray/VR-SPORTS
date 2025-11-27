@@ -94,6 +94,11 @@ export function useRecommendedPicks(options = {}) {
               // Calculate real EV based on actual odds
               const ev = calculateEV(outcome.price, game.bookmakers);
 
+              // Log EV calculation for debugging
+              if (picks.length === 0 && market === bestBookmaker.markets[0]) {
+                console.log(`  EV for ${outcome.name}: ${ev.toFixed(2)}% (threshold: ${minEV}%)`);
+              }
+
               if (ev >= minEV) {
                 picks.push({
                   id: `${game.id}-${market.key}-${outcome.name}`,
@@ -215,6 +220,11 @@ function calculateEV(odds, bookmakers) {
     // EV = (Actual Probability - Implied Probability) * 100
     // If actual prob is higher than implied, there's positive EV
     const ev = (actualProb - impliedProb) * 100;
+    
+    // Debug logging
+    if (ev > 0) {
+      console.log(`    [EV Debug] Input odds: ${odds}, Best odds: ${bestOdds}, Implied: ${(impliedProb*100).toFixed(1)}%, Actual: ${(actualProb*100).toFixed(1)}%, EV: ${ev.toFixed(2)}%`);
+    }
     
     // Return max of 0 (no negative EV picks) and calculated EV
     return Math.max(0, ev);
