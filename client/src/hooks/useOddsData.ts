@@ -282,10 +282,20 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // Build query parameters - match backend API expectations
       const params = new URLSearchParams();
       
+      // Map frontend sport IDs to TheOddsAPI sport keys
+      const sportKeyMap: { [key: string]: string } = {
+        'nfl': 'americanfootball_nfl',
+        'ncaa-football': 'americanfootball_ncaaf',
+        'nba': 'basketball_nba',
+        'ncaa-basketball': 'basketball_ncaab',
+        'nhl': 'icehockey_nhl',
+        'mlb': 'baseball_mlb',
+      };
+      
       // Map frontend filters to backend parameter names
       // Default sports if not specified
       const sportsList = sport && sport !== 'all' 
-        ? sport 
+        ? (sportKeyMap[sport] || sport)
         : 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl';
       params.append('sports', sportsList);
       
