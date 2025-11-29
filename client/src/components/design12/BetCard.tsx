@@ -114,7 +114,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             isHero || isDark
               ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
-          } backdrop-blur-xl border rounded-md font-bold text-xs`}>
+          } backdrop-blur-xl border rounded-lg font-bold text-xs`}>
             {bet.sport}
           </span>
         </div>
