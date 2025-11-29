@@ -420,7 +420,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                       {[1, 2, 3, 4].map((i) => (
                         <div
                           key={i}
-                          className={`p-4 rounded-xl ${isLight ? 'bg-gray-100' : 'bg-white/5'} animate-pulse`}
+                          className={`p-4 rounded-lg ${isLight ? 'bg-gray-100' : 'bg-white/5'} animate-pulse`}
                           style={{ height: '300px' }}
                         />
                       ))}
