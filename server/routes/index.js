@@ -9,6 +9,7 @@ const adminRoutes = require('./admin');
 const sportsRoutes = require('./sports');
 const billingRoutes = require('./billing');
 const oddsRoutes = require('./odds');
+const featuredRoutes = require('./featured');
 
 /**
  * Register all routes with the Express app
@@ -35,6 +36,9 @@ function registerRoutes(app) {
   
   // Odds routes
   app.use('/api/odds', oddsRoutes);
+  
+  // Featured routes
+  app.use('/api/featured', featuredRoutes);
 }
 
 module.exports = {
