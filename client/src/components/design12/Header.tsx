@@ -117,7 +117,7 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick }: Heade
                 >
                   Login
                 </button>
-                <button className="w-full px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md hover:from-purple-400 hover:to-indigo-400 transition-all font-bold border border-purple-400/30">
+                <button className="w-full px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all font-bold border border-purple-400/30">
                   Sign up
                 </button>
               </div>
