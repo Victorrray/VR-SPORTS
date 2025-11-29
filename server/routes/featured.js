@@ -19,14 +19,19 @@ router.get('/', async (req, res) => {
     }
 
     // Fetch NBA odds
-    const url = `https://api.the-odds-api.com/v4/sports/basketball_nba/odds?apiKey=${API_KEY}&regions=us&markets=h2h&oddsFormat=american&limit=1`;
+    const url = `https://api.the-odds-api.com/v4/sports/basketball_nba/odds?apiKey=${API_KEY}&regions=us&markets=h2h&oddsFormat=american&limit=10`;
     const response = await axios.get(url, { timeout: 10000 });
 
     if (!response.data?.events || response.data.events.length === 0) {
       return res.json({ bet: null });
     }
 
-    const game = response.data.events[0];
+    const upcomingGames = response.data.events.filter(game => game.commence_time > Date.now() / 1000);
+    if (upcomingGames.length === 0) {
+      return res.json({ bet: null });
+    }
+
+    const game = upcomingGames[0];
     const h2hMarket = game.bookmakers?.[0]?.markets?.find(m => m.key === 'h2h');
     const homeOdds = h2hMarket?.outcomes?.[0]?.odds || -110;
 
