@@ -1,20 +1,34 @@
 import { ArrowRight, Play, Sparkles } from 'lucide-react';
 import { BetCard } from './BetCard';
 import { motion } from 'framer-motion';
+import { useFeaturedPick } from '../../hooks/useFeaturedPick';
 
 export function Hero() {
-  // TODO: Replace this mock data with a cached bet from the API
-  const featuredBet = {
-    id: 1,
-    teams: "Detroit Pistons @ Philadelphia 76ers",
-    time: "Sun, Nov 10 4:41 PM PST",
-    pick: "Detroit Pistons -3.5",
-    odds: "-118",
-    sportsbook: "DraftKings",
-    ev: "+8.2%",
-    sport: "NBA",
-    status: "active",
-    confidence: "High",
+  const { bet, loading } = useFeaturedPick();
+
+  // Transform API bet to BetCard format
+  const featuredBet = bet ? {
+    id: Number(bet.id),
+    teams: bet.teams,
+    time: bet.gameTime,
+    pick: bet.pick,
+    odds: String(bet.odds),
+    sportsbook: bet.sportsbook,
+    ev: bet.ev,
+    sport: bet.sport,
+    status: 'active',
+    confidence: 'High',
+  } : {
+    id: 0,
+    teams: 'Loading...',
+    time: 'Loading...',
+    pick: 'Loading...',
+    odds: '-',
+    sportsbook: 'Loading...',
+    ev: '-',
+    sport: 'NBA',
+    status: 'active',
+    confidence: 'High',
   };
 
   return (
