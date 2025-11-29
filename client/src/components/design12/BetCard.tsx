@@ -114,7 +114,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             isHero || isDark
               ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
-          } backdrop-blur-xl border rounded-lg font-bold text-xs`}>
+          } backdrop-blur-xl border rounded-md font-bold text-xs`}>
             {bet.sport}
           </span>
         </div>
@@ -149,7 +149,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30' 
             : 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200'
-        } backdrop-blur-xl border rounded-lg`}>
+        } backdrop-blur-xl border rounded-xl`}>
           <div className={`${
             isHero || isDark ? 'text-purple-300' : 'text-purple-600'
           } font-bold uppercase tracking-wide mb-1 text-xs`}>
@@ -165,7 +165,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'border-white/10' 
             : 'bg-gray-50 border-gray-200'
-        } backdrop-blur-xl rounded-lg border`}>
+        } backdrop-blur-xl rounded-xl border`}>
           <div>
             <div className={`${
               isHero || isDark ? 'text-white/50' : 'text-gray-500'
@@ -198,7 +198,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 isHero || isDark
                   ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
                   : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-              } backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}>
+              } backdrop-blur-xl border rounded-md transition-all font-bold text-xs text-center`}>
                 Compare Odds
               </button>
             )}
