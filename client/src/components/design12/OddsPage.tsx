@@ -261,6 +261,9 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       
       bestBook = bestBookData.name;
       bestOdds = typeof bestBookData.odds === 'number' ? (bestBookData.odds > 0 ? `+${bestBookData.odds}` : bestBookData.odds) : (typeof bestBookData.odds === 'string' && !bestBookData.odds.startsWith('-') && !bestBookData.odds.startsWith('+') && bestBookData.odds !== '--' ? `+${bestBookData.odds}` : bestBookData.odds);
+    } else {
+      // Format bestOdds even if no filtered books (use original)
+      bestOdds = typeof bestOdds === 'number' ? (bestOdds > 0 ? `+${bestOdds}` : bestOdds) : (typeof bestOdds === 'string' && !bestOdds.startsWith('-') && !bestOdds.startsWith('+') && bestOdds !== '--' ? `+${bestOdds}` : bestOdds);
     }
 
     return {
