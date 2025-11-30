@@ -2110,8 +2110,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             pageSize={15}
             mode="game"
             bookFilter={effectiveSelectedBooks}
-            marketFilter={marketKeys} // Use selected markets, empty array shows all
-            evMin={minEV === "" ? null : Number(minEV)}
+            marketFilter={filters.markets} // Use selected markets, empty array shows all
+            evMin={filters.minEV === "" ? null : Number(filters.minEV)}
             loading={filtersLoading || marketsLoading}
             error={error || marketsError}
             oddsFormat={oddsFormat}
@@ -2119,7 +2119,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             onAddBet={addBet}
             betSlipCount={bets.length}
             onOpenBetSlip={openBetSlip}
-            dataPoints={dataPoints}
+            dataPoints={filters.dataPoints}
           />
         </div>
       ) : null}
