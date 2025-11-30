@@ -149,7 +149,7 @@ export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[
             >
               {/* Sport Badge */}
               <div className="mb-3">
-                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
+                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl font-bold text-xs`}>
                   {pick.sport}
                 </span>
               </div>
@@ -168,7 +168,7 @@ export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[
 
                 {/* EV Badge */}
                 <div className="shrink-0">
-                  <div className={`inline-flex items-center px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-lg border`}>
+                  <div className={`inline-flex items-center px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-xl border`}>
                     <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
                       {pick.ev}
                     </span>
@@ -177,7 +177,7 @@ export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[
               </div>
 
               {/* Pick Display */}
-              <div className={`text-center p-3 mb-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-lg`}>
+              <div className={`text-center p-3 mb-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-xl`}>
                 <div className={`${isLight ? 'text-purple-600' : 'text-purple-300'} font-bold uppercase tracking-wide mb-1 text-xs`}>
                   Pick
                 </div>
@@ -187,7 +187,7 @@ export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[
               </div>
 
               {/* Odds & Sportsbook */}
-              <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'border-white/10'} backdrop-blur-xl rounded-lg border mb-3`}>
+              <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'border-white/10'} backdrop-blur-xl rounded-xl border mb-3`}>
                 <div>
                   <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
                     Sportsbook
@@ -213,7 +213,7 @@ export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[
                     onRemovePick(index);
                     toast.success('Pick removed');
                   }}
-                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl transition-all ${
                     isLight 
                       ? 'bg-red-100 hover:bg-red-200 text-red-600 border border-red-300' 
                       : 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-400/30'
