@@ -98,12 +98,21 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       console.log('🏈 ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
       console.log('🏈 Requested sports:', sportsArray);
       
-      // Map sports to their player props markets
+      // Map sports to their player props markets (using TheOddsAPI market names)
       const playerPropsMarketMap = {
-        'americanfootball_nfl': ['player_pass_tds', 'player_pass_yards', 'player_rush_yards', 'player_receptions'],
-        'basketball_nba': ['player_points', 'player_rebounds', 'player_assists'],
-        'baseball_mlb': ['batter_home_runs', 'batter_hits', 'pitcher_strikeouts'],
-        'icehockey_nhl': ['player_goals', 'player_assists', 'player_shots_on_goal']
+        'americanfootball_nfl': [
+          'player_passing_yards', 'player_passing_touchdowns', 'player_rushing_yards', 
+          'player_receptions', 'player_receiving_yards', 'player_rushing_attempts'
+        ],
+        'basketball_nba': [
+          'player_points', 'player_rebounds', 'player_assists', 'player_three_pointers_made'
+        ],
+        'baseball_mlb': [
+          'player_home_runs', 'player_hits', 'player_strikeouts', 'player_total_bases'
+        ],
+        'icehockey_nhl': [
+          'player_goals', 'player_assists', 'player_shots_on_goal'
+        ]
       };
       
       // Get player props markets for requested sports
