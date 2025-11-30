@@ -9,6 +9,7 @@ import MobileFiltersSheet from "../components/layout/MobileFiltersSheet";
 import MobileSearchModal from "../components/modals/MobileSearchModal";
 import "../components/betting/FormControls.css"; // Import form controls styling
 import { useBetSlip } from "../contexts/BetSlipContext";
+import { useFilters } from "../contexts/FilterContext";
 import BetSlip from "../components/betting/BetSlip";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
 import DatePicker from "../components/common/DatePicker";
@@ -207,6 +208,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const { user } = useAuth();
   const { me, loading: meLoading } = useMe();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
+  const { filters, updateFilter, updateFilters, openFilterModal, applyFilters: contextApplyFilters, closeFilterModal, resetFilters: contextResetFilters } = useFilters();
   
   // Get user's saved sportsbook selections by mode
   const getUserSelectedSportsbooks = (mode = 'game') => {
