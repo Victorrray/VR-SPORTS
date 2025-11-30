@@ -194,11 +194,11 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             {!isHero && (
               <button 
                 onClick={handleToggleCompare}
-                className={`px-3 py-2 ${
+                className={`px-3 py-2 rounded-full ${
                 isHero || isDark
                   ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
                   : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-              } backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}>
+              } backdrop-blur-xl border transition-all font-bold text-xs text-center`}>
                 Compare Odds
               </button>
             )}
@@ -206,7 +206,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               <button 
                 onClick={handleAddToPicks}
                 disabled={isAdded}
-                className={`px-3 py-2 ${
+                className={`px-3 py-2 rounded-full ${
                   isAdded 
                     ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed' 
                     : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
