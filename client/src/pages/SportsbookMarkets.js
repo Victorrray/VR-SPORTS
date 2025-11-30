@@ -2169,8 +2169,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   📅 Date
                 </label>
                 <DatePicker
-                  value={draftSelectedDate}
-                  onChange={setDraftSelectedDate}
+                  value={filters.date}
+                  onChange={(value) => updateFilter('date', value)}
                 />
               </div>
 
@@ -2181,8 +2181,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
                 <SportMultiSelect
                   list={sportList || []}
-                  selected={draftPicked || []}
-                  onChange={setDraftPicked}
+                  selected={filters.sports || []}
+                  onChange={(value) => updateFilter('sports', value)}
                   placeholderText="Select sports..."
                   allLabel="All Sports"
                   enableCategories={true}
@@ -2195,9 +2195,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   🎯 Player Prop Markets
                 </label>
                 <SportMultiSelect
-                  list={getPlayerPropMarketsBySport(draftPicked)}
-                  selected={draftSelectedPlayerPropMarkets || []}
-                  onChange={setDraftSelectedPlayerPropMarkets}
+                  list={getPlayerPropMarketsBySport(filters.sports)}
+                  selected={filters.playerPropMarkets || []}
+                  onChange={(value) => updateFilter('playerPropMarkets', value)}
                   placeholderText="Select player props..."
                   allLabel="All Player Props"
                 />
@@ -2210,8 +2210,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
-                  selected={draftSelectedPlayerPropsBooks || []}
-                  onChange={setDraftSelectedPlayerPropsBooks}
+                  selected={filters.playerPropSportsbooks || []}
+                  onChange={(value) => updateFilter('playerPropSportsbooks', value)}
                   placeholderText="Select sportsbooks..."
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
@@ -2409,14 +2409,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
                   <span>📊 Data Points</span>
-                  <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700 }}>{draftDataPoints}</span>
+                  <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700 }}>{filters.dataPoints}</span>
                 </label>
                 <input 
                   type="range" 
                   min="3" 
                   max="10" 
-                  value={draftDataPoints}
-                  onChange={(e) => setDraftDataPoints(parseInt(e.target.value, 10))}
+                  value={filters.dataPoints}
+                  onChange={(e) => updateFilter('dataPoints', parseInt(e.target.value, 10))}
                   style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)', WebkitAppearance: 'none', appearance: 'none', padding: '0' }}
                 />
               </div>
@@ -2427,8 +2427,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   📅 Date
                 </label>
                 <DatePicker
-                  value={draftSelectedDate}
-                  onChange={setDraftSelectedDate}
+                  value={filters.date}
+                  onChange={(value) => updateFilter('date', value)}
                 />
               </div>
 
@@ -2439,8 +2439,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
                 <SportMultiSelect
                   list={sportList || []}
-                  selected={draftPicked || []}
-                  onChange={setDraftPicked}
+                  selected={filters.sports || []}
+                  onChange={(value) => updateFilter('sports', value)}
                   placeholderText="Select sports..."
                   allLabel="All Sports"
                   enableCategories={true}
@@ -2454,8 +2454,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
-                  selected={draftSelectedBooks || []}
-                  onChange={setDraftSelectedBooks}
+                  selected={filters.sportsbooks || []}
+                  onChange={(value) => updateFilter('sportsbooks', value)}
                   placeholderText="Select sportsbooks..."
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
@@ -2470,12 +2470,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   📊 Markets
                 </label>
                 <SportMultiSelect
-                  list={getAvailableMarkets(draftPicked)}
-                  selected={draftMarketKeys || []}
-                  onChange={(newMarkets) => {
-                    setDraftMarketKeys(newMarkets);
-                    setUserHasSelectedMarkets(true); // Mark that user has made a selection
-                    console.log('🎯 User selected markets (mobile):', newMarkets.length > 0 ? newMarkets : 'ALL MARKETS (empty array)');
+                  list={getAvailableMarkets(filters.sports)}
+                  selected={filters.markets || []}
+                  onChange={(value) => {
+                    updateFilter('markets', value);
+                    console.log('🎯 User selected markets (mobile):', value.length > 0 ? value : 'ALL MARKETS (empty array)');
                   }}
                   placeholderText="Select markets..."
                   allLabel="All Markets"
@@ -2486,10 +2485,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
           )}
           
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <button onClick={applyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
+            <button onClick={handleApplyFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Apply
             </button>
-            <button onClick={resetAllFilters} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6b7280, #4b5563)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
+            <button onClick={() => contextResetFilters()} style={{ flex: 1, padding: '12px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6b7280, #4b5563)', color: '#fff', fontWeight: 600, fontSize: '14px' }}>
               Reset
             </button>
           </div>
