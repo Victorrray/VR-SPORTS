@@ -1140,6 +1140,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // For player props mode, respect the user's selection if they've made one
     // Otherwise use empty array to show ALL books
     const newPlayerPropsBooks = Array.isArray(draftSelectedPlayerPropsBooks) ? draftSelectedPlayerPropsBooks : [];
+    // CRITICAL: If user selected markets, use them. If empty array, treat as "all markets" (don't default)
     const newMarkets = Array.isArray(draftMarketKeys) ? draftMarketKeys : [];
     
     console.log('🏈 Applying filters:', {
@@ -1151,7 +1152,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       newMarkets: newMarkets,
       dataPoints: draftDataPoints,
       playerPropsMode: showPlayerProps,
-      userHasSelectedMarkets: userHasSelectedMarkets
+      userHasSelectedMarkets: userHasSelectedMarkets,
+      marketKeysBeforeApply: marketKeys
     });
     
     // Mark that user has explicitly selected markets (if they changed them)
@@ -1163,7 +1165,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
     
     // Update state - this will trigger useMarketsWithCache to re-fetch data
-    console.log('🎯 About to setMarketKeys to:', newMarkets);
+    console.log('🎯 About to setMarketKeys to:', newMarkets, '(length:', newMarkets.length, ')');
     setPicked(newPicked);
     setSelectedDate(newDate);
     setSelectedBooks(newBooks);
