@@ -1147,7 +1147,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       date: newDate,
       books: newBooks,
       playerPropsBooks: newPlayerPropsBooks,
-      markets: newMarkets,
+      draftMarketKeys: draftMarketKeys,
+      newMarkets: newMarkets,
       dataPoints: draftDataPoints,
       playerPropsMode: showPlayerProps,
       userHasSelectedMarkets: userHasSelectedMarkets
@@ -1157,9 +1158,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     if (userHasSelectedMarkets) {
       setUserHasAppliedMarketSelection(true);
       console.log('🎯 User has applied market selection - will prevent auto-selection');
+    } else {
+      console.log('⚠️ userHasSelectedMarkets is FALSE - auto-selection might override markets');
     }
     
     // Update state - this will trigger useMarketsWithCache to re-fetch data
+    console.log('🎯 About to setMarketKeys to:', newMarkets);
     setPicked(newPicked);
     setSelectedDate(newDate);
     setSelectedBooks(newBooks);
