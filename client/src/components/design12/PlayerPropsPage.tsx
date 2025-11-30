@@ -16,7 +16,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('today');
+  const [selectedDate, setSelectedDate] = useState('all_upcoming');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -469,7 +469,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                   onClick={() => {
                     setSelectedSport('all');
                     setSelectedMarket('all');
-                    setSelectedDate('today');
+                    setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
                     toast.success('Filters reset', {
                       description: 'All filters have been cleared'
@@ -948,7 +948,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                   onClick={() => {
                     setSelectedSport('all');
                     setSelectedMarket('all');
-                    setSelectedDate('today');
+                    setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
                     toast.success('Filters reset', {
                       description: 'All filters have been cleared'

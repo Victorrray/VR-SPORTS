@@ -17,7 +17,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('today');
+  const [selectedDate, setSelectedDate] = useState('all_upcoming');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -297,7 +297,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           setSelectedSport('all');
           setSelectedMarket('all');
           setSelectedBetType('straight');
-          setSelectedDate('today');
+          setSelectedDate('all_upcoming');
         }}
         className={`px-6 py-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-white hover:from-purple-500/30 hover:to-indigo-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
       >
