@@ -218,7 +218,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                       {profile?.username || user?.email?.split('@')[0] || 'User'}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <div className={`px-2 py-0.5 ${isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-lg backdrop-blur-xl`}>
+                      <div className={`px-2 py-0.5 ${isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-full backdrop-blur-xl`}>
                         <div className="flex items-center gap-1">
                           <Crown className="w-3 h-3 text-amber-400" />
                           <span className="text-amber-400 font-bold text-xs">
@@ -409,7 +409,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-sm md:text-base`}>
                       Top Picks
                     </h2>
-                    <span className={`px-2 md:px-2.5 lg:px-3 py-0.5 md:py-1 ${isLight ? lightModeColors.statsBadge : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-[10px] md:text-xs`}>
+                    <span className={`px-2 md:px-2.5 lg:px-3 py-0.5 md:py-1 ${isLight ? lightModeColors.statsBadge : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-[10px] md:text-xs`}>
                       {bets.length} Available
                     </span>
                   </div>
