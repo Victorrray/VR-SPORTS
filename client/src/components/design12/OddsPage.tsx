@@ -1319,7 +1319,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 15}` : `${parseInt(pick.bestOdds) + 15}`}
+                              --
                             </span>
                           </div>
                         </div>
@@ -1331,7 +1331,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 8}` : `${parseInt(pick.bestOdds) + 8}`}
+                              --
                             </span>
                           </div>
                         </div>
