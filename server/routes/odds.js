@@ -73,8 +73,8 @@ router.use((req, res, next) => {
 
 router.get('/', requireUser, checkPlanAccess, async (req, res) => {
   try {
-    const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american", date } = req.query;
-    console.log('🔍 /api/odds called with:', { sports, regions, markets, date, userId: req.__userId });
+    const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american", date, betType } = req.query;
+    console.log('🔍 /api/odds called with:', { sports, regions, markets, date, betType, userId: req.__userId });
     
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
     if (!API_KEY) {
@@ -85,11 +85,36 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     }
     
     const sportsArray = sports.split(',');
-    const marketsArray = markets.split(',');
+    let marketsArray = markets.split(',');
     let allGames = [];
     
     // Define DFS apps list at top level for use throughout the function
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+    
+    // Handle player props bet type
+    if (betType === 'props') {
+      console.log('🏈 Player props requested - mapping to player prop markets');
+      // Map sports to their player props markets
+      const playerPropsMarketMap = {
+        'americanfootball_nfl': ['player_pass_tds', 'player_pass_yards', 'player_rush_yards', 'player_receptions'],
+        'basketball_nba': ['player_points', 'player_rebounds', 'player_assists'],
+        'baseball_mlb': ['batter_home_runs', 'batter_hits', 'pitcher_strikeouts'],
+        'icehockey_nhl': ['player_goals', 'player_assists', 'player_shots_on_goal']
+      };
+      
+      // Get player props markets for requested sports
+      const playerPropsMarkets = [];
+      sportsArray.forEach(sport => {
+        if (playerPropsMarketMap[sport]) {
+          playerPropsMarkets.push(...playerPropsMarketMap[sport]);
+        }
+      });
+      
+      if (playerPropsMarkets.length > 0) {
+        marketsArray = playerPropsMarkets;
+        console.log('📊 Player props markets:', marketsArray);
+      }
+    }
     
     // Separate player props from regular markets
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));

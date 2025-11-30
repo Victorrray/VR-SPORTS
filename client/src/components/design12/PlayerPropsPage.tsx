@@ -287,10 +287,10 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
         <Search className={`w-8 h-8 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
       </div>
       <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl mb-2`}>
-        Player Props Coming Soon
+        No player props found
       </h3>
       <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold mb-4`}>
-        We're integrating player props data from TheOddsAPI. Check back soon for individual player performance bets across all major sports.
+        Try adjusting your filters to see more player prop betting opportunities
       </p>
     </div>
   );
