@@ -580,9 +580,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // Filter bookmakers' markets to only include requested markets (if not fetching all)
     const allRequestedMarkets = [...regularMarkets, ...playerPropMarkets];
     console.log('🎯 All requested markets:', allRequestedMarkets);
+    console.log('🎯 betType:', betType);
+    console.log('🎯 regularMarkets:', regularMarkets);
+    console.log('🎯 playerPropMarkets:', playerPropMarkets);
     
-    if (allRequestedMarkets.length > 0 && !betType) {
+    if (allRequestedMarkets.length > 0 && betType !== 'props') {
       // For regular game odds, filter to only requested markets
+      console.log('🔍 Filtering bookmakers to only include markets:', allRequestedMarkets);
       allGames.forEach(game => {
         if (game.bookmakers) {
           game.bookmakers = game.bookmakers.map(bookmaker => ({
@@ -592,6 +596,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         }
       });
       console.log('✅ Filtered bookmakers to only requested markets');
+    } else {
+      console.log('⏭️ Skipping market filtering - allRequestedMarkets.length:', allRequestedMarkets.length, 'betType:', betType);
     }
     
     // Debug: Count markets in response
