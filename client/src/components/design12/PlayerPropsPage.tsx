@@ -290,7 +290,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
         Player Props Coming Soon
       </h3>
       <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold mb-4`}>
-        Player props data is not yet available. Check back soon for individual player performance bets.
+        We're integrating player props data from TheOddsAPI. Check back soon for individual player performance bets across all major sports.
       </p>
     </div>
   );
