@@ -49,15 +49,15 @@ export function useFeaturedPick() {
         const data = await response.json();
 
         if (data.bet) {
-          // Format the game time
+          // Format the game time in user's local timezone
           const gameTime = new Date(data.bet.gameTime).toLocaleString('en-US', {
             weekday: 'short',
             month: 'short',
             day: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
-            timeZone: 'America/Los_Angeles'
-          }) + ' PST';
+            timeZoneName: 'short'
+          });
 
           const formattedBet: FeaturedBet = {
             id: data.bet.id,
@@ -85,8 +85,8 @@ export function useFeaturedPick() {
               day: 'numeric',
               hour: 'numeric',
               minute: '2-digit',
-              timeZone: 'America/Los_Angeles'
-            }) + ' PST',
+              timeZoneName: 'short'
+            }),
             pick: 'Boston Celtics -4.5',
             odds: -110,
             sportsbook: 'DraftKings',
@@ -108,8 +108,8 @@ export function useFeaturedPick() {
             day: 'numeric',
             hour: 'numeric',
             minute: '2-digit',
-            timeZone: 'America/Los_Angeles'
-          }) + ' PST',
+            timeZoneName: 'short'
+          }),
           pick: 'Boston Celtics -4.5',
           odds: -110,
           sportsbook: 'DraftKings',
