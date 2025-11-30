@@ -1363,7 +1363,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-full items-center`}
                           >
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{typeof book.odds === 'number' && book.odds > 0 ? `+${book.odds}` : book.odds}</div>
+                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{typeof book.odds === 'number' ? (book.odds > 0 ? `+${book.odds}` : book.odds) : (typeof book.odds === 'string' && !book.odds.startsWith('-') && !book.odds.startsWith('+') && book.odds !== '--' ? `+${book.odds}` : book.odds)}</div>
                             <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{book.team2Odds}</div>
                             <div className="flex justify-end">
                               <button
@@ -1459,7 +1459,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             </tr>
                           </thead>
                           <tbody className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
-                            {(expandedSportsbooks.includes(pick.id) ? pick.books : pick.books.slice(0, 5)).map((book, idx) => (
+                            {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
                               <tr 
                                 key={idx}
                                 className={`transition-all ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'}`}
@@ -1468,7 +1468,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                   <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
                                 </td>
                                 <td className="py-2 px-3 text-center">
-                                  <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{typeof book.odds === 'number' && book.odds > 0 ? `+${book.odds}` : book.odds}</span>
+                                  <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{typeof book.odds === 'number' ? (book.odds > 0 ? `+${book.odds}` : book.odds) : (typeof book.odds === 'string' && !book.odds.startsWith('-') && !book.odds.startsWith('+') && book.odds !== '--' ? `+${book.odds}` : book.odds)}</span>
                                 </td>
                                 <td className="py-2 px-3 text-center">
                                   <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm`}>{book.team2Odds}</span>
