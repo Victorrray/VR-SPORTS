@@ -1762,9 +1762,11 @@ export default function OddsTable({
     };
 
     const gameRows = [];
+    console.log(`🎯 OddsTable: Processing ${games?.length || 0} games with marketFilter:`, marketFilter);
     games?.forEach((game) => {
       const baseKeys = ["h2h", "spreads", "totals"];
       const keys = (marketFilter && marketFilter.length) ? marketFilter : baseKeys;
+      console.log(`🎯 OddsTable: Game ${game.home_team} - Using markets:`, keys);
 
       keys.forEach((mktKey) => {
         const allMarketOutcomes = [];
