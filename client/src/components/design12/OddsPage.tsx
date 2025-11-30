@@ -5,6 +5,18 @@ import { useOddsData, getSportLabel } from '../../hooks/useOddsData';
 import { PlayerPropsPage } from './PlayerPropsPage';
 import { toast } from 'sonner';
 
+// Helper function to format odds with +/- sign
+const formatOdds = (odds: any): string => {
+  if (!odds) return '--';
+  const oddsStr = String(odds);
+  if (oddsStr.startsWith('+') || oddsStr.startsWith('-') || oddsStr === '--') {
+    return oddsStr;
+  }
+  const oddsNum = parseInt(oddsStr);
+  if (isNaN(oddsNum)) return oddsStr;
+  return oddsNum > 0 ? `+${oddsNum}` : String(oddsNum);
+};
+
 export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
@@ -1275,7 +1287,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             Odds
                           </div>
                           <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                            {pick.bestOdds}
+                            {formatOdds(pick.bestOdds)}
                           </div>
                         </div>
                       </div>
