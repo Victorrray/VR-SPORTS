@@ -735,9 +735,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Debug logging after marketGames is available
   console.log('🎯 Markets hook params:', {
     sportsForMode,
-    picked,
+    sports: filters.sports,
     isPlayerPropsMode,
-    selectedDate,
+    date: filters.date,
     marketsForMode,
     marketGamesCount: marketGames?.length || 0,
     selectedBooks: selectedBooks
@@ -763,21 +763,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const filteredGames = useMemo(() => {
     if (!Array.isArray(marketGames)) return [];
     
-    // First, filter by sport (picked sports)
+    // First, filter by sport (selected sports)
     let sportFilteredGames = marketGames;
-    if (picked && picked.length > 0) {
-      sportFilteredGames = marketGames.filter(game => picked.includes(game.sport_key));
-      console.log(`🏆 Sport filter (${picked.join(', ')}) - showing:`, sportFilteredGames.length, 'of', marketGames.length, 'total');
+    if (filters.sports && filters.sports.length > 0) {
+      sportFilteredGames = marketGames.filter(game => filters.sports.includes(game.sport_key));
+      console.log(`🏆 Sport filter (${filters.sports.join(', ')}) - showing:`, sportFilteredGames.length, 'of', marketGames.length, 'total');
     }
     
     // If no date filter is selected, return sport-filtered games
-    if (!selectedDate || selectedDate === "") {
+    if (!filters.date || filters.date === "") {
       console.log('🗓️ No date filter - showing all games:', sportFilteredGames.length);
       return sportFilteredGames;
     }
     
     // Filter for live games only
-    if (selectedDate === "live") {
+    if (filters.date === "live") {
       const liveGames = sportFilteredGames.filter(game => {
         const isLive = game.commence_time && new Date(game.commence_time) <= new Date();
         return isLive;
@@ -788,7 +788,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Filter for specific date (Today or future dates)
     // For "Today" and future dates, only show games that HAVEN'T started yet
-    const selectedDateObj = new Date(selectedDate + 'T00:00:00');
+    const selectedDateObj = new Date(filters.date + 'T00:00:00');
     const nextDay = new Date(selectedDateObj);
     nextDay.setDate(selectedDateObj.getDate() + 1);
     const now = new Date();
@@ -803,9 +803,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       return isOnSelectedDate && hasNotStarted;
     });
     
-    console.log(`🗓️ Date filter (${selectedDate}) - showing:`, dateFilteredGames.length, 'upcoming games of', sportFilteredGames.length, 'total');
+    console.log(`🗓️ Date filter (${filters.date}) - showing:`, dateFilteredGames.length, 'upcoming games of', sportFilteredGames.length, 'total');
     return dateFilteredGames;
-  }, [marketGames, selectedDate, picked]);
+  }, [marketGames, filters.date, filters.sports]);
 
   // Arbitrage games filter - includes LIVE games for arbitrage detection
   // Arbitrage opportunities only exist when games are actively being traded
@@ -1066,69 +1066,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     fetchSports();
   }, []);
 
-  // Sync draft state with applied state only when filters modal opens
-  useEffect(() => {
-    if (mobileFiltersOpen) {
-      // Only sync when modal opens, not on every state change
-      setDraftPicked([...picked]);
-      setDraftSelectedDate(selectedDate);
-      setDraftSelectedBooks([...selectedBooks]);
-      setDraftMarketKeys([...marketKeys]);
-      setDraftSelectedPlayerPropMarkets([...selectedPlayerPropMarkets]);
-      // Reset the flag when modal opens so auto-selection works if user hasn't changed markets
-      setUserHasSelectedMarkets(false);
-      // Arbitrage states don't need syncing as they're internal to the component
-    }
-  }, [mobileFiltersOpen]); // Only depend on modal open state
+  // No sync needed - FilterContext handles all filter state automatically
+  // When modal opens, filters are already available via context
 
-  const applyFilters = () => {
+  const handleApplyFilters = () => {
     // Show loading immediately when filters are applied
     setFiltersLoading(true);
     
-    // Apply draft filters to actual state
-    const newPicked = Array.isArray(draftPicked) && draftPicked.length > 0 ? draftPicked : ["americanfootball_nfl"];
-    const newDate = draftSelectedDate || '';
-    const newBooks = Array.isArray(draftSelectedBooks) ? draftSelectedBooks : [];
-    // For player props mode, respect the user's selection if they've made one
-    // Otherwise use empty array to show ALL books
-    const newPlayerPropsBooks = Array.isArray(draftSelectedPlayerPropsBooks) ? draftSelectedPlayerPropsBooks : [];
-    // CRITICAL: If user selected markets, use them. If empty array, treat as "all markets" (don't default)
-    const newMarkets = Array.isArray(draftMarketKeys) ? draftMarketKeys : [];
-    
     console.log('🏈 Applying filters:', {
-      sports: newPicked,
-      date: newDate,
-      books: newBooks,
-      playerPropsBooks: newPlayerPropsBooks,
-      draftMarketKeys: draftMarketKeys,
-      newMarkets: newMarkets,
-      dataPoints: draftDataPoints,
-      playerPropsMode: showPlayerProps,
-      userHasSelectedMarkets: userHasSelectedMarkets,
-      marketKeysBeforeApply: marketKeys
+      sports: filters.sports,
+      date: filters.date,
+      sportsbooks: filters.sportsbooks,
+      playerPropSportsbooks: filters.playerPropSportsbooks,
+      markets: filters.markets,
+      playerPropMarkets: filters.playerPropMarkets,
+      dataPoints: filters.dataPoints,
+      playerPropsMode: showPlayerProps
     });
     
-    // Mark that user has explicitly selected markets (if they changed them)
-    if (userHasSelectedMarkets) {
-      setUserHasAppliedMarketSelection(true);
-      console.log('🎯 User has applied market selection - will prevent auto-selection');
-    } else {
-      console.log('⚠️ userHasSelectedMarkets is FALSE - auto-selection might override markets');
-    }
-    
-    // Update state - this will trigger useMarketsWithCache to re-fetch data
-    console.log('🎯 About to setMarketKeys to:', newMarkets, '(length:', newMarkets.length, ')');
-    setPicked(newPicked);
-    setSelectedDate(newDate);
-    setSelectedBooks(newBooks);
-    setSelectedPlayerPropsBooks(newPlayerPropsBooks);
-    setMarketKeys(newMarkets);
-    setDataPoints(draftDataPoints);
-    
-    // Save mode-specific sportsbook selections to localStorage
-    optimizedStorage.set('userSelectedSportsbooks', newBooks);
-    optimizedStorage.set('userSelectedSportsbooks_props', newPlayerPropsBooks);
-    setSelectedPlayerPropMarkets(Array.isArray(draftSelectedPlayerPropMarkets) && draftSelectedPlayerPropMarkets.length > 0 ? draftSelectedPlayerPropMarkets : ["player_pass_yds", "player_rush_yds", "player_receptions"]);
+    // Apply filters via context (handles state update and localStorage persistence)
+    contextApplyFilters();
     
     // Close modal immediately so user sees the new data loading
     setMobileFiltersOpen(false);
@@ -1136,14 +1093,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Force OddsTable to re-render with new filters
     setTableNonce(prev => prev + 1);
 
-    // Trigger data refresh after filters are applied (state updates trigger useMarketsWithCache)
+    // Trigger data refresh after filters are applied
     setTimeout(() => {
       console.log('🔄 Triggering refresh after filter application');
       if (refreshMarkets) {
         refreshMarkets();
       }
       setFiltersLoading(false);
-    }, 100); // Reduced timeout - state updates already queued
+    }, 100);
   };
 
   const resetDraftFilters = () => {
