@@ -560,7 +560,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            className="fixed top-0 left-0 right-0 bottom-0 bg-black/30 backdrop-blur-sm z-40"
             onClick={() => setIsFilterMenuOpen(false)}
           />
           
