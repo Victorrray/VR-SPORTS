@@ -45,15 +45,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const topPicks = apiPicks || [];
   const isLoading = apiLoading;
 
-  // Show toast when filters change and reset to page 1
+  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when filters change
-    if (!isLoading && (selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today')) {
-      toast.success('Filters applied', {
-        description: 'Odds updated based on your filter selection'
-      });
-    }
-  }, [selectedSport, selectedMarket, selectedBetType, selectedDate, isLoading]);
+  }, [selectedSport, selectedMarket, selectedBetType, selectedDate]);
 
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
@@ -590,9 +585,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <button
                   onClick={() => {
                     setIsFilterMenuOpen(false);
-                    toast.success('Filters applied', {
-                      description: 'Your filter selections have been applied'
-                    });
                   }}
                   className={`flex-1 px-4 py-2.5 rounded-lg font-bold text-sm transition-all text-center ${
                     isLight 
@@ -1068,14 +1060,11 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <button
                   onClick={() => {
                     setIsFilterMenuOpen(false);
-                    toast.success('Filters applied', {
-                      description: 'Odds updated based on your filter selection'
-                    });
                   }}
                   className={`w-full px-4 py-2.5 rounded-lg font-bold text-sm transition-all text-center ${
                     isLight 
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700' 
-                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
+                      ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700 hover:from-purple-200 hover:to-indigo-200' 
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30 text-white'
                   }`}
                 >
                   Apply Filters
