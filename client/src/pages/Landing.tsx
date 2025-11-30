@@ -37,7 +37,7 @@ export default function Landing() {
           onRoadmapClick={handleRoadmapClick}
           onSignupClick={handleSignUpClick}
         />
-        <Hero />
+        <Hero onGetStartedClick={handleSignUpClick} />
         <Stats />
         <Bookmakers />
         <Features />
