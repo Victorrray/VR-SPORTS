@@ -670,7 +670,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       { id: 'today', name: 'Today' },
                       { id: 'tomorrow', name: 'Tomorrow' },
                       { id: 'week', name: 'This Week' },
-                      { id: 'all', name: 'All Upcoming' }
+                      { id: 'all_upcoming', name: 'All Upcoming' }
                     ].find(d => d.id === selectedDate)?.name}
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${dateExpanded ? 'rotate-180' : ''}`} />
@@ -683,7 +683,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       { id: 'today', name: 'Today' },
                       { id: 'tomorrow', name: 'Tomorrow' },
                       { id: 'week', name: 'This Week' },
-                      { id: 'all', name: 'All Upcoming' }
+                      { id: 'all_upcoming', name: 'All Upcoming' }
                     ].map((date) => (
                       <button
                         key={date.id}
@@ -739,7 +739,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         { id: 'today', name: 'Today' },
                         { id: 'tomorrow', name: 'Tomorrow' },
                         { id: 'week', name: 'This Week' },
-                        { id: 'all', name: 'All Upcoming' }
+                        { id: 'all_upcoming', name: 'All Upcoming' }
                       ].map((date) => (
                         <button
                           key={date.id}
