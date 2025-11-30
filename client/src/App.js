@@ -6,6 +6,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AccessibilityProvider } from './components/layout/AccessibilityProvider';
 import { BetSlipProvider } from './contexts/BetSlipContext';
 import { BankrollProvider } from './contexts/BankrollContext';
+import { FilterProvider } from './contexts/FilterContext';
 import { ToastProvider } from './components/common/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -204,13 +205,15 @@ function App() {
         <AuthProvider>
           <BankrollProvider>
             <BetSlipProvider>
-              <AccessibilityProvider>
-                <ToastProvider>
-                  <ErrorBoundary>
-                    <AppRoutes />
-                  </ErrorBoundary>
-                </ToastProvider>
-              </AccessibilityProvider>
+              <FilterProvider>
+                <AccessibilityProvider>
+                  <ToastProvider>
+                    <ErrorBoundary>
+                      <AppRoutes />
+                    </ErrorBoundary>
+                  </ToastProvider>
+                </AccessibilityProvider>
+              </FilterProvider>
             </BetSlipProvider>
           </BankrollProvider>
         </AuthProvider>
