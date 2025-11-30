@@ -239,10 +239,36 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       });
     }
 
+    // Recalculate bestBook and bestOdds based on filtered books
+    let bestBook = pick.bestBook;
+    let bestOdds = pick.bestOdds;
+    
+    if (displayBooks.length > 0) {
+      // Find the best odds from filtered books
+      const bestBookData = displayBooks.reduce((best, current) => {
+        const currentOdds = typeof current.odds === 'number' ? current.odds : parseInt(current.odds) || 0;
+        const bestOddsNum = typeof best.odds === 'number' ? best.odds : parseInt(best.odds) || 0;
+        // For positive odds, higher is better. For negative odds, closer to 0 is better
+        if (currentOdds > 0 && bestOddsNum > 0) {
+          return currentOdds > bestOddsNum ? current : best;
+        } else if (currentOdds < 0 && bestOddsNum < 0) {
+          return currentOdds > bestOddsNum ? current : best;
+        } else if (currentOdds > 0) {
+          return current;
+        }
+        return best;
+      });
+      
+      bestBook = bestBookData.name;
+      bestOdds = typeof bestBookData.odds === 'number' ? (bestBookData.odds > 0 ? `+${bestBookData.odds}` : bestBookData.odds) : (typeof bestBookData.odds === 'string' && !bestBookData.odds.startsWith('-') && !bestBookData.odds.startsWith('+') && bestBookData.odds !== '--' ? `+${bestBookData.odds}` : bestBookData.odds);
+    }
+
     return {
       ...pick,
       displayBooks: displayBooks,
-      allBooks: pick.books // Keep original books for expanded view
+      allBooks: pick.books, // Keep original books for expanded view
+      bestBook: bestBook,
+      bestOdds: bestOdds
     };
   });
 
