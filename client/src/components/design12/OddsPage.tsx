@@ -181,7 +181,35 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   };
 
   // Filter picks based on selections
-  const filteredPicks = topPicks.filter(pick => {
+  const filteredPicks = topPicks.map(pick => {
+    // Create a map of sportsbook IDs to names for matching
+    const sportsbookMap: Record<string, string[]> = {};
+    sportsbooksByTier.forEach(tier => {
+      tier.books.forEach(book => {
+        if (!sportsbookMap[book.id]) {
+          sportsbookMap[book.id] = [];
+        }
+        sportsbookMap[book.id].push(book.name.toLowerCase());
+      });
+    });
+
+    // Filter books array if sportsbooks are selected
+    let filteredBooks = pick.books;
+    if (selectedSportsbooks.length > 0) {
+      filteredBooks = pick.books.filter(book => {
+        const bookNameLower = book.name.toLowerCase();
+        return selectedSportsbooks.some(selectedId => {
+          const matchingNames = sportsbookMap[selectedId] || [];
+          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+        });
+      });
+    }
+
+    return {
+      ...pick,
+      books: filteredBooks
+    };
+  }).filter(pick => {
     // Filter by sport - compare against readable sport label from getSportLabel
     if (selectedSport !== 'all') {
       // Map filter IDs to readable sport labels (as returned by getSportLabel)
@@ -204,26 +232,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     
     // Filter by sportsbooks (if any selected, show only picks available at selected books)
     if (selectedSportsbooks.length > 0) {
-      // Create a map of sportsbook IDs to names for matching
-      const sportsbookMap: Record<string, string[]> = {};
-      sportsbooksByTier.forEach(tier => {
-        tier.books.forEach(book => {
-          if (!sportsbookMap[book.id]) {
-            sportsbookMap[book.id] = [];
-          }
-          sportsbookMap[book.id].push(book.name.toLowerCase());
-        });
-      });
-
-      const hasSelectedBook = pick.books.some(book => {
-        const bookNameLower = book.name.toLowerCase();
-        return selectedSportsbooks.some(selectedId => {
-          const matchingNames = sportsbookMap[selectedId] || [];
-          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
-        });
-      });
-
-      if (!hasSelectedBook) {
+      // Only include picks that have at least one book after filtering
+      if (pick.books.length === 0) {
         return false;
       }
     }
