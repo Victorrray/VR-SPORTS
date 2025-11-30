@@ -308,16 +308,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
 
   return (
     <div className="space-y-6">
-      {/* Dynamic Heading */}
-      <div>
-        <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-3xl font-bold mb-2`}>
-          Player Props
-        </h1>
-        <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold`}>
-          Individual player performance bets with positive expected value
-        </p>
-      </div>
-
       {/* Bet Type Quick Filters */}
       
 
