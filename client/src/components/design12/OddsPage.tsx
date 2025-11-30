@@ -175,36 +175,19 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     }
   };
 
-  // Filter picks based on selections
-  const filteredPicks = topPicks.map(pick => {
-    // Create a map of sportsbook IDs to names for matching
-    const sportsbookMap: Record<string, string[]> = {};
-    sportsbooksByTier.forEach(tier => {
-      tier.books.forEach(book => {
-        if (!sportsbookMap[book.id]) {
-          sportsbookMap[book.id] = [];
-        }
-        sportsbookMap[book.id].push(book.name.toLowerCase());
-      });
+  // Create a map of sportsbook IDs to names for matching
+  const sportsbookMap: Record<string, string[]> = {};
+  sportsbooksByTier.forEach(tier => {
+    tier.books.forEach(book => {
+      if (!sportsbookMap[book.id]) {
+        sportsbookMap[book.id] = [];
+      }
+      sportsbookMap[book.id].push(book.name.toLowerCase());
     });
+  });
 
-    // Filter books array if sportsbooks are selected
-    let filteredBooks = pick.books;
-    if (selectedSportsbooks.length > 0) {
-      filteredBooks = pick.books.filter(book => {
-        const bookNameLower = book.name.toLowerCase();
-        return selectedSportsbooks.some(selectedId => {
-          const matchingNames = sportsbookMap[selectedId] || [];
-          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
-        });
-      });
-    }
-
-    return {
-      ...pick,
-      books: filteredBooks
-    };
-  }).filter(pick => {
+  // Filter picks based on selections
+  const filteredPicks = topPicks.filter(pick => {
     // Filter by sport - compare against readable sport label from getSportLabel
     if (selectedSport !== 'all') {
       // Map filter IDs to readable sport labels (as returned by getSportLabel)
@@ -225,10 +208,17 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       }
     }
     
-    // Filter by sportsbooks (if any selected, show only picks available at selected books)
+    // Filter by sportsbooks (if any selected, check if pick has at least one selected book)
     if (selectedSportsbooks.length > 0) {
-      // Only include picks that have at least one book after filtering
-      if (pick.books.length === 0) {
+      const hasSelectedBook = pick.books.some(book => {
+        const bookNameLower = book.name.toLowerCase();
+        return selectedSportsbooks.some(selectedId => {
+          const matchingNames = sportsbookMap[selectedId] || [];
+          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+        });
+      });
+      
+      if (!hasSelectedBook) {
         return false;
       }
     }
@@ -236,8 +226,28 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     return true;
   });
 
-  // Sort filtered picks
-  const sortedPicks = [...filteredPicks].sort((a, b) => {
+  // Create display picks with filtered books for main table, but keep original books for expanded view
+  const displayPicks = filteredPicks.map(pick => {
+    let displayBooks = pick.books;
+    if (selectedSportsbooks.length > 0) {
+      displayBooks = pick.books.filter(book => {
+        const bookNameLower = book.name.toLowerCase();
+        return selectedSportsbooks.some(selectedId => {
+          const matchingNames = sportsbookMap[selectedId] || [];
+          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+        });
+      });
+    }
+
+    return {
+      ...pick,
+      displayBooks: displayBooks,
+      allBooks: pick.books // Keep original books for expanded view
+    };
+  });
+
+  // Sort display picks
+  const sortedPicks = [...displayPicks].sort((a, b) => {
     if (!sortBy) return 0;
     
     if (sortBy === 'ev') {
@@ -1347,7 +1357,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         </div>
 
                         {/* Table Rows */}
-                        {(expandedSportsbooks.includes(pick.id) ? pick.books : pick.books.slice(0, 5)).map((book, idx) => (
+                        {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
                           <div 
                             key={idx}
                             className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-full items-center`}
@@ -1385,7 +1395,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       </div>
 
                       {/* View More Button */}
-                      {pick.books.length > 5 && (
+                      {pick.allBooks.length > 5 && (
                         <button 
                           onClick={() => toggleSportsbook(pick.id)}
                           className={`w-full flex items-center justify-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}
@@ -1500,7 +1510,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       </div>
 
                       {/* View More Button */}
-                      {pick.books.length > 5 && (
+                      {pick.allBooks.length > 5 && (
                         <div className="flex justify-center mt-3">
                           <button 
                             onClick={() => toggleSportsbook(pick.id)}
