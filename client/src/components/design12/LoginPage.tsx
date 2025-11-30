@@ -119,7 +119,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                 <div className="flex gap-2 p-1 bg-slate-950/50 rounded-lg md:rounded-xl border border-white/5">
                   <button
                     onClick={() => setIsLogin(true)}
-                    className={`flex-1 py-2.5 md:py-3 rounded-md md:rounded-lg font-bold transition-all text-center text-sm md:text-base ${
+                    className={`flex-1 py-2.5 md:py-3 rounded-lg md:rounded-lg font-bold transition-all text-center text-sm md:text-base ${
                       isLogin
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
                         : 'text-white/50 hover:text-white/80'
@@ -129,7 +129,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                   </button>
                   <button
                     onClick={onSignUp}
-                    className={`flex-1 py-2.5 md:py-3 rounded-md md:rounded-lg font-bold transition-all text-center text-sm md:text-base ${
+                    className={`flex-1 py-2.5 md:py-3 rounded-lg md:rounded-lg font-bold transition-all text-center text-sm md:text-base ${
                       !isLogin
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
                         : 'text-white/50 hover:text-white/80'
@@ -149,7 +149,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your@email.com"
-                      className="w-full px-3.5 md:px-4 py-3 md:py-3.5 bg-slate-950/50 border border-white/10 rounded-md md:rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold text-sm md:text-base"
+                      className="w-full px-3.5 md:px-4 py-3 md:py-3.5 bg-slate-950/50 border border-white/10 rounded-lg md:rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold text-sm md:text-base"
                       required
                     />
                   </div>
@@ -163,7 +163,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full px-3.5 md:px-4 py-3 md:py-3.5 bg-slate-950/50 border border-white/10 rounded-md md:rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold pr-11 md:pr-12 text-sm md:text-base"
+                        className="w-full px-3.5 md:px-4 py-3 md:py-3.5 bg-slate-950/50 border border-white/10 rounded-lg md:rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold pr-11 md:pr-12 text-sm md:text-base"
                         required
                       />
                       <button
@@ -202,7 +202,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 md:py-4 rounded-md md:rounded-lg hover:from-purple-400 hover:to-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-center text-sm md:text-base"
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 md:py-4 rounded-lg md:rounded-lg hover:from-purple-400 hover:to-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-center text-sm md:text-base"
                   >
                     {isLoading ? 'Loading...' : (isLogin ? 'Login to your account' : 'Create your account')}
                   </button>
@@ -219,7 +219,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                   {/* Social Login */}
                   <button
                     type="button"
-                    className="w-full flex items-center justify-center gap-2.5 md:gap-3 px-3.5 md:px-4 py-3 md:py-3.5 bg-slate-950/50 border border-white/10 rounded-md md:rounded-lg text-white/90 hover:bg-slate-900/70 hover:border-white/20 transition-all font-bold text-sm md:text-base"
+                    className="w-full flex items-center justify-center gap-2.5 md:gap-3 px-3.5 md:px-4 py-3 md:py-3.5 bg-slate-950/50 border border-white/10 rounded-lg md:rounded-lg text-white/90 hover:bg-slate-900/70 hover:border-white/20 transition-all font-bold text-sm md:text-base"
                   >
                     <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24">
                       <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

@@ -72,7 +72,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your@email.com"
-                        className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-md text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold"
+                        className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold"
                         required
                       />
                     </div>
@@ -80,7 +80,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                     {/* Submit Button */}
                     <button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-md hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center"
+                      className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center"
                     >
                       Reset password
                     </button>
@@ -103,7 +103,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                     <div className="pt-4 space-y-3">
                       <button
                         onClick={onBack}
-                        className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-md hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center"
+                        className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-center"
                       >
                         Back to login
                       </button>
