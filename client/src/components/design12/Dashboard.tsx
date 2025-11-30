@@ -218,7 +218,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                       {profile?.username || user?.email?.split('@')[0] || 'User'}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <div className={`px-2 py-0.5 ${isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-md backdrop-blur-xl`}>
+                      <div className={`px-2 py-0.5 ${isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-lg backdrop-blur-xl`}>
                         <div className="flex items-center gap-1">
                           <Crown className="w-3 h-3 text-amber-400" />
                           <span className="text-amber-400 font-bold text-xs">

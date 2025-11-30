@@ -198,7 +198,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 isHero || isDark
                   ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
                   : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-              } backdrop-blur-xl border rounded-md transition-all font-bold text-xs text-center`}>
+              } backdrop-blur-xl border rounded-lg transition-all font-bold text-xs text-center`}>
                 Compare Odds
               </button>
             )}

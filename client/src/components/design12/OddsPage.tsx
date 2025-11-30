@@ -257,25 +257,25 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     <div className={`p-4 ${isLight ? 'bg-white' : 'bg-white/5'} animate-pulse`}>
       <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center">
         <div className="lg:col-span-2">
-          <div className={`h-6 w-16 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md`}></div>
+          <div className={`h-6 w-16 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg`}></div>
         </div>
         <div className="lg:col-span-3">
-          <div className={`h-4 w-20 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md mb-2`}></div>
-          <div className={`h-5 w-full ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md`}></div>
+          <div className={`h-4 w-20 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg mb-2`}></div>
+          <div className={`h-5 w-full ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg`}></div>
         </div>
         <div className="lg:col-span-3">
-          <div className={`h-5 w-32 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md`}></div>
+          <div className={`h-5 w-32 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg`}></div>
         </div>
         <div className="lg:col-span-2">
-          <div className={`h-5 w-24 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md`}></div>
+          <div className={`h-5 w-24 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg`}></div>
         </div>
         <div className="lg:col-span-2">
-          <div className={`h-5 w-16 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md`}></div>
+          <div className={`h-5 w-16 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg`}></div>
         </div>
       </div>
       <div className="lg:hidden space-y-3">
-        <div className={`h-8 w-48 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md`}></div>
-        <div className={`h-6 w-full ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-md`}></div>
+        <div className={`h-8 w-48 ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg`}></div>
+        <div className={`h-6 w-full ${isLight ? 'bg-gray-200' : 'bg-white/10'} rounded-lg`}></div>
       </div>
     </div>
   );
