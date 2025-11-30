@@ -308,7 +308,64 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
   // Show PlayerPropsPage when props are selected
   if (selectedBetType === 'props') {
-    return <PlayerPropsPage onAddPick={onAddPick} savedPicks={savedPicks} />;
+    return (
+      <div className="space-y-6">
+        <div className="relative">
+          <button
+            onClick={() => setIsBetTypeDropdownOpen(!isBetTypeDropdownOpen)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
+              isLight 
+                ? 'bg-white border-gray-300 text-gray-900 hover:bg-gray-50' 
+                : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+            }`}
+          >
+            <span className="font-bold text-2xl md:text-3xl">
+              {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
+            </span>
+            <ChevronDown className={`w-6 h-6 transition-transform ${isBetTypeDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Dropdown Menu - Positioned relative to button */}
+          {isBetTypeDropdownOpen && (
+            <div className={`absolute top-full mt-2 left-0 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
+              {betTypes.map((betType) => (
+                <button
+                  key={betType.id}
+                  onClick={() => {
+                    setSelectedBetType(betType.id);
+                    setIsBetTypeDropdownOpen(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left font-bold transition-all flex items-center justify-between ${
+                    selectedBetType === betType.id
+                      ? isLight 
+                        ? 'bg-purple-50 text-purple-700' 
+                        : 'bg-purple-500/10 text-purple-300'
+                      : isLight 
+                        ? 'text-gray-700 hover:bg-gray-50' 
+                        : 'text-white/80 hover:bg-white/5'
+                  }`}
+                >
+                  <span>{betType.name}</span>
+                  {selectedBetType === betType.id && (
+                    <Check className="w-5 h-5" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Backdrop - Rendered outside relative container */}
+        {isBetTypeDropdownOpen && (
+          <div 
+            className="fixed inset-0 z-30" 
+            onClick={() => setIsBetTypeDropdownOpen(false)}
+          />
+        )}
+
+        <PlayerPropsPage onAddPick={onAddPick} savedPicks={savedPicks} />
+      </div>
+    );
   }
 
   return (
