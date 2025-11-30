@@ -374,10 +374,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     {stats.map((stat, idx) => (
                       <div
                         key={idx}
-                        className={`p-3 md:p-4 lg:p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent backdrop-blur-2xl border-white/10'} border rounded-lg md:rounded-xl lg:rounded-2xl`}
+                        className={`p-3 md:p-4 lg:p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent backdrop-blur-2xl border-white/10'} border rounded-xl md:rounded-2xl lg:rounded-2xl`}
                       >
                         <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-2">
-                          <div className={`p-1.5 md:p-2 ${isLight ? lightModeColors.statsIcon : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-lg border`}>
+                          <div className={`p-1.5 md:p-2 ${isLight ? lightModeColors.statsIcon : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-xl border`}>
                             <stat.icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isLight ? lightModeColors.statsIconColor : 'text-purple-300'}`} />
                           </div>
                           <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-[10px] md:text-xs lg:text-sm uppercase tracking-wide leading-tight`}>
