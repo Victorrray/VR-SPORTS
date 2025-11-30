@@ -324,7 +324,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const marketsList = marketType && marketType !== 'all'
         ? (marketKeyMap[marketType] || marketType)
         : 'h2h,spreads,totals';
-      params.append('markets', marketsList);
+      // Only append markets if not 'all' - let backend use default
+      if (marketType && marketType !== 'all') {
+        params.append('markets', marketsList);
+      }
       console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList);
       
       // Add other parameters the backend expects
