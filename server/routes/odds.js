@@ -456,8 +456,14 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     
     // Step 3: Fetch player props if requested
     // NOTE: Player props must be fetched using /events/{eventId}/odds endpoint, one event at a time
+    console.log('🏈 PLAYER PROPS CHECK:');
+    console.log('🏈   playerPropMarkets.length:', playerPropMarkets.length);
+    console.log('🏈   playerPropMarkets:', playerPropMarkets);
+    console.log('🏈   ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
+    console.log('🏈   Will fetch player props?', playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2);
+    
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
-      console.log('🎯 Fetching player props for markets:', playerPropMarkets);
+      console.log('🎯 STARTING PLAYER PROPS FETCH for markets:', playerPropMarkets);
       
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
