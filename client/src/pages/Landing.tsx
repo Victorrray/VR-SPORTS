@@ -35,6 +35,7 @@ export default function Landing() {
           onLoginClick={handleLoginClick} 
           onDashboardClick={handleDashboardClick}
           onRoadmapClick={handleRoadmapClick}
+          onSignupClick={handleSignUpClick}
         />
         <Hero />
         <Stats />
