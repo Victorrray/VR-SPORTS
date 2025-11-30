@@ -130,7 +130,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="John Doe"
-                      className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold"
+                      className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold"
                       required
                     />
                   </div>
@@ -143,7 +143,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your@email.com"
-                      className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold"
+                      className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold"
                       required
                     />
                   </div>
@@ -157,7 +157,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold pr-12"
+                        className="w-full px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-semibold pr-12"
                         required
                       />
                       <button
@@ -174,7 +174,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 text-center"
+                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 text-center"
                   >
                     Create your account
                   </button>
@@ -191,7 +191,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                   {/* Social Sign Up */}
                   <button
                     type="button"
-                    className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-lg text-white/90 hover:bg-slate-900/70 hover:border-white/20 transition-all font-bold"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-slate-950/50 border border-white/10 rounded-xl text-white/90 hover:bg-slate-900/70 hover:border-white/20 transition-all font-bold"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
