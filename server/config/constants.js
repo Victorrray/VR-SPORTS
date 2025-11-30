@@ -13,7 +13,7 @@ const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ODDS_API_KEY;
 const PLAYER_PROPS_API_BASE = process.env.PLAYER_PROPS_API_BASE || null;
-const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 === 'true';
+const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 !== 'false'; // Default to true, can be disabled with 'false'
 const REMOVE_API_LIMITS = process.env.REMOVE_API_LIMITS === 'true'; // Testing flag to remove all API limits
 
 // Player props configuration
