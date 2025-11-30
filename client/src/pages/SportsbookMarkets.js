@@ -229,32 +229,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return ['draftkings', 'fanduel', 'betmgm', 'caesars'];
   };
   
-  const [picked, setPicked] = useState(["americanfootball_nfl", "basketball_nba", "icehockey_nhl"]);
+  // ===== FILTER STATE NOW MANAGED BY FilterContext =====
+  // All filter state is now in the filters object from useFilters()
+  // Access via: filters.sports, filters.date, filters.markets, filters.sportsbooks, etc.
+  // Update via: updateFilter(key, value) or updateFilters({...})
+  // Apply via: contextApplyFilters() or handleApplyFilters()
+  // ====================================================
+  
+  // UI State (not filter-related, kept local)
   const [query, setQuery] = useState("");
-  const [selectedBooks, setSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
-  const [selectedPlayerPropsBooks, setSelectedPlayerPropsBooks] = useState(getUserSelectedSportsbooks('props'));
-  const [selectedDate, setSelectedDate] = useState(""); // Empty string = "All Dates" (no date filtering)
-  // Initialize marketKeys with default markets - CRITICAL: must not be empty or API calls will be skipped
-  const [marketKeys, setMarketKeys] = useState(() => {
-    const saved = localStorage.getItem('selectedMarkets');
-    if (saved && Array.isArray(JSON.parse(saved)) && JSON.parse(saved).length > 0) {
-      return JSON.parse(saved);
-    }
-    // Default to core markets - REQUIRED for API calls to work
-    return ["h2h", "spreads", "totals"];
-  });
-  // All available player prop markets
-  const [selectedPlayerPropMarkets, setSelectedPlayerPropMarkets] = useState([
-    // Football markets (NFL and NCAAF)
-    "player_pass_yds", "player_pass_tds", "player_rush_yds", "player_rush_tds", "player_receptions", "player_reception_yds", "player_anytime_td",
-    // Basketball markets (NBA and NCAAB)
-    "player_points", "player_rebounds", "player_assists", "player_threes", "player_blocks", "player_steals", "player_turnovers",
-    // Baseball markets (MLB)
-    "player_hits", "player_total_bases", "player_strikeouts", "pitcher_strikeouts",
-    // Alternate markets
-    "player_points_alternate", "player_rebounds_alternate", "player_assists_alternate", "player_threes_alternate",
-    "player_points_assists_alternate", "player_points_rebounds_alternate", "player_rebounds_assists_alternate", "player_points_rebounds_assists_alternate"
-  ]);
   const [showPlayerProps, setShowPlayerProps] = useState(false);
   const [showArbitrage, setShowArbitrage] = useState(false);
   const [showMiddles, setShowMiddles] = useState(false);
@@ -263,25 +246,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [minEV, setMinEV] = useState("");
   const [tableNonce, setTableNonce] = useState(0);
   const [playerPropsProcessing, setPlayerPropsProcessing] = useState(false);
   const [filtersLoading, setFiltersLoading] = useState(false);
   const [navigationExpanded, setNavigationExpanded] = useState(false);
   
-  // Draft state for player props filter modal - default to NFL only with all markets
-  const [draftPicked, setDraftPicked] = useState(["americanfootball_nfl"]);
-  const [draftSelectedPlayerPropMarkets, setDraftSelectedPlayerPropMarkets] = useState([
-    // Football markets (NFL and NCAAF)
-    "player_pass_yds", "player_pass_tds", "player_rush_yds", "player_rush_tds", "player_receptions", "player_reception_yds", "player_anytime_td",
-    // Basketball markets (NBA and NCAAB)
-    "player_points", "player_rebounds", "player_assists", "player_threes", "player_blocks", "player_steals", "player_turnovers",
-    // Baseball markets (MLB)
-    "player_hits", "player_total_bases", "player_strikeouts", "pitcher_strikeouts",
-    // Alternate markets
-    "player_points_alternate", "player_rebounds_alternate", "player_assists_alternate", "player_threes_alternate",
-    "player_points_assists_alternate", "player_points_rebounds_alternate", "player_rebounds_assists_alternate", "player_points_rebounds_assists_alternate"
-  ]);
   // Major US Sports only (for now)
   const AVAILABLE_SPORTS = [
     { key: 'americanfootball_nfl', title: 'NFL' },
@@ -294,28 +263,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [sportList, setSportList] = useState(AVAILABLE_SPORTS);
   const [bookList, setBookList] = useState([]);
   
-  // Missing variables
+  // Constants
   const oddsFormat = "american";
   const debouncedQuery = useDebounce(query, 300);
-  
-  // Draft filter state - initialize with current applied state
-  const [draftSelectedDate, setDraftSelectedDate] = useState(selectedDate); // Empty string = "All Dates"
-  const [draftSelectedBooks, setDraftSelectedBooks] = useState(getUserSelectedSportsbooks('game'));
-  const [draftSelectedPlayerPropsBooks, setDraftSelectedPlayerPropsBooks] = useState(selectedPlayerPropsBooks);
-  const [draftMarketKeys, setDraftMarketKeys] = useState(marketKeys);
-  
-  // Arbitrage-specific filter states
-  const [draftMinProfit, setDraftMinProfit] = useState(0.5);
-  const [draftMaxStake, setDraftMaxStake] = useState(100);
-  
-  // Middles-specific filter states
-  const [draftMinMiddleGap, setDraftMinMiddleGap] = useState(3);
-  const [draftMinMiddleProbability, setDraftMinMiddleProbability] = useState(15);
-  const [draftMaxMiddleStake, setDraftMaxMiddleStake] = useState(1000);
-  
-  // Data Points filter state for odds table
-  const [dataPoints, setDataPoints] = useState(10);
-  const [draftDataPoints, setDraftDataPoints] = useState(10);
   
   // Refresh cooldown state
   const [refreshCooldown, setRefreshCooldown] = useState(0);
@@ -352,10 +302,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // For regular mode, use all selected sports (no longer limiting to single sport)
   // For arbitrage mode, use all major sports by default to find maximum opportunities
   const sportsForMode = isPlayerPropsMode 
-    ? (picked.length > 0 ? picked : ["americanfootball_nfl"]) 
+    ? (filters.sports.length > 0 ? filters.sports : ["americanfootball_nfl"]) 
     : isArbitrageMode
-    ? (picked.length > 0 ? picked : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
-    : picked;
+    ? (filters.sports.length > 0 ? filters.sports : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
+    : filters.sports;
     
   // Log the sports being used for the current mode
   console.log(`🎯 Sports for ${isPlayerPropsMode ? 'Player Props' : 'Straight Bets'} mode:`, sportsForMode);
