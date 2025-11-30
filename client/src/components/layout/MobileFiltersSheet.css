@@ -128,10 +128,11 @@
 }
 .mfs-content {
   padding: 20px 20px 16px;
-  max-height: 70vh;
+  max-height: calc(85vh - 140px);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
+  flex: 1;
 }
 
 .mfs-content::-webkit-scrollbar {
@@ -211,7 +212,15 @@
   gap: 12px;
   margin-top: 24px;
   padding-top: 20px;
+  padding-bottom: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent, var(--glass-bg));
+  margin-left: -20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .mfs-content .filter-btn {
