@@ -287,22 +287,11 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
         <Search className={`w-8 h-8 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
       </div>
       <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl mb-2`}>
-        No odds found
+        Player Props Coming Soon
       </h3>
       <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold mb-4`}>
-        Try adjusting your filters to see more betting opportunities
+        Player props data is not yet available. Check back soon for individual player performance bets.
       </p>
-      <button
-        onClick={() => {
-          setSelectedSport('all');
-          setSelectedMarket('all');
-          setSelectedSportsbooks([]);
-          setSelectedDate('today');
-        }}
-        className={`px-6 py-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-white hover:from-purple-500/30 hover:to-indigo-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
-      >
-        Clear All Filters
-      </button>
     </div>
   );
 
