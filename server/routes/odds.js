@@ -93,7 +93,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     
     // Handle player props bet type
     if (betType === 'props') {
-      console.log('🏈 Player props requested - mapping to player prop markets');
+      console.log('🏈🏈🏈 PLAYER PROPS REQUESTED 🏈🏈🏈');
+      console.log('🏈 betType:', betType);
+      console.log('🏈 ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
+      console.log('🏈 Requested sports:', sportsArray);
+      
       // Map sports to their player props markets
       const playerPropsMarketMap = {
         'americanfootball_nfl': ['player_pass_tds', 'player_pass_yards', 'player_rush_yards', 'player_receptions'],
@@ -106,13 +110,18 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const playerPropsMarkets = [];
       sportsArray.forEach(sport => {
         if (playerPropsMarketMap[sport]) {
+          console.log(`🏈 Adding markets for ${sport}:`, playerPropsMarketMap[sport]);
           playerPropsMarkets.push(...playerPropsMarketMap[sport]);
+        } else {
+          console.log(`🏈 No player props markets found for ${sport}`);
         }
       });
       
       if (playerPropsMarkets.length > 0) {
         marketsArray = playerPropsMarkets;
-        console.log('📊 Player props markets:', marketsArray);
+        console.log('🏈 Final player props markets:', marketsArray);
+      } else {
+        console.log('🏈 WARNING: No player props markets mapped!');
       }
     }
     
@@ -541,9 +550,17 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       }
       
       console.log(`✅ Total player props events fetched: ${playerPropsCount}`);
+      console.log(`🏈 Player props fetch complete - returning ${playerPropsCount} events`);
+    } else if (betType === 'props') {
+      console.log('🏈 WARNING: betType is props but ENABLE_PLAYER_PROPS_V2 is disabled or playerPropMarkets is empty');
+      console.log('🏈 ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
+      console.log('🏈 playerPropMarkets:', playerPropMarkets);
     }
     
     console.log(`📊 Final response: ${allGames.length} total games/events (including ${allGames.filter(g => g.bookmakers?.some(b => dfsApps.includes(b.key))).length} with player props)`);
+    if (betType === 'props') {
+      console.log(`🏈 Player props response: ${allGames.length} events with player props`);
+    }
     
     // Debug: Count markets in response
     const marketCounts = {};

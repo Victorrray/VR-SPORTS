@@ -342,12 +342,20 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const queryString = params.toString();
       const endpoint = `/api/odds${queryString ? `?${queryString}` : ''}`;
 
+      if (betType === 'props') {
+        console.log('🏈🏈🏈 PLAYER PROPS HOOK - FETCHING 🏈🏈🏈');
+        console.log('🏈 betType:', betType);
+        console.log('🏈 sport:', sport);
+        console.log('🏈 Fetching from:', endpoint);
+      }
+      
       console.log('📊 Fetching odds data from:', endpoint);
       console.log('📊 Full filter params:', Object.fromEntries(params));
       console.log('📊 Sport filter details:', {
         selectedSport: sport,
         mappedToAPI: sportsList,
         marketFilter: marketsList,
+        betType: betType,
         isNCAAFootball: sport === 'ncaa-football'
       });
 
@@ -364,7 +372,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         const transformedPicks = transformOddsApiToOddsPick(response.data);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
-        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'Results:', transformedPicks.length);
+        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Results:', transformedPicks.length);
+        if (betType === 'props') {
+          console.log('🏈 Player props response received:', transformedPicks.length, 'player prop picks');
+        }
         if (transformedPicks.length === 0 && sport !== 'all') {
           console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
         }
@@ -372,17 +383,29 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         const transformedPicks = transformOddsApiToOddsPick(response.data.picks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
-        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'Results:', transformedPicks.length);
+        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Results:', transformedPicks.length);
+        if (betType === 'props') {
+          console.log('🏈 Player props response received:', transformedPicks.length, 'player prop picks');
+        }
         if (transformedPicks.length === 0 && sport !== 'all') {
           console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
         }
       } else {
         console.warn('⚠️ Unexpected response format:', response.data);
+        if (betType === 'props') {
+          console.error('🏈 Player props error - unexpected response format');
+        }
         setError('Invalid response format from API');
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch odds data';
       console.error('❌ Error fetching odds data:', errorMessage);
+      if (betType === 'props') {
+        console.error('🏈 Player props error:');
+        console.error('🏈 Status:', err.response?.status);
+        console.error('🏈 Message:', errorMessage);
+        console.error('🏈 Full error:', err);
+      }
       setError(errorMessage);
       setPicks([]);
     } finally {
