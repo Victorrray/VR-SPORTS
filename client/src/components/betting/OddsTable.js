@@ -6,10 +6,8 @@ import { getBestLink, supportsDeepLinking } from '../../utils/deepLinkBuilder';
 import { useMe } from '../../hooks/useMe';
 import EnhancedLoadingSpinner from '../common/EnhancedLoadingSpinner';
 import OddsTableSkeleton, { OddsTableSkeletonMobile } from "./OddsTableSkeleton";
-import "./OddsTable.css";
 import "./OddsTable.desktop.css";
 import "./OddsTable.soccer.css";
-import "./OddsTableDesktop.css";
 // Import team logo utilities
 import { resolveTeamLogo } from "../../utils/logoResolver";
 import { getTeamLogos } from "../../constants/teamLogos";
