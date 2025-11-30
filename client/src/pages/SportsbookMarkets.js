@@ -499,12 +499,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // For player props mode, return the selected player prop markets
     if (isPlayerPropsMode) {
-      return selectedPlayerPropMarkets;
+      return filters.playerPropMarkets;
     }
     
     // For regular mode with selected markets, use those
-    if (marketKeys && marketKeys.length > 0) {
-      return marketKeys;
+    if (filters.markets && filters.markets.length > 0) {
+      return filters.markets;
     }
     
     // Fallback to auto-selected markets (includes core + period markets)
@@ -523,7 +523,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     sportsForMode,
     regionsForMode,
     getAllCompatibleMarkets(sportsForMode),
-    { date: selectedDate, autoRefresh: autoRefreshEnabled }
+    { date: filters.date, autoRefresh: autoRefreshEnabled }
   );
 
   // Cooldown timer effect
@@ -618,8 +618,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   useEffect(() => {
     const handleStorageChange = () => {
       const newSelectedBooks = getUserSelectedSportsbooks();
-      setSelectedBooks(newSelectedBooks);
-      setDraftSelectedBooks(newSelectedBooks);
+      updateFilter("sportsbooks", newSelectedBooks);
+      updateFilter("sportsbooks", newSelectedBooks);
     };
 
     // Listen for storage changes (when user updates selections in MySportsbooks)
@@ -640,13 +640,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const handleResetFilters = () => {
       console.log('🔄 Resetting all filters to defaults');
       // Reset to default values
-      setPicked(["americanfootball_nfl"]);
-      setSelectedDate('');
-      setSelectedBooks([]);
-      setSelectedPlayerPropsBooks([]);
-      setMarketKeys(["h2h", "spreads", "totals"]);
-      setSelectedPlayerPropMarkets(["player_pass_yds", "player_rush_yds", "player_receptions"]);
-      setMinEV("");
+      updateFilter("sports", ["americanfootball_nfl"]);
+      updateFilter("date", '');
+      updateFilter("sportsbooks", []);
+      updateFilter("playerPropSportsbooks", []);
+      updateFilter("markets", ["h2h", "spreads", "totals"]);
+      updateFilter("playerPropMarkets", ["player_pass_yds", "player_rush_yds", "player_receptions"]);
+      updateFilter("minEV", "");
       
       // Force refresh data
       setTableNonce(prev => prev + 1);
@@ -664,9 +664,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Initialize markets for default sports on component mount
   useEffect(() => {
-    const initialMarkets = getAutoSelectedMarkets(picked);
-    setMarketKeys(initialMarkets);
-    setDraftMarketKeys(initialMarkets);
+    const initialMarkets = getAutoSelectedMarkets(filters.sports);
+    updateFilter("markets", initialMarkets);
+    updateFilter("markets", initialMarkets);
     console.log('🎯 Initial auto-selected markets:', initialMarkets);
   }, []); // Run only once on mount
 
@@ -687,14 +687,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Auto-update player prop markets when sport changes (only if current selection is inappropriate)
   useEffect(() => {
-    if (isPlayerPropsMode && picked && picked.length > 0) {
-      const sportBasedMarkets = getPlayerPropMarketsBySport(picked);
+    if (isPlayerPropsMode && filters.sports && filters.sports.length > 0) {
+      const sportBasedMarkets = getPlayerPropMarketsBySport(filters.sports);
       const availableMarketKeys = sportBasedMarkets
         .filter(market => !market.isHeader)
         .map(market => market.key);
       
       // First, migrate any old invalid market names in current selection
-      const migratedMarkets = migrateInvalidMarkets(selectedPlayerPropMarkets);
+      const migratedMarkets = migrateInvalidMarkets(filters.playerPropMarkets);
       
       // Check if current selection contains markets that don't exist for the current sport
       const hasInvalidMarkets = migratedMarkets.some(market => 
@@ -702,8 +702,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       );
       
       // If we migrated markets or have invalid markets, update the selection
-      if (migratedMarkets.length !== selectedPlayerPropMarkets.length || 
-          JSON.stringify(migratedMarkets) !== JSON.stringify(selectedPlayerPropMarkets) ||
+      if (migratedMarkets.length !== filters.playerPropMarkets.length || 
+          JSON.stringify(migratedMarkets) !== JSON.stringify(filters.playerPropMarkets) ||
           hasInvalidMarkets) {
         
         let marketsToUse = migratedMarkets;
@@ -715,19 +715,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         
         if (marketsToUse.length > 0) {
           console.log('🎯 Migrating/updating player prop markets:', {
-            sports: picked,
-            oldMarkets: selectedPlayerPropMarkets,
+            sports: filters.sports,
+            oldMarkets: filters.playerPropMarkets,
             migratedMarkets: migratedMarkets,
             finalMarkets: marketsToUse,
-            reason: migratedMarkets.length !== selectedPlayerPropMarkets.length ? 'migration' : 
+            reason: migratedMarkets.length !== filters.playerPropMarkets.length ? 'migration' : 
                    hasInvalidMarkets ? 'invalid markets' : 'empty selection'
           });
           
-          setSelectedPlayerPropMarkets(marketsToUse);
+          updateFilter("playerPropMarkets", marketsToUse);
         }
       }
     }
-  }, [picked, isPlayerPropsMode, selectedPlayerPropMarkets]); // Run when sport, mode, or markets change
+  }, [filters.sports, isPlayerPropsMode, filters.playerPropMarkets]); // Run when sport, mode, or markets change
 
 
   // Removed auto-selection logic - users should be able to select individual player prop markets
@@ -740,7 +740,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     date: filters.date,
     marketsForMode,
     marketGamesCount: marketGames?.length || 0,
-    selectedBooks: selectedBooks
+    sportsbooks: filters.sportsbooks
   });
   
   // Debug: Log games by sport
@@ -832,29 +832,29 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [userHasAppliedMarketSelection, setUserHasAppliedMarketSelection] = useState(false);
   
   useEffect(() => {
-    if (draftPicked && draftPicked.length > 0) {
+    if (filters.sports && filters.sports.length > 0) {
       // Only auto-select if user hasn't explicitly selected markets yet
       if (!userHasSelectedMarkets) {
-        const autoSelectedMarkets = getAutoSelectedMarkets(draftPicked);
-        setDraftMarketKeys(autoSelectedMarkets);
-        console.log('🎯 Auto-selected draft markets for sports:', draftPicked, '→', autoSelectedMarkets);
+        const autoSelectedMarkets = getAutoSelectedMarkets(filters.sports);
+        updateFilter("markets", autoSelectedMarkets);
+        console.log('🎯 Auto-selected draft markets for sports:', filters.sports, '→', autoSelectedMarkets);
       } else {
         // User has made a selection - respect it (even if it's empty = "all markets")
-        console.log('🎯 User has selected markets - keeping selection:', draftMarketKeys);
+        console.log('🎯 User has selected markets - keeping selection:', filters.markets);
       }
     }
-  }, [draftPicked, userHasSelectedMarkets]);
+  }, [filters.sports, userHasSelectedMarkets]);
 
   // Auto-update draft player prop markets when draft sports change
   useEffect(() => {
-    if (showPlayerProps && draftPicked && draftPicked.length > 0) {
-      const sportBasedMarkets = getPlayerPropMarketsBySport(draftPicked);
+    if (showPlayerProps && filters.sports && filters.sports.length > 0) {
+      const sportBasedMarkets = getPlayerPropMarketsBySport(filters.sports);
       const availableMarketKeys = sportBasedMarkets
         .filter(market => !market.isHeader)
         .map(market => market.key);
       
       // Check if current draft selection contains markets that don't exist for the draft sport
-      const hasInvalidMarkets = (draftSelectedPlayerPropMarkets || []).some(market => 
+      const hasInvalidMarkets = (filters.playerPropMarkets || []).some(market => 
         !availableMarketKeys.includes(market)
       );
       
@@ -864,22 +864,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         const newMarkets = availableMarketKeys.slice(0, 3);
         
         console.log('🎯 Updating draft player prop markets for sport change:', {
-          draftSports: draftPicked,
-          oldDraftMarkets: draftSelectedPlayerPropMarkets,
+          draftSports: filters.sports,
+          oldDraftMarkets: filters.playerPropMarkets,
           newMarkets: newMarkets,
           availableMarkets: availableMarketKeys
         });
         
-        setDraftSelectedPlayerPropMarkets(newMarkets);
+        updateFilter("playerPropMarkets", newMarkets);
       }
     }
-  }, [draftPicked, showPlayerProps]);
+  }, [filters.sports, showPlayerProps]);
 
 
   // Auto-select all relevant markets when applied sports change
   // BUT: Don't override user's explicit market selection
   useEffect(() => {
-    if (picked && picked.length > 0) {
+    if (filters.sports && filters.sports.length > 0) {
       // If user has explicitly selected markets, don't auto-select
       if (userHasAppliedMarketSelection) {
         console.log('🎯 User has applied market selection - NOT auto-selecting markets');
@@ -887,22 +887,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       }
       
       // Get all relevant markets for the selected sports
-      const autoSelectedMarkets = getAutoSelectedMarkets(picked);
+      const autoSelectedMarkets = getAutoSelectedMarkets(filters.sports);
       
       // If we already have some markets selected, merge them with the auto-selected ones
       // to ensure we don't lose any markets when adding new sports
-      if (marketKeys && marketKeys.length > 0) {
+      if (filters.markets && filters.markets.length > 0) {
         // Create a Set to avoid duplicates
-        const combinedMarkets = new Set([...marketKeys, ...autoSelectedMarkets]);
-        setMarketKeys(Array.from(combinedMarkets));
-        console.log('🎯 Combined markets for sports:', picked, '→', Array.from(combinedMarkets));
+        const combinedMarkets = new Set([...filters.markets, ...autoSelectedMarkets]);
+        updateFilter("markets", Array.from(combinedMarkets));
+        console.log('🎯 Combined markets for sports:', filters.sports, '→', Array.from(combinedMarkets));
       } else {
         // If no markets are selected yet, use the auto-selected ones
-        setMarketKeys(autoSelectedMarkets);
-        console.log('🎯 Auto-selected markets for sports:', picked, '→', autoSelectedMarkets);
+        updateFilter("markets", autoSelectedMarkets);
+        console.log('🎯 Auto-selected markets for sports:', filters.sports, '→', autoSelectedMarkets);
       }
     }
-  }, [picked, userHasAppliedMarketSelection]);
+  }, [filters.sports, userHasAppliedMarketSelection]);
 
   // Enhanced player props loading state - show loading until props are populated
   useEffect(() => {
@@ -983,13 +983,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       const timeoutId = setTimeout(prefetchPlayerProps, 300);
       return () => clearTimeout(timeoutId);
     }
-  }, [isPlayerPropsMode, picked, selectedDate, filteredGames.length]);
+  }, [isPlayerPropsMode, filters.sports, filters.date, filteredGames.length]);
 
   // Removed redundant loading effect to prevent flashing
 
   const effectiveSelectedBooks = useMemo(() => {
     // Use mode-specific sportsbook selection
-    const currentSelectedBooks = isPlayerPropsMode ? selectedPlayerPropsBooks : selectedBooks;
+    const currentSelectedBooks = isPlayerPropsMode ? filters.playerPropSportsbooks : filters.sportsbooks;
     
     // If no books are explicitly selected, return an EMPTY ARRAY to signal "show all books"
     // This is better than returning all marketBooks keys because:
@@ -1005,8 +1005,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Debug logging for filtering issues
     console.log('🎯 Bookmaker Filtering Debug:', {
       mode: isPlayerPropsMode ? 'Player Props' : 'Straight Bets',
-      selectedBooks: selectedBooks,
-      selectedPlayerPropsBooks: selectedPlayerPropsBooks,
+      sportsbooks: filters.sportsbooks,
+      playerPropSportsbooks: filters.playerPropSportsbooks,
       currentSelectedBooks: currentSelectedBooks,
       selectedBooksLength: currentSelectedBooks?.length || 0,
       marketBooks: marketBooks?.map(b => b.key) || [],
@@ -1016,7 +1016,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     });
     
     return result;
-  }, [selectedBooks, selectedPlayerPropsBooks, marketBooks, isPlayerPropsMode]);
+  }, [filters.sportsbooks, filters.playerPropSportsbooks, marketBooks, isPlayerPropsMode]);
 
   const handleMobileSearch = (searchTerm) => {
     setQuery(searchTerm);
@@ -1105,12 +1105,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   const resetDraftFilters = () => {
     const defaultSports = ["americanfootball_nfl"];
-    setDraftPicked(defaultSports);
-    setDraftSelectedDate('');
-    setDraftSelectedBooks(getUserSelectedSportsbooks('game')); // Reset to user's saved sportsbooks for game mode
-    setDraftSelectedPlayerPropsBooks(getUserSelectedSportsbooks('props')); // Reset to user's saved sportsbooks for props mode
-    setDraftMarketKeys(getAutoSelectedMarkets(defaultSports)); // Auto-select markets for default sport
-    setDraftSelectedPlayerPropMarkets(["player_pass_yds", "player_rush_yds", "player_receptions"]);
+    updateFilter("sports", defaultSports);
+    updateFilter("date", '');
+    updateFilter("sportsbooks", getUserSelectedSportsbooks('game')); // Reset to user's saved sportsbooks for game mode
+    updateFilter("playerPropSportsbooks", getUserSelectedSportsbooks('props')); // Reset to user's saved sportsbooks for props mode
+    updateFilter("markets", getAutoSelectedMarkets(defaultSports)); // Auto-select markets for default sport
+    updateFilter("playerPropMarkets", ["player_pass_yds", "player_rush_yds", "player_receptions"]);
   };
 
   const resetAllFilters = () => {
@@ -1130,22 +1130,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const defaultPlayerPropsSportsbooks = [];
     
     // Reset draft state
-    setDraftPicked(defaultSports);
-    setDraftSelectedDate('');
-    setDraftSelectedBooks(defaultSportsbooks);
-    setDraftSelectedPlayerPropsBooks(defaultPlayerPropsSportsbooks);
-    setDraftMarketKeys(defaultMarkets);
-    setDraftSelectedPlayerPropMarkets(defaultPlayerProps);
-    setDraftDataPoints(10);
+    updateFilter("sports", defaultSports);
+    updateFilter("date", '');
+    updateFilter("sportsbooks", defaultSportsbooks);
+    updateFilter("playerPropSportsbooks", defaultPlayerPropsSportsbooks);
+    updateFilter("markets", defaultMarkets);
+    updateFilter("playerPropMarkets", defaultPlayerProps);
+    updateFilter("filters.dataPoints", 10);
     
     // Reset applied state
-    setPicked(defaultSports);
-    setSelectedDate('');
-    setSelectedBooks(defaultSportsbooks);
-    setSelectedPlayerPropsBooks(defaultPlayerPropsSportsbooks);
-    setMarketKeys(defaultMarkets);
-    setSelectedPlayerPropMarkets(defaultPlayerProps);
-    setDataPoints(10);
+    updateFilter("sports", defaultSports);
+    updateFilter("date", '');
+    updateFilter("sportsbooks", defaultSportsbooks);
+    updateFilter("playerPropSportsbooks", defaultPlayerPropsSportsbooks);
+    updateFilter("markets", defaultMarkets);
+    updateFilter("playerPropMarkets", defaultPlayerProps);
+    updateFilter("filters.dataPoints", 10);
   };
 
   // Function to get available markets for the markets filter dropdown
@@ -1640,11 +1640,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                       type="range" 
                       min="3" 
                       max="10" 
-                      value={draftDataPoints}
-                      onChange={(e) => setDraftDataPoints(parseInt(e.target.value, 10))}
+                      value={filters.dataPoints}
+                      onChange={(e) => updateFilter("dataPoints", parseInt(e.target.value, 10))}
                       style={{ flex: 1, height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)', WebkitAppearance: 'none', appearance: 'none', padding: '0' }}
                     />
-                    <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700, minWidth: '30px', textAlign: 'center' }}>{draftDataPoints}</span>
+                    <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700, minWidth: '30px', textAlign: 'center' }}>{filters.dataPoints}</span>
                   </div>
                 </div>
 
@@ -1653,8 +1653,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     <span>📅</span> Date
                   </div>
                   <DatePicker
-                    value={draftSelectedDate}
-                    onChange={setDraftSelectedDate}
+                    value={filters.date}
+                    onChange={(value) => updateFilter('date', value)}
                   />
                 </div>
 
@@ -1664,14 +1664,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   </div>
                   <SportMultiSelect
                     list={sportList || []}
-                    selected={draftPicked || []}
+                    selected={filters.sports || []}
                     onChange={(selected) => {
                       // Player props: only allow one sport at a time
                       if (selected.length > 1) {
                         // Keep only the last selected sport
-                        setDraftPicked([selected[selected.length - 1]]);
+                        updateFilter("sports", [selected[selected.length - 1]]);
                       } else {
-                        setDraftPicked(selected);
+                        updateFilter("sports", selected);
                       }
                     }}
                     placeholderText="Select one sport..."
@@ -1685,9 +1685,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     <span>🎯</span> Player Prop Markets
                   </div>
                   <SportMultiSelect
-                    list={getPlayerPropMarketsBySport(draftPicked)}
-                    selected={draftSelectedPlayerPropMarkets || []}
-                    onChange={setDraftSelectedPlayerPropMarkets}
+                    list={getPlayerPropMarketsBySport(filters.sports)}
+                    selected={filters.playerPropMarkets || []}
+                    onChange={(value) => updateFilter('playerPropMarkets', value)}
                     placeholderText="Select player props..."
                     allLabel="All Player Props"
                   />
@@ -1699,8 +1699,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   </div>
                   <SportMultiSelect
                     list={enhancedSportsbookList}
-                    selected={draftSelectedPlayerPropsBooks || []}
-                    onChange={setDraftSelectedPlayerPropsBooks}
+                    selected={filters.playerPropSportsbooks || []}
+                    onChange={(value) => updateFilter('playerPropSportsbooks', value)}
                     placeholderText="Select sportsbooks..."
                     allLabel="All Sportsbooks"
                     isSportsbook={true}
@@ -1723,8 +1723,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     min="0.1"
                     max="50"
                     step="0.1"
-                    value={draftMinProfit}
-                    onChange={(e) => setDraftMinProfit(Number(e.target.value))}
+                    value={filters.minProfit}
+                    onChange={(e) => updateFilter("minProfit", Number(e.target.value))}
                   />
                 </div>
 
@@ -1737,8 +1737,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     min="10"
                     max="10000"
                     step="10"
-                    value={draftMaxStake}
-                    onChange={(e) => setDraftMaxStake(Number(e.target.value))}
+                    value={filters.maxStake}
+                    onChange={(e) => updateFilter("maxStake", Number(e.target.value))}
                   />
                 </div>
 
@@ -1748,8 +1748,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   </div>
                   <SportMultiSelect
                     list={enhancedSportsbookList}
-                    selected={draftSelectedBooks || []}
-                    onChange={setDraftSelectedBooks}
+                    selected={filters.sportsbooks || []}
+                    onChange={(value) => updateFilter('sportsbooks', value)}
                     placeholderText="Select sportsbooks..."
                     allLabel="All Sportsbooks"
                     isSportsbook={true}
@@ -1770,8 +1770,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     <span>📅</span> Date
                   </div>
                   <DatePicker
-                    value={draftSelectedDate}
-                    onChange={setDraftSelectedDate}
+                    value={filters.date}
+                    onChange={(value) => updateFilter('date', value)}
                   />
                 </div>
 
@@ -1781,8 +1781,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   </div>
                   <SportMultiSelect
                     list={sportList || []}
-                    selected={draftPicked || []}
-                    onChange={setDraftPicked}
+                    selected={filters.sports || []}
+                    onChange={(value) => updateFilter('sports', value)}
                     placeholderText="Select sports..."
                     allLabel="All Sports"
                     enableCategories={true}
@@ -1794,10 +1794,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     <span>📊</span> Markets
                   </div>
                   <SportMultiSelect
-                    list={getAvailableMarkets(draftPicked)}
-                    selected={draftMarketKeys || []}
+                    list={getAvailableMarkets(filters.sports)}
+                    selected={filters.markets || []}
                     onChange={(newMarkets) => {
-                      setDraftMarketKeys(newMarkets);
+                      updateFilter("markets", newMarkets);
                       setUserHasSelectedMarkets(true); // Mark that user has made a selection
                       console.log('🎯 User selected markets:', newMarkets.length > 0 ? newMarkets : 'ALL MARKETS (empty array)');
                     }}
@@ -1813,15 +1813,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   </div>
                   <SportMultiSelect
                     list={enhancedSportsbookList}
-                    selected={draftSelectedBooks || []}
+                    selected={filters.sportsbooks || []}
                     onChange={(newSelection) => {
                       console.log('🏪 Straight Bets Sportsbook selection changed:', {
                         newSelection,
-                        previousSelection: draftSelectedBooks,
+                        previousSelection: filters.sportsbooks,
                         listAvailable: enhancedSportsbookList?.length,
                         listKeys: enhancedSportsbookList?.map(b => b.key)
                       });
-                      setDraftSelectedBooks(newSelection);
+                      updateFilter("sportsbooks", newSelection);
                     }}
                     placeholderText="Select sportsbooks..."
                     allLabel="All Sportsbooks"
@@ -1835,7 +1835,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
             {/* Apply/Reset Buttons */}
             <div className="desktop-filter-actions">
-              <button className="desktop-filter-btn desktop-filter-btn-apply" onClick={applyFilters}>
+              <button className="desktop-filter-btn desktop-filter-btn-apply" onClick={handleApplyFilters}>
                 Apply
               </button>
               <button className="desktop-filter-btn desktop-filter-btn-reset" onClick={resetAllFilters}>
@@ -1949,13 +1949,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
       ) : (marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
-          sport={picked.length > 0 ? picked : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
+          sport={filters.sports.length > 0 ? filters.sports : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
           games={filteredGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
-          minProfit={draftMinProfit}
-          maxStake={draftMaxStake}
-          selectedMarkets={draftMarketKeys}
+          minProfit={filters.minProfit}
+          maxStake={filters.maxStake}
+          selectedMarkets={filters.markets}
         />
       ) : isArbitrageMode && !hasPlatinum ? (
         <div style={{
@@ -2061,7 +2061,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               pageSize={15}
               mode="props"
               bookFilter={effectiveSelectedBooks}
-              marketFilter={selectedPlayerPropMarkets} // Use selected player prop markets
+              marketFilter={filters.playerPropMarkets} // Use selected player prop markets
               evMin={null}
               loading={filtersLoading || playerPropsProcessing || marketsLoading}
               error={error || marketsError}
@@ -2071,7 +2071,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               betSlipCount={bets.length}
               onOpenBetSlip={openBetSlip}
               searchQuery={debouncedQuery}
-              dataPoints={dataPoints}
+              dataPoints={filters.dataPoints}
             />
           </div>
         ) : null
@@ -2253,8 +2253,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="0.1"
                   max="50"
                   step="0.1"
-                  value={draftMinProfit}
-                  onChange={(e) => setDraftMinProfit(Number(e.target.value))}
+                  value={filters.minProfit}
+                  onChange={(e) => updateFilter("minProfit", Number(e.target.value))}
                   className="form-control"
                 />
               </div>
@@ -2268,8 +2268,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="10"
                   max="10000"
                   step="10"
-                  value={draftMaxStake}
-                  onChange={(e) => setDraftMaxStake(Number(e.target.value))}
+                  value={filters.maxStake}
+                  onChange={(e) => updateFilter("maxStake", Number(e.target.value))}
                   className="form-control"
                 />
               </div>
@@ -2281,8 +2281,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
-                  selected={draftSelectedBooks || []}
-                  onChange={setDraftSelectedBooks}
+                  selected={filters.sportsbooks || []}
+                  onChange={(value) => updateFilter('sportsbooks', value)}
                   placeholderText="Select sportsbooks..."
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
@@ -2326,8 +2326,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="0.5"
                   max="20"
                   step="0.5"
-                  value={draftMinMiddleGap || 3}
-                  onChange={(e) => setDraftMinMiddleGap(Number(e.target.value))}
+                  value={filters.minMiddleGap || 3}
+                  onChange={(e) => updateFilter("minMiddleGap", Number(e.target.value))}
                   className="form-control"
                 />
               </div>
@@ -2341,8 +2341,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="5"
                   max="50"
                   step="1"
-                  value={draftMinMiddleProbability || 15}
-                  onChange={(e) => setDraftMinMiddleProbability(Number(e.target.value))}
+                  value={filters.minMiddleProbability || 15}
+                  onChange={(e) => updateFilter("minMiddleProbability", Number(e.target.value))}
                   className="form-control"
                 />
               </div>
@@ -2356,8 +2356,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   min="10"
                   max="10000"
                   step="10"
-                  value={draftMaxMiddleStake || 1000}
-                  onChange={(e) => setDraftMaxMiddleStake(Number(e.target.value))}
+                  value={filters.maxMiddleStake || 1000}
+                  onChange={(e) => updateFilter("maxMiddleStake", Number(e.target.value))}
                   className="form-control"
                 />
               </div>
@@ -2369,8 +2369,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
                 <SportMultiSelect
                   list={enhancedSportsbookList}
-                  selected={draftSelectedBooks || []}
-                  onChange={setDraftSelectedBooks}
+                  selected={filters.sportsbooks || []}
+                  onChange={(value) => updateFilter('sportsbooks', value)}
                   placeholderText="Select sportsbooks..."
                   allLabel="All Sportsbooks"
                   isSportsbook={true}
@@ -2409,14 +2409,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
                   <span>📊 Data Points</span>
-                  <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700 }}>{filters.dataPoints}</span>
+                  <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700 }}>{filters.filters.dataPoints}</span>
                 </label>
                 <input 
                   type="range" 
                   min="3" 
                   max="10" 
-                  value={filters.dataPoints}
-                  onChange={(e) => updateFilter('dataPoints', parseInt(e.target.value, 10))}
+                  value={filters.filters.dataPoints}
+                  onChange={(e) => updateFilter('filters.dataPoints', parseInt(e.target.value, 10))}
                   style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)', WebkitAppearance: 'none', appearance: 'none', padding: '0' }}
                 />
               </div>
