@@ -1175,6 +1175,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Close modal immediately so user sees the new data loading
     setMobileFiltersOpen(false);
 
+    // Force OddsTable to re-render with new filters
+    setTableNonce(prev => prev + 1);
+
     // Trigger data refresh after filters are applied (state updates trigger useMarketsWithCache)
     setTimeout(() => {
       console.log('🔄 Triggering refresh after filter application');
