@@ -876,6 +876,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Auto-select all relevant markets when sports change (draft state)
   // Track if user has explicitly selected markets in the modal
   const [userHasSelectedMarkets, setUserHasSelectedMarkets] = useState(false);
+  // Track if user has explicitly selected markets in the APPLIED state (for API calls)
+  const [userHasAppliedMarketSelection, setUserHasAppliedMarketSelection] = useState(false);
   
   useEffect(() => {
     if (draftPicked && draftPicked.length > 0) {
@@ -923,8 +925,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
 
   // Auto-select all relevant markets when applied sports change
+  // BUT: Don't override user's explicit market selection
   useEffect(() => {
     if (picked && picked.length > 0) {
+      // If user has explicitly selected markets, don't auto-select
+      if (userHasAppliedMarketSelection) {
+        console.log('🎯 User has applied market selection - NOT auto-selecting markets');
+        return;
+      }
+      
       // Get all relevant markets for the selected sports
       const autoSelectedMarkets = getAutoSelectedMarkets(picked);
       
@@ -941,7 +950,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         console.log('🎯 Auto-selected markets for sports:', picked, '→', autoSelectedMarkets);
       }
     }
-  }, [picked]);
+  }, [picked, userHasAppliedMarketSelection]);
 
   // Enhanced player props loading state - show loading until props are populated
   useEffect(() => {
@@ -1140,8 +1149,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       playerPropsBooks: newPlayerPropsBooks,
       markets: newMarkets,
       dataPoints: draftDataPoints,
-      playerPropsMode: showPlayerProps
+      playerPropsMode: showPlayerProps,
+      userHasSelectedMarkets: userHasSelectedMarkets
     });
+    
+    // Mark that user has explicitly selected markets (if they changed them)
+    if (userHasSelectedMarkets) {
+      setUserHasAppliedMarketSelection(true);
+      console.log('🎯 User has applied market selection - will prevent auto-selection');
+    }
     
     // Update state - this will trigger useMarketsWithCache to re-fetch data
     setPicked(newPicked);

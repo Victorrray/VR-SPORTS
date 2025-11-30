@@ -1589,3 +1589,8 @@
 {"duration":"4ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/.well-known/appspecific/com.chrome.devtools.json","service":"vr-odds-api","status":404,"timestamp":"2025-11-08 17:59:21","userId":"anonymous"}
 {"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/static/js/main.6aa78dcf.js.map","service":"vr-odds-api","status":304,"timestamp":"2025-11-08 17:59:21","userId":"anonymous"}
 {"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/static/css/main.27f44fd4.css.map","service":"vr-odds-api","status":304,"timestamp":"2025-11-08 17:59:21","userId":"anonymous"}
+{"level":"info","message":"✅ Server running on http://localhost:10000","port":"10000","service":"vr-odds-api","timestamp":"2025-11-29 18:59:36"}
+{"duration":"260ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":401,"timestamp":"2025-11-29 19:00:06","userId":"anonymous"}
+{"level":"info","message":"✅ Server running on http://localhost:10000","port":"10000","service":"vr-odds-api","timestamp":"2025-11-29 19:00:44"}
+{"level":"info","message":"✅ Server running on http://localhost:10000","port":"10000","service":"vr-odds-api","timestamp":"2025-11-29 19:10:51"}
+{"level":"info","message":"✅ Server running on http://localhost:10000","port":"10000","service":"vr-odds-api","timestamp":"2025-11-29 19:18:00"}
