@@ -3,6 +3,18 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
+// Helper function to format odds with +/- sign
+const formatOdds = (odds: string | number): string => {
+  if (!odds) return '--';
+  const oddsStr = String(odds);
+  if (oddsStr.startsWith('+') || oddsStr.startsWith('-') || oddsStr === '--') {
+    return oddsStr;
+  }
+  const oddsNum = parseInt(oddsStr);
+  if (isNaN(oddsNum)) return oddsStr;
+  return oddsNum > 0 ? `+${oddsNum}` : String(oddsNum);
+};
+
 export interface BetData {
   id: number;
   teams: string;
@@ -149,7 +161,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30' 
             : 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200'
-        } backdrop-blur-xl border rounded-lg`}>
+        } backdrop-blur-xl border rounded-xl`}>
           <div className={`${
             isHero || isDark ? 'text-purple-300' : 'text-purple-600'
           } font-bold uppercase tracking-wide mb-1 text-xs`}>
@@ -165,7 +177,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'border-white/10' 
             : 'bg-gray-50 border-gray-200'
-        } backdrop-blur-xl rounded-lg border`}>
+        } backdrop-blur-xl rounded-xl border`}>
           <div>
             <div className={`${
               isHero || isDark ? 'text-white/50' : 'text-gray-500'
@@ -183,7 +195,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               Odds
             </div>
             <div className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold`}>
-              {bet.odds}
+              {formatOdds(bet.odds)}
             </div>
           </div>
         </div>
@@ -194,7 +206,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             {!isHero && (
               <button 
                 onClick={handleToggleCompare}
-                className={`px-3 py-2 rounded-lg ${
+                className={`px-3 py-2 rounded-xl ${
                 isHero || isDark
                   ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
                   : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
@@ -206,7 +218,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               <button 
                 onClick={handleAddToPicks}
                 disabled={isAdded}
-                className={`px-3 py-2 rounded-lg ${
+                className={`px-3 py-2 rounded-xl ${
                   isAdded 
                     ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed' 
                     : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
