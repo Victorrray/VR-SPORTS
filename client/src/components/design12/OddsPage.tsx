@@ -1,9 +1,33 @@
 import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown, Check } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useOddsData, getSportLabel } from '../../hooks/useOddsData';
 import { PlayerPropsPage } from './PlayerPropsPage';
 import { toast } from 'sonner';
+
+// Generate date options: All Upcoming, Today (with day name), then next 6 days
+function generateDateOptions() {
+  const options = [{ id: 'all_upcoming', name: 'All Upcoming' }];
+  const today = new Date();
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayName = dayNames[date.getDay()];
+    const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    if (i === 0) {
+      options.push({ id: dateStr, name: `Today (${dayName})` });
+    } else if (i === 1) {
+      options.push({ id: dateStr, name: `Tomorrow (${dayName})` });
+    } else {
+      options.push({ id: dateStr, name: dayName });
+    }
+  }
+  
+  return options;
+}
 
 // Helper function to format odds with +/- sign
 const formatOdds = (odds: any): string => {
@@ -43,6 +67,9 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [sportsbooksExpanded, setSportsbooksExpanded] = useState(false);
   const [addedPicks, setAddedPicks] = useState<number[]>([]); // Track which picks have been added
   const [autoRefresh, setAutoRefresh] = useState(true);
+
+  // Generate date options dynamically
+  const dateOptions = useMemo(() => generateDateOptions(), []);
 
   // Fetch real odds data from API
   const { picks: apiPicks, loading: apiLoading, error: apiError, refetch } = useOddsData({
@@ -707,25 +734,15 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                   }`}
                 >
                   <span>
-                    {[
-                      { id: 'today', name: 'Today' },
-                      { id: 'tomorrow', name: 'Tomorrow' },
-                      { id: 'week', name: 'This Week' },
-                      { id: 'all_upcoming', name: 'All Upcoming' }
-                    ].find(d => d.id === selectedDate)?.name}
+                    {dateOptions.find(d => d.id === selectedDate)?.name || 'All Upcoming'}
                   </span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${dateExpanded ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {/* Desktop Inline Dropdown */}
                 {dateExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden`}>
-                    {[
-                      { id: 'today', name: 'Today' },
-                      { id: 'tomorrow', name: 'Tomorrow' },
-                      { id: 'week', name: 'This Week' },
-                      { id: 'all_upcoming', name: 'All Upcoming' }
-                    ].map((date) => (
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden max-h-64 overflow-y-auto`}>
+                    {dateOptions.map((date) => (
                       <button
                         key={date.id}
                         onClick={() => {
@@ -776,12 +793,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     
                     {/* Options */}
                     <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
-                      {[
-                        { id: 'today', name: 'Today' },
-                        { id: 'tomorrow', name: 'Tomorrow' },
-                        { id: 'week', name: 'This Week' },
-                        { id: 'all_upcoming', name: 'All Upcoming' }
-                      ].map((date) => (
+                      {dateOptions.map((date) => (
                         <button
                           key={date.id}
                           onClick={() => {
