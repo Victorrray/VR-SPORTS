@@ -2406,39 +2406,51 @@ export default function OddsTable({
       });
       
       console.log('🎯 After sportsbook filtering: ' + r.length + ' rows');
-    } else if (hasBookFilter && mode === 'props') {
-      // CRITICAL: Apply sportsbook filtering for props mode as well
-      // The allRows filtering should have handled this, but we add a safety check here
-      console.log('🎯 Props mode: Applying sportsbook filter as safety check');
+    }
+    
+    // ALWAYS apply sportsbook filtering for props mode when a filter is active
+    // This is the FINAL safety check to ensure only filtered books appear
+    if (hasBookFilter && mode === 'props') {
+      console.log('🎯 Props mode: Applying MANDATORY sportsbook filter');
       console.log('🎯 Before props sportsbook filtering: ' + r.length + ' rows');
+      console.log('🎯 Filter values:', bookFilter);
       
       const normalizedFilter = bookFilter.map(b => b.toLowerCase());
       
+      // Log what bookmakers are in the current rows
+      const currentBookmakers = r.map(row => row?.bk?.key || 'unknown').filter((v, i, a) => a.indexOf(v) === i);
+      console.log('🎯 Current bookmakers in rows:', currentBookmakers);
+      
       r = r.filter(row => {
         // For player props, bookmaker info is in row.bk
-        const bookmakerKey = (row?.bk?.key || '').toLowerCase();
+        const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
+        
+        if (!bookmakerKey) {
+          console.log(`❌ Props filter FAIL: No bookmaker key found for row`);
+          return false;
+        }
         
         // Check for exact match first
         if (normalizedFilter.includes(bookmakerKey)) {
-          console.log(`✅ Props filter PASS: ${bookmakerKey} in filter`);
           return true;
         }
         
         // Check for partial match (for DFS apps that might have different key formats)
+        // e.g., "dabble" should match "dabble_au", "prizepicks" should match "prizepicks"
         const hasPartialMatch = normalizedFilter.some(filterKey => {
-          return bookmakerKey.includes(filterKey) || filterKey.includes(bookmakerKey);
+          const matches = bookmakerKey.includes(filterKey) || filterKey.includes(bookmakerKey);
+          return matches;
         });
         
         if (hasPartialMatch) {
-          console.log(`✅ Props filter PASS (partial): ${bookmakerKey} matches filter`);
           return true;
         }
         
-        console.log(`❌ Props filter FAIL: ${bookmakerKey} NOT in filter ${normalizedFilter.join(', ')}`);
+        console.log(`❌ Props filter REMOVING: ${bookmakerKey} NOT in filter [${normalizedFilter.join(', ')}]`);
         return false;
       });
       
-      console.log('🎯 After props sportsbook filtering: ' + r.length + ' rows');
+      console.log('🎯 After props sportsbook filtering: ' + r.length + ' rows remaining');
     }
     
     // ========== MARKET FILTERING ==========
