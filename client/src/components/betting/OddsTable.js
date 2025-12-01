@@ -1659,25 +1659,49 @@ export default function OddsTable({
             return;
           }
           
-          // NEW: If a bookFilter is applied, verify the selected bookmaker actually has this bet
-          let hasSelectedBookmakerBet = true;
+          // NEW: If a bookFilter is applied, find the best book from the filtered list
+          let bestFilteredBook = null;
           if (bookFilter && bookFilter.length > 0) {
-            // Check if any of the selected bookmakers have this specific bet
             const normalizedFilter = bookFilter.map(f => f.toLowerCase());
-            const hasSelectedBook = propData.selectedBooks && propData.selectedBooks.some(book => {
+            
+            // Find all books that match the filter
+            const matchingBooks = propData.allBooks.filter(book => {
               const bookKey = String(book?.bookmaker?.key || book?.book || '').toLowerCase();
-              return normalizedFilter.includes(bookKey);
+              return normalizedFilter.some(filterKey => 
+                bookKey === filterKey || bookKey.includes(filterKey) || filterKey.includes(bookKey)
+              );
             });
             
-            if (!hasSelectedBook) {
+            if (matchingBooks.length === 0) {
               console.log(`🎯 FILTERING OUT: Regular prop not available on selected bookmaker(s) - ${propKey}`);
-              hasSelectedBookmakerBet = false;
+              return; // Skip this prop entirely
             }
+            
+            // Find the best book from matching books (best odds)
+            bestFilteredBook = matchingBooks.reduce((best, book) => {
+              const bestDec = americanToDecimal(best.price || best.odds);
+              const bookDec = americanToDecimal(book.price || book.odds);
+              return bookDec > bestDec ? book : best;
+            });
+            
+            console.log(`🎯 Regular prop ${propKey}: Using filtered book ${bestFilteredBook.bookmaker?.key} with odds ${bestFilteredBook.price}`);
           }
           
-          if (hasSelectedBookmakerBet) {
-            propsRows.push(propData);
-          }
+          // Update propData with the filtered book for main card display
+          const finalPropData = {
+            ...propData,
+            // If filter is active, use the best filtered book for main card
+            // Otherwise keep the original best book
+            bk: bestFilteredBook ? bestFilteredBook.bookmaker : propData.bk,
+            out: bestFilteredBook ? {
+              ...propData.out,
+              price: bestFilteredBook.price || bestFilteredBook.odds,
+              odds: bestFilteredBook.price || bestFilteredBook.odds,
+              point: bestFilteredBook.point || propData.out.point
+            } : propData.out
+          };
+          
+          propsRows.push(finalPropData);
         }
       });
       
