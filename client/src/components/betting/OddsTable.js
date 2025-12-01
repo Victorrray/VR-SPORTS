@@ -1611,6 +1611,21 @@ export default function OddsTable({
             hasFilter: hasFilter
           });
           
+          // CRITICAL: Validate that primaryBook is actually from the filtered list
+          if (hasFilter && primaryBook) {
+            const primaryBookKey = (primaryBook.bookmaker?.key || '').toLowerCase();
+            const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+            const isInFilter = normalizedFilter.some(filterKey => 
+              primaryBookKey === filterKey || primaryBookKey.includes(filterKey) || filterKey.includes(primaryBookKey)
+            );
+            
+            if (!isInFilter) {
+              console.log(`⚠️ PRIMARY BOOK VALIDATION FAILED: ${primaryBookKey} is NOT in filter ${normalizedFilter.join(', ')} - SKIPPING PROP`);
+              return; // Skip this prop - the primary book is not in the filter
+            }
+            console.log(`✅ PRIMARY BOOK VALIDATION PASSED: ${primaryBookKey} is in filter`);
+          }
+          
           // Check if primary book's market is locked - skip this row if locked
           if (primaryBook) {
             const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6'].includes(
