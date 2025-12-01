@@ -146,55 +146,110 @@ export function AccountPage({
             Subscription
           </h2>
           <button onClick={onNavigateToChangePlan} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-sm">
-            Change Plan
+            {isPlatinum || isGold ? 'Change Plan' : 'Upgrade'}
           </button>
         </div>
 
-        <div className={`p-6 ${isLight ? 'bg-amber-50 border-amber-200' : 'bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-transparent border-amber-400/30'} backdrop-blur-xl border rounded-xl`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className={`p-3 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/30 to-orange-500/30 border-amber-400/30'} rounded-xl border`}>
-                <Crown className={`w-6 h-6 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
+        {/* Show different content based on plan */}
+        {isPlatinum ? (
+          // Platinum Plan Card
+          <div className={`p-6 ${isLight ? 'bg-amber-50 border-amber-200' : 'bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-transparent border-amber-400/30'} backdrop-blur-xl border rounded-xl`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-3 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/30 to-orange-500/30 border-amber-400/30'} rounded-xl border`}>
+                  <Crown className={`w-6 h-6 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
+                </div>
+                <div>
+                  <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                    Platinum Plan
+                  </h3>
+                  <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
+                    Full access to all features
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                  Platinum Plan
-                </h3>
-                <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
-                  Full access to all features
-                </p>
+              <div className="text-right">
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} text-2xl font-bold`}>
+                  $25
+                </div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                  /month
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className={`${isLight ? 'text-gray-900' : 'text-white'} text-2xl font-bold`}>
-                $25
+          </div>
+        ) : isGold ? (
+          // Gold Plan Card
+          <div className={`p-6 ${isLight ? 'bg-yellow-50 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-transparent border-yellow-400/30'} backdrop-blur-xl border rounded-xl`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-3 ${isLight ? 'bg-yellow-100 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/30 to-amber-500/30 border-yellow-400/30'} rounded-xl border`}>
+                  <Star className={`w-6 h-6 ${isLight ? 'text-yellow-600' : 'text-yellow-400'}`} />
+                </div>
+                <div>
+                  <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                    Gold Plan
+                  </h3>
+                  <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
+                    Enhanced features
+                  </p>
+                </div>
               </div>
-              <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
-                /month
+              <div className="text-right">
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} text-2xl font-bold`}>
+                  $15
+                </div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                  /month
+                </div>
               </div>
             </div>
           </div>
-
-          <div className={`pt-4 border-t ${isLight ? 'border-amber-200' : 'border-amber-400/20'}`}>
-            <div className="flex items-center justify-between text-sm">
-              <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold`}>
-                Next billing date
-              </span>
-              <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                December 10, 2024
-              </span>
+        ) : (
+          // Free Plan Card
+          <div className={`p-6 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-gray-500/10 via-slate-500/10 to-transparent border-gray-400/30'} backdrop-blur-xl border rounded-xl`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-3 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-br from-gray-500/30 to-slate-500/30 border-gray-400/30'} rounded-xl border`}>
+                  <User className={`w-6 h-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} />
+                </div>
+                <div>
+                  <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                    Free Plan
+                  </h3>
+                  <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
+                    Limited access - {me?.remaining || 0} API calls remaining
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} text-2xl font-bold`}>
+                  Free
+                </div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                  Limited
+                </div>
+              </div>
+            </div>
+            <div className={`pt-4 border-t ${isLight ? 'border-gray-200' : 'border-gray-400/20'}`}>
+              <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>
+                Upgrade to unlock unlimited odds data, arbitrage detection, and more!
+              </p>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-          <button className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
-            Update Payment Method
-          </button>
-          <button className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
-            View Billing History
-          </button>
-        </div>
+        {/* Only show billing buttons for paid plans */}
+        {(isPlatinum || isGold) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+            <button className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
+              Update Payment Method
+            </button>
+            <button className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
+              View Billing History
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Settings Section */}
