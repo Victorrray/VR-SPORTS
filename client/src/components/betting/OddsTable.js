@@ -2337,10 +2337,14 @@ export default function OddsTable({
   const sorter = sorters[sort.key] || sorters.ev;
 
   let rows = useMemo(() => {
-    console.log('🚨🚨🚨 ROWS USEMEMO RUNNING 🚨🚨🚨');
-    console.log('🚨 bookFilter:', bookFilter);
+    console.log('🚨🚨🚨 ROWS USEMEMO RUNNING - VERSION 2 🚨🚨🚨');
+    console.log('🚨 bookFilter:', JSON.stringify(bookFilter));
     console.log('🚨 mode:', mode);
     console.log('🚨 allRows length:', allRows?.length);
+    
+    // Log unique bookmakers in allRows
+    const uniqueBookmakers = [...new Set(allRows.map(r => r?.bk?.key || 'unknown'))];
+    console.log('🚨 Unique bookmakers in allRows:', uniqueBookmakers);
     
     let r = allRows;
     
@@ -2631,12 +2635,10 @@ export default function OddsTable({
     r = Array.from(bestBy.values()).map(v => v.row);
     
     // Debug final results
-    console.log(`🎯 FINAL RESULTS: ${r.length} rows after best odds selection`);
-    r.forEach(row => {
-      const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
-      const odds = Number(row?.out?.price ?? row?.out?.odds ?? 0);
-      console.log(`🎯 FINAL ROW: ${bookmakerKey} - ${row.game?.home_team} vs ${row.game?.away_team} - ${row.mkt?.key} - ${row.out?.name} - ${odds}`);
-    });
+    console.log(`🚨🚨🚨 FINAL RESULTS: ${r.length} rows after best odds selection 🚨🚨🚨`);
+    const finalBookmakers = [...new Set(r.map(row => row?.bk?.key || 'unknown'))];
+    console.log('🚨 FINAL bookmakers in results:', finalBookmakers);
+    console.log('🚨 bookFilter was:', JSON.stringify(bookFilter));
     
     return r.slice().sort((a, b) => {
       // Always push locked markets to the bottom
