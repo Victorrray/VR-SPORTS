@@ -322,7 +322,7 @@ export const optimizedStorage = {
   getStats: () => storageOptimizer.getStorageStats()
 };
 
-export default storageOptimizer;
+export default optimizedStorage;
 
 // Make optimizedStorage available globally
 if (typeof window !== 'undefined') {
