@@ -110,7 +110,6 @@ export function useFeaturedPick() {
             minute: '2-digit',
             timeZoneName: 'short'
           }),
-          }) + ' PST',
           pick: 'Boston Celtics -4.5',
           odds: -110,
           sportsbook: 'DraftKings',
