@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { optimizedStorage } from '../utils/storageOptimizer';
+import optimizedStorage from '../utils/storageOptimizer';
 
 const FilterContext = createContext();
 
