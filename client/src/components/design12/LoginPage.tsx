@@ -22,8 +22,35 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
+    // Basic validation
+    if (!email.trim()) {
+      setError('Please enter your email address');
+      return;
+    }
+    
+    if (!password) {
+      setError('Please enter your password');
+      return;
+    }
+    
     if (onLogin && isLogin) {
-      await onLogin(email, password);
+      try {
+        await onLogin(email, password);
+      } catch (err: any) {
+        // Handle common Supabase auth errors with user-friendly messages
+        const errorMessage = err.message || 'Login failed';
+        if (errorMessage.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please try again.');
+        } else if (errorMessage.includes('Email not confirmed')) {
+          setError('Please verify your email address before logging in.');
+        } else if (errorMessage.includes('Too many requests')) {
+          setError('Too many login attempts. Please wait a moment and try again.');
+        } else {
+          setError(errorMessage);
+        }
+      }
     }
   };
 
@@ -129,8 +156,17 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                   <h3 className="text-white text-2xl md:text-4xl font-bold mb-2">
                     {isLogin ? 'Welcome back' : 'Create account'}
                   </h3>
-                  
                 </div>
+
+                {/* Error Message - Prominent Position */}
+                {error && (
+                  <div className="p-3 md:p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm md:text-base text-center font-semibold flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {error}
+                  </div>
+                )}
 
                 {/* Tab Toggle */}
                 <div className="flex gap-2 p-1 bg-slate-950/50 rounded-xl md:rounded-2xl border border-white/5">
@@ -232,13 +268,6 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                     </span>
                     <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/20 to-white/20"></div>
                   </div>
-
-                  {/* Error Message */}
-                  {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center">
-                      {error}
-                    </div>
-                  )}
 
                   {/* Social Login */}
                   <button
