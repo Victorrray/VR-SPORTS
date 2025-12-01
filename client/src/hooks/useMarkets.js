@@ -215,6 +215,17 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       const marketsParam = Array.isArray(markets) ? markets.join(',') : markets;
       console.log('🔍 useMarkets: Processed marketsParam:', marketsParam);
       
+      // Detect if this is a player props request
+      const playerPropMarketPrefixes = ['player_', 'batter_', 'pitcher_'];
+      const marketsArray = Array.isArray(markets) ? markets : markets.split(',');
+      const isPlayerPropsRequest = marketsArray.some(m => 
+        playerPropMarketPrefixes.some(prefix => m.startsWith(prefix))
+      );
+      
+      if (isPlayerPropsRequest) {
+        console.log('🏈 useMarkets: Detected PLAYER PROPS request');
+      }
+      
       const params = new URLSearchParams({
         sports: sports.join(','),
         regions: regions.join(','),
@@ -223,6 +234,12 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         dateFormat: 'iso',
         _t: Date.now() // Cache buster
       });
+
+      // Add betType=props for player props requests
+      if (isPlayerPropsRequest) {
+        params.append('betType', 'props');
+        console.log('🏈 useMarkets: Added betType=props to request');
+      }
 
       // Add date parameter if provided
       if (date && date.trim()) {
@@ -235,8 +252,10 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       console.log('🔍 useMarkets: Final API URL:', fullUrl);
       
       // Enhanced fetch with better error handling and timeout
+      // Player props requests need longer timeout since they fetch data for each event
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutMs = isPlayerPropsRequest ? 120000 : 15000; // 2 minutes for props, 15s for regular
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       
       let response;
       let data;
