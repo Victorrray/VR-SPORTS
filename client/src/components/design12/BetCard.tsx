@@ -101,7 +101,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           : isDark
           ? 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10 hover:border-purple-400/40'
           : 'bg-white border-gray-200 hover:border-purple-300'
-      } backdrop-blur-2xl border rounded-xl overflow-hidden transition-all`}
+      } backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all`}
     >
       {/* Card Header */}
       <div className={`p-3 ${
@@ -149,7 +149,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30' 
             : 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200'
-        } backdrop-blur-xl border rounded-xl`}>
+        } backdrop-blur-xl border rounded-2xl`}>
           <div className={`${
             isHero || isDark ? 'text-purple-300' : 'text-purple-600'
           } font-bold uppercase tracking-wide mb-1 text-xs`}>
@@ -165,7 +165,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'border-white/10' 
             : 'bg-gray-50 border-gray-200'
-        } backdrop-blur-xl rounded-xl border`}>
+        } backdrop-blur-xl rounded-2xl border`}>
           <div>
             <div className={`${
               isHero || isDark ? 'text-white/50' : 'text-gray-500'
@@ -194,7 +194,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             {!isHero && (
               <button 
                 onClick={handleToggleCompare}
-                className={`px-3 py-2 rounded-full ${
+                className={`px-3 py-2 rounded-lg ${
                 isHero || isDark
                   ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
                   : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
@@ -206,11 +206,11 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               <button 
                 onClick={handleAddToPicks}
                 disabled={isAdded}
-                className={`px-3 py-2 rounded-full ${
+                className={`px-3 py-2 rounded-lg ${
                   isAdded 
                     ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed' 
                     : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
-                } text-white rounded-full transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
+                } text-white transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
               >
                 {isAdded ? (
                   <>
@@ -246,7 +246,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 isHero || isDark
                   ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30' 
                   : 'bg-emerald-100 border-emerald-300'
-              } backdrop-blur-xl border rounded-lg`}>
+              } backdrop-blur-xl border rounded-xl`}>
                 <span className={`${isHero || isDark ? 'text-emerald-400' : 'text-emerald-700'} font-bold text-base`}>
                   {bet.odds}
                 </span>
@@ -262,7 +262,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 isHero || isDark
                   ? 'bg-white/5 border-white/10' 
                   : 'bg-gray-100 border-gray-200'
-              } backdrop-blur-xl border rounded-lg`}>
+              } backdrop-blur-xl border rounded-xl`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
                   {String(bet.odds).includes('+') ? `+${parseInt(String(bet.odds)) - 15}` : `${parseInt(String(bet.odds)) + 15}`}
                 </span>
@@ -278,7 +278,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 isHero || isDark
                   ? 'bg-white/5 border-white/10' 
                   : 'bg-gray-100 border-gray-200'
-              } backdrop-blur-xl border rounded-lg`}>
+              } backdrop-blur-xl border rounded-xl`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
                   {String(bet.odds).includes('+') ? `+${parseInt(String(bet.odds)) - 8}` : `${parseInt(String(bet.odds)) + 8}`}
                 </span>
@@ -293,7 +293,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               isHero || isDark
                 ? 'bg-purple-500/20 border-purple-400/30' 
                 : 'bg-purple-100 border-purple-200'
-            } border rounded-lg`}>
+            } border rounded-xl`}>
               <div className={`${isHero || isDark ? 'text-purple-300' : 'text-purple-700'} font-bold text-xs`}>
                 Book
               </div>
