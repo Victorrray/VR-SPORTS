@@ -101,7 +101,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           : isDark
           ? 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10 hover:border-purple-400/40'
           : 'bg-white border-gray-200 hover:border-purple-300'
-      } backdrop-blur-2xl border rounded-2xl overflow-hidden transition-all`}
+      } backdrop-blur-2xl border rounded-xl overflow-hidden transition-all`}
     >
       {/* Card Header */}
       <div className={`p-3 ${
@@ -114,7 +114,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             isHero || isDark
               ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
-          } backdrop-blur-xl border rounded-xl font-bold text-xs`}>
+          } backdrop-blur-xl border rounded-lg font-bold text-xs`}>
             {bet.sport}
           </span>
         </div>
@@ -134,7 +134,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             isHero || isDark
               ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30' 
               : 'bg-emerald-100 border-emerald-300'
-          } backdrop-blur-xl rounded-full border`}>
+          } backdrop-blur-xl rounded-lg border`}>
             <span className={`${isHero || isDark ? 'text-white' : 'text-emerald-700'} font-bold text-xs`}>
               {bet.ev}
             </span>
@@ -149,7 +149,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30' 
             : 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200'
-        } backdrop-blur-xl border rounded-2xl`}>
+        } backdrop-blur-xl border rounded-lg`}>
           <div className={`${
             isHero || isDark ? 'text-purple-300' : 'text-purple-600'
           } font-bold uppercase tracking-wide mb-1 text-xs`}>
@@ -165,7 +165,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           isHero || isDark
             ? 'border-white/10' 
             : 'bg-gray-50 border-gray-200'
-        } backdrop-blur-xl rounded-2xl border`}>
+        } backdrop-blur-xl rounded-lg border`}>
           <div>
             <div className={`${
               isHero || isDark ? 'text-white/50' : 'text-gray-500'
@@ -194,7 +194,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             {!isHero && (
               <button 
                 onClick={handleToggleCompare}
-                className={`px-3 py-2 rounded-xl ${
+                className={`px-3 py-2 rounded-lg ${
                 isHero || isDark
                   ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
                   : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
@@ -206,7 +206,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               <button 
                 onClick={handleAddToPicks}
                 disabled={isAdded}
-                className={`px-3 py-2 rounded-xl ${
+                className={`px-3 py-2 rounded-lg ${
                   isAdded 
                     ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed' 
                     : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
@@ -293,7 +293,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               isHero || isDark
                 ? 'bg-purple-500/20 border-purple-400/30' 
                 : 'bg-purple-100 border-purple-200'
-            } border rounded-xl`}>
+            } border rounded-lg`}>
               <div className={`${isHero || isDark ? 'text-purple-300' : 'text-purple-700'} font-bold text-xs`}>
                 Book
               </div>

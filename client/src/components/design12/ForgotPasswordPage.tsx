@@ -35,7 +35,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
             <span className="font-semibold">Back to login</span>
           </button>
 
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-900/80 to-purple-900/30 backdrop-blur-xl border border-white/10 p-8 md:p-10">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/80 to-purple-900/30 backdrop-blur-xl border border-white/10 p-8 md:p-10">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/10"></div>
             
             <div className="relative space-y-6">
@@ -51,7 +51,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                 <>
                   {/* Header */}
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-400/30 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-400/30 flex items-center justify-center mx-auto mb-4">
                       <Mail className="w-8 h-8 text-purple-400" />
                     </div>
                     <h3 className="text-white text-3xl font-bold mb-2">
@@ -90,7 +90,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                 <>
                   {/* Success State */}
                   <div className="text-center space-y-4">
-                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 border border-emerald-400/30 flex items-center justify-center mx-auto">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-green-500/20 border border-emerald-400/30 flex items-center justify-center mx-auto">
                       <CheckCircle2 className="w-8 h-8 text-emerald-400" />
                     </div>
                     <h3 className="text-white text-3xl font-bold">
