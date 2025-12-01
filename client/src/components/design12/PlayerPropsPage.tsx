@@ -64,11 +64,35 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     marketType: selectedMarket,
     betType: selectedBetType,
     sportsbooks: selectedSportsbooks,
+    date: selectedDate,
     enabled: true
   });
 
-  // Use API picks, fallback to empty array
-  const topPicks = apiPicks || [];
+  // Filter picks by selected date
+  const dateFilteredPicks = useMemo(() => {
+    if (!apiPicks || apiPicks.length === 0) return [];
+    
+    // If "all_upcoming" is selected, show all future games
+    if (selectedDate === 'all_upcoming') {
+      const now = new Date();
+      return apiPicks.filter(pick => {
+        if (!pick.commenceTime && !pick.gameTime) return true;
+        const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
+        return gameDate >= now;
+      });
+    }
+    
+    // Filter by specific date (YYYY-MM-DD format)
+    return apiPicks.filter(pick => {
+      if (!pick.commenceTime && !pick.gameTime) return false;
+      const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
+      const gameDateStr = gameDate.toISOString().split('T')[0];
+      return gameDateStr === selectedDate;
+    });
+  }, [apiPicks, selectedDate]);
+
+  // Use date-filtered picks
+  const topPicks = dateFilteredPicks;
   const isLoading = apiLoading;
 
   // Reset to page 1 when filters change
