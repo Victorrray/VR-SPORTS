@@ -1397,11 +1397,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         supported: enhancedBooks.map(b => b.key)
       });
     } else {
-      // For Straight Bets mode, include all sportsbooks AND DFS apps
-      enhancedBooks = [
-        ...(booksToUse || []),
-        ...missingDFSApps.map(dfs => ({ key: dfs.key, title: dfs.name }))
-      ];
+      // For Straight Bets mode, EXCLUDE DFS apps (they don't offer straight bets)
+      // DFS apps only offer player props, not traditional moneyline/spread/totals
+      const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au'];
+      enhancedBooks = (booksToUse || []).filter(book => 
+        !dfsAppKeys.includes(book.key?.toLowerCase())
+      );
     }
     
     // Log different messages based on mode
