@@ -2261,16 +2261,13 @@ export default function OddsTable({
     }
     
     // ========== SPORTSBOOK FILTERING ==========
-    // Check if we're filtering for DFS apps only
+    // Apply sportsbook filter if any books are selected
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
-    const filteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => dfsApps.includes(book));
+    const hasBookFilter = bookFilter && bookFilter.length > 0;
     
-    console.log('🔍 DFS FILTER DEBUG: bookFilter =', bookFilter);
-    console.log('🔍 DFS FILTER DEBUG: bookFilter type =', typeof bookFilter, 'length =', bookFilter?.length);
-    console.log('🔍 DFS FILTER DEBUG: filteringForDFSOnly =', filteringForDFSOnly);
-    console.log('🔍 DFS FILTER DEBUG: Number of rows before filtering:', r.length);
-    console.log('🔍 DFS FILTER DEBUG: dfsApps array =', dfsApps);
-    console.log('🔍 DFS FILTER DEBUG: bookFilter.every check =', bookFilter?.map(book => ({ book, isDFS: dfsApps.includes(book) })));
+    console.log('🔍 SPORTSBOOK FILTER DEBUG: bookFilter =', bookFilter);
+    console.log('🔍 SPORTSBOOK FILTER DEBUG: hasBookFilter =', hasBookFilter);
+    console.log('🔍 SPORTSBOOK FILTER DEBUG: Number of rows before filtering:', r.length);
     
     // Log all available bookmakers in the data
     const allBookmakers = new Set();
@@ -2278,52 +2275,37 @@ export default function OddsTable({
       const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
       if (bookmakerKey) allBookmakers.add(bookmakerKey);
     });
-    console.log('🔍 DFS FILTER DEBUG: All bookmakers in data =', Array.from(allBookmakers));
+    console.log('🔍 SPORTSBOOK FILTER DEBUG: All bookmakers in data =', Array.from(allBookmakers));
     
-    // If filtering for DFS apps only, strictly filter to only show DFS apps
-    if (filteringForDFSOnly) {
-      console.log('🎯 DFS-only filtering active - strictly showing only DFS apps');
+    // If any sportsbooks are selected, filter to only show those books
+    if (hasBookFilter) {
+      console.log('🎯 Sportsbook filtering active - showing only selected books:', bookFilter);
       console.log('🎯 Before filtering: ' + r.length + ' rows');
       
-      // Count DFS app rows before filtering
-      const dfsRowsBefore = r.filter(row => {
-        const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
-        return dfsApps.some(app => bookmakerKey.includes(app));
-      }).length;
-      
-      console.log('🎯 DFS app rows before filtering: ' + dfsRowsBefore);
-      
-      // Log all DFS app rows for debugging
-      r.forEach(row => {
-        const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
-        if (dfsApps.some(app => bookmakerKey.includes(app))) {
-          console.log(`🎯 DFS app row found: ${bookmakerKey} - ${row.game?.home_team} vs ${row.game?.away_team} - ${row.mkt?.key} - ${row.out?.name}`);
-        }
-      });
+      const normalizedFilter = bookFilter.map(b => b.toLowerCase());
       
       r = r.filter(row => {
         // For player props, bookmaker info is in row.bk, for game odds it's in row.out.bookmaker
         const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         
-        // Debug each filter check
-        const matchResults = bookFilter.map(selectedBook => {
-          const filterKey = selectedBook.toLowerCase();
-          const matches = bookmakerKey.includes(filterKey);
-          console.log(`🔍 FILTER CHECK: "${bookmakerKey}" includes "${filterKey}"? ${matches}`);
-          return matches;
+        // Check for exact match first
+        if (normalizedFilter.includes(bookmakerKey)) {
+          return true;
+        }
+        
+        // Check for partial match (for DFS apps that might have different key formats)
+        const hasPartialMatch = normalizedFilter.some(filterKey => {
+          return bookmakerKey.includes(filterKey) || filterKey.includes(bookmakerKey);
         });
         
-        const isSelectedDFSApp = matchResults.some(match => match);
-        
-        if (!isSelectedDFSApp) {
-          console.log(`🎯 EXCLUDING: "${bookmakerKey}" (not in filter: ${JSON.stringify(bookFilter)})`);
-        } else {
-          console.log(`🎯 INCLUDING: "${bookmakerKey}" (matches filter: ${JSON.stringify(bookFilter)})`);
+        if (hasPartialMatch) {
+          return true;
         }
-        return isSelectedDFSApp;
+        
+        return false;
       });
       
-      console.log('🎯 After filtering: ' + r.length + ' rows');
+      console.log('🎯 After sportsbook filtering: ' + r.length + ' rows');
     }
     
     // ========== MARKET FILTERING ==========
