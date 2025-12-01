@@ -2343,14 +2343,21 @@ export default function OddsTable({
   const sorter = sorters[sort.key] || sorters.ev;
 
   let rows = useMemo(() => {
-    console.log('🚨🚨🚨 ROWS USEMEMO RUNNING - VERSION 2 🚨🚨🚨');
-    console.log('🚨 bookFilter:', JSON.stringify(bookFilter));
+    console.log('🚨🚨🚨 ROWS USEMEMO RUNNING - VERSION 3 🚨🚨🚨');
+    console.log('🚨 bookFilter received:', JSON.stringify(bookFilter));
+    console.log('🚨 bookFilter type:', typeof bookFilter);
+    console.log('🚨 bookFilter is array:', Array.isArray(bookFilter));
+    console.log('🚨 bookFilter length:', bookFilter?.length);
     console.log('🚨 mode:', mode);
     console.log('🚨 allRows length:', allRows?.length);
     
     // Log unique bookmakers in allRows
     const uniqueBookmakers = [...new Set(allRows.map(r => r?.bk?.key || 'unknown'))];
     console.log('🚨 Unique bookmakers in allRows:', uniqueBookmakers);
+    
+    // CRITICAL: Check if filter should be applied
+    const shouldFilter = bookFilter && Array.isArray(bookFilter) && bookFilter.length > 0;
+    console.log('🚨 Should apply filter?', shouldFilter);
     
     let r = allRows;
     
