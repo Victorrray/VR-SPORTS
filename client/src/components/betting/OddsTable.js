@@ -525,6 +525,25 @@ function getSportLeague(sportKey='', sportTitle=''){
   return { sport: sportGuess, league };
 }
 
+/* ---------- DFS Apps Odds Override ---------- */
+// DFS apps (PrizePicks, Underdog, DraftKings Pick 6, Dabble) always have -119 odds
+const DFS_APPS = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au'];
+function isDFSApp(bookKey) {
+  if (!bookKey) return false;
+  const normalized = String(bookKey).toLowerCase();
+  return DFS_APPS.some(app => normalized.includes(app) || app.includes(normalized));
+}
+function getDFSFixedOdds() {
+  return -119;
+}
+// Get the display odds - returns -119 for DFS apps, otherwise the actual odds
+function getDisplayOdds(odds, bookKey) {
+  if (isDFSApp(bookKey)) {
+    return getDFSFixedOdds();
+  }
+  return odds;
+}
+
 /* ---------- De-vig helpers ---------- */
 function consensusDevigProb(row) {
   try {
@@ -3203,7 +3222,9 @@ export default function OddsTable({
                   <td className={oddsChange ? (oddsChange === 'up' ? 'flash-up' : 'flash-down') : ''}>
                     <span className="odds-main odds-best">
                       {(() => {
-                        const n = Number(row.out.price ?? row.out.odds ?? 0);
+                        // Use fixed -119 odds for DFS apps (PrizePicks, Underdog, Pick6, Dabble)
+                        const rawOdds = Number(row.out.price ?? row.out.odds ?? 0);
+                        const n = getDisplayOdds(rawOdds, row.bk?.key);
                         if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
                         if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
                         const num = n > 0 ? Math.round(Math.abs(n)) : 100;
@@ -3418,7 +3439,9 @@ export default function OddsTable({
                           <div className={`mob-odds-container ${priceDelta[row.key] ? (priceDelta[row.key] === 'up' ? 'up' : 'down') : ''}`}>
                             <span className="mob-odds">
                               {(() => {
-                                const n = Number(row.out.price ?? row.out.odds ?? 0);
+                                // Use fixed -119 odds for DFS apps (PrizePicks, Underdog, Pick6, Dabble)
+                                const rawOdds = Number(row.out.price ?? row.out.odds ?? 0);
+                                const n = getDisplayOdds(rawOdds, row.bk?.key);
                                 if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
                                 if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
                                 const num = n > 0 ? Math.round(Math.abs(n)) : 100;
@@ -3801,15 +3824,20 @@ export default function OddsTable({
                               return '';
                             };
 
-                            const formatOdds = (n) => {
-                              if (!n && n !== 0) return '';
-                              if (currentOddsFormat === 'american') return n > 0 ? `+${n}` : `${n}`;
-                              if (currentOddsFormat === 'decimal') { const d = toDecimal(n); return d ? d.toFixed(2) : ''; }
-                              const num = n > 0 ? Math.round(Math.abs(n)) : 100;
-                              const den = n > 0 ? 100 : Math.round(Math.abs(n));
+                            // Format odds with DFS app override (-119 for PrizePicks, Underdog, Pick6, Dabble)
+                            const formatOddsWithBook = (n, bookKey) => {
+                              // Apply DFS fixed odds if applicable
+                              const displayOdds = getDisplayOdds(n, bookKey);
+                              if (!displayOdds && displayOdds !== 0) return '';
+                              if (currentOddsFormat === 'american') return displayOdds > 0 ? `+${displayOdds}` : `${displayOdds}`;
+                              if (currentOddsFormat === 'decimal') { const d = toDecimal(displayOdds); return d ? d.toFixed(2) : ''; }
+                              const num = displayOdds > 0 ? Math.round(Math.abs(displayOdds)) : 100;
+                              const den = displayOdds > 0 ? 100 : Math.round(Math.abs(displayOdds));
                               const g = (function g(a,b){return b?g(b,a%b):a})(num,den)||1;
                               return `${num/g}/${den/g}`;
                             };
+                            // Keep original formatOdds for backward compatibility
+                            const formatOdds = (n) => formatOddsWithBook(n, null);
 
                             return (
                               <>
@@ -3920,7 +3948,8 @@ export default function OddsTable({
                                               );
                                               if (!overBook) return '-';
                                               // Show only odds, line is displayed under sportsbook name
-                                              return formatOdds(Number(overBook.price ?? overBook.odds ?? 0));
+                                              // Use formatOddsWithBook to apply DFS fixed odds
+                                              return formatOddsWithBook(Number(overBook.price ?? overBook.odds ?? 0), ob.bookmaker?.key);
                                             })()}
                                           </div>
                                         </div>
@@ -3934,7 +3963,8 @@ export default function OddsTable({
                                               );
                                               if (!underBook) return '-';
                                               // Show only odds, line is displayed under sportsbook name
-                                              return formatOdds(Number(underBook.price ?? underBook.odds ?? 0));
+                                              // Use formatOddsWithBook to apply DFS fixed odds
+                                              return formatOddsWithBook(Number(underBook.price ?? underBook.odds ?? 0), ob.bookmaker?.key);
                                             })()}
                                           </div>
                                         </div>
@@ -3944,7 +3974,7 @@ export default function OddsTable({
                                       <>
                                         <div className="mini-odds-col">
                                           <div className="mini-swipe-odds" style={ob.isBestOdds ? { background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)', borderRadius: '4px', padding: '2px 6px' } : {}}>
-                                            {formatOdds(Number(ob.price ?? ob.odds ?? 0))}
+                                            {formatOddsWithBook(Number(ob.price ?? ob.odds ?? 0), ob.bookmaker?.key)}
                                             {(() => {
                                               // Debug logging for bet limits
                                               if (ob.bookmaker?.key === 'novig' || ob.bookmaker?.key === 'prophetx') {
