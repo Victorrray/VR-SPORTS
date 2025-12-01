@@ -92,11 +92,21 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     { id: 'middles', name: 'Middles' }
   ];
 
+  // Player props market types
   const marketTypes = [
-    { id: 'all', name: 'All Markets' },
-    { id: 'moneyline', name: 'Moneyline' },
-    { id: 'spread', name: 'Spread' },
-    { id: 'totals', name: 'Totals (Over/Under)' },
+    { id: 'all', name: 'All Props' },
+    { id: 'player_points', name: 'Points' },
+    { id: 'player_rebounds', name: 'Rebounds' },
+    { id: 'player_assists', name: 'Assists' },
+    { id: 'player_threes', name: '3-Pointers' },
+    { id: 'player_steals', name: 'Steals' },
+    { id: 'player_blocks', name: 'Blocks' },
+    { id: 'player_pass_yds', name: 'Passing Yards' },
+    { id: 'player_pass_tds', name: 'Passing TDs' },
+    { id: 'player_rush_yds', name: 'Rushing Yards' },
+    { id: 'player_receptions', name: 'Receptions' },
+    { id: 'player_reception_yds', name: 'Receiving Yards' },
+    { id: 'player_anytime_td', name: 'Anytime TD' },
   ];
 
   const sportsbooksByTier = [
