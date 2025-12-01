@@ -1483,6 +1483,36 @@ export default function OddsTable({
           if (hasFilter) {
             // Filter overBooks and underBooks to only include books in the filter
             const normalizedFilter = bookFilter.map(f => f.toLowerCase());
+            
+            // STRICT matching function - only exact match or known DFS app variations
+            const dfsVariations = {
+              'dabble': ['dabble', 'dabble_au'],
+              'prizepicks': ['prizepicks'],
+              'underdog': ['underdog'],
+              'pick6': ['pick6', 'draftkings_pick6']
+            };
+            
+            const matchesFilter = (bookKey) => {
+              const key = bookKey.toLowerCase();
+              return normalizedFilter.some(filterKey => {
+                // Exact match
+                if (key === filterKey) return true;
+                
+                // Check DFS variations
+                const variations = dfsVariations[filterKey] || [];
+                if (variations.includes(key)) return true;
+                
+                // Check reverse
+                for (const [base, vars] of Object.entries(dfsVariations)) {
+                  if (vars.includes(key) && (filterKey === base || vars.includes(filterKey))) {
+                    return true;
+                  }
+                }
+                
+                return false;
+              });
+            };
+            
             console.log(`🎯 FILTER DEBUG START: ${propData.playerName}`, {
               rawFilter: bookFilter,
               normalizedFilter: normalizedFilter,
@@ -1492,39 +1522,16 @@ export default function OddsTable({
             
             overBooksToUse = propData.overBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              // Check for exact match first
-              if (normalizedFilter.includes(bookKey)) {
-                console.log(`  🎯 Over book check: "${bookKey}" EXACT MATCH in filter`);
-                return true;
-              }
-              // Check for partial match (for DFS apps that might have different key formats)
-              const hasPartialMatch = normalizedFilter.some(filterKey => {
-                return bookKey.includes(filterKey) || filterKey.includes(bookKey);
-              });
-              if (hasPartialMatch) {
-                console.log(`  🎯 Over book check: "${bookKey}" PARTIAL MATCH in filter`);
-                return true;
-              }
-              console.log(`  🎯 Over book check: "${bookKey}" NO MATCH in filter`);
-              return false;
+              const matches = matchesFilter(bookKey);
+              console.log(`  🎯 Over book check: "${bookKey}" ${matches ? 'MATCH' : 'NO MATCH'} in filter`);
+              return matches;
             });
+            
             underBooksToUse = propData.underBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              // Check for exact match first
-              if (normalizedFilter.includes(bookKey)) {
-                console.log(`  🎯 Under book check: "${bookKey}" EXACT MATCH in filter`);
-                return true;
-              }
-              // Check for partial match (for DFS apps that might have different key formats)
-              const hasPartialMatch = normalizedFilter.some(filterKey => {
-                return bookKey.includes(filterKey) || filterKey.includes(bookKey);
-              });
-              if (hasPartialMatch) {
-                console.log(`  🎯 Under book check: "${bookKey}" PARTIAL MATCH in filter`);
-                return true;
-              }
-              console.log(`  🎯 Under book check: "${bookKey}" NO MATCH in filter`);
-              return false;
+              const matches = matchesFilter(bookKey);
+              console.log(`  🎯 Under book check: "${bookKey}" ${matches ? 'MATCH' : 'NO MATCH'} in filter`);
+              return matches;
             });
             
             console.log(`🎯 FILTER DEBUG END: ${propData.playerName} - Filtering for ${bookFilter.join(', ')} - overBooks: ${overBooksToUse.length}/${propData.overBooks.length}, underBooks: ${underBooksToUse.length}/${propData.underBooks.length}`, {
@@ -1619,12 +1626,39 @@ export default function OddsTable({
           });
           
           // CRITICAL: Validate that primaryBook is actually from the filtered list
+          console.log(`🚨 VALIDATION CHECK for ${propData.playerName}: hasFilter=${hasFilter}, primaryBook=${primaryBook?.bookmaker?.key}, bookFilter=${JSON.stringify(bookFilter)}`);
+          
           if (hasFilter && primaryBook) {
             const primaryBookKey = (primaryBook.bookmaker?.key || '').toLowerCase();
             const normalizedFilter = bookFilter.map(f => f.toLowerCase());
-            const isInFilter = normalizedFilter.some(filterKey => 
-              primaryBookKey === filterKey || primaryBookKey.includes(filterKey) || filterKey.includes(primaryBookKey)
-            );
+            
+            // STRICT matching - only exact match or known DFS app variations
+            const dfsVariations = {
+              'dabble': ['dabble', 'dabble_au'],
+              'prizepicks': ['prizepicks'],
+              'underdog': ['underdog'],
+              'pick6': ['pick6', 'draftkings_pick6']
+            };
+            
+            const isInFilter = normalizedFilter.some(filterKey => {
+              // Exact match
+              if (primaryBookKey === filterKey) return true;
+              
+              // Check DFS variations
+              const variations = dfsVariations[filterKey] || [];
+              if (variations.includes(primaryBookKey)) return true;
+              
+              // Check reverse - if primaryBookKey is a base and filterKey is a variation
+              for (const [base, vars] of Object.entries(dfsVariations)) {
+                if (vars.includes(primaryBookKey) && (filterKey === base || vars.includes(filterKey))) {
+                  return true;
+                }
+              }
+              
+              return false;
+            });
+            
+            console.log(`🚨 VALIDATION RESULT: primaryBookKey="${primaryBookKey}", normalizedFilter=${JSON.stringify(normalizedFilter)}, isInFilter=${isInFilter}`);
             
             if (!isInFilter) {
               console.log(`⚠️ PRIMARY BOOK VALIDATION FAILED: ${primaryBookKey} is NOT in filter ${normalizedFilter.join(', ')} - SKIPPING PROP`);
