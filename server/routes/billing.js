@@ -344,4 +344,58 @@ router.post('/cancel-subscription', requireUser, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/billing/customer-portal
+ * Creates a Stripe customer portal session for managing billing
+ */
+router.post('/customer-portal', requireUser, async (req, res) => {
+  try {
+    const stripe = req.app.locals.stripe;
+    const supabase = req.app.locals.supabase;
+
+    if (!stripe) {
+      return res.status(500).json({ error: 'Stripe not configured' });
+    }
+
+    const userId = req.__userId;
+
+    if (!userId || userId === 'demo-user') {
+      return res.status(401).json({ error: 'Authenticated user required' });
+    }
+
+    // Get user's Stripe customer ID from Supabase
+    if (!supabase) {
+      return res.status(500).json({ error: 'Database not configured' });
+    }
+
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('stripe_customer_id')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      console.error('Error fetching user:', userError);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!user.stripe_customer_id) {
+      return res.status(400).json({ error: 'No billing account found. Please subscribe first.' });
+    }
+
+    // Create a customer portal session
+    const session = await stripe.billingPortal.sessions.create({
+      customer: user.stripe_customer_id,
+      return_url: `${FRONTEND_URL}/account`,
+    });
+
+    console.log(`✅ Created customer portal session for user: ${userId}`);
+    res.json({ url: session.url });
+
+  } catch (error) {
+    console.error('Error creating customer portal session:', error);
+    res.status(500).json({ error: 'Failed to create billing portal session' });
+  }
+});
+
 module.exports = router;

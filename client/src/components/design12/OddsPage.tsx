@@ -47,8 +47,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [selectedSport, setSelectedSport] = useState('all');
   const [selectedMarket, setSelectedMarket] = useState('all');
   const [selectedBetType, setSelectedBetType] = useState('straight');
-  const [expandedRows, setExpandedRows] = useState<number[]>([]);
-  const [expandedSportsbooks, setExpandedSportsbooks] = useState<number[]>([]);
+  const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
+  const [expandedSportsbooks, setExpandedSportsbooks] = useState<(string | number)[]>([]);
   const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false);
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
@@ -65,7 +65,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [betTypeExpanded, setBetTypeExpanded] = useState(false);
   const [marketExpanded, setMarketExpanded] = useState(false);
   const [sportsbooksExpanded, setSportsbooksExpanded] = useState(false);
-  const [addedPicks, setAddedPicks] = useState<number[]>([]); // Track which picks have been added
+  const [addedPicks, setAddedPicks] = useState<(string | number)[]>([]); // Track which picks have been added
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Generate date options dynamically
@@ -226,13 +226,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     }
   ];
 
-  const toggleRow = (id: number) => {
+  const toggleRow = (id: string | number) => {
     setExpandedRows(prev => 
       prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
     );
   };
 
-  const toggleSportsbook = (id: number) => {
+  const toggleSportsbook = (id: string | number) => {
     setExpandedSportsbooks(prev => 
       prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
     );

@@ -57,9 +57,30 @@ export default function Navbar({ onOpenMobileSearch }) {
     navigate('/subscribe');
   };
 
-  const handleManageBilling = () => {
-    // TODO: Implement customer portal link
-    alert('Billing management coming soon!');
+  const handleManageBilling = async () => {
+    try {
+      const { withApiBase, getAuthHeaders } = require('../../config/api');
+      const response = await fetch(withApiBase('/api/billing/customer-portal'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data?.url) {
+        window.location.href = data.url;
+      } else if (data?.error) {
+        alert(data.error);
+      } else {
+        alert('Unable to open billing portal. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error opening billing portal:', error);
+      alert('Failed to open billing portal. Please try again.');
+    }
   };
 
   return (
