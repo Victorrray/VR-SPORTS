@@ -99,19 +99,34 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       console.log('🏈 Requested sports:', sportsArray);
       
       // Map sports to their player props markets (using TheOddsAPI market names)
+      // Reference: https://the-odds-api.com/sports-odds-data/betting-markets.html
       const playerPropsMarketMap = {
         'americanfootball_nfl': [
-          'player_passing_yards', 'player_passing_touchdowns', 'player_rushing_yards', 
-          'player_receptions', 'player_receiving_yards', 'player_rushing_attempts'
+          'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions',
+          'player_rush_yds', 'player_rush_tds', 'player_rush_attempts', 'player_rush_longest',
+          'player_receptions', 'player_reception_yds', 'player_reception_tds', 'player_reception_longest',
+          'player_anytime_td', 'player_1st_td', 'player_last_td'
+        ],
+        'americanfootball_ncaaf': [
+          'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts',
+          'player_rush_yds', 'player_rush_tds', 'player_rush_attempts',
+          'player_receptions', 'player_reception_yds', 'player_reception_tds',
+          'player_anytime_td'
         ],
         'basketball_nba': [
-          'player_points', 'player_rebounds', 'player_assists', 'player_three_pointers_made'
+          'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+          'player_steals', 'player_blocks', 'player_turnovers'
+        ],
+        'basketball_ncaab': [
+          'player_points', 'player_rebounds', 'player_assists', 'player_threes'
         ],
         'baseball_mlb': [
-          'player_home_runs', 'player_hits', 'player_strikeouts', 'player_total_bases'
+          'batter_hits', 'batter_total_bases', 'batter_rbis', 'batter_runs_scored', 'batter_home_runs',
+          'pitcher_strikeouts', 'pitcher_hits_allowed', 'pitcher_walks', 'pitcher_earned_runs', 'pitcher_outs'
         ],
         'icehockey_nhl': [
-          'player_goals', 'player_assists', 'player_shots_on_goal'
+          'player_goals', 'player_assists', 'player_shots_on_goal', 'player_blocked_shots',
+          'player_power_play_points', 'player_total_saves'
         ]
       };
       
