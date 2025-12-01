@@ -1687,7 +1687,13 @@ export default function OddsTable({
               // For mini-table: include ALL books for line shopping and comparison
               // Use UNFILTERED books (propData) for mini-table, not the filtered ones (overBooksToUse/underBooksToUse)
               // Even if main row is filtered, users need to see all available odds
-              allBooks: [...(propData.overBooks || []), ...(propData.underBooks || [])],
+              allBooks: (() => {
+                const allUnfilteredBooks = [...(propData.overBooks || []), ...(propData.underBooks || [])];
+                console.log(`🚨 Creating allBooks for ${propData.playerName}: ${allUnfilteredBooks.length} total books`);
+                console.log(`🚨 propData.overBooks: ${propData.overBooks?.length || 0}, propData.underBooks: ${propData.underBooks?.length || 0}`);
+                console.log(`🚨 Books in allBooks:`, allUnfilteredBooks.map(b => b?.bookmaker?.key || 'unknown'));
+                return allUnfilteredBooks;
+              })(),
               selectedBooks: propData.selectedBooks || [],
               nonSelectedBooks: propData.nonSelectedBooks || [],
               otherSideName: showOver ? 'Under' : 'Over'
@@ -3586,7 +3592,8 @@ export default function OddsTable({
                             const dedupedBooks = (() => {
                               const seenKeys = new Set();
                               
-                              console.log(`🎯 Mini table: Showing ${booksToProcess.length} books for line shopping and comparison`);
+                              console.log(`🚨 Mini table DEBUG: row.allBooks has ${booksToProcess.length} books`);
+                              console.log(`🚨 Mini table DEBUG: Books are:`, booksToProcess.map(b => b?.bookmaker?.key || b?.book || 'unknown'));
                               
                               // For combined props, collect all unique bookmakers from allBooks (which contains ALL books, not filtered)
                               if (mode === "props" && row.isCombinedProp) {
