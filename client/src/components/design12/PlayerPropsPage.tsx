@@ -1012,10 +1012,18 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       </div>
                       {/* Game Matchup */}
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.game}</div>
-                      {/* Game Time - TODO: Mock date - will be replaced with actual game time from API */}
+                      {/* Game Time */}
                       <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
                         <Clock className="w-3 h-3" />
-                        Sun, Nov 10 7:00 PM PST
+                        {pick.commenceTime || pick.gameTime ? new Date(pick.commenceTime || pick.gameTime).toLocaleString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true,
+                          timeZone: 'America/Los_Angeles'
+                        }) : 'Time TBD'}
                       </div>
                     </div>
 
@@ -1055,7 +1063,15 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </h3>
                           <div className={`flex items-center gap-1.5 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold`}>
                             <Clock className="w-3 h-3" />
-                            Sun, Nov 10 7:00 PM PST
+                            {pick.commenceTime || pick.gameTime ? new Date(pick.commenceTime || pick.gameTime).toLocaleString('en-US', { 
+                              weekday: 'short', 
+                              month: 'short', 
+                              day: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                              timeZone: 'America/Los_Angeles'
+                            }) : 'Time TBD'}
                           </div>
                         </div>
                         <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-full border`}>

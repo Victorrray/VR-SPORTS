@@ -212,7 +212,9 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
           isPlayerProp: true,
           playerName: propData.playerName,
           marketKey: propData.marketKey,
-          line: propData.point
+          line: propData.point,
+          gameTime: game.commence_time || undefined,
+          commenceTime: game.commence_time || undefined
         });
       });
     } else {
