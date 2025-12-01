@@ -1713,3 +1713,18 @@
 {"duration":"0ms","ip":"::ffff:127.0.0.1","level":"info","message":"API Request","method":"GET","path":"/favicon.svg","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 20:57:31","userId":"anonymous"}
 {"duration":"3ms","ip":"::ffff:127.0.0.1","level":"info","message":"API Request","method":"GET","path":"/favicon.svg","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 20:57:40","userId":"anonymous"}
 {"duration":"1ms","ip":"::ffff:127.0.0.1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 20:58:00","userId":"anonymous"}
+{"level":"info","message":"✅ Server running on http://localhost:10000","port":"10000","service":"vr-odds-api","timestamp":"2025-11-30 23:44:18"}
+{"duration":"5ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"2ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/static/css/main.7d865476.css","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"8ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/static/js/main.0a672967.js","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"28ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/sw.js","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/manifest.json","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/favicon.svg","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/apple-touch-icon.png","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/favicon.png","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"439ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":200,"timestamp":"2025-11-30 23:44:21","userId":"anonymous"}
+{"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/favicon.svg","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 23:44:23","userId":"anonymous"}
+{"duration":"0ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/favicon.svg","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 23:44:25","userId":"anonymous"}
+{"duration":"129ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 23:44:25","userId":"anonymous"}
+{"duration":"0ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/favicon.svg","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 23:44:26","userId":"anonymous"}
+{"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/favicon.svg","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 23:44:47","userId":"anonymous"}
