@@ -9,9 +9,11 @@ import {
   Bell,
   LogOut,
   Lock,
+  Star,
 } from "lucide-react";
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/SimpleAuth';
+import { useMe } from '../../hooks/useMe';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
@@ -29,6 +31,14 @@ export function AccountPage({
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const { user, profile } = useAuth();
+  const { me, loading: meLoading } = useMe();
+  
+  // Determine plan display
+  const userPlan = me?.plan || 'free';
+  const isPlatinum = userPlan === 'platinum' || me?.unlimited === true;
+  const isGold = userPlan === 'gold';
+  const planDisplayName = isPlatinum ? 'Platinum Member' : isGold ? 'Gold Member' : 'Free Plan';
+  const PlanIcon = isPlatinum ? Crown : isGold ? Star : User;
   
   return (
     <div className="space-y-6 relative">
@@ -73,11 +83,29 @@ export function AccountPage({
               {profile?.username || user?.email?.split('@')[0] || 'User'}
             </h3>
             <div className="flex items-center gap-2">
-              <div className={`px-3 py-1 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-lg backdrop-blur-xl`}>
+              <div className={`px-3 py-1 ${
+                isPlatinum 
+                  ? (isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30')
+                  : isGold
+                    ? (isLight ? 'bg-yellow-100 border-yellow-200' : 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/30')
+                    : (isLight ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 border-gray-400/30')
+              } border rounded-lg backdrop-blur-xl`}>
                 <div className="flex items-center gap-1.5">
-                  <Crown className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
-                  <span className={`${isLight ? 'text-amber-700' : 'text-amber-400'} font-bold text-sm`}>
-                    Platinum Member
+                  <PlanIcon className={`w-4 h-4 ${
+                    isPlatinum 
+                      ? (isLight ? 'text-amber-600' : 'text-amber-400')
+                      : isGold
+                        ? (isLight ? 'text-yellow-600' : 'text-yellow-400')
+                        : (isLight ? 'text-gray-600' : 'text-gray-400')
+                  }`} />
+                  <span className={`${
+                    isPlatinum 
+                      ? (isLight ? 'text-amber-700' : 'text-amber-400')
+                      : isGold
+                        ? (isLight ? 'text-yellow-700' : 'text-yellow-400')
+                        : (isLight ? 'text-gray-700' : 'text-gray-400')
+                  } font-bold text-sm`}>
+                    {meLoading ? 'Loading...' : planDisplayName}
                   </span>
                 </div>
               </div>
