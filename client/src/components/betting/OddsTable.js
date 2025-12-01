@@ -1467,15 +1467,39 @@ export default function OddsTable({
             
             overBooksToUse = propData.overBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              const matches = normalizedFilter.includes(bookKey);
-              console.log(`  🎯 Over book check: "${bookKey}" in filter? ${matches}`);
-              return matches;
+              // Check for exact match first
+              if (normalizedFilter.includes(bookKey)) {
+                console.log(`  🎯 Over book check: "${bookKey}" EXACT MATCH in filter`);
+                return true;
+              }
+              // Check for partial match (for DFS apps that might have different key formats)
+              const hasPartialMatch = normalizedFilter.some(filterKey => {
+                return bookKey.includes(filterKey) || filterKey.includes(bookKey);
+              });
+              if (hasPartialMatch) {
+                console.log(`  🎯 Over book check: "${bookKey}" PARTIAL MATCH in filter`);
+                return true;
+              }
+              console.log(`  🎯 Over book check: "${bookKey}" NO MATCH in filter`);
+              return false;
             });
             underBooksToUse = propData.underBooks.filter(b => {
               const bookKey = (b.bookmaker?.key || b.book || '').toLowerCase();
-              const matches = normalizedFilter.includes(bookKey);
-              console.log(`  🎯 Under book check: "${bookKey}" in filter? ${matches}`);
-              return matches;
+              // Check for exact match first
+              if (normalizedFilter.includes(bookKey)) {
+                console.log(`  🎯 Under book check: "${bookKey}" EXACT MATCH in filter`);
+                return true;
+              }
+              // Check for partial match (for DFS apps that might have different key formats)
+              const hasPartialMatch = normalizedFilter.some(filterKey => {
+                return bookKey.includes(filterKey) || filterKey.includes(bookKey);
+              });
+              if (hasPartialMatch) {
+                console.log(`  🎯 Under book check: "${bookKey}" PARTIAL MATCH in filter`);
+                return true;
+              }
+              console.log(`  🎯 Under book check: "${bookKey}" NO MATCH in filter`);
+              return false;
             });
             
             console.log(`🎯 FILTER DEBUG END: ${propData.playerName} - Filtering for ${bookFilter.join(', ')} - overBooks: ${overBooksToUse.length}/${propData.overBooks.length}, underBooks: ${underBooksToUse.length}/${propData.underBooks.length}`, {
@@ -2261,12 +2285,16 @@ export default function OddsTable({
     }
     
     // ========== SPORTSBOOK FILTERING ==========
-    // Apply sportsbook filter if any books are selected
+    // For player props mode, sportsbook filtering is already handled in allRows
+    // where the primary book (row.bk) is selected from filtered books.
+    // We skip the additional filtering here to avoid double-filtering.
+    // For game mode, we apply the filter here.
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
     const hasBookFilter = bookFilter && bookFilter.length > 0;
     
     console.log('🔍 SPORTSBOOK FILTER DEBUG: bookFilter =', bookFilter);
     console.log('🔍 SPORTSBOOK FILTER DEBUG: hasBookFilter =', hasBookFilter);
+    console.log('🔍 SPORTSBOOK FILTER DEBUG: mode =', mode);
     console.log('🔍 SPORTSBOOK FILTER DEBUG: Number of rows before filtering:', r.length);
     
     // Log all available bookmakers in the data
@@ -2278,7 +2306,8 @@ export default function OddsTable({
     console.log('🔍 SPORTSBOOK FILTER DEBUG: All bookmakers in data =', Array.from(allBookmakers));
     
     // If any sportsbooks are selected, filter to only show those books
-    if (hasBookFilter) {
+    // Skip for props mode since filtering is handled in allRows
+    if (hasBookFilter && mode !== 'props') {
       console.log('🎯 Sportsbook filtering active - showing only selected books:', bookFilter);
       console.log('🎯 Before filtering: ' + r.length + ' rows');
       
@@ -2306,6 +2335,8 @@ export default function OddsTable({
       });
       
       console.log('🎯 After sportsbook filtering: ' + r.length + ' rows');
+    } else if (hasBookFilter && mode === 'props') {
+      console.log('🎯 Props mode: Sportsbook filtering already applied in allRows, skipping here');
     }
     
     // ========== MARKET FILTERING ==========
