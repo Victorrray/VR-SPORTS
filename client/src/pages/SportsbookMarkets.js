@@ -492,14 +492,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Function to get all compatible markets for the selected sports
   const getAllCompatibleMarkets = (sports) => {
-    // If no sports selected or in player props mode, return default
+    // If no sports selected, return default
     if (!sports || sports.length === 0) {
       return getAutoSelectedMarkets([]);
     }
     
-    // For player props mode, return the selected player prop markets
+    // For player props mode, use PLAYER_PROP_MARKET_KEYS to ensure we send player prop markets
+    // This triggers the backend to fetch player props via betType=props detection
     if (isPlayerPropsMode) {
-      return filters.playerPropMarkets;
+      // Use selected player prop markets if available, otherwise use all player prop markets
+      const selectedMarkets = filters.playerPropMarkets && filters.playerPropMarkets.length > 0
+        ? filters.playerPropMarkets
+        : PLAYER_PROP_MARKET_KEYS;
+      console.log('🏈 getAllCompatibleMarkets: Player props mode, returning markets:', selectedMarkets);
+      return selectedMarkets;
     }
     
     // For regular mode with selected markets, use those

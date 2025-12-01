@@ -1790,3 +1790,6 @@
 {"duration":"1ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/apple-touch-icon.png","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 23:58:31","userId":"anonymous"}
 {"duration":"123ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":304,"timestamp":"2025-11-30 23:58:31","userId":"anonymous"}
 {"duration":"229ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":401,"timestamp":"2025-12-01 00:00:45","userId":"anonymous"}
+{"level":"info","message":"✅ Server running on http://localhost:10000","port":"10000","service":"vr-odds-api","timestamp":"2025-12-01 00:11:06"}
+{"duration":"4ms","ip":"::1","level":"info","message":"API Request","method":"GET","path":"/","service":"vr-odds-api","status":401,"timestamp":"2025-12-01 00:11:26","userId":"anonymous"}
+{"level":"info","message":"✅ Server running on http://localhost:10000","port":"10000","service":"vr-odds-api","timestamp":"2025-12-01 00:12:33"}
