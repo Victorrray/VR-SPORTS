@@ -2337,6 +2337,11 @@ export default function OddsTable({
   const sorter = sorters[sort.key] || sorters.ev;
 
   let rows = useMemo(() => {
+    console.log('🚨🚨🚨 ROWS USEMEMO RUNNING 🚨🚨🚨');
+    console.log('🚨 bookFilter:', bookFilter);
+    console.log('🚨 mode:', mode);
+    console.log('🚨 allRows length:', allRows?.length);
+    
     let r = allRows;
     
     // ========== MODE-SPECIFIC FILTERING ==========
