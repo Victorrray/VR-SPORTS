@@ -178,24 +178,30 @@ function isMarketLikelyLocked(book, isDFSApp = false) {
   return false;
 }
 
+/* ---------- DFS Apps Odds Override (must be before calculateEV) ---------- */
+// DFS apps (PrizePicks, Underdog, DraftKings Pick 6, Dabble) always have -119 odds
+const DFS_APPS_LIST = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au'];
+const DFS_FIXED_ODDS = -119;
+
+function isDFSAppForEV(bookKey) {
+  if (!bookKey) return false;
+  const normalized = String(bookKey).toLowerCase();
+  return DFS_APPS_LIST.some(app => normalized.includes(app) || app.includes(normalized));
+}
+
 /* ---------- Helpers (unchanged core math) ---------- */
 function calculateEV(odds, fairLine, bookmakerKey = null) {
   if (!odds || !fairLine) return null;
   const toDec = o => (o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1);
   
-  // Special EV calculation for DFS apps only
-  const isDFSApp = ['prizepicks', 'underdog', 'pick6', 'dabble_au'].includes(bookmakerKey);
-  
-  if (isDFSApp) {
-    // DFS apps pay even money (+100) regardless of displayed odds
-    // PrizePicks, Underdog, Pick6 all use pick'em model with +100 payout
-    const dfsPayoutOdds = +100; // Even money payout
-    const dfsDec = toDec(dfsPayoutOdds);
+  // Check if this is a DFS app - use fixed -119 odds for EV calculation
+  if (isDFSAppForEV(bookmakerKey)) {
+    // DFS apps always have -119 odds for EV calculation
+    // This ensures EV is calculated based on the actual -119 payout, not API odds
+    const dfsDec = toDec(DFS_FIXED_ODDS); // -119
     const fairDec = toDec(fairLine);
     
-    // Calculate EV: Compare +100 payout to market consensus
-    // If market is -120, getting +100 is +EV
-    // If market is -102, getting +100 is -EV
+    // Calculate EV: Compare -119 payout to market consensus (fair line)
     return ((dfsDec / fairDec) - 1) * 100;
   }
   
