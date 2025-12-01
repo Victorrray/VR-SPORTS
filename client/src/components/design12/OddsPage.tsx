@@ -85,21 +85,23 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const dateFilteredPicks = useMemo(() => {
     if (!apiPicks || apiPicks.length === 0) return [];
     
-    // If "all_upcoming" is selected, show all future games
+    // If "all_upcoming" is selected, show all games (no date filter)
     if (selectedDate === 'all_upcoming') {
-      const now = new Date();
-      return apiPicks.filter(pick => {
-        if (!pick.commenceTime && !pick.gameTime) return true;
-        const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
-        return gameDate >= now;
-      });
+      return apiPicks;
     }
     
     // Filter by specific date (YYYY-MM-DD format)
     return apiPicks.filter(pick => {
-      if (!pick.commenceTime && !pick.gameTime) return false;
+      // If no game time, include the pick (don't filter it out)
+      if (!pick.commenceTime && !pick.gameTime) return true;
+      
       const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
-      const gameDateStr = gameDate.toISOString().split('T')[0];
+      // Use local date string to avoid timezone issues
+      const year = gameDate.getFullYear();
+      const month = String(gameDate.getMonth() + 1).padStart(2, '0');
+      const day = String(gameDate.getDate()).padStart(2, '0');
+      const gameDateStr = `${year}-${month}-${day}`;
+      
       return gameDateStr === selectedDate;
     });
   }, [apiPicks, selectedDate]);
