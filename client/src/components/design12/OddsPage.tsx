@@ -90,8 +90,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       return apiPicks;
     }
     
+    // Debug: Log all game dates
+    console.log('🗓️ Selected date:', selectedDate);
+    console.log('🗓️ All picks with dates:', apiPicks.map(p => ({
+      game: p.game,
+      commenceTime: p.commenceTime,
+      gameTime: p.gameTime
+    })));
+    
     // Filter by specific date (YYYY-MM-DD format)
-    return apiPicks.filter(pick => {
+    const filtered = apiPicks.filter(pick => {
       // If no game time, include the pick (don't filter it out)
       if (!pick.commenceTime && !pick.gameTime) return true;
       
@@ -102,8 +110,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       const day = String(gameDate.getDate()).padStart(2, '0');
       const gameDateStr = `${year}-${month}-${day}`;
       
+      console.log(`🗓️ Game: ${pick.game}, Date: ${gameDateStr}, Selected: ${selectedDate}, Match: ${gameDateStr === selectedDate}`);
+      
       return gameDateStr === selectedDate;
     });
+    
+    console.log('🗓️ Filtered picks count:', filtered.length);
+    return filtered;
   }, [apiPicks, selectedDate]);
 
   // Use date-filtered picks
