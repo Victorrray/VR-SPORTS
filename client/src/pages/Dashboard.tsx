@@ -104,33 +104,37 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     });
   };
 
+  // Calculate dynamic change values based on actual data
+  const profitIsPositive = !userStats.totalProfit.startsWith('-');
+  const edgeIsPositive = parseFloat(userStats.averageEdge) > 0;
+  
   const stats = [
     {
       label: "Win Rate",
       value: userStats.loading ? "—" : userStats.winRate,
-      change: "+5.2%",
-      positive: true,
+      change: userStats.loading ? "" : `${userStats.totalPicks} picks`,
+      positive: parseFloat(userStats.winRate) >= 50,
       icon: Target,
     },
     {
       label: "Average Edge",
       value: userStats.loading ? "—" : userStats.averageEdge,
-      change: "+0.3%",
-      positive: true,
+      change: userStats.loading ? "" : edgeIsPositive ? "Positive EV" : "Track more bets",
+      positive: edgeIsPositive,
       icon: TrendingUp,
     },
     {
       label: "Total Profit",
       value: userStats.loading ? "—" : userStats.totalProfit,
-      change: "+$892",
-      positive: true,
+      change: userStats.loading ? "" : profitIsPositive ? "Keep it up!" : "Stay disciplined",
+      positive: profitIsPositive,
       icon: DollarSign,
     },
     {
       label: "Active Bets",
       value: userStats.loading ? "—" : userStats.activeBets.toString(),
-      change: "3 today",
-      positive: true,
+      change: userStats.loading ? "" : userStats.activeBets > 0 ? "In play" : "Add picks",
+      positive: userStats.activeBets > 0,
       icon: Sparkles,
     },
   ];

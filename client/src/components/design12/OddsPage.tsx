@@ -128,6 +128,18 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     setCurrentPage(1); // Reset to first page when filters change
   }, [selectedSport, selectedMarket, selectedBetType, selectedDate]);
 
+  // Auto-refresh effect - refresh odds every 30 seconds when enabled
+  useEffect(() => {
+    if (!autoRefresh) return;
+    
+    const refreshInterval = setInterval(() => {
+      console.log('🔄 Auto-refreshing odds data...');
+      refetch();
+    }, 30000); // 30 seconds
+    
+    return () => clearInterval(refreshInterval);
+  }, [autoRefresh, refetch]);
+
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
     { id: 'ncaa-football', name: 'NCAA Football', count: 45, active: false },
@@ -577,9 +589,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
               <span>Filters</span>
             </button>
 
-            {/* Auto-Refresh Button - Toggles automatic refreshing of odds data
-                - Will automatically fetch latest odds at regular intervals when enabled
-                - TODO: Functionality to be implemented with real-time API updates */}
+            {/* Manual Refresh Button */}
             <button 
               onClick={() => {
                 refetch();
@@ -596,6 +606,24 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{isLoading ? 'Refreshing...' : 'Refresh'}</span>
+            </button>
+
+            {/* Auto-Refresh Toggle Button */}
+            <button 
+              onClick={() => {
+                setAutoRefresh(!autoRefresh);
+                toast.success(autoRefresh ? 'Auto-refresh disabled' : 'Auto-refresh enabled (30s)', {
+                  description: autoRefresh ? 'Manual refresh only' : 'Odds will update automatically'
+                });
+              }}
+              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
+                autoRefresh
+                  ? isLight ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-green-300 text-green-700' : 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/40 text-green-400'
+                  : isLight ? 'bg-gray-100 border-gray-300 text-gray-500' : 'bg-white/5 border-white/10 text-white/50'
+              }`}
+            >
+              <Clock className={`w-4 h-4 ${autoRefresh ? 'animate-pulse' : ''}`} />
+              <span className="hidden sm:inline">{autoRefresh ? 'Auto' : 'Manual'}</span>
             </button>
 
             {/* Pagination Controls - Mobile only */}

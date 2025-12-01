@@ -7,8 +7,87 @@ export interface UserStats {
   averageEdge: string;
   totalProfit: string;
   activeBets: number;
+  totalPicks: number;
   loading: boolean;
   error: string | null;
+}
+
+// Helper to calculate stats from picks array
+function calculateStatsFromPicks(picks: any[]): Omit<UserStats, 'loading' | 'error'> {
+  if (!picks || picks.length === 0) {
+    return {
+      winRate: '0%',
+      averageEdge: '0%',
+      totalProfit: '$0',
+      activeBets: 0,
+      totalPicks: 0,
+    };
+  }
+
+  // Calculate active bets (pending status)
+  const activePicks = picks.filter((p: any) => 
+    p.status === 'active' || p.status === 'pending'
+  );
+  
+  // Calculate completed picks for win rate
+  const completedPicks = picks.filter((p: any) => 
+    p.status === 'won' || p.status === 'lost'
+  );
+  
+  let winRate = '0%';
+  if (completedPicks.length > 0) {
+    const wins = completedPicks.filter((p: any) => p.status === 'won').length;
+    const rate = (wins / completedPicks.length) * 100;
+    winRate = `${rate.toFixed(1)}%`;
+  }
+
+  // Calculate average edge/EV from all picks
+  let averageEdge = '0%';
+  const picksWithEV = picks.filter((p: any) => {
+    const ev = parseFloat(p.expected_value || p.ev || p.edge || '0');
+    return !isNaN(ev) && ev !== 0;
+  });
+  
+  if (picksWithEV.length > 0) {
+    const totalEV = picksWithEV.reduce((sum: number, p: any) => {
+      const ev = parseFloat(p.expected_value || p.ev || p.edge || '0');
+      return sum + ev;
+    }, 0);
+    const avgEV = totalEV / picksWithEV.length;
+    averageEdge = `${avgEV.toFixed(1)}%`;
+  }
+
+  // Calculate total profit
+  let totalProfit = '$0';
+  const profitAmount = picks.reduce((sum: number, p: any) => {
+    const profit = parseFloat(p.profit || p.payout || '0');
+    return sum + profit;
+  }, 0);
+  
+  if (profitAmount !== 0) {
+    totalProfit = profitAmount >= 0 
+      ? `+$${Math.abs(profitAmount).toFixed(0)}`
+      : `-$${Math.abs(profitAmount).toFixed(0)}`;
+  }
+
+  return {
+    winRate,
+    averageEdge,
+    totalProfit,
+    activeBets: activePicks.length,
+    totalPicks: picks.length,
+  };
+}
+
+// Get picks from localStorage
+function getLocalStoragePicks(): any[] {
+  try {
+    const stored = localStorage.getItem('my_picks_v1');
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.warn('Error loading picks from localStorage:', error);
+    return [];
+  }
 }
 
 export function useUserStats(): UserStats {
@@ -18,84 +97,39 @@ export function useUserStats(): UserStats {
     averageEdge: '0%',
     totalProfit: '$0',
     activeBets: 0,
+    totalPicks: 0,
     loading: true,
     error: null,
   });
 
   useEffect(() => {
-    if (!user || !supabase) {
-      setStats(prev => ({ ...prev, loading: false }));
-      return;
-    }
-
     const fetchUserStats = async () => {
       try {
-        // Fetch user picks to calculate stats
-        const { data: picks, error: picksError } = await supabase
-          .from('picks')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (picksError) {
-          console.warn('Error fetching picks:', picksError);
-          setStats(prev => ({
-            ...prev,
-            loading: false,
-            error: 'Failed to load stats',
-          }));
-          return;
-        }
-
-        if (!picks || picks.length === 0) {
-          setStats(prev => ({
-            ...prev,
-            loading: false,
-            winRate: '0%',
-            averageEdge: '0%',
-            totalProfit: '$0',
-            activeBets: 0,
-          }));
-          return;
-        }
-
-        // Calculate stats from picks
-        const activePicks = picks.filter((p: any) => p.status === 'active' || p.status === 'pending');
-        const completedPicks = picks.filter((p: any) => p.status === 'won' || p.status === 'lost');
+        let picks: any[] = [];
         
-        let winRate = '0%';
-        if (completedPicks.length > 0) {
-          const wins = completedPicks.filter((p: any) => p.status === 'won').length;
-          const rate = (wins / completedPicks.length) * 100;
-          winRate = `${rate.toFixed(1)}%`;
+        // Try to fetch from Supabase if user is logged in
+        if (user && supabase) {
+          const { data: supabasePicks, error: picksError } = await supabase
+            .from('picks')
+            .select('*')
+            .eq('user_id', user.id);
+
+          if (!picksError && supabasePicks && supabasePicks.length > 0) {
+            picks = supabasePicks;
+            console.log('📊 Stats: Using Supabase picks:', picks.length);
+          }
+        }
+        
+        // Fallback to localStorage picks if no Supabase picks
+        if (picks.length === 0) {
+          picks = getLocalStoragePicks();
+          console.log('📊 Stats: Using localStorage picks:', picks.length);
         }
 
-        // Calculate average edge
-        let averageEdge = '0%';
-        if (picks.length > 0) {
-          const totalEV = picks.reduce((sum: number, p: any) => {
-            const ev = parseFloat(p.expected_value || '0');
-            return sum + ev;
-          }, 0);
-          const avgEV = totalEV / picks.length;
-          averageEdge = `${avgEV.toFixed(1)}%`;
-        }
-
-        // Calculate total profit
-        let totalProfit = '$0';
-        const profitAmount = picks.reduce((sum: number, p: any) => {
-          const profit = parseFloat(p.profit || '0');
-          return sum + profit;
-        }, 0);
-        totalProfit = `$${Math.abs(profitAmount).toFixed(0)}`;
-        if (profitAmount < 0) {
-          totalProfit = `-${totalProfit}`;
-        }
-
+        const calculatedStats = calculateStatsFromPicks(picks);
+        
         setStats({
-          winRate,
-          averageEdge,
-          totalProfit,
-          activeBets: activePicks.length,
+          ...calculatedStats,
           loading: false,
           error: null,
         });

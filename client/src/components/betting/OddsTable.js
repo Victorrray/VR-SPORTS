@@ -3678,50 +3678,51 @@ export default function OddsTable({
 
                             pushEntry(topEntry);
                             
-                            // TODO: Re-enable Best Odds and Average Odds summary cards after improvements
                             // Calculate Best Odds and Average Odds summary cards
-                            // if (booksToProcess.length > 0) {
-                            //   const allOdds = booksToProcess
-                            //     .map(book => book.price || book.odds)
-                            //     .filter(odds => odds != null && !isNaN(odds));
-                            //   
-                            //   if (allOdds.length > 0) {
-                            //     // Find best odds (highest value is best for + odds, closest to 0 for - odds)
-                            //     const bestOddsValue = allOdds.reduce((best, current) => {
-                            //       // Convert to decimal for comparison
-                            //       const bestDec = best > 0 ? (best / 100) + 1 : (100 / Math.abs(best)) + 1;
-                            //       const currDec = current > 0 ? (current / 100) + 1 : (100 / Math.abs(current)) + 1;
-                            //       return currDec > bestDec ? current : best;
-                            //     });
-                            //     
-                            //     // Calculate average odds
-                            //     const avgOddsValue = Math.round(allOdds.reduce((sum, odds) => sum + odds, 0) / allOdds.length);
-                            //     
-                            //     console.log('📊 Summary Cards:', { bestOddsValue, avgOddsValue, totalBooks: allOdds.length });
-                            //     
-                            //     // Add Best Odds card directly to orderedBooks (bypass pushEntry to avoid dedup)
-                            //     orderedBooks.push({
-                            //       book: 'BEST ODDS',
-                            //       bookmaker: { key: 'best_odds_summary' },
-                            //       price: bestOddsValue,
-                            //       odds: bestOddsValue,
-                            //       isSummaryCard: true,
-                            //       summaryType: 'best',
-                            //       _rowId: 'best-odds-card'
-                            //     });
-                            //     
-                            //     // Add Average Odds card directly to orderedBooks
-                            //     orderedBooks.push({
-                            //       book: 'AVG ODDS',
-                            //       bookmaker: { key: 'avg_odds_summary' },
-                            //       price: avgOddsValue,
-                            //       odds: avgOddsValue,
-                            //       isSummaryCard: true,
-                            //       summaryType: 'avg',
-                            //       _rowId: 'avg-odds-card'
-                            //     });
-                            //   }
-                            // }
+                            // Only show for player props mode with multiple books
+                            if (mode === "props" && booksToProcess.length >= 2) {
+                              const allOdds = booksToProcess
+                                .map(book => {
+                                  const bookKey = book.bookmaker?.key || book.book;
+                                  // Use fixed -119 for DFS apps
+                                  const rawOdds = book.price || book.odds;
+                                  return isDFSApp(bookKey) ? getDFSFixedOdds() : rawOdds;
+                                })
+                                .filter(odds => odds != null && !isNaN(odds));
+                              
+                              if (allOdds.length >= 2) {
+                                // Find best odds (highest decimal value = best payout)
+                                const bestOddsValue = allOdds.reduce((best, current) => {
+                                  const bestDec = best > 0 ? (best / 100) + 1 : (100 / Math.abs(best)) + 1;
+                                  const currDec = current > 0 ? (current / 100) + 1 : (100 / Math.abs(current)) + 1;
+                                  return currDec > bestDec ? current : best;
+                                });
+                                
+                                // Calculate average odds
+                                const avgOddsValue = Math.round(allOdds.reduce((sum, odds) => sum + odds, 0) / allOdds.length);
+                                
+                                // Insert summary cards at the beginning (after topEntry)
+                                orderedBooks.splice(1, 0, {
+                                  book: '⭐ BEST',
+                                  bookmaker: { key: 'best_odds_summary', title: 'Best Odds' },
+                                  price: bestOddsValue,
+                                  odds: bestOddsValue,
+                                  isSummaryCard: true,
+                                  summaryType: 'best',
+                                  _rowId: 'best-odds-card'
+                                });
+                                
+                                orderedBooks.splice(2, 0, {
+                                  book: '📊 AVG',
+                                  bookmaker: { key: 'avg_odds_summary', title: 'Average Odds' },
+                                  price: avgOddsValue,
+                                  odds: avgOddsValue,
+                                  isSummaryCard: true,
+                                  summaryType: 'avg',
+                                  _rowId: 'avg-odds-card'
+                                });
+                              }
+                            }
                             
                             sortedCombined.forEach(book => {
                               const entry = {
