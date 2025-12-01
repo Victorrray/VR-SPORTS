@@ -427,24 +427,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
               <span className="hidden sm:inline">{isLoading ? 'Refreshing...' : 'Refresh'}</span>
             </button>
 
-            {/* Auto-Refresh Toggle Button */}
-            <button 
-              onClick={() => {
-                setAutoRefresh(!autoRefresh);
-                toast.success(autoRefresh ? 'Auto-refresh disabled' : 'Auto-refresh enabled (30s)', {
-                  description: autoRefresh ? 'Manual refresh only' : 'Props will update automatically'
-                });
-              }}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
-                autoRefresh
-                  ? isLight ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-green-300 text-green-700' : 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/40 text-green-400'
-                  : isLight ? 'bg-gray-100 border-gray-300 text-gray-500' : 'bg-white/5 border-white/10 text-white/50'
-              }`}
-            >
-              <Clock className={`w-4 h-4 ${autoRefresh ? 'animate-pulse' : ''}`} />
-              <span className="hidden sm:inline">{autoRefresh ? 'Auto' : 'Manual'}</span>
-            </button>
-
             {/* Pagination Controls - Mobile only */}
             <div className="flex md:hidden items-center gap-2">
               <button 
