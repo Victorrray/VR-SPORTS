@@ -6,7 +6,9 @@
 const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const planCache = new Map();
 const allowDemoUserFallback = String(process.env.ALLOW_DEMO_USER || '').toLowerCase() === 'true';
-const REMOVE_API_LIMITS = process.env.REMOVE_API_LIMITS === 'true';
+// REMOVE_API_LIMITS should ONLY work in development, never in production
+const IS_PRODUCTION = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+const REMOVE_API_LIMITS = !IS_PRODUCTION && process.env.REMOVE_API_LIMITS === 'true';
 
 /**
  * Helper: Check if request is from local development environment
@@ -156,9 +158,10 @@ async function checkPlanAccess(req, res, next) {
   try {
     const userId = req.__userId;
     
-    // TESTING MODE: If REMOVE_API_LIMITS is enabled, grant unlimited access
+    // TESTING MODE: If REMOVE_API_LIMITS is enabled (DEV ONLY), grant unlimited access
+    // This is automatically disabled in production (NODE_ENV=production or RENDER=true)
     if (REMOVE_API_LIMITS) {
-      console.log('🧪 TESTING MODE: API limits removed - granting unlimited access');
+      console.log('🧪 TESTING MODE (DEV ONLY): API limits removed - granting unlimited access');
       req.__userProfile = {
         id: userId || 'test-user',
         plan: 'platinum',
