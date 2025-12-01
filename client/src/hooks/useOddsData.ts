@@ -11,7 +11,7 @@ export interface OddsBook {
 }
 
 export interface OddsPick {
-  id: number;
+  id: number | string;
   ev: string;
   sport: string;
   game: string;
@@ -20,11 +20,16 @@ export interface OddsPick {
   pick: string;
   bestOdds: string;
   bestBook: string;
-  avgOdds: string;
-  isHot: boolean;
+  avgOdds?: string;
+  isHot?: boolean;
   books: OddsBook[];
   gameTime?: string;  // ISO 8601 format (e.g., "2025-11-18T19:00:00Z")
   commenceTime?: string;  // Alias for gameTime
+  // Player props specific fields
+  isPlayerProp?: boolean;
+  playerName?: string;
+  marketKey?: string;
+  line?: number;
 }
 
 export interface UseOddsDataOptions {
@@ -65,6 +70,22 @@ function normalizeAmericanOdds(raw: any): string {
   return n > 0 ? `+${n}` : String(n);
 }
 
+// Check if a market key is a player prop
+function isPlayerPropMarket(marketKey: string): boolean {
+  return marketKey?.startsWith('player_') || marketKey?.startsWith('batter_') || marketKey?.startsWith('pitcher_');
+}
+
+// Format market key to readable name (e.g., "player_assists" -> "Assists")
+function formatMarketName(marketKey: string): string {
+  if (!marketKey) return '';
+  return marketKey
+    .replace('player_', '')
+    .replace('batter_', '')
+    .replace('pitcher_', '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase());
+}
+
 function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
   if (!Array.isArray(games)) return [];
   
@@ -74,196 +95,309 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
     console.log('📋 First game keys:', Object.keys(games[0]));
   }
   
-  return games.map((game, idx) => {
+  const allPicks: OddsPick[] = [];
+  
+  games.forEach((game, gameIdx) => {
     const team1 = game.away_team || 'Team A';
     const team2 = game.home_team || 'Team B';
     const bookmakers = game.bookmakers || [];
+    const gameMatchup = `${team1} @ ${team2}`;
     
     // Log first game's bookmakers
-    if (idx === 0) {
+    if (gameIdx === 0) {
       console.log(`📋 First game bookmakers:`, bookmakers);
       console.log(`📋 First game bookmakers length:`, bookmakers.length);
     }
     
-    // Get best odds from all bookmakers
-    let bestOdds = '-110';
-    let bestBook = 'N/A';
-    let ev = '0%';
-    const booksArray: any[] = [];
+    // Check if this game has player prop markets
+    const hasPlayerProps = bookmakers.some((bm: any) => 
+      bm.markets?.some((m: any) => isPlayerPropMarket(m.key))
+    );
     
-    // Find odds from all bookmakers - try h2h first, then spreads, then any market
-    bookmakers.forEach((bm, bmIdx) => {
-      let marketToUse = null;
-      const bookName = bm.title || bm.key;
+    if (hasPlayerProps) {
+      // PLAYER PROPS MODE: Create one pick per player per market
+      const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey"
       
-      // Debug first bookmaker - log entire structure
-      if (idx === 0 && bmIdx === 0) {
-        console.log(`📚 FIRST BOOKMAKER FULL OBJECT:`, bm);
-        console.log(`📚 First bookmaker keys:`, Object.keys(bm));
-        console.log(`📚 First bookmaker: ${bookName}, markets:`, bm.markets?.length || 0);
-        if (bm.markets && bm.markets.length > 0) {
-          console.log(`📚 First market:`, bm.markets[0]);
-          console.log(`📚 First market key: ${bm.markets[0].key}`);
-          console.log(`📚 First market outcomes:`, bm.markets[0].outcomes);
-        }
-      }
-      
-      // Try to find h2h market first (moneyline)
-      if (bm.markets && Array.isArray(bm.markets)) {
-        if (idx === 0 && bmIdx === 0) {
-          console.log(`🔎 Available markets for ${bookName}:`, bm.markets.map((m: any) => m.key));
-        }
+      bookmakers.forEach((bm: any) => {
+        const bookName = bm.title || bm.key;
         
-        marketToUse = bm.markets.find((m: any) => m.key === 'h2h');
-        if (idx === 0 && bmIdx === 0 && marketToUse) {
-          console.log(`✅ Found h2h market`);
-        }
-        
-        // If no h2h, try spreads
-        if (!marketToUse) {
-          marketToUse = bm.markets.find((m: any) => m.key === 'spreads');
-          if (idx === 0 && bmIdx === 0 && marketToUse) {
-            console.log(`✅ Found spreads market (h2h not available)`);
-          }
-        }
-        
-        // If no spreads, try totals (last resort)
-        if (!marketToUse) {
-          marketToUse = bm.markets.find((m: any) => m.key === 'totals');
-          if (idx === 0 && bmIdx === 0 && marketToUse) {
-            console.log(`✅ Found totals market (h2h and spreads not available)`);
-          }
-        }
-        
-        // If still nothing, use first available market
-        if (!marketToUse && bm.markets.length > 0) {
-          marketToUse = bm.markets[0];
-          if (idx === 0 && bmIdx === 0) {
-            console.log(`✅ Using first available market: ${marketToUse.key}`);
-          }
-        }
-      }
-      
-      if (marketToUse && marketToUse.outcomes && marketToUse.outcomes.length > 0) {
-        // Get the first outcome (usually the away team for h2h, or the first side for spreads/totals)
-        const outcome0 = marketToUse.outcomes[0];
-        const outcome1 = marketToUse.outcomes[1];
-        
-        if (idx === 0 && bmIdx === 0) {
-          console.log(`🔍 Outcome 0 FULL:`, outcome0);
-          console.log(`🔍 Outcome 0 keys:`, Object.keys(outcome0));
-          console.log(`🔍 Outcome 1 FULL:`, outcome1);
-          if (outcome1) {
-            console.log(`🔍 Outcome 1 keys:`, Object.keys(outcome1));
-          }
-        }
-        
-        // Try different property names for odds
-        const odds = outcome0.odds !== undefined ? outcome0.odds : 
-                     outcome0.price !== undefined ? outcome0.price :
-                     outcome0.value !== undefined ? outcome0.value : undefined;
-        const team2Odds = outcome1 ? (outcome1.odds !== undefined ? outcome1.odds :
-                                       outcome1.price !== undefined ? outcome1.price :
-                                       outcome1.value !== undefined ? outcome1.value : '-110') : '-110';
-        
-        if (idx === 0 && bmIdx === 0) {
-          console.log(`🔍 Extracted odds: ${odds}, team2Odds: ${team2Odds}`);
-        }
-        
-        if (odds !== undefined && odds !== null) {
-          booksArray.push({
-            name: bookName,
-            odds: normalizeAmericanOdds(odds),
-            team2Odds: normalizeAmericanOdds(team2Odds),
-            ev: '0%',
-            isBest: bmIdx === 0
+        bm.markets?.forEach((market: any) => {
+          if (!isPlayerPropMarket(market.key)) return;
+          
+          // Group outcomes by player (description field)
+          const playerOutcomes = new Map<string, any[]>();
+          
+          market.outcomes?.forEach((outcome: any) => {
+            const playerName = outcome.description || 'Unknown Player';
+            if (!playerOutcomes.has(playerName)) {
+              playerOutcomes.set(playerName, []);
+            }
+            playerOutcomes.get(playerName)!.push({ ...outcome, bookName, marketKey: market.key });
           });
           
-          // Set best odds from first bookmaker with valid odds
-          if (bmIdx === 0 && bestOdds === '-110') {
-            bestOdds = normalizeAmericanOdds(odds);
-            bestBook = bookName;
+          // Create picks for each player
+          playerOutcomes.forEach((outcomes, playerName) => {
+            const overOutcome = outcomes.find(o => o.name === 'Over');
+            const underOutcome = outcomes.find(o => o.name === 'Under');
+            
+            if (overOutcome) {
+              const pickKey = `${playerName}-${market.key}-${overOutcome.point}`;
+              
+              if (!playerPropsMap.has(pickKey)) {
+                playerPropsMap.set(pickKey, {
+                  playerName,
+                  marketKey: market.key,
+                  point: overOutcome.point,
+                  books: []
+                });
+              }
+              
+              const propData = playerPropsMap.get(pickKey)!;
+              propData.books.push({
+                name: bookName,
+                overOdds: normalizeAmericanOdds(overOutcome.price),
+                underOdds: underOutcome ? normalizeAmericanOdds(underOutcome.price) : null
+              });
+            }
+          });
+        });
+      });
+      
+      // Convert player props map to picks
+      playerPropsMap.forEach((propData, pickKey) => {
+        if (propData.books.length === 0) return;
+        
+        // Find best odds
+        const bestBook = propData.books.reduce((best: any, book: any) => {
+          const bestOddsNum = parseInt(best.overOdds, 10);
+          const bookOddsNum = parseInt(book.overOdds, 10);
+          return bookOddsNum > bestOddsNum ? book : best;
+        }, propData.books[0]);
+        
+        // Calculate EV
+        const numericOdds = propData.books.map((b: any) => parseInt(b.overOdds, 10)).filter((o: number) => !isNaN(o));
+        let ev = '0%';
+        if (numericOdds.length > 0) {
+          const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
+          const probs = numericOdds.map(toProb);
+          const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
+          const bestOddsNum = parseInt(bestBook.overOdds, 10);
+          if (!isNaN(bestOddsNum)) {
+            const bestProb = toProb(bestOddsNum);
+            const edge = ((avgProb - bestProb) / bestProb) * 100;
+            ev = `${(Math.round(edge * 100) / 100).toFixed(2)}%`;
+          }
+        }
+        
+        const marketName = formatMarketName(propData.marketKey);
+        const pickDescription = `${propData.playerName} Over ${propData.point} ${marketName}`;
+        
+        allPicks.push({
+          id: `${game.id}-${pickKey}`,
+          ev,
+          sport: getSportLabel((game.sport_key || game.sport_title || 'Unknown').toLowerCase()),
+          game: gameMatchup,
+          team1,
+          team2,
+          pick: pickDescription,
+          bestOdds: bestBook.overOdds,
+          bestBook: bestBook.name,
+          books: propData.books.map((b: any) => ({
+            name: b.name,
+            odds: b.overOdds,
+            team2Odds: b.underOdds || '-110',
+            ev: '0%',
+            isBest: b.name === bestBook.name
+          })),
+          isPlayerProp: true,
+          playerName: propData.playerName,
+          marketKey: propData.marketKey,
+          line: propData.point
+        });
+      });
+    } else {
+      // GAME ODDS MODE: Original logic for h2h/spreads/totals
+      let bestOdds = '-110';
+      let bestBook = 'N/A';
+      let ev = '0%';
+      const booksArray: any[] = [];
+      
+      // Find odds from all bookmakers - try h2h first, then spreads, then any market
+      bookmakers.forEach((bm: any, bmIdx: number) => {
+        let marketToUse = null;
+        const bookName = bm.title || bm.key;
+        
+        // Debug first bookmaker - log entire structure
+        if (gameIdx === 0 && bmIdx === 0) {
+          console.log(`📚 FIRST BOOKMAKER FULL OBJECT:`, bm);
+          console.log(`📚 First bookmaker keys:`, Object.keys(bm));
+          console.log(`📚 First bookmaker: ${bookName}, markets:`, bm.markets?.length || 0);
+          if (bm.markets && bm.markets.length > 0) {
+            console.log(`📚 First market:`, bm.markets[0]);
+            console.log(`📚 First market key: ${bm.markets[0].key}`);
+            console.log(`📚 First market outcomes:`, bm.markets[0].outcomes);
+          }
+        }
+        
+        // Try to find h2h market first (moneyline)
+        if (bm.markets && Array.isArray(bm.markets)) {
+          if (gameIdx === 0 && bmIdx === 0) {
+            console.log(`🔎 Available markets for ${bookName}:`, bm.markets.map((m: any) => m.key));
           }
           
-          if (idx === 0 && bmIdx === 0) {
-            console.log(`✅ Found odds for ${bookName}: ${odds} (market: ${marketToUse.key})`);
+          marketToUse = bm.markets.find((m: any) => m.key === 'h2h');
+          if (gameIdx === 0 && bmIdx === 0 && marketToUse) {
+            console.log(`✅ Found h2h market`);
+          }
+          
+          // If no h2h, try spreads
+          if (!marketToUse) {
+            marketToUse = bm.markets.find((m: any) => m.key === 'spreads');
+            if (gameIdx === 0 && bmIdx === 0 && marketToUse) {
+              console.log(`✅ Found spreads market (h2h not available)`);
+            }
+          }
+          
+          // If no spreads, try totals (last resort)
+          if (!marketToUse) {
+            marketToUse = bm.markets.find((m: any) => m.key === 'totals');
+            if (gameIdx === 0 && bmIdx === 0 && marketToUse) {
+              console.log(`✅ Found totals market (h2h and spreads not available)`);
+            }
+          }
+          
+          // If still nothing, use first available market (but not player props)
+          if (!marketToUse && bm.markets.length > 0) {
+            marketToUse = bm.markets.find((m: any) => !isPlayerPropMarket(m.key)) || bm.markets[0];
+            if (gameIdx === 0 && bmIdx === 0) {
+              console.log(`✅ Using first available market: ${marketToUse.key}`);
+            }
+          }
+        }
+      
+        if (marketToUse && marketToUse.outcomes && marketToUse.outcomes.length > 0) {
+          // Get the first outcome (usually the away team for h2h, or the first side for spreads/totals)
+          const outcome0 = marketToUse.outcomes[0];
+          const outcome1 = marketToUse.outcomes[1];
+          
+          if (gameIdx === 0 && bmIdx === 0) {
+            console.log(`🔍 Outcome 0 FULL:`, outcome0);
+            console.log(`🔍 Outcome 0 keys:`, Object.keys(outcome0));
+            console.log(`🔍 Outcome 1 FULL:`, outcome1);
+            if (outcome1) {
+              console.log(`🔍 Outcome 1 keys:`, Object.keys(outcome1));
+            }
+          }
+          
+          // Try different property names for odds
+          const odds = outcome0.odds !== undefined ? outcome0.odds : 
+                       outcome0.price !== undefined ? outcome0.price :
+                       outcome0.value !== undefined ? outcome0.value : undefined;
+          const team2Odds = outcome1 ? (outcome1.odds !== undefined ? outcome1.odds :
+                                         outcome1.price !== undefined ? outcome1.price :
+                                         outcome1.value !== undefined ? outcome1.value : '-110') : '-110';
+          
+          if (gameIdx === 0 && bmIdx === 0) {
+            console.log(`🔍 Extracted odds: ${odds}, team2Odds: ${team2Odds}`);
+          }
+          
+          if (odds !== undefined && odds !== null) {
+            booksArray.push({
+              name: bookName,
+              odds: normalizeAmericanOdds(odds),
+              team2Odds: normalizeAmericanOdds(team2Odds),
+              ev: '0%',
+              isBest: bmIdx === 0
+            });
+            
+            // Set best odds from first bookmaker with valid odds
+            if (bmIdx === 0 && bestOdds === '-110') {
+              bestOdds = normalizeAmericanOdds(odds);
+              bestBook = bookName;
+            }
+            
+            if (gameIdx === 0 && bmIdx === 0) {
+              console.log(`✅ Found odds for ${bookName}: ${odds} (market: ${marketToUse.key})`);
+            }
+          } else {
+            if (gameIdx === 0 && bmIdx === 0) {
+              console.log(`⚠️ Market found but no odds for ${bookName}, odds value: ${odds}`);
+            }
           }
         } else {
-          if (idx === 0 && bmIdx === 0) {
-            console.log(`⚠️ Market found but no odds for ${bookName}, odds value: ${odds}`);
+          // No markets found for this bookmaker - skip adding mock odds
+          if (gameIdx === 0 && bmIdx === 0) {
+            console.log(`⚠️ No market data for ${bookName}, skipping bookmaker (no fallback odds)`);
           }
         }
-      } else {
-        // No markets found for this bookmaker - skip adding mock odds
-        if (idx === 0 && bmIdx === 0) {
-          console.log(`⚠️ No market data for ${bookName}, skipping bookmaker (no fallback odds)`);
-        }
-      }
-    });
+      });
 
-    // After collecting all bookmaker odds, compute a simple EV% based on
-    // the best price vs the average price across all books for this side.
-    const numericOdds = booksArray
-      .map(b => parseInt(b.odds, 10))
-      .filter(o => !isNaN(o));
+      // After collecting all bookmaker odds, compute a simple EV% based on
+      // the best price vs the average price across all books for this side.
+      const numericOdds = booksArray
+        .map(b => parseInt(b.odds, 10))
+        .filter(o => !isNaN(o));
 
-    if (numericOdds.length > 0) {
-      // Convert American odds to implied probability
-      const toProb = (american: number) => {
-        if (american > 0) {
-          return 100 / (american + 100);
-        }
-        return -american / (-american + 100);
-      };
-
-      const probs = numericOdds.map(toProb);
-      const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
-
-      const bestOddsNum = parseInt(bestOdds, 10);
-      if (!isNaN(bestOddsNum)) {
-        const bestProb = toProb(bestOddsNum);
-        // Positive EV when bestProb < avgProb (better price than market average)
-        const edge = ((avgProb - bestProb) / bestProb) * 100;
-        const roundedEdge = Math.round(edge * 100) / 100;
-        ev = `${roundedEdge.toFixed(2)}%`;
-
-        // Apply per-book EVs relative to the same fair (average) probability
-        booksArray.forEach(b => {
-          const o = parseInt(b.odds, 10);
-          if (!isNaN(o)) {
-            const p = toProb(o);
-            const bookEdge = ((avgProb - p) / p) * 100;
-            const roundedBookEdge = Math.round(bookEdge * 100) / 100;
-            b.ev = `${roundedBookEdge.toFixed(2)}%`;
-          } else {
-            b.ev = '0%';
+      if (numericOdds.length > 0) {
+        // Convert American odds to implied probability
+        const toProb = (american: number) => {
+          if (american > 0) {
+            return 100 / (american + 100);
           }
-        });
+          return -american / (-american + 100);
+        };
+
+        const probs = numericOdds.map(toProb);
+        const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
+
+        const bestOddsNum = parseInt(bestOdds, 10);
+        if (!isNaN(bestOddsNum)) {
+          const bestProb = toProb(bestOddsNum);
+          // Positive EV when bestProb < avgProb (better price than market average)
+          const edge = ((avgProb - bestProb) / bestProb) * 100;
+          const roundedEdge = Math.round(edge * 100) / 100;
+          ev = `${roundedEdge.toFixed(2)}%`;
+
+          // Apply per-book EVs relative to the same fair (average) probability
+          booksArray.forEach(b => {
+            const o = parseInt(b.odds, 10);
+            if (!isNaN(o)) {
+              const p = toProb(o);
+              const bookEdge = ((avgProb - p) / p) * 100;
+              const roundedBookEdge = Math.round(bookEdge * 100) / 100;
+              b.ev = `${roundedBookEdge.toFixed(2)}%`;
+            } else {
+              b.ev = '0%';
+            }
+          });
+        }
       }
-    }
 
-    if (idx === 0) {
-      console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}, EV: ${ev}`);
-    }
+      if (gameIdx === 0) {
+        console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}, EV: ${ev}`);
+      }
 
-    return {
-      id: game.id || idx + 1,
-      ev: ev,
-      // Use getSportLabel to convert sport_key to readable league name (NFL, NBA, etc.)
-      sport: getSportLabel((game.sport_key || game.sport_title || 'Unknown').toLowerCase()),
-      game: `${team1} @ ${team2}`,
-      team1,
-      team2,
-      pick: `${team1} ML`,
-      bestOdds,
-      bestBook,
-      avgOdds: bestOdds,
-      isHot: false,
-      books: booksArray,
-      gameTime: game.commence_time || game.gameTime || undefined,
-      commenceTime: game.commence_time || game.gameTime || undefined
-    };
+      allPicks.push({
+        id: game.id || gameIdx + 1,
+        ev: ev,
+        // Use getSportLabel to convert sport_key to readable league name (NFL, NBA, etc.)
+        sport: getSportLabel((game.sport_key || game.sport_title || 'Unknown').toLowerCase()),
+        game: gameMatchup,
+        team1,
+        team2,
+        pick: `${team1} ML`,
+        bestOdds,
+        bestBook,
+        avgOdds: bestOdds,
+        isHot: false,
+        books: booksArray,
+        gameTime: game.commence_time || game.gameTime || undefined,
+        commenceTime: game.commence_time || game.gameTime || undefined
+      });
+    }
   });
+  
+  return allPicks;
 }
 
 // Export getSportLabel for use in components
