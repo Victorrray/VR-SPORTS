@@ -40,14 +40,31 @@ export default function AuthCallback() {
         console.log('🔐 AuthCallback: User authenticated:', userId);
 
         // Check if user has a username (for OAuth users who might not have one yet)
+        // Note: We skip this check if the profiles table query fails (e.g., RLS issues, table doesn't exist)
+        // In that case, we just proceed with the normal flow
         console.log('🔍 AuthCallback: Checking if user has username...');
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', userId)
-          .single();
+        let hasUsername = true; // Default to true to avoid blocking users
+        
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', userId)
+            .single();
 
-        const hasUsername = profileData?.username;
+          if (profileError) {
+            // If profile doesn't exist or there's an error, don't block the user
+            // They can set up their profile later from the account page
+            console.log('⚠️ AuthCallback: Could not fetch profile (this is OK for new users):', profileError.message);
+            hasUsername = true; // Don't redirect to account setup
+          } else {
+            hasUsername = !!profileData?.username;
+          }
+        } catch (err) {
+          console.log('⚠️ AuthCallback: Profile check failed, proceeding with login:', err.message);
+          hasUsername = true; // Don't block the user
+        }
+        
         console.log('🔍 AuthCallback: User has username:', hasUsername);
 
         // Get intent from URL params or localStorage
