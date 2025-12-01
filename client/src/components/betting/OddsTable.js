@@ -3119,10 +3119,10 @@ export default function OddsTable({
                   </td>
                   <td>
                     <div className="desktop-matchup">
-                      <span className="desktop-matchup-league">
+                      <span className="desktop-matchup-league" style={{ borderRadius: '16px' }}>
                         {(() => { 
                           const { sport, league } = getSportLeague(row.game?.sport_key, row.game?.sport_title); 
-                          return `${sport} | ${league}`; 
+                          return league; 
                         })()}
                       </span>
                       <div className="desktop-teams">
