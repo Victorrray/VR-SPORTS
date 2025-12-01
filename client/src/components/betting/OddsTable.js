@@ -3201,6 +3201,23 @@ export default function OddsTable({
                       tabIndex={0}
                       onKeyDown={(e)=>{ if (e.key==='Enter'||e.key===' ') { e.preventDefault(); toggleRow(row.key); } }}
                     >
+                      {/* League badge for props mode */}
+                      {mode === "props" && (
+                        <span style={{
+                          display: 'inline-block',
+                          background: 'rgba(139, 92, 246, 0.25)',
+                          border: '1px solid rgba(139, 92, 246, 0.4)',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          fontSize: '0.8em',
+                          fontWeight: '600',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          marginBottom: '10px',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {getSportLeague(row.game?.sport_key, row.game?.sport_title).league}
+                        </span>
+                      )}
                       <div className="mob-top">
                         <div className="mob-top-left">
                           <div className="mob-match-title">
