@@ -51,6 +51,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   
   // Check if user has a paid plan (gold or platinum)
   const hasPaidPlan = me?.plan === 'gold' || me?.plan === 'platinum' || me?.unlimited === true;
+  const hasPlatinum = me?.plan === 'platinum' || me?.unlimited === true;
   const [selectedSport, setSelectedSport] = useState('all');
   const [selectedMarket, setSelectedMarket] = useState('all');
   const [selectedBetType, setSelectedBetType] = useState('straight');
@@ -833,27 +834,34 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
             {/* Scrollable Content */}
             <div className="overflow-y-auto flex-1 p-6 pt-6 space-y-6">
 
-              {/* Auto Refresh Toggle */}
+              {/* Auto Refresh Toggle - Platinum Only */}
               <div>
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 flex items-center gap-2`}>
                   Auto Refresh
+                  <span className={`px-1.5 py-0.5 text-[10px] rounded ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
+                    <Crown className="w-3 h-3 inline mr-0.5" />
+                    PLATINUM
+                  </span>
                 </label>
-                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-lg`}>
+                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-lg ${!hasPlatinum ? 'opacity-60' : ''}`}>
                   <div className="flex items-center gap-3 flex-1">
                     <RefreshCw className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
                     <div>
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>Auto Refresh Odds</div>
-                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold`}>Update every 30 seconds</div>
+                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold`}>
+                        {hasPlatinum ? 'Update every 30 seconds' : 'Upgrade to Platinum to enable'}
+                      </div>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-cursor-pointer">
+                  <label className={`relative inline-flex items-center ${!hasPlatinum ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
                     <input 
                       type="checkbox" 
                       className="sr-only peer" 
-                      checked={autoRefresh}
-                      onChange={(e) => setAutoRefresh(e.target.checked)}
+                      checked={hasPlatinum && autoRefresh}
+                      onChange={(e) => hasPlatinum && setAutoRefresh(e.target.checked)}
+                      disabled={!hasPlatinum}
                     />
-                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500`}></div>
+                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500 ${!hasPlatinum ? 'cursor-not-allowed' : ''}`}></div>
                   </label>
                 </div>
               </div>
