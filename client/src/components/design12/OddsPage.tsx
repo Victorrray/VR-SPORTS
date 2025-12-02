@@ -1,6 +1,8 @@
-import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown, Check } from 'lucide-react';
+import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown, Check, Lock, Crown, Sparkles } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useMe } from '../../hooks/useMe';
+import { useNavigate } from 'react-router-dom';
 import { useOddsData, getSportLabel } from '../../hooks/useOddsData';
 import { PlayerPropsPage } from './PlayerPropsPage';
 import { toast } from 'sonner';
@@ -44,6 +46,11 @@ const formatOdds = (odds: any): string => {
 export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
+  const { me, loading: meLoading } = useMe();
+  const navigate = useNavigate();
+  
+  // Check if user has a paid plan (gold or platinum)
+  const hasPaidPlan = me?.plan === 'gold' || me?.plan === 'platinum' || me?.unlimited === true;
   const [selectedSport, setSelectedSport] = useState('all');
   const [selectedMarket, setSelectedMarket] = useState('all');
   const [selectedBetType, setSelectedBetType] = useState('straight');
@@ -439,6 +446,86 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       </button>
     </div>
   );
+
+  // Paywall Component for Free Users
+  const PaywallOverlay = () => (
+    <div className="min-h-[60vh] flex items-center justify-center px-4">
+      <div className={`max-w-lg w-full text-center ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-slate-900/90 to-purple-900/30 border-white/10'} border rounded-3xl p-8 md:p-12 backdrop-blur-xl shadow-2xl`}>
+        {/* Lock Icon */}
+        <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border-purple-400/30'} border flex items-center justify-center`}>
+          <Lock className={`w-10 h-10 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+        </div>
+        
+        {/* Title */}
+        <h2 className={`text-2xl md:text-3xl font-bold mb-3 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+          Unlock Premium Odds
+        </h2>
+        
+        {/* Description */}
+        <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-medium mb-8 text-base md:text-lg`}>
+          Get access to real-time odds comparison, +EV betting opportunities, and line shopping across 15+ sportsbooks.
+        </p>
+        
+        {/* Features List */}
+        <div className={`${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-2xl p-6 mb-8 text-left`}>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg ${isLight ? 'bg-green-100' : 'bg-green-500/20'} flex items-center justify-center`}>
+                <Check className={`w-4 h-4 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
+              </div>
+              <span className={`font-bold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>Real-time odds from 15+ sportsbooks</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg ${isLight ? 'bg-green-100' : 'bg-green-500/20'} flex items-center justify-center`}>
+                <Check className={`w-4 h-4 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
+              </div>
+              <span className={`font-bold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>+EV bet identification</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg ${isLight ? 'bg-green-100' : 'bg-green-500/20'} flex items-center justify-center`}>
+                <Check className={`w-4 h-4 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
+              </div>
+              <span className={`font-bold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>Line shopping & best odds alerts</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg ${isLight ? 'bg-green-100' : 'bg-green-500/20'} flex items-center justify-center`}>
+                <Check className={`w-4 h-4 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
+              </div>
+              <span className={`font-bold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>Player props & alternate lines</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* CTA Buttons */}
+        <div className="space-y-3">
+          <button
+            onClick={() => navigate('/subscribe')}
+            className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2"
+          >
+            <Crown className="w-5 h-5" />
+            Upgrade to Gold - $10/mo
+          </button>
+          <button
+            onClick={() => navigate('/subscribe')}
+            className={`w-full py-3 px-6 ${isLight ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-white/5 hover:bg-white/10 text-white/80'} font-bold rounded-xl transition-all flex items-center justify-center gap-2`}
+          >
+            <Sparkles className="w-4 h-4" />
+            View All Plans
+          </button>
+        </div>
+        
+        {/* Money-back guarantee */}
+        <p className={`mt-6 text-sm ${isLight ? 'text-gray-500' : 'text-white/40'}`}>
+          ✨ Plans pay for themselves in 2-3 weeks
+        </p>
+      </div>
+    </div>
+  );
+
+  // Show paywall for free users (after loading completes)
+  if (!meLoading && !hasPaidPlan) {
+    return <PaywallOverlay />;
+  }
 
   // Show PlayerPropsPage when props are selected
   if (selectedBetType === 'props') {
