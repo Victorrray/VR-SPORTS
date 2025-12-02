@@ -35,6 +35,7 @@ import {
 import { useState, useEffect } from "react";
 import { useTheme, lightModeColors, themeConfig } from "../../contexts/ThemeContext";
 import { useAuth } from "../../hooks/SimpleAuth";
+import { useMe } from "../../hooks/useMe";
 import { OddsPage } from "./OddsPage";
 import { AccountPage } from "./AccountPage";
 import { SettingsPage } from "./SettingsPage";
@@ -59,6 +60,22 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const config = themeConfig[theme];
   const isLight = colorMode === "light";
   const { user, profile } = useAuth();
+  const { me } = useMe();
+  
+  // Get plan display info
+  const userPlan = me?.plan || 'free';
+  const getPlanConfig = () => {
+    switch (userPlan) {
+      case 'platinum':
+        return { label: 'Platinum', icon: Crown, color: 'text-amber-400', bg: isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30' };
+      case 'gold':
+        return { label: 'Gold', icon: Sparkles, color: 'text-yellow-400', bg: isLight ? 'bg-yellow-100 border-yellow-300' : 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/30' };
+      default:
+        return { label: 'Free', icon: Zap, color: 'text-gray-400', bg: isLight ? 'bg-gray-100 border-gray-300' : 'bg-gradient-to-r from-gray-500/20 to-gray-600/20 border-gray-400/30' };
+    }
+  };
+  const planConfig = getPlanConfig();
+  const PlanIcon = planConfig.icon;
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");
   const [currentView, setCurrentView] = useState<
@@ -218,11 +235,11 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                       {profile?.username || user?.email?.split('@')[0] || 'User'}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <div className={`px-2 py-0.5 ${isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'} border rounded-full backdrop-blur-xl`}>
+                      <div className={`px-2 py-0.5 ${planConfig.bg} border rounded-full backdrop-blur-xl`}>
                         <div className="flex items-center gap-1">
-                          <Crown className="w-3 h-3 text-amber-400" />
-                          <span className="text-amber-400 font-bold text-xs">
-                            Platinum
+                          <PlanIcon className={`w-3 h-3 ${planConfig.color}`} />
+                          <span className={`${planConfig.color} font-bold text-xs`}>
+                            {planConfig.label}
                           </span>
                         </div>
                       </div>
