@@ -134,19 +134,25 @@ function requireUser(req, res, next) {
   const tokenUserId = req.user?.id;
   const headerUserId = req.headers["x-user-id"];
 
+  console.log(`🔐 requireUser: path=${req.path}, method=${req.method}, hasUser=${!!req.user}, tokenUserId=${tokenUserId}, headerUserId=${headerUserId}`);
+
   if (tokenUserId) {
     if (headerUserId && headerUserId !== tokenUserId) {
+      console.log(`❌ requireUser: Header user mismatch - token=${tokenUserId}, header=${headerUserId}`);
       return res.status(401).json({ error: "UNAUTHENTICATED", detail: "Header user mismatch" });
     }
     req.__userId = tokenUserId;
+    console.log(`✅ requireUser: Authenticated user ${tokenUserId}`);
     return next();
   }
 
   if (allowDemoUserFallback && isReadOnlyGet && isLocalRequest(req)) {
     req.__userId = 'demo-user';
+    console.log(`✅ requireUser: Demo user fallback`);
     return next();
   }
 
+  console.log(`❌ requireUser: No valid user - rejecting with 401`);
   return res.status(401).json({ error: "UNAUTHENTICATED" });
 }
 
