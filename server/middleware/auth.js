@@ -235,18 +235,19 @@ async function authenticate(req, _res, next) {
   try {
     const auth = req.headers.authorization || "";
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
-    const supabase = req.app.locals.supabase;
+    // Use supabaseAuth for JWT verification (uses anon key), fallback to supabase (service role)
+    const supabaseAuth = req.app.locals.supabaseAuth || req.app.locals.supabase;
     
-    console.log(`🔍 Auth middleware: path=${req.path}, hasToken=${!!token}, hasSupabase=${!!supabase}`);
+    console.log(`🔍 Auth middleware: path=${req.path}, hasToken=${!!token}, hasSupabaseAuth=${!!supabaseAuth}`);
     
-    if (!token || !supabase) {
-      console.log(`⚠️ Auth skipped: token=${!!token}, supabase=${!!supabase}`);
+    if (!token || !supabaseAuth) {
+      console.log(`⚠️ Auth skipped: token=${!!token}, supabaseAuth=${!!supabaseAuth}`);
       return next();
     }
     
     try {
       // Use getUser() to verify the token - this is the correct Supabase method
-      const { data, error } = await supabase.auth.getUser(token);
+      const { data, error } = await supabaseAuth.auth.getUser(token);
       
       if (!error && data?.user) {
         req.user = data.user;

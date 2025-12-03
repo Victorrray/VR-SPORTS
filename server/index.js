@@ -21,10 +21,15 @@ const { FREE_QUOTA } = require("./config/usage.js");
 const Stripe = require("stripe");
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
-// Initialize Supabase client for server operations
+// Initialize Supabase clients
 const { createClient } = require('@supabase/supabase-js');
+// Service role client for admin operations (database writes, etc.)
 const supabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY 
   ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
+// Auth client for JWT verification (uses anon key or service role key as fallback)
+const supabaseAuth = process.env.SUPABASE_URL && (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
+  ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)
   : null;
 
 // Initialize Odds Cache Service
@@ -41,6 +46,7 @@ initSentry(app);
 // Store services in app.locals for route access
 app.locals.stripe = stripe;
 app.locals.supabase = supabase;
+app.locals.supabaseAuth = supabaseAuth; // For JWT verification
 app.locals.oddsCacheService = oddsCacheService;
 app.locals.userUsage = new Map(); // In-memory usage tracking
 
