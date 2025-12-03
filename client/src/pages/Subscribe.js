@@ -232,7 +232,7 @@ const Subscribe = () => {
 
   // If no active plan, show pricing page
   return (
-    <div style={{ minHeight: '100vh', paddingBottom: '80px' }}>
+    <div style={{ minHeight: '100vh', paddingBottom: '80px', background: '#0a0612' }}>
       <Pricing />
     </div>
   );
