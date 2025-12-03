@@ -237,7 +237,10 @@ async function authenticate(req, _res, next) {
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
     const supabase = req.app.locals.supabase;
     
+    console.log(`🔍 Auth middleware: path=${req.path}, hasToken=${!!token}, hasSupabase=${!!supabase}`);
+    
     if (!token || !supabase) {
+      console.log(`⚠️ Auth skipped: token=${!!token}, supabase=${!!supabase}`);
       return next();
     }
     

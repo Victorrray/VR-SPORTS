@@ -78,10 +78,18 @@ const Pricing = ({ onUpgrade }) => {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       
+      console.log('🔐 Session check:', { 
+        hasSession: !!session, 
+        hasToken: !!token,
+        tokenLength: token?.length,
+        userId: session?.user?.id
+      });
+      
       if (!token) {
         throw new Error('No authentication token available');
       }
       
+      console.log('📤 Sending checkout request with token');
       const response = await fetch(withApiBase('/api/billing/create-checkout-session'), {
         method: 'POST',
         credentials: 'include',
