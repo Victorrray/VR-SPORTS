@@ -27,7 +27,13 @@ export function ThemeProvider({
 }) {
   const [theme, setTheme] =
     useState<ThemeType>("solid-gradient");
-  const [colorMode, setColorMode] = useState<ColorMode>("dark");
+  // Force dark mode - light mode disabled for now
+  const [colorMode] = useState<ColorMode>("dark");
+  // No-op setter to prevent light mode
+  const setColorMode = (_mode: ColorMode) => {
+    // Light mode disabled - always use dark
+    console.log('Light mode is currently disabled');
+  };
 
   return (
     <ThemeContext.Provider
