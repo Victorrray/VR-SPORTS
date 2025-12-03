@@ -1,5 +1,7 @@
 import { Crown, Check, ArrowLeft, Sparkles, Zap, Rocket } from 'lucide-react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useMe } from '../../hooks/useMe';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface ChangePlanPageProps {
@@ -9,11 +11,19 @@ interface ChangePlanPageProps {
 export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
+  const { me } = useMe();
+  const navigate = useNavigate();
+  
+  // Get user's current plan
+  const currentPlan = me?.plan || 'free';
+  const isGold = currentPlan === 'gold';
+  const isPlatinum = currentPlan === 'platinum' || me?.unlimited === true;
+  const isFree = currentPlan === 'free' && !me?.unlimited;
 
   const plans = [
     {
       name: 'Gold',
-      price: 15,
+      price: 10,
       period: 'month',
       icon: Zap,
       iconColor: isLight ? 'text-yellow-600' : 'text-yellow-400',
@@ -31,9 +41,9 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
         'Premium features',
         'Priority support',
       ],
-      buttonText: 'Downgrade to Gold',
-      buttonDisabled: false,
-      current: false,
+      buttonText: isGold ? 'Current Plan' : (isPlatinum ? 'Downgrade to Gold' : 'Upgrade to Gold'),
+      buttonDisabled: isGold,
+      current: isGold,
     },
     {
       name: 'Platinum',
@@ -55,20 +65,23 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
         'Advanced filters',
       ],
       unavailableFeatures: [],
-      buttonText: 'Current Plan',
-      buttonDisabled: true,
-      current: true,
+      buttonText: isPlatinum ? 'Current Plan' : 'Upgrade to Platinum',
+      buttonDisabled: isPlatinum,
+      current: isPlatinum,
     },
   ];
 
   const handleSelectPlan = (planName: string) => {
-    if (planName === 'Platinum') {
-      toast.info('You are already on the Platinum plan');
-    } else if (planName === 'Gold') {
-      toast.success('Plan change initiated. Check your email to confirm.');
-    } else {
-      toast.success('Plan change initiated. You will lose premium features.');
+    const planLower = planName.toLowerCase();
+    
+    // If already on this plan, do nothing
+    if ((planLower === 'gold' && isGold) || (planLower === 'platinum' && isPlatinum)) {
+      toast.info(`You are already on the ${planName} plan`);
+      return;
     }
+    
+    // Navigate to subscribe page to handle the upgrade/change
+    navigate('/subscribe');
   };
 
   return (
