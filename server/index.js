@@ -94,10 +94,16 @@ app.use(limiter);
 
 // ============================================================================
 // STRIPE WEBHOOK - MUST be before express.json() to access raw body stream
+// Only the webhook endpoint needs raw body for signature verification
 // ============================================================================
 const bodyParser = require('body-parser');
 const billingRoutes = require('./routes/billing');
-app.use('/api/billing', bodyParser.raw({ type: 'application/json' }), billingRoutes);
+// Register ONLY the webhook with raw body parser (before express.json)
+app.post('/api/billing/webhook', bodyParser.raw({ type: 'application/json' }), (req, res, next) => {
+  // Forward to billing routes
+  req.url = '/webhook';
+  billingRoutes(req, res, next);
+});
 
 // Body parsing with size limits
 app.use(express.json({ limit: '10mb' }));
@@ -110,6 +116,9 @@ app.use(logRequest);
 // This extracts the JWT token from Authorization header and populates req.user
 const { authenticate } = require('./middleware/auth');
 app.use(authenticate);
+
+// Register billing routes (except webhook) AFTER authentication
+app.use('/api/billing', billingRoutes);
 
 // Static file serving
 const clientBuildPath = path.join(__dirname, '../client/build');
