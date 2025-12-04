@@ -17,7 +17,11 @@ function generateDateOptions() {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     const dayName = dayNames[date.getDay()];
-    const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    // Use local date format (YYYY-MM-DD) to match filtering
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     
     if (i === 0) {
       options.push({ id: dateStr, name: `Today (${dayName})` });
@@ -138,19 +142,17 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       gameTime: p.gameTime
     })));
     
-    // Filter by specific date (YYYY-MM-DD format)
+    // Filter by specific date (YYYY-MM-DD format in local timezone)
     const filtered = apiPicks.filter(pick => {
       // If no game time, include the pick (don't filter it out)
       if (!pick.commenceTime && !pick.gameTime) return true;
       
       const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
-      // Use local date string to avoid timezone issues
+      // Use local date to match user's timezone
       const year = gameDate.getFullYear();
       const month = String(gameDate.getMonth() + 1).padStart(2, '0');
       const day = String(gameDate.getDate()).padStart(2, '0');
       const gameDateStr = `${year}-${month}-${day}`;
-      
-      console.log(`🗓️ Game: ${pick.game}, Date: ${gameDateStr}, Selected: ${selectedDate}, Match: ${gameDateStr === selectedDate}`);
       
       return gameDateStr === selectedDate;
     });

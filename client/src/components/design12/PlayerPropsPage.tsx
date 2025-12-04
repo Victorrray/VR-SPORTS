@@ -15,7 +15,11 @@ function generateDateOptions() {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     const dayName = dayNames[date.getDay()];
-    const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    // Use local date format (YYYY-MM-DD) to match filtering
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     
     if (i === 0) {
       options.push({ id: dateStr, name: `Today (${dayName})` });
