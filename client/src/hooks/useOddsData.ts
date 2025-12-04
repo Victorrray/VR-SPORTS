@@ -26,6 +26,9 @@ export interface OddsPick {
   allBooks?: OddsBook[];  // For compatibility with mini table
   gameTime?: string;  // ISO 8601 format (e.g., "2025-11-18T19:00:00Z")
   commenceTime?: string;  // Alias for gameTime
+  // Market data fields
+  bookCount?: number;  // Number of books with odds for this market
+  hasEnoughData?: boolean;  // Whether there's enough data for EV calculation (min 4 books)
   // Player props specific fields
   isPlayerProp?: boolean;
   playerName?: string;
@@ -223,10 +226,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           return bookOddsNum > bestOddsNum ? book : best;
         }, booksForMainCard[0]);
         
-        // Calculate EV using ALL books (for accurate EV calculation)
+        // Calculate EV using ALL books - require minimum 4 books for meaningful EV
+        const MIN_BOOKS_FOR_EV = 4;
         const numericOdds = propData.books.map((b: any) => parseInt(b.overOdds, 10)).filter((o: number) => !isNaN(o));
-        let ev = '0%';
-        if (numericOdds.length > 0) {
+        const hasEnoughData = numericOdds.length >= MIN_BOOKS_FOR_EV;
+        let ev = '--';
+        
+        if (hasEnoughData) {
           const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
           const probs = numericOdds.map(toProb);
           const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
@@ -256,13 +262,15 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             name: b.name,
             odds: b.overOdds,
             team2Odds: b.underOdds || b.overOdds,
-            ev: '0%',
+            ev: hasEnoughData ? '0%' : '--',
             isBest: b.name === bestBookForCard.name
           })),
           isPlayerProp: true,
           playerName: propData.playerName,
           marketKey: propData.marketKey,
           line: propData.point,
+          bookCount: propData.books.length,
+          hasEnoughData,
           gameTime: game.commence_time || undefined,
           commenceTime: game.commence_time || undefined
         });
@@ -336,9 +344,12 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           bestBook = bestBookData.name;
         }
         
-        // Calculate EV
+        // Calculate EV - require minimum 4 books for meaningful EV calculation
+        const MIN_BOOKS_FOR_EV = 4;
         const numericOdds = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-        if (numericOdds.length > 0) {
+        const hasEnoughData = numericOdds.length >= MIN_BOOKS_FOR_EV;
+        
+        if (hasEnoughData) {
           const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
           const probs = numericOdds.map(toProb);
           const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
@@ -358,6 +369,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               b.isBest = b.name === bestBook;
             });
           }
+        } else {
+          // Not enough books for EV calculation - mark as insufficient data
+          ev = '--';
+          booksArray.forEach(b => {
+            b.ev = '--';
+            b.isBest = b.name === bestBook;
+          });
         }
         
         // Create pick description based on market type
@@ -387,6 +405,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           allBooks: booksArray, // For compatibility
           marketKey,
           line: marketPoint,
+          bookCount: booksArray.length, // Number of books with odds for this market
+          hasEnoughData, // Whether there's enough data for EV calculation
           gameTime: game.commence_time || game.gameTime || undefined,
           commenceTime: game.commence_time || game.gameTime || undefined
         });
