@@ -1,4 +1,4 @@
-import { Settings, Bell, Shield, Globe, Moon, Sun, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign } from 'lucide-react';
+import { Settings, Bell, Shield, Globe, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 
@@ -8,7 +8,7 @@ interface SettingsPageProps {
 }
 
 export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscription }: SettingsPageProps = {}) {
-  const { colorMode, setColorMode } = useTheme();
+  const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const [notifications, setNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
@@ -98,40 +98,6 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         </h2>
 
         <div className="space-y-4">
-          <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
-            <div className="flex items-center gap-3 flex-1">
-              {colorMode === 'dark' ? (
-                <Moon className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              ) : (
-                <Sun className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              )}
-              <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>{colorMode === 'dark' ? 'Dark Mode' : 'Light Mode'}</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Currently enabled</div>
-              </div>
-            </div>
-            <label className="relative inline-flex items-cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer" 
-                checked={colorMode === 'dark'}
-                onChange={(e) => setColorMode(e.target.checked ? 'dark' : 'light')}
-              />
-              <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500`}></div>
-            </label>
-          </div>
-
-          <button className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}>
-            <div className="flex items-center gap-3">
-              <Globe className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Language & Region</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>English (US)</div>
-              </div>
-            </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
-          </button>
-
           <button className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}>
             <div className="flex items-center gap-3">
               <DollarSign className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
