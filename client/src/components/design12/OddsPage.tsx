@@ -47,15 +47,45 @@ const formatOdds = (odds: any): string => {
   return oddsNum > 0 ? `+${oddsNum}` : String(oddsNum);
 };
 
+// Helper function to parse odds string/number to numeric value
+const parseOdds = (odds: any): number => {
+  if (typeof odds === 'number') return odds;
+  if (typeof odds === 'string') {
+    const cleaned = odds.replace('+', '');
+    return parseInt(cleaned, 10);
+  }
+  return NaN;
+};
+
 // Helper function to calculate average odds from books array
+// Uses implied probability to properly average odds (can't just average American odds directly)
 const calculateAverageOdds = (books: any[]): string => {
   if (!books || books.length === 0) return '--';
+  
+  // Parse odds using the helper
   const numericOdds = books
-    .map(b => parseInt(b.odds, 10))
-    .filter(o => !isNaN(o));
+    .map(b => parseOdds(b.odds))
+    .filter(o => !isNaN(o) && (o <= -100 || o >= 100)); // Only valid American odds
+  
   if (numericOdds.length === 0) return '--';
-  const avg = Math.round(numericOdds.reduce((sum, o) => sum + o, 0) / numericOdds.length);
-  return avg > 0 ? `+${avg}` : String(avg);
+  
+  // Convert to implied probability, average, then convert back
+  const toProb = (american: number) => {
+    if (american > 0) return 100 / (american + 100);
+    return -american / (-american + 100);
+  };
+  
+  const toAmerican = (prob: number) => {
+    if (prob >= 0.5) return Math.round(-100 * prob / (1 - prob));
+    return Math.round(100 * (1 - prob) / prob);
+  };
+  
+  // Average the probabilities
+  const avgProb = numericOdds.reduce((sum, o) => sum + toProb(o), 0) / numericOdds.length;
+  
+  // Convert back to American odds
+  const avgOdds = toAmerican(avgProb);
+  return avgOdds > 0 ? `+${avgOdds}` : String(avgOdds);
 };
 
 // Helper function to calculate devig (no-vig/fair) odds
@@ -67,10 +97,12 @@ const calculateDevigOdds = (books: any[]): string => {
   const oddsPairs = books
     .filter(b => b.odds && b.team2Odds && b.odds !== '--' && b.team2Odds !== '--')
     .map(b => ({
-      odds1: parseInt(b.odds, 10),
-      odds2: parseInt(b.team2Odds, 10)
+      odds1: parseOdds(b.odds),
+      odds2: parseOdds(b.team2Odds)
     }))
-    .filter(p => !isNaN(p.odds1) && !isNaN(p.odds2));
+    .filter(p => !isNaN(p.odds1) && !isNaN(p.odds2) && 
+                 (p.odds1 <= -100 || p.odds1 >= 100) && 
+                 (p.odds2 <= -100 || p.odds2 >= 100)); // Only valid American odds
   
   if (oddsPairs.length === 0) return '--';
   
