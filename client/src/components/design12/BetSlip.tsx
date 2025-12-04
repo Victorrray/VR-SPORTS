@@ -79,23 +79,25 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
 
   const calculateKellyBet = () => {
     // Parse EV - remove % sign if present and convert to decimal (e.g., "102.58%" -> 1.0258)
-    const evString = String(betData.ev || '0').replace('%', '');
+    const evString = String(betData?.ev || '0').replace('%', '').replace('+', '');
     const evPercent = parseFloat(evString);
     if (isNaN(evPercent) || evPercent <= 0) return 0;
     
     const ev = evPercent / 100; // Convert percentage to decimal
     
-    const odds = String(betData.odds || '0');
+    // Parse odds - handle both string and number formats
+    const oddsStr = String(betData?.odds || '0').replace('+', '');
+    const oddsNum = parseInt(oddsStr);
+    if (isNaN(oddsNum) || oddsNum === 0) return 0;
+    
     let decimalOdds = 2; // Default to even odds
     
-    if (odds.includes('+')) {
+    if (oddsNum > 0) {
       // Positive odds: +200 means you win $200 on a $100 bet
-      const oddsValue = parseInt(odds.replace('+', ''));
-      decimalOdds = 1 + (oddsValue / 100);
-    } else if (odds.includes('-')) {
+      decimalOdds = 1 + (oddsNum / 100);
+    } else {
       // Negative odds: -150 means you need to bet $150 to win $100
-      const oddsValue = Math.abs(parseInt(odds));
-      decimalOdds = 1 + (100 / oddsValue);
+      decimalOdds = 1 + (100 / Math.abs(oddsNum));
     }
     
     // Kelly formula: f* = (bp - q) / b where b = decimal odds - 1, p = win probability, q = 1 - p
@@ -106,8 +108,9 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
     const kellyBet = ev / b;
     const recommendedBet = kellyBet * kellyFraction * currentBankroll;
     
-    // Cap at 25% of bankroll for safety
-    return Math.min(Math.max(recommendedBet, 0), currentBankroll * 0.25);
+    // Cap at 25% of bankroll for safety, ensure non-negative
+    const result = Math.min(Math.max(recommendedBet, 0), currentBankroll * 0.25);
+    return isNaN(result) ? 0 : result;
   };
 
   return (
@@ -217,7 +220,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                   ${calculateKellyBet().toFixed(2)}
                 </span>
                 <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>
-                  ({((calculateKellyBet() / currentBankroll) * 100).toFixed(1)}% of bankroll)
+                  ({currentBankroll > 0 ? ((calculateKellyBet() / currentBankroll) * 100).toFixed(1) : '0.0'}% of bankroll)
                 </span>
               </div>
 
