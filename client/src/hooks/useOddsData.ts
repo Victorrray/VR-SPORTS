@@ -86,8 +86,20 @@ function formatMarketName(marketKey: string): string {
     .replace(/\b\w/g, l => l.toUpperCase());
 }
 
-function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
+function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] = []): OddsPick[] {
   if (!Array.isArray(games)) return [];
+  
+  // Helper to check if a book should be included based on filter
+  const isBookIncluded = (bookKey: string, bookName: string): boolean => {
+    if (selectedSportsbooks.length === 0) return true; // No filter = include all
+    const normalizedKey = bookKey?.toLowerCase();
+    const normalizedName = bookName?.toLowerCase();
+    return selectedSportsbooks.some(sb => {
+      const normalizedSb = sb.toLowerCase();
+      return normalizedKey === normalizedSb || normalizedName === normalizedSb || 
+             normalizedKey?.includes(normalizedSb) || normalizedName?.includes(normalizedSb);
+    });
+  };
   
   // Log first game structure to debug
   if (games.length > 0) {
@@ -119,7 +131,11 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey"
       
       bookmakers.forEach((bm: any) => {
+        const bookKey = bm.key || '';
         const bookName = bm.title || bm.key;
+        
+        // Skip this bookmaker if it's not in the selected filter
+        if (!isBookIncluded(bookKey, bookName)) return;
         
         bm.markets?.forEach((market: any) => {
           if (!isPlayerPropMarket(market.key)) return;
@@ -132,7 +148,7 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
             if (!playerOutcomes.has(playerName)) {
               playerOutcomes.set(playerName, []);
             }
-            playerOutcomes.get(playerName)!.push({ ...outcome, bookName, marketKey: market.key });
+            playerOutcomes.get(playerName)!.push({ ...outcome, bookName, bookKey, marketKey: market.key });
           });
           
           // Create picks for each player
@@ -155,6 +171,7 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
               const propData = playerPropsMap.get(pickKey)!;
               propData.books.push({
                 name: bookName,
+                key: bookKey,
                 overOdds: normalizeAmericanOdds(overOutcome.price),
                 underOdds: underOutcome ? normalizeAmericanOdds(underOutcome.price) : null
               });
@@ -227,7 +244,11 @@ function transformOddsApiToOddsPick(games: any[]): OddsPick[] {
       // Find odds from all bookmakers - try h2h first, then spreads, then any market
       bookmakers.forEach((bm: any, bmIdx: number) => {
         let marketToUse = null;
+        const bookKey = bm.key || '';
         const bookName = bm.title || bm.key;
+        
+        // Skip this bookmaker if it's not in the selected filter
+        if (!isBookIncluded(bookKey, bookName)) return;
         
         // Debug first bookmaker - log entire structure
         if (gameIdx === 0 && bmIdx === 0) {
@@ -508,10 +529,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       }
 
       if (response.data && Array.isArray(response.data)) {
-        const transformedPicks = transformOddsApiToOddsPick(response.data);
+        const transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
-        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Results:', transformedPicks.length);
+        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
         if (betType === 'props') {
           console.log('🏈 Player props response received:', transformedPicks.length, 'player prop picks');
         }
@@ -519,10 +540,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
         }
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
-        const transformedPicks = transformOddsApiToOddsPick(response.data.picks);
+        const transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
-        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Results:', transformedPicks.length);
+        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
         if (betType === 'props') {
           console.log('🏈 Player props response received:', transformedPicks.length, 'player prop picks');
         }
