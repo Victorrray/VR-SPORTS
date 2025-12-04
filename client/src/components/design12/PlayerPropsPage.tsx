@@ -1347,7 +1347,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                                     description: `${pick.pick} at ${book.name} has been added to your picks`
                                   });
                                 }}
-                                className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
+                                className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
                               >
                                 <Plus className="w-4 h-4 text-white" />
                               </button>
@@ -1459,7 +1459,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                                           analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
                                         });
                                       }}
-                                      className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
+                                      className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
                                     >
                                       <Plus className="w-4 h-4 text-white" />
                                     </button>
