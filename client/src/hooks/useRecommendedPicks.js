@@ -129,7 +129,7 @@ export function useRecommendedPicks(options = {}) {
                   }),
                   pick: pickDescription,
                   odds: outcome.price,
-                  sportsbook: bestBookmaker.title || bestBookmaker.key,
+                  sportsbook: normalizeBookName(bestBookmaker.title || bestBookmaker.key),
                   ev: `${ev.toFixed(2)}%`,
                   sport: getSportLabel(game.sport_key),
                   status: new Date(game.commence_time) <= new Date() ? 'live' : 'active',
@@ -182,6 +182,35 @@ export function useRecommendedPicks(options = {}) {
     error,
     refetch: fetchRecommendedPicks,
   };
+}
+
+// Normalize sportsbook display names
+function normalizeBookName(bookName) {
+  const nameMap = {
+    'LowVig.ag': 'LowVig',
+    'lowvig': 'LowVig',
+    'Hard Rock Bet': 'Hard Rock',
+    'hardrockbet': 'Hard Rock',
+    'Dabble AU': 'Dabble',
+    'dabble_au': 'Dabble',
+    'William Hill (US)': 'Caesars',
+    'williamhill_us': 'Caesars',
+    'theScore Bet': 'TheScore',
+    'thescorebet': 'TheScore',
+    'FanDuel': 'FanDuel',
+    'fanduel': 'FanDuel',
+    'DraftKings': 'DraftKings',
+    'draftkings': 'DraftKings',
+    'BetMGM': 'BetMGM',
+    'betmgm': 'BetMGM',
+    'Caesars': 'Caesars',
+    'caesars': 'Caesars',
+    'PointsBet (US)': 'PointsBet',
+    'pointsbetus': 'PointsBet',
+    'Fanatics': 'Fanatics',
+    'fanatics': 'Fanatics',
+  };
+  return nameMap[bookName] || bookName;
 }
 
 function getSportLabel(sportKey) {
