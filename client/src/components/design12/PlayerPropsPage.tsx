@@ -1406,7 +1406,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       {pick.books.length > 5 && (
                         <button 
                           onClick={() => toggleSportsbook(pick.id)}
-                          className={`w-full flex items-center justify-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}
+                          className={`w-full flex items-center justify-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
                         >
                           <ChevronDown className={`w-4 h-4 transition-transform ${expandedSportsbooks.includes(pick.id) ? 'rotate-180' : ''}`} />
                           <span>{expandedSportsbooks.includes(pick.id) ? 'View Less' : 'View More'}</span>
@@ -1522,7 +1522,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                         <div className="flex justify-center mt-3">
                           <button 
                             onClick={() => toggleSportsbook(pick.id)}
-                            className={`flex items-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}
+                            className={`flex items-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
                           >
                             <ChevronDown className={`w-4 h-4 transition-transform ${expandedSportsbooks.includes(pick.id) ? 'rotate-180' : ''}`} />
                             <span>{expandedSportsbooks.includes(pick.id) ? 'View Less' : 'View More'}</span>
