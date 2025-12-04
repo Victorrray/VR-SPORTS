@@ -179,8 +179,8 @@ function isMarketLikelyLocked(book, isDFSApp = false) {
 }
 
 /* ---------- DFS Apps Odds Override (must be before calculateEV) ---------- */
-// DFS apps (PrizePicks, Underdog, DraftKings Pick 6, Dabble) always have -119 odds
-const DFS_APPS_LIST = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au'];
+// DFS apps (PrizePicks, Underdog, DraftKings Pick 6, Dabble, Betr) always have -119 odds
+const DFS_APPS_LIST = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au', 'betr', 'betrdfs'];
 const DFS_FIXED_ODDS = -119;
 
 function isDFSAppForEV(bookKey) {
@@ -2206,8 +2206,28 @@ export default function OddsTable({
     
     // For player props, use weighted consensus probability from all available books
     if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
+      // CRITICAL: Only compare books with the SAME line/point value
+      // Different lines (0.5 vs 1.5 threes) should NOT be mixed in EV calculation
+      const targetPoint = row.point ?? row.line;
+      const sameLineBooks = allBooks.filter(b => {
+        const bookPoint = b.point ?? b.line;
+        // If we have a target point, only include books with matching point
+        if (targetPoint !== undefined && targetPoint !== null) {
+          return bookPoint === targetPoint;
+        }
+        return true; // No point specified, include all
+      });
+      
+      console.log(`🎯 EV LINE FILTER: Target point ${targetPoint}, filtered ${allBooks.length} -> ${sameLineBooks.length} books with same line`);
+      
+      // Need at least 2 books with the same line for meaningful EV
+      if (sameLineBooks.length < 2) {
+        console.log(`⚠️ EV CALC SKIPPED: Not enough books with same line (${targetPoint}) - only ${sameLineBooks.length} books`);
+        return null;
+      }
+      
       // Calculate probabilities and weights for each book
-      const bookData = allBooks
+      const bookData = sameLineBooks
         .map(b => ({
           prob: americanToProb(b.price ?? b.odds),
           weight: getBookWeight(b.bookmaker?.key || b.book),
@@ -2258,7 +2278,13 @@ export default function OddsTable({
         // Sanity check: if EV is showing as the implied probability, return the correct calculation
         if (Math.abs(ev - (consensusProb * 100)) < 1) {
           console.warn(`⚠️ EV CALCULATION ERROR: Returning implied probability instead of EV! Recalculating...`);
-          return evCheck;
+          return Math.min(50, Math.max(0, evCheck)); // Cap at 50%
+        }
+        
+        // Cap EV at 50% - anything higher is almost certainly bad data or calculation error
+        if (ev > 50) {
+          console.warn(`⚠️ EV CAP: ${ev.toFixed(2)}% capped to 50% for ${row.playerName || 'unknown'}`);
+          return 50;
         }
         
         return ev;
