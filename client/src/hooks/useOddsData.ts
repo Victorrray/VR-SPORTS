@@ -394,7 +394,20 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
         
         // Determine which side is better (higher EV)
-        const isOverBetter = overEV >= underEV || !hasEnoughUnderData;
+        // DFS apps only offer Over bets, so if the best book is a DFS app, force Over
+        const bestOverBookIsDFS = dfsAppKeys.includes(bestOverBook?.key?.toLowerCase());
+        const bestUnderBookIsDFS = bestUnderBook ? dfsAppKeys.includes(bestUnderBook?.key?.toLowerCase()) : false;
+        
+        // If Under would be chosen but the best Under book is a DFS app (which doesn't offer Under), use Over instead
+        let isOverBetter = overEV >= underEV || !hasEnoughUnderData;
+        
+        // Force Over if the best book for the card would be a DFS app and we'd pick Under
+        // DFS apps don't offer Under bets
+        if (!isOverBetter && bestUnderBookIsDFS) {
+          console.log(`⚠️ Forcing Over for ${propData.playerName}: Under was better EV but best Under book is DFS app`);
+          isOverBetter = true;
+        }
+        
         const pickSide = isOverBetter ? 'Over' : 'Under';
         const bestBookForCard = isOverBetter ? bestOverBook : bestUnderBook || bestOverBook;
         const bestEV = isOverBetter ? overEV : underEV;
@@ -1451,8 +1464,31 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         console.log('📦 Response keys:', Object.keys(response.data));
       }
 
+      // DFS apps that only offer Over bets (no Under)
+      const dfsAppsNoUnder = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'betr', 'betr_us_dfs', 'dabble', 'dabble_au', 'sleeper', 'fliff'];
+      const isDFSOnlyFilter = sportsbooks && sportsbooks.length > 0 && 
+        sportsbooks.every(sb => dfsAppsNoUnder.includes(sb.toLowerCase()));
+      
+      // Filter function to remove Under picks when only DFS apps are selected
+      const filterUnderForDFS = (picks: OddsPick[]) => {
+        if (!isDFSOnlyFilter) return picks;
+        
+        const filtered = picks.filter(pick => {
+          // For player props, check if it's an Under pick
+          if (pick.isPlayerProp && pick.pickSide === 'Under') {
+            console.log(`🚫 Filtering out Under pick for DFS filter: ${pick.pick}`);
+            return false;
+          }
+          return true;
+        });
+        
+        console.log(`🎮 DFS filter: Removed ${picks.length - filtered.length} Under picks`);
+        return filtered;
+      };
+      
       if (response.data && Array.isArray(response.data)) {
-        const transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
+        let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
+        transformedPicks = filterUnderForDFS(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
@@ -1463,7 +1499,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
         }
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
-        const transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
+        let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
+        transformedPicks = filterUnderForDFS(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
