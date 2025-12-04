@@ -125,6 +125,12 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     setSavedPicks((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const updatePickStatus = (index: number, status: 'won' | 'lost' | 'pending') => {
+    setSavedPicks((prev) => prev.map((pick, i) => 
+      i === index ? { ...pick, status } : pick
+    ));
+  };
+
   // Calculate stats from saved picks
   const calculateStats = () => {
     if (savedPicks.length === 0) {
@@ -550,7 +556,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </>
             )}
 
-            {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} onNavigateToCalculator={() => setCurrentView("calculator")} />}
+            {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} onUpdatePickStatus={updatePickStatus} onNavigateToCalculator={() => setCurrentView("calculator")} />}
             {currentView === "odds" && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} />}
             {currentView === "account" && (
               <AccountPage
