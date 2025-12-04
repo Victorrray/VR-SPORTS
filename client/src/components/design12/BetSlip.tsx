@@ -129,7 +129,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
             </h2>
             <button
               onClick={onClose}
-              className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+              className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-xl transition-all`}
             >
               <X className="w-5 h-5" />
             </button>
@@ -148,7 +148,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                     {betData.sport}
                   </div>
                 </div>
-                <div className={`px-3 py-1.5 bg-gradient-to-r from-emerald-500/20 to-green-500/20 border ${isLight ? 'border-emerald-300' : 'border-emerald-400/30'} rounded-lg`}>
+                <div className={`px-3 py-1.5 bg-gradient-to-r from-emerald-500/20 to-green-500/20 border ${isLight ? 'border-emerald-300' : 'border-emerald-400/30'} rounded-full`}>
                   <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>
                     {betData.ev}
                   </span>
@@ -197,7 +197,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                 </div>
                 <button
                   onClick={() => setBetAmount(calculateKellyBet().toFixed(2))}
-                  className={`px-3 py-1.5 ${isLight ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700 border-indigo-300' : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-400/30'} border rounded-lg font-bold text-xs transition-all`}
+                  className={`px-3 py-1.5 ${isLight ? 'bg-indigo-100 hover:bg-indigo-200 text-indigo-700 border-indigo-300' : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border-indigo-400/30'} border rounded-full font-bold text-xs transition-all`}
                 >
                   Use This Amount
                 </button>
@@ -229,7 +229,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                 <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={() => setKellyFraction(0.25)}
-                    className={`py-2 px-3 rounded-lg font-bold text-xs transition-all border ${
+                    className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 0.25
                         ? isLight
                           ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
@@ -243,7 +243,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                   </button>
                   <button
                     onClick={() => setKellyFraction(0.5)}
-                    className={`py-2 px-3 rounded-lg font-bold text-xs transition-all border ${
+                    className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 0.5
                         ? isLight
                           ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
@@ -257,7 +257,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                   </button>
                   <button
                     onClick={() => setKellyFraction(0.75)}
-                    className={`py-2 px-3 rounded-lg font-bold text-xs transition-all border ${
+                    className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 0.75
                         ? isLight
                           ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
@@ -271,7 +271,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                   </button>
                   <button
                     onClick={() => setKellyFraction(1)}
-                    className={`py-2 px-3 rounded-lg font-bold text-xs transition-all border ${
+                    className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 1
                         ? isLight
                           ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
@@ -286,7 +286,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                 </div>
               </div>
 
-              <div className={`${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-lg p-3`}>
+              <div className={`${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-xl p-3`}>
                 <div className="flex items-start gap-2">
                   <Info className={`w-4 h-4 mt-0.5 ${isLight ? 'text-blue-600' : 'text-blue-400'} flex-shrink-0`} />
                   <div className={`${isLight ? 'text-blue-700' : 'text-blue-300'} text-xs`}>
