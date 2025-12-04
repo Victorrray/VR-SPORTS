@@ -383,14 +383,19 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     console.log('📊 Expanded markets from request:', expandedMarkets);
     
     // Filter markets based on sport support
+    console.log('📊 Filtering expanded markets:', expandedMarkets.length, 'markets');
+    console.log('📊 Sports to check:', sportsArray);
+    
     const filteredRegularMarkets = expandedMarkets.filter(m => {
-      return sportsArray.some(sport => {
+      const isSupported = sportsArray.some(sport => {
         const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
         return supportedForSport.includes(m);
       });
+      return isSupported;
     });
     
     console.log('🎯 Sport-specific market filtering:');
+    console.log('  Filtered markets count:', filteredRegularMarkets.length);
     sportsArray.forEach(sport => {
       const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
       console.log(`  ${sport}: supported markets count = ${supportedForSport.length}`);
@@ -404,6 +409,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     console.log('📊 Market separation:');
     console.log('  Base markets:', baseMarkets);
     console.log('  Quarter/Half/Period markets:', quarterMarkets.length, 'markets');
+    
+    // Safety check - ensure we have base markets
+    if (baseMarkets.length === 0 && regularMarkets.length > 0) {
+      console.log('⚠️ WARNING: No base markets after filtering! Using original markets:', regularMarkets);
+      baseMarkets.push(...regularMarkets.filter(m => ['h2h', 'spreads', 'totals'].includes(m)));
+    }
     
     // Step 1: Fetch base odds
     if (baseMarkets.length > 0) {
