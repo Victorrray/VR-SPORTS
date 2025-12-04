@@ -263,20 +263,67 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       playerPropsMap.forEach((propData, pickKey) => {
         if (propData.books.length === 0) return;
         
+        // DFS apps that offer pick'em style betting (not traditional odds)
+        const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'fliff'];
+        
+        // Separate traditional sportsbooks from DFS apps
+        const traditionalBooks = propData.books.filter((b: any) => !dfsAppKeys.includes(b.key?.toLowerCase()));
+        const dfsBooks = propData.books.filter((b: any) => dfsAppKeys.includes(b.key?.toLowerCase()));
+        
+        // Find the CONSENSUS LINE from traditional sportsbooks (most common line)
+        // This is the "main" line that we should compare against
+        let consensusLine = propData.point;
+        if (traditionalBooks.length > 0) {
+          const lineCount = new Map<number, number>();
+          traditionalBooks.forEach((b: any) => {
+            const line = b.line;
+            lineCount.set(line, (lineCount.get(line) || 0) + 1);
+          });
+          // Find the most common line
+          let maxCount = 0;
+          lineCount.forEach((count, line) => {
+            if (count > maxCount) {
+              maxCount = count;
+              consensusLine = line;
+            }
+          });
+        }
+        
+        // Filter books to only show those at the consensus line (or close to it)
+        // DFS apps: only include if their line matches the consensus line
+        const booksAtConsensusLine = propData.books.filter((b: any) => {
+          const isDFS = dfsAppKeys.includes(b.key?.toLowerCase());
+          if (isDFS) {
+            // For DFS apps, only show if their line matches the consensus
+            return b.line === consensusLine;
+          }
+          // For traditional books, show all (they'll be labeled with their line)
+          return true;
+        });
+        
         // Skip this pick if no filtered books match (user has a filter but none match)
         const hasFilteredBooks = propData.filteredBooks.length > 0;
-        const booksForMainCard = hasFilteredBooks ? propData.filteredBooks : propData.books;
+        const filteredBooksAtConsensus = hasFilteredBooks 
+          ? propData.filteredBooks.filter((b: any) => {
+              const isDFS = dfsAppKeys.includes(b.key?.toLowerCase());
+              return !isDFS || b.line === consensusLine;
+            })
+          : booksAtConsensusLine;
+        const booksForMainCard = filteredBooksAtConsensus.length > 0 ? filteredBooksAtConsensus : booksAtConsensusLine;
         
-        // Find best odds from FILTERED books (for main card display)
+        if (booksForMainCard.length === 0) return; // Skip if no books at consensus line
+        
+        // Find best odds from books at consensus line (for main card display)
         const bestBookForCard = booksForMainCard.reduce((best: any, book: any) => {
           const bestOddsNum = parseInt(best.overOdds, 10);
           const bookOddsNum = parseInt(book.overOdds, 10);
           return bookOddsNum > bestOddsNum ? book : best;
         }, booksForMainCard[0]);
         
-        // Calculate EV using ALL books - require minimum 4 books for meaningful EV
+        // Calculate EV using books at consensus line - require minimum 4 books for meaningful EV
         const MIN_BOOKS_FOR_EV = 4;
-        const numericOdds = propData.books.map((b: any) => parseInt(b.overOdds, 10)).filter((o: number) => !isNaN(o));
+        const booksForEV = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
+        const numericOdds = booksForEV.map((b: any) => parseInt(b.overOdds, 10)).filter((o: number) => !isNaN(o));
         const hasEnoughData = numericOdds.length >= MIN_BOOKS_FOR_EV;
         let ev = '--';
         
@@ -293,13 +340,44 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
         
         const marketName = formatMarketName(propData.marketKey);
-        // Use the best book's line for the pick description
-        const bestLine = bestBookForCard.line || propData.point;
-        const pickDescription = `${propData.playerName} Over ${bestLine} ${marketName}`;
+        // Use the CONSENSUS line for the pick description (not the best book's line)
+        const pickDescription = `${propData.playerName} Over ${consensusLine} ${marketName}`;
         
-        // Check if there are multiple different lines
-        const uniqueLines: number[] = propData.allLines ? Array.from(propData.allLines) : [bestLine];
+        // Check if there are multiple different lines across all books
+        const uniqueLines: number[] = propData.allLines ? Array.from(propData.allLines) : [consensusLine];
         const hasMultipleLines = uniqueLines.length > 1;
+        
+        // For the books list, only show books at the consensus line
+        // DFS apps are already filtered above, traditional books show their line if different
+        const displayBooks = booksAtConsensusLine.map((b: any) => {
+          const isDFS = dfsAppKeys.includes(b.key?.toLowerCase());
+          const isAtConsensus = b.line === consensusLine;
+          // Show line in name only if it differs from consensus (for traditional books)
+          const displayName = (!isDFS && !isAtConsensus) ? `${b.name} (${b.line})` : b.name;
+          return {
+            name: displayName,
+            rawName: b.name,
+            line: b.line,
+            odds: b.overOdds,
+            team2Odds: b.underOdds || b.overOdds,
+            ev: hasEnoughData ? '0%' : '--',
+            isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
+            isAtConsensus
+          };
+        }).sort((a: any, b: any) => {
+          // Best book should always be first
+          if (a.isBest && !b.isBest) return -1;
+          if (!a.isBest && b.isBest) return 1;
+          // Books at consensus line come before those at different lines
+          if (a.isAtConsensus && !b.isAtConsensus) return -1;
+          if (!a.isAtConsensus && b.isAtConsensus) return 1;
+          // Then sort by odds (highest first)
+          const aOdds = parseInt(a.odds, 10);
+          const bOdds = parseInt(b.odds, 10);
+          if (isNaN(aOdds)) return 1;
+          if (isNaN(bOdds)) return -1;
+          return bOdds - aOdds;
+        });
         
         allPicks.push({
           id: `${game.id}-${pickKey}`,
@@ -311,34 +389,15 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           pick: pickDescription,
           bestOdds: bestBookForCard.overOdds,
           bestBook: bestBookForCard.name,
-          // Mini table shows ALL books with actual odds, sorted so best book is first
-          // Include line info for each book when there are multiple lines
-          books: propData.books.map((b: any) => ({
-            name: hasMultipleLines ? `${b.name} (${b.line})` : b.name,
-            rawName: b.name,
-            line: b.line,
-            odds: b.overOdds,
-            team2Odds: b.underOdds || b.overOdds,
-            ev: hasEnoughData ? '0%' : '--',
-            isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line
-          })).sort((a: any, b: any) => {
-            // Best book should always be first
-            if (a.isBest && !b.isBest) return -1;
-            if (!a.isBest && b.isBest) return 1;
-            // Then sort by odds (highest first)
-            const aOdds = parseInt(a.odds, 10);
-            const bOdds = parseInt(b.odds, 10);
-            if (isNaN(aOdds)) return 1;
-            if (isNaN(bOdds)) return -1;
-            return bOdds - aOdds;
-          }),
+          // Mini table shows books at consensus line, with line labeled if different
+          books: displayBooks,
           isPlayerProp: true,
           playerName: propData.playerName,
           marketKey: propData.marketKey,
-          line: bestLine,
+          line: consensusLine,
           allLines: uniqueLines,
           hasMultipleLines,
-          bookCount: propData.books.length,
+          bookCount: booksAtConsensusLine.length,
           hasEnoughData,
           gameTime: game.commence_time || undefined,
           commenceTime: game.commence_time || undefined
