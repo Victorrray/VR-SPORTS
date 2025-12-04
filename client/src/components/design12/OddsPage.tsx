@@ -918,7 +918,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
                     onClick={() => setDateExpanded(false)}
                   />
                   
@@ -1011,7 +1012,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
                     onClick={() => setSportExpanded(false)}
                   />
                   
@@ -1104,7 +1106,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
                     onClick={() => setMarketExpanded(false)}
                   />
                   
@@ -1208,7 +1211,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
                     onClick={() => setSportsbooksExpanded(false)}
                   />
                   
