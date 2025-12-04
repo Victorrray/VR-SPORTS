@@ -130,6 +130,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     if (gameIdx === 0) {
       console.log(`📋 First game bookmakers:`, bookmakers);
       console.log(`📋 First game bookmakers length:`, bookmakers.length);
+      console.log(`📋 Bookmaker keys:`, bookmakers.map((b: any) => b.key));
+      // Check for DFS apps specifically
+      const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'fliff'];
+      const foundDFS = bookmakers.filter((b: any) => dfsApps.includes(b.key?.toLowerCase()));
+      console.log(`🎮 DFS Apps found:`, foundDFS.map((b: any) => b.key));
     }
     
     // Check if this game has player prop markets
