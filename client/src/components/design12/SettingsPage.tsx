@@ -239,12 +239,51 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
 
         <div className="space-y-3">
 
-          <button className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}>
+          <button 
+            onClick={() => {
+              // Keys to PRESERVE (user settings)
+              const preserveKeys = [
+                'vr_bankroll_current',
+                'vr_bankroll_starting', 
+                'vr_bankroll_strategy',
+                'vr_bankroll_kelly',
+                'vr_bankroll_flat',
+                'vr_bankroll_percentage',
+                'vr_odds_format',
+                'userSelectedSportsbooks',
+                'userBankroll',
+              ];
+              
+              // Save preserved values
+              const preserved: Record<string, string | null> = {};
+              preserveKeys.forEach(key => {
+                preserved[key] = localStorage.getItem(key);
+              });
+              
+              // Clear all localStorage
+              localStorage.clear();
+              
+              // Restore preserved values
+              Object.entries(preserved).forEach(([key, value]) => {
+                if (value !== null) {
+                  localStorage.setItem(key, value);
+                }
+              });
+              
+              // Clear sessionStorage (temporary data only)
+              sessionStorage.clear();
+              
+              toast.success('Cache Cleared', {
+                description: 'Temporary data cleared. Your settings have been preserved.'
+              });
+            }}
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+          >
             <div className="flex items-center gap-3">
               <Trash2 className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
               <div>
                 <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Clear Cache</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Remove stored data to improve performance</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Remove temporary data (preserves your settings)</div>
               </div>
             </div>
             <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
