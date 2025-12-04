@@ -34,6 +34,8 @@ export interface OddsPick {
   playerName?: string;
   marketKey?: string;
   line?: number | null;
+  allLines?: number[];  // All unique lines offered by different books
+  hasMultipleLines?: boolean;  // Whether different books offer different lines
 }
 
 export interface UseOddsDataOptions {
@@ -154,8 +156,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     );
     
     if (hasPlayerProps) {
-      // PLAYER PROPS MODE: Create one pick per player per market
-      const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey"
+      // PLAYER PROPS MODE: Create one pick per player per market (combining all lines)
+      const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey" (no line in key)
       
       // Collect ALL books for the mini table (no filtering here)
       bookmakers.forEach((bm: any) => {
@@ -182,25 +184,30 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const underOutcome = outcomes.find(o => o.name === 'Under');
             
             if (overOutcome) {
-              const pickKey = `${playerName}-${market.key}-${overOutcome.point}`;
+              // Group by player + market only (NOT by line) to combine all books
+              const pickKey = `${playerName}-${market.key}`;
               
               if (!playerPropsMap.has(pickKey)) {
                 playerPropsMap.set(pickKey, {
                   playerName,
                   marketKey: market.key,
-                  point: overOutcome.point,
+                  point: overOutcome.point, // Will be updated to best/most common line
+                  allLines: new Set<number>(), // Track all unique lines
                   books: [],
                   filteredBooks: [] // Books matching the filter for main card display
                 });
               }
               
               const propData = playerPropsMap.get(pickKey)!;
+              propData.allLines.add(overOutcome.point);
+              
               // DFS apps always have -119 odds, traditional sportsbooks use actual odds
               const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'fliff'];
               const isDFS = dfsApps.includes(bookKey?.toLowerCase());
               const bookData = {
                 name: bookName,
                 key: bookKey,
+                line: overOutcome.point, // Include the line for this specific book
                 overOdds: isDFS ? '-119' : normalizeAmericanOdds(overOutcome.price),
                 underOdds: isDFS ? '-119' : (underOutcome ? normalizeAmericanOdds(underOutcome.price) : null)
               };
@@ -258,7 +265,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
         
         const marketName = formatMarketName(propData.marketKey);
-        const pickDescription = `${propData.playerName} Over ${propData.point} ${marketName}`;
+        // Use the best book's line for the pick description
+        const bestLine = bestBookForCard.line || propData.point;
+        const pickDescription = `${propData.playerName} Over ${bestLine} ${marketName}`;
+        
+        // Check if there are multiple different lines
+        const uniqueLines: number[] = propData.allLines ? Array.from(propData.allLines) : [bestLine];
+        const hasMultipleLines = uniqueLines.length > 1;
         
         allPicks.push({
           id: `${game.id}-${pickKey}`,
@@ -271,12 +284,15 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           bestOdds: bestBookForCard.overOdds,
           bestBook: bestBookForCard.name,
           // Mini table shows ALL books with actual odds, sorted so best book is first
+          // Include line info for each book when there are multiple lines
           books: propData.books.map((b: any) => ({
-            name: b.name,
+            name: hasMultipleLines ? `${b.name} (${b.line})` : b.name,
+            rawName: b.name,
+            line: b.line,
             odds: b.overOdds,
             team2Odds: b.underOdds || b.overOdds,
             ev: hasEnoughData ? '0%' : '--',
-            isBest: b.name === bestBookForCard.name
+            isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line
           })).sort((a: any, b: any) => {
             // Best book should always be first
             if (a.isBest && !b.isBest) return -1;
@@ -291,7 +307,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           isPlayerProp: true,
           playerName: propData.playerName,
           marketKey: propData.marketKey,
-          line: propData.point,
+          line: bestLine,
+          allLines: uniqueLines,
+          hasMultipleLines,
           bookCount: propData.books.length,
           hasEnoughData,
           gameTime: game.commence_time || undefined,
