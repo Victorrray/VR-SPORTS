@@ -536,6 +536,14 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                   
                   // TheOddsAPI returns a single event object with bookmakers and markets
                   if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
+                    // Log all bookmakers returned from API
+                    const allBookKeys = playerPropsResponse.data.bookmakers.map(bk => bk.key);
+                    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'fliff'];
+                    const foundDFS = allBookKeys.filter(key => dfsApps.includes(key));
+                    if (foundDFS.length > 0) {
+                      console.log(`🎮 DFS APPS FOUND for ${event.home_team} vs ${event.away_team}:`, foundDFS);
+                    }
+                    
                     // Filter bookmakers to only include those with player prop markets
                     const eventWithProps = {
                       ...playerPropsResponse.data,
