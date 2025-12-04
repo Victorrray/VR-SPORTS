@@ -1412,7 +1412,16 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                             key={idx}
                             className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl items-center`}
                           >
-                            <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
+                            <div className="flex flex-col">
+                              <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                                {book.rawName || book.name.replace(/\s*\([^)]*\)\s*$/, '')}
+                              </span>
+                              {book.line && (
+                                <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>
+                                  {book.line}
+                                </span>
+                              )}
+                            </div>
                             <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{book.odds}</div>
                             <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{book.team2Odds}</div>
                             <div className="flex justify-end">
@@ -1515,7 +1524,16 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                                 className={`transition-all ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'}`}
                               >
                                 <td className="py-2 px-3">
-                                  <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
+                                  <div className="flex flex-col">
+                                    <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                                      {book.rawName || book.name.replace(/\s*\([^)]*\)\s*$/, '')}
+                                    </span>
+                                    {book.line && (
+                                      <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>
+                                        {book.line}
+                                      </span>
+                                    )}
+                                  </div>
                                 </td>
                                 <td className="py-2 px-3 text-center">
                                   <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.odds}</span>
