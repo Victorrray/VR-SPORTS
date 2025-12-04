@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
 
-export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[], onRemovePick?: (index: number) => void }) {
+export function PicksPage({ savedPicks = [], onRemovePick, onNavigateToCalculator }: { savedPicks?: any[], onRemovePick?: (index: number) => void, onNavigateToCalculator?: () => void }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const [showFilters, setShowFilters] = useState(false);
@@ -41,8 +41,7 @@ export function PicksPage({ savedPicks = [], onRemovePick }: { savedPicks?: any[
             <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl md:text-3xl font-bold`}>My Picks</h1>
             <button 
               onClick={() => {
-                // Navigate to calculator page
-                window.location.hash = '#calculator';
+                onNavigateToCalculator?.();
               }}
               className={`md:hidden flex items-center gap-2 px-3 py-3 rounded-xl font-bold transition-all shrink-0 ${
                 isLight 

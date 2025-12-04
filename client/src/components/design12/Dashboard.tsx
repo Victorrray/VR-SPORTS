@@ -550,7 +550,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </>
             )}
 
-            {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} />}
+            {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} onNavigateToCalculator={() => setCurrentView("calculator")} />}
             {currentView === "odds" && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} />}
             {currentView === "account" && (
               <AccountPage
