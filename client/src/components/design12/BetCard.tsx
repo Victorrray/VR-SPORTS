@@ -346,7 +346,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 <div className="flex justify-end">
                   <button
                     onClick={handleAddToPicks}
-                    className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all"
+                    className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
                   >
                     <Plus className="w-4 h-4 text-white" />
                   </button>
