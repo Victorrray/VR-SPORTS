@@ -162,59 +162,55 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
 
   const sportsbooksByTier = [
     {
-      tier: 'Tier 1 - Major US Sportsbooks',
+      tier: '🎮 DFS & Pick\'em',
+      books: [
+        { id: 'prizepicks', name: 'PrizePicks' },
+        { id: 'underdog', name: 'Underdog' },
+        { id: 'pick6', name: 'DK Pick6' },
+        { id: 'dabble_au', name: 'Dabble' },
+        { id: 'betr_us_dfs', name: 'Betr' },
+      ]
+    },
+    {
+      tier: '📱 Major Sportsbooks',
       books: [
         { id: 'draftkings', name: 'DraftKings' },
         { id: 'fanduel', name: 'FanDuel' },
         { id: 'betmgm', name: 'BetMGM' },
-        { id: 'caesars', name: 'Caesars Sportsbook' },
-      ]
-    },
-    {
-      tier: '🎮 DFS APPS (Tier 1)',
-      books: [
-        { id: 'prizepicks', name: 'PrizePicks' },
-        { id: 'underdog', name: 'Underdog Fantasy' },
-        { id: 'dkpick6', name: 'DK Pick6' },
-        { id: 'dabble', name: 'Dabble' },
-      ]
-    },
-    {
-      tier: '⭐ SECOND TIER - MAJOR OPERATORS (Tier 2)',
-      books: [
+        { id: 'caesars', name: 'Caesars' },
         { id: 'espnbet', name: 'ESPN BET' },
-        { id: 'fanatics', name: 'Fanatics Sportsbook' },
-        { id: 'hardrock', name: 'Hard Rock Bet' },
-        { id: 'pointsbet', name: 'PointsBet US' },
-        { id: 'betrivers', name: 'BetRivers' },
-        { id: 'wynnbet', name: 'WynnBET' },
-        { id: 'unibet', name: 'Unibet US' },
+        { id: 'fanatics', name: 'Fanatics' },
       ]
     },
     {
-      tier: '🎯 SHARP/LOW VIG BOOKS (Tier 2)',
+      tier: '🏆 More Sportsbooks',
+      books: [
+        { id: 'hardrock', name: 'Hard Rock' },
+        { id: 'betrivers', name: 'BetRivers' },
+        { id: 'pointsbet', name: 'PointsBet' },
+        { id: 'wynnbet', name: 'WynnBET' },
+        { id: 'unibet', name: 'Unibet' },
+        { id: 'fliff', name: 'Fliff' },
+      ]
+    },
+    {
+      tier: '📊 Sharp Books',
       books: [
         { id: 'pinnacle', name: 'Pinnacle' },
         { id: 'novig', name: 'NoVig' },
-      ]
-    },
-    {
-      tier: '💱 EXCHANGES (Tier 3)',
-      books: [
-        { id: 'prophetx', name: 'ProphetX' },
-        { id: 'rebet', name: 'ReBet' },
-        { id: 'betopenly', name: 'BetOpenly' },
-      ]
-    },
-    {
-      tier: '🌍 REGIONAL/SPECIALTY (Tier 3)',
-      books: [
-        { id: 'fliff', name: 'Fliff' },
         { id: 'circa', name: 'Circa Sports' },
       ]
     },
     {
-      tier: '🌐 OFFSHORE (Tier 3 - Optional)',
+      tier: '💱 Exchanges',
+      books: [
+        { id: 'kalshi', name: 'Kalshi' },
+        { id: 'prophetx', name: 'ProphetX' },
+        { id: 'betopenly', name: 'BetOpenly' },
+      ]
+    },
+    {
+      tier: '🌐 Offshore',
       books: [
         { id: 'bovada', name: 'Bovada' },
         { id: 'betonline', name: 'BetOnline' },
