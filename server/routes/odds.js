@@ -403,7 +403,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     
     // Separate quarter/half/period markets from base markets
     const quarterMarketPatterns = ['_q1', '_q2', '_q3', '_q4', '_h1', '_h2', '_p1', '_p2', '_p3', '_1st_'];
-    const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
+    let baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
     const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
     
     console.log('📊 Market separation:');
@@ -413,7 +413,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // Safety check - ensure we have base markets
     if (baseMarkets.length === 0 && regularMarkets.length > 0) {
       console.log('⚠️ WARNING: No base markets after filtering! Using original markets:', regularMarkets);
-      baseMarkets.push(...regularMarkets.filter(m => ['h2h', 'spreads', 'totals'].includes(m)));
+      baseMarkets = regularMarkets.filter(m => ['h2h', 'spreads', 'totals'].includes(m));
     }
     
     // Step 1: Fetch base odds
