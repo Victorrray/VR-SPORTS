@@ -72,10 +72,21 @@ function getSportLabel(sportKey: string): string {
 
 // Transform TheOddsAPI format to OddsPick format
 // Normalize American odds so positive numbers always have a leading '+'
-function normalizeAmericanOdds(raw: any): string {
+// American odds must be at least +100 or -100 (values between -99 and +99 are invalid)
+function normalizeAmericanOdds(raw: any): string | null {
   const n = parseInt(String(raw), 10);
-  if (isNaN(n)) return String(raw ?? '');
+  if (isNaN(n)) return null;
+  // Invalid odds: values between -99 and +99 (exclusive of 0)
+  if (n > -100 && n < 100 && n !== 0) return null;
   return n > 0 ? `+${n}` : String(n);
+}
+
+// Check if odds value is valid (at least ±100)
+function isValidOdds(odds: string | number | null | undefined): boolean {
+  if (odds === null || odds === undefined) return false;
+  const n = parseInt(String(odds).replace('+', ''), 10);
+  if (isNaN(n)) return false;
+  return n <= -100 || n >= 100;
 }
 
 // Check if a market key is a player prop
@@ -215,20 +226,26 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               // DFS apps always have -119 odds, traditional sportsbooks use actual odds
               const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'fliff'];
               const isDFS = dfsApps.includes(bookKey?.toLowerCase());
-              const bookData = {
-                name: bookName,
-                key: bookKey,
-                line: overOutcome.point, // Include the line for this specific book
-                overOdds: isDFS ? '-119' : normalizeAmericanOdds(overOutcome.price),
-                underOdds: isDFS ? '-119' : (underOutcome ? normalizeAmericanOdds(underOutcome.price) : null)
-              };
+              const overOdds = isDFS ? '-119' : normalizeAmericanOdds(overOutcome.price);
+              const underOdds = isDFS ? '-119' : (underOutcome ? normalizeAmericanOdds(underOutcome.price) : null);
               
-              // Add to ALL books (for mini table)
-              propData.books.push(bookData);
-              
-              // Also add to filtered books if it matches the filter (for main card)
-              if (isBookIncluded(bookKey, bookName)) {
-                propData.filteredBooks.push(bookData);
+              // Only add books with valid odds
+              if (overOdds) {
+                const bookData = {
+                  name: bookName,
+                  key: bookKey,
+                  line: overOutcome.point, // Include the line for this specific book
+                  overOdds,
+                  underOdds
+                };
+                
+                // Add to ALL books (for mini table)
+                propData.books.push(bookData);
+                
+                // Also add to filtered books if it matches the filter (for main card)
+                if (isBookIncluded(bookKey, bookName)) {
+                  propData.filteredBooks.push(bookData);
+                }
               }
             }
           });
@@ -423,12 +440,17 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
           const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
           
-          if (odds !== undefined && odds !== null) {
+          // Normalize and validate odds
+          const normalizedOdds = normalizeAmericanOdds(odds);
+          const normalizedTeam2Odds = team2Odds ? normalizeAmericanOdds(team2Odds) : null;
+          
+          // Skip books with invalid odds
+          if (normalizedOdds && odds !== undefined && odds !== null) {
             const bookData = {
               name: bookName,
               key: bookKey,
-              odds: normalizeAmericanOdds(odds),
-              team2Odds: team2Odds ? normalizeAmericanOdds(team2Odds) : '--',
+              odds: normalizedOdds,
+              team2Odds: normalizedTeam2Odds || '--',
               ev: '0%',
               isBest: false
             };
@@ -571,12 +593,16 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
           const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
           
-          if (odds !== undefined && odds !== null) {
+          // Normalize and validate odds
+          const normalizedOdds = normalizeAmericanOdds(odds);
+          const normalizedTeam2Odds = team2Odds ? normalizeAmericanOdds(team2Odds) : null;
+          
+          if (normalizedOdds && odds !== undefined && odds !== null) {
             booksArray.push({
               name: bookName,
               key: bookKey,
-              odds: normalizeAmericanOdds(odds),
-              team2Odds: team2Odds ? normalizeAmericanOdds(team2Odds) : '--',
+              odds: normalizedOdds,
+              team2Odds: normalizedTeam2Odds || '--',
               drawOdds: outcome2 ? normalizeAmericanOdds(outcome2.price || outcome2.odds) : null,
               ev: '0%',
               isBest: false
@@ -691,12 +717,16 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
           const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
           
-          if (odds !== undefined && odds !== null) {
+          // Normalize and validate odds
+          const normalizedOdds = normalizeAmericanOdds(odds);
+          const normalizedTeam2Odds = team2Odds ? normalizeAmericanOdds(team2Odds) : null;
+          
+          if (normalizedOdds && odds !== undefined && odds !== null) {
             booksArray.push({
               name: bookName,
               key: bookKey,
-              odds: normalizeAmericanOdds(odds),
-              team2Odds: team2Odds ? normalizeAmericanOdds(team2Odds) : '--',
+              odds: normalizedOdds,
+              team2Odds: normalizedTeam2Odds || '--',
               ev: '0%',
               isBest: false
             });
@@ -789,11 +819,12 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             }
             
             const odds = outcome.price !== undefined ? outcome.price : outcome.odds;
-            if (odds !== undefined && odds !== null) {
+            const normalizedOdds = normalizeAmericanOdds(odds);
+            if (normalizedOdds && odds !== undefined && odds !== null) {
               lineGroups.get(point)!.push({
                 name: bookName,
                 key: bookKey,
-                odds: normalizeAmericanOdds(odds),
+                odds: normalizedOdds,
                 team: outcome.name,
                 description: outcome.description
               });
@@ -886,12 +917,16 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
           const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
           
-          if (odds !== undefined && odds !== null) {
+          // Normalize and validate odds
+          const normalizedOdds = normalizeAmericanOdds(odds);
+          const normalizedTeam2Odds = team2Odds ? normalizeAmericanOdds(team2Odds) : null;
+          
+          if (normalizedOdds && odds !== undefined && odds !== null) {
             booksArray.push({
               name: bookName,
               key: bookKey,
-              odds: normalizeAmericanOdds(odds),
-              team2Odds: team2Odds ? normalizeAmericanOdds(team2Odds) : '--',
+              odds: normalizedOdds,
+              team2Odds: normalizedTeam2Odds || '--',
               drawOdds: outcome2 ? normalizeAmericanOdds(outcome2.price || outcome2.odds) : null,
               ev: '0%',
               isBest: false
