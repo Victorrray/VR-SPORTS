@@ -520,9 +520,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             const batchPromises = batch.map(event => 
               (async () => {
                 try {
-                  // Include us,us2 regions to get DFS apps (PrizePicks, Underdog, etc.)
-                  // us2 region contains DFS/pick'em apps
-                  const playerPropsRegions = 'us,us2';
+                  // Include us and us_dfs regions to get both sportsbooks and DFS apps
+                  // us_dfs region contains: PrizePicks, Underdog, DraftKings Pick6, Betr
+                  const playerPropsRegions = 'us,us_dfs';
                   const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
                   
                   console.log(`🔍 Fetching player props for event ${event.id} (${event.home_team} vs ${event.away_team})...`);
@@ -538,10 +538,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                   if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
                     // Log all bookmakers returned from API
                     const allBookKeys = playerPropsResponse.data.bookmakers.map(bk => bk.key);
-                    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'fliff'];
+                    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs'];
                     const foundDFS = allBookKeys.filter(key => dfsApps.includes(key));
+                    console.log(`📚 All bookmakers for ${event.home_team} vs ${event.away_team}:`, allBookKeys);
                     if (foundDFS.length > 0) {
-                      console.log(`🎮 DFS APPS FOUND for ${event.home_team} vs ${event.away_team}:`, foundDFS);
+                      console.log(`🎮 DFS APPS FOUND:`, foundDFS);
                     }
                     
                     // Filter bookmakers to only include those with player prop markets
