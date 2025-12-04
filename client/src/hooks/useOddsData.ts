@@ -97,6 +97,12 @@ function normalizeBookName(bookName: string): string {
     'dabble_au': 'Dabble',
     'William Hill (US)': 'Caesars',
     'williamhill_us': 'Caesars',
+    'LowVig.ag': 'LowVig',
+    'lowvig': 'LowVig',
+    'Hard Rock Bet': 'Hard Rock',
+    'hardrockbet': 'Hard Rock',
+    'theScore Bet': 'TheScore',
+    'thescorebet': 'TheScore',
   };
   return nameMap[bookName] || bookName;
 }
