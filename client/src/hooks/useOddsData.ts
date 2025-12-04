@@ -130,12 +130,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // PLAYER PROPS MODE: Create one pick per player per market
       const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey"
       
+      // Collect ALL books for the mini table (no filtering here)
       bookmakers.forEach((bm: any) => {
         const bookKey = bm.key || '';
         const bookName = bm.title || bm.key;
-        
-        // Skip this bookmaker if it's not in the selected filter
-        if (!isBookIncluded(bookKey, bookName)) return;
         
         bm.markets?.forEach((market: any) => {
           if (!isPlayerPropMarket(market.key)) return;
@@ -164,17 +162,26 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
                   playerName,
                   marketKey: market.key,
                   point: overOutcome.point,
-                  books: []
+                  books: [],
+                  filteredBooks: [] // Books matching the filter for main card display
                 });
               }
               
               const propData = playerPropsMap.get(pickKey)!;
-              propData.books.push({
+              const bookData = {
                 name: bookName,
                 key: bookKey,
                 overOdds: normalizeAmericanOdds(overOutcome.price),
                 underOdds: underOutcome ? normalizeAmericanOdds(underOutcome.price) : null
-              });
+              };
+              
+              // Add to ALL books (for mini table)
+              propData.books.push(bookData);
+              
+              // Also add to filtered books if it matches the filter (for main card)
+              if (isBookIncluded(bookKey, bookName)) {
+                propData.filteredBooks.push(bookData);
+              }
             }
           });
         });
@@ -184,21 +191,25 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       playerPropsMap.forEach((propData, pickKey) => {
         if (propData.books.length === 0) return;
         
-        // Find best odds
-        const bestBook = propData.books.reduce((best: any, book: any) => {
+        // Skip this pick if no filtered books match (user has a filter but none match)
+        const hasFilteredBooks = propData.filteredBooks.length > 0;
+        const booksForMainCard = hasFilteredBooks ? propData.filteredBooks : propData.books;
+        
+        // Find best odds from FILTERED books (for main card display)
+        const bestBookForCard = booksForMainCard.reduce((best: any, book: any) => {
           const bestOddsNum = parseInt(best.overOdds, 10);
           const bookOddsNum = parseInt(book.overOdds, 10);
           return bookOddsNum > bestOddsNum ? book : best;
-        }, propData.books[0]);
+        }, booksForMainCard[0]);
         
-        // Calculate EV
+        // Calculate EV using ALL books (for accurate EV calculation)
         const numericOdds = propData.books.map((b: any) => parseInt(b.overOdds, 10)).filter((o: number) => !isNaN(o));
         let ev = '0%';
         if (numericOdds.length > 0) {
           const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
           const probs = numericOdds.map(toProb);
           const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
-          const bestOddsNum = parseInt(bestBook.overOdds, 10);
+          const bestOddsNum = parseInt(bestBookForCard.overOdds, 10);
           if (!isNaN(bestOddsNum)) {
             const bestProb = toProb(bestOddsNum);
             const edge = ((avgProb - bestProb) / bestProb) * 100;
@@ -217,14 +228,15 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           team1,
           team2,
           pick: pickDescription,
-          bestOdds: bestBook.overOdds,
-          bestBook: bestBook.name,
+          bestOdds: bestBookForCard.overOdds,
+          bestBook: bestBookForCard.name,
+          // Mini table shows ALL books
           books: propData.books.map((b: any) => ({
             name: b.name,
             odds: b.overOdds,
             team2Odds: b.underOdds || '-110',
             ev: '0%',
-            isBest: b.name === bestBook.name
+            isBest: b.name === bestBookForCard.name
           })),
           isPlayerProp: true,
           playerName: propData.playerName,
@@ -236,19 +248,15 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       });
     } else {
       // GAME ODDS MODE: Original logic for h2h/spreads/totals
-      let bestOdds = '-110';
-      let bestBook = 'N/A';
       let ev = '0%';
-      const booksArray: any[] = [];
+      const booksArray: any[] = []; // ALL books for mini table
+      const filteredBooksArray: any[] = []; // Filtered books for main card
       
       // Find odds from all bookmakers - try h2h first, then spreads, then any market
       bookmakers.forEach((bm: any, bmIdx: number) => {
         let marketToUse = null;
         const bookKey = bm.key || '';
         const bookName = bm.title || bm.key;
-        
-        // Skip this bookmaker if it's not in the selected filter
-        if (!isBookIncluded(bookKey, bookName)) return;
         
         // Debug first bookmaker - log entire structure
         if (gameIdx === 0 && bmIdx === 0) {
@@ -325,18 +333,21 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           }
           
           if (odds !== undefined && odds !== null) {
-            booksArray.push({
+            const bookData = {
               name: bookName,
+              key: bookKey,
               odds: normalizeAmericanOdds(odds),
               team2Odds: normalizeAmericanOdds(team2Odds),
               ev: '0%',
-              isBest: bmIdx === 0
-            });
+              isBest: false
+            };
             
-            // Set best odds from first bookmaker with valid odds
-            if (bmIdx === 0 && bestOdds === '-110') {
-              bestOdds = normalizeAmericanOdds(odds);
-              bestBook = bookName;
+            // Add to ALL books (for mini table)
+            booksArray.push(bookData);
+            
+            // Also add to filtered books if it matches the filter (for main card)
+            if (isBookIncluded(bookKey, bookName)) {
+              filteredBooksArray.push({ ...bookData });
             }
             
             if (gameIdx === 0 && bmIdx === 0) {
@@ -355,8 +366,26 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
       });
 
+      // Determine best book from FILTERED books (for main card display)
+      const hasFilteredBooks = filteredBooksArray.length > 0;
+      const booksForMainCard = hasFilteredBooks ? filteredBooksArray : booksArray;
+      
+      let bestOdds = '-110';
+      let bestBook = 'N/A';
+      
+      if (booksForMainCard.length > 0) {
+        const bestBookData = booksForMainCard.reduce((best: any, book: any) => {
+          const bestOddsNum = parseInt(best.odds, 10);
+          const bookOddsNum = parseInt(book.odds, 10);
+          return bookOddsNum > bestOddsNum ? book : best;
+        }, booksForMainCard[0]);
+        
+        bestOdds = bestBookData.odds;
+        bestBook = bestBookData.name;
+      }
+
       // After collecting all bookmaker odds, compute a simple EV% based on
-      // the best price vs the average price across all books for this side.
+      // the best price vs the average price across ALL books for this side.
       const numericOdds = booksArray
         .map(b => parseInt(b.odds, 10))
         .filter(o => !isNaN(o));
@@ -392,12 +421,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             } else {
               b.ev = '0%';
             }
+            // Mark the best book
+            b.isBest = b.name === bestBook;
           });
         }
       }
 
       if (gameIdx === 0) {
-        console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Best odds: ${bestOdds}, EV: ${ev}`);
+        console.log(`📊 Game: ${team1} @ ${team2}, Books found: ${booksArray.length}, Filtered: ${filteredBooksArray.length}, Best odds: ${bestOdds}, EV: ${ev}`);
       }
 
       allPicks.push({
@@ -413,6 +444,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         bestBook,
         avgOdds: bestOdds,
         isHot: false,
+        // Mini table shows ALL books
         books: booksArray,
         gameTime: game.commence_time || game.gameTime || undefined,
         commenceTime: game.commence_time || game.gameTime || undefined
