@@ -258,9 +258,22 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
   const marketTypes = [
     { id: 'all', name: 'All Markets' },
+    // Standard Markets
     { id: 'moneyline', name: 'Moneyline' },
     { id: 'spread', name: 'Spread' },
     { id: 'totals', name: 'Totals (Over/Under)' },
+    // Alternate Markets
+    { id: 'alternate_spreads', name: 'Alternate Spreads' },
+    { id: 'alternate_totals', name: 'Alternate Totals' },
+    { id: 'team_totals', name: 'Team Totals' },
+    // Period Markets
+    { id: '1st_half', name: '1st Half' },
+    { id: '2nd_half', name: '2nd Half' },
+    { id: '1st_quarter', name: '1st Quarter' },
+    { id: '1st_period', name: '1st Period (NHL)' },
+    // Soccer Markets
+    { id: 'btts', name: 'Both Teams to Score' },
+    { id: 'draw_no_bet', name: 'Draw No Bet' },
   ];
 
   const sportsbooksByTier = [
@@ -390,6 +403,47 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       const matches = allowedLabels.some(label => pick.sport === label);
       
       if (!matches) {
+        return false;
+      }
+    }
+    
+    // Filter by market type
+    if (selectedMarket !== 'all') {
+      const marketKey = pick.marketKey || '';
+      
+      // Map filter IDs to market keys
+      const marketMatches = (() => {
+        switch (selectedMarket) {
+          case 'moneyline':
+            return marketKey === 'h2h' || marketKey.startsWith('h2h_') && !marketKey.includes('3_way');
+          case 'spread':
+            return marketKey === 'spreads' || (marketKey.startsWith('spreads_') && !marketKey.includes('alternate'));
+          case 'totals':
+            return marketKey === 'totals' || (marketKey.startsWith('totals_') && !marketKey.includes('alternate') && !marketKey.includes('team'));
+          case 'alternate_spreads':
+            return marketKey.includes('alternate_spreads');
+          case 'alternate_totals':
+            return marketKey.includes('alternate_totals') && !marketKey.includes('team');
+          case 'team_totals':
+            return marketKey.includes('team_totals');
+          case '1st_half':
+            return marketKey.includes('_h1');
+          case '2nd_half':
+            return marketKey.includes('_h2');
+          case '1st_quarter':
+            return marketKey.includes('_q1');
+          case '1st_period':
+            return marketKey.includes('_p1');
+          case 'btts':
+            return marketKey === 'btts';
+          case 'draw_no_bet':
+            return marketKey === 'draw_no_bet';
+          default:
+            return true;
+        }
+      })();
+      
+      if (!marketMatches) {
         return false;
       }
     }
