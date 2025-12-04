@@ -1063,31 +1063,45 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         : 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl';
       params.append('sports', sportsList);
       
-      // Map market types to API format and backend expects 'markets' not 'marketType'
-      // For period/alternate markets, we need to request all markets and filter client-side
-      // The backend will request the appropriate markets based on the sport
-      const marketKeyMap: { [key: string]: string } = {
-        'moneyline': 'h2h',
-        'spread': 'spreads',
-        'totals': 'totals',
+      // Map market types to API format
+      // For special markets (periods, alternates), request those specific markets from the API
+      const getMarketsForFilter = (filter: string): string => {
+        switch (filter) {
+          // Standard markets
+          case 'moneyline': return 'h2h';
+          case 'spread': return 'spreads';
+          case 'totals': return 'totals';
+          
+          // Alternate markets
+          case 'alternate_spreads': return 'alternate_spreads';
+          case 'alternate_totals': return 'alternate_totals';
+          case 'team_totals': return 'team_totals';
+          
+          // 1st Half markets (all sports)
+          case '1st_half': return 'h2h_h1,spreads_h1,totals_h1';
+          
+          // 2nd Half markets
+          case '2nd_half': return 'h2h_h2,spreads_h2,totals_h2';
+          
+          // 1st Quarter markets (NFL, NBA)
+          case '1st_quarter': return 'h2h_q1,spreads_q1,totals_q1';
+          
+          // 1st Period markets (NHL)
+          case '1st_period': return 'h2h_p1,spreads_p1,totals_p1';
+          
+          // Soccer markets
+          case 'btts': return 'btts';
+          case 'draw_no_bet': return 'draw_no_bet';
+          
+          // All markets - request standard, backend handles the rest
+          case 'all':
+          default: return 'h2h,spreads,totals';
+        }
       };
       
-      // For special market filters (periods, alternates, etc.), request all markets
-      // and let client-side filtering handle it
-      const specialMarketFilters = [
-        'alternate_spreads', 'alternate_totals', 'team_totals',
-        '1st_half', '2nd_half', '1st_quarter', '1st_period',
-        'btts', 'draw_no_bet'
-      ];
-      
-      const isSpecialMarket = marketType && specialMarketFilters.includes(marketType);
-      const marketsList = isSpecialMarket || !marketType || marketType === 'all'
-        ? 'h2h,spreads,totals'  // Request standard markets, backend adds period/alternate markets
-        : (marketKeyMap[marketType] || marketType);
-      
-      // Always append markets parameter to ensure spreads and totals are included
+      const marketsList = getMarketsForFilter(marketType || 'all');
       params.append('markets', marketsList);
-      console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList, 'isSpecialMarket:', isSpecialMarket);
+      console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList);
       
       // Add other parameters the backend expects
       params.append('regions', 'us');
