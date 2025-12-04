@@ -336,6 +336,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           sportsbookMap[book.id] = [];
         }
         sportsbookMap[book.id].push(book.name.toLowerCase());
+        // Also add the ID itself as a matching name
+        sportsbookMap[book.id].push(book.id.toLowerCase());
       });
     });
 
@@ -343,10 +345,24 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     let filteredBooks = pick.books;
     if (selectedSportsbooks.length > 0) {
       filteredBooks = pick.books.filter(book => {
-        const bookNameLower = ((book as any).rawName || book.name).toLowerCase();
+        // Use rawName if available (for books with line in name), otherwise use name
+        // Also strip any line info like "(4.5)" from the name for matching
+        const rawName = (book as any).rawName || book.name;
+        const bookNameLower = rawName.replace(/\s*\([^)]*\)\s*$/, '').toLowerCase().trim();
+        const bookKey = ((book as any).key || '').toLowerCase();
+        
         return selectedSportsbooks.some(selectedId => {
           const matchingNames = sportsbookMap[selectedId] || [];
-          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+          const selectedIdLower = selectedId.toLowerCase();
+          
+          // Match by key, name, or partial name match
+          return bookKey === selectedIdLower ||
+                 bookKey.includes(selectedIdLower) ||
+                 matchingNames.some(name => 
+                   bookNameLower.includes(name) || 
+                   name.includes(bookNameLower) ||
+                   bookNameLower === name
+                 );
         });
       });
     }
