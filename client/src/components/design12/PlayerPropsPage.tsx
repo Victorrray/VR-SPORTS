@@ -339,11 +339,11 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       });
     });
 
-    // Filter books array if sportsbooks are selected
+    // Filter books array if sportsbooks are selected (for main card display)
     let filteredBooks = pick.books;
     if (selectedSportsbooks.length > 0) {
       filteredBooks = pick.books.filter(book => {
-        const bookNameLower = book.name.toLowerCase();
+        const bookNameLower = ((book as any).rawName || book.name).toLowerCase();
         return selectedSportsbooks.some(selectedId => {
           const matchingNames = sportsbookMap[selectedId] || [];
           return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
@@ -351,9 +351,24 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       });
     }
 
+    // Find best book from filtered books for main card
+    const bestBookForCard = filteredBooks.length > 0 
+      ? filteredBooks.reduce((best: any, book: any) => {
+          const bestOddsNum = parseInt(best.odds, 10);
+          const bookOddsNum = parseInt(book.odds, 10);
+          return bookOddsNum > bestOddsNum ? book : best;
+        }, filteredBooks[0])
+      : pick.books[0];
+
     return {
       ...pick,
-      books: filteredBooks
+      // Keep ALL books for mini table (allBooks)
+      allBooks: pick.books,
+      // Use filtered books for determining if pick should show
+      filteredBooks: filteredBooks,
+      // Update bestBook and bestOdds based on filtered selection
+      bestBook: bestBookForCard?.rawName || bestBookForCard?.name || pick.bestBook,
+      bestOdds: bestBookForCard?.odds || pick.bestOdds
     };
   }).filter(pick => {
     // Filter by sport - compare against API sport value
@@ -380,7 +395,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     // Filter by sportsbooks (if any selected, show only picks available at selected books)
     if (selectedSportsbooks.length > 0) {
       // Only include picks that have at least one book after filtering
-      if (pick.books.length === 0) {
+      if ((pick as any).filteredBooks?.length === 0) {
         return false;
       }
     }
@@ -1336,7 +1351,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {calculateAverageOdds(pick.books)}
+                              {calculateAverageOdds((pick as any).allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1348,7 +1363,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {calculateDevigOdds(pick.books)}
+                              {calculateDevigOdds((pick as any).allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1365,7 +1380,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                         </div>
 
                         {/* Table Rows */}
-                        {(expandedSportsbooks.includes(pick.id) ? pick.books : pick.books.slice(0, 5)).map((book, idx) => (
+                        {(expandedSportsbooks.includes(pick.id) ? ((pick as any).allBooks || pick.books) : ((pick as any).allBooks || pick.books).slice(0, 5)).map((book: any, idx: number) => (
                           <div 
                             key={idx}
                             className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl items-center`}
@@ -1403,7 +1418,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       </div>
 
                       {/* View More Button */}
-                      {pick.books.length > 5 && (
+                      {((pick as any).allBooks || pick.books).length > 5 && (
                         <button 
                           onClick={() => toggleSportsbook(pick.id)}
                           className={`w-full flex items-center justify-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
@@ -1437,7 +1452,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {calculateAverageOdds(pick.books)}
+                              {calculateAverageOdds((pick as any).allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1449,7 +1464,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {calculateDevigOdds(pick.books)}
+                              {calculateDevigOdds((pick as any).allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1467,7 +1482,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                             </tr>
                           </thead>
                           <tbody className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
-                            {(expandedSportsbooks.includes(pick.id) ? pick.books : pick.books.slice(0, 5)).map((book, idx) => (
+                            {(expandedSportsbooks.includes(pick.id) ? ((pick as any).allBooks || pick.books) : ((pick as any).allBooks || pick.books).slice(0, 5)).map((book: any, idx: number) => (
                               <tr 
                                 key={idx}
                                 className={`transition-all ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'}`}
@@ -1518,7 +1533,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       </div>
 
                       {/* View More Button */}
-                      {pick.books.length > 5 && (
+                      {((pick as any).allBooks || pick.books).length > 5 && (
                         <div className="flex justify-center mt-3">
                           <button 
                             onClick={() => toggleSportsbook(pick.id)}
