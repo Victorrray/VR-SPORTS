@@ -191,6 +191,8 @@ function normalizeBookName(bookName) {
     'lowvig': 'LowVig',
     'BetOnline.ag': 'BetOnline',
     'betonlineag': 'BetOnline',
+    'Betr DFS': 'Betr',
+    'betrdfs': 'Betr',
     'Hard Rock Bet': 'Hard Rock',
     'hardrockbet': 'Hard Rock',
     'Dabble AU': 'Dabble',
