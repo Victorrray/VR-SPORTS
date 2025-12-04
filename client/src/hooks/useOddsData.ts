@@ -185,12 +185,12 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               }
               
               const propData = playerPropsMap.get(pickKey)!;
-              // Player props always display as -119 odds
+              // Use actual odds from API
               const bookData = {
                 name: bookName,
                 key: bookKey,
-                overOdds: '-119',
-                underOdds: '-119'
+                overOdds: normalizeAmericanOdds(overOutcome.price),
+                underOdds: underOutcome ? normalizeAmericanOdds(underOutcome.price) : null
               };
               
               // Add to ALL books (for mini table)
@@ -248,11 +248,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           pick: pickDescription,
           bestOdds: bestBookForCard.overOdds,
           bestBook: bestBookForCard.name,
-          // Mini table shows ALL books - player props always show -119
+          // Mini table shows ALL books with actual odds
           books: propData.books.map((b: any) => ({
             name: b.name,
-            odds: '-119',
-            team2Odds: '-119',
+            odds: b.overOdds,
+            team2Odds: b.underOdds || b.overOdds,
             ev: '0%',
             isBest: b.name === bestBookForCard.name
           })),
