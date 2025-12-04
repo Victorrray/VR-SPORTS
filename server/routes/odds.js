@@ -26,22 +26,34 @@ const {
 // Sport-specific market support from TheOddsAPI
 const SPORT_MARKET_SUPPORT = {
   'americanfootball_nfl': [
-    'h2h', 'spreads', 'totals'
+    'h2h', 'spreads', 'totals', 
+    'alternate_spreads', 'alternate_totals', 
+    'team_totals', 'alternate_team_totals'
   ],
   'americanfootball_ncaaf': [
-    'h2h', 'spreads', 'totals'
+    'h2h', 'spreads', 'totals',
+    'alternate_spreads', 'alternate_totals',
+    'team_totals', 'alternate_team_totals'
   ],
   'basketball_nba': [
-    'h2h', 'spreads', 'totals'
+    'h2h', 'spreads', 'totals',
+    'alternate_spreads', 'alternate_totals',
+    'team_totals', 'alternate_team_totals'
   ],
   'basketball_ncaab': [
-    'h2h', 'spreads', 'totals'
+    'h2h', 'spreads', 'totals',
+    'alternate_spreads', 'alternate_totals',
+    'team_totals', 'alternate_team_totals'
   ],
   'baseball_mlb': [
-    'h2h', 'spreads', 'totals'
+    'h2h', 'spreads', 'totals',
+    'alternate_spreads', 'alternate_totals',
+    'team_totals', 'alternate_team_totals'
   ],
   'icehockey_nhl': [
-    'h2h', 'spreads', 'totals'
+    'h2h', 'spreads', 'totals',
+    'alternate_spreads', 'alternate_totals',
+    'team_totals', 'alternate_team_totals'
   ],
   'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
