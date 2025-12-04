@@ -1029,17 +1029,30 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       params.append('sports', sportsList);
       
       // Map market types to API format and backend expects 'markets' not 'marketType'
+      // For period/alternate markets, we need to request all markets and filter client-side
+      // The backend will request the appropriate markets based on the sport
       const marketKeyMap: { [key: string]: string } = {
         'moneyline': 'h2h',
         'spread': 'spreads',
         'totals': 'totals',
       };
-      const marketsList = marketType && marketType !== 'all'
-        ? (marketKeyMap[marketType] || marketType)
-        : 'h2h,spreads,totals';
+      
+      // For special market filters (periods, alternates, etc.), request all markets
+      // and let client-side filtering handle it
+      const specialMarketFilters = [
+        'alternate_spreads', 'alternate_totals', 'team_totals',
+        '1st_half', '2nd_half', '1st_quarter', '1st_period',
+        'btts', 'draw_no_bet'
+      ];
+      
+      const isSpecialMarket = marketType && specialMarketFilters.includes(marketType);
+      const marketsList = isSpecialMarket || !marketType || marketType === 'all'
+        ? 'h2h,spreads,totals'  // Request standard markets, backend adds period/alternate markets
+        : (marketKeyMap[marketType] || marketType);
+      
       // Always append markets parameter to ensure spreads and totals are included
       params.append('markets', marketsList);
-      console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList);
+      console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList, 'isSpecialMarket:', isSpecialMarket);
       
       // Add other parameters the backend expects
       params.append('regions', 'us');
