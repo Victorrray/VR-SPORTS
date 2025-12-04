@@ -157,27 +157,34 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
 
               <div className={`h-px ${isLight ? 'bg-gray-200' : 'bg-white/10'}`} />
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
+              {/* Pick with Odds Badge */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
                   <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs mb-1`}>
                     Pick
                   </div>
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
                     {betData.pick}
                   </div>
                 </div>
-                <div>
-                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs mb-1`}>
-                    Odds
-                  </div>
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
-                    {betData.odds}
-                  </div>
+                <div className={`px-4 py-2 ${isLight ? 'bg-purple-100 border-purple-300' : 'bg-purple-500/20 border-purple-400/30'} border rounded-xl`}>
+                  <span className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-lg`}>
+                    {(() => {
+                      const odds = String(betData.odds || '');
+                      if (odds.startsWith('+') || odds.startsWith('-') || odds === '--') return odds;
+                      const num = parseInt(odds);
+                      if (isNaN(num)) return odds;
+                      return num > 0 ? `+${num}` : String(num);
+                    })()}
+                  </span>
                 </div>
               </div>
 
-              <div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs mb-1`}>
+              <div className={`h-px ${isLight ? 'bg-gray-200' : 'bg-white/10'}`} />
+
+              {/* Sportsbook */}
+              <div className="flex items-center justify-between">
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-medium`}>
                   Sportsbook
                 </div>
                 <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
