@@ -468,6 +468,30 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     }
   });
   
+  // Sort picks: bets with valid EV% at top (sorted by EV descending), bets without EV at bottom
+  allPicks.sort((a, b) => {
+    const aHasEV = a.ev !== '--' && a.ev !== '0%' && a.hasEnoughData !== false;
+    const bHasEV = b.ev !== '--' && b.ev !== '0%' && b.hasEnoughData !== false;
+    
+    // Picks with EV come before picks without EV
+    if (aHasEV && !bHasEV) return -1;
+    if (!aHasEV && bHasEV) return 1;
+    
+    // If both have EV, sort by EV percentage (highest first)
+    if (aHasEV && bHasEV) {
+      const aEV = parseFloat(a.ev.replace('%', ''));
+      const bEV = parseFloat(b.ev.replace('%', ''));
+      if (!isNaN(aEV) && !isNaN(bEV)) {
+        return bEV - aEV; // Higher EV first
+      }
+    }
+    
+    // If neither has EV, sort by book count (more books = more data = higher priority)
+    const aBooks = a.bookCount || a.books?.length || 0;
+    const bBooks = b.bookCount || b.books?.length || 0;
+    return bBooks - aBooks;
+  });
+  
   return allPicks;
 }
 
