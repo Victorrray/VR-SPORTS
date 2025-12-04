@@ -36,7 +36,7 @@ router.get('/me', async (req, res) => {
 
     const { data, error } = await supabase
       .from('users')
-      .select('plan, api_request_count, grandfathered')
+      .select('plan, api_request_count, grandfathered, subscription_end_date, stripe_customer_id')
       .eq('id', userId)
       .single();
 
@@ -53,7 +53,23 @@ router.get('/me', async (req, res) => {
         remaining: null,
         limit: null,
         unlimited: true,
-        used: data.api_request_count || 0
+        used: data.api_request_count || 0,
+        subscription_end_date: data.subscription_end_date,
+        has_billing: !!data.stripe_customer_id
+      });
+    }
+
+    // Gold plan
+    if (data.plan === 'gold') {
+      console.log(`✅ User ${userId} has gold plan`);
+      return res.json({
+        plan: 'gold',
+        remaining: null,
+        limit: null,
+        unlimited: false,
+        used: data.api_request_count || 0,
+        subscription_end_date: data.subscription_end_date,
+        has_billing: !!data.stripe_customer_id
       });
     }
 
@@ -68,7 +84,9 @@ router.get('/me', async (req, res) => {
       remaining,
       limit,
       used,
-      unlimited: false
+      unlimited: false,
+      subscription_end_date: data.subscription_end_date,
+      has_billing: !!data.stripe_customer_id
     });
   } catch (error) {
     console.error('Error fetching user plan:', error);

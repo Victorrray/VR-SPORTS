@@ -1,6 +1,7 @@
 import { AlertCircle, ArrowLeft, ChevronDown, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useMe } from '../../hooks/useMe';
 import { toast } from 'sonner';
 
 interface CancelSubscriptionPageProps {
@@ -10,11 +11,30 @@ interface CancelSubscriptionPageProps {
 export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
+  const { me } = useMe();
   const [selectedReason, setSelectedReason] = useState('');
   const [showReasonDropdown, setShowReasonDropdown] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Get plan details
+  const userPlan = me?.plan || 'free';
+  const isPlatinum = userPlan === 'platinum' || me?.unlimited === true;
+  const isGold = userPlan === 'gold';
+  const planDisplayName = isPlatinum ? 'Platinum' : isGold ? 'Gold' : 'Free';
+  const planPrice = isPlatinum ? '$25' : isGold ? '$15' : '$0';
+  
+  // Format next billing date
+  const formatBillingDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'Not available';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    } catch {
+      return 'Not available';
+    }
+  };
 
   const reasons = [
     'Too expensive',
@@ -185,15 +205,15 @@ export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) 
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Plan</span>
-            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>Platinum Monthly</span>
+            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{planDisplayName} Monthly</span>
           </div>
           <div className="flex justify-between">
             <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Next billing date</span>
-            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>December 15, 2025</span>
+            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{formatBillingDate(me?.subscription_end_date)}</span>
           </div>
           <div className="flex justify-between">
             <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Amount</span>
-            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>$49.99/month</span>
+            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{planPrice}/month</span>
           </div>
         </div>
       </div>
