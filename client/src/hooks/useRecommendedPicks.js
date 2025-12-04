@@ -100,6 +100,22 @@ export function useRecommendedPicks(options = {}) {
               }
 
               if (ev >= minEV) {
+                // Format pick description based on market type
+                let pickDescription = outcome.name;
+                if (market.key === 'h2h') {
+                  // Moneyline - add "ML" suffix
+                  pickDescription = `${outcome.name} ML`;
+                } else if (market.key === 'spreads') {
+                  // Spread - add point value
+                  const point = outcome.point;
+                  const pointStr = point > 0 ? `+${point}` : `${point}`;
+                  pickDescription = `${outcome.name} ${pointStr}`;
+                } else if (market.key === 'totals') {
+                  // Totals - Over/Under with point
+                  const point = outcome.point;
+                  pickDescription = `${outcome.name} ${point}`;
+                }
+
                 picks.push({
                   id: `${game.id}-${market.key}-${outcome.name}`,
                   teams: `${game.away_team} @ ${game.home_team}`,
@@ -111,14 +127,15 @@ export function useRecommendedPicks(options = {}) {
                     minute: '2-digit',
                     timeZoneName: 'short',
                   }),
-                  pick: outcome.name,
+                  pick: pickDescription,
                   odds: outcome.price,
                   sportsbook: bestBookmaker.title || bestBookmaker.key,
-                  ev: `+${ev.toFixed(2)}%`,
+                  ev: `${ev.toFixed(2)}%`,
                   sport: getSportLabel(game.sport_key),
                   status: new Date(game.commence_time) <= new Date() ? 'live' : 'active',
                   confidence: ev > 10 ? 'High' : ev > 7 ? 'Medium' : 'Low',
                   bookmakers: game.bookmakers, // Include all bookmakers for odds comparison
+                  marketKey: market.key, // Include market type for reference
                 });
               }
             });
