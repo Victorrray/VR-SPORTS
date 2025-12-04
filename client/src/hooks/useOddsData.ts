@@ -185,12 +185,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               }
               
               const propData = playerPropsMap.get(pickKey)!;
-              // Use actual odds from API
+              // DFS apps always have -119 odds, traditional sportsbooks use actual odds
+              const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'fliff'];
+              const isDFS = dfsApps.includes(bookKey?.toLowerCase());
               const bookData = {
                 name: bookName,
                 key: bookKey,
-                overOdds: normalizeAmericanOdds(overOutcome.price),
-                underOdds: underOutcome ? normalizeAmericanOdds(underOutcome.price) : null
+                overOdds: isDFS ? '-119' : normalizeAmericanOdds(overOutcome.price),
+                underOdds: isDFS ? '-119' : (underOutcome ? normalizeAmericanOdds(underOutcome.price) : null)
               };
               
               // Add to ALL books (for mini table)
