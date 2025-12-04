@@ -79,11 +79,33 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [sortBy, setSortBy] = useState<'ev' | 'time' | null>('ev');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [dateExpanded, setDateExpanded] = useState(false);
+  const [dateClosing, setDateClosing] = useState(false);
   const [sportExpanded, setSportExpanded] = useState(false);
+  const [sportClosing, setSportClosing] = useState(false);
   const [betTypeExpanded, setBetTypeExpanded] = useState(false);
   const [marketExpanded, setMarketExpanded] = useState(false);
+  const [marketClosing, setMarketClosing] = useState(false);
   const [sportsbooksExpanded, setSportsbooksExpanded] = useState(false);
+  const [sportsbooksClosing, setSportsbooksClosing] = useState(false);
   const [addedPicks, setAddedPicks] = useState<(string | number)[]>([]); // Track which picks have been added
+  
+  // Close handlers with animation for sub-filters
+  const closeDateDrawer = () => {
+    setDateClosing(true);
+    setTimeout(() => { setDateExpanded(false); setDateClosing(false); }, 280);
+  };
+  const closeSportDrawer = () => {
+    setSportClosing(true);
+    setTimeout(() => { setSportExpanded(false); setSportClosing(false); }, 280);
+  };
+  const closeMarketDrawer = () => {
+    setMarketClosing(true);
+    setTimeout(() => { setMarketExpanded(false); setMarketClosing(false); }, 280);
+  };
+  const closeSportsbooksDrawer = () => {
+    setSportsbooksClosing(true);
+    setTimeout(() => { setSportsbooksExpanded(false); setSportsbooksClosing(false); }, 280);
+  };
   const [autoRefresh, setAutoRefresh] = useState(false);
 
   // Generate date options dynamically
@@ -918,13 +940,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${dateClosing ? 'opacity-0' : 'opacity-100'}`}
                     style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
-                    onClick={() => setDateExpanded(false)}
+                    onClick={closeDateDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${dateClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -935,7 +957,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       <div className="flex items-center justify-between">
                         <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Date</h3>
                         <button
-                          onClick={() => setDateExpanded(false)}
+                          onClick={closeDateDrawer}
                           className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
                         >
                           <span className="text-lg">✕</span>
@@ -1012,13 +1034,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${sportClosing ? 'opacity-0' : 'opacity-100'}`}
                     style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
-                    onClick={() => setSportExpanded(false)}
+                    onClick={closeSportDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${sportClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -1029,7 +1051,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       <div className="flex items-center justify-between">
                         <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sport</h3>
                         <button
-                          onClick={() => setSportExpanded(false)}
+                          onClick={closeSportDrawer}
                           className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
                         >
                           <span className="text-lg">✕</span>
@@ -1106,13 +1128,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${marketClosing ? 'opacity-0' : 'opacity-100'}`}
                     style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
-                    onClick={() => setMarketExpanded(false)}
+                    onClick={closeMarketDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${marketClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -1123,7 +1145,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       <div className="flex items-center justify-between">
                         <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Market Type</h3>
                         <button
-                          onClick={() => setMarketExpanded(false)}
+                          onClick={closeMarketDrawer}
                           className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
                         >
                           <span className="text-lg">✕</span>
@@ -1211,13 +1233,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 <>
                   {/* Backdrop */}
                   <div 
-                    className="lg:hidden fixed bg-black/50 backdrop-blur-md z-40"
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${sportsbooksClosing ? 'opacity-0' : 'opacity-100'}`}
                     style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
-                    onClick={() => setSportsbooksExpanded(false)}
+                    onClick={closeSportsbooksDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden animate-in slide-in-from-bottom fade-in duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${sportsbooksClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -1228,7 +1250,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       <div className="flex items-center justify-between">
                         <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sportsbooks</h3>
                         <button
-                          onClick={() => setSportsbooksExpanded(false)}
+                          onClick={closeSportsbooksDrawer}
                           className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
                         >
                           <span className="text-lg">✕</span>
