@@ -48,17 +48,19 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
     const amount = parseFloat(betAmount);
     if (isNaN(amount) || amount <= 0) return '0.00';
     
-    const odds = betData.odds;
+    // Handle odds as either string or number
+    const oddsStr = String(betData.odds || '0');
+    const oddsNum = parseInt(oddsStr.replace('+', ''));
+    if (isNaN(oddsNum)) return '0.00';
+    
     let multiplier = 1;
     
-    if (odds.includes('+')) {
-      // Positive odds
-      const oddsValue = parseInt(odds.replace('+', ''));
-      multiplier = oddsValue / 100;
+    if (oddsNum > 0) {
+      // Positive odds: +200 means you win $200 on $100 bet
+      multiplier = oddsNum / 100;
     } else {
-      // Negative odds
-      const oddsValue = Math.abs(parseInt(odds));
-      multiplier = 100 / oddsValue;
+      // Negative odds: -150 means you bet $150 to win $100
+      multiplier = 100 / Math.abs(oddsNum);
     }
     
     const profit = amount * multiplier;
