@@ -353,68 +353,28 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
     const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
     
-    // Expand standard markets to include period/alternate variants
-    // When h2h, spreads, or totals are requested, also include their period variants
-    let expandedMarkets = [...regularMarkets];
-    const periodMarketExpansions = {
-      'h2h': ['h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4', 'h2h_h1', 'h2h_h2', 'h2h_p1', 'h2h_p2', 'h2h_p3'],
-      'spreads': ['spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4', 'spreads_h1', 'spreads_h2', 'spreads_p1', 'spreads_p2', 'spreads_p3'],
-      'totals': ['totals_q1', 'totals_q2', 'totals_q3', 'totals_q4', 'totals_h1', 'totals_h2', 'totals_p1', 'totals_p2', 'totals_p3']
-    };
-    
-    // Add period markets for each standard market requested
-    regularMarkets.forEach(market => {
-      if (periodMarketExpansions[market]) {
-        expandedMarkets.push(...periodMarketExpansions[market]);
-      }
-    });
-    
-    // Also add alternate markets if standard markets are requested
-    if (regularMarkets.includes('spreads')) {
-      expandedMarkets.push('alternate_spreads', 'alternate_spreads_h1', 'alternate_spreads_h2', 'alternate_spreads_q1', 'alternate_spreads_q2', 'alternate_spreads_q3', 'alternate_spreads_q4');
-    }
-    if (regularMarkets.includes('totals')) {
-      expandedMarkets.push('alternate_totals', 'team_totals', 'alternate_totals_h1', 'alternate_totals_h2', 'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4');
-      expandedMarkets.push('team_totals_h1', 'team_totals_h2', 'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4');
-    }
-    
-    // Remove duplicates
-    expandedMarkets = [...new Set(expandedMarkets)];
-    console.log('📊 Expanded markets from request:', expandedMarkets);
-    
     // Filter markets based on sport support
-    console.log('📊 Filtering expanded markets:', expandedMarkets.length, 'markets');
-    console.log('📊 Sports to check:', sportsArray);
-    
-    const filteredRegularMarkets = expandedMarkets.filter(m => {
-      const isSupported = sportsArray.some(sport => {
+    const filteredRegularMarkets = regularMarkets.filter(m => {
+      return sportsArray.some(sport => {
         const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
         return supportedForSport.includes(m);
       });
-      return isSupported;
     });
     
     console.log('🎯 Sport-specific market filtering:');
-    console.log('  Filtered markets count:', filteredRegularMarkets.length);
     sportsArray.forEach(sport => {
       const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
-      console.log(`  ${sport}: supported markets count = ${supportedForSport.length}`);
+      console.log(`  ${sport}: ${supportedForSport.join(', ')}`);
     });
     
     // Separate quarter/half/period markets from base markets
     const quarterMarketPatterns = ['_q1', '_q2', '_q3', '_q4', '_h1', '_h2', '_p1', '_p2', '_p3', '_1st_'];
-    let baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
+    const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
     const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
     
     console.log('📊 Market separation:');
     console.log('  Base markets:', baseMarkets);
-    console.log('  Quarter/Half/Period markets:', quarterMarkets.length, 'markets');
-    
-    // Safety check - ensure we have base markets
-    if (baseMarkets.length === 0 && regularMarkets.length > 0) {
-      console.log('⚠️ WARNING: No base markets after filtering! Using original markets:', regularMarkets);
-      baseMarkets = regularMarkets.filter(m => ['h2h', 'spreads', 'totals'].includes(m));
-    }
+    console.log('  Quarter/Half/Period markets:', quarterMarkets);
     
     // Step 1: Fetch base odds
     if (baseMarkets.length > 0) {
