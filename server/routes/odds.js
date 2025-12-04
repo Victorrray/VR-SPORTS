@@ -520,7 +520,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             const batchPromises = batch.map(event => 
               (async () => {
                 try {
-                  const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+                  // Remove bookmakers filter to get ALL available sportsbooks for player props
+                  const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
                   
                   console.log(`🔍 Fetching player props for event ${event.id} (${event.home_team} vs ${event.away_team})...`);
                   const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 20000 });
