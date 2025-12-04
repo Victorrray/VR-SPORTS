@@ -36,6 +36,7 @@ export interface OddsPick {
   line?: number | null;
   allLines?: number[];  // All unique lines offered by different books
   hasMultipleLines?: boolean;  // Whether different books offer different lines
+  pickSide?: 'Over' | 'Under';  // Which side (Over/Under) was chosen for player props
   // Alternate market fields
   isAlternate?: boolean;  // Flag for alternate spreads/totals markets
 }
@@ -318,35 +319,88 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         if (booksForMainCard.length === 0) return; // Skip if no books at consensus line
         
-        // Find best odds from books at consensus line (for main card display)
-        const bestBookForCard = booksForMainCard.reduce((best: any, book: any) => {
+        // Calculate EV for BOTH Over and Under to determine which side is better
+        const MIN_BOOKS_FOR_EV = 4;
+        const booksForEV = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
+        const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
+        
+        // Get Over odds
+        const overOddsArray = booksForEV.map((b: any) => parseInt(b.overOdds, 10)).filter((o: number) => !isNaN(o));
+        const hasEnoughOverData = overOddsArray.length >= MIN_BOOKS_FOR_EV;
+        
+        // Get Under odds (filter out missing '--' values)
+        const underOddsArray = booksForEV
+          .map((b: any) => b.underOdds)
+          .filter((o: any) => o && o !== '--')
+          .map((o: any) => parseInt(o, 10))
+          .filter((o: number) => !isNaN(o));
+        const hasEnoughUnderData = underOddsArray.length >= MIN_BOOKS_FOR_EV;
+        
+        // Calculate average implied probability for both sides
+        let overAvgProb = 0.5;
+        let underAvgProb = 0.5;
+        
+        if (hasEnoughOverData) {
+          const overProbs = overOddsArray.map(toProb);
+          overAvgProb = overProbs.reduce((sum, p) => sum + p, 0) / overProbs.length;
+        }
+        
+        if (hasEnoughUnderData) {
+          const underProbs = underOddsArray.map(toProb);
+          underAvgProb = underProbs.reduce((sum, p) => sum + p, 0) / underProbs.length;
+        }
+        
+        // Find best odds for each side
+        const bestOverBook = booksForMainCard.reduce((best: any, book: any) => {
           const bestOddsNum = parseInt(best.overOdds, 10);
           const bookOddsNum = parseInt(book.overOdds, 10);
           return bookOddsNum > bestOddsNum ? book : best;
         }, booksForMainCard[0]);
         
-        // Calculate EV using books at consensus line - require minimum 4 books for meaningful EV
-        const MIN_BOOKS_FOR_EV = 4;
-        const booksForEV = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
-        const numericOdds = booksForEV.map((b: any) => parseInt(b.overOdds, 10)).filter((o: number) => !isNaN(o));
-        const hasEnoughData = numericOdds.length >= MIN_BOOKS_FOR_EV;
-        let ev = '--';
+        const booksWithUnder = booksForMainCard.filter((b: any) => b.underOdds && b.underOdds !== '--');
+        const bestUnderBook = booksWithUnder.length > 0 
+          ? booksWithUnder.reduce((best: any, book: any) => {
+              const bestOddsNum = parseInt(best.underOdds, 10);
+              const bookOddsNum = parseInt(book.underOdds, 10);
+              return bookOddsNum > bestOddsNum ? book : best;
+            }, booksWithUnder[0])
+          : null;
         
-        if (hasEnoughData) {
-          const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
-          const probs = numericOdds.map(toProb);
-          const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
-          const bestOddsNum = parseInt(bestBookForCard.overOdds, 10);
-          if (!isNaN(bestOddsNum)) {
-            const bestProb = toProb(bestOddsNum);
-            const edge = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${Math.abs(Math.round(edge * 100) / 100).toFixed(2)}%`;
+        // Calculate EV for both sides
+        let overEV = 0;
+        let underEV = 0;
+        
+        if (hasEnoughOverData) {
+          const bestOverOdds = parseInt(bestOverBook.overOdds, 10);
+          if (!isNaN(bestOverOdds)) {
+            const bestOverProb = toProb(bestOverOdds);
+            overEV = ((overAvgProb - bestOverProb) / bestOverProb) * 100;
           }
         }
         
+        if (hasEnoughUnderData && bestUnderBook) {
+          const bestUnderOdds = parseInt(bestUnderBook.underOdds, 10);
+          if (!isNaN(bestUnderOdds)) {
+            const bestUnderProb = toProb(bestUnderOdds);
+            underEV = ((underAvgProb - bestUnderProb) / bestUnderProb) * 100;
+          }
+        }
+        
+        // Determine which side is better (higher EV)
+        const isOverBetter = overEV >= underEV || !hasEnoughUnderData;
+        const pickSide = isOverBetter ? 'Over' : 'Under';
+        const bestBookForCard = isOverBetter ? bestOverBook : bestUnderBook || bestOverBook;
+        const bestEV = isOverBetter ? overEV : underEV;
+        const hasEnoughData = isOverBetter ? hasEnoughOverData : hasEnoughUnderData;
+        
+        let ev = '--';
+        if (hasEnoughData && bestEV > 0) {
+          ev = `${Math.abs(Math.round(bestEV * 100) / 100).toFixed(2)}%`;
+        }
+        
         const marketName = formatMarketName(propData.marketKey);
-        // Use the CONSENSUS line for the pick description (not the best book's line)
-        const pickDescription = `${propData.playerName} Over ${consensusLine} ${marketName}`;
+        // Use the CONSENSUS line for the pick description with the better side
+        const pickDescription = `${propData.playerName} ${pickSide} ${consensusLine} ${marketName}`;
         
         // Check if there are multiple different lines across all books
         const uniqueLines: number[] = propData.allLines ? Array.from(propData.allLines) : [consensusLine];
@@ -384,6 +438,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           return bOdds - aOdds;
         });
         
+        // Get the best odds for the chosen side
+        const bestOddsForPick = isOverBetter ? bestBookForCard.overOdds : bestBookForCard.underOdds;
+        
         allPicks.push({
           id: `${game.id}-${pickKey}`,
           ev,
@@ -392,8 +449,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           team1,
           team2,
           pick: pickDescription,
-          bestOdds: bestBookForCard.overOdds,
+          bestOdds: bestOddsForPick,
           bestBook: bestBookForCard.name,
+          pickSide: pickSide, // Track which side was chosen
           // Mini table shows books at consensus line, with line labeled if different
           books: displayBooks,
           isPlayerProp: true,
