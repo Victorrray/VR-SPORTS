@@ -159,10 +159,19 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // PLAYER PROPS MODE: Create one pick per player per market (combining all lines)
       const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey" (no line in key)
       
+      // Filter out stale bookmakers (odds not updated in the last 2 hours)
+      const STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
+      const now = Date.now();
+      
       // Collect ALL books for the mini table (no filtering here)
       bookmakers.forEach((bm: any) => {
         const bookKey = bm.key || '';
         const bookName = normalizeBookName(bm.title || bm.key);
+        
+        // Check if bookmaker data is stale
+        const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+        const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+        if (isStale) return; // Skip stale bookmakers
         
         bm.markets?.forEach((market: any) => {
           if (!isPlayerPropMarket(market.key)) return;
@@ -320,6 +329,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // GAME ODDS MODE: Create separate picks for each market type (h2h, spreads, totals)
       const marketTypes = ['h2h', 'spreads', 'totals'];
       
+      // Filter out stale bookmakers (odds not updated in the last 2 hours)
+      const STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
+      const now = Date.now();
+      
       marketTypes.forEach(marketKey => {
         const booksArray: any[] = [];
         const filteredBooksArray: any[] = [];
@@ -329,6 +342,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         bookmakers.forEach((bm: any) => {
           const bookKey = bm.key || '';
           const bookName = normalizeBookName(bm.title || bm.key);
+          
+          // Check if bookmaker data is stale
+          const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+          const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+          if (isStale) return; // Skip stale bookmakers
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
           
