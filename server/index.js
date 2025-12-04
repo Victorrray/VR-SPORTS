@@ -143,6 +143,16 @@ console.log('🚀 Feature Flags:', {
   NODE_ENV: process.env.NODE_ENV,
 });
 
+// Health check endpoint (before route registration)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    version: 'e5f7a3b', // Update this on each deploy
+    node: process.version
+  });
+});
+
 // Register all routes
 registerRoutes(app);
 
