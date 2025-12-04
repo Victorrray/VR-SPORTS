@@ -130,11 +130,12 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     if (gameIdx === 0) {
       console.log(`📋 First game bookmakers:`, bookmakers);
       console.log(`📋 First game bookmakers length:`, bookmakers.length);
-      console.log(`📋 Bookmaker keys:`, bookmakers.map((b: any) => b.key));
+      const bookKeys = bookmakers.map((b: any) => b.key);
+      console.log(`📋 Bookmaker keys in response:`, bookKeys);
       // Check for DFS apps specifically
       const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'fliff'];
-      const foundDFS = bookmakers.filter((b: any) => dfsApps.includes(b.key?.toLowerCase()));
-      console.log(`🎮 DFS Apps found:`, foundDFS.map((b: any) => b.key));
+      const foundDFS = bookKeys.filter((key: string) => dfsApps.includes(key?.toLowerCase()));
+      console.log(`🎮 DFS Apps in response:`, foundDFS.length > 0 ? foundDFS : 'NONE - API not returning DFS apps');
     }
     
     // Check if this game has player prop markets
