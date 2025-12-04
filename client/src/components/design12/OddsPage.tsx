@@ -1238,7 +1238,15 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     
                     {/* Options - Grouped by Tier */}
                     <div className="overflow-y-auto max-h-[calc(70vh-80px)]">
-                      {sportsbooksByTier.map((tierGroup, tierIndex) => (
+                      {sportsbooksByTier
+                        .filter(tierGroup => {
+                          // Hide DFS & Pick'em category when in straight bets mode
+                          if (selectedBetType === 'straight' && tierGroup.tier.includes('DFS')) {
+                            return false;
+                          }
+                          return true;
+                        })
+                        .map((tierGroup, tierIndex) => (
                         <div key={tierIndex}>
                           {/* Tier Header */}
                           <div className={`px-6 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider`}>
