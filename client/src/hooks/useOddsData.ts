@@ -86,6 +86,17 @@ function formatMarketName(marketKey: string): string {
     .replace(/\b\w/g, l => l.toUpperCase());
 }
 
+// Normalize sportsbook display names
+function normalizeBookName(bookName: string): string {
+  const nameMap: { [key: string]: string } = {
+    'Dabble AU': 'Dabble',
+    'dabble_au': 'Dabble',
+    'William Hill (US)': 'Caesars',
+    'williamhill_us': 'Caesars',
+  };
+  return nameMap[bookName] || bookName;
+}
+
 function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] = []): OddsPick[] {
   if (!Array.isArray(games)) return [];
   
@@ -133,7 +144,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // Collect ALL books for the mini table (no filtering here)
       bookmakers.forEach((bm: any) => {
         const bookKey = bm.key || '';
-        const bookName = bm.title || bm.key;
+        const bookName = normalizeBookName(bm.title || bm.key);
         
         bm.markets?.forEach((market: any) => {
           if (!isPlayerPropMarket(market.key)) return;
@@ -257,7 +268,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       bookmakers.forEach((bm: any, bmIdx: number) => {
         let marketToUse = null;
         const bookKey = bm.key || '';
-        const bookName = bm.title || bm.key;
+        const bookName = normalizeBookName(bm.title || bm.key);
         
         // Debug first bookmaker - log entire structure
         if (gameIdx === 0 && bmIdx === 0) {
