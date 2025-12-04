@@ -140,19 +140,35 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   // Check if user has a paid plan (gold or platinum)
   const hasPaidPlan = me?.plan === 'gold' || me?.plan === 'platinum' || me?.unlimited === true;
   const hasPlatinum = me?.plan === 'platinum' || me?.unlimited === true;
-  const [selectedSport, setSelectedSport] = useState('all');
-  const [selectedMarket, setSelectedMarket] = useState('all');
-  const [selectedBetType, setSelectedBetType] = useState('straight');
+  
+  // Load cached filters from localStorage
+  const FILTERS_CACHE_KEY = 'vr-odds-filters';
+  const getCachedFilters = () => {
+    try {
+      const cached = localStorage.getItem(FILTERS_CACHE_KEY);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.warn('Failed to load cached filters:', e);
+    }
+    return null;
+  };
+  const cachedFilters = getCachedFilters();
+  
+  const [selectedSport, setSelectedSport] = useState(cachedFilters?.sport || 'all');
+  const [selectedMarket, setSelectedMarket] = useState(cachedFilters?.market || 'all');
+  const [selectedBetType, setSelectedBetType] = useState(cachedFilters?.betType || 'straight');
   const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
   const [expandedSportsbooks, setExpandedSportsbooks] = useState<(string | number)[]>([]);
   const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false);
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('all_upcoming');
+  const [selectedDate, setSelectedDate] = useState(cachedFilters?.date || 'all_upcoming');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isFilterClosing, setIsFilterClosing] = useState(false);
-  const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
+  const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>(cachedFilters?.sportsbooks || []);
   
   // Close filter with animation
   const closeFilterMenu = () => {
@@ -195,6 +211,22 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     setTimeout(() => { setSportsbooksExpanded(false); setSportsbooksClosing(false); }, 280);
   };
   const [autoRefresh, setAutoRefresh] = useState(false);
+
+  // Save filters to localStorage when they change
+  useEffect(() => {
+    try {
+      const filtersToCache = {
+        sport: selectedSport,
+        market: selectedMarket,
+        betType: selectedBetType,
+        date: selectedDate,
+        sportsbooks: selectedSportsbooks
+      };
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(filtersToCache));
+    } catch (e) {
+      console.warn('Failed to cache filters:', e);
+    }
+  }, [selectedSport, selectedMarket, selectedBetType, selectedDate, selectedSportsbooks]);
 
   // Generate date options dynamically
   const dateOptions = useMemo(() => generateDateOptions(), []);
