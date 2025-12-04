@@ -1,7 +1,9 @@
-import { AlertCircle, ArrowLeft, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Trash2, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/SimpleAuth';
+import { useMe } from '../../hooks/useMe';
+import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
 
 interface DeleteAccountPageProps {
@@ -13,15 +15,63 @@ export function DeleteAccountPage({ onBack, onDelete }: DeleteAccountPageProps) 
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const { user, profile } = useAuth();
-  const [confirmText, setConfirmText] = useState('');
-  const [understand, setUnderstand] = useState(false);
+  const { me } = useMe();
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = () => {
-    // Mock deletion - in production, this would call an API
-    toast.success('Account deletion initiated');
-    setTimeout(() => {
-      onDelete();
-    }, 1500);
+  // Format member since date
+  const formatMemberSince = () => {
+    if (!user?.created_at) return 'Not available';
+    try {
+      const date = new Date(user.created_at);
+      return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } catch {
+      return 'Not available';
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      // First cancel any active subscription
+      if (me?.has_billing) {
+        try {
+          await fetch('/api/billing/cancel-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+          });
+        } catch (e) {
+          console.warn('Could not cancel subscription:', e);
+        }
+      }
+
+      // Delete user data from Supabase users table
+      const { error: deleteError } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', user?.id);
+
+      if (deleteError) {
+        console.error('Error deleting user data:', deleteError);
+      }
+
+      // Sign out and delete auth user
+      await supabase.auth.signOut();
+      
+      toast.success('Account deleted successfully', {
+        description: 'Your account and data have been removed'
+      });
+      
+      setTimeout(() => {
+        onDelete();
+      }, 1000);
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      toast.error('Failed to delete account', {
+        description: error.message || 'Please try again or contact support'
+      });
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -124,16 +174,18 @@ export function DeleteAccountPage({ onBack, onDelete }: DeleteAccountPageProps) 
             <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{profile?.username || user?.email?.split('@')[0] || 'User'}</span>
           </div>
           <div className="flex justify-between">
+            <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Email</span>
+            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{user?.email || 'Not available'}</span>
+          </div>
+          <div className="flex justify-between">
             <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Member since</span>
-            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>January 2024</span>
+            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{formatMemberSince()}</span>
           </div>
           <div className="flex justify-between">
-            <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Total picks</span>
-            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>247</span>
-          </div>
-          <div className="flex justify-between">
-            <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Win rate</span>
-            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>67.3%</span>
+            <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Current plan</span>
+            <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>
+              {me?.plan === 'platinum' || me?.unlimited ? 'Platinum' : me?.plan === 'gold' ? 'Gold' : 'Free'}
+            </span>
           </div>
         </div>
       </div>
@@ -142,16 +194,27 @@ export function DeleteAccountPage({ onBack, onDelete }: DeleteAccountPageProps) 
       <div className="flex flex-col-reverse md:flex-row gap-3">
         <button
           onClick={onBack}
-          className={`flex-1 px-6 py-3 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold`}
+          disabled={isDeleting}
+          className={`flex-1 px-6 py-3 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold disabled:opacity-50`}
         >
           Cancel
         </button>
         <button
           onClick={handleDelete}
-          className={`flex-1 px-6 py-3 ${isLight ? 'bg-red-600 border-red-700 text-white hover:bg-red-700' : 'bg-red-500 border-red-600 text-white hover:bg-red-600'} border rounded-xl transition-all font-bold flex items-center justify-center gap-2`}
+          disabled={isDeleting}
+          className={`flex-1 px-6 py-3 ${isLight ? 'bg-red-600 border-red-700 text-white hover:bg-red-700' : 'bg-red-500 border-red-600 text-white hover:bg-red-600'} border rounded-xl transition-all font-bold flex items-center justify-center gap-2 disabled:opacity-50`}
         >
-          <Trash2 className="w-4 h-4" />
-          Delete My Account Permanently
+          {isDeleting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Deleting...
+            </>
+          ) : (
+            <>
+              <Trash2 className="w-4 h-4" />
+              Delete My Account Permanently
+            </>
+          )}
         </button>
       </div>
 
