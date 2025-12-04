@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   ReactNode,
 } from "react";
 
@@ -9,16 +10,22 @@ export type ThemeType = "solid-gradient";
 
 export type ColorMode = "dark" | "light";
 
+export type OddsFormat = "american" | "decimal" | "fractional";
+
 interface ThemeContextType {
   theme: ThemeType;
   setTheme: (theme: ThemeType) => void;
   colorMode: ColorMode;
   setColorMode: (mode: ColorMode) => void;
+  oddsFormat: OddsFormat;
+  setOddsFormat: (format: OddsFormat) => void;
 }
 
 const ThemeContext = createContext<
   ThemeContextType | undefined
 >(undefined);
+
+const ODDS_FORMAT_KEY = 'vr_odds_format';
 
 export function ThemeProvider({
   children,
@@ -35,9 +42,20 @@ export function ThemeProvider({
     console.log('Light mode is currently disabled');
   };
 
+  // Odds format with localStorage persistence
+  const [oddsFormat, setOddsFormatState] = useState<OddsFormat>(() => {
+    const saved = localStorage.getItem(ODDS_FORMAT_KEY);
+    return (saved as OddsFormat) || 'american';
+  });
+
+  const setOddsFormat = (format: OddsFormat) => {
+    setOddsFormatState(format);
+    localStorage.setItem(ODDS_FORMAT_KEY, format);
+  };
+
   return (
     <ThemeContext.Provider
-      value={{ theme, setTheme, colorMode, setColorMode }}
+      value={{ theme, setTheme, colorMode, setColorMode, oddsFormat, setOddsFormat }}
     >
       {children}
     </ThemeContext.Provider>

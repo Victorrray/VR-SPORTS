@@ -1,6 +1,6 @@
-import { Settings, Bell, Shield, Globe, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign } from 'lucide-react';
+import { Settings, Bell, Shield, Globe, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign, Check } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
+import { useTheme, lightModeColors, OddsFormat } from '../../contexts/ThemeContext';
 
 interface SettingsPageProps {
   onNavigateToChangePlan?: () => void;
@@ -8,7 +8,7 @@ interface SettingsPageProps {
 }
 
 export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscription }: SettingsPageProps = {}) {
-  const { colorMode } = useTheme();
+  const { colorMode, oddsFormat, setOddsFormat } = useTheme();
   const isLight = colorMode === 'light';
   const [notifications, setNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
@@ -98,16 +98,80 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         </h2>
 
         <div className="space-y-4">
-          <button className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}>
-            <div className="flex items-center gap-3">
+          <div className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
+            <div className="flex items-center gap-3 mb-4">
               <DollarSign className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Default Odds Format</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>American (-110, +150)</div>
-              </div>
+              <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Default Odds Format</div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
-          </button>
+            
+            <div className="grid grid-cols-3 gap-2">
+              {/* American */}
+              <button
+                onClick={() => setOddsFormat('american')}
+                className={`p-3 rounded-xl border transition-all ${
+                  oddsFormat === 'american'
+                    ? isLight
+                      ? 'bg-purple-100 border-purple-400 text-purple-700'
+                      : 'bg-purple-500/20 border-purple-400/50 text-purple-300'
+                    : isLight
+                      ? 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  {oddsFormat === 'american' && <Check className="w-3.5 h-3.5" />}
+                  <span className="font-bold text-sm">American</span>
+                </div>
+                <div className={`text-xs ${oddsFormat === 'american' ? '' : isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                  -110, +150
+                </div>
+              </button>
+
+              {/* Decimal */}
+              <button
+                onClick={() => setOddsFormat('decimal')}
+                className={`p-3 rounded-xl border transition-all ${
+                  oddsFormat === 'decimal'
+                    ? isLight
+                      ? 'bg-purple-100 border-purple-400 text-purple-700'
+                      : 'bg-purple-500/20 border-purple-400/50 text-purple-300'
+                    : isLight
+                      ? 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  {oddsFormat === 'decimal' && <Check className="w-3.5 h-3.5" />}
+                  <span className="font-bold text-sm">Decimal</span>
+                </div>
+                <div className={`text-xs ${oddsFormat === 'decimal' ? '' : isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                  1.91, 2.50
+                </div>
+              </button>
+
+              {/* Fractional */}
+              <button
+                onClick={() => setOddsFormat('fractional')}
+                className={`p-3 rounded-xl border transition-all ${
+                  oddsFormat === 'fractional'
+                    ? isLight
+                      ? 'bg-purple-100 border-purple-400 text-purple-700'
+                      : 'bg-purple-500/20 border-purple-400/50 text-purple-300'
+                    : isLight
+                      ? 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-1.5 mb-1">
+                  {oddsFormat === 'fractional' && <Check className="w-3.5 h-3.5" />}
+                  <span className="font-bold text-sm">Fractional</span>
+                </div>
+                <div className={`text-xs ${oddsFormat === 'fractional' ? '' : isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                  10/11, 3/2
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
