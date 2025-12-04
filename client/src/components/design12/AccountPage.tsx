@@ -10,10 +10,13 @@ import {
   LogOut,
   Lock,
   Star,
+  Loader2,
 } from "lucide-react";
+import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/SimpleAuth';
 import { useMe } from '../../hooks/useMe';
+import { toast } from 'sonner';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
@@ -32,6 +35,7 @@ export function AccountPage({
   const isLight = colorMode === 'light';
   const { user, profile } = useAuth();
   const { me, loading: meLoading } = useMe();
+  const [portalLoading, setPortalLoading] = useState(false);
   
   // Determine plan display
   const userPlan = me?.plan || 'free';
@@ -39,6 +43,35 @@ export function AccountPage({
   const isGold = userPlan === 'gold';
   const planDisplayName = isPlatinum ? 'Platinum Member' : isGold ? 'Gold Member' : 'Free Plan';
   const PlanIcon = isPlatinum ? Crown : isGold ? Star : User;
+
+  // Open Stripe Customer Portal
+  const openCustomerPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const response = await fetch('/api/billing/customer-portal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to open billing portal');
+      }
+      
+      // Redirect to Stripe Customer Portal
+      window.location.href = data.url;
+    } catch (error: any) {
+      console.error('Error opening customer portal:', error);
+      toast.error('Unable to open billing portal', {
+        description: error.message || 'Please try again later'
+      });
+      setPortalLoading(false);
+    }
+  };
   
   return (
     <div className="space-y-6 relative">
@@ -246,11 +279,33 @@ export function AccountPage({
         {/* Only show billing buttons for paid plans */}
         {(isPlatinum || isGold) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-            <button className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
-              Update Payment Method
+            <button 
+              onClick={openCustomerPortal}
+              disabled={portalLoading}
+              className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50`}
+            >
+              {portalLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Update Payment Method'
+              )}
             </button>
-            <button className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
-              View Billing History
+            <button 
+              onClick={openCustomerPortal}
+              disabled={portalLoading}
+              className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50`}
+            >
+              {portalLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'View Billing History'
+              )}
             </button>
           </div>
         )}
