@@ -133,7 +133,11 @@ export function AccountPage({
                 Member Since
               </span>
             </div>
-            <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>January 2024</p>
+            <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+              {user?.created_at 
+                ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                : 'Not available'}
+            </p>
           </div>
         </div>
       </div>
