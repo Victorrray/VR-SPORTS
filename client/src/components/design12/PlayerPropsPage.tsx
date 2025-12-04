@@ -45,7 +45,17 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState('all_upcoming');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [isFilterClosing, setIsFilterClosing] = useState(false);
   const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
+  
+  // Close filter with animation
+  const closeFilterMenu = () => {
+    setIsFilterClosing(true);
+    setTimeout(() => {
+      setIsFilterMenuOpen(false);
+      setIsFilterClosing(false);
+    }, 280);
+  };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [sortBy, setSortBy] = useState<'ev' | 'time' | null>('ev');
@@ -502,14 +512,15 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       {/* Filter Side Panel */}
       {isFilterMenuOpen && (
         <>
-          {/* Backdrop - extends to cover entire screen including top header */}
+          {/* Backdrop - full screen overlay */}
           <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100]"
-            onClick={() => setIsFilterMenuOpen(false)}
+            className={`fixed inset-0 w-screen h-screen bg-black/50 backdrop-blur-md z-[100] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
+            style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}
+            onClick={closeFilterMenu}
           />
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
-          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-0 left-0 right-0 lg:w-80 lg:h-auto max-lg:h-auto max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-[101] lg:rounded-none rounded-t-3xl animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 flex flex-col`}>
+          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-0 left-0 right-0 lg:w-80 lg:h-auto max-lg:h-auto max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-[101] lg:rounded-none rounded-t-3xl transition-transform duration-300 ${isFilterClosing ? 'max-lg:translate-y-full lg:-translate-x-full' : 'translate-y-0 translate-x-0'} flex flex-col`}>
             {/* Sticky Header */}
             <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
               {/* Drag Handle - Mobile Only */}
@@ -521,7 +532,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
               <div className="flex items-center justify-between">
                 <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl`}>Filters</h3>
                 <button
-                  onClick={() => setIsFilterMenuOpen(false)}
+                  onClick={closeFilterMenu}
                   className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
                 >
                   <ChevronRight className="w-5 h-5 lg:block hidden" />
@@ -532,9 +543,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
               {/* Apply and Reset Buttons - Mobile Only */}
               <div className="flex lg:hidden gap-2">
                 <button
-                  onClick={() => {
-                    setIsFilterMenuOpen(false);
-                  }}
+                  onClick={closeFilterMenu}
                   className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
                     isLight 
                       ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600' 
