@@ -770,13 +770,12 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         <>
           {/* Backdrop - extends to cover entire screen including top header */}
           <div 
-            className="fixed top-0 left-0 right-0 bottom-0 w-full h-full bg-black/50 backdrop-blur-md z-40"
-            style={{ minHeight: '100dvh' }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-md z-[100]"
             onClick={() => setIsFilterMenuOpen(false)}
           />
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
-          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-0 left-0 right-0 lg:w-80 lg:h-screen max-lg:h-auto max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-50 lg:rounded-none rounded-t-3xl animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 flex flex-col`}>
+          <div className={`fixed lg:left-0 lg:top-0 lg:bottom-0 bottom-0 left-0 right-0 lg:w-80 lg:h-screen max-lg:h-auto max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-[101] lg:rounded-none rounded-t-3xl animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 flex flex-col`}>
             {/* Sticky Header */}
             <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
               {/* Drag Handle - Mobile Only */}
