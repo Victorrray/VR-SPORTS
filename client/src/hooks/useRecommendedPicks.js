@@ -189,6 +189,8 @@ function normalizeBookName(bookName) {
   const nameMap = {
     'LowVig.ag': 'LowVig',
     'lowvig': 'LowVig',
+    'BetOnline.ag': 'BetOnline',
+    'betonlineag': 'BetOnline',
     'Hard Rock Bet': 'Hard Rock',
     'hardrockbet': 'Hard Rock',
     'Dabble AU': 'Dabble',

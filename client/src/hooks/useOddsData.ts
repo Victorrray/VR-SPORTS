@@ -115,6 +115,8 @@ function normalizeBookName(bookName: string): string {
     'williamhill_us': 'Caesars',
     'LowVig.ag': 'LowVig',
     'lowvig': 'LowVig',
+    'BetOnline.ag': 'BetOnline',
+    'betonlineag': 'BetOnline',
     'Hard Rock Bet': 'Hard Rock',
     'hardrockbet': 'Hard Rock',
     'theScore Bet': 'TheScore',
