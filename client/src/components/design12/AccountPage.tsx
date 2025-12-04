@@ -17,6 +17,7 @@ import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/SimpleAuth';
 import { useMe } from '../../hooks/useMe';
 import { toast } from 'sonner';
+import { supabase } from '../../lib/supabase';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
@@ -36,6 +37,7 @@ export function AccountPage({
   const { user, profile } = useAuth();
   const { me, loading: meLoading } = useMe();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
   
   // Determine plan display
   const userPlan = me?.plan || 'free';
@@ -87,6 +89,38 @@ export function AccountPage({
         description: error.message || 'Please try again later'
       });
       setPortalLoading(false);
+    }
+  };
+
+  // Send password reset email
+  const handlePasswordReset = async () => {
+    if (!user?.email) {
+      toast.error('No email found', {
+        description: 'Unable to send password reset email'
+      });
+      return;
+    }
+
+    setPasswordResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Password reset email sent', {
+        description: `Check your inbox at ${user.email}`
+      });
+    } catch (error: any) {
+      console.error('Error sending password reset:', error);
+      toast.error('Failed to send reset email', {
+        description: error.message || 'Please try again later'
+      });
+    } finally {
+      setPasswordResetLoading(false);
     }
   };
   
@@ -337,15 +371,23 @@ export function AccountPage({
         </h2>
 
         <div className="space-y-4">
-          <button className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}>
+          <button 
+            onClick={handlePasswordReset}
+            disabled={passwordResetLoading}
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left disabled:opacity-50`}
+          >
             <div className="flex items-center gap-3">
-              <Lock className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              {passwordResetLoading ? (
+                <Loader2 className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'} animate-spin`} />
+              ) : (
+                <Lock className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              )}
               <div>
                 <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                  Change Password
+                  {passwordResetLoading ? 'Sending...' : 'Change Password'}
                 </div>
                 <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
-                  Update your account password
+                  {passwordResetLoading ? 'Please wait...' : 'Send password reset email'}
                 </div>
               </div>
             </div>
