@@ -169,10 +169,10 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                 )}
 
                 {/* Tab Toggle */}
-                <div className="flex gap-2 p-1 bg-slate-950/50 rounded-xl md:rounded-2xl border border-white/5">
+                <div className="flex gap-2 p-1.5 bg-slate-950/50 rounded-xl border border-white/5">
                   <button
                     onClick={() => setIsLogin(true)}
-                    className={`flex-1 py-2.5 md:py-3 rounded-lg md:rounded-xl font-bold transition-all text-center text-sm md:text-base ${
+                    className={`flex-1 py-2.5 md:py-3 rounded-lg font-bold transition-all text-center text-sm md:text-base ${
                       isLogin
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
                         : 'text-white/50 hover:text-white/80'
@@ -182,7 +182,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                   </button>
                   <button
                     onClick={onSignUp}
-                    className={`flex-1 py-2.5 md:py-3 rounded-lg md:rounded-xl font-bold transition-all text-center text-sm md:text-base ${
+                    className={`flex-1 py-2.5 md:py-3 rounded-lg font-bold transition-all text-center text-sm md:text-base ${
                       !isLogin
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
                         : 'text-white/50 hover:text-white/80'
