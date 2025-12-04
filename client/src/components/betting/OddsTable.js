@@ -1798,6 +1798,19 @@ export default function OddsTable({
         console.log('Sample prop row:', propsRows[0]);
       }
       
+      // Sort props: non-alternate lines first, then alternate lines
+      // Within each group, sort by player name for consistency
+      propsRows.sort((a, b) => {
+        // First priority: non-alternate before alternate
+        if (a.isAlternate !== b.isAlternate) {
+          return a.isAlternate ? 1 : -1; // non-alternate (false) comes first
+        }
+        // Second priority: sort by player name
+        const playerA = a.player || '';
+        const playerB = b.player || '';
+        return playerA.localeCompare(playerB);
+      });
+      
       return propsRows;
     }
 
