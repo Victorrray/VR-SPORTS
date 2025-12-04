@@ -1124,7 +1124,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       
       // Map market types to API format
       // For special markets (periods, alternates), request those specific markets from the API
-      const getMarketsForFilter = (filter: string): string => {
+      const getMarketsForFilter = (filter: string, sportKey: string): string => {
         switch (filter) {
           // Standard markets
           case 'moneyline': return 'h2h';
@@ -1152,13 +1152,82 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           case 'btts': return 'btts';
           case 'draw_no_bet': return 'draw_no_bet';
           
-          // All markets - request standard, backend handles the rest
+          // All markets - request ALL available markets for the sport
           case 'all':
-          default: return 'h2h,spreads,totals';
+          default: {
+            // Base markets for all sports
+            const baseMarkets = ['h2h', 'spreads', 'totals', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'];
+            
+            // Sport-specific period markets
+            const sportMarkets: { [key: string]: string[] } = {
+              // NFL & NCAAF - quarters and halves
+              'americanfootball_nfl': [
+                'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4', 'h2h_h1', 'h2h_h2',
+                'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4', 'spreads_h1', 'spreads_h2',
+                'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4', 'totals_h1', 'totals_h2',
+                'alternate_spreads_q1', 'alternate_spreads_h1',
+                'alternate_totals_q1', 'alternate_totals_h1',
+                'team_totals_q1', 'team_totals_h1'
+              ],
+              'americanfootball_ncaaf': [
+                'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4', 'h2h_h1', 'h2h_h2',
+                'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4', 'spreads_h1', 'spreads_h2',
+                'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4', 'totals_h1', 'totals_h2',
+                'alternate_spreads_q1', 'alternate_spreads_h1',
+                'alternate_totals_q1', 'alternate_totals_h1',
+                'team_totals_q1', 'team_totals_h1'
+              ],
+              // NBA & NCAAB - quarters and halves
+              'basketball_nba': [
+                'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4', 'h2h_h1', 'h2h_h2',
+                'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4', 'spreads_h1', 'spreads_h2',
+                'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4', 'totals_h1', 'totals_h2',
+                'alternate_spreads_q1', 'alternate_spreads_h1',
+                'alternate_totals_q1', 'alternate_totals_h1',
+                'team_totals_q1', 'team_totals_h1'
+              ],
+              'basketball_ncaab': [
+                'h2h_h1', 'h2h_h2',
+                'spreads_h1', 'spreads_h2',
+                'totals_h1', 'totals_h2',
+                'alternate_spreads_h1', 'alternate_totals_h1',
+                'team_totals_h1'
+              ],
+              // NHL - periods
+              'icehockey_nhl': [
+                'h2h_p1', 'h2h_p2', 'h2h_p3',
+                'spreads_p1', 'spreads_p2', 'spreads_p3',
+                'totals_p1', 'totals_p2', 'totals_p3',
+                'alternate_spreads_p1', 'alternate_totals_p1',
+                'team_totals_p1'
+              ],
+              // MLB - innings
+              'baseball_mlb': [
+                'h2h_1st_1_innings', 'h2h_1st_3_innings', 'h2h_1st_5_innings',
+                'spreads_1st_1_innings', 'spreads_1st_3_innings', 'spreads_1st_5_innings',
+                'totals_1st_1_innings', 'totals_1st_3_innings', 'totals_1st_5_innings'
+              ]
+            };
+            
+            // Get sport-specific markets
+            const additionalMarkets = sportMarkets[sportKey] || [];
+            
+            // If multiple sports (all), include common period markets
+            if (sportKey.includes(',') || !sportKey) {
+              // For "all sports", include quarter and half markets (most common)
+              const allSportsMarkets = [
+                'h2h_q1', 'h2h_h1', 'spreads_q1', 'spreads_h1', 'totals_q1', 'totals_h1',
+                'h2h_p1', 'spreads_p1', 'totals_p1' // NHL periods
+              ];
+              return [...baseMarkets, ...allSportsMarkets].join(',');
+            }
+            
+            return [...baseMarkets, ...additionalMarkets].join(',');
+          }
         }
       };
       
-      const marketsList = getMarketsForFilter(marketType || 'all');
+      const marketsList = getMarketsForFilter(marketType || 'all', sportsList);
       params.append('markets', marketsList);
       console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList);
       
