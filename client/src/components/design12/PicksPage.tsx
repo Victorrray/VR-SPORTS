@@ -255,6 +255,36 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
                 </div>
               </div>
 
+              {/* Stake & Potential Payout */}
+              {pick.betAmount && (
+                <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-gradient-to-r from-emerald-500/10 to-green-500/10 border-emerald-400/20'} backdrop-blur-xl rounded-xl border mb-3`}>
+                  <div>
+                    <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
+                      Stake
+                    </div>
+                    <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-300'} font-bold text-sm`}>
+                      ${pick.betAmount.toFixed(2)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
+                      To Win
+                    </div>
+                    <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-300'} font-bold`}>
+                      ${(() => {
+                        const odds = parseInt((pick.odds || '+100').replace('+', ''), 10);
+                        const stake = pick.betAmount || 0;
+                        if (odds > 0) {
+                          return (stake * (odds / 100)).toFixed(2);
+                        } else {
+                          return (stake * (100 / Math.abs(odds))).toFixed(2);
+                        }
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Grading Buttons - Show for ended games that need grading */}
               {onUpdatePickStatus && (!pick.status || pick.status === 'pending') && isGameEnded(pick) && (
                 <div className="flex gap-2 mb-3">
