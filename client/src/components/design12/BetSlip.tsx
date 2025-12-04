@@ -76,22 +76,36 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
   };
 
   const calculateKellyBet = () => {
-    const ev = parseFloat(betData.ev);
-    const odds = betData.odds;
-    let decimalOdds = 1;
+    // Parse EV - remove % sign if present and convert to decimal (e.g., "102.58%" -> 1.0258)
+    const evString = String(betData.ev || '0').replace('%', '');
+    const evPercent = parseFloat(evString);
+    if (isNaN(evPercent) || evPercent <= 0) return 0;
+    
+    const ev = evPercent / 100; // Convert percentage to decimal
+    
+    const odds = String(betData.odds || '0');
+    let decimalOdds = 2; // Default to even odds
     
     if (odds.includes('+')) {
-      // Positive odds
+      // Positive odds: +200 means you win $200 on a $100 bet
       const oddsValue = parseInt(odds.replace('+', ''));
       decimalOdds = 1 + (oddsValue / 100);
-    } else {
-      // Negative odds
+    } else if (odds.includes('-')) {
+      // Negative odds: -150 means you need to bet $150 to win $100
       const oddsValue = Math.abs(parseInt(odds));
-      decimalOdds = 100 / oddsValue;
+      decimalOdds = 1 + (100 / oddsValue);
     }
     
-    const kellyBet = (ev * decimalOdds - 1) / (decimalOdds - 1);
-    return kellyBet * kellyFraction * currentBankroll;
+    // Kelly formula: f* = (bp - q) / b where b = decimal odds - 1, p = win probability, q = 1 - p
+    // Simplified with EV: f* = EV / (decimal odds - 1)
+    const b = decimalOdds - 1;
+    if (b <= 0) return 0;
+    
+    const kellyBet = ev / b;
+    const recommendedBet = kellyBet * kellyFraction * currentBankroll;
+    
+    // Cap at 25% of bankroll for safety
+    return Math.min(Math.max(recommendedBet, 0), currentBankroll * 0.25);
   };
 
   return (
