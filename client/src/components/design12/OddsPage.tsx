@@ -432,14 +432,50 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     }
   };
 
-  // Create a map of sportsbook IDs to names for matching
+  // Create a map of sportsbook IDs to names and API keys for matching
   const sportsbookMap: Record<string, string[]> = {};
+  // Map filter IDs to all possible API keys and display names
+  const apiKeyAliases: Record<string, string[]> = {
+    'pick6': ['pick6', 'draftkings_pick6', 'dk pick6', 'dkpick6'],
+    'betr_us_dfs': ['betr', 'betrdfs', 'betr_us_dfs', 'betr dfs'],
+    'dabble_au': ['dabble', 'dabble_au'],
+    'prizepicks': ['prizepicks'],
+    'underdog': ['underdog'],
+    'draftkings': ['draftkings'],
+    'fanduel': ['fanduel'],
+    'betmgm': ['betmgm'],
+    'caesars': ['caesars', 'williamhill_us'],
+    'espnbet': ['espnbet', 'espn_bet'],
+    'fanatics': ['fanatics'],
+    'hardrock': ['hardrock', 'hardrockbet', 'hard rock'],
+    'betrivers': ['betrivers'],
+    'pointsbet': ['pointsbet', 'pointsbetus'],
+    'wynnbet': ['wynnbet'],
+    'unibet': ['unibet', 'unibet_us'],
+    'fliff': ['fliff'],
+    'pinnacle': ['pinnacle'],
+    'novig': ['novig'],
+    'circa': ['circa', 'circasports'],
+    'bovada': ['bovada'],
+    'betonline': ['betonline', 'betonlineag'],
+    'mybookie': ['mybookie', 'mybookieag'],
+    'lowvig': ['lowvig', 'lowvig.ag'],
+  };
+  
   sportsbooksByTier.forEach(tier => {
     tier.books.forEach(book => {
       if (!sportsbookMap[book.id]) {
         sportsbookMap[book.id] = [];
       }
+      // Add the display name
       sportsbookMap[book.id].push(book.name.toLowerCase());
+      // Add all API key aliases
+      const aliases = apiKeyAliases[book.id] || [book.id];
+      aliases.forEach(alias => {
+        if (!sportsbookMap[book.id].includes(alias.toLowerCase())) {
+          sportsbookMap[book.id].push(alias.toLowerCase());
+        }
+      });
     });
   });
 

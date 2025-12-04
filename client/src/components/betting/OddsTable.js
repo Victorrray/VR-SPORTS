@@ -1489,7 +1489,9 @@ export default function OddsTable({
               'dabble': ['dabble', 'dabble_au'],
               'prizepicks': ['prizepicks'],
               'underdog': ['underdog'],
-              'pick6': ['pick6', 'draftkings_pick6']
+              'pick6': ['pick6', 'draftkings_pick6'],
+              'betr_us_dfs': ['betr', 'betrdfs', 'betr_us_dfs', 'betr dfs'],
+              'betr': ['betr', 'betrdfs', 'betr_us_dfs', 'betr dfs']
             };
             
             const matchesFilter = (bookKey) => {
@@ -1637,7 +1639,9 @@ export default function OddsTable({
               'dabble': ['dabble', 'dabble_au'],
               'prizepicks': ['prizepicks'],
               'underdog': ['underdog'],
-              'pick6': ['pick6', 'draftkings_pick6']
+              'pick6': ['pick6', 'draftkings_pick6'],
+              'betr_us_dfs': ['betr', 'betrdfs', 'betr_us_dfs', 'betr dfs'],
+              'betr': ['betr', 'betrdfs', 'betr_us_dfs', 'betr dfs']
             };
             
             const isInFilter = normalizedFilter.some(filterKey => {
