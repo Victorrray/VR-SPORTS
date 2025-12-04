@@ -506,10 +506,23 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       bestOdds = typeof bestOdds === 'number' ? (bestOdds > 0 ? `+${bestOdds}` : bestOdds) : (typeof bestOdds === 'string' && !bestOdds.startsWith('-') && !bestOdds.startsWith('+') && bestOdds !== '--' ? `+${bestOdds}` : bestOdds);
     }
 
+    // Sort allBooks to put the best book first
+    const sortedAllBooks = [...pick.books].sort((a, b) => {
+      // Best book (matching bestBook name) should always be first
+      const aIsBest = a.name === bestBook;
+      const bIsBest = b.name === bestBook;
+      if (aIsBest && !bIsBest) return -1;
+      if (!aIsBest && bIsBest) return 1;
+      // Then sort by odds (highest/best first)
+      const aOdds = typeof a.odds === 'number' ? a.odds : parseInt(a.odds) || 0;
+      const bOdds = typeof b.odds === 'number' ? b.odds : parseInt(b.odds) || 0;
+      return bOdds - aOdds;
+    });
+
     return {
       ...pick,
       displayBooks: displayBooks,
-      allBooks: pick.books, // Keep original books for expanded view
+      allBooks: sortedAllBooks, // Sorted with best book first
       bestBook: bestBook,
       bestOdds: bestOdds
     };
