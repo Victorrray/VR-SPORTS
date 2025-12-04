@@ -56,7 +56,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const [marketExpanded, setMarketExpanded] = useState(false);
   const [sportsbooksExpanded, setSportsbooksExpanded] = useState(false);
   const [addedPicks, setAddedPicks] = useState<(string | number)[]>([]); // Track which picks have been added
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   // Generate date options dynamically
   const dateOptions = useMemo(() => generateDateOptions(), []);
