@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeft, ChevronDown, X } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ChevronDown, X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
@@ -11,12 +11,13 @@ interface CancelSubscriptionPageProps {
 export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
-  const { me } = useMe();
+  const { me, refetch } = useMe();
   const [selectedReason, setSelectedReason] = useState('');
   const [showReasonDropdown, setShowReasonDropdown] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Get plan details
   const userPlan = me?.plan || 'free';
@@ -50,12 +51,57 @@ export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) 
     setShowConfirmation(true);
   };
 
-  const handleFinalCancel = () => {
-    // Mock cancellation - in production, this would call an API
-    toast.success('Subscription canceled successfully');
-    setTimeout(() => {
-      onBack();
-    }, 1500);
+  const handleFinalCancel = async () => {
+    setIsCancelling(true);
+    try {
+      const response = await fetch('/api/billing/cancel-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          reason: selectedReason,
+          feedback: feedback,
+        }),
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error('Invalid response from server');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to cancel subscription');
+      }
+
+      // Format the end date if available
+      const endDate = data.current_period_end 
+        ? new Date(data.current_period_end * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        : null;
+
+      toast.success('Subscription cancelled', {
+        description: endDate 
+          ? `Your access continues until ${endDate}`
+          : 'Your subscription has been cancelled'
+      });
+
+      // Refresh user data
+      if (refetch) refetch();
+
+      setTimeout(() => {
+        onBack();
+      }, 2000);
+    } catch (error: any) {
+      console.error('Error cancelling subscription:', error);
+      toast.error('Failed to cancel subscription', {
+        description: error.message || 'Please try again or contact support'
+      });
+      setIsCancelling(false);
+    }
   };
 
   // Confirmation Screen
@@ -140,15 +186,24 @@ export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) 
         <div className="flex flex-col-reverse md:flex-row gap-3">
           <button
             onClick={() => setShowConfirmation(false)}
-            className={`flex-1 px-6 py-3 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold`}
+            disabled={isCancelling}
+            className={`flex-1 px-6 py-3 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold disabled:opacity-50`}
           >
             Go Back
           </button>
           <button
             onClick={handleFinalCancel}
-            className={`flex-1 px-6 py-3 ${isLight ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-500 text-white hover:bg-red-600'} backdrop-blur-xl rounded-xl transition-all font-bold`}
+            disabled={isCancelling}
+            className={`flex-1 px-6 py-3 ${isLight ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-500 text-white hover:bg-red-600'} backdrop-blur-xl rounded-xl transition-all font-bold flex items-center justify-center gap-2 disabled:opacity-50`}
           >
-            Yes, Cancel My Subscription
+            {isCancelling ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Cancelling...
+              </>
+            ) : (
+              'Yes, Cancel My Subscription'
+            )}
           </button>
         </div>
 
