@@ -125,32 +125,120 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     setSavedPicks((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Calculate stats from saved picks
+  const calculateStats = () => {
+    if (savedPicks.length === 0) {
+      return {
+        winRate: '---',
+        avgEdge: '---',
+        totalProfit: '---',
+        activeBets: '0',
+        winRateChange: '---',
+        avgEdgeChange: '---',
+        profitChange: '---',
+        betsChange: '---',
+      };
+    }
+
+    // Count wins, losses, and pending
+    const settledPicks = savedPicks.filter(p => p.result === 'win' || p.result === 'loss');
+    const wins = savedPicks.filter(p => p.result === 'win').length;
+    const activeBets = savedPicks.filter(p => !p.result || p.result === 'pending').length;
+    
+    // Calculate win rate (only from settled bets)
+    const winRate = settledPicks.length > 0 
+      ? ((wins / settledPicks.length) * 100).toFixed(1) + '%'
+      : activeBets > 0 ? 'Pending' : '---';
+    
+    // Calculate average EV/edge from all picks
+    const evValues = savedPicks
+      .map(p => {
+        const evStr = p.ev || p.edge || '0';
+        const match = evStr.match(/([+-]?\d+\.?\d*)/);
+        return match ? parseFloat(match[1]) : 0;
+      })
+      .filter(v => v !== 0);
+    
+    const avgEdge = evValues.length > 0 
+      ? '+' + (evValues.reduce((a, b) => a + b, 0) / evValues.length).toFixed(1) + '%'
+      : '---';
+    
+    // Calculate total profit/loss from settled bets
+    let totalProfit = 0;
+    savedPicks.forEach(pick => {
+      const betAmount = pick.betAmount || 0;
+      const oddsStr = pick.odds || '+100';
+      const oddsNum = parseInt(oddsStr.replace('+', ''), 10);
+      
+      if (pick.result === 'win') {
+        // Calculate winnings based on American odds
+        if (oddsNum > 0) {
+          totalProfit += betAmount * (oddsNum / 100);
+        } else {
+          totalProfit += betAmount * (100 / Math.abs(oddsNum));
+        }
+      } else if (pick.result === 'loss') {
+        totalProfit -= betAmount;
+      }
+    });
+    
+    const profitStr = totalProfit >= 0 
+      ? '+$' + totalProfit.toFixed(2)
+      : '-$' + Math.abs(totalProfit).toFixed(2);
+    
+    // Calculate potential profit from active bets
+    let potentialProfit = 0;
+    savedPicks.filter(p => !p.result || p.result === 'pending').forEach(pick => {
+      const betAmount = pick.betAmount || 0;
+      const oddsStr = pick.odds || '+100';
+      const oddsNum = parseInt(oddsStr.replace('+', ''), 10);
+      if (oddsNum > 0) {
+        potentialProfit += betAmount * (oddsNum / 100);
+      } else {
+        potentialProfit += betAmount * (100 / Math.abs(oddsNum));
+      }
+    });
+
+    return {
+      winRate,
+      avgEdge,
+      totalProfit: settledPicks.length > 0 ? profitStr : '---',
+      activeBets: activeBets.toString(),
+      winRateChange: settledPicks.length > 0 ? `${wins}W - ${settledPicks.length - wins}L` : '---',
+      avgEdgeChange: evValues.length > 0 ? `${evValues.length} picks` : '---',
+      profitChange: potentialProfit > 0 ? `+$${potentialProfit.toFixed(2)} potential` : '---',
+      betsChange: activeBets > 0 ? `$${savedPicks.filter(p => !p.result).reduce((sum, p) => sum + (p.betAmount || 0), 0).toFixed(2)} at risk` : '---',
+    };
+  };
+
+  const calculatedStats = calculateStats();
+
   const stats = [
     {
       label: "Win Rate",
-      value: "---",
-      change: "---",
+      value: calculatedStats.winRate,
+      change: calculatedStats.winRateChange,
       positive: true,
       icon: Target,
     },
     {
       label: "Average Edge",
-      value: "---",
-      change: "---",
+      value: calculatedStats.avgEdge,
+      change: calculatedStats.avgEdgeChange,
       positive: true,
       icon: TrendingUp,
     },
     {
       label: "Total Profit",
-      value: "---",
-      change: "---",
-      positive: true,
+      value: calculatedStats.totalProfit,
+      change: calculatedStats.profitChange,
+      positive: calculatedStats.totalProfit.startsWith('+') || calculatedStats.totalProfit === '---',
       icon: DollarSign,
     },
     {
       label: "Active Bets",
-      value: "---",
-      change: "---",
+      value: calculatedStats.activeBets,
+      change: calculatedStats.betsChange,
       positive: true,
       icon: Sparkles,
     },
