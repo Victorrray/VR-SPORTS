@@ -192,31 +192,141 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       // Reference: https://the-odds-api.com/sports-odds-data/betting-markets.html
       const playerPropsMarketMap = {
         'americanfootball_nfl': [
+          // Standard props
           'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions',
+          'player_pass_longest_completion', 'player_pass_rush_yds', 'player_pass_rush_reception_tds', 'player_pass_rush_reception_yds',
+          'player_pass_yds_q1',
           'player_rush_yds', 'player_rush_tds', 'player_rush_attempts', 'player_rush_longest',
+          'player_rush_reception_tds', 'player_rush_reception_yds',
           'player_receptions', 'player_reception_yds', 'player_reception_tds', 'player_reception_longest',
-          'player_anytime_td', 'player_1st_td', 'player_last_td'
+          'player_anytime_td', 'player_1st_td', 'player_last_td', 'player_tds_over',
+          'player_assists', 'player_defensive_interceptions', 'player_field_goals', 'player_kicking_points',
+          'player_pats', 'player_sacks', 'player_solo_tackles', 'player_tackles_assists',
+          // Alternate props
+          'player_assists_alternate', 'player_field_goals_alternate', 'player_kicking_points_alternate',
+          'player_pass_attempts_alternate', 'player_pass_completions_alternate', 'player_pass_interceptions_alternate',
+          'player_pass_longest_completion_alternate', 'player_pass_rush_yds_alternate',
+          'player_pass_rush_reception_tds_alternate', 'player_pass_rush_reception_yds_alternate',
+          'player_pass_tds_alternate', 'player_pass_yds_alternate', 'player_pats_alternate',
+          'player_receptions_alternate', 'player_reception_longest_alternate', 'player_reception_tds_alternate', 'player_reception_yds_alternate',
+          'player_rush_attempts_alternate', 'player_rush_longest_alternate', 'player_rush_reception_tds_alternate', 'player_rush_reception_yds_alternate',
+          'player_rush_tds_alternate', 'player_rush_yds_alternate',
+          'player_sacks_alternate', 'player_solo_tackles_alternate', 'player_tackles_assists_alternate'
         ],
         'americanfootball_ncaaf': [
-          'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts',
+          // Standard props
+          'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions',
+          'player_pass_longest_completion', 'player_pass_rush_yds', 'player_pass_rush_reception_tds', 'player_pass_rush_reception_yds',
+          'player_rush_yds', 'player_rush_tds', 'player_rush_attempts', 'player_rush_longest',
+          'player_rush_reception_tds', 'player_rush_reception_yds',
+          'player_receptions', 'player_reception_yds', 'player_reception_tds', 'player_reception_longest',
+          'player_anytime_td', 'player_1st_td', 'player_last_td', 'player_tds_over',
+          'player_assists', 'player_defensive_interceptions', 'player_field_goals', 'player_kicking_points',
+          'player_pats', 'player_sacks', 'player_solo_tackles', 'player_tackles_assists'
+        ],
+        'americanfootball_cfl': [
+          // CFL uses same markets as NFL/NCAAF
+          'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions',
           'player_rush_yds', 'player_rush_tds', 'player_rush_attempts',
           'player_receptions', 'player_reception_yds', 'player_reception_tds',
-          'player_anytime_td'
+          'player_anytime_td', 'player_1st_td', 'player_last_td'
         ],
         'basketball_nba': [
-          'player_points', 'player_rebounds', 'player_assists', 'player_threes',
-          'player_steals', 'player_blocks', 'player_turnovers'
+          // Standard props
+          'player_points', 'player_points_q1', 'player_rebounds', 'player_rebounds_q1',
+          'player_assists', 'player_assists_q1', 'player_threes',
+          'player_steals', 'player_blocks', 'player_blocks_steals', 'player_turnovers',
+          'player_points_rebounds_assists', 'player_points_rebounds', 'player_points_assists', 'player_rebounds_assists',
+          'player_field_goals', 'player_frees_made', 'player_frees_attempts',
+          'player_first_basket', 'player_first_team_basket', 'player_double_double', 'player_triple_double',
+          'player_method_of_first_basket',
+          // Alternate props
+          'player_points_alternate', 'player_rebounds_alternate', 'player_assists_alternate',
+          'player_blocks_alternate', 'player_steals_alternate', 'player_turnovers_alternate', 'player_threes_alternate',
+          'player_points_assists_alternate', 'player_points_rebounds_alternate', 'player_rebounds_assists_alternate',
+          'player_points_rebounds_assists_alternate'
         ],
         'basketball_ncaab': [
-          'player_points', 'player_rebounds', 'player_assists', 'player_threes'
+          'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+          'player_steals', 'player_blocks', 'player_turnovers',
+          'player_points_rebounds_assists', 'player_points_rebounds', 'player_points_assists', 'player_rebounds_assists',
+          'player_double_double'
+        ],
+        'basketball_wnba': [
+          'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+          'player_steals', 'player_blocks', 'player_turnovers',
+          'player_points_rebounds_assists', 'player_points_rebounds', 'player_points_assists', 'player_rebounds_assists',
+          'player_double_double', 'player_triple_double'
         ],
         'baseball_mlb': [
-          'batter_hits', 'batter_total_bases', 'batter_rbis', 'batter_runs_scored', 'batter_home_runs',
-          'pitcher_strikeouts', 'pitcher_hits_allowed', 'pitcher_walks', 'pitcher_earned_runs', 'pitcher_outs'
+          // Batter props
+          'batter_home_runs', 'batter_first_home_run', 'batter_hits', 'batter_total_bases',
+          'batter_rbis', 'batter_runs_scored', 'batter_hits_runs_rbis',
+          'batter_singles', 'batter_doubles', 'batter_triples',
+          'batter_walks', 'batter_strikeouts', 'batter_stolen_bases',
+          // Pitcher props
+          'pitcher_strikeouts', 'pitcher_record_a_win', 'pitcher_hits_allowed',
+          'pitcher_walks', 'pitcher_earned_runs', 'pitcher_outs',
+          // Alternate batter props
+          'batter_total_bases_alternate', 'batter_home_runs_alternate', 'batter_hits_alternate',
+          'batter_rbis_alternate', 'batter_walks_alternate', 'batter_strikeouts_alternate',
+          'batter_runs_scored_alternate', 'batter_singles_alternate', 'batter_doubles_alternate', 'batter_triples_alternate',
+          // Alternate pitcher props
+          'pitcher_hits_allowed_alternate', 'pitcher_walks_alternate', 'pitcher_strikeouts_alternate'
         ],
         'icehockey_nhl': [
-          'player_goals', 'player_assists', 'player_shots_on_goal', 'player_blocked_shots',
-          'player_power_play_points', 'player_total_saves'
+          // Standard props
+          'player_points', 'player_power_play_points', 'player_assists',
+          'player_blocked_shots', 'player_shots_on_goal', 'player_goals', 'player_total_saves',
+          'player_goal_scorer_first', 'player_goal_scorer_last', 'player_goal_scorer_anytime',
+          // Alternate props
+          'player_points_alternate', 'player_assists_alternate', 'player_power_play_points_alternate',
+          'player_goals_alternate', 'player_shots_on_goal_alternate', 'player_blocked_shots_alternate',
+          'player_total_saves_alternate'
+        ],
+        // Soccer leagues
+        'soccer_epl': [
+          'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+          'player_to_receive_card', 'player_to_receive_red_card',
+          'player_shots_on_target', 'player_shots', 'player_assists',
+          'alternate_spreads_corners', 'alternate_totals_corners',
+          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+        ],
+        'soccer_uefa_champs_league': [
+          'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+        ],
+        'soccer_mls': [
+          'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+        ],
+        'soccer_spain_la_liga': [
+          'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+        ],
+        'soccer_germany_bundesliga': [
+          'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+        ],
+        'soccer_italy_serie_a': [
+          'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+        ],
+        'soccer_france_ligue_one': [
+          'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+        ],
+        // AFL
+        'aussierules_afl': [
+          'player_disposals', 'player_disposals_over',
+          'player_goal_scorer_first', 'player_goal_scorer_last', 'player_goal_scorer_anytime',
+          'player_goals_scored_over', 'player_marks_over', 'player_marks_most',
+          'player_tackles_over', 'player_tackles_most',
+          'player_afl_fantasy_points', 'player_afl_fantasy_points_over', 'player_afl_fantasy_points_most'
+        ],
+        // Rugby League (NRL)
+        'rugbyleague_nrl': [
+          'player_try_scorer_first', 'player_try_scorer_last', 'player_try_scorer_anytime', 'player_try_scorer_over'
         ]
       };
       
