@@ -91,8 +91,8 @@ export function useRecommendedPicks(options = {}) {
             if (!market.outcomes || market.outcomes.length === 0) return;
 
             market.outcomes.forEach((outcome) => {
-              // Calculate real EV based on actual odds
-              const ev = calculateEV(outcome.price, game.bookmakers);
+              // Calculate real EV based on actual odds - pass market key, outcome name, and point for proper comparison
+              const ev = calculateEV(outcome.price, game.bookmakers, market.key, outcome.name, outcome.point);
 
               // Log EV calculation for debugging
               if (picks.length === 0 && market === bestBookmaker.markets[0]) {
@@ -233,37 +233,40 @@ function getSportLabel(sportKey) {
 }
 
 /**
- * Calculate real EV (Expected Value) based on actual odds from multiple bookmakers
- * EV = (Probability of Winning * Potential Profit) - (Probability of Losing * Stake) * 100
- * 
- * @param {number} odds - The odds for this outcome (American format)
+ * Calculate Expected Value (EV) for a bet
+ * @param {number} odds - The odds being offered
  * @param {Array} bookmakers - All bookmakers with their odds for comparison
+ * @param {string} marketKey - The market type (h2h, spreads, totals, etc.)
+ * @param {string} outcomeName - The outcome name (team name, Over, Under, etc.)
+ * @param {number} point - The point value for spreads/totals (null for moneyline)
  * @returns {number} EV percentage
  */
-function calculateEV(odds, bookmakers) {
+function calculateEV(odds, bookmakers, marketKey = null, outcomeName = null, point = null) {
   if (!odds || !bookmakers || bookmakers.length === 0) return 0;
 
   try {
     // Convert American odds to implied probability
     const impliedProb = americanOddsToProb(odds);
     
-    // Find the BEST odds for this outcome across all bookmakers
-    // Best means highest probability (lowest risk) for the bettor
-    let bestOdds = odds;
-    let bestProb = impliedProb;
+    // Collect all odds for the SAME market type, outcome, and point value
+    const comparableOdds = [];
     
     bookmakers.forEach((book) => {
       if (book.markets) {
         book.markets.forEach((market) => {
+          // Only compare same market type
+          if (marketKey && market.key !== marketKey) return;
+          
           if (market.outcomes) {
             market.outcomes.forEach((outcome) => {
+              // Only compare same outcome name (or similar - Over/Under, team names)
+              if (outcomeName && outcome.name !== outcomeName) return;
+              
+              // CRITICAL: Only compare same point value for spreads/totals
+              if (point !== null && outcome.point !== point) return;
+              
               if (outcome.price) {
-                const outcomeProb = americanOddsToProb(outcome.price);
-                // Keep the odds with the HIGHEST probability (best for bettor)
-                if (outcomeProb > bestProb) {
-                  bestOdds = outcome.price;
-                  bestProb = outcomeProb;
-                }
+                comparableOdds.push(outcome.price);
               }
             });
           }
@@ -271,20 +274,45 @@ function calculateEV(odds, bookmakers) {
       }
     });
 
-    // Calculate actual probability from best odds
-    const actualProb = bestProb;
+    // Need at least 2 comparable odds to calculate meaningful EV
+    if (comparableOdds.length < 2) {
+      return 0;
+    }
+
+    // Calculate fair probability using power method (de-vig)
+    // Average the implied probabilities and normalize
+    const probs = comparableOdds.map(o => americanOddsToProb(o));
+    const avgProb = probs.reduce((a, b) => a + b, 0) / probs.length;
     
-    // EV = (Actual Probability - Implied Probability) * 100
-    // If actual prob is higher than implied, there's positive EV
-    const ev = (actualProb - impliedProb) * 100;
+    // The fair probability should be close to the average
+    // EV = (Fair Probability / Implied Probability - 1) * 100
+    // Or equivalently: how much better are our odds vs the fair line
     
-    // Debug logging
-    if (ev > 0) {
-      console.log(`    [EV Debug] Input odds: ${odds}, Best odds: ${bestOdds}, Implied: ${(impliedProb*100).toFixed(1)}%, Actual: ${(actualProb*100).toFixed(1)}%, EV: ${ev.toFixed(2)}%`);
+    // Find the best (lowest juice) odds among comparable books
+    const bestOdds = comparableOdds.reduce((best, current) => {
+      // For negative odds, less negative is better (-110 > -120)
+      // For positive odds, more positive is better (+150 > +130)
+      if (current > 0 && best > 0) return current > best ? current : best;
+      if (current < 0 && best < 0) return current > best ? current : best;
+      if (current > 0) return current; // Positive is always better than negative
+      return best;
+    }, comparableOdds[0]);
+    
+    const bestProb = americanOddsToProb(bestOdds);
+    
+    // EV calculation: compare our odds to the consensus fair line
+    // If our implied prob is LOWER than fair prob, we have +EV (getting better odds)
+    // EV% = (Fair Prob / Our Implied Prob - 1) * 100
+    const ev = ((avgProb / impliedProb) - 1) * 100;
+    
+    // Only show positive EV and cap at reasonable values
+    // Anything over 20% EV is likely a data error
+    if (ev > 0 && ev < 50) {
+      console.log(`    [EV Debug] Odds: ${odds}, Comparable: ${comparableOdds.length} books, Fair: ${(avgProb*100).toFixed(1)}%, Implied: ${(impliedProb*100).toFixed(1)}%, EV: ${ev.toFixed(2)}%`);
     }
     
-    // Return max of 0 (no negative EV picks) and calculated EV
-    return Math.max(0, ev);
+    // Cap EV at 50% - anything higher is almost certainly bad data
+    return Math.min(50, Math.max(0, ev));
   } catch (err) {
     console.warn('Error calculating EV:', err);
     return 0;
