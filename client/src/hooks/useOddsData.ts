@@ -263,14 +263,24 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           pick: pickDescription,
           bestOdds: bestBookForCard.overOdds,
           bestBook: bestBookForCard.name,
-          // Mini table shows ALL books with actual odds
+          // Mini table shows ALL books with actual odds, sorted so best book is first
           books: propData.books.map((b: any) => ({
             name: b.name,
             odds: b.overOdds,
             team2Odds: b.underOdds || b.overOdds,
             ev: hasEnoughData ? '0%' : '--',
             isBest: b.name === bestBookForCard.name
-          })),
+          })).sort((a: any, b: any) => {
+            // Best book should always be first
+            if (a.isBest && !b.isBest) return -1;
+            if (!a.isBest && b.isBest) return 1;
+            // Then sort by odds (highest first)
+            const aOdds = parseInt(a.odds, 10);
+            const bOdds = parseInt(b.odds, 10);
+            if (isNaN(aOdds)) return 1;
+            if (isNaN(bOdds)) return -1;
+            return bOdds - aOdds;
+          }),
           isPlayerProp: true,
           playerName: propData.playerName,
           marketKey: propData.marketKey,
@@ -383,6 +393,19 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             b.isBest = b.name === bestBook;
           });
         }
+        
+        // Sort books so the best book (highest odds) appears first
+        booksArray.sort((a, b) => {
+          // Best book should always be first
+          if (a.isBest && !b.isBest) return -1;
+          if (!a.isBest && b.isBest) return 1;
+          // Then sort by odds (highest first)
+          const aOdds = parseInt(a.odds, 10);
+          const bOdds = parseInt(b.odds, 10);
+          if (isNaN(aOdds)) return 1;
+          if (isNaN(bOdds)) return -1;
+          return bOdds - aOdds;
+        });
         
         // Create pick description based on market type
         let pickDescription = '';
