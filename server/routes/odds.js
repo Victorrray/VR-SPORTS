@@ -23,6 +23,12 @@ const {
   DEFAULT_BOOK_STATE
 } = require('../config/constants');
 
+// All available markets from TheOddsAPI (for reference)
+// Featured: h2h, spreads, totals, outrights, h2h_lay, outrights_lay
+// Additional: alternate_spreads, alternate_totals, btts, draw_no_bet, h2h_3_way, team_totals, alternate_team_totals
+// Game Period: h2h_q1-q4, h2h_h1-h2, h2h_p1-p3, h2h_1st_X_innings, spreads_*, totals_*, alternate_*, team_totals_*
+// 3-Way Period: h2h_3_way_q1-q4, h2h_3_way_h1-h2, h2h_3_way_p1-p3, h2h_3_way_1st_X_innings
+
 // Sport-specific market support from TheOddsAPI
 const SPORT_MARKET_SUPPORT = {
   'americanfootball_nfl': [
@@ -30,7 +36,7 @@ const SPORT_MARKET_SUPPORT = {
     'h2h', 'spreads', 'totals', 
     'alternate_spreads', 'alternate_totals', 
     'team_totals', 'alternate_team_totals',
-    // Quarter markets
+    // Quarter markets - 2-way
     'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
     'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
     'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
@@ -38,21 +44,25 @@ const SPORT_MARKET_SUPPORT = {
     'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
     'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
     'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
-    // Half markets
+    // Quarter markets - 3-way
+    'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+    // Half markets - 2-way
     'h2h_h1', 'h2h_h2',
     'spreads_h1', 'spreads_h2',
     'totals_h1', 'totals_h2',
     'alternate_spreads_h1', 'alternate_spreads_h2',
     'alternate_totals_h1', 'alternate_totals_h2',
     'team_totals_h1', 'team_totals_h2',
-    'alternate_team_totals_h1', 'alternate_team_totals_h2'
+    'alternate_team_totals_h1', 'alternate_team_totals_h2',
+    // Half markets - 3-way
+    'h2h_3_way_h1', 'h2h_3_way_h2'
   ],
   'americanfootball_ncaaf': [
     // Standard markets
     'h2h', 'spreads', 'totals',
     'alternate_spreads', 'alternate_totals',
     'team_totals', 'alternate_team_totals',
-    // Quarter markets
+    // Quarter markets - 2-way
     'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
     'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
     'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
@@ -60,21 +70,25 @@ const SPORT_MARKET_SUPPORT = {
     'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
     'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
     'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
-    // Half markets
+    // Quarter markets - 3-way
+    'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+    // Half markets - 2-way
     'h2h_h1', 'h2h_h2',
     'spreads_h1', 'spreads_h2',
     'totals_h1', 'totals_h2',
     'alternate_spreads_h1', 'alternate_spreads_h2',
     'alternate_totals_h1', 'alternate_totals_h2',
     'team_totals_h1', 'team_totals_h2',
-    'alternate_team_totals_h1', 'alternate_team_totals_h2'
+    'alternate_team_totals_h1', 'alternate_team_totals_h2',
+    // Half markets - 3-way
+    'h2h_3_way_h1', 'h2h_3_way_h2'
   ],
   'basketball_nba': [
     // Standard markets
     'h2h', 'spreads', 'totals',
     'alternate_spreads', 'alternate_totals',
     'team_totals', 'alternate_team_totals',
-    // Quarter markets
+    // Quarter markets - 2-way
     'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
     'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
     'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
@@ -82,14 +96,18 @@ const SPORT_MARKET_SUPPORT = {
     'alternate_totals_q1', 'alternate_totals_q2', 'alternate_totals_q3', 'alternate_totals_q4',
     'team_totals_q1', 'team_totals_q2', 'team_totals_q3', 'team_totals_q4',
     'alternate_team_totals_q1', 'alternate_team_totals_q2', 'alternate_team_totals_q3', 'alternate_team_totals_q4',
-    // Half markets
+    // Quarter markets - 3-way
+    'h2h_3_way_q1', 'h2h_3_way_q2', 'h2h_3_way_q3', 'h2h_3_way_q4',
+    // Half markets - 2-way
     'h2h_h1', 'h2h_h2',
     'spreads_h1', 'spreads_h2',
     'totals_h1', 'totals_h2',
     'alternate_spreads_h1', 'alternate_spreads_h2',
     'alternate_totals_h1', 'alternate_totals_h2',
     'team_totals_h1', 'team_totals_h2',
-    'alternate_team_totals_h1', 'alternate_team_totals_h2'
+    'alternate_team_totals_h1', 'alternate_team_totals_h2',
+    // Half markets - 3-way
+    'h2h_3_way_h1', 'h2h_3_way_h2'
   ],
   'basketball_ncaab': [
     // Standard markets
@@ -133,7 +151,13 @@ const SPORT_MARKET_SUPPORT = {
     'team_totals_p1', 'team_totals_p2', 'team_totals_p3',
     'alternate_team_totals_p1', 'alternate_team_totals_p2', 'alternate_team_totals_p3'
   ],
-  'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+  'soccer_epl': [
+    'h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts',
+    'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals',
+    // Soccer-specific markets (corners, cards)
+    'alternate_spreads_corners', 'alternate_totals_corners',
+    'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+  ],
   'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_mls': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_spain_la_liga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
@@ -147,7 +171,11 @@ const SPORT_MARKET_SUPPORT = {
   'golf_masters': ['outrights', 'outrights_lay'],
   'golf_us_open': ['outrights', 'outrights_lay'],
   'golf_british_open': ['outrights', 'outrights_lay'],
-  'default': ['h2h', 'spreads', 'totals']
+  'default': [
+    'h2h', 'spreads', 'totals',
+    'alternate_spreads', 'alternate_totals',
+    'team_totals', 'alternate_team_totals'
+  ]
 };
 
 /**
@@ -471,22 +499,60 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             const response = await axios.get(url);
             responseData = response.data;
             
-            // Debug: Log first game's bookmakers structure
+            // Debug: Log comprehensive market summary
             if (responseData && responseData.length > 0) {
-              const firstGame = responseData[0];
-              console.log(`🎮 First game from API: ${firstGame.away_team} @ ${firstGame.home_team}`);
-              console.log(`📚 First game bookmakers count: ${firstGame.bookmakers ? firstGame.bookmakers.length : 0}`);
-              if (firstGame.bookmakers && firstGame.bookmakers.length > 0) {
-                const firstBook = firstGame.bookmakers[0];
-                console.log(`📚 First bookmaker FULL OBJECT:`, JSON.stringify(firstBook, null, 2).substring(0, 500));
-                console.log(`📚 First bookmaker: ${firstBook.key || firstBook.title}`);
-                console.log(`📊 First bookmaker markets: ${firstBook.markets ? firstBook.markets.length : 0}`);
-                if (firstBook.markets && firstBook.markets.length > 0) {
-                  console.log(`📊 First market: ${firstBook.markets[0].key}`);
-                  console.log(`📊 First market outcomes: ${firstBook.markets[0].outcomes ? firstBook.markets[0].outcomes.length : 0}`);
-                  console.log(`📊 First market FULL:`, JSON.stringify(firstBook.markets[0], null, 2).substring(0, 500));
+              console.log(`\n${'='.repeat(60)}`);
+              console.log(`📊 MARKET SUMMARY FOR ${sport.toUpperCase()}`);
+              console.log(`${'='.repeat(60)}`);
+              console.log(`📦 Games returned: ${responseData.length}`);
+              
+              // Collect all unique markets across all games and bookmakers
+              const allMarketsFound = new Set();
+              const marketsByBook = new Map();
+              let totalBookmakers = 0;
+              
+              responseData.forEach(game => {
+                if (game.bookmakers) {
+                  game.bookmakers.forEach(book => {
+                    totalBookmakers++;
+                    if (!marketsByBook.has(book.key)) {
+                      marketsByBook.set(book.key, new Set());
+                    }
+                    if (book.markets) {
+                      book.markets.forEach(market => {
+                        allMarketsFound.add(market.key);
+                        marketsByBook.get(book.key).add(market.key);
+                      });
+                    }
+                  });
                 }
+              });
+              
+              console.log(`📚 Total bookmaker entries: ${totalBookmakers}`);
+              console.log(`📊 Unique markets found: ${allMarketsFound.size}`);
+              console.log(`📊 Markets requested: ${marketsToFetch.join(', ')}`);
+              console.log(`📊 Markets returned: ${Array.from(allMarketsFound).sort().join(', ')}`);
+              
+              // Check which requested markets were NOT returned
+              const missingMarkets = marketsToFetch.filter(m => !allMarketsFound.has(m));
+              if (missingMarkets.length > 0) {
+                console.log(`⚠️ MISSING MARKETS (requested but not returned): ${missingMarkets.join(', ')}`);
               }
+              
+              // Log markets by bookmaker (first 5 bookmakers)
+              console.log(`\n📚 Markets by Bookmaker (sample):`);
+              let bookCount = 0;
+              for (const [bookKey, markets] of marketsByBook) {
+                if (bookCount >= 5) break;
+                console.log(`   ${bookKey}: ${Array.from(markets).join(', ')}`);
+                bookCount++;
+              }
+              
+              // Log first game details
+              const firstGame = responseData[0];
+              console.log(`\n🎮 First game: ${firstGame.away_team} @ ${firstGame.home_team}`);
+              console.log(`📚 Bookmakers for this game: ${firstGame.bookmakers ? firstGame.bookmakers.length : 0}`);
+              console.log(`${'='.repeat(60)}\n`);
             }
             
             // Log quota information from response headers
