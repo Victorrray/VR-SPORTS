@@ -344,9 +344,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     // Filter books array if sportsbooks are selected (for main card display)
     let filteredBooks = pick.books;
     if (selectedSportsbooks.length > 0) {
-      console.log('🔍 Filtering for sportsbooks:', selectedSportsbooks);
-      console.log('🔍 Available books:', pick.books.map((b: any) => ({ name: b.name, rawName: b.rawName, key: b.key })));
-      
       filteredBooks = pick.books.filter(book => {
         // Use rawName if available (for books with line in name), otherwise use name
         // Also strip any line info like "(4.5)" from the name for matching
@@ -354,28 +351,31 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
         const bookNameLower = rawName.replace(/\s*\([^)]*\)\s*$/, '').toLowerCase().trim();
         const bookKey = ((book as any).key || '').toLowerCase();
         
-        const matched = selectedSportsbooks.some(selectedId => {
+        return selectedSportsbooks.some(selectedId => {
           const matchingNames = sportsbookMap[selectedId] || [];
           const selectedIdLower = selectedId.toLowerCase();
           
-          // Match by key, name, or partial name match
-          const keyMatch = bookKey === selectedIdLower || bookKey.includes(selectedIdLower);
-          const nameMatch = matchingNames.some(name => 
-            bookNameLower.includes(name) || 
-            name.includes(bookNameLower) ||
-            bookNameLower === name
-          );
+          // Exact match by key or selected ID
+          if (bookKey === selectedIdLower) return true;
           
-          return keyMatch || nameMatch;
+          // Exact match by name
+          if (matchingNames.some(name => bookNameLower === name)) return true;
+          
+          // For DFS apps, also check if the book key starts with the selected ID
+          // e.g., "prizepicks" matches "prizepicks", "underdog" matches "underdog"
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs', 'sleeper', 'fliff'];
+          if (dfsApps.includes(selectedIdLower)) {
+            // Check if book name or key contains the DFS app name
+            if (bookKey === selectedIdLower || bookNameLower === selectedIdLower) return true;
+            // Special handling for display names
+            if (selectedIdLower === 'dabble_au' && bookNameLower === 'dabble') return true;
+            if (selectedIdLower === 'betr_us_dfs' && bookNameLower === 'betr') return true;
+            if (selectedIdLower === 'pick6' && (bookNameLower === 'pick6' || bookNameLower === 'draftkings pick6')) return true;
+          }
+          
+          return false;
         });
-        
-        if (matched) {
-          console.log('✅ Matched book:', bookNameLower, 'key:', bookKey);
-        }
-        return matched;
       });
-      
-      console.log('🔍 Filtered books result:', filteredBooks.length);
     }
 
     // Find best book from filtered books for main card
