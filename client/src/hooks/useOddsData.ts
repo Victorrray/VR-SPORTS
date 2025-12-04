@@ -335,7 +335,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (!isNaN(bestOddsNum)) {
             const bestProb = toProb(bestOddsNum);
             const edge = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${(Math.round(edge * 100) / 100).toFixed(2)}%`;
+            ev = `${Math.abs(Math.round(edge * 100) / 100).toFixed(2)}%`;
           }
         }
         
@@ -556,7 +556,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (!isNaN(bestOddsNum)) {
             const bestProb = toProb(bestOddsNum);
             const edge = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${(Math.round(edge * 100) / 100).toFixed(2)}%`;
+            ev = `${Math.abs(Math.round(edge * 100) / 100).toFixed(2)}%`;
             
             booksArray.forEach(b => {
               const o = parseInt(b.odds, 10);
@@ -690,7 +690,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const avgProb = toProb(avgOdds);
           const bestProb = toProb(parseInt(bestOdds, 10));
           const evValue = ((avgProb - bestProb) / bestProb) * 100;
-          ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+          ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
         }
         
         // Create pick description
@@ -834,7 +834,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               const avgProb = toProb(avgOdds);
               const bestProb = toProb(parseInt(bestOdds, 10));
               const evValue = ((avgProb - bestProb) / bestProb) * 100;
-              ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+              ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
             }
             
             const periodLabel = getPeriodLabel(marketKey);
@@ -929,7 +929,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const avgProb = toProb(avgOdds);
             const bestProb = toProb(parseInt(bestOdds, 10));
             const evValue = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+            ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
           }
           
           const periodLabel = getPeriodLabel(marketKey);
@@ -1033,7 +1033,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const avgProb = toProb(avgOdds);
             const bestProb = toProb(parseInt(bestBook.odds, 10));
             const evValue = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+            ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
           }
           
           allPicks.push({
@@ -1122,7 +1122,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const avgProb = toProb(avgOdds);
           const bestProb = toProb(parseInt(bestOdds, 10));
           const evValue = ((avgProb - bestProb) / bestProb) * 100;
-          ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+          ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
         }
         
         const periodLabel = getPeriodLabel(marketKey);
