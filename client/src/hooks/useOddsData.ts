@@ -159,8 +159,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // PLAYER PROPS MODE: Create one pick per player per market (combining all lines)
       const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey" (no line in key)
       
-      // Filter out stale bookmakers (odds not updated in the last 2 hours)
-      const STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
+      // Filter out stale bookmakers (odds not updated in the last 30 minutes)
+      const STALE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
       const now = Date.now();
       
       // Collect ALL books for the mini table (no filtering here)
@@ -329,8 +329,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // GAME ODDS MODE: Create separate picks for each market type (h2h, spreads, totals)
       const marketTypes = ['h2h', 'spreads', 'totals'];
       
-      // Filter out stale bookmakers (odds not updated in the last 2 hours)
-      const STALE_THRESHOLD_MS = 2 * 60 * 60 * 1000; // 2 hours
+      // Filter out stale bookmakers (odds not updated in the last 30 minutes)
+      const STALE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
       const now = Date.now();
       
       marketTypes.forEach(marketKey => {
