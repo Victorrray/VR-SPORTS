@@ -132,7 +132,7 @@ export function BankrollPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={`p-2 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-lg border`}>
+            <div className={`p-2 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-xl border`}>
               <Wallet className={`w-4 h-4 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
             </div>
             <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-xs uppercase tracking-wide`}>
@@ -146,7 +146,7 @@ export function BankrollPage() {
 
         <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={`p-2 ${isLight ? 'bg-emerald-100 border-emerald-200' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl rounded-lg border`}>
+            <div className={`p-2 ${isLight ? 'bg-emerald-100 border-emerald-200' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl rounded-xl border`}>
               {totalProfit >= 0 ? (
                 <TrendingUp className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-300'}`} />
               ) : (
@@ -167,7 +167,7 @@ export function BankrollPage() {
 
         <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={`p-2 ${isLight ? 'bg-blue-100 border-blue-200' : 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-400/30'} backdrop-blur-xl rounded-lg border`}>
+            <div className={`p-2 ${isLight ? 'bg-blue-100 border-blue-200' : 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-400/30'} backdrop-blur-xl rounded-xl border`}>
               <Target className={`w-4 h-4 ${isLight ? 'text-blue-600' : 'text-blue-300'}`} />
             </div>
             <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-xs uppercase tracking-wide`}>
@@ -184,7 +184,7 @@ export function BankrollPage() {
 
         <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={`p-2 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/30'} backdrop-blur-xl rounded-lg border`}>
+            <div className={`p-2 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/30'} backdrop-blur-xl rounded-xl border`}>
               <DollarSign className={`w-4 h-4 ${isLight ? 'text-amber-600' : 'text-amber-300'}`} />
             </div>
             <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-xs uppercase tracking-wide`}>
