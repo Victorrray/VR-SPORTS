@@ -205,6 +205,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const overOutcome = outcomes.find(o => o.name === 'Over');
             const underOutcome = outcomes.find(o => o.name === 'Under');
             
+            // Debug: Log when Under is missing or same as Over
+            if (overOutcome && !underOutcome) {
+              console.log(`⚠️ Missing Under for ${playerName} at ${bookName}:`, outcomes.map(o => o.name));
+            }
+            
             if (overOutcome) {
               // Group by player + market only (NOT by line) to combine all books
               const pickKey = `${playerName}-${market.key}`;
@@ -359,7 +364,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             rawName: b.name,
             line: b.line,
             odds: b.overOdds,
-            team2Odds: b.underOdds || b.overOdds,
+            team2Odds: b.underOdds || '--',
             ev: hasEnoughData ? '0%' : '--',
             isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
             isAtConsensus
