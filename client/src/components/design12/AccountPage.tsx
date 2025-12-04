@@ -89,7 +89,7 @@ export function AccountPage({
                   : isGold
                     ? (isLight ? 'bg-yellow-100 border-yellow-200' : 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/30')
                     : (isLight ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 border-gray-400/30')
-              } border rounded-lg backdrop-blur-xl`}>
+              } border rounded-full backdrop-blur-xl`}>
                 <div className="flex items-center gap-1.5">
                   <PlanIcon className={`w-4 h-4 ${
                     isPlatinum 
