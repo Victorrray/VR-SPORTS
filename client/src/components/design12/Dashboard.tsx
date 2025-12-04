@@ -115,7 +115,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       };
       setSavedPicks((prev) => [...prev, pickWithAmount]);
       toast.success('Added to My Picks', {
-        description: `${pendingBet.pick} at ${pendingBet.sportsbook} has been added with $${betAmount.toFixed(2)} bet`
+        description: `${pendingBet.pick || 'Pick'} at ${pendingBet.sportsbook || 'Sportsbook'} has been added with $${betAmount.toFixed(2)} bet`
       });
     }
     closeBetSlip();

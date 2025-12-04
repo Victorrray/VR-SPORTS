@@ -8,12 +8,12 @@ interface BetSlipProps {
   onClose: () => void;
   onConfirm: (betAmount: number) => void;
   betData: {
-    teams: string;
-    pick: string;
-    odds: string;
-    sportsbook: string;
-    ev: string;
-    sport: string;
+    teams?: string;
+    pick?: string;
+    odds?: string | number;
+    sportsbook?: string;
+    ev?: string;
+    sport?: string;
   } | null;
 }
 
@@ -144,15 +144,15 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base mb-1`}>
-                    {betData.teams}
+                    {betData.teams || 'Game'}
                   </div>
                   <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>
-                    {betData.sport}
+                    {betData.sport || 'Sport'}
                   </div>
                 </div>
                 <div className={`px-3 py-1.5 bg-gradient-to-r from-emerald-500/20 to-green-500/20 border ${isLight ? 'border-emerald-300' : 'border-emerald-400/30'} rounded-full`}>
                   <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>
-                    {betData.ev}
+                    {betData.ev || '--'}
                   </span>
                 </div>
               </div>
@@ -166,16 +166,16 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                     Pick
                   </div>
                   <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                    {betData.pick}
+                    {betData.pick || 'Pick'}
                   </div>
                 </div>
                 <div className={`px-4 py-2 ${isLight ? 'bg-purple-100 border-purple-300' : 'bg-purple-500/20 border-purple-400/30'} border rounded-xl`}>
                   <span className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-lg`}>
                     {(() => {
-                      const odds = String(betData.odds || '');
+                      const odds = String(betData.odds || '0');
                       if (odds.startsWith('+') || odds.startsWith('-') || odds === '--') return odds;
                       const num = parseInt(odds);
-                      if (isNaN(num)) return odds;
+                      if (isNaN(num)) return odds || '--';
                       return num > 0 ? `+${num}` : String(num);
                     })()}
                   </span>
@@ -190,7 +190,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                   Sportsbook
                 </div>
                 <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
-                  {betData.sportsbook}
+                  {betData.sportsbook || 'Sportsbook'}
                 </div>
               </div>
             </div>
