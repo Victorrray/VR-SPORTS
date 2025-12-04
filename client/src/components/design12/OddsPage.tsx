@@ -843,7 +843,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     PLATINUM
                   </span>
                 </label>
-                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-lg ${!hasPlatinum ? 'opacity-60' : ''}`}>
+                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl ${!hasPlatinum ? 'opacity-60' : ''}`}>
                   <div className="flex items-center gap-3 flex-1">
                     <RefreshCw className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
                     <div>
