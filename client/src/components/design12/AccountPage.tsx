@@ -56,10 +56,27 @@ export function AccountPage({
         credentials: 'include',
       });
       
-      const data = await response.json();
+      // Check if response has content
+      const text = await response.text();
+      
+      if (!text) {
+        throw new Error('Empty response from server');
+      }
+      
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error('Invalid JSON response:', text);
+        throw new Error('Invalid response from server');
+      }
       
       if (!response.ok) {
         throw new Error(data.error || 'Failed to open billing portal');
+      }
+      
+      if (!data.url) {
+        throw new Error('No portal URL returned');
       }
       
       // Redirect to Stripe Customer Portal
