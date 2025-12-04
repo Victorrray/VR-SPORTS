@@ -970,7 +970,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       {sportsbooksByTier.map((tierGroup, tierIndex) => (
                         <div key={tierIndex}>
                           {/* Tier Header */}
-                          <div className={`px-6 py-3 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider sticky top-0`}>
+                          <div className={`px-6 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider`}>
                             {tierGroup.tier}
                           </div>
                           {/* Sportsbooks in this tier */}
