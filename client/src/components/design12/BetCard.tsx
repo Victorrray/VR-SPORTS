@@ -2,18 +2,7 @@ import { Clock, Check, Plus, ChevronDown } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-
-// Helper function to format odds with +/- sign
-const formatOdds = (odds: string | number): string => {
-  if (!odds) return '--';
-  const oddsStr = String(odds);
-  if (oddsStr.startsWith('+') || oddsStr.startsWith('-') || oddsStr === '--') {
-    return oddsStr;
-  }
-  const oddsNum = parseInt(oddsStr);
-  if (isNaN(oddsNum)) return oddsStr;
-  return oddsNum > 0 ? `+${oddsNum}` : String(oddsNum);
-};
+import { formatOdds as convertOdds } from '../../utils/oddsConverter';
 
 export interface BetData {
   id: number;
@@ -55,8 +44,11 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
   const isHero = variant === 'hero';
   
   // Always call the hook at the top level
-  const { colorMode } = useTheme();
+  const { colorMode, oddsFormat } = useTheme();
   const isDark = isHero ? true : colorMode === 'dark';
+  
+  // Format odds based on user's selected format
+  const formatOdds = (odds: string | number): string => convertOdds(odds, oddsFormat);
 
   const handleAddToPicks = () => {
     if (!isAdded && onAddPick) {

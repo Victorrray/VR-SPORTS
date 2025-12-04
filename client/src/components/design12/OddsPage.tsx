@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useOddsData, getSportLabel } from '../../hooks/useOddsData';
 import { PlayerPropsPage } from './PlayerPropsPage';
 import { toast } from 'sonner';
+import { formatOdds as convertOdds } from '../../utils/oddsConverter';
 
 // Generate date options: All Upcoming, Today (with day name), then next 6 days
 function generateDateOptions() {
@@ -35,17 +36,7 @@ function generateDateOptions() {
   return options;
 }
 
-// Helper function to format odds with +/- sign
-const formatOdds = (odds: any): string => {
-  if (!odds) return '--';
-  const oddsStr = String(odds);
-  if (oddsStr.startsWith('+') || oddsStr.startsWith('-') || oddsStr === '--') {
-    return oddsStr;
-  }
-  const oddsNum = parseInt(oddsStr);
-  if (isNaN(oddsNum)) return oddsStr;
-  return oddsNum > 0 ? `+${oddsNum}` : String(oddsNum);
-};
+// formatOdds is now imported from oddsConverter and used via the hook below
 
 // Helper function to parse odds string/number to numeric value
 const parseOdds = (odds: any): number => {
@@ -138,8 +129,11 @@ const calculateDevigOdds = (books: any[]): string => {
 };
 
 export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
-  const { colorMode } = useTheme();
+  const { colorMode, oddsFormat } = useTheme();
   const isLight = colorMode === 'light';
+  
+  // Format odds based on user's selected format
+  const formatOdds = (odds: any): string => convertOdds(odds, oddsFormat);
   const { me, loading: meLoading } = useMe();
   const navigate = useNavigate();
   
@@ -1576,7 +1570,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     {/* Odds - Best available odds for this pick */}
                     <div className="lg:col-span-2 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.bestOdds}</span>
+                        <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{formatOdds(pick.bestOdds)}</span>
                       </div>
                     </div>
                   </div>
@@ -1711,7 +1705,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>
-                              {pick.bestOdds}
+                              {formatOdds(pick.bestOdds)}
                             </span>
                           </div>
                         </div>
@@ -1812,7 +1806,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-full`}>
                             <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>
-                              {pick.bestOdds}
+                              {formatOdds(pick.bestOdds)}
                             </span>
                           </div>
                         </div>

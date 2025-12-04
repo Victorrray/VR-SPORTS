@@ -2,6 +2,7 @@ import { X, DollarSign, TrendingUp, Check, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useBankroll } from '../../contexts/BankrollContext';
+import { formatOdds as convertOdds } from '../../utils/oddsConverter';
 
 interface BetSlipProps {
   isOpen: boolean;
@@ -18,8 +19,11 @@ interface BetSlipProps {
 }
 
 export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
-  const { colorMode } = useTheme();
+  const { colorMode, oddsFormat } = useTheme();
   const isLight = colorMode === 'light';
+  
+  // Format odds based on user's selected format
+  const formatOdds = (odds: string | number): string => convertOdds(odds, oddsFormat);
   const { currentBankroll, kellyFraction: globalKellyFraction } = useBankroll();
   const [betAmount, setBetAmount] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,13 +178,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                 </div>
                 <div className={`px-4 py-2 ${isLight ? 'bg-purple-100 border-purple-300' : 'bg-purple-500/20 border-purple-400/30'} border rounded-xl`}>
                   <span className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-lg`}>
-                    {(() => {
-                      const odds = String(betData.odds || '0');
-                      if (odds.startsWith('+') || odds.startsWith('-') || odds === '--') return odds;
-                      const num = parseInt(odds);
-                      if (isNaN(num)) return odds || '--';
-                      return num > 0 ? `+${num}` : String(num);
-                    })()}
+                    {formatOdds(betData.odds || 0)}
                   </span>
                 </div>
               </div>
