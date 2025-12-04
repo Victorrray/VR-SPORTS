@@ -217,6 +217,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         });
       });
       
+      // Log player props summary
+      console.log(`🏈 Player props found: ${playerPropsMap.size} unique props`);
+      if (playerPropsMap.size > 0) {
+        const firstProp = playerPropsMap.values().next().value;
+        console.log(`🏈 Sample prop books count: ${firstProp?.books?.length}, books:`, firstProp?.books?.map((b: any) => b.name));
+      }
+      
       // Convert player props map to picks
       playerPropsMap.forEach((propData, pickKey) => {
         if (propData.books.length === 0) return;
