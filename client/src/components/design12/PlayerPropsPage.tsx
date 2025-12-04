@@ -33,6 +33,48 @@ function generateDateOptions() {
   return options;
 }
 
+// Helper function to calculate average odds from books array
+const calculateAverageOdds = (books: any[]): string => {
+  if (!books || books.length === 0) return '--';
+  const numericOdds = books
+    .map(b => parseInt(b.odds, 10))
+    .filter(o => !isNaN(o));
+  if (numericOdds.length === 0) return '--';
+  const avg = Math.round(numericOdds.reduce((sum, o) => sum + o, 0) / numericOdds.length);
+  return avg > 0 ? `+${avg}` : String(avg);
+};
+
+// Helper function to calculate devig (no-vig/fair) odds
+const calculateDevigOdds = (books: any[]): string => {
+  if (!books || books.length < 2) return '--';
+  
+  const oddsPairs = books
+    .filter(b => b.odds && b.team2Odds && b.odds !== '--' && b.team2Odds !== '--')
+    .map(b => ({
+      odds1: parseInt(b.odds, 10),
+      odds2: parseInt(b.team2Odds, 10)
+    }))
+    .filter(p => !isNaN(p.odds1) && !isNaN(p.odds2));
+  
+  if (oddsPairs.length === 0) return '--';
+  
+  const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
+  const toAmerican = (prob: number) => prob >= 0.5 ? Math.round(-100 * prob / (1 - prob)) : Math.round(100 * (1 - prob) / prob);
+  
+  let totalProb1 = 0, totalProb2 = 0;
+  oddsPairs.forEach(p => {
+    totalProb1 += toProb(p.odds1);
+    totalProb2 += toProb(p.odds2);
+  });
+  
+  const avgProb1 = totalProb1 / oddsPairs.length;
+  const avgProb2 = totalProb2 / oddsPairs.length;
+  const totalProb = avgProb1 + avgProb2;
+  const fairProb1 = avgProb1 / totalProb;
+  const fairOdds = toAmerican(fairProb1);
+  return fairOdds > 0 ? `+${fairOdds}` : String(fairOdds);
+};
+
 export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
@@ -1294,7 +1336,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              --
+                              {calculateAverageOdds(pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1306,7 +1348,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              --
+                              {calculateDevigOdds(pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1395,7 +1437,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              --
+                              {calculateAverageOdds(pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1407,7 +1449,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              --
+                              {calculateDevigOdds(pick.books)}
                             </span>
                           </div>
                         </div>

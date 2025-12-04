@@ -47,6 +47,64 @@ const formatOdds = (odds: any): string => {
   return oddsNum > 0 ? `+${oddsNum}` : String(oddsNum);
 };
 
+// Helper function to calculate average odds from books array
+const calculateAverageOdds = (books: any[]): string => {
+  if (!books || books.length === 0) return '--';
+  const numericOdds = books
+    .map(b => parseInt(b.odds, 10))
+    .filter(o => !isNaN(o));
+  if (numericOdds.length === 0) return '--';
+  const avg = Math.round(numericOdds.reduce((sum, o) => sum + o, 0) / numericOdds.length);
+  return avg > 0 ? `+${avg}` : String(avg);
+};
+
+// Helper function to calculate devig (no-vig/fair) odds
+// Uses the multiplicative method to remove vig
+const calculateDevigOdds = (books: any[]): string => {
+  if (!books || books.length < 2) return '--';
+  
+  // Get all odds pairs (team1 and team2)
+  const oddsPairs = books
+    .filter(b => b.odds && b.team2Odds && b.odds !== '--' && b.team2Odds !== '--')
+    .map(b => ({
+      odds1: parseInt(b.odds, 10),
+      odds2: parseInt(b.team2Odds, 10)
+    }))
+    .filter(p => !isNaN(p.odds1) && !isNaN(p.odds2));
+  
+  if (oddsPairs.length === 0) return '--';
+  
+  // Convert American odds to implied probability
+  const toProb = (american: number) => {
+    if (american > 0) return 100 / (american + 100);
+    return -american / (-american + 100);
+  };
+  
+  // Convert probability back to American odds
+  const toAmerican = (prob: number) => {
+    if (prob >= 0.5) return Math.round(-100 * prob / (1 - prob));
+    return Math.round(100 * (1 - prob) / prob);
+  };
+  
+  // Calculate average implied probabilities
+  let totalProb1 = 0;
+  let totalProb2 = 0;
+  oddsPairs.forEach(p => {
+    totalProb1 += toProb(p.odds1);
+    totalProb2 += toProb(p.odds2);
+  });
+  const avgProb1 = totalProb1 / oddsPairs.length;
+  const avgProb2 = totalProb2 / oddsPairs.length;
+  
+  // Remove vig by normalizing probabilities to sum to 1
+  const totalProb = avgProb1 + avgProb2;
+  const fairProb1 = avgProb1 / totalProb;
+  
+  // Convert fair probability back to American odds
+  const fairOdds = toAmerican(fairProb1);
+  return fairOdds > 0 ? `+${fairOdds}` : String(fairOdds);
+};
+
 export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
@@ -1566,7 +1624,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              --
+                              {calculateAverageOdds(pick.allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1578,7 +1636,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              --
+                              {calculateDevigOdds(pick.allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1667,7 +1725,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-lg`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 15}` : `${parseInt(pick.bestOdds) + 15}`}
+                              {calculateAverageOdds(pick.allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
@@ -1679,7 +1737,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                           <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-lg`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
-                              {pick.bestOdds.includes('+') ? `+${parseInt(pick.bestOdds) - 8}` : `${parseInt(pick.bestOdds) + 8}`}
+                              {calculateDevigOdds(pick.allBooks || pick.books)}
                             </span>
                           </div>
                         </div>
