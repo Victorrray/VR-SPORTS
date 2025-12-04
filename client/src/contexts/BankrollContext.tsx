@@ -21,6 +21,7 @@ interface BankrollContextType {
   setFlatBetAmount: (amount: string) => void;
   percentageBet: string;
   setPercentageBet: (percentage: string) => void;
+  resetBankroll: () => void;
 }
 
 const BankrollContext = createContext<
@@ -114,6 +115,23 @@ export function BankrollProvider({
     setPercentageBetState(percentage);
   };
 
+  // Reset all bankroll data to defaults
+  const resetBankroll = () => {
+    setCurrentBankrollState(0);
+    setStartingBankrollState(0);
+    setStrategyState('kelly');
+    setKellyFractionState('0.5');
+    setFlatBetAmountState('50');
+    setPercentageBetState('2');
+    // Clear localStorage
+    localStorage.removeItem('vr_bankroll_current');
+    localStorage.removeItem('vr_bankroll_starting');
+    localStorage.removeItem('vr_bankroll_strategy');
+    localStorage.removeItem('vr_bankroll_kelly');
+    localStorage.removeItem('vr_bankroll_flat');
+    localStorage.removeItem('vr_bankroll_percentage');
+  };
+
   return (
     <BankrollContext.Provider
       value={{
@@ -129,6 +147,7 @@ export function BankrollProvider({
         setFlatBetAmount,
         percentageBet,
         setPercentageBet,
+        resetBankroll,
       }}
     >
       {children}
