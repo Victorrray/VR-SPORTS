@@ -749,107 +749,216 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       };
       
       // Process period markets (like standard markets but with period labels)
+      // For totals/spreads period markets, group by line since API returns multiple lines
       periodMarkets.forEach(marketKey => {
-        const booksArray: any[] = [];
-        let marketPoint: number | null = null;
+        const isTotalsOrSpreads = marketKey.includes('totals_') || marketKey.includes('spreads_');
         
-        bookmakers.forEach((bm: any) => {
-          const bookKey = bm.key || '';
-          const bookName = normalizeBookName(bm.title || bm.key);
+        if (isTotalsOrSpreads) {
+          // Group by line for totals/spreads period markets
+          const lineGroups = new Map<number, any[]>();
           
-          const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
-          if (isStale) return;
-          
-          if (!bm.markets || !Array.isArray(bm.markets)) return;
-          
-          const market = bm.markets.find((m: any) => m.key === marketKey);
-          if (!market || !market.outcomes || market.outcomes.length === 0) return;
-          
-          const outcome0 = market.outcomes[0];
-          const outcome1 = market.outcomes[1];
-          
-          if (outcome0.point !== undefined) {
-            marketPoint = outcome0.point;
-          }
-          
-          const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
-          const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
-          
-          // Normalize and validate odds
-          const normalizedOdds = normalizeAmericanOdds(odds);
-          const normalizedTeam2Odds = team2Odds ? normalizeAmericanOdds(team2Odds) : null;
-          
-          if (normalizedOdds && odds !== undefined && odds !== null) {
-            booksArray.push({
-              name: bookName,
-              key: bookKey,
-              odds: normalizedOdds,
-              team2Odds: normalizedTeam2Odds || '--',
-              ev: '0%',
-              isBest: false
+          bookmakers.forEach((bm: any) => {
+            const bookKey = bm.key || '';
+            const bookName = normalizeBookName(bm.title || bm.key);
+            
+            const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+            const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+            if (isStale) return;
+            
+            if (!bm.markets || !Array.isArray(bm.markets)) return;
+            
+            const market = bm.markets.find((m: any) => m.key === marketKey);
+            if (!market || !market.outcomes || market.outcomes.length === 0) return;
+            
+            // Process all outcomes and group by line
+            market.outcomes.forEach((outcome: any) => {
+              const line = outcome.point;
+              if (line === undefined) return;
+              
+              const isOver = outcome.name === 'Over';
+              const odds = outcome.price !== undefined ? outcome.price : outcome.odds;
+              const normalizedOdds = normalizeAmericanOdds(odds);
+              
+              if (!normalizedOdds) return;
+              
+              if (!lineGroups.has(line)) {
+                lineGroups.set(line, []);
+              }
+              
+              // Find or create book entry for this line
+              const lineBooks = lineGroups.get(line)!;
+              let bookEntry = lineBooks.find(b => b.name === bookName);
+              
+              if (!bookEntry) {
+                bookEntry = {
+                  name: bookName,
+                  key: bookKey,
+                  odds: '--',
+                  team2Odds: '--',
+                  ev: '0%',
+                  isBest: false,
+                  line: line
+                };
+                lineBooks.push(bookEntry);
+              }
+              
+              if (isOver) {
+                bookEntry.odds = normalizedOdds;
+              } else {
+                bookEntry.team2Odds = normalizedOdds;
+              }
             });
+          });
+          
+          // Create a pick for each line
+          lineGroups.forEach((booksArray, line) => {
+            // Filter to only books that have Over odds
+            const validBooks = booksArray.filter(b => b.odds !== '--');
+            if (validBooks.length === 0) return;
+            
+            const bestBookData = validBooks.reduce((best, book) => {
+              const bestOdds = parseInt(best.odds, 10);
+              const bookOdds = parseInt(book.odds, 10);
+              return bookOdds > bestOdds ? book : best;
+            }, validBooks[0]);
+            
+            const bestBook = bestBookData.name;
+            const bestOdds = bestBookData.odds;
+            const hasEnoughData = validBooks.length >= 4;
+            let ev = '--';
+            
+            if (hasEnoughData) {
+              const oddsValues = validBooks.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
+              const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
+              const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
+              const avgProb = toProb(avgOdds);
+              const bestProb = toProb(parseInt(bestOdds, 10));
+              const evValue = ((avgProb - bestProb) / bestProb) * 100;
+              ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+            }
+            
+            const periodLabel = getPeriodLabel(marketKey);
+            let pickDescription = '';
+            
+            if (marketKey.includes('spreads_')) {
+              const pointStr = line > 0 ? `+${line}` : `${line}`;
+              pickDescription = `${team1} ${pointStr} ${periodLabel}`;
+            } else if (marketKey.includes('totals_')) {
+              pickDescription = `Over ${line} ${periodLabel}`;
+            }
+            
+            validBooks.forEach(b => { b.isBest = b.name === bestBook; });
+            
+            allPicks.push({
+              id: `${game.id || gameIdx + 1}-${marketKey}-${line}`,
+              ev,
+              sport: getSportLabel((game.sport_key || game.sport_title || 'Unknown').toLowerCase()),
+              game: gameMatchup,
+              team1,
+              team2,
+              pick: pickDescription,
+              bestOdds,
+              bestBook,
+              avgOdds: bestOdds,
+              isHot: false,
+              books: validBooks,
+              allBooks: validBooks,
+              marketKey,
+              line: line,
+              bookCount: validBooks.length,
+              hasEnoughData,
+              gameTime: game.commence_time || game.gameTime || undefined,
+              commenceTime: game.commence_time || game.gameTime || undefined
+            });
+          });
+        } else {
+          // H2H period markets - no line grouping needed
+          const booksArray: any[] = [];
+          
+          bookmakers.forEach((bm: any) => {
+            const bookKey = bm.key || '';
+            const bookName = normalizeBookName(bm.title || bm.key);
+            
+            const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+            const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+            if (isStale) return;
+            
+            if (!bm.markets || !Array.isArray(bm.markets)) return;
+            
+            const market = bm.markets.find((m: any) => m.key === marketKey);
+            if (!market || !market.outcomes || market.outcomes.length === 0) return;
+            
+            const outcome0 = market.outcomes[0];
+            const outcome1 = market.outcomes[1];
+            
+            const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
+            const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
+            
+            const normalizedOdds = normalizeAmericanOdds(odds);
+            const normalizedTeam2Odds = team2Odds ? normalizeAmericanOdds(team2Odds) : null;
+            
+            if (normalizedOdds && odds !== undefined && odds !== null) {
+              booksArray.push({
+                name: bookName,
+                key: bookKey,
+                odds: normalizedOdds,
+                team2Odds: normalizedTeam2Odds || '--',
+                ev: '0%',
+                isBest: false
+              });
+            }
+          });
+          
+          if (booksArray.length === 0) return;
+          
+          const bestBookData = booksArray.reduce((best, book) => {
+            const bestOdds = parseInt(best.odds, 10);
+            const bookOdds = parseInt(book.odds, 10);
+            return bookOdds > bestOdds ? book : best;
+          }, booksArray[0]);
+          
+          const bestBook = bestBookData.name;
+          const bestOdds = bestBookData.odds;
+          const hasEnoughData = booksArray.length >= 4;
+          let ev = '--';
+          
+          if (hasEnoughData) {
+            const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
+            const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
+            const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
+            const avgProb = toProb(avgOdds);
+            const bestProb = toProb(parseInt(bestOdds, 10));
+            const evValue = ((avgProb - bestProb) / bestProb) * 100;
+            ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
           }
-        });
-        
-        if (booksArray.length === 0) return;
-        
-        const bestBookData = booksArray.reduce((best, book) => {
-          const bestOdds = parseInt(best.odds, 10);
-          const bookOdds = parseInt(book.odds, 10);
-          return bookOdds > bestOdds ? book : best;
-        }, booksArray[0]);
-        
-        const bestBook = bestBookData.name;
-        const bestOdds = bestBookData.odds;
-        const hasEnoughData = booksArray.length >= 4;
-        let ev = '--';
-        
-        if (hasEnoughData) {
-          const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-          const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
-          const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-          const avgProb = toProb(avgOdds);
-          const bestProb = toProb(parseInt(bestOdds, 10));
-          const evValue = ((avgProb - bestProb) / bestProb) * 100;
-          ev = `${(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+          
+          const periodLabel = getPeriodLabel(marketKey);
+          const pickDescription = `${team1} ML ${periodLabel}`;
+          
+          booksArray.forEach(b => { b.isBest = b.name === bestBook; });
+          
+          allPicks.push({
+            id: `${game.id || gameIdx + 1}-${marketKey}`,
+            ev,
+            sport: getSportLabel((game.sport_key || game.sport_title || 'Unknown').toLowerCase()),
+            game: gameMatchup,
+            team1,
+            team2,
+            pick: pickDescription,
+            bestOdds,
+            bestBook,
+            avgOdds: bestOdds,
+            isHot: false,
+            books: booksArray,
+            allBooks: booksArray,
+            marketKey,
+            line: null,
+            bookCount: booksArray.length,
+            hasEnoughData,
+            gameTime: game.commence_time || game.gameTime || undefined,
+            commenceTime: game.commence_time || game.gameTime || undefined
+          });
         }
-        
-        const periodLabel = getPeriodLabel(marketKey);
-        let pickDescription = '';
-        
-        if (marketKey.startsWith('h2h_')) {
-          pickDescription = `${team1} ML ${periodLabel}`;
-        } else if (marketKey.startsWith('spreads_')) {
-          const pointStr = marketPoint !== null ? (marketPoint > 0 ? `+${marketPoint}` : `${marketPoint}`) : '';
-          pickDescription = `${team1} ${pointStr} ${periodLabel}`;
-        } else if (marketKey.startsWith('totals_')) {
-          pickDescription = marketPoint !== null ? `Over ${marketPoint} ${periodLabel}` : `Over ${periodLabel}`;
-        }
-        
-        booksArray.forEach(b => { b.isBest = b.name === bestBook; });
-        
-        allPicks.push({
-          id: `${game.id || gameIdx + 1}-${marketKey}`,
-          ev,
-          sport: getSportLabel((game.sport_key || game.sport_title || 'Unknown').toLowerCase()),
-          game: gameMatchup,
-          team1,
-          team2,
-          pick: pickDescription,
-          bestOdds,
-          bestBook,
-          avgOdds: bestOdds,
-          isHot: false,
-          books: booksArray,
-          allBooks: booksArray,
-          marketKey,
-          line: marketPoint,
-          bookCount: booksArray.length,
-          hasEnoughData,
-          gameTime: game.commence_time || game.gameTime || undefined,
-          commenceTime: game.commence_time || game.gameTime || undefined
-        });
       });
       
       // Process alternate period markets (like alternate markets but with period labels)
