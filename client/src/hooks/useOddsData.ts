@@ -442,6 +442,16 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (!hasOverBestOdds && !hasUnderBestOdds) {
             return; // Skip - another book has better odds
           }
+          
+          // If filtered book only has best odds for one side, we must use that side
+          // This will be checked again after EV calculation
+          if (hasOverBestOdds && !hasUnderBestOdds) {
+            // Force Over - filtered book only has best Over odds
+            (propData as any).forceSide = 'Over';
+          } else if (hasUnderBestOdds && !hasOverBestOdds) {
+            // Force Under - filtered book only has best Under odds
+            (propData as any).forceSide = 'Under';
+          }
         }
         
         // Use filtered books if filter is applied, otherwise use all books
@@ -486,6 +496,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const bestOverBookIsDFS = dfsAppKeys.includes(bestOverBook?.key?.toLowerCase());
         const bestUnderBookIsDFS = bestUnderBook ? dfsAppKeys.includes(bestUnderBook?.key?.toLowerCase()) : false;
         
+        // Check if we have a forced side from the filter logic
+        const forcedSide = (propData as any).forceSide;
+        
         // If Under would be chosen but the best Under book is a DFS app (which doesn't offer Under), use Over instead
         let isOverBetter = overEV >= underEV || !hasEnoughUnderData;
         
@@ -494,6 +507,17 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         if (!isOverBetter && bestUnderBookIsDFS) {
           console.log(`⚠️ Forcing Over for ${propData.playerName}: Under was better EV but best Under book is DFS app`);
           isOverBetter = true;
+        }
+        
+        // If user has a filter and the filtered book only has best odds for one side,
+        // we MUST use that side. If EV says otherwise, skip this pick.
+        if (forcedSide) {
+          const evWantsSide = isOverBetter ? 'Over' : 'Under';
+          if (evWantsSide !== forcedSide) {
+            // EV calculation wants a different side than what the filtered book has best odds for
+            // Skip this pick - the filtered book doesn't have the best odds for the better EV side
+            return;
+          }
         }
         
         const pickSide = isOverBetter ? 'Over' : 'Under';
