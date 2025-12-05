@@ -1889,7 +1889,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-2`}>
                             Average Odds
                           </div>
-                          <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-lg`}>
+                          <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
                               {calculateAverageOdds(pick.allBooks || pick.books)}
                             </span>
@@ -1901,7 +1901,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-2`}>
                             DeVig Odds
                           </div>
-                          <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-lg`}>
+                          <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
                             <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
                               {calculateDevigOdds(pick.allBooks || pick.books)}
                             </span>
