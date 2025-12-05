@@ -357,14 +357,24 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           underAvgProb = underProbs.reduce((sum, p) => sum + p, 0) / underProbs.length;
         }
         
-        // Find best odds for each side
-        const bestOverBook = booksForMainCard.reduce((best: any, book: any) => {
+        // Find best odds for each side - only consider books with valid odds
+        const booksWithValidOverOdds = booksForMainCard.filter((b: any) => {
+          const odds = parseInt(b.overOdds, 10);
+          return !isNaN(odds) && b.overOdds && b.overOdds !== '--';
+        });
+        
+        if (booksWithValidOverOdds.length === 0) return; // Skip if no valid odds
+        
+        const bestOverBook = booksWithValidOverOdds.reduce((best: any, book: any) => {
           const bestOddsNum = parseInt(best.overOdds, 10);
           const bookOddsNum = parseInt(book.overOdds, 10);
           return bookOddsNum > bestOddsNum ? book : best;
-        }, booksForMainCard[0]);
+        }, booksWithValidOverOdds[0]);
         
-        const booksWithUnder = booksForMainCard.filter((b: any) => b.underOdds && b.underOdds !== '--');
+        const booksWithUnder = booksForMainCard.filter((b: any) => {
+          const odds = parseInt(b.underOdds, 10);
+          return !isNaN(odds) && b.underOdds && b.underOdds !== '--';
+        });
         const bestUnderBook = booksWithUnder.length > 0 
           ? booksWithUnder.reduce((best: any, book: any) => {
               const bestOddsNum = parseInt(best.underOdds, 10);
@@ -415,7 +425,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         let ev = '--';
         if (hasEnoughData && bestEV > 0) {
-          ev = `${Math.abs(Math.round(bestEV * 100) / 100).toFixed(2)}%`;
+          // Cap EV at 50% - anything higher is almost certainly bad data or calculation error
+          const cappedEV = Math.min(50, Math.abs(bestEV));
+          ev = `${Math.round(cappedEV * 100) / 100}%`;
         }
         
         const marketName = formatMarketName(propData.marketKey);

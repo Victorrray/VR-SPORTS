@@ -82,63 +82,88 @@ export function useRecommendedPicks(options = {}) {
           
           if (!game.bookmakers || game.bookmakers.length === 0) return picks;
 
-          // Get best odds from all bookmakers
-          const bestBookmaker = game.bookmakers[0];
-          if (!bestBookmaker.markets || bestBookmaker.markets.length === 0) return picks;
+          // Collect all unique market/outcome combinations across ALL bookmakers
+          // and find the best odds for each
+          const bestOddsMap = new Map(); // key: "marketKey|outcomeName|point" -> { odds, bookmaker, market, outcome }
+          
+          game.bookmakers.forEach((bookmaker) => {
+            if (!bookmaker.markets) return;
+            
+            bookmaker.markets.forEach((market) => {
+              if (!market.outcomes) return;
+              
+              market.outcomes.forEach((outcome) => {
+                const key = `${market.key}|${outcome.name}|${outcome.point || 'null'}`;
+                const existing = bestOddsMap.get(key);
+                
+                // Determine if this is better odds
+                const isBetter = !existing || 
+                  (outcome.price > 0 && existing.odds > 0 && outcome.price > existing.odds) ||
+                  (outcome.price < 0 && existing.odds < 0 && outcome.price > existing.odds) ||
+                  (outcome.price > 0 && existing.odds < 0);
+                
+                if (isBetter) {
+                  bestOddsMap.set(key, {
+                    odds: outcome.price,
+                    bookmaker: bookmaker,
+                    market: market,
+                    outcome: outcome
+                  });
+                }
+              });
+            });
+          });
 
-          // Create picks from available markets
-          bestBookmaker.markets.forEach((market) => {
-            if (!market.outcomes || market.outcomes.length === 0) return;
+          // Now create picks from the best odds we found
+          bestOddsMap.forEach((best, key) => {
+            const { odds, bookmaker, market, outcome } = best;
+            
+            // Calculate real EV based on actual odds
+            const ev = calculateEV(odds, game.bookmakers, market.key, outcome.name, outcome.point);
 
-            market.outcomes.forEach((outcome) => {
-              // Calculate real EV based on actual odds - pass market key, outcome name, and point for proper comparison
-              const ev = calculateEV(outcome.price, game.bookmakers, market.key, outcome.name, outcome.point);
-
-              // Log EV calculation for debugging
-              if (picks.length === 0 && market === bestBookmaker.markets[0]) {
-                console.log(`  EV for ${outcome.name}: ${ev.toFixed(2)}% (threshold: ${minEV}%)`);
-              }
-
-              if (ev >= minEV) {
-                // Format pick description based on market type
-                let pickDescription = outcome.name;
-                if (market.key === 'h2h') {
-                  // Moneyline - add "ML" suffix
-                  pickDescription = `${outcome.name} ML`;
-                } else if (market.key === 'spreads') {
-                  // Spread - add point value
-                  const point = outcome.point;
-                  const pointStr = point > 0 ? `+${point}` : `${point}`;
-                  pickDescription = `${outcome.name} ${pointStr}`;
-                } else if (market.key === 'totals') {
-                  // Totals - Over/Under with point
-                  const point = outcome.point;
+            if (ev >= minEV) {
+              // Format pick description based on market type
+              let pickDescription = outcome.name;
+              if (market.key === 'h2h') {
+                pickDescription = `${outcome.name} ML`;
+              } else if (market.key === 'spreads') {
+                const point = outcome.point;
+                const pointStr = point > 0 ? `+${point}` : `${point}`;
+                pickDescription = `${outcome.name} ${pointStr}`;
+              } else if (market.key === 'totals') {
+                const point = outcome.point;
+                pickDescription = `${outcome.name} ${point}`;
+              } else if (market.key.includes('player_') || market.key.includes('alternate')) {
+                // Player props - include point value
+                const point = outcome.point;
+                if (point !== null && point !== undefined) {
                   pickDescription = `${outcome.name} ${point}`;
                 }
-
-                picks.push({
-                  id: `${game.id}-${market.key}-${outcome.name}`,
-                  teams: `${game.away_team} @ ${game.home_team}`,
-                  time: new Date(game.commence_time).toLocaleString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZoneName: 'short',
-                  }),
-                  pick: pickDescription,
-                  odds: outcome.price,
-                  sportsbook: normalizeBookName(bestBookmaker.title || bestBookmaker.key),
-                  ev: `${ev.toFixed(2)}%`,
-                  sport: getSportLabel(game.sport_key),
-                  status: new Date(game.commence_time) <= new Date() ? 'live' : 'active',
-                  confidence: ev > 10 ? 'High' : ev > 7 ? 'Medium' : 'Low',
-                  bookmakers: game.bookmakers, // Include all bookmakers for odds comparison
-                  marketKey: market.key, // Include market type for reference
-                });
               }
-            });
+
+              picks.push({
+                id: `${game.id}-${market.key}-${outcome.name}-${outcome.point || ''}`,
+                teams: `${game.away_team} @ ${game.home_team}`,
+                time: new Date(game.commence_time).toLocaleString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZoneName: 'short',
+                }),
+                pick: pickDescription,
+                odds: odds,
+                sportsbook: normalizeBookName(bookmaker.title || bookmaker.key),
+                ev: `${ev.toFixed(2)}%`,
+                sport: getSportLabel(game.sport_key),
+                status: new Date(game.commence_time) <= new Date() ? 'live' : 'active',
+                confidence: ev > 10 ? 'High' : ev > 7 ? 'Medium' : 'Low',
+                bookmakers: game.bookmakers,
+                marketKey: market.key,
+                point: outcome.point,
+              });
+            }
           });
 
           return picks;
