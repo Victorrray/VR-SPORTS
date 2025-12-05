@@ -1215,6 +1215,132 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 </>
               )}
 
+              {/* Sportsbooks Filter */}
+              <div className="relative">
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                  Sportsbooks
+                </label>
+                <button
+                  onClick={() => setSportsbooksExpanded(!sportsbooksExpanded)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                    isLight ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span>
+                    {selectedSportsbooks.length === 0 
+                      ? 'All Sportsbooks' 
+                      : selectedSportsbooks.length === 1 
+                        ? sportsbooksByTier.flatMap(t => t.books).find(b => b.id === selectedSportsbooks[0])?.name
+                        : `${selectedSportsbooks.length} selected`
+                    }
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sportsbooksExpanded ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {/* Desktop Inline Dropdown */}
+                {sportsbooksExpanded && (
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-80 overflow-y-auto`}>
+                    {sportsbooksByTier
+                      .flatMap(tierGroup => tierGroup.books)
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((book) => (
+                        <button
+                          key={book.id}
+                          onClick={() => toggleSportsbookFilter(book.id)}
+                          className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                            selectedSportsbooks.includes(book.id)
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          <span>{book.name}</span>
+                          {selectedSportsbooks.includes(book.id) && (
+                            <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
+                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sportsbooks Drawer - Mobile Only */}
+              {sportsbooksExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${sportsbooksClosing ? 'opacity-0' : 'opacity-100'}`}
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    onClick={closeSportsbooksDrawer}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${sportsbooksClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sportsbooks</h3>
+                        <button
+                          onClick={closeSportsbooksDrawer}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options - Grouped by Tier */}
+                    <div className="overflow-y-auto max-h-[calc(70vh-80px)]">
+                      {sportsbooksByTier
+                        .filter(tierGroup => {
+                          // Hide DFS & Pick'em category when in straight bets mode
+                          if (selectedBetType === 'straight' && tierGroup.tier.includes('DFS')) {
+                            return false;
+                          }
+                          return true;
+                        })
+                        .map((tierGroup, tierIndex) => (
+                        <div key={tierIndex}>
+                          {/* Tier Header */}
+                          <div className={`px-6 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider`}>
+                            {tierGroup.tier}
+                          </div>
+                          {/* Sportsbooks in this tier */}
+                          {tierGroup.books.map((book) => (
+                            <button
+                              key={book.id}
+                              onClick={() => toggleSportsbookFilter(book.id)}
+                              className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                                selectedSportsbooks.includes(book.id)
+                                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                                  : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                              }`}
+                            >
+                              <span>{book.name}</span>
+                              {selectedSportsbooks.includes(book.id) && (
+                                <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
+                                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Sport Filter */}
               <div className="relative">
                 <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
@@ -1397,132 +1523,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         >
                           {market.name}
                         </button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Sportsbooks Filter */}
-              <div className="relative">
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
-                  Sportsbooks
-                </label>
-                <button
-                  onClick={() => setSportsbooksExpanded(!sportsbooksExpanded)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                    isLight ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span>
-                    {selectedSportsbooks.length === 0 
-                      ? 'All Sportsbooks' 
-                      : selectedSportsbooks.length === 1 
-                        ? sportsbooksByTier.flatMap(t => t.books).find(b => b.id === selectedSportsbooks[0])?.name
-                        : `${selectedSportsbooks.length} selected`
-                    }
-                  </span>
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sportsbooksExpanded ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {/* Desktop Inline Dropdown */}
-                {sportsbooksExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-80 overflow-y-auto`}>
-                    {sportsbooksByTier
-                      .flatMap(tierGroup => tierGroup.books)
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map((book) => (
-                        <button
-                          key={book.id}
-                          onClick={() => toggleSportsbookFilter(book.id)}
-                          className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
-                            selectedSportsbooks.includes(book.id)
-                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
-                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
-                          }`}
-                        >
-                          <span>{book.name}</span>
-                          {selectedSportsbooks.includes(book.id) && (
-                            <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
-                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Sportsbooks Drawer - Mobile Only */}
-              {sportsbooksExpanded && (
-                <>
-                  {/* Backdrop */}
-                  <div 
-                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${sportsbooksClosing ? 'opacity-0' : 'opacity-100'}`}
-                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
-                    onClick={closeSportsbooksDrawer}
-                  />
-                  
-                  {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${sportsbooksClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
-                    {/* Drag Handle */}
-                    <div className="flex justify-center pt-3 pb-2">
-                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
-                    </div>
-                    
-                    {/* Header */}
-                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
-                      <div className="flex items-center justify-between">
-                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sportsbooks</h3>
-                        <button
-                          onClick={closeSportsbooksDrawer}
-                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
-                        >
-                          <span className="text-lg">✕</span>
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Options - Grouped by Tier */}
-                    <div className="overflow-y-auto max-h-[calc(70vh-80px)]">
-                      {sportsbooksByTier
-                        .filter(tierGroup => {
-                          // Hide DFS & Pick'em category when in straight bets mode
-                          if (selectedBetType === 'straight' && tierGroup.tier.includes('DFS')) {
-                            return false;
-                          }
-                          return true;
-                        })
-                        .map((tierGroup, tierIndex) => (
-                        <div key={tierIndex}>
-                          {/* Tier Header */}
-                          <div className={`px-6 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider`}>
-                            {tierGroup.tier}
-                          </div>
-                          {/* Sportsbooks in this tier */}
-                          {tierGroup.books.map((book) => (
-                            <button
-                              key={book.id}
-                              onClick={() => toggleSportsbookFilter(book.id)}
-                              className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
-                                selectedSportsbooks.includes(book.id)
-                                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
-                                  : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
-                              }`}
-                            >
-                              <span>{book.name}</span>
-                              {selectedSportsbooks.includes(book.id) && (
-                                <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
-                                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                </div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
                       ))}
                     </div>
                   </div>
