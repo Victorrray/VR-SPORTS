@@ -370,31 +370,96 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           underAvgProb = underProbs.reduce((sum, p) => sum + p, 0) / underProbs.length;
         }
         
-        // Find best odds for each side - only consider books with valid odds
-        const booksWithValidOverOdds = booksForMainCard.filter((b: any) => {
+        // Find best odds for each side across ALL books at consensus line
+        const allBooksWithValidOverOdds = booksAtConsensusLine.filter((b: any) => {
           const odds = parseInt(b.overOdds, 10);
           return !isNaN(odds) && b.overOdds && b.overOdds !== '--';
         });
         
-        if (booksWithValidOverOdds.length === 0) return; // Skip if no valid odds
+        if (allBooksWithValidOverOdds.length === 0) return; // Skip if no valid odds
         
-        const bestOverBook = booksWithValidOverOdds.reduce((best: any, book: any) => {
+        // Find the OVERALL best Over book (across all books)
+        const overallBestOverBook = allBooksWithValidOverOdds.reduce((best: any, book: any) => {
           const bestOddsNum = parseInt(best.overOdds, 10);
           const bookOddsNum = parseInt(book.overOdds, 10);
           return bookOddsNum > bestOddsNum ? book : best;
-        }, booksWithValidOverOdds[0]);
+        }, allBooksWithValidOverOdds[0]);
         
-        const booksWithUnder = booksForMainCard.filter((b: any) => {
+        const allBooksWithUnder = booksAtConsensusLine.filter((b: any) => {
           const odds = parseInt(b.underOdds, 10);
           return !isNaN(odds) && b.underOdds && b.underOdds !== '--';
         });
-        const bestUnderBook = booksWithUnder.length > 0 
-          ? booksWithUnder.reduce((best: any, book: any) => {
+        const overallBestUnderBook = allBooksWithUnder.length > 0 
+          ? allBooksWithUnder.reduce((best: any, book: any) => {
               const bestOddsNum = parseInt(best.underOdds, 10);
               const bookOddsNum = parseInt(book.underOdds, 10);
               return bookOddsNum > bestOddsNum ? book : best;
-            }, booksWithUnder[0])
+            }, allBooksWithUnder[0])
           : null;
+        
+        // Now find best odds from FILTERED books (if filter is applied)
+        const filteredBooksWithValidOverOdds = booksForMainCard.filter((b: any) => {
+          const odds = parseInt(b.overOdds, 10);
+          return !isNaN(odds) && b.overOdds && b.overOdds !== '--';
+        });
+        
+        const filteredBooksWithUnder = booksForMainCard.filter((b: any) => {
+          const odds = parseInt(b.underOdds, 10);
+          return !isNaN(odds) && b.underOdds && b.underOdds !== '--';
+        });
+        
+        // If user has a filter, check if filtered book has the best odds
+        if (userHasFilter) {
+          // Find best Over from filtered books
+          const bestFilteredOver = filteredBooksWithValidOverOdds.length > 0
+            ? filteredBooksWithValidOverOdds.reduce((best: any, book: any) => {
+                const bestOddsNum = parseInt(best.overOdds, 10);
+                const bookOddsNum = parseInt(book.overOdds, 10);
+                return bookOddsNum > bestOddsNum ? book : best;
+              }, filteredBooksWithValidOverOdds[0])
+            : null;
+          
+          // Find best Under from filtered books
+          const bestFilteredUnder = filteredBooksWithUnder.length > 0
+            ? filteredBooksWithUnder.reduce((best: any, book: any) => {
+                const bestOddsNum = parseInt(best.underOdds, 10);
+                const bookOddsNum = parseInt(book.underOdds, 10);
+                return bookOddsNum > bestOddsNum ? book : best;
+              }, filteredBooksWithUnder[0])
+            : null;
+          
+          // Check if filtered book has the best odds for EITHER side
+          const overallBestOverOdds = parseInt(overallBestOverBook.overOdds, 10);
+          const overallBestUnderOdds = overallBestUnderBook ? parseInt(overallBestUnderBook.underOdds, 10) : -9999;
+          
+          const filteredBestOverOdds = bestFilteredOver ? parseInt(bestFilteredOver.overOdds, 10) : -9999;
+          const filteredBestUnderOdds = bestFilteredUnder ? parseInt(bestFilteredUnder.underOdds, 10) : -9999;
+          
+          const hasOverBestOdds = filteredBestOverOdds >= overallBestOverOdds;
+          const hasUnderBestOdds = filteredBestUnderOdds >= overallBestUnderOdds;
+          
+          // Skip if filtered book doesn't have the best odds for either side
+          if (!hasOverBestOdds && !hasUnderBestOdds) {
+            return; // Skip - another book has better odds
+          }
+        }
+        
+        // Use filtered books if filter is applied, otherwise use all books
+        const bestOverBook = filteredBooksWithValidOverOdds.length > 0
+          ? filteredBooksWithValidOverOdds.reduce((best: any, book: any) => {
+              const bestOddsNum = parseInt(best.overOdds, 10);
+              const bookOddsNum = parseInt(book.overOdds, 10);
+              return bookOddsNum > bestOddsNum ? book : best;
+            }, filteredBooksWithValidOverOdds[0])
+          : overallBestOverBook;
+        
+        const bestUnderBook = filteredBooksWithUnder.length > 0
+          ? filteredBooksWithUnder.reduce((best: any, book: any) => {
+              const bestOddsNum = parseInt(best.underOdds, 10);
+              const bookOddsNum = parseInt(book.underOdds, 10);
+              return bookOddsNum > bestOddsNum ? book : best;
+            }, filteredBooksWithUnder[0])
+          : overallBestUnderBook;
         
         // Calculate EV for both sides
         let overEV = 0;
