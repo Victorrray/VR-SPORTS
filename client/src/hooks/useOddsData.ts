@@ -652,25 +652,19 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
         const hasFilteredBooks = filteredBooksArray.length > 0;
         
-        // If user filtered for specific books, check if any of them have the best odds
-        // If not, we should still show the pick but indicate the filtered book's odds
-        if (userHasFilter && hasFilteredBooks) {
+        // If user filtered for specific books, show picks where the filtered book has the market
+        // Use the filtered book's odds for display
+        if (userHasFilter) {
+          if (!hasFilteredBooks) {
+            return; // Skip - the filtered book doesn't have this market at all
+          }
+          
           // Find the best book among filtered books
           const bestFilteredBook = filteredBooksArray.reduce((best: any, book: any) => {
             const bestOddsNum = parseInt(best.odds, 10);
             const bookOddsNum = parseInt(book.odds, 10);
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooksArray[0]);
-          
-          // Check if the filtered book has the actual best odds
-          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
-          const overallBestOdds = parseInt(bestOdds, 10);
-          
-          // If filtered book doesn't have the best odds, skip this pick
-          // (user is filtering for a specific book but that book doesn't have competitive odds)
-          if (filteredOdds < overallBestOdds) {
-            return; // Skip - the filtered book doesn't have the best line
-          }
           
           // Use the filtered book as the best book for display
           bestOdds = bestFilteredBook.odds;
@@ -839,14 +833,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooks[0]);
           
-          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
-          const overallBestOdds = parseInt(bestOdds, 10);
-          
-          // Skip if filtered book doesn't have the best odds
-          if (filteredOdds < overallBestOdds) {
-            return;
-          }
-          
+          // Use the filtered book's odds for display
           bestBook = bestFilteredBook.name;
           bestOdds = bestFilteredBook.odds;
         }
@@ -1014,14 +1001,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
                 return bookOddsNum > bestOddsNum ? book : best;
               }, filteredBooks[0]);
               
-              const filteredOdds = parseInt(bestFilteredBook.odds, 10);
-              const overallBestOdds = parseInt(bestOdds, 10);
-              
-              // Skip if filtered book doesn't have the best odds
-              if (filteredOdds < overallBestOdds) {
-                return;
-              }
-              
+              // Use the filtered book's odds for display
               bestBook = bestFilteredBook.name;
               bestOdds = bestFilteredBook.odds;
             }
@@ -1147,14 +1127,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               return bookOddsNum > bestOddsNum ? book : best;
             }, filteredBooks[0]);
             
-            const filteredOdds = parseInt(bestFilteredBook.odds, 10);
-            const overallBestOdds = parseInt(bestOdds, 10);
-            
-            // Skip if filtered book doesn't have the best odds
-            if (filteredOdds < overallBestOdds) {
-              return;
-            }
-            
+            // Use the filtered book's odds for display
             bestBook = bestFilteredBook.name;
             bestOdds = bestFilteredBook.odds;
           }
@@ -1378,14 +1351,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooks[0]);
           
-          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
-          const overallBestOdds = parseInt(bestOdds, 10);
-          
-          // Skip if filtered book doesn't have the best odds
-          if (filteredOdds < overallBestOdds) {
-            return;
-          }
-          
+          // Use the filtered book's odds for display
           bestBook = bestFilteredBook.name;
           bestOdds = bestFilteredBook.odds;
         }
