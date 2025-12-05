@@ -652,8 +652,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
         const hasFilteredBooks = filteredBooksArray.length > 0;
         
-        // If user filtered for specific books, show picks where the filtered book has the market
-        // Use the filtered book's odds for display
+        // If user filtered for specific books, only show picks where filtered book has the BEST odds
         if (userHasFilter) {
           if (!hasFilteredBooks) {
             return; // Skip - the filtered book doesn't have this market at all
@@ -665,6 +664,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const bookOddsNum = parseInt(book.odds, 10);
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooksArray[0]);
+          
+          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+          const overallBestOdds = parseInt(bestOdds, 10);
+          
+          // Skip if filtered book doesn't have the best odds
+          if (filteredOdds < overallBestOdds) {
+            return; // Skip - another book has better odds
+          }
           
           // Use the filtered book as the best book for display
           bestOdds = bestFilteredBook.odds;
@@ -833,7 +840,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooks[0]);
           
-          // Use the filtered book's odds for display
+          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+          const overallBestOdds = parseInt(bestOdds, 10);
+          
+          // Skip if filtered book doesn't have the best odds
+          if (filteredOdds < overallBestOdds) {
+            return;
+          }
+          
           bestBook = bestFilteredBook.name;
           bestOdds = bestFilteredBook.odds;
         }
@@ -1001,7 +1015,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
                 return bookOddsNum > bestOddsNum ? book : best;
               }, filteredBooks[0]);
               
-              // Use the filtered book's odds for display
+              const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+              const overallBestOdds = parseInt(bestOdds, 10);
+              
+              // Skip if filtered book doesn't have the best odds
+              if (filteredOdds < overallBestOdds) {
+                return;
+              }
+              
               bestBook = bestFilteredBook.name;
               bestOdds = bestFilteredBook.odds;
             }
@@ -1127,7 +1148,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               return bookOddsNum > bestOddsNum ? book : best;
             }, filteredBooks[0]);
             
-            // Use the filtered book's odds for display
+            const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+            const overallBestOdds = parseInt(bestOdds, 10);
+            
+            // Skip if filtered book doesn't have the best odds
+            if (filteredOdds < overallBestOdds) {
+              return;
+            }
+            
             bestBook = bestFilteredBook.name;
             bestOdds = bestFilteredBook.odds;
           }
@@ -1351,7 +1379,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooks[0]);
           
-          // Use the filtered book's odds for display
+          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+          const overallBestOdds = parseInt(bestOdds, 10);
+          
+          // Skip if filtered book doesn't have the best odds
+          if (filteredOdds < overallBestOdds) {
+            return;
+          }
+          
           bestBook = bestFilteredBook.name;
           bestOdds = bestFilteredBook.odds;
         }
