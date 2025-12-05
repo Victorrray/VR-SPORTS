@@ -264,10 +264,22 @@ export function AccountPage({
                 </div>
               </div>
               
-              <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
-                <Calendar className="w-4 h-4" />
-                <span>Next billing date: {me?.subscription_end_date ? new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
-              </div>
+              {me?.subscription_end_date ? (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Next billing date: {new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+              ) : !me?.has_billing ? (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Lifetime Access — No billing required</span>
+                </div>
+              ) : (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Billing date unavailable</span>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <button 
@@ -302,10 +314,22 @@ export function AccountPage({
                 </div>
               </div>
               
-              <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
-                <Calendar className="w-4 h-4" />
-                <span>Next billing date: {me?.subscription_end_date ? new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
-              </div>
+              {me?.subscription_end_date ? (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Next billing date: {new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+              ) : !me?.has_billing ? (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Lifetime Access — No billing required</span>
+                </div>
+              ) : (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Billing date unavailable</span>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <button 
