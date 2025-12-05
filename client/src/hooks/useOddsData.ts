@@ -630,23 +630,45 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // Skip this market if no books have odds for it
         if (booksArray.length === 0) return;
         
-        // Determine best book
-        const hasFilteredBooks = filteredBooksArray.length > 0;
-        const booksForMainCard = hasFilteredBooks ? filteredBooksArray : booksArray;
+        // ALWAYS find the best odds across ALL books (not just filtered ones)
+        const bestBookDataOverall = booksArray.reduce((best: any, book: any) => {
+          const bestOddsNum = parseInt(best.odds, 10);
+          const bookOddsNum = parseInt(book.odds, 10);
+          // Higher is better for American odds (both positive and negative)
+          return bookOddsNum > bestOddsNum ? book : best;
+        }, booksArray[0]);
         
-        let bestOdds = '-110';
-        let bestBook = 'N/A';
+        let bestOdds = bestBookDataOverall.odds;
+        let bestBook = bestBookDataOverall.name;
         let ev = '0%';
         
-        if (booksForMainCard.length > 0) {
-          const bestBookData = booksForMainCard.reduce((best: any, book: any) => {
+        // Check if user has a filter applied
+        const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
+        const hasFilteredBooks = filteredBooksArray.length > 0;
+        
+        // If user filtered for specific books, check if any of them have the best odds
+        // If not, we should still show the pick but indicate the filtered book's odds
+        if (userHasFilter && hasFilteredBooks) {
+          // Find the best book among filtered books
+          const bestFilteredBook = filteredBooksArray.reduce((best: any, book: any) => {
             const bestOddsNum = parseInt(best.odds, 10);
             const bookOddsNum = parseInt(book.odds, 10);
             return bookOddsNum > bestOddsNum ? book : best;
-          }, booksForMainCard[0]);
+          }, filteredBooksArray[0]);
           
-          bestOdds = bestBookData.odds;
-          bestBook = bestBookData.name;
+          // Check if the filtered book has the actual best odds
+          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+          const overallBestOdds = parseInt(bestOdds, 10);
+          
+          // If filtered book doesn't have the best odds, skip this pick
+          // (user is filtering for a specific book but that book doesn't have competitive odds)
+          if (filteredOdds < overallBestOdds) {
+            return; // Skip - the filtered book doesn't have the best line
+          }
+          
+          // Use the filtered book as the best book for display
+          bestOdds = bestFilteredBook.odds;
+          bestBook = bestFilteredBook.name;
         }
         
         // Calculate EV - require minimum 4 books for meaningful EV calculation
