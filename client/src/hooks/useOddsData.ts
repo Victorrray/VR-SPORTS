@@ -594,16 +594,24 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const market = bm.markets.find((m: any) => m.key === marketKey);
           if (!market || !market.outcomes || market.outcomes.length === 0) return;
           
-          const outcome0 = market.outcomes[0];
-          const outcome1 = market.outcomes[1];
+          // Match outcomes to correct teams (API may return in any order)
+          // team1 = away_team, team2 = home_team
+          let awayOutcome = market.outcomes.find((o: any) => o.name === team1);
+          let homeOutcome = market.outcomes.find((o: any) => o.name === team2);
           
-          // Get the point/line for spreads and totals
-          if ((marketKey === 'spreads' || marketKey === 'totals') && outcome0.point !== undefined) {
-            marketPoint = outcome0.point;
+          // Fallback to index-based if names don't match exactly
+          if (!awayOutcome || !homeOutcome) {
+            awayOutcome = market.outcomes[0];
+            homeOutcome = market.outcomes[1];
           }
           
-          const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
-          const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
+          // Get the point/line for spreads and totals
+          if ((marketKey === 'spreads' || marketKey === 'totals') && awayOutcome?.point !== undefined) {
+            marketPoint = awayOutcome.point;
+          }
+          
+          const odds = awayOutcome?.price !== undefined ? awayOutcome.price : awayOutcome?.odds;
+          const team2Odds = homeOutcome ? (homeOutcome.price !== undefined ? homeOutcome.price : homeOutcome.odds) : null;
           
           // Normalize and validate odds
           const normalizedOdds = normalizeAmericanOdds(odds);
@@ -773,12 +781,19 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           // For BTTS, outcomes are "Yes" and "No"
           // For h2h_3_way, outcomes are team1, team2, and draw
           // For draw_no_bet, outcomes are team1 and team2
-          const outcome0 = market.outcomes[0];
-          const outcome1 = market.outcomes[1];
-          const outcome2 = market.outcomes[2]; // Draw for h2h_3_way
+          // Match outcomes to correct teams (API may return in any order)
+          let awayOutcome = market.outcomes.find((o: any) => o.name === team1);
+          let homeOutcome = market.outcomes.find((o: any) => o.name === team2);
+          const drawOutcome = market.outcomes.find((o: any) => o.name === 'Draw'); // Draw for h2h_3_way
           
-          const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
-          const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
+          // Fallback to index-based if names don't match exactly
+          if (!awayOutcome || !homeOutcome) {
+            awayOutcome = market.outcomes[0];
+            homeOutcome = market.outcomes[1];
+          }
+          
+          const odds = awayOutcome?.price !== undefined ? awayOutcome.price : awayOutcome?.odds;
+          const team2Odds = homeOutcome ? (homeOutcome.price !== undefined ? homeOutcome.price : homeOutcome.odds) : null;
           
           // Normalize and validate odds
           const normalizedOdds = normalizeAmericanOdds(odds);
@@ -790,7 +805,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               key: bookKey,
               odds: normalizedOdds,
               team2Odds: normalizedTeam2Odds || '--',
-              drawOdds: outcome2 ? normalizeAmericanOdds(outcome2.price || outcome2.odds) : null,
+              drawOdds: drawOutcome ? normalizeAmericanOdds(drawOutcome.price || drawOutcome.odds) : null,
               ev: '0%',
               isBest: false
             });
@@ -1077,11 +1092,18 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const market = bm.markets.find((m: any) => m.key === marketKey);
             if (!market || !market.outcomes || market.outcomes.length === 0) return;
             
-            const outcome0 = market.outcomes[0];
-            const outcome1 = market.outcomes[1];
+            // Match outcomes to correct teams (API may return in any order)
+            let awayOutcome = market.outcomes.find((o: any) => o.name === team1);
+            let homeOutcome = market.outcomes.find((o: any) => o.name === team2);
             
-            const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
-            const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
+            // Fallback to index-based if names don't match exactly
+            if (!awayOutcome || !homeOutcome) {
+              awayOutcome = market.outcomes[0];
+              homeOutcome = market.outcomes[1];
+            }
+            
+            const odds = awayOutcome?.price !== undefined ? awayOutcome.price : awayOutcome?.odds;
+            const team2Odds = homeOutcome ? (homeOutcome.price !== undefined ? homeOutcome.price : homeOutcome.odds) : null;
             
             const normalizedOdds = normalizeAmericanOdds(odds);
             const normalizedTeam2Odds = team2Odds ? normalizeAmericanOdds(team2Odds) : null;
@@ -1298,12 +1320,19 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const market = bm.markets.find((m: any) => m.key === marketKey);
           if (!market || !market.outcomes || market.outcomes.length === 0) return;
           
-          const outcome0 = market.outcomes[0];
-          const outcome1 = market.outcomes[1];
-          const outcome2 = market.outcomes[2];
+          // Match outcomes to correct teams (API may return in any order)
+          let awayOutcome = market.outcomes.find((o: any) => o.name === team1);
+          let homeOutcome = market.outcomes.find((o: any) => o.name === team2);
+          const drawOutcome = market.outcomes.find((o: any) => o.name === 'Draw');
           
-          const odds = outcome0.price !== undefined ? outcome0.price : outcome0.odds;
-          const team2Odds = outcome1 ? (outcome1.price !== undefined ? outcome1.price : outcome1.odds) : null;
+          // Fallback to index-based if names don't match exactly
+          if (!awayOutcome || !homeOutcome) {
+            awayOutcome = market.outcomes[0];
+            homeOutcome = market.outcomes[1];
+          }
+          
+          const odds = awayOutcome?.price !== undefined ? awayOutcome.price : awayOutcome?.odds;
+          const team2Odds = homeOutcome ? (homeOutcome.price !== undefined ? homeOutcome.price : homeOutcome.odds) : null;
           
           // Normalize and validate odds
           const normalizedOdds = normalizeAmericanOdds(odds);
@@ -1315,7 +1344,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               key: bookKey,
               odds: normalizedOdds,
               team2Odds: normalizedTeam2Odds || '--',
-              drawOdds: outcome2 ? normalizeAmericanOdds(outcome2.price || outcome2.odds) : null,
+              drawOdds: drawOutcome ? normalizeAmericanOdds(drawOutcome.price || drawOutcome.odds) : null,
               ev: '0%',
               isBest: false
             });
