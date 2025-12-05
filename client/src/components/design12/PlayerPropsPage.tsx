@@ -368,7 +368,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           
           // For DFS apps, also check if the book key starts with the selected ID
           // e.g., "prizepicks" matches "prizepicks", "underdog" matches "underdog"
-          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs', 'sleeper', 'fliff'];
+          // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs', 'sleeper'];
           if (dfsApps.includes(selectedIdLower)) {
             // Check if book name or key contains the DFS app name
             if (bookKey === selectedIdLower || bookNameLower === selectedIdLower) return true;
