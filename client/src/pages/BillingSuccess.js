@@ -33,6 +33,15 @@ const BillingSuccess = () => {
       console.warn('⚠️ Could not clear cache:', e);
     }
     
+    // Track Google Ads conversion
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-17783188669/PURCHASE',
+        'transaction_id': sessionId || ''
+      });
+      console.log('📊 Google Ads conversion tracked');
+    }
+    
     // Trigger plan refresh event so useMe hook refetches
     console.log('📢 Dispatching planUpdated event');
     window.dispatchEvent(new Event('planUpdated'));
@@ -43,7 +52,7 @@ const BillingSuccess = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [sessionId]);
 
   if (loading) {
     return (
