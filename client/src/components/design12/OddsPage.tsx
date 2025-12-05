@@ -1611,8 +1611,18 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           {pick.sport}
                         </span>
                       </div>
-                      {/* Game Matchup */}
-                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.game}</div>
+                      {/* Game Matchup - Stack teams on desktop if too long */}
+                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base`}>
+                        <span className="lg:hidden truncate block">{pick.game}</span>
+                        <span className="hidden lg:block">
+                          {pick.game.includes(' @ ') ? (
+                            <span className="flex flex-col leading-tight">
+                              <span>{pick.game.split(' @ ')[0]}</span>
+                              <span className="text-white/60">@ {pick.game.split(' @ ')[1]}</span>
+                            </span>
+                          ) : pick.game}
+                        </span>
+                      </div>
                       {/* Game Time - From API */}
                       <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
                         <Clock className="w-3 h-3" />
