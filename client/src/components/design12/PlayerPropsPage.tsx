@@ -1211,7 +1211,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           {pick.game.includes(' @ ') ? (
                             <span className="flex flex-col leading-tight">
                               <span>{pick.game.split(' @ ')[0]}</span>
-                              <span className={`${isLight ? 'text-gray-500' : 'text-white/60'}`}>@ {pick.game.split(' @ ')[1]}</span>
+                              <span>@ {pick.game.split(' @ ')[1]}</span>
                             </span>
                           ) : pick.game}
                         </span>

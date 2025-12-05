@@ -1618,7 +1618,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           {pick.game.includes(' @ ') ? (
                             <span className="flex flex-col leading-tight">
                               <span>{pick.game.split(' @ ')[0]}</span>
-                              <span className="text-white/60">@ {pick.game.split(' @ ')[1]}</span>
+                              <span>@ {pick.game.split(' @ ')[1]}</span>
                             </span>
                           ) : pick.game}
                         </span>
