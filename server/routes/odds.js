@@ -191,7 +191,7 @@ router.use((req, res, next) => {
 
 router.get('/', requireUser, checkPlanAccess, async (req, res) => {
   try {
-    const { sports, regions = "us", markets = "h2h,spreads,totals", oddsFormat = "american", date, betType } = req.query;
+    const { sports, regions = "us,us2", markets = "h2h,spreads,totals", oddsFormat = "american", date, betType } = req.query;
     console.log('🔍 /api/odds called with:', { sports, regions, markets, date, betType, userId: req.__userId });
     
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
@@ -788,10 +788,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 try {
                   // Include multiple regions to get all sportsbooks, DFS apps, and exchanges
                   // us: Traditional US sportsbooks
+                  // us2: Additional US books (ReBet, ProphetX, BetOpenly)
                   // us_dfs: PrizePicks, Underdog, DraftKings Pick6, Betr
                   // us_ex: Kalshi (exchange)
                   // au: Dabble AU
-                  const playerPropsRegions = 'us,us_dfs,us_ex,au';
+                  const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
                   const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
                   
                   console.log(`🔍 Fetching player props for event ${event.id} (${event.home_team} vs ${event.away_team})...`);
