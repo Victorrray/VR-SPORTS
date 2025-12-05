@@ -449,22 +449,20 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const uniqueLines: number[] = propData.allLines ? Array.from(propData.allLines) : [consensusLine];
         const hasMultipleLines = uniqueLines.length > 1;
         
-        // For the books list, only show books at the consensus line
-        // DFS apps are already filtered above, traditional books show their line if different
-        const displayBooks = booksAtConsensusLine.map((b: any) => {
-          const isDFS = dfsAppKeys.includes(b.key?.toLowerCase());
-          const isAtConsensus = b.line === consensusLine;
-          // Show line in name only if it differs from consensus (for traditional books)
-          const displayName = (!isDFS && !isAtConsensus) ? `${b.name} (${b.line})` : b.name;
+        // For the books list, ONLY show books at the consensus line
+        // Filter out books with different lines to avoid confusion
+        const booksAtExactConsensus = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
+        
+        const displayBooks = booksAtExactConsensus.map((b: any) => {
           return {
-            name: displayName,
+            name: b.name,
             rawName: b.name,
             line: b.line,
             odds: b.overOdds,
             team2Odds: b.underOdds || '--',
             ev: hasEnoughData ? '0%' : '--',
             isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
-            isAtConsensus
+            isAtConsensus: true
           };
         }).sort((a: any, b: any) => {
           // Best book should always be first
@@ -503,7 +501,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           line: consensusLine,
           allLines: uniqueLines,
           hasMultipleLines,
-          bookCount: booksAtConsensusLine.length,
+          bookCount: booksAtExactConsensus.length,
           hasEnoughData,
           gameTime: game.commence_time || undefined,
           commenceTime: game.commence_time || undefined
