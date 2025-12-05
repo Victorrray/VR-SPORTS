@@ -6,11 +6,18 @@ import { withApiBase } from '../config/api';
  * Hook to fetch recommended picks for the dashboard
  * Gets high EV picks from the odds API
  */
+// Major sportsbooks to show in recommended picks
+const RECOMMENDED_SPORTSBOOKS = [
+  'fanduel', 'draftkings', 'caesars', 'betmgm', 'fanatics',
+  'williamhill_us' // Caesars was formerly William Hill
+];
+
 export function useRecommendedPicks(options = {}) {
   const {
     limit = 4,
     minEV = 5, // Minimum 5% EV
     enabled = true,
+    sportsbooks = RECOMMENDED_SPORTSBOOKS, // Default to major books
   } = options;
 
   const [picks, setPicks] = useState([]);
@@ -86,7 +93,20 @@ export function useRecommendedPicks(options = {}) {
           // and find the best odds for each
           const bestOddsMap = new Map(); // key: "marketKey|outcomeName|point" -> { odds, bookmaker, market, outcome }
           
-          game.bookmakers.forEach((bookmaker) => {
+          // Filter to only include specified sportsbooks
+          const filteredBookmakers = game.bookmakers.filter((bookmaker) => {
+            const bookKey = (bookmaker.key || '').toLowerCase();
+            const bookName = (bookmaker.title || '').toLowerCase();
+            return sportsbooks.some(sb => 
+              bookKey.includes(sb.toLowerCase()) || 
+              bookName.includes(sb.toLowerCase()) ||
+              sb.toLowerCase().includes(bookKey)
+            );
+          });
+          
+          if (filteredBookmakers.length === 0) return picks;
+          
+          filteredBookmakers.forEach((bookmaker) => {
             if (!bookmaker.markets) return;
             
             bookmaker.markets.forEach((market) => {
