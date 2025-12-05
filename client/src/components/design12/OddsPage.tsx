@@ -67,8 +67,13 @@ const calculateAverageOdds = (books: any[]): string => {
   };
   
   const toAmerican = (prob: number) => {
-    if (prob >= 0.5) return Math.round(-100 * prob / (1 - prob));
-    return Math.round(100 * (1 - prob) / prob);
+    // Ensure valid American odds (minimum -100 or +100)
+    if (prob >= 0.5) {
+      const odds = Math.round(-100 * prob / (1 - prob));
+      return Math.min(odds, -100); // Ensure at least -100
+    }
+    const odds = Math.round(100 * (1 - prob) / prob);
+    return Math.max(odds, 100); // Ensure at least +100
   };
   
   // Average the probabilities
@@ -105,8 +110,13 @@ const calculateDevigOdds = (books: any[]): string => {
   
   // Convert probability back to American odds
   const toAmerican = (prob: number) => {
-    if (prob >= 0.5) return Math.round(-100 * prob / (1 - prob));
-    return Math.round(100 * (1 - prob) / prob);
+    // Ensure valid American odds (minimum -100 or +100)
+    if (prob >= 0.5) {
+      const odds = Math.round(-100 * prob / (1 - prob));
+      return Math.min(odds, -100); // Ensure at least -100
+    }
+    const odds = Math.round(100 * (1 - prob) / prob);
+    return Math.max(odds, 100); // Ensure at least +100
   };
   
   // Calculate average implied probabilities

@@ -35,14 +35,29 @@ function generateDateOptions() {
 }
 
 // Helper function to calculate average odds from books array
+// Uses implied probability to properly average odds
 const calculateAverageOdds = (books: any[]): string => {
   if (!books || books.length === 0) return '--';
   const numericOdds = books
     .map(b => parseInt(b.odds, 10))
-    .filter(o => !isNaN(o));
+    .filter(o => !isNaN(o) && (o <= -100 || o >= 100)); // Only valid American odds
   if (numericOdds.length === 0) return '--';
-  const avg = Math.round(numericOdds.reduce((sum, o) => sum + o, 0) / numericOdds.length);
-  return avg > 0 ? `+${avg}` : String(avg);
+  
+  // Convert to implied probability, average, then convert back
+  const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
+  const toAmerican = (prob: number) => {
+    // Ensure valid American odds (minimum -100 or +100)
+    if (prob >= 0.5) {
+      const odds = Math.round(-100 * prob / (1 - prob));
+      return Math.min(odds, -100); // Ensure at least -100
+    }
+    const odds = Math.round(100 * (1 - prob) / prob);
+    return Math.max(odds, 100); // Ensure at least +100
+  };
+  
+  const avgProb = numericOdds.reduce((sum, o) => sum + toProb(o), 0) / numericOdds.length;
+  const avgOdds = toAmerican(avgProb);
+  return avgOdds > 0 ? `+${avgOdds}` : String(avgOdds);
 };
 
 // Helper function to calculate devig (no-vig/fair) odds
@@ -55,12 +70,22 @@ const calculateDevigOdds = (books: any[]): string => {
       odds1: parseInt(b.odds, 10),
       odds2: parseInt(b.team2Odds, 10)
     }))
-    .filter(p => !isNaN(p.odds1) && !isNaN(p.odds2));
+    .filter(p => !isNaN(p.odds1) && !isNaN(p.odds2) && 
+                 (p.odds1 <= -100 || p.odds1 >= 100) && 
+                 (p.odds2 <= -100 || p.odds2 >= 100));
   
   if (oddsPairs.length === 0) return '--';
   
   const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
-  const toAmerican = (prob: number) => prob >= 0.5 ? Math.round(-100 * prob / (1 - prob)) : Math.round(100 * (1 - prob) / prob);
+  const toAmerican = (prob: number) => {
+    // Ensure valid American odds (minimum -100 or +100)
+    if (prob >= 0.5) {
+      const odds = Math.round(-100 * prob / (1 - prob));
+      return Math.min(odds, -100); // Ensure at least -100
+    }
+    const odds = Math.round(100 * (1 - prob) / prob);
+    return Math.max(odds, 100); // Ensure at least +100
+  };
   
   let totalProb1 = 0, totalProb2 = 0;
   oddsPairs.forEach(p => {
