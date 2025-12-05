@@ -72,18 +72,21 @@ const BOOK_WEIGHTS: { [key: string]: number } = {
   
   // Sharp books (high weight - accurate lines, low margins)
   'pinnacle': 3.0,
-  'circa': 2.5,
+  'circa': 3.0,
   'bookmaker': 2.5,
   'bookmaker_us': 2.5,
   'bovada': 2.0,
   'betonline': 2.0,
   'betonlineag': 2.0,
   
-  // Mid-tier books (moderate weight)
+  // Major US sportsbooks (moderate weight)
+  'fanduel': 1.5,
+  'draftkings': 1.5,
+  'caesars': 1.5,
+  'betmgm': 1.5,
   'bet365': 1.5,
   'williamhill': 1.5,
   'williamhill_us': 1.5,
-  'caesars': 1.5,
   'betrivers': 1.2,
   'unibet': 1.2,
   'unibet_us': 1.2,
