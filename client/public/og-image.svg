@@ -63,7 +63,7 @@
     <!-- Feature 3 -->
     <circle cx="0" cy="120" r="6" fill="#8b5cf6"/>
     <text x="20" y="128" font-family="Arial, sans-serif" font-size="18" fill="#e5e7eb">
-      Track line movement & maximize ROI
+      Track line movement and maximize ROI
     </text>
   </g>
   
