@@ -51,10 +51,19 @@ export function AccountPage({
   const openCustomerPortal = async () => {
     setPortalLoading(true);
     try {
+      // Get the auth token from Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      if (!token) {
+        throw new Error('Please sign in to access billing');
+      }
+      
       const response = await fetch('/api/billing/customer-portal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         credentials: 'include',
       });
