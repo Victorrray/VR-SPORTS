@@ -314,15 +314,26 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           return true;
         });
         
-        // Skip this pick if no filtered books match (user has a filter but none match)
+        // Skip this pick if user has a sportsbook filter and the filtered book doesn't have this prop
+        const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
         const hasFilteredBooks = propData.filteredBooks.length > 0;
+        
+        // CRITICAL: If user filtered for specific sportsbooks but none of them have this prop, skip it
+        if (userHasFilter && !hasFilteredBooks) {
+          return; // Don't show picks where the filtered sportsbook doesn't offer the line
+        }
+        
         const filteredBooksAtConsensus = hasFilteredBooks 
           ? propData.filteredBooks.filter((b: any) => {
               const isDFS = dfsAppKeys.includes(b.key?.toLowerCase());
               return !isDFS || b.line === consensusLine;
             })
           : booksAtConsensusLine;
-        const booksForMainCard = filteredBooksAtConsensus.length > 0 ? filteredBooksAtConsensus : booksAtConsensusLine;
+        
+        // If user has a filter, only use filtered books; don't fall back to all books
+        const booksForMainCard = userHasFilter 
+          ? filteredBooksAtConsensus 
+          : (filteredBooksAtConsensus.length > 0 ? filteredBooksAtConsensus : booksAtConsensusLine);
         
         if (booksForMainCard.length === 0) return; // Skip if no books at consensus line
         
