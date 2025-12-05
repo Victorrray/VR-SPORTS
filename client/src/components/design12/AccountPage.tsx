@@ -11,6 +11,7 @@ import {
   Lock,
   Star,
   Loader2,
+  Download,
 } from "lucide-react";
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
@@ -227,140 +228,162 @@ export function AccountPage({
         </div>
       </div>
 
-      {/* Subscription Section */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2`}>
-            <CreditCard className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-            Subscription
-          </h2>
-          <button onClick={onNavigateToChangePlan} className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-sm">
-            {isPlatinum || isGold ? 'Change Plan' : 'Upgrade'}
-          </button>
+      {/* Billing & Subscription Section */}
+      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
+        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
+          <CreditCard className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+          Billing & Subscription
+        </h2>
+
+        <div className="space-y-4">
+          {/* Current Plan */}
+          {isPlatinum ? (
+            <div className={`p-6 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-transparent border-purple-400/30'} backdrop-blur-xl rounded-xl border shadow-lg`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+                    <Crown className={`w-6 h-6 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
+                  </div>
+                  <div>
+                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Platinum Plan</div>
+                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Premium features unlocked</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>$25</div>
+                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>per month</div>
+                </div>
+              </div>
+              
+              <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
+                <Calendar className="w-4 h-4" />
+                <span>Next billing date: {profile?.subscription_end ? new Date(profile.subscription_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+              </div>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={onNavigateToChangePlan}
+                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+                >
+                  Change Plan
+                </button>
+                <button 
+                  onClick={onNavigateToCancelSubscription}
+                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+                >
+                  Cancel Subscription
+                </button>
+              </div>
+            </div>
+          ) : isGold ? (
+            <div className={`p-6 ${isLight ? 'bg-yellow-50 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-transparent border-yellow-400/30'} backdrop-blur-xl rounded-xl border shadow-lg`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-yellow-100 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border-yellow-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+                    <Star className={`w-6 h-6 ${isLight ? 'text-yellow-600' : 'text-yellow-400'}`} />
+                  </div>
+                  <div>
+                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Gold Plan</div>
+                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Enhanced features</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>$15</div>
+                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>per month</div>
+                </div>
+              </div>
+              
+              <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
+                <Calendar className="w-4 h-4" />
+                <span>Next billing date: {profile?.subscription_end ? new Date(profile.subscription_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+              </div>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={onNavigateToChangePlan}
+                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+                >
+                  Change Plan
+                </button>
+                <button 
+                  onClick={onNavigateToCancelSubscription}
+                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+                >
+                  Cancel Subscription
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className={`p-6 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-gray-500/10 via-slate-500/10 to-transparent border-gray-400/30'} backdrop-blur-xl rounded-xl border`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-br from-gray-500/20 to-slate-500/20 border-gray-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+                    <User className={`w-6 h-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} />
+                  </div>
+                  <div>
+                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Free Plan</div>
+                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Limited access - {me?.remaining || 0} API calls remaining</div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>Free</div>
+                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Limited</div>
+                </div>
+              </div>
+              <div className={`pt-4 border-t ${isLight ? 'border-gray-200' : 'border-gray-400/20'}`}>
+                <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm mb-4`}>
+                  Upgrade to unlock unlimited odds data, arbitrage detection, and more!
+                </p>
+                <button 
+                  onClick={onNavigateToChangePlan}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-sm"
+                >
+                  Upgrade Now
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Payment Method - Only for paid plans */}
+          {(isPlatinum || isGold) && (
+            <button 
+              onClick={openCustomerPortal}
+              disabled={portalLoading}
+              className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left disabled:opacity-50`}
+            >
+              <div className="flex items-center gap-3">
+                <CreditCard className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                <div>
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Payment Method</div>
+                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                    {portalLoading ? 'Loading...' : 'Manage your payment method'}
+                  </div>
+                </div>
+              </div>
+              <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            </button>
+          )}
+
+          {/* Billing History - Only for paid plans */}
+          {(isPlatinum || isGold) && (
+            <button 
+              onClick={openCustomerPortal}
+              disabled={portalLoading}
+              className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left disabled:opacity-50`}
+            >
+              <div className="flex items-center gap-3">
+                <Download className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                <div>
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Billing History</div>
+                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                    {portalLoading ? 'Loading...' : 'View and download past invoices'}
+                  </div>
+                </div>
+              </div>
+              <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            </button>
+          )}
         </div>
-
-        {/* Show different content based on plan */}
-        {isPlatinum ? (
-          // Platinum Plan Card
-          <div className={`p-6 ${isLight ? 'bg-amber-50 border-amber-200' : 'bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-transparent border-amber-400/30'} backdrop-blur-xl border rounded-xl`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-3 ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/30 to-orange-500/30 border-amber-400/30'} rounded-xl border`}>
-                  <Crown className={`w-6 h-6 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
-                </div>
-                <div>
-                  <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                    Platinum Plan
-                  </h3>
-                  <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
-                    Full access to all features
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} text-2xl font-bold`}>
-                  $25
-                </div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
-                  /month
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : isGold ? (
-          // Gold Plan Card
-          <div className={`p-6 ${isLight ? 'bg-yellow-50 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-transparent border-yellow-400/30'} backdrop-blur-xl border rounded-xl`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-3 ${isLight ? 'bg-yellow-100 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/30 to-amber-500/30 border-yellow-400/30'} rounded-xl border`}>
-                  <Star className={`w-6 h-6 ${isLight ? 'text-yellow-600' : 'text-yellow-400'}`} />
-                </div>
-                <div>
-                  <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                    Gold Plan
-                  </h3>
-                  <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
-                    Enhanced features
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} text-2xl font-bold`}>
-                  $15
-                </div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
-                  /month
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          // Free Plan Card
-          <div className={`p-6 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-gray-500/10 via-slate-500/10 to-transparent border-gray-400/30'} backdrop-blur-xl border rounded-xl`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-3 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-br from-gray-500/30 to-slate-500/30 border-gray-400/30'} rounded-xl border`}>
-                  <User className={`w-6 h-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} />
-                </div>
-                <div>
-                  <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                    Free Plan
-                  </h3>
-                  <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>
-                    Limited access - {me?.remaining || 0} API calls remaining
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} text-2xl font-bold`}>
-                  Free
-                </div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
-                  Limited
-                </div>
-              </div>
-            </div>
-            <div className={`pt-4 border-t ${isLight ? 'border-gray-200' : 'border-gray-400/20'}`}>
-              <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>
-                Upgrade to unlock unlimited odds data, arbitrage detection, and more!
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Only show billing buttons for paid plans */}
-        {(isPlatinum || isGold) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-            <button 
-              onClick={openCustomerPortal}
-              disabled={portalLoading}
-              className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50`}
-            >
-              {portalLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'Update Payment Method'
-              )}
-            </button>
-            <button 
-              onClick={openCustomerPortal}
-              disabled={portalLoading}
-              className={`px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50`}
-            >
-              {portalLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                'View Billing History'
-              )}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Settings Section */}
