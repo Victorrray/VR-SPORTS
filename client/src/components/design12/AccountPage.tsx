@@ -257,7 +257,7 @@ export function AccountPage({
               
               <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
                 <Calendar className="w-4 h-4" />
-                <span>Next billing date: {profile?.subscription_end ? new Date(profile.subscription_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+                <span>Next billing date: {me?.subscription_end_date ? new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
               </div>
 
               <div className="flex gap-2">
@@ -295,7 +295,7 @@ export function AccountPage({
               
               <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
                 <Calendar className="w-4 h-4" />
-                <span>Next billing date: {profile?.subscription_end ? new Date(profile.subscription_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+                <span>Next billing date: {me?.subscription_end_date ? new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
               </div>
 
               <div className="flex gap-2">
