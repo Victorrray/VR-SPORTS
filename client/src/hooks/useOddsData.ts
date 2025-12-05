@@ -974,14 +974,45 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const validBooks = booksArray.filter(b => b.odds !== '--');
             if (validBooks.length === 0) return;
             
-            const bestBookData = validBooks.reduce((best, book) => {
-              const bestOdds = parseInt(best.odds, 10);
-              const bookOdds = parseInt(book.odds, 10);
-              return bookOdds > bestOdds ? book : best;
+            // Find best odds across ALL books
+            const bestBookDataOverall = validBooks.reduce((best, book) => {
+              const bestOddsNum = parseInt(best.odds, 10);
+              const bookOddsNum = parseInt(book.odds, 10);
+              return bookOddsNum > bestOddsNum ? book : best;
             }, validBooks[0]);
             
-            const bestBook = bestBookData.name;
-            const bestOdds = bestBookData.odds;
+            let bestBook = bestBookDataOverall.name;
+            let bestOdds = bestBookDataOverall.odds;
+            
+            // Check if user has a filter applied
+            const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
+            const filteredBooks = validBooks.filter(b => isBookIncluded(b.key, b.name));
+            const hasFilteredBooks = filteredBooks.length > 0;
+            
+            // If user filtered for specific books, check if any have the best odds
+            if (userHasFilter) {
+              if (!hasFilteredBooks) {
+                return; // Skip - filtered book doesn't have this market
+              }
+              
+              const bestFilteredBook = filteredBooks.reduce((best, book) => {
+                const bestOddsNum = parseInt(best.odds, 10);
+                const bookOddsNum = parseInt(book.odds, 10);
+                return bookOddsNum > bestOddsNum ? book : best;
+              }, filteredBooks[0]);
+              
+              const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+              const overallBestOdds = parseInt(bestOdds, 10);
+              
+              // Skip if filtered book doesn't have the best odds
+              if (filteredOdds < overallBestOdds) {
+                return;
+              }
+              
+              bestBook = bestFilteredBook.name;
+              bestOdds = bestFilteredBook.odds;
+            }
+            
             const hasEnoughData = validBooks.length >= 4;
             let ev = '--';
             
