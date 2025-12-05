@@ -88,6 +88,7 @@ export function AccountPage({
       toast.error('Unable to open billing portal', {
         description: error.message || 'Please try again later'
       });
+    } finally {
       setPortalLoading(false);
     }
   };
