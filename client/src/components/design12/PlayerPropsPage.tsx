@@ -278,6 +278,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       books: [
         { id: 'kalshi', name: 'Kalshi' },
         { id: 'prophetx', name: 'ProphetX' },
+        { id: 'rebet', name: 'ReBet' },
         { id: 'betopenly', name: 'BetOpenly' },
       ]
     },

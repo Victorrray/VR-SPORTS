@@ -380,6 +380,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       books: [
         { id: 'kalshi', name: 'Kalshi' },
         { id: 'prophetx', name: 'ProphetX' },
+        { id: 'rebet', name: 'ReBet' },
         { id: 'betopenly', name: 'BetOpenly' },
       ]
     },
@@ -456,6 +457,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     'pinnacle': ['pinnacle'],
     'novig': ['novig'],
     'circa': ['circa', 'circasports'],
+    'kalshi': ['kalshi'],
+    'prophetx': ['prophetx', 'prophet_exchange'],
+    'rebet': ['rebet'],
+    'betopenly': ['betopenly'],
     'bovada': ['bovada'],
     'betonline': ['betonline', 'betonlineag'],
     'mybookie': ['mybookie', 'mybookieag'],
