@@ -58,6 +58,81 @@ export interface UseOddsDataResult {
   refetch: () => void;
 }
 
+// Book weighting for EV calculations
+// Sharp books and exchanges get higher weights because their lines are more accurate
+const BOOK_WEIGHTS: { [key: string]: number } = {
+  // Exchanges (highest weight - no vig, true market prices)
+  'kalshi': 3.0,
+  'novig': 3.0,
+  'prophetx': 3.0,
+  'prophet': 3.0,
+  'betfair': 3.0,
+  'betfair_ex_us': 3.0,
+  'matchbook': 3.0,
+  
+  // Sharp books (high weight - accurate lines, low margins)
+  'pinnacle': 3.0,
+  'circa': 2.5,
+  'bookmaker': 2.5,
+  'bookmaker_us': 2.5,
+  'bovada': 2.0,
+  'betonline': 2.0,
+  'betonlineag': 2.0,
+  
+  // Mid-tier books (moderate weight)
+  'bet365': 1.5,
+  'williamhill': 1.5,
+  'williamhill_us': 1.5,
+  'caesars': 1.5,
+  'betrivers': 1.2,
+  'unibet': 1.2,
+  'unibet_us': 1.2,
+  
+  // Default weight for all other books
+  'default': 1.0
+};
+
+// Get weight for a book by key or name
+function getBookWeight(bookKey: string): number {
+  const key = (bookKey || '').toLowerCase().replace(/\s+/g, '');
+  
+  // Check for exact match first
+  if (BOOK_WEIGHTS[key]) return BOOK_WEIGHTS[key];
+  
+  // Check for partial matches
+  for (const [weightKey, weight] of Object.entries(BOOK_WEIGHTS)) {
+    if (key.includes(weightKey) || weightKey.includes(key)) {
+      return weight;
+    }
+  }
+  
+  return BOOK_WEIGHTS['default'];
+}
+
+// Calculate weighted average probability from odds array
+function calculateWeightedAvgProb(
+  oddsArray: number[], 
+  bookKeys: string[],
+  toProb: (american: number) => number
+): number {
+  if (oddsArray.length === 0) return 0.5;
+  
+  let totalWeightedProb = 0;
+  let totalWeight = 0;
+  
+  for (let i = 0; i < oddsArray.length; i++) {
+    const odds = oddsArray[i];
+    const bookKey = bookKeys[i] || '';
+    const weight = getBookWeight(bookKey);
+    const prob = toProb(odds);
+    
+    totalWeightedProb += prob * weight;
+    totalWeight += weight;
+  }
+  
+  return totalWeight > 0 ? totalWeightedProb / totalWeight : 0.5;
+}
+
 // Map sport keys to readable league names
 function getSportLabel(sportKey: string): string {
   const sportLabelMap: { [key: string]: string } = {
@@ -356,18 +431,26 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           .filter((o: number) => !isNaN(o));
         const hasEnoughUnderData = underOddsArray.length >= MIN_BOOKS_FOR_EV;
         
-        // Calculate average implied probability for both sides
+        // Calculate WEIGHTED average implied probability for both sides
+        // Get book keys for weighting
+        const overBookKeys = booksForEV
+          .filter((b: any) => !isNaN(parseInt(b.overOdds, 10)))
+          .map((b: any) => b.key || b.name || '');
+        const underBookKeys = booksForEV
+          .filter((b: any) => b.underOdds && b.underOdds !== '--' && !isNaN(parseInt(b.underOdds, 10)))
+          .map((b: any) => b.key || b.name || '');
+        
         let overAvgProb = 0.5;
         let underAvgProb = 0.5;
         
         if (hasEnoughOverData) {
-          const overProbs = overOddsArray.map(toProb);
-          overAvgProb = overProbs.reduce((sum, p) => sum + p, 0) / overProbs.length;
+          // Use weighted average based on book sharpness
+          overAvgProb = calculateWeightedAvgProb(overOddsArray, overBookKeys, toProb);
         }
         
         if (hasEnoughUnderData) {
-          const underProbs = underOddsArray.map(toProb);
-          underAvgProb = underProbs.reduce((sum, p) => sum + p, 0) / underProbs.length;
+          // Use weighted average based on book sharpness
+          underAvgProb = calculateWeightedAvgProb(underOddsArray, underBookKeys, toProb);
         }
         
         // Find best odds for each side across ALL books at consensus line
@@ -948,9 +1031,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         if (hasEnoughData) {
           const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-          const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
+          const bookKeys = booksArray.map(b => b.key || b.name || '');
           const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-          const avgProb = toProb(avgOdds);
+          // Use weighted average based on book sharpness
+          const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
           const bestProb = toProb(parseInt(bestOdds, 10));
           const evValue = ((avgProb - bestProb) / bestProb) * 100;
           ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
@@ -1123,9 +1207,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             
             if (hasEnoughData) {
               const oddsValues = validBooks.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-              const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
+              const bookKeys = validBooks.map(b => b.key || b.name || '');
               const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-              const avgProb = toProb(avgOdds);
+              // Use weighted average based on book sharpness
+              const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
               const bestProb = toProb(parseInt(bestOdds, 10));
               const evValue = ((avgProb - bestProb) / bestProb) * 100;
               ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
@@ -1256,9 +1341,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           
           if (hasEnoughData) {
             const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-            const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
+            const bookKeys = booksArray.map(b => b.key || b.name || '');
             const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-            const avgProb = toProb(avgOdds);
+            // Use weighted average based on book sharpness
+            const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
             const bestProb = toProb(parseInt(bestOdds, 10));
             const evValue = ((avgProb - bestProb) / bestProb) * 100;
             ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
@@ -1360,9 +1446,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           
           if (hasEnoughData) {
             const oddsValues = books.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-            const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
+            const bookKeys = books.map(b => b.key || b.name || '');
             const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-            const avgProb = toProb(avgOdds);
+            // Use weighted average based on book sharpness
+            const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
             const bestProb = toProb(parseInt(bestBook.odds, 10));
             const evValue = ((avgProb - bestProb) / bestProb) * 100;
             ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
@@ -1487,9 +1574,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         if (hasEnoughData) {
           const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-          const avgOdds = oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length;
+          const bookKeys = booksArray.map(b => b.key || b.name || '');
           const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-          const avgProb = toProb(avgOdds);
+          // Use weighted average based on book sharpness
+          const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
           const bestProb = toProb(parseInt(bestOdds, 10));
           const evValue = ((avgProb - bestProb) / bestProb) * 100;
           ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
