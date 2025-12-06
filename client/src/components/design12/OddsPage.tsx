@@ -1928,10 +1928,133 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                   </div>
                 </div>
 
-                {/* Expanded Section - Books Comparison */}
+                {/* Expanded Section - Books Comparison or Arbitrage Calculator */}
                 {expandedRows.includes(pick.id) && (
                   <div className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border-t`}>
-                    {/* Mobile Expanded - Bet Details */}
+                    {/* Arbitrage Calculator - Shows when in arbitrage mode */}
+                    {selectedBetType === 'arbitrage' ? (
+                      <div className="space-y-4">
+                        {(() => {
+                          // Get odds for both sides
+                          const books = pick.allBooks || pick.books || [];
+                          const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
+                          const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                          const bestOppBook = booksWithTeam2.length > 0 
+                            ? booksWithTeam2.reduce((best: any, b: any) => {
+                                const bestOdds = parseInt(best.team2Odds, 10);
+                                const bOdds = parseInt(b.team2Odds, 10);
+                                return bOdds > bestOdds ? b : best;
+                              }, booksWithTeam2[0])
+                            : null;
+                          const side2Odds = bestOppBook ? parseInt(bestOppBook.team2Odds, 10) : 0;
+                          
+                          // Calculate arbitrage
+                          const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+                          const decimal1 = toDecimal(side1Odds);
+                          const decimal2 = toDecimal(side2Odds);
+                          const impliedProb1 = 1 / decimal1;
+                          const impliedProb2 = 1 / decimal2;
+                          const totalImplied = impliedProb1 + impliedProb2;
+                          const isArbitrage = totalImplied < 1;
+                          const arbPercentage = isArbitrage ? ((1 - totalImplied) * 100).toFixed(2) : '0';
+                          
+                          // Default stake for calculation
+                          const totalStake = 1000;
+                          const stake1 = totalStake * (impliedProb1 / totalImplied);
+                          const stake2 = totalStake * (impliedProb2 / totalImplied);
+                          const payout1 = stake1 * decimal1;
+                          const payout2 = stake2 * decimal2;
+                          const guaranteedPayout = Math.min(payout1, payout2);
+                          const profit = guaranteedPayout - totalStake;
+                          
+                          const oppositeSideName = pick.pick.includes('Over') ? pick.pick.replace('Over', 'Under') 
+                            : pick.pick.includes('Under') ? pick.pick.replace('Under', 'Over')
+                            : pick.team2 || 'Opposite';
+                          
+                          return (
+                            <>
+                              {/* Arbitrage Summary */}
+                              <div className={`p-4 ${isArbitrage ? (isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20') : (isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-400/20')} border rounded-xl`}>
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className={`font-bold ${isArbitrage ? (isLight ? 'text-emerald-700' : 'text-emerald-400') : (isLight ? 'text-red-700' : 'text-red-400')}`}>
+                                    {isArbitrage ? '✓ Arbitrage Opportunity' : '✗ No Arbitrage'}
+                                  </div>
+                                  <div className={`px-3 py-1 rounded-full font-bold text-sm ${isArbitrage ? (isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400') : (isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400')}`}>
+                                    {arbPercentage}% ROI
+                                  </div>
+                                </div>
+                                <div className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>
+                                  Combined implied probability: {(totalImplied * 100).toFixed(2)}%
+                                </div>
+                              </div>
+                              
+                              {/* Stake Calculator */}
+                              <div className={`p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
+                                <div className={`font-bold mb-3 ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                                  Stake Calculator (Based on $1,000 total)
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {/* Side 1 */}
+                                  <div className={`p-3 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-xl`}>
+                                    <div className={`text-xs font-bold uppercase mb-2 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Side 1: {pick.pick}</div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Book:</span>
+                                      <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{pick.bestBook}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Odds:</span>
+                                      <span className={`font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>{formatOdds(pick.bestOdds)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Stake:</span>
+                                      <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>${stake1.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Payout:</span>
+                                      <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>${payout1.toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Side 2 */}
+                                  <div className={`p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-xl`}>
+                                    <div className={`text-xs font-bold uppercase mb-2 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Side 2: {oppositeSideName}</div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Book:</span>
+                                      <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{bestOppBook?.name || '--'}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Odds:</span>
+                                      <span className={`font-bold ${isLight ? 'text-blue-700' : 'text-blue-400'}`}>{bestOppBook ? formatOdds(bestOppBook.team2Odds) : '--'}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Stake:</span>
+                                      <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>${stake2.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Payout:</span>
+                                      <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>${payout2.toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {/* Profit Summary */}
+                                {isArbitrage && (
+                                  <div className={`mt-4 p-3 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-emerald-500/20 border-emerald-400/30'} border rounded-xl`}>
+                                    <div className="flex justify-between items-center">
+                                      <span className={`font-bold ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>Guaranteed Profit:</span>
+                                      <span className={`font-bold text-lg ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>${profit.toFixed(2)}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                    <>
+                    {/* Standard Expanded - Mobile Bet Details */}
                     <div className="lg:hidden space-y-4">
                       {/* Three Column Stats */}
                       <div className={`grid grid-cols-3 gap-3 pb-3 mb-4 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
@@ -2032,7 +2155,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       )}
                     </div>
 
-                    {/* Desktop Expanded - Compact Table */}
+                    {/* Desktop Expanded - Compact Table (only for non-arbitrage) */}
                     <div className="hidden lg:block space-y-4">
                       {/* Three Column Stats */}
                       <div className={`grid grid-cols-3 gap-4 pb-4 mb-4 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
@@ -2148,6 +2271,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         </div>
                       )}
                     </div>
+                    </>
+                    )}
                   </div>
                 )}
               </div>
