@@ -1690,10 +1690,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
       
       // Map frontend filters to backend parameter names
-      // Default sports if not specified (include NCAA sports and soccer)
+      // Default sports if not specified (include NCAA sports and major soccer leagues)
       const sportsList = sport && sport !== 'all' 
         ? (sportKeyMap[sport] || sport)
-        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_mls,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_italy_serie_a,soccer_france_ligue_one,soccer_uefa_champs_league';
+        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_usa_mls,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_italy_serie_a,soccer_france_ligue_one,soccer_uefa_champs_league';
       params.append('sports', sportsList);
       
       // Map market types to API format
@@ -1786,7 +1786,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               ],
               // Soccer leagues - halves and soccer-specific markets
               'soccer_epl': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
-              'soccer_mls': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
+              'soccer_usa_mls': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
               'soccer_spain_la_liga': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
               'soccer_germany_bundesliga': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
               'soccer_italy_serie_a': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],

@@ -159,7 +159,7 @@ const SPORT_MARKET_SUPPORT = {
     'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
   ],
   'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
-  'soccer_mls': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+  'soccer_usa_mls': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_spain_la_liga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_germany_bundesliga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
   'soccer_italy_serie_a': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
@@ -327,7 +327,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           'alternate_spreads_corners', 'alternate_totals_corners',
           'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
         ],
-        'soccer_mls': [
+        'soccer_usa_mls': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
           'player_shots_on_target', 'player_shots', 'player_assists',
