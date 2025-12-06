@@ -512,11 +512,14 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         'nhl': ['NHL'],
         'mlb': ['MLB'],
         'ncaa-football': ['NCAA Football'],
-        'ncaa-basketball': ['NCAA Basketball']
+        'ncaa-basketball': ['NCAA Basketball'],
+        'soccer': ['Soccer']  // Soccer label
       };
       
       const allowedLabels = sportLabelMap[selectedSport] || [];
-      const matches = allowedLabels.some(label => pick.sport === label);
+      // For soccer, also check if sport starts with 'soccer_' (API key format)
+      const matches = allowedLabels.some(label => pick.sport === label) || 
+        (selectedSport === 'soccer' && pick.sport?.toLowerCase().startsWith('soccer'));
       
       if (!matches) {
         return false;

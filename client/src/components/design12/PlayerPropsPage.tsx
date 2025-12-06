@@ -450,8 +450,9 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
         'nba': ['basketball_nba', 'nba'],
         'nhl': ['icehockey_nhl', 'nhl'],
         'mlb': ['baseball_mlb', 'mlb'],
-        'ncaa-football': ['americanfootball_ncaa', 'ncaa_football'],
-        'ncaa-basketball': ['basketball_ncaa', 'ncaa_basketball']
+        'ncaa-football': ['americanfootball_ncaaf', 'americanfootball_ncaa', 'ncaa_football'],
+        'ncaa-basketball': ['basketball_ncaab', 'basketball_ncaa', 'ncaa_basketball'],
+        'soccer': ['soccer_']  // Match any sport starting with soccer_
       };
       
       const allowedSports = sportMap[selectedSport] || [];

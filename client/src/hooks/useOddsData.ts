@@ -147,6 +147,10 @@ function getSportLabel(sportKey: string): string {
     'icehockey_nhl': 'NHL',
     'baseball_mlb': 'MLB',
   };
+  // Check for soccer leagues - return "Soccer" for any soccer_ key
+  if (sportKey?.toLowerCase().startsWith('soccer_')) {
+    return 'Soccer';
+  }
   return sportLabelMap[sportKey] || sportKey;
 }
 
