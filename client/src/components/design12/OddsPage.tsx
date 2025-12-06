@@ -1680,7 +1680,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             
                             return (
                               <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                                {roi}% ROI
+                                {roi}%
                               </div>
                             );
                           })()}
@@ -1890,7 +1890,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             return (
                               <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100' : 'bg-emerald-500/20'} rounded-full`}>
                                 <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-xs`}>
-                                  {roi}% ROI
+                                  {roi}%
                                 </span>
                               </div>
                             );
