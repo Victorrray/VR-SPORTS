@@ -312,7 +312,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           'player_goals_alternate', 'player_shots_on_goal_alternate', 'player_blocked_shots_alternate',
           'player_total_saves_alternate'
         ],
-        // Soccer leagues
+        // Soccer leagues - Full player props and other soccer markets
         'soccer_epl': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
@@ -322,27 +322,45 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         ],
         'soccer_uefa_champs_league': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
-          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+          'player_to_receive_card', 'player_to_receive_red_card',
+          'player_shots_on_target', 'player_shots', 'player_assists',
+          'alternate_spreads_corners', 'alternate_totals_corners',
+          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
         ],
         'soccer_mls': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
-          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+          'player_to_receive_card', 'player_to_receive_red_card',
+          'player_shots_on_target', 'player_shots', 'player_assists',
+          'alternate_spreads_corners', 'alternate_totals_corners',
+          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
         ],
         'soccer_spain_la_liga': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
-          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+          'player_to_receive_card', 'player_to_receive_red_card',
+          'player_shots_on_target', 'player_shots', 'player_assists',
+          'alternate_spreads_corners', 'alternate_totals_corners',
+          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
         ],
         'soccer_germany_bundesliga': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
-          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+          'player_to_receive_card', 'player_to_receive_red_card',
+          'player_shots_on_target', 'player_shots', 'player_assists',
+          'alternate_spreads_corners', 'alternate_totals_corners',
+          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
         ],
         'soccer_italy_serie_a': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
-          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+          'player_to_receive_card', 'player_to_receive_red_card',
+          'player_shots_on_target', 'player_shots', 'player_assists',
+          'alternate_spreads_corners', 'alternate_totals_corners',
+          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
         ],
         'soccer_france_ligue_one': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
-          'player_to_receive_card', 'player_shots_on_target', 'player_shots', 'player_assists'
+          'player_to_receive_card', 'player_to_receive_red_card',
+          'player_shots_on_target', 'player_shots', 'player_assists',
+          'alternate_spreads_corners', 'alternate_totals_corners',
+          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
         ],
         // AFL
         'aussierules_afl': [

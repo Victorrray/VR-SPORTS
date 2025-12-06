@@ -353,6 +353,9 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     // Soccer Markets
     { id: 'btts', name: 'Both Teams to Score' },
     { id: 'draw_no_bet', name: 'Draw No Bet' },
+    { id: 'double_chance', name: 'Double Chance' },
+    { id: 'alternate_totals_corners', name: 'Total Corners' },
+    { id: 'alternate_totals_cards', name: 'Total Cards' },
   ];
 
   const sportsbooksByTier = [

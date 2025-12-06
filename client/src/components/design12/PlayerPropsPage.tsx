@@ -269,8 +269,12 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     { id: 'player_anytime_td', name: 'Anytime TD' },
     // Soccer Props
     { id: 'player_goal_scorer_anytime', name: 'Anytime Goalscorer' },
+    { id: 'player_first_goal_scorer', name: 'First Goalscorer' },
+    { id: 'player_last_goal_scorer', name: 'Last Goalscorer' },
+    { id: 'player_to_receive_card', name: 'To Receive Card' },
     { id: 'player_shots', name: 'Shots' },
     { id: 'player_shots_on_target', name: 'Shots on Target' },
+    { id: 'player_assists', name: 'Assists (Soccer)' },
   ];
 
   const sportsbooksByTier = [

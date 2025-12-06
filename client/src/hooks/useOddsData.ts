@@ -1731,6 +1731,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           // Soccer markets
           case 'btts': return 'btts';
           case 'draw_no_bet': return 'draw_no_bet';
+          case 'double_chance': return 'double_chance';
+          case 'alternate_totals_corners': return 'alternate_totals_corners';
+          case 'alternate_totals_cards': return 'alternate_totals_cards';
           
           // All markets - request ALL available markets for the sport
           case 'all':
@@ -1786,7 +1789,15 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 'h2h_1st_1_innings', 'h2h_1st_3_innings', 'h2h_1st_5_innings',
                 'spreads_1st_1_innings', 'spreads_1st_3_innings', 'spreads_1st_5_innings',
                 'totals_1st_1_innings', 'totals_1st_3_innings', 'totals_1st_5_innings'
-              ]
+              ],
+              // Soccer leagues - halves and soccer-specific markets
+              'soccer_epl': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
+              'soccer_mls': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
+              'soccer_spain_la_liga': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
+              'soccer_germany_bundesliga': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
+              'soccer_italy_serie_a': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
+              'soccer_france_ligue_one': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards'],
+              'soccer_uefa_champs_league': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards']
             };
             
             // Get sport-specific markets
