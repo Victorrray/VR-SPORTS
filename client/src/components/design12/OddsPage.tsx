@@ -1654,11 +1654,36 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     <div className="hidden lg:block">
                       {/* Arbitrage Header Row */}
                       <div className="grid grid-cols-12 gap-4 items-center">
-                        {/* EV/Profit Badge */}
+                        {/* ROI Badge - Calculate arbitrage ROI */}
                         <div className="col-span-1 flex items-center justify-center">
-                          <div className={`inline-flex items-center gap-2 px-2 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-full shadow-lg whitespace-nowrap`}>
-                            <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{pick.ev}</span>
-                          </div>
+                          {(() => {
+                            // Calculate ROI for arbitrage
+                            const books = pick.allBooks || pick.books || [];
+                            const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
+                            const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                            const bestOppBook = booksWithTeam2.length > 0 
+                              ? booksWithTeam2.reduce((best: any, b: any) => {
+                                  const bestOdds = parseInt(best.team2Odds, 10);
+                                  const bOdds = parseInt(b.team2Odds, 10);
+                                  return bOdds > bestOdds ? b : best;
+                                }, booksWithTeam2[0])
+                              : null;
+                            const side2Odds = bestOppBook ? parseInt(bestOppBook.team2Odds, 10) : 0;
+                            
+                            const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+                            const decimal1 = toDecimal(side1Odds);
+                            const decimal2 = toDecimal(side2Odds);
+                            const impliedProb1 = 1 / decimal1;
+                            const impliedProb2 = 1 / decimal2;
+                            const totalImplied = impliedProb1 + impliedProb2;
+                            const roi = totalImplied < 1 ? ((1 - totalImplied) * 100).toFixed(2) : '0';
+                            
+                            return (
+                              <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                {roi}% ROI
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* Match Info */}
@@ -1839,11 +1864,44 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             }) : 'Time TBD'}
                           </div>
                         </div>
-                        <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-full border`}>
-                          <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
-                            {pick.ev}
-                          </span>
-                        </div>
+                        {/* Show ROI for arbitrage, EV for others */}
+                        {selectedBetType === 'arbitrage' ? (
+                          (() => {
+                            const books = pick.allBooks || pick.books || [];
+                            const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
+                            const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                            const bestOppBook = booksWithTeam2.length > 0 
+                              ? booksWithTeam2.reduce((best: any, b: any) => {
+                                  const bestOdds = parseInt(best.team2Odds, 10);
+                                  const bOdds = parseInt(b.team2Odds, 10);
+                                  return bOdds > bestOdds ? b : best;
+                                }, booksWithTeam2[0])
+                              : null;
+                            const side2Odds = bestOppBook ? parseInt(bestOppBook.team2Odds, 10) : 0;
+                            
+                            const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+                            const decimal1 = toDecimal(side1Odds);
+                            const decimal2 = toDecimal(side2Odds);
+                            const impliedProb1 = 1 / decimal1;
+                            const impliedProb2 = 1 / decimal2;
+                            const totalImplied = impliedProb1 + impliedProb2;
+                            const roi = totalImplied < 1 ? ((1 - totalImplied) * 100).toFixed(2) : '0';
+                            
+                            return (
+                              <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100' : 'bg-emerald-500/20'} rounded-full`}>
+                                <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-xs`}>
+                                  {roi}% ROI
+                                </span>
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-full border`}>
+                            <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
+                              {pick.ev}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
