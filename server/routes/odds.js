@@ -511,9 +511,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             }
           } else {
             console.log(`🌐 API call for ${sport}`);
-            console.log(`🔗 URL: ${url.substring(0, 150)}...`);
+            console.log(`🔗 Full URL: ${url}`);
             const response = await axios.get(url);
             responseData = response.data;
+            console.log(`📦 ${sport} returned ${responseData?.length || 0} games`);
             
             // Debug: Log comprehensive market summary
             if (responseData && responseData.length > 0) {
