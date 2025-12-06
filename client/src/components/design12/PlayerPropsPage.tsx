@@ -208,6 +208,18 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   // Use date-filtered picks
   const topPicks = dateFilteredPicks;
   const isLoading = apiLoading;
+  
+  // Debug logging
+  console.log('🎯 PlayerPropsPage Debug:', {
+    apiPicksCount: apiPicks?.length || 0,
+    dateFilteredCount: dateFilteredPicks?.length || 0,
+    selectedSport,
+    selectedMarket,
+    selectedBetType,
+    selectedDate,
+    isLoading,
+    apiError
+  });
 
   // Reset to page 1 when filters change
   useEffect(() => {
