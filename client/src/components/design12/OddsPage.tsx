@@ -2086,21 +2086,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           
                           return (
                             <>
-                              {/* Arbitrage Summary */}
-                              <div className={`p-4 ${isArbitrage ? (isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20') : (isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-400/20')} border rounded-xl`}>
-                                <div className="flex items-center justify-between mb-3">
-                                  <div className={`font-bold ${isArbitrage ? (isLight ? 'text-emerald-700' : 'text-emerald-400') : (isLight ? 'text-red-700' : 'text-red-400')}`}>
-                                    {isArbitrage ? '✓ Arbitrage Opportunity' : '✗ No Arbitrage'}
-                                  </div>
-                                  <div className={`px-3 py-1 rounded-full font-bold text-sm ${isArbitrage ? (isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400') : (isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400')}`}>
-                                    {arbPercentage}% ROI
-                                  </div>
-                                </div>
-                                <div className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>
-                                  Combined implied probability: {(totalImplied * 100).toFixed(2)}%
-                                </div>
-                              </div>
-                              
                               {/* Stake Calculator */}
                               <div className={`p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
                                 <div className={`font-bold mb-3 ${isLight ? 'text-gray-900' : 'text-white'}`}>
