@@ -1874,15 +1874,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
       const queryString = params.toString();
       const endpoint = `/api/odds${queryString ? `?${queryString}` : ''}`;
+      const fetchTimestamp = new Date().toISOString();
 
       if (betType === 'props') {
-        console.log('🏈🏈🏈 PLAYER PROPS HOOK - FETCHING 🏈🏈🏈');
+        console.log('🏈🏈🏈 PLAYER PROPS HOOK - FETCHING 🏈🏈🏈', fetchTimestamp);
         console.log('🏈 betType:', betType);
         console.log('🏈 sport:', sport);
+        console.log('🏈 sportsbooks filter:', sportsbooks);
         console.log('🏈 Fetching from:', endpoint);
       }
       
-      console.log('📊 Fetching odds data from:', endpoint);
+      console.log('📊 Fetching odds data from:', endpoint, 'at', fetchTimestamp);
       console.log('📊 Full filter params:', Object.fromEntries(params));
       console.log('📊 Sport filter details:', {
         selectedSport: sport,
