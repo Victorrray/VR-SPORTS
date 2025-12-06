@@ -1729,15 +1729,15 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         'ncaa-basketball': 'basketball_ncaab',
         'nhl': 'icehockey_nhl',
         'mlb': 'baseball_mlb',
-        // Soccer - major leagues with player props support (limited to avoid rate limits)
-        'soccer': 'soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_italy_serie_a,soccer_france_ligue_one,soccer_usa_mls,soccer_uefa_champs_league,soccer_uefa_europa_league,soccer_mexico_ligamx,soccer_netherlands_eredivisie,soccer_portugal_primeira_liga,soccer_spl',
+        // Soccer - top 5 leagues only (limited for performance)
+        'soccer': 'soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx',
       };
       
       // Map frontend filters to backend parameter names
       // Default sports if not specified (include NCAA sports and major soccer leagues)
       const sportsList = sport && sport !== 'all' 
         ? (sportKeyMap[sport] || sport)
-        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_usa_mls,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_italy_serie_a,soccer_france_ligue_one,soccer_uefa_champs_league';
+        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
       params.append('sports', sportsList);
       
       // Map market types to API format
