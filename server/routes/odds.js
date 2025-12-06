@@ -151,31 +151,35 @@ const SPORT_MARKET_SUPPORT = {
     'team_totals_p1', 'team_totals_p2', 'team_totals_p3',
     'alternate_team_totals_p1', 'alternate_team_totals_p2', 'alternate_team_totals_p3'
   ],
-  'soccer_epl': [
-    'h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts',
-    'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals',
-    // Soccer-specific markets (corners, cards)
-    'alternate_spreads_corners', 'alternate_totals_corners',
-    'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
-  ],
-  'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
-  'soccer_usa_mls': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
-  'soccer_spain_la_liga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
-  'soccer_germany_bundesliga': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
-  'soccer_italy_serie_a': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
-  'soccer_france_ligue_one': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
-  'soccer_fifa_world_cup': ['h2h', 'spreads', 'totals', 'h2h_lay', 'h2h_3_way', 'draw_no_bet', 'btts', 'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals'],
+  // Soccer leagues - only h2h, spreads, totals supported (NO alternate markets)
+  // TheOddsAPI returns 422 error if alternate_spreads, alternate_totals, team_totals are requested for soccer
+  'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_usa_mls': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_spain_la_liga': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_germany_bundesliga': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_italy_serie_a': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_france_ligue_one': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_fifa_world_cup': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_uefa_europa_league': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_mexico_ligamx': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_netherlands_eredivisie': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_portugal_primeira_liga': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  'soccer_spl': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
   'mma_mixed_martial_arts': ['h2h', 'spreads', 'totals', 'h2h_lay'],
   'boxing_boxing': ['h2h', 'spreads', 'totals', 'h2h_lay'],
   'golf_pga': ['outrights', 'outrights_lay'],
   'golf_masters': ['outrights', 'outrights_lay'],
   'golf_us_open': ['outrights', 'outrights_lay'],
   'golf_british_open': ['outrights', 'outrights_lay'],
+  // Default for US sports (supports alternate markets)
   'default': [
     'h2h', 'spreads', 'totals',
     'alternate_spreads', 'alternate_totals',
     'team_totals', 'alternate_team_totals'
-  ]
+  ],
+  // Default for soccer (NO alternate markets - TheOddsAPI doesn't support them)
+  'soccer_default': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance']
 };
 
 /**
@@ -397,17 +401,29 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
     const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
     
+    // Helper to get supported markets for a sport (use soccer_default for unlisted soccer leagues)
+    const getSupportedMarketsForSport = (sport) => {
+      if (SPORT_MARKET_SUPPORT[sport]) {
+        return SPORT_MARKET_SUPPORT[sport];
+      }
+      // Use soccer_default for any soccer league not explicitly listed
+      if (sport.startsWith('soccer_')) {
+        return SPORT_MARKET_SUPPORT['soccer_default'];
+      }
+      return SPORT_MARKET_SUPPORT['default'];
+    };
+    
     // Filter markets based on sport support
     const filteredRegularMarkets = regularMarkets.filter(m => {
       return sportsArray.some(sport => {
-        const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
+        const supportedForSport = getSupportedMarketsForSport(sport);
         return supportedForSport.includes(m);
       });
     });
     
     console.log('🎯 Sport-specific market filtering:');
     sportsArray.forEach(sport => {
-      const supportedForSport = SPORT_MARKET_SUPPORT[sport] || SPORT_MARKET_SUPPORT['default'];
+      const supportedForSport = getSupportedMarketsForSport(sport);
       console.log(`  ${sport}: ${supportedForSport.join(', ')}`);
     });
     
