@@ -802,96 +802,69 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       
       let playerPropsCount = 0;
       
-      for (const sport of sportsArray) {
+      // OPTIMIZATION: Fetch all sports' events in parallel first
+      console.log(`🚀 Fetching events for all ${sportsArray.length} sports in parallel...`);
+      const eventsPromises = sportsArray.map(async (sport) => {
         try {
-          // First, get list of events for this sport
           const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
-          console.log(`🔍 Fetching events for ${sport}...`);
           const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
           const events = eventsResponse.data || [];
-          
           console.log(`📅 Got ${events.length} events for ${sport}`);
-          
-          // Limit concurrent requests to avoid timeouts (max 5 concurrent)
-          const MAX_CONCURRENT = 5;
-          for (let i = 0; i < events.length; i += MAX_CONCURRENT) {
-            const batch = events.slice(i, i + MAX_CONCURRENT);
-            const batchPromises = batch.map(event => 
-              (async () => {
-                try {
-                  // Include multiple regions to get all sportsbooks, DFS apps, and exchanges
-                  // us: Traditional US sportsbooks
-                  // us2: Additional US books (ReBet, ProphetX, BetOpenly)
-                  // us_dfs: PrizePicks, Underdog, DraftKings Pick6, Betr
-                  // us_ex: Kalshi (exchange)
-                  // au: Dabble AU
-                  const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
-                  const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
-                  
-                  console.log(`🔍 Fetching player props for event ${event.id} (${event.home_team} vs ${event.away_team})...`);
-                  const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 20000 });
-                  
-                  // Log quota information from response headers
-                  const quotaRemaining = playerPropsResponse.headers['x-requests-remaining'];
-                  const quotaUsed = playerPropsResponse.headers['x-requests-used'];
-                  const quotaLast = playerPropsResponse.headers['x-requests-last'];
-                  console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
-                  
-                  // TheOddsAPI returns a single event object with bookmakers and markets
-                  if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
-                    // Log all bookmakers returned from API
-                    const allBookKeys = playerPropsResponse.data.bookmakers.map(bk => bk.key);
-                    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'kalshi', 'dabble_au'];
-                    const foundDFS = allBookKeys.filter(key => dfsApps.includes(key));
-                    console.log(`📚 All bookmakers for ${event.home_team} vs ${event.away_team}:`, allBookKeys);
-                    if (foundDFS.length > 0) {
-                      console.log(`🎮 DFS APPS FOUND:`, foundDFS);
-                    }
-                    
-                    // Filter bookmakers to only include those with player prop markets
-                    const eventWithProps = {
-                      ...playerPropsResponse.data,
-                      bookmakers: playerPropsResponse.data.bookmakers
-                        .filter(bk => 
-                          bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key))
-                        )
-                        .map(bk => ({
-                          ...bk,
-                          // Ensure title is set for display
-                          title: bk.title || bk.key?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'
-                        }))
-                    };
-                    
-                    if (eventWithProps.bookmakers.length > 0) {
-                      console.log(`✅ Got player props for ${event.home_team} vs ${event.away_team} with ${eventWithProps.bookmakers.length} bookmakers and ${eventWithProps.bookmakers.reduce((sum, bk) => sum + (bk.markets?.length || 0), 0)} markets`);
-                      allGames.push(eventWithProps);
-                      playerPropsCount++;
-                    } else {
-                      console.log(`⏭️ Event ${event.id} has bookmakers but no player prop markets`);
-                    }
-                  } else {
-                    console.log(`⏭️ Event ${event.id} has no bookmakers with player props`);
-                  }
-                } catch (eventErr) {
-                  // Skip events that don't have player props available
-                  if (eventErr.response?.status === 422) {
-                    console.log(`⏭️ No player props available for event ${event.id}`);
-                  } else if (eventErr.code === 'ECONNABORTED') {
-                    console.warn(`⚠️ Player props timeout for event ${event.id}`);
-                  } else {
-                    console.warn(`⚠️ Player props fetch error for event ${event.id}:`, eventErr.message);
-                  }
-                }
-              })()
-            );
-            
-            // Wait for all concurrent requests in this batch to complete
-            await Promise.all(batchPromises);
-          }
-        } catch (sportErr) {
-          console.warn(`⚠️ Failed to fetch events for ${sport}:`, sportErr.message);
-          // Continue with other sports even if one fails
+          return events.map(e => ({ ...e, sport_key: sport }));
+        } catch (err) {
+          console.warn(`⚠️ Failed to fetch events for ${sport}:`, err.message);
+          return [];
         }
+      });
+      
+      const allEventsArrays = await Promise.all(eventsPromises);
+      const allEvents = allEventsArrays.flat();
+      console.log(`📅 Total events across all sports: ${allEvents.length}`);
+      
+      // OPTIMIZATION: Fetch player props for all events in larger parallel batches
+      const MAX_CONCURRENT = 15; // Increased from 10 to 15
+      const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
+      
+      for (let i = 0; i < allEvents.length; i += MAX_CONCURRENT) {
+        const batch = allEvents.slice(i, i + MAX_CONCURRENT);
+        const batchPromises = batch.map(event => 
+          (async () => {
+            try {
+              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+              
+              const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 15000 }); // Reduced timeout
+              
+              if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
+                const eventWithProps = {
+                  ...playerPropsResponse.data,
+                  bookmakers: playerPropsResponse.data.bookmakers
+                    .filter(bk => bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key)))
+                    .map(bk => ({
+                      ...bk,
+                      title: bk.title || bk.key?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'
+                    }))
+                };
+                
+                if (eventWithProps.bookmakers.length > 0) {
+                  console.log(`✅ Props: ${event.home_team} vs ${event.away_team} (${eventWithProps.bookmakers.length} books)`);
+                  allGames.push(eventWithProps);
+                  playerPropsCount++;
+                }
+              }
+            } catch (eventErr) {
+              // Silently skip failed events to reduce log noise
+              if (eventErr.response?.status !== 422 && eventErr.code !== 'ECONNABORTED') {
+                console.warn(`⚠️ Props error for ${event.id}:`, eventErr.message);
+              }
+            }
+          })()
+        );
+        
+        await Promise.all(batchPromises);
+        
+        // Log progress every batch
+        const progress = Math.min(i + MAX_CONCURRENT, allEvents.length);
+        console.log(`⏳ Progress: ${progress}/${allEvents.length} events processed`);
       }
       
       console.log(`✅ Total player props events fetched: ${playerPropsCount}`);
