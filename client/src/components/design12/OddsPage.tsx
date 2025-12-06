@@ -1649,7 +1649,105 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                   onClick={() => toggleRow(pick.id)}
                   className={`w-full p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all cursor-pointer`}
                 >
-                  {/* Desktop Layout - Grid format for larger screens */}
+                  {/* Arbitrage Layout - Shows both sides stacked */}
+                  {selectedBetType === 'arbitrage' ? (
+                    <div className="hidden lg:block">
+                      {/* Arbitrage Header Row */}
+                      <div className="grid grid-cols-12 gap-4 items-start">
+                        {/* EV/Profit Badge */}
+                        <div className="col-span-1">
+                          <div className={`inline-flex items-center gap-2 px-2 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-full shadow-lg whitespace-nowrap`}>
+                            <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{pick.ev}</span>
+                          </div>
+                        </div>
+
+                        {/* Match Info */}
+                        <div className="col-span-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                              {pick.sport}
+                            </span>
+                          </div>
+                          <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                            {pick.game.includes(' @ ') ? (
+                              <span className="flex flex-col leading-tight">
+                                <span>{pick.game.split(' @ ')[0]}</span>
+                                <span>@ {pick.game.split(' @ ')[1]}</span>
+                              </span>
+                            ) : pick.game}
+                          </div>
+                          <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
+                            <Clock className="w-3 h-3" />
+                            {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
+                              weekday: 'short', month: 'short', day: 'numeric',
+                              hour: 'numeric', minute: '2-digit', hour12: true,
+                              timeZone: 'America/Los_Angeles'
+                            }) : 'Time TBD'}
+                          </div>
+                        </div>
+
+                        {/* Both Sides Stacked */}
+                        <div className="col-span-8">
+                          {/* Side 1 - Best odds for this pick */}
+                          <div className={`grid grid-cols-3 gap-4 p-3 mb-2 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-xl`}>
+                            <div>
+                              <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 1</div>
+                              <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.pick}</div>
+                            </div>
+                            <div>
+                              <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Book</div>
+                              <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.bestBook}</div>
+                            </div>
+                            <div>
+                              <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
+                              <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{formatOdds(pick.bestOdds)}</div>
+                            </div>
+                          </div>
+                          
+                          {/* Side 2 - Opposite side with best odds from another book */}
+                          {(() => {
+                            // Find the best book for the opposite side
+                            const books = pick.allBooks || pick.books || [];
+                            const oppositeSideName = pick.pick.includes('Over') ? pick.pick.replace('Over', 'Under') 
+                              : pick.pick.includes('Under') ? pick.pick.replace('Under', 'Over')
+                              : pick.team2 || 'Opposite';
+                            
+                            // Find book with best team2Odds (opposite side)
+                            const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                            const bestOppBook = booksWithTeam2.length > 0 
+                              ? booksWithTeam2.reduce((best: any, b: any) => {
+                                  const bestOdds = parseInt(best.team2Odds, 10);
+                                  const bOdds = parseInt(b.team2Odds, 10);
+                                  return bOdds > bestOdds ? b : best;
+                                }, booksWithTeam2[0])
+                              : null;
+                            
+                            return bestOppBook ? (
+                              <div className={`grid grid-cols-3 gap-4 p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-xl`}>
+                                <div>
+                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
+                                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{oppositeSideName}</div>
+                                </div>
+                                <div>
+                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Book</div>
+                                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestOppBook.name}</div>
+                                </div>
+                                <div>
+                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
+                                  <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{formatOdds(bestOppBook.team2Odds)}</div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl text-center`}>
+                                <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>No opposite side data available</span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                  /* Standard Desktop Layout - Grid format for larger screens */
                   <div className="hidden lg:grid lg:grid-cols-12 gap-4 lg:gap-6 items-center">
                     {/* EV Badge - Shows expected value percentage */}
                     <div className="lg:col-span-2">
@@ -1712,6 +1810,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       </div>
                     </div>
                   </div>
+                  )}
 
                   {/* Mobile Layout - BetCard Style */}
                   <div className="lg:hidden">
