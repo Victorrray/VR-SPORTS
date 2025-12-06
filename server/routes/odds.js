@@ -312,55 +312,41 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           'player_goals_alternate', 'player_shots_on_goal_alternate', 'player_blocked_shots_alternate',
           'player_total_saves_alternate'
         ],
-        // Soccer leagues - Full player props and other soccer markets
+        // Soccer leagues - Player props only (no game markets)
         'soccer_epl': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
-          'player_shots_on_target', 'player_shots', 'player_assists',
-          'alternate_spreads_corners', 'alternate_totals_corners',
-          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+          'player_shots_on_target', 'player_shots', 'player_assists'
         ],
         'soccer_uefa_champs_league': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
-          'player_shots_on_target', 'player_shots', 'player_assists',
-          'alternate_spreads_corners', 'alternate_totals_corners',
-          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+          'player_shots_on_target', 'player_shots', 'player_assists'
         ],
         'soccer_usa_mls': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
-          'player_shots_on_target', 'player_shots', 'player_assists',
-          'alternate_spreads_corners', 'alternate_totals_corners',
-          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+          'player_shots_on_target', 'player_shots', 'player_assists'
         ],
         'soccer_spain_la_liga': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
-          'player_shots_on_target', 'player_shots', 'player_assists',
-          'alternate_spreads_corners', 'alternate_totals_corners',
-          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+          'player_shots_on_target', 'player_shots', 'player_assists'
         ],
         'soccer_germany_bundesliga': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
-          'player_shots_on_target', 'player_shots', 'player_assists',
-          'alternate_spreads_corners', 'alternate_totals_corners',
-          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+          'player_shots_on_target', 'player_shots', 'player_assists'
         ],
         'soccer_italy_serie_a': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
-          'player_shots_on_target', 'player_shots', 'player_assists',
-          'alternate_spreads_corners', 'alternate_totals_corners',
-          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+          'player_shots_on_target', 'player_shots', 'player_assists'
         ],
         'soccer_france_ligue_one': [
           'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
           'player_to_receive_card', 'player_to_receive_red_card',
-          'player_shots_on_target', 'player_shots', 'player_assists',
-          'alternate_spreads_corners', 'alternate_totals_corners',
-          'alternate_spreads_cards', 'alternate_totals_cards', 'double_chance'
+          'player_shots_on_target', 'player_shots', 'player_assists'
         ],
         // AFL
         'aussierules_afl': [
@@ -399,8 +385,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       });
       
       if (playerPropsMarkets.length > 0) {
-        marketsArray = playerPropsMarkets;
-        console.log('🏈 Final player props markets:', marketsArray);
+        // Deduplicate markets (same markets may be added for multiple sports)
+        marketsArray = [...new Set(playerPropsMarkets)];
+        console.log('🏈 Final player props markets (deduplicated):', marketsArray);
       } else {
         console.log('🏈 WARNING: No player props markets mapped!');
       }
