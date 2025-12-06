@@ -1688,10 +1688,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
       
       // Map frontend filters to backend parameter names
-      // Default sports if not specified
+      // Default sports if not specified (include NCAA sports)
       const sportsList = sport && sport !== 'all' 
         ? (sportKeyMap[sport] || sport)
-        : 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl';
+        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl';
       params.append('sports', sportsList);
       
       // Map market types to API format
