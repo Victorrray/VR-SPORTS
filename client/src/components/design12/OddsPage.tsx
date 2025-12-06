@@ -1653,16 +1653,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                   {selectedBetType === 'arbitrage' ? (
                     <div className="hidden lg:block">
                       {/* Arbitrage Header Row */}
-                      <div className="grid grid-cols-12 gap-4 items-start">
+                      <div className="grid grid-cols-12 gap-4 items-center">
                         {/* EV/Profit Badge */}
-                        <div className="col-span-1">
+                        <div className="col-span-1 flex items-center justify-center">
                           <div className={`inline-flex items-center gap-2 px-2 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-full shadow-lg whitespace-nowrap`}>
                             <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{pick.ev}</span>
                           </div>
                         </div>
 
                         {/* Match Info */}
-                        <div className="col-span-3">
+                        <div className="col-span-3 flex flex-col justify-center">
                           <div className="flex items-center gap-2 mb-1">
                             <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                               {pick.sport}
