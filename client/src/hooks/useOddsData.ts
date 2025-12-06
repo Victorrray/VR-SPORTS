@@ -49,6 +49,7 @@ export interface UseOddsDataOptions {
   sportsbooks?: string[];
   limit?: number;
   enabled?: boolean;
+  minDataPoints?: number;
 }
 
 export interface UseOddsDataResult {
@@ -1655,6 +1656,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
     sportsbooks = [],
     limit = 50,
     enabled = true,
+    minDataPoints = 4,
   } = options;
 
   const { user, authLoading } = useAuth();
@@ -1865,9 +1867,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         return filtered;
       };
       
+      // Filter picks by minimum data points (book count)
+      const filterByMinDataPoints = (picks: OddsPick[]) => {
+        if (minDataPoints <= 1) return picks; // No filtering needed
+        return picks.filter(pick => {
+          const bookCount = pick.books?.length || pick.bookCount || 0;
+          return bookCount >= minDataPoints;
+        });
+      };
+      
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
+        transformedPicks = filterByMinDataPoints(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
@@ -1880,6 +1892,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
+        transformedPicks = filterByMinDataPoints(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);

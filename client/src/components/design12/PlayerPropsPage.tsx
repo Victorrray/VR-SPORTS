@@ -146,6 +146,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const [sportsbooksClosing, setSportsbooksClosing] = useState(false);
   const [addedPicks, setAddedPicks] = useState<(string | number)[]>([]); // Track which picks have been added
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [minDataPoints, setMinDataPoints] = useState(4);
   
   // Close handlers with animation for sub-filters
   const closeDateDrawer = () => {
@@ -175,6 +176,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     betType: selectedBetType,
     sportsbooks: selectedSportsbooks,
     date: selectedDate,
+    minDataPoints: minDataPoints,
     enabled: true
   });
 
@@ -698,6 +700,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     setSelectedMarket('all');
                     setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
+                    setMinDataPoints(4);
                     toast.success('Filters reset', {
                       description: 'All filters have been cleared'
                     });
@@ -745,6 +748,54 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     />
                     <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500 ${!hasPlatinum ? 'cursor-not-allowed' : ''}`}></div>
                   </label>
+                </div>
+              </div>
+
+              {/* Minimum Data Points Slider */}
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                  Minimum Data Points
+                </label>
+                <div className={`p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold`}>
+                      Filter out bets with fewer books
+                    </div>
+                    <div className={`${isLight ? 'text-purple-600 bg-purple-100' : 'text-purple-300 bg-purple-500/20'} px-2 py-1 rounded-lg font-bold text-sm`}>
+                      {minDataPoints === 15 ? 'MAX' : minDataPoints}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-xs font-bold`}>1</span>
+                    <input
+                      type="range"
+                      min="1"
+                      max="15"
+                      step="1"
+                      value={minDataPoints}
+                      onChange={(e) => setMinDataPoints(parseInt(e.target.value))}
+                      className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-purple-500`}
+                      style={{
+                        background: `linear-gradient(to right, ${isLight ? '#9333ea' : '#a855f7'} 0%, ${isLight ? '#9333ea' : '#a855f7'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
+                      }}
+                    />
+                    <span className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-xs font-bold`}>MAX</span>
+                  </div>
+                  <div className="flex justify-between mt-2">
+                    {[1, 5, 10, 15].map((val) => (
+                      <button
+                        key={val}
+                        onClick={() => setMinDataPoints(val)}
+                        className={`px-2 py-1 rounded text-xs font-bold transition-all ${
+                          minDataPoints === val
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-purple-300'
+                            : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/40 hover:bg-white/10'
+                        }`}
+                      >
+                        {val === 15 ? 'MAX' : val}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -1170,6 +1221,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     setSelectedMarket('all');
                     setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
+                    setMinDataPoints(4);
                     toast.success('Filters reset', {
                       description: 'All filters have been cleared'
                     });
