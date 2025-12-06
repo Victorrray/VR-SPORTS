@@ -458,18 +458,24 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     if (selectedSport !== 'all') {
       // Map filter IDs to API sport values
       const sportMap: Record<string, string[]> = {
-        'nfl': ['americanfootball_nfl', 'nfl'],
-        'nba': ['basketball_nba', 'nba'],
-        'nhl': ['icehockey_nhl', 'nhl'],
-        'mlb': ['baseball_mlb', 'mlb'],
-        'ncaa-football': ['americanfootball_ncaaf', 'americanfootball_ncaa', 'ncaa_football'],
-        'ncaa-basketball': ['basketball_ncaab', 'basketball_ncaa', 'ncaa_basketball'],
-        'soccer': ['soccer_']  // Match any sport starting with soccer_
+        'nfl': ['americanfootball_nfl', 'nfl', 'NFL'],
+        'nba': ['basketball_nba', 'nba', 'NBA'],
+        'nhl': ['icehockey_nhl', 'nhl', 'NHL'],
+        'mlb': ['baseball_mlb', 'mlb', 'MLB'],
+        'ncaa-football': ['americanfootball_ncaaf', 'americanfootball_ncaa', 'ncaa_football', 'NCAA Football'],
+        'ncaa-basketball': ['basketball_ncaab', 'basketball_ncaa', 'ncaa_basketball', 'NCAA Basketball'],
+        'soccer': ['soccer_', 'soccer', 'Soccer']  // Match API keys (soccer_epl) or display label (Soccer)
       };
       
       const allowedSports = sportMap[selectedSport] || [];
-      const pickSport = pick.sport.toLowerCase();
-      const matches = allowedSports.some(sport => pickSport.includes(sport.toLowerCase()));
+      const pickSport = pick.sport?.toLowerCase() || '';
+      // Check if pick sport matches any allowed value (case-insensitive)
+      const matches = allowedSports.some(sport => {
+        const sportLower = sport.toLowerCase();
+        // For soccer_, check if pickSport starts with it (for API keys like soccer_epl)
+        // Otherwise check for exact match or includes
+        return pickSport === sportLower || pickSport.includes(sportLower) || sportLower.includes(pickSport);
+      });
       
       if (!matches) {
         return false;
