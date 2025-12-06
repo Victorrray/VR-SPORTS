@@ -376,12 +376,23 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         ]
       };
       
+      // Default soccer player props markets (for any soccer league not explicitly defined)
+      const defaultSoccerPlayerProps = [
+        'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+        'player_to_receive_card', 'player_to_receive_red_card',
+        'player_shots_on_target', 'player_shots', 'player_assists'
+      ];
+      
       // Get player props markets for requested sports
       const playerPropsMarkets = [];
       sportsArray.forEach(sport => {
         if (playerPropsMarketMap[sport]) {
           console.log(`🏈 Adding markets for ${sport}:`, playerPropsMarketMap[sport]);
           playerPropsMarkets.push(...playerPropsMarketMap[sport]);
+        } else if (sport.startsWith('soccer_')) {
+          // Use default soccer player props for any soccer league
+          console.log(`⚽ Adding default soccer markets for ${sport}:`, defaultSoccerPlayerProps);
+          playerPropsMarkets.push(...defaultSoccerPlayerProps);
         } else {
           console.log(`🏈 No player props markets found for ${sport}`);
         }
