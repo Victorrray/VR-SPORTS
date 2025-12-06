@@ -354,11 +354,29 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       if (playerPropsMap.size > 0) {
         const firstProp = playerPropsMap.values().next().value;
         console.log(`🏈 Sample prop books count: ${firstProp?.books?.length}, books:`, firstProp?.books?.map((b: any) => b.name));
+        console.log(`🏈 Sample prop data:`, {
+          playerName: firstProp?.playerName,
+          marketKey: firstProp?.marketKey,
+          point: firstProp?.point,
+          booksCount: firstProp?.books?.length,
+          firstBook: firstProp?.books?.[0]
+        });
       }
       
       // Convert player props map to picks
+      let skippedNoBooks = 0;
+      let skippedNoFilteredBooks = 0;
+      let skippedNoConsensusBooks = 0;
+      let skippedNoValidOdds = 0;
+      let skippedNoFilteredBestOdds = 0;
+      let skippedForcedSide = 0;
+      let successfulPicks = 0;
+      
       playerPropsMap.forEach((propData, pickKey) => {
-        if (propData.books.length === 0) return;
+        if (propData.books.length === 0) {
+          skippedNoBooks++;
+          return;
+        }
         
         // DFS apps that offer pick'em style betting (not traditional odds)
         // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
@@ -405,6 +423,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         // CRITICAL: If user filtered for specific sportsbooks but none of them have this prop, skip it
         if (userHasFilter && !hasFilteredBooks) {
+          skippedNoFilteredBooks++;
           return; // Don't show picks where the filtered sportsbook doesn't offer the line
         }
         
@@ -420,7 +439,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           ? filteredBooksAtConsensus 
           : (filteredBooksAtConsensus.length > 0 ? filteredBooksAtConsensus : booksAtConsensusLine);
         
-        if (booksForMainCard.length === 0) return; // Skip if no books at consensus line
+        if (booksForMainCard.length === 0) {
+          skippedNoConsensusBooks++;
+          return; // Skip if no books at consensus line
+        }
         
         // Calculate EV for BOTH Over and Under to determine which side is better
         const MIN_BOOKS_FOR_EV = 4;
@@ -467,7 +489,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           return !isNaN(odds) && b.overOdds && b.overOdds !== '--';
         });
         
-        if (allBooksWithValidOverOdds.length === 0) return; // Skip if no valid odds
+        if (allBooksWithValidOverOdds.length === 0) {
+          skippedNoValidOdds++;
+          return; // Skip if no valid odds
+        }
         
         // Find the OVERALL best Over book (across all books)
         const overallBestOverBook = allBooksWithValidOverOdds.reduce((best: any, book: any) => {
@@ -531,6 +556,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           
           // Skip if filtered book doesn't have the best odds for either side
           if (!hasOverBestOdds && !hasUnderBestOdds) {
+            skippedNoFilteredBestOdds++;
             return; // Skip - another book has better odds
           }
           
@@ -607,6 +633,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (evWantsSide !== forcedSide) {
             // EV calculation wants a different side than what the filtered book has best odds for
             // Skip this pick - the filtered book doesn't have the best odds for the better EV side
+            skippedForcedSide++;
             return;
           }
         }
@@ -664,6 +691,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // Get the best odds for the chosen side
         const bestOddsForPick = isOverBetter ? bestBookForCard.overOdds : bestBookForCard.underOdds;
         
+        successfulPicks++;
         allPicks.push({
           id: `${game.id}-${pickKey}`,
           ev,
@@ -688,6 +716,18 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           gameTime: game.commence_time || undefined,
           commenceTime: game.commence_time || undefined
         });
+      });
+      
+      // Log filter summary for debugging
+      console.log(`🏈 Player props filter summary:`, {
+        totalProps: playerPropsMap.size,
+        successfulPicks,
+        skippedNoBooks,
+        skippedNoFilteredBooks,
+        skippedNoConsensusBooks,
+        skippedNoValidOdds,
+        skippedNoFilteredBestOdds,
+        skippedForcedSide
       });
     } else {
       // GAME ODDS MODE: Create separate picks for each market type
