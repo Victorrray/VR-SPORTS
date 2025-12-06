@@ -1404,7 +1404,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 
                 {/* Desktop Inline Dropdown */}
                 {sportExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
                     {sports.map((sport) => (
                       <button
                         key={sport.id}
@@ -1501,7 +1501,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 
                 {/* Desktop Inline Dropdown */}
                 {marketExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg overflow-hidden`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
                     {marketTypes.map((market) => (
                       <button
                         key={market.id}
