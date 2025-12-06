@@ -148,6 +148,18 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [minDataPoints, setMinDataPoints] = useState(4);
   
+  // Auto-adjust minDataPoints when sport changes
+  // Soccer has fewer books (1-2), so lower the threshold
+  useEffect(() => {
+    if (selectedSport === 'soccer') {
+      setMinDataPoints(1); // Soccer only has 1-2 books
+    } else if (selectedSport === 'all') {
+      setMinDataPoints(2); // Mixed sports, use moderate threshold
+    } else {
+      setMinDataPoints(4); // US sports have more books
+    }
+  }, [selectedSport]);
+  
   // Close handlers with animation for sub-filters
   const closeDateDrawer = () => {
     setDateClosing(true);
