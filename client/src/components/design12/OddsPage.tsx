@@ -1142,32 +1142,34 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 </div>
               </div>
 
-              {/* Minimum Data Points Slider */}
-              <div>
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
-                  Minimum Data Points
-                </label>
-                <div className={`p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
-                  <div className="flex items-center gap-3">
-                    <span className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-xs font-bold`}>1</span>
-                    <input
-                      type="range"
-                      min="1"
-                      max="15"
-                      step="1"
-                      value={minDataPoints}
-                      onChange={(e) => setMinDataPoints(parseInt(e.target.value))}
-                      className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-purple-500`}
-                      style={{
-                        background: `linear-gradient(to right, ${isLight ? '#9333ea' : '#a855f7'} 0%, ${isLight ? '#9333ea' : '#a855f7'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
-                      }}
-                    />
-                    <div className={`${isLight ? 'text-purple-600 bg-purple-100' : 'text-purple-300 bg-purple-500/20'} px-2 py-1 rounded-lg font-bold text-sm min-w-[40px] text-center`}>
-                      {minDataPoints === 15 ? 'MAX' : minDataPoints}
+              {/* Minimum Data Points Slider - Hidden for arbitrage */}
+              {selectedBetType !== 'arbitrage' && (
+                <div>
+                  <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                    Minimum Data Points
+                  </label>
+                  <div className={`p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
+                    <div className="flex items-center gap-3">
+                      <span className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-xs font-bold`}>1</span>
+                      <input
+                        type="range"
+                        min="1"
+                        max="15"
+                        step="1"
+                        value={minDataPoints}
+                        onChange={(e) => setMinDataPoints(parseInt(e.target.value))}
+                        className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-purple-500`}
+                        style={{
+                          background: `linear-gradient(to right, ${isLight ? '#9333ea' : '#a855f7'} 0%, ${isLight ? '#9333ea' : '#a855f7'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
+                        }}
+                      />
+                      <div className={`${isLight ? 'text-purple-600 bg-purple-100' : 'text-purple-300 bg-purple-500/20'} px-2 py-1 rounded-lg font-bold text-sm min-w-[40px] text-center`}>
+                        {minDataPoints === 15 ? 'MAX' : minDataPoints}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Date Filter */}
               <div className="relative">
