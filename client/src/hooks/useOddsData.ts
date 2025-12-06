@@ -1685,13 +1685,21 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         'ncaa-basketball': 'basketball_ncaab',
         'nhl': 'icehockey_nhl',
         'mlb': 'baseball_mlb',
+        // Soccer leagues
+        'soccer-epl': 'soccer_epl',
+        'soccer-mls': 'soccer_mls',
+        'soccer-laliga': 'soccer_spain_la_liga',
+        'soccer-bundesliga': 'soccer_germany_bundesliga',
+        'soccer-seriea': 'soccer_italy_serie_a',
+        'soccer-ligue1': 'soccer_france_ligue_one',
+        'soccer-ucl': 'soccer_uefa_champs_league',
       };
       
       // Map frontend filters to backend parameter names
-      // Default sports if not specified (include NCAA sports)
+      // Default sports if not specified (include NCAA sports and soccer)
       const sportsList = sport && sport !== 'all' 
         ? (sportKeyMap[sport] || sport)
-        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl';
+        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_mls,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_italy_serie_a,soccer_france_ligue_one,soccer_uefa_champs_league';
       params.append('sports', sportsList);
       
       // Map market types to API format

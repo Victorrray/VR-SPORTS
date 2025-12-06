@@ -232,7 +232,15 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     { id: 'nfl', name: 'NFL', count: 12, active: false },
     { id: 'nba', name: 'NBA', count: 18, active: false },
     { id: 'nhl', name: 'NHL', count: 24, active: false },
-    { id: 'ncaa-basketball', name: 'NCAA Basketball', count: 25, active: false }
+    { id: 'ncaa-basketball', name: 'NCAA Basketball', count: 25, active: false },
+    // Soccer Leagues
+    { id: 'soccer-epl', name: 'EPL', count: 10, active: false },
+    { id: 'soccer-mls', name: 'MLS', count: 8, active: false },
+    { id: 'soccer-laliga', name: 'La Liga', count: 10, active: false },
+    { id: 'soccer-bundesliga', name: 'Bundesliga', count: 9, active: false },
+    { id: 'soccer-seriea', name: 'Serie A', count: 10, active: false },
+    { id: 'soccer-ligue1', name: 'Ligue 1', count: 10, active: false },
+    { id: 'soccer-ucl', name: 'Champions League', count: 8, active: false },
   ];
 
   const betTypes = [
@@ -245,18 +253,24 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   // Player props market types
   const marketTypes = [
     { id: 'all', name: 'All Props' },
+    // Basketball Props
     { id: 'player_points', name: 'Points' },
     { id: 'player_rebounds', name: 'Rebounds' },
     { id: 'player_assists', name: 'Assists' },
     { id: 'player_threes', name: '3-Pointers' },
     { id: 'player_steals', name: 'Steals' },
     { id: 'player_blocks', name: 'Blocks' },
+    // Football Props
     { id: 'player_pass_yds', name: 'Passing Yards' },
     { id: 'player_pass_tds', name: 'Passing TDs' },
     { id: 'player_rush_yds', name: 'Rushing Yards' },
     { id: 'player_receptions', name: 'Receptions' },
     { id: 'player_reception_yds', name: 'Receiving Yards' },
     { id: 'player_anytime_td', name: 'Anytime TD' },
+    // Soccer Props
+    { id: 'player_goal_scorer_anytime', name: 'Anytime Goalscorer' },
+    { id: 'player_shots', name: 'Shots' },
+    { id: 'player_shots_on_target', name: 'Shots on Target' },
   ];
 
   const sportsbooksByTier = [

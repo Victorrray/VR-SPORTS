@@ -317,7 +317,15 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     { id: 'nfl', name: 'NFL', count: 12, active: false },
     { id: 'nba', name: 'NBA', count: 18, active: false },
     { id: 'nhl', name: 'NHL', count: 24, active: false },
-    { id: 'ncaa-basketball', name: 'NCAA Basketball', count: 25, active: false }
+    { id: 'ncaa-basketball', name: 'NCAA Basketball', count: 25, active: false },
+    // Soccer Leagues
+    { id: 'soccer-epl', name: 'EPL', count: 10, active: false },
+    { id: 'soccer-mls', name: 'MLS', count: 8, active: false },
+    { id: 'soccer-laliga', name: 'La Liga', count: 10, active: false },
+    { id: 'soccer-bundesliga', name: 'Bundesliga', count: 9, active: false },
+    { id: 'soccer-seriea', name: 'Serie A', count: 10, active: false },
+    { id: 'soccer-ligue1', name: 'Ligue 1', count: 10, active: false },
+    { id: 'soccer-ucl', name: 'Champions League', count: 8, active: false },
   ];
 
   const betTypes = [
