@@ -1849,33 +1849,88 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
                     {/* Card Content - Mobile BetCard Style */}
                     <div className="p-3 space-y-2.5">
-                      {/* Pick Display - Rounded */}
-                      <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-2xl`}>
-                        
-                        <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                          {pick.pick}
-                        </div>
-                      </div>
+                      {/* Arbitrage Mobile - Show both sides stacked */}
+                      {selectedBetType === 'arbitrage' ? (
+                        <>
+                          {/* Side 1 */}
+                          <div className={`p-3 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-2xl`}>
+                            <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 1</div>
+                            <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold mb-2`}>{pick.pick}</div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Book</div>
+                                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.bestBook}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Odds</div>
+                                <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold`}>{formatOdds(pick.bestOdds)}</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Side 2 */}
+                          {(() => {
+                            const books = pick.allBooks || pick.books || [];
+                            const oppositeSideName = pick.pick.includes('Over') ? pick.pick.replace('Over', 'Under') 
+                              : pick.pick.includes('Under') ? pick.pick.replace('Under', 'Over')
+                              : pick.team2 || 'Opposite';
+                            const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                            const bestOppBook = booksWithTeam2.length > 0 
+                              ? booksWithTeam2.reduce((best: any, b: any) => {
+                                  const bestOdds = parseInt(best.team2Odds, 10);
+                                  const bOdds = parseInt(b.team2Odds, 10);
+                                  return bOdds > bestOdds ? b : best;
+                                }, booksWithTeam2[0])
+                              : null;
+                            
+                            return bestOppBook ? (
+                              <div className={`p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-2xl`}>
+                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
+                                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold mb-2`}>{oppositeSideName}</div>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Book</div>
+                                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestOppBook.name}</div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Odds</div>
+                                    <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold`}>{formatOdds(bestOppBook.team2Odds)}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : null;
+                          })()}
+                        </>
+                      ) : (
+                        <>
+                          {/* Standard Pick Display - Rounded */}
+                          <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-2xl`}>
+                            <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                              {pick.pick}
+                            </div>
+                          </div>
 
-                      {/* Odds & Sportsbook - Rounded */}
-                      <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-2xl border`}>
-                        <div>
-                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
-                            Sportsbook
+                          {/* Odds & Sportsbook - Rounded */}
+                          <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-2xl border`}>
+                            <div>
+                              <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
+                                Sportsbook
+                              </div>
+                              <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                                {pick.bestBook}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
+                                Odds
+                              </div>
+                              <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                                {formatOdds(pick.bestOdds)}
+                              </div>
+                            </div>
                           </div>
-                          <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
-                            {pick.bestBook}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase tracking-wide mb-0.5`}>
-                            Odds
-                          </div>
-                          <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                            {formatOdds(pick.bestOdds)}
-                          </div>
-                        </div>
-                      </div>
+                        </>
+                      )}
 
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-2">
