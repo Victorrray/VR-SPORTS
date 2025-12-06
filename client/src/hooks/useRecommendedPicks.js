@@ -15,7 +15,7 @@ const RECOMMENDED_SPORTSBOOKS = [
 export function useRecommendedPicks(options = {}) {
   const {
     limit = 4,
-    minEV = 5, // Minimum 5% EV
+    minEV = 2, // Minimum 2% EV (lowered from 5% to show more picks)
     enabled = true,
     sportsbooks = RECOMMENDED_SPORTSBOOKS, // Default to major books
   } = options;
