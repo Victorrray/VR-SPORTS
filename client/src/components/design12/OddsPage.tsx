@@ -1701,17 +1701,11 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
           {sortedPicks.length} {sortedPicks.length === 1 ? 'pick' : 'picks'} found
         </div>
-        <div className={`flex items-center gap-2 text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+        <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
           {isRefreshing ? (
-            <div className="flex items-center gap-1.5">
-              <RefreshCw className="w-4 h-4 animate-spin text-emerald-500" />
-              <span className="text-emerald-500 font-medium">Updating...</span>
-            </div>
+            <span className="text-emerald-500 font-medium">Updating...</span>
           ) : lastUpdated && (
-            <div className="flex items-center gap-1.5">
-              <RefreshCw className="w-4 h-4" />
-              <span>Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
+            <span>Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           )}
         </div>
       </div>
