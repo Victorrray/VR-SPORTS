@@ -1046,7 +1046,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           {/* Backdrop - full screen overlay */}
           <div 
             className={`fixed inset-0 bg-black/50 backdrop-blur-md z-[100] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
-            style={{ top: '-100px', height: 'calc(100vh + 100px)' }}
             onClick={closeFilterMenu}
           />
           
