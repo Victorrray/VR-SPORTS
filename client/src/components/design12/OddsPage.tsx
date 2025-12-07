@@ -221,7 +221,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     setSportsbooksClosing(true);
     setTimeout(() => { setSportsbooksExpanded(false); setSportsbooksClosing(false); }, 280);
   };
-  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true); // Always enabled by default for better UX
   const [minDataPoints, setMinDataPoints] = useState(cachedFilters?.minDataPoints || 4);
 
   // Save filters to localStorage when they change
@@ -260,8 +260,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     date: selectedDate,
     minDataPoints: minDataPoints,
     enabled: true,
-    autoRefresh: true,
-    refreshInterval: 45000  // 45 seconds
+    autoRefresh: autoRefresh,  // Controlled by user toggle
+    refreshInterval: 30000  // 30 seconds for faster updates
   });
 
   // Filter picks by selected date
@@ -309,17 +309,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     setCurrentPage(1); // Reset to first page when filters change
   }, [selectedSport, selectedMarket, selectedBetType, selectedDate]);
 
-  // Auto-refresh effect - refresh odds every 30 seconds when enabled
-  useEffect(() => {
-    if (!autoRefresh) return;
-    
-    const refreshInterval = setInterval(() => {
-      console.log('🔄 Auto-refreshing odds data...');
-      refetch();
-    }, 30000); // 30 seconds
-    
-    return () => clearInterval(refreshInterval);
-  }, [autoRefresh, refetch]);
+  // Auto-refresh is now handled by useOddsData hook (45 second interval)
+  // The hook uses isRefreshing state to update data in background without showing loading state
 
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
@@ -1187,25 +1178,24 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     PLATINUM
                   </span>
                 </label>
-                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl ${!hasPlatinum ? 'opacity-60' : ''}`}>
+                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
                   <div className="flex items-center gap-3 flex-1">
-                    <RefreshCw className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                    <RefreshCw className={`w-5 h-5 ${autoRefresh ? (isLight ? 'text-purple-600' : 'text-purple-400') : (isLight ? 'text-gray-400' : 'text-white/40')}`} />
                     <div>
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>Auto Refresh Odds</div>
                       <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold`}>
-                        {hasPlatinum ? 'Update every 30 seconds' : 'Upgrade to Platinum to enable'}
+                        {autoRefresh ? 'Updates every 30 seconds in background' : 'Disabled - manual refresh only'}
                       </div>
                     </div>
                   </div>
-                  <label className={`relative inline-flex items-center ${!hasPlatinum ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                  <label className="relative inline-flex items-center cursor-pointer">
                     <input 
                       type="checkbox" 
                       className="sr-only peer" 
-                      checked={hasPlatinum && autoRefresh}
-                      onChange={(e) => hasPlatinum && setAutoRefresh(e.target.checked)}
-                      disabled={!hasPlatinum}
+                      checked={autoRefresh}
+                      onChange={(e) => setAutoRefresh(e.target.checked)}
                     />
-                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500 ${!hasPlatinum ? 'cursor-not-allowed' : ''}`}></div>
+                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500`}></div>
                   </label>
                 </div>
               </div>
