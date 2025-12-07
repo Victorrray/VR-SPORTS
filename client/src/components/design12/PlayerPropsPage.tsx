@@ -585,9 +585,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
               className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
-                isFilterMenuOpen || selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today'
-                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/40 text-white'
-                  : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
               }`}
             >
               <Filter className="w-4 h-4" />
@@ -685,22 +683,26 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       {/* Filter Side Panel */}
       {isFilterMenuOpen && (
         <>
-          {/* Backdrop - full screen overlay */}
+          {/* Backdrop - positioned to the right of the filter panel */}
           <div 
-            className={`fixed inset-0 bg-black/50 backdrop-blur-md z-[100] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
-            style={{ top: '-100px', height: 'calc(100vh + 100px)' }}
+            className={`fixed top-0 right-0 bottom-0 bg-black/50 backdrop-blur-md z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
+            style={{ left: '320px' }}
             onClick={closeFilterMenu}
           />
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`fixed left-0 right-0 lg:right-auto lg:w-80 lg:top-0 lg:bottom-0 max-lg:bottom-0 max-lg:h-auto max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-[101] lg:rounded-none rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'}`}
-            style={{ top: 0 }}
+            className={`!fixed !top-0 !left-0 !bottom-0 max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 lg:rounded-none rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} w-80`}
+            style={{
+              zIndex: 9999,
+              marginTop: 0,
+              paddingTop: 0,
+            }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-4 pb-4 space-y-4 lg:border-b border-b-0`}>
               {/* Drag Handle - Mobile Only */}
-              <div className="lg:hidden flex justify-center -mt-3 mb-2">
+              <div className="lg:hidden flex justify-center mb-2">
                 <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
               </div>
 
