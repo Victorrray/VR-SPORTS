@@ -1141,7 +1141,15 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`fixed inset-y-0 left-0 max-lg:inset-y-auto max-lg:bottom-0 max-lg:left-0 max-lg:right-0 max-lg:h-auto max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 z-[9999] lg:rounded-none rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} lg:w-80`}
+            className={`max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 lg:rounded-none rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'}`}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: '320px',
+              zIndex: 9999,
+            }}
           >
             {/* Sticky Header */}
             <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 p-6 pb-4 space-y-4 lg:border-b border-b-0`}>
