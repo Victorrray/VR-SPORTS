@@ -1692,27 +1692,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           {sortedPicks.length} {sortedPicks.length === 1 ? 'pick' : 'picks'} found
         </div>
         <div className={`flex items-center gap-2 text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-          <button
-            onClick={() => refetch()}
-            className={`p-1.5 rounded-lg transition-all ${
-              isLight 
-                ? 'hover:bg-gray-100 text-gray-500 hover:text-gray-700' 
-                : 'hover:bg-white/10 text-white/50 hover:text-white'
-            }`}
-            title="Refresh odds"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </button>
-          {isRefreshing && (
+          {isRefreshing ? (
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <RefreshCw className="w-4 h-4 animate-spin text-emerald-500" />
               <span className="text-emerald-500 font-medium">Updating...</span>
             </div>
-          )}
-          {lastUpdated && !isRefreshing && (
-            <span>
-              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
+          ) : lastUpdated && (
+            <div className="flex items-center gap-1.5">
+              <RefreshCw className="w-4 h-4" />
+              <span>Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
           )}
         </div>
       </div>
