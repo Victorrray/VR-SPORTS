@@ -1133,9 +1133,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       {/* Filter Side Panel */}
       {isFilterMenuOpen && (
         <>
-          {/* Backdrop - full screen overlay */}
+          {/* Backdrop - positioned to the right of the filter panel */}
           <div 
-            className={`fixed inset-0 bg-black/50 backdrop-blur-md z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
+            className={`fixed top-0 right-0 bottom-0 bg-black/50 backdrop-blur-md z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
+            style={{ left: '320px' }}
             onClick={closeFilterMenu}
           />
           
