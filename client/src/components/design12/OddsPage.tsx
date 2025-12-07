@@ -671,6 +671,22 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     return totalImplied < 1 ? (1 - totalImplied) * 100 : 0;
   };
 
+  // Helper function to calculate middle gap for sorting
+  const calculateMiddleGap = (pick: any) => {
+    const books = pick.allBooks || pick.books || [];
+    const line1 = pick.line || 0;
+    const booksWithDiffLines = books.filter((b: any) => b.line && b.line !== line1);
+    if (booksWithDiffLines.length === 0) return 0;
+    
+    const bestMiddleBook = booksWithDiffLines.reduce((best: any, b: any) => {
+      const gap = Math.abs(b.line - line1);
+      const bestGap = Math.abs(best.line - line1);
+      return gap > bestGap ? b : best;
+    }, booksWithDiffLines[0]);
+    
+    return Math.abs(bestMiddleBook.line - line1);
+  };
+
   // Sort display picks
   const sortedPicks = [...displayPicks].sort((a, b) => {
     // For arbitrage, always sort by ROI (highest first)
@@ -678,6 +694,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       const aROI = calculateROI(a);
       const bROI = calculateROI(b);
       return bROI - aROI; // Highest ROI first
+    }
+    
+    // For middles, sort by gap (highest first)
+    if (selectedBetType === 'middles') {
+      const aGap = calculateMiddleGap(a);
+      const bGap = calculateMiddleGap(b);
+      return bGap - aGap; // Highest gap first
     }
     
     if (!sortBy) return 0;
@@ -1661,12 +1684,12 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       {/* Odds Table */}
       <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden`}>
         {/* Table Header - Desktop Only */}
-        {selectedBetType === 'arbitrage' ? (
+        {selectedBetType === 'arbitrage' || selectedBetType === 'middles' ? (
           <div className={`hidden lg:grid lg:grid-cols-12 gap-4 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
-            <div className={`col-span-1 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>ROI</div>
+            <div className={`col-span-1 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>{selectedBetType === 'middles' ? 'Gap' : 'ROI'}</div>
             <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
             <div className={`col-span-6 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Sides</div>
-            <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Stakes</div>
+            <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>{selectedBetType === 'middles' ? 'Middle' : 'Stakes'}</div>
           </div>
         ) : (
           <div className={`hidden lg:grid lg:grid-cols-12 gap-4 lg:gap-6 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
@@ -1690,40 +1713,66 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                   onClick={() => toggleRow(pick.id)}
                   className={`w-full p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all cursor-pointer`}
                 >
-                  {/* Arbitrage Layout - Shows both sides stacked */}
-                  {selectedBetType === 'arbitrage' ? (
+                  {/* Arbitrage/Middles Layout - Shows both sides stacked */}
+                  {(selectedBetType === 'arbitrage' || selectedBetType === 'middles') ? (
                     <div className="hidden lg:block">
-                      {/* Arbitrage Header Row */}
+                      {/* Arbitrage/Middles Header Row */}
                       <div className="grid grid-cols-12 gap-4 items-center">
-                        {/* ROI Badge - Calculate arbitrage ROI */}
+                        {/* ROI/Gap Badge */}
                         <div className="col-span-1 flex items-center justify-center">
                           {(() => {
-                            // Calculate ROI for arbitrage
                             const books = pick.allBooks || pick.books || [];
-                            const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
-                            const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
-                            const bestOppBook = booksWithTeam2.length > 0 
-                              ? booksWithTeam2.reduce((best: any, b: any) => {
-                                  const bestOdds = parseInt(best.team2Odds, 10);
-                                  const bOdds = parseInt(b.team2Odds, 10);
-                                  return bOdds > bestOdds ? b : best;
-                                }, booksWithTeam2[0])
-                              : null;
-                            const side2Odds = bestOppBook ? parseInt(bestOppBook.team2Odds, 10) : 0;
                             
-                            const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
-                            const decimal1 = toDecimal(side1Odds);
-                            const decimal2 = toDecimal(side2Odds);
-                            const impliedProb1 = 1 / decimal1;
-                            const impliedProb2 = 1 / decimal2;
-                            const totalImplied = impliedProb1 + impliedProb2;
-                            const roi = totalImplied < 1 ? ((1 - totalImplied) * 100).toFixed(2) : '0';
-                            
-                            return (
-                              <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                                {roi}%
-                              </div>
-                            );
+                            if (selectedBetType === 'middles') {
+                              // Calculate middle gap (difference in lines)
+                              const line1 = pick.line || 0;
+                              const booksWithDiffLines = books.filter((b: any) => b.line && b.line !== line1);
+                              if (booksWithDiffLines.length === 0) {
+                                return (
+                                  <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
+                                    0 pts
+                                  </div>
+                                );
+                              }
+                              const bestMiddleBook = booksWithDiffLines.reduce((best: any, b: any) => {
+                                const gap = Math.abs(b.line - line1);
+                                const bestGap = Math.abs(best.line - line1);
+                                return gap > bestGap ? b : best;
+                              }, booksWithDiffLines[0]);
+                              const gap = Math.abs(bestMiddleBook.line - line1);
+                              
+                              return (
+                                <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
+                                  {gap} pts
+                                </div>
+                              );
+                            } else {
+                              // Calculate ROI for arbitrage
+                              const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
+                              const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                              const bestOppBook = booksWithTeam2.length > 0 
+                                ? booksWithTeam2.reduce((best: any, b: any) => {
+                                    const bestOdds = parseInt(best.team2Odds, 10);
+                                    const bOdds = parseInt(b.team2Odds, 10);
+                                    return bOdds > bestOdds ? b : best;
+                                  }, booksWithTeam2[0])
+                                : null;
+                              const side2Odds = bestOppBook ? parseInt(bestOppBook.team2Odds, 10) : 0;
+                              
+                              const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+                              const decimal1 = toDecimal(side1Odds);
+                              const decimal2 = toDecimal(side2Odds);
+                              const impliedProb1 = 1 / decimal1;
+                              const impliedProb2 = 1 / decimal2;
+                              const totalImplied = impliedProb1 + impliedProb2;
+                              const roi = totalImplied < 1 ? ((1 - totalImplied) * 100).toFixed(2) : '0';
+                              
+                              return (
+                                <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                  {roi}%
+                                </div>
+                              );
+                            }
                           })()}
                         </div>
 
@@ -1752,96 +1801,178 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           </div>
                         </div>
 
-                        {/* Both Sides Stacked + Stakes */}
+                        {/* Both Sides Stacked + Stakes/Middle Info */}
                         {(() => {
-                          // Calculate stakes for $100 total
                           const books = pick.allBooks || pick.books || [];
-                          const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
-                          const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
-                          const bestOppBook = booksWithTeam2.length > 0 
-                            ? booksWithTeam2.reduce((best: any, b: any) => {
-                                const bestOdds = parseInt(best.team2Odds, 10);
-                                const bOdds = parseInt(b.team2Odds, 10);
-                                return bOdds > bestOdds ? b : best;
-                              }, booksWithTeam2[0])
-                            : null;
-                          const side2Odds = bestOppBook ? parseInt(bestOppBook.team2Odds, 10) : 0;
                           
-                          const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
-                          const decimal1 = toDecimal(side1Odds);
-                          const decimal2 = toDecimal(side2Odds);
-                          const impliedProb1 = 1 / decimal1;
-                          const impliedProb2 = 1 / decimal2;
-                          const totalImplied = impliedProb1 + impliedProb2;
-                          
-                          const totalStake = arbitrageStake;
-                          const stake1 = totalStake * (impliedProb1 / totalImplied);
-                          const stake2 = totalStake * (impliedProb2 / totalImplied);
-                          
-                          const oppositeSideName = pick.pick.includes('Over') ? pick.pick.replace('Over', 'Under') 
-                            : pick.pick.includes('Under') ? pick.pick.replace('Under', 'Over')
-                            : pick.team2 || 'Opposite';
-                          
-                          return (
-                            <>
-                              <div className="col-span-6">
-                                {/* Side 1 - Best odds for this pick */}
-                                <div className={`grid grid-cols-3 gap-4 p-3 mb-2 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-xl`}>
-                                  <div>
-                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 1</div>
-                                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.pick}</div>
-                                  </div>
-                                  <div>
-                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Book</div>
-                                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.bestBook}</div>
-                                  </div>
-                                  <div>
-                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
-                                    <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{formatOdds(pick.bestOdds)}</div>
-                                  </div>
-                                </div>
-                                
-                                {/* Side 2 - Opposite side with best odds from another book */}
-                                {bestOppBook ? (
-                                  <div className={`grid grid-cols-3 gap-4 p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-xl`}>
+                          if (selectedBetType === 'middles') {
+                            // Middles layout - show different lines from different books
+                            const line1 = pick.line || 0;
+                            const booksWithDiffLines = books.filter((b: any) => b.line && b.line !== line1);
+                            const bestMiddleBook = booksWithDiffLines.length > 0 
+                              ? booksWithDiffLines.reduce((best: any, b: any) => {
+                                  const gap = Math.abs(b.line - line1);
+                                  const bestGap = Math.abs(best.line - line1);
+                                  return gap > bestGap ? b : best;
+                                }, booksWithDiffLines[0])
+                              : null;
+                            const line2 = bestMiddleBook?.line || 0;
+                            const gap = Math.abs(line2 - line1);
+                            
+                            // Determine which side is which based on the pick
+                            const isOver = pick.pick.includes('Over');
+                            const isUnder = pick.pick.includes('Under');
+                            const side1Label = pick.pick;
+                            const side2Label = isOver ? pick.pick.replace('Over', 'Under').replace(String(line1), String(line2))
+                              : isUnder ? pick.pick.replace('Under', 'Over').replace(String(line1), String(line2))
+                              : `${pick.team2 || 'Opposite'} ${line2 > 0 ? '+' : ''}${line2}`;
+                            
+                            return (
+                              <>
+                                <div className="col-span-6">
+                                  {/* Side 1 */}
+                                  <div className={`grid grid-cols-3 gap-4 p-3 mb-2 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-xl`}>
                                     <div>
-                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
-                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{oppositeSideName}</div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 1</div>
+                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{side1Label}</div>
                                     </div>
                                     <div>
                                       <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Book</div>
-                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestOppBook.name}</div>
+                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.bestBook}</div>
                                     </div>
                                     <div>
-                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
-                                      <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{formatOdds(bestOppBook.team2Odds)}</div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Line</div>
+                                      <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{line1 > 0 ? `+${line1}` : line1}</div>
                                     </div>
                                   </div>
-                                ) : (
-                                  <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl text-center`}>
-                                    <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>No opposite side data</span>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              {/* Stakes Column */}
-                              <div className="col-span-2 flex flex-col">
-                                <div className={`h-full p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl flex flex-col justify-center`}>
-                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-3 text-center`}>Stakes (${arbitrageStake})</div>
-                                  <div className="space-y-3">
-                                    <div className="flex justify-between items-center">
-                                      <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>Side 1:</span>
-                                      <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>${stake1.toFixed(2)}</span>
+                                  
+                                  {/* Side 2 */}
+                                  {bestMiddleBook ? (
+                                    <div className={`grid grid-cols-3 gap-4 p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-xl`}>
+                                      <div>
+                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
+                                        <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{side2Label}</div>
+                                      </div>
+                                      <div>
+                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Book</div>
+                                        <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestMiddleBook.name}</div>
+                                      </div>
+                                      <div>
+                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Line</div>
+                                        <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{line2 > 0 ? `+${line2}` : line2}</div>
+                                      </div>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                      <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>Side 2:</span>
-                                      <span className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-base`}>${stake2.toFixed(2)}</span>
+                                  ) : (
+                                    <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl text-center`}>
+                                      <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>No middle opportunity</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Middle Info Column */}
+                                <div className="col-span-2 flex flex-col">
+                                  <div className={`h-full p-3 ${isLight ? 'bg-amber-50 border-amber-200' : 'bg-amber-500/10 border-amber-400/20'} border rounded-xl flex flex-col justify-center`}>
+                                    <div className={`${isLight ? 'text-amber-700' : 'text-amber-400'} text-xs font-bold uppercase mb-3 text-center`}>Middle Range</div>
+                                    <div className="text-center">
+                                      <div className={`${isLight ? 'text-amber-800' : 'text-amber-300'} font-bold text-2xl`}>{gap}</div>
+                                      <div className={`${isLight ? 'text-amber-600' : 'text-amber-400/70'} text-xs font-bold`}>points</div>
+                                    </div>
+                                    <div className={`mt-2 text-center ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs`}>
+                                      {line1} to {line2}
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            </>
-                          );
+                              </>
+                            );
+                          } else {
+                            // Arbitrage layout
+                            const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
+                            const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                            const bestOppBook = booksWithTeam2.length > 0 
+                              ? booksWithTeam2.reduce((best: any, b: any) => {
+                                  const bestOdds = parseInt(best.team2Odds, 10);
+                                  const bOdds = parseInt(b.team2Odds, 10);
+                                  return bOdds > bestOdds ? b : best;
+                                }, booksWithTeam2[0])
+                              : null;
+                            const side2Odds = bestOppBook ? parseInt(bestOppBook.team2Odds, 10) : 0;
+                            
+                            const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+                            const decimal1 = toDecimal(side1Odds);
+                            const decimal2 = toDecimal(side2Odds);
+                            const impliedProb1 = 1 / decimal1;
+                            const impliedProb2 = 1 / decimal2;
+                            const totalImplied = impliedProb1 + impliedProb2;
+                            
+                            const totalStake = arbitrageStake;
+                            const stake1 = totalStake * (impliedProb1 / totalImplied);
+                            const stake2 = totalStake * (impliedProb2 / totalImplied);
+                            
+                            const oppositeSideName = pick.pick.includes('Over') ? pick.pick.replace('Over', 'Under') 
+                              : pick.pick.includes('Under') ? pick.pick.replace('Under', 'Over')
+                              : pick.team2 || 'Opposite';
+                            
+                            return (
+                              <>
+                                <div className="col-span-6">
+                                  {/* Side 1 - Best odds for this pick */}
+                                  <div className={`grid grid-cols-3 gap-4 p-3 mb-2 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-xl`}>
+                                    <div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 1</div>
+                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.pick}</div>
+                                    </div>
+                                    <div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Book</div>
+                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.bestBook}</div>
+                                    </div>
+                                    <div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
+                                      <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{formatOdds(pick.bestOdds)}</div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Side 2 - Opposite side with best odds from another book */}
+                                  {bestOppBook ? (
+                                    <div className={`grid grid-cols-3 gap-4 p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-xl`}>
+                                      <div>
+                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
+                                        <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{oppositeSideName}</div>
+                                      </div>
+                                      <div>
+                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Book</div>
+                                        <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestOppBook.name}</div>
+                                      </div>
+                                      <div>
+                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
+                                        <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{formatOdds(bestOppBook.team2Odds)}</div>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl text-center`}>
+                                      <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>No opposite side data</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Stakes Column */}
+                                <div className="col-span-2 flex flex-col">
+                                  <div className={`h-full p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl flex flex-col justify-center`}>
+                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-3 text-center`}>Stakes (${arbitrageStake})</div>
+                                    <div className="space-y-3">
+                                      <div className="flex justify-between items-center">
+                                        <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>Side 1:</span>
+                                        <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>${stake1.toFixed(2)}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>Side 2:</span>
+                                        <span className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-base`}>${stake2.toFixed(2)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          }
                         })()}
                       </div>
                     </div>
@@ -1938,7 +2069,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             }) : 'Time TBD'}
                           </div>
                         </div>
-                        {/* Show ROI for arbitrage, EV for others */}
+                        {/* Show ROI for arbitrage, Gap for middles, EV for others */}
                         {selectedBetType === 'arbitrage' ? (
                           (() => {
                             const books = pick.allBooks || pick.books || [];
@@ -1969,6 +2100,28 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               </div>
                             );
                           })()
+                        ) : selectedBetType === 'middles' ? (
+                          (() => {
+                            const books = pick.allBooks || pick.books || [];
+                            const line1 = pick.line || 0;
+                            const booksWithDiffLines = books.filter((b: any) => b.line && b.line !== line1);
+                            const bestMiddleBook = booksWithDiffLines.length > 0 
+                              ? booksWithDiffLines.reduce((best: any, b: any) => {
+                                  const gap = Math.abs(b.line - line1);
+                                  const bestGap = Math.abs(best.line - line1);
+                                  return gap > bestGap ? b : best;
+                                }, booksWithDiffLines[0])
+                              : null;
+                            const gap = bestMiddleBook ? Math.abs(bestMiddleBook.line - line1) : 0;
+                            
+                            return (
+                              <div className={`px-2.5 py-1 ${isLight ? 'bg-amber-100' : 'bg-amber-500/20'} rounded-full`}>
+                                <span className={`${isLight ? 'text-amber-700' : 'text-amber-400'} font-bold text-xs`}>
+                                  {gap} pts
+                                </span>
+                              </div>
+                            );
+                          })()
                         ) : (
                           <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-full border`}>
                             <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
@@ -1981,8 +2134,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
                     {/* Card Content - Mobile BetCard Style */}
                     <div className="p-3 space-y-2.5">
-                      {/* Arbitrage Mobile - Show both sides stacked */}
-                      {selectedBetType === 'arbitrage' ? (
+                      {/* Arbitrage/Middles Mobile - Show both sides stacked */}
+                      {(selectedBetType === 'arbitrage' || selectedBetType === 'middles') ? (
                         <>
                           {/* Side 1 */}
                           <div className={`p-3 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-2xl`}>
@@ -1994,8 +2147,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                 <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.bestBook}</div>
                               </div>
                               <div className="text-right">
-                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Odds</div>
-                                <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold`}>{formatOdds(pick.bestOdds)}</div>
+                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{selectedBetType === 'middles' ? 'Line' : 'Odds'}</div>
+                                <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold`}>
+                                  {selectedBetType === 'middles' ? (pick.line ? (pick.line > 0 ? `+${pick.line}` : pick.line) : '--') : formatOdds(pick.bestOdds)}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -2003,34 +2158,75 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           {/* Side 2 */}
                           {(() => {
                             const books = pick.allBooks || pick.books || [];
-                            const oppositeSideName = pick.pick.includes('Over') ? pick.pick.replace('Over', 'Under') 
-                              : pick.pick.includes('Under') ? pick.pick.replace('Under', 'Over')
-                              : pick.team2 || 'Opposite';
-                            const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
-                            const bestOppBook = booksWithTeam2.length > 0 
-                              ? booksWithTeam2.reduce((best: any, b: any) => {
-                                  const bestOdds = parseInt(best.team2Odds, 10);
-                                  const bOdds = parseInt(b.team2Odds, 10);
-                                  return bOdds > bestOdds ? b : best;
-                                }, booksWithTeam2[0])
-                              : null;
                             
-                            return bestOppBook ? (
-                              <div className={`p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-2xl`}>
-                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
-                                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold mb-2`}>{oppositeSideName}</div>
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Book</div>
-                                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestOppBook.name}</div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Odds</div>
-                                    <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold`}>{formatOdds(bestOppBook.team2Odds)}</div>
+                            if (selectedBetType === 'middles') {
+                              // Middles - find book with different line
+                              const line1 = pick.line || 0;
+                              const booksWithDiffLines = books.filter((b: any) => b.line && b.line !== line1);
+                              const bestMiddleBook = booksWithDiffLines.length > 0 
+                                ? booksWithDiffLines.reduce((best: any, b: any) => {
+                                    const gap = Math.abs(b.line - line1);
+                                    const bestGap = Math.abs(best.line - line1);
+                                    return gap > bestGap ? b : best;
+                                  }, booksWithDiffLines[0])
+                                : null;
+                              
+                              if (!bestMiddleBook) return null;
+                              
+                              const line2 = bestMiddleBook.line;
+                              const isOver = pick.pick.includes('Over');
+                              const isUnder = pick.pick.includes('Under');
+                              const side2Label = isOver ? pick.pick.replace('Over', 'Under').replace(String(line1), String(line2))
+                                : isUnder ? pick.pick.replace('Under', 'Over').replace(String(line1), String(line2))
+                                : `${pick.team2 || 'Opposite'} ${line2 > 0 ? '+' : ''}${line2}`;
+                              
+                              return (
+                                <div className={`p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-2xl`}>
+                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
+                                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold mb-2`}>{side2Label}</div>
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Book</div>
+                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestMiddleBook.name}</div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Line</div>
+                                      <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold`}>{line2 > 0 ? `+${line2}` : line2}</div>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ) : null;
+                              );
+                            } else {
+                              // Arbitrage - find opposite side
+                              const oppositeSideName = pick.pick.includes('Over') ? pick.pick.replace('Over', 'Under') 
+                                : pick.pick.includes('Under') ? pick.pick.replace('Under', 'Over')
+                                : pick.team2 || 'Opposite';
+                              const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+                              const bestOppBook = booksWithTeam2.length > 0 
+                                ? booksWithTeam2.reduce((best: any, b: any) => {
+                                    const bestOdds = parseInt(best.team2Odds, 10);
+                                    const bOdds = parseInt(b.team2Odds, 10);
+                                    return bOdds > bestOdds ? b : best;
+                                  }, booksWithTeam2[0])
+                                : null;
+                              
+                              return bestOppBook ? (
+                                <div className={`p-3 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-blue-500/10 border-blue-400/20'} border rounded-2xl`}>
+                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Side 2</div>
+                                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold mb-2`}>{oppositeSideName}</div>
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Book</div>
+                                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestOppBook.name}</div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>Odds</div>
+                                      <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold`}>{formatOdds(bestOppBook.team2Odds)}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : null;
+                            }
                           })()}
                         </>
                       ) : (
