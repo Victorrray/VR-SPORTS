@@ -2312,7 +2312,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 </div>
 
                 {/* Expanded Section - Books Comparison or Arbitrage Calculator */}
-                {expandedRows.includes(pick.id) && (
+                {expandedRows.includes(pick.id) && selectedBetType !== 'middles' && (
                   <div className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border-t`}>
                     {/* Arbitrage Calculator - Shows when in arbitrage mode */}
                     {selectedBetType === 'arbitrage' ? (
