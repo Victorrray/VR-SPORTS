@@ -1026,16 +1026,11 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
             />
           </div>
           <div className="flex items-center justify-center gap-2 overflow-x-auto overflow-y-visible -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide w-full md:w-auto">
-            {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date
-                - Shows purple/active styling when filters are applied or panel is open
-                - Displays a badge with count of active filters when any non-default filters are selected
-                - Default filters: All Sports, All Markets, Straight Bets, Today */}
+            {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date */}
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
               className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
-                isFilterMenuOpen || selectedSport !== 'all' || selectedMarket !== 'all' || selectedBetType !== 'straight' || selectedDate !== 'today'
-                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/40 text-white'
-                  : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
               }`}
             >
               <Filter className="w-4 h-4" />
