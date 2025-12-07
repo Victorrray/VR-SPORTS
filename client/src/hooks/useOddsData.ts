@@ -1972,12 +1972,42 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           };
         }).filter((pick) => pick !== null) as OddsPick[];
       };
+
+      // Filter out arbitrage opportunities with less than 1% ROI
+      const filterLowROIArbitrage = (picks: OddsPick[]) => {
+        if (betType !== 'arbitrage') return picks;
+        return picks.filter(pick => {
+          const books = pick.allBooks || pick.books || [];
+          const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
+          const booksWithTeam2 = books.filter((b: OddsBook) => b.team2Odds && b.team2Odds !== '--');
+          if (booksWithTeam2.length === 0) return false;
+          
+          const bestOppBook = booksWithTeam2.reduce((best: OddsBook, b: OddsBook) => {
+            const bestOdds = parseInt(best.team2Odds, 10);
+            const bOdds = parseInt(b.team2Odds, 10);
+            return bOdds > bestOdds ? b : best;
+          }, booksWithTeam2[0]);
+          const side2Odds = parseInt(bestOppBook.team2Odds, 10);
+          
+          // Calculate ROI
+          const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+          const decimal1 = toDecimal(side1Odds);
+          const decimal2 = toDecimal(side2Odds);
+          const impliedProb1 = 1 / decimal1;
+          const impliedProb2 = 1 / decimal2;
+          const totalImplied = impliedProb1 + impliedProb2;
+          const roi = totalImplied < 1 ? (1 - totalImplied) * 100 : 0;
+          
+          return roi >= 1; // Only keep picks with 1% or higher ROI
+        });
+      };
       
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
+        transformedPicks = filterLowROIArbitrage(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
@@ -1992,6 +2022,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
+        transformedPicks = filterLowROIArbitrage(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
