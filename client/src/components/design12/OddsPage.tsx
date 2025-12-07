@@ -47,7 +47,20 @@ const isGameLive = (commenceTime: string | undefined): boolean => {
   // Game is live if it started (commence time is in the past)
   // We assume games last about 3-4 hours max, so check if within 4 hours of start
   const fourHoursMs = 4 * 60 * 60 * 1000;
-  return now >= gameStart && now <= gameStart + fourHoursMs;
+  const isLive = now >= gameStart && now <= gameStart + fourHoursMs;
+  return isLive;
+};
+
+// DFS apps that don't offer live betting - filter these out for live games
+const DFS_APPS_NO_LIVE = [
+  'betr', 'betrdfs', 'prizepicks', 'underdog', 'sleeper', 'fliff', 
+  'chalkboard', 'parlay', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au'
+];
+
+// Check if a book is a DFS app (no live betting)
+const isDFSApp = (bookName: string): boolean => {
+  const normalized = bookName?.toLowerCase() || '';
+  return DFS_APPS_NO_LIVE.some(dfs => normalized.includes(dfs));
 };
 
 // Helper function to parse odds string/number to numeric value
@@ -286,6 +299,14 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     if (!hasPlatinum) {
       filtered = filtered.filter(pick => !isGameLive(pick.commenceTime));
     }
+    
+    // Filter out DFS apps from live games (DFS apps don't offer live betting, so data is stale)
+    filtered = filtered.filter(pick => {
+      if (isGameLive(pick.commenceTime) && isDFSApp(pick.bestBook || '')) {
+        return false; // Exclude DFS app picks for live games
+      }
+      return true;
+    });
     
     // If "all_upcoming" is selected, return filtered picks (no date filter)
     if (selectedDate === 'all_upcoming') {
