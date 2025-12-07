@@ -19,6 +19,7 @@ import { useAuth } from '../../hooks/SimpleAuth';
 import { useMe } from '../../hooks/useMe';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
+import { apiClient } from '../../utils/apiClient';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
@@ -51,48 +52,14 @@ export function AccountPage({
   const openCustomerPortal = async () => {
     setPortalLoading(true);
     try {
-      // Get the auth token from Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      const response = await apiClient.post('/api/billing/customer-portal');
       
-      if (!token) {
-        throw new Error('Please sign in to access billing');
-      }
-      
-      const response = await fetch('/api/billing/customer-portal', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        credentials: 'include',
-      });
-      
-      // Check if response has content
-      const text = await response.text();
-      
-      if (!text) {
-        throw new Error('Empty response from server');
-      }
-      
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.error('Invalid JSON response:', text);
-        throw new Error('Invalid response from server');
-      }
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to open billing portal');
-      }
-      
-      if (!data.url) {
+      if (!response.data?.url) {
         throw new Error('No portal URL returned');
       }
       
       // Redirect to Stripe Customer Portal
-      window.location.href = data.url;
+      window.location.href = response.data.url;
     } catch (error: any) {
       console.error('Error opening customer portal:', error);
       toast.error('Unable to open billing portal', {
