@@ -1847,8 +1847,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{pick.bestBook}</div>
                                     </div>
                                     <div>
-                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Line</div>
-                                      <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{formatLine(line1)}</div>
+                                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
+                                      <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{formatOdds(pick.bestOdds)}</div>
                                     </div>
                                   </div>
                                   
@@ -1864,8 +1864,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                         <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{bestMiddleBook.name}</div>
                                       </div>
                                       <div>
-                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Line</div>
-                                        <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{formatLine(line2)}</div>
+                                        <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Odds</div>
+                                        <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{formatOdds(bestMiddleBook.odds)}</div>
                                       </div>
                                     </div>
                                   ) : (
