@@ -689,6 +689,31 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           return bOdds - aOdds;
         });
         
+        // For middles: include ALL books with their lines (not just consensus)
+        const allBooksWithLines = propData.books.map((b: any) => {
+          return {
+            name: b.name,
+            rawName: b.name,
+            line: b.line,
+            odds: b.overOdds,
+            team2Odds: b.underOdds || '--',
+            ev: hasEnoughData ? '0%' : '--',
+            isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
+            isAtConsensus: b.line === consensusLine
+          };
+        }).sort((a: any, b: any) => {
+          // Sort by line difference from consensus (closest first)
+          const aDiff = Math.abs(a.line - consensusLine);
+          const bDiff = Math.abs(b.line - consensusLine);
+          if (aDiff !== bDiff) return aDiff - bDiff;
+          // Then by odds
+          const aOdds = parseInt(a.odds, 10);
+          const bOdds = parseInt(b.odds, 10);
+          if (isNaN(aOdds)) return 1;
+          if (isNaN(bOdds)) return -1;
+          return bOdds - aOdds;
+        });
+        
         // Get the best odds for the chosen side
         const bestOddsForPick = isOverBetter ? bestBookForCard.overOdds : bestBookForCard.underOdds;
         
@@ -706,6 +731,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           pickSide: pickSide, // Track which side was chosen
           // Mini table shows books at consensus line, with line labeled if different
           books: displayBooks,
+          // All books with their lines for middles detection
+          allBooks: allBooksWithLines,
           isPlayerProp: true,
           playerName: propData.playerName,
           marketKey: propData.marketKey,
@@ -826,9 +853,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             homeOutcome = market.outcomes[1];
           }
           
-          // Get the point/line for spreads and totals
+          // Get the point/line for spreads and totals - store per book for middles
+          let bookLine: number | null = null;
           if ((marketKey === 'spreads' || marketKey === 'totals') && awayOutcome?.point !== undefined) {
-            marketPoint = awayOutcome.point;
+            bookLine = awayOutcome.point;
+            if (marketPoint === null) {
+              marketPoint = awayOutcome.point; // Set first line as default
+            }
           }
           
           const odds = awayOutcome?.price !== undefined ? awayOutcome.price : awayOutcome?.odds;
@@ -846,7 +877,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               odds: normalizedOdds,
               team2Odds: normalizedTeam2Odds || '--',
               ev: '0%',
-              isBest: false
+              isBest: false,
+              line: bookLine // Store line per book for middles detection
             };
             
             booksArray.push(bookData);
@@ -2010,17 +2042,18 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const filterForMiddles = (picks: OddsPick[]) => {
         if (betType !== 'middles') return picks;
         
-        return picks.filter(pick => {
+        console.log('🎯 Middles filter: Starting with', picks.length, 'picks');
+        
+        const filtered = picks.filter(pick => {
           // Only include spreads, totals, and player props (markets with lines)
           const marketKey = pick.marketKey || '';
           const isSpread = marketKey.includes('spread') || pick.pick.includes('+') || pick.pick.includes('-');
           const isTotal = marketKey.includes('total') || pick.pick.includes('Over') || pick.pick.includes('Under');
           const isPlayerProp = pick.isPlayerProp || marketKey.includes('player_');
           
-          if (!isSpread && !isTotal && !isPlayerProp) return false;
-          
-          // Must have a line value
-          if (pick.line === null || pick.line === undefined) return false;
+          if (!isSpread && !isTotal && !isPlayerProp) {
+            return false;
+          }
           
           // Filter out DFS apps from books
           const books = (pick.allBooks || pick.books || []).filter((b: any) => {
@@ -2028,16 +2061,24 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             return !DFS_APPS.some(dfs => bookName.includes(dfs));
           });
           
-          if (books.length < 2) return false;
+          if (books.length < 2) {
+            return false;
+          }
           
-          // Check if there are different lines available (middle opportunity)
-          const line1 = pick.line;
-          const booksWithDiffLines = books.filter((b: any) => 
-            b.line !== undefined && b.line !== null && b.line !== line1
-          );
+          // Get all unique lines from books
+          const linesFromBooks = books
+            .map((b: any) => b.line)
+            .filter((l: any) => l !== undefined && l !== null);
           
-          // Must have at least one book with a different line
-          return booksWithDiffLines.length > 0;
+          const uniqueLines = [...new Set(linesFromBooks)];
+          
+          // Must have at least 2 different lines for a middle opportunity
+          if (uniqueLines.length < 2) {
+            return false;
+          }
+          
+          console.log('🎯 Middle found:', pick.pick, 'Lines:', uniqueLines);
+          return true;
         }).map(pick => {
           // Also filter DFS from the books arrays
           const filteredBooks = (pick.books || []).filter((b: any) => {
@@ -2055,6 +2096,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             allBooks: filteredAllBooks
           };
         });
+        
+        console.log('🎯 Middles filter: Found', filtered.length, 'middle opportunities');
+        return filtered;
       };
       
       if (response.data && Array.isArray(response.data)) {
