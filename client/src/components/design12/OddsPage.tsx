@@ -1688,8 +1688,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           <div className={`hidden lg:grid lg:grid-cols-12 gap-4 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
             <div className={`col-span-1 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>{selectedBetType === 'middles' ? 'Gap' : 'ROI'}</div>
             <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
-            <div className={`col-span-6 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Sides</div>
-            <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>{selectedBetType === 'middles' ? 'Middle' : 'Stakes'}</div>
+            <div className={`${selectedBetType === 'middles' ? 'col-span-8' : 'col-span-6'} ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Sides</div>
+            {selectedBetType !== 'middles' && (
+              <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Stakes</div>
+            )}
           </div>
         ) : (
           <div className={`hidden lg:grid lg:grid-cols-12 gap-4 lg:gap-6 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
@@ -1829,7 +1831,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             
                             return (
                               <>
-                                <div className="col-span-6">
+                                <div className="col-span-8">
                                   {/* Side 1 */}
                                   <div className={`grid grid-cols-3 gap-4 p-3 mb-2 ${isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'} border rounded-xl`}>
                                     <div>
@@ -1867,20 +1869,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                       <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>No middle opportunity</span>
                                     </div>
                                   )}
-                                </div>
-                                
-                                {/* Middle Info Column */}
-                                <div className="col-span-2 flex flex-col">
-                                  <div className={`h-full p-3 ${isLight ? 'bg-amber-50 border-amber-200' : 'bg-amber-500/10 border-amber-400/20'} border rounded-xl flex flex-col justify-center`}>
-                                    <div className={`${isLight ? 'text-amber-700' : 'text-amber-400'} text-xs font-bold uppercase mb-3 text-center`}>Middle Range</div>
-                                    <div className="text-center">
-                                      <div className={`${isLight ? 'text-amber-800' : 'text-amber-300'} font-bold text-2xl`}>{gap}</div>
-                                      <div className={`${isLight ? 'text-amber-600' : 'text-amber-400/70'} text-xs font-bold`}>points</div>
-                                    </div>
-                                    <div className={`mt-2 text-center ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs`}>
-                                      {line1} to {line2}
-                                    </div>
-                                  </div>
                                 </div>
                               </>
                             );
