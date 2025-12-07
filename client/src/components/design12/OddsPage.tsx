@@ -190,6 +190,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [arbitrageStake, setArbitrageStake] = useState(100);
   const [sortBy, setSortBy] = useState<'ev' | 'time' | null>('ev');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [dateExpanded, setDateExpanded] = useState(false);
@@ -1744,7 +1745,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           const impliedProb2 = 1 / decimal2;
                           const totalImplied = impliedProb1 + impliedProb2;
                           
-                          const totalStake = 100;
+                          const totalStake = arbitrageStake;
                           const stake1 = totalStake * (impliedProb1 / totalImplied);
                           const stake2 = totalStake * (impliedProb2 / totalImplied);
                           
@@ -1797,7 +1798,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               {/* Stakes Column */}
                               <div className="col-span-2 flex flex-col">
                                 <div className={`h-full p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl flex flex-col justify-center`}>
-                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-3 text-center`}>Stakes ($100)</div>
+                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-3 text-center`}>Stakes (${arbitrageStake})</div>
                                   <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                       <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>Side 1:</span>
@@ -2115,8 +2116,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           const isArbitrage = totalImplied < 1;
                           const arbPercentage = isArbitrage ? ((1 - totalImplied) * 100).toFixed(2) : '0';
                           
-                          // Default stake for calculation
-                          const totalStake = 1000;
+                          // Use state for stake calculation
+                          const totalStake = arbitrageStake;
                           const stake1 = totalStake * (impliedProb1 / totalImplied);
                           const stake2 = totalStake * (impliedProb2 / totalImplied);
                           const payout1 = stake1 * decimal1;
@@ -2132,8 +2133,23 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             <>
                               {/* Stake Calculator */}
                               <div className={`p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
-                                <div className={`font-bold mb-3 ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                                  Stake Calculator (Based on $1,000 total)
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                                    Stake Calculator
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-sm ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Total Stake:</span>
+                                    <div className="relative">
+                                      <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>$</span>
+                                      <input
+                                        type="number"
+                                        min="1"
+                                        value={arbitrageStake}
+                                        onChange={(e) => setArbitrageStake(Math.max(1, parseInt(e.target.value) || 100))}
+                                        className={`w-24 pl-7 pr-3 py-1.5 rounded-lg text-sm font-bold ${isLight ? 'bg-gray-100 border-gray-300 text-gray-900' : 'bg-white/10 border-white/20 text-white'} border focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                      />
+                                    </div>
+                                  </div>
                                 </div>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
