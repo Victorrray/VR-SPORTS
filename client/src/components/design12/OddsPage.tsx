@@ -648,8 +648,38 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     };
   });
 
+  // Helper function to calculate ROI for arbitrage sorting
+  const calculateROI = (pick: any) => {
+    const books = pick.allBooks || pick.books || [];
+    const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
+    const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+    if (booksWithTeam2.length === 0) return 0;
+    
+    const bestOppBook = booksWithTeam2.reduce((best: any, b: any) => {
+      const bestOdds = parseInt(best.team2Odds, 10);
+      const bOdds = parseInt(b.team2Odds, 10);
+      return bOdds > bestOdds ? b : best;
+    }, booksWithTeam2[0]);
+    const side2Odds = parseInt(bestOppBook.team2Odds, 10);
+    
+    const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+    const decimal1 = toDecimal(side1Odds);
+    const decimal2 = toDecimal(side2Odds);
+    const impliedProb1 = 1 / decimal1;
+    const impliedProb2 = 1 / decimal2;
+    const totalImplied = impliedProb1 + impliedProb2;
+    return totalImplied < 1 ? (1 - totalImplied) * 100 : 0;
+  };
+
   // Sort display picks
   const sortedPicks = [...displayPicks].sort((a, b) => {
+    // For arbitrage, always sort by ROI (highest first)
+    if (selectedBetType === 'arbitrage') {
+      const aROI = calculateROI(a);
+      const bROI = calculateROI(b);
+      return bROI - aROI; // Highest ROI first
+    }
+    
     if (!sortBy) return 0;
     
     if (sortBy === 'ev') {
