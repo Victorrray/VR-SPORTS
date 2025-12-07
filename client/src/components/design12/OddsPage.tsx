@@ -2642,25 +2642,28 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         </div>
                       </div>
 
-                      {/* Books Cards */}
-                      <div className="space-y-3">
-                        {/* Header */}
-                        <div className={`grid grid-cols-4 gap-6 px-6 py-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm`}>Book</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-center`}>{pick.team1}</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-center`}>{pick.team2}</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-right`}>Pick</div>
+                      {/* Books Table - Matching Player Props Style */}
+                      <div className="space-y-2">
+                        {/* Header Row */}
+                        <div className={`grid grid-cols-4 gap-6 px-6 py-3 ${isLight ? 'border-gray-200' : 'border-white/10'} border-b`}>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm`}>Book</div>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.team1 || 'Side 1'}</div>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.team2 || 'Side 2'}</div>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-right`}>Pick</div>
                         </div>
 
-                        {/* Rows */}
+                        {/* Data Rows */}
                         {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
                           <div 
                             key={idx}
-                            className={`grid grid-cols-4 gap-6 px-6 py-4 ${isLight ? 'bg-white border-gray-200 hover:bg-gray-50' : 'bg-white/5 border-white/10 hover:bg-white/10'} border rounded-2xl items-center transition-all`}
+                            className={`grid grid-cols-4 gap-6 px-6 py-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} items-center transition-all ${idx !== 0 ? (isLight ? 'border-t border-gray-100' : 'border-t border-white/5') : ''}`}
                           >
-                            <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
+                            <div>
+                              <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
+                              {book.line && <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{book.line}</div>}
+                            </div>
                             <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-base text-center`}>{formatOdds(book.odds)}</div>
-                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-base text-center`}>{formatOdds(book.team2Odds)}</div>
+                            <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-base text-center`}>{book.team2Odds && book.team2Odds !== '--' ? formatOdds(book.team2Odds) : '--'}</div>
                             <div className="flex justify-end">
                               {isPickAdded(pick, book.name) ? (
                                 <button
