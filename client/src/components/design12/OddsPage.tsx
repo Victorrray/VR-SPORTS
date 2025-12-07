@@ -38,6 +38,18 @@ function generateDateOptions() {
 
 // formatOdds is now imported from oddsConverter and used via the hook below
 
+// Helper function to check if a game is live (started but not finished)
+// A game is considered live if commence_time is in the past
+const isGameLive = (commenceTime: string | undefined): boolean => {
+  if (!commenceTime) return false;
+  const gameStart = new Date(commenceTime).getTime();
+  const now = Date.now();
+  // Game is live if it started (commence time is in the past)
+  // We assume games last about 3-4 hours max, so check if within 4 hours of start
+  const fourHoursMs = 4 * 60 * 60 * 1000;
+  return now >= gameStart && now <= gameStart + fourHoursMs;
+};
+
 // Helper function to parse odds string/number to numeric value
 const parseOdds = (odds: any): number => {
   if (typeof odds === 'number') return odds;
@@ -264,25 +276,24 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     refreshInterval: 30000  // 30 seconds for faster updates
   });
 
-  // Filter picks by selected date
+  // Filter picks by selected date and live game access
   const dateFilteredPicks = useMemo(() => {
     if (!apiPicks || apiPicks.length === 0) return [];
     
-    // If "all_upcoming" is selected, show all games (no date filter)
-    if (selectedDate === 'all_upcoming') {
-      return apiPicks;
+    let filtered = apiPicks;
+    
+    // Filter out live games for non-Platinum users (Gold and below only see pre-match)
+    if (!hasPlatinum) {
+      filtered = filtered.filter(pick => !isGameLive(pick.commenceTime));
     }
     
-    // Debug: Log all game dates
-    console.log('🗓️ Selected date:', selectedDate);
-    console.log('🗓️ All picks with dates:', apiPicks.map(p => ({
-      game: p.game,
-      commenceTime: p.commenceTime,
-      gameTime: p.gameTime
-    })));
+    // If "all_upcoming" is selected, return filtered picks (no date filter)
+    if (selectedDate === 'all_upcoming') {
+      return filtered;
+    }
     
     // Filter by specific date (YYYY-MM-DD format in local timezone)
-    const filtered = apiPicks.filter(pick => {
+    filtered = filtered.filter(pick => {
       // If no game time, include the pick (don't filter it out)
       if (!pick.commenceTime && !pick.gameTime) return true;
       
@@ -296,9 +307,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       return gameDateStr === selectedDate;
     });
     
-    console.log('🗓️ Filtered picks count:', filtered.length);
     return filtered;
-  }, [apiPicks, selectedDate]);
+  }, [apiPicks, selectedDate, hasPlatinum]);
 
   // Use date-filtered picks
   const topPicks = dateFilteredPicks;
@@ -1804,14 +1814,23 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               </span>
                             ) : pick.game}
                           </div>
-                          <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
-                            <Clock className="w-3 h-3" />
-                            {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
-                              weekday: 'short', month: 'short', day: 'numeric',
-                              hour: 'numeric', minute: '2-digit', hour12: true,
-                              timeZone: 'America/Los_Angeles'
-                            }) : 'Time TBD'}
-                          </div>
+                          {isGameLive(pick.commenceTime) ? (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500 rounded text-white text-xs font-bold">
+                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                LIVE
+                              </span>
+                            </div>
+                          ) : (
+                            <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
+                              <Clock className="w-3 h-3" />
+                              {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
+                                weekday: 'short', month: 'short', day: 'numeric',
+                                hour: 'numeric', minute: '2-digit', hour12: true,
+                                timeZone: 'America/Los_Angeles'
+                              }) : 'Time TBD'}
+                            </div>
+                          )}
                         </div>
 
                         {/* Both Sides Stacked + Stakes/Middle Info */}
@@ -2010,18 +2029,27 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         </span>
                       </div>
                       {/* Game Time - From API */}
-                      <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
-                        <Clock className="w-3 h-3" />
-                        {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
-                          weekday: 'short', 
-                          month: 'short', 
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true,
-                          timeZone: 'America/Los_Angeles'
-                        }) : 'Time TBD'}
-                      </div>
+                      {isGameLive(pick.commenceTime) ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500 rounded text-white text-xs font-bold">
+                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                            LIVE
+                          </span>
+                        </div>
+                      ) : (
+                        <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
+                          <Clock className="w-3 h-3" />
+                          {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
+                            weekday: 'short', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true,
+                            timeZone: 'America/Los_Angeles'
+                          }) : 'Time TBD'}
+                        </div>
+                      )}
                     </div>
 
                     {/* Team/Line - Recommended pick (spread, total, moneyline, etc.) */}
@@ -2059,18 +2087,27 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold mb-1 text-sm`}>
                             {pick.game}
                           </h3>
-                          <div className={`flex items-center gap-1.5 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold`}>
-                            <Clock className="w-3 h-3" />
-                            {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
-                              weekday: 'short', 
-                              month: 'short', 
-                              day: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true,
-                              timeZone: 'America/Los_Angeles'
-                            }) : 'Time TBD'}
-                          </div>
+                          {isGameLive(pick.commenceTime) ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500 rounded text-white text-xs font-bold">
+                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                LIVE
+                              </span>
+                            </div>
+                          ) : (
+                            <div className={`flex items-center gap-1.5 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold`}>
+                              <Clock className="w-3 h-3" />
+                              {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
+                                weekday: 'short', 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true,
+                                timeZone: 'America/Los_Angeles'
+                              }) : 'Time TBD'}
+                            </div>
+                          )}
                         </div>
                         {/* Show ROI for arbitrage, Gap for middles, EV for others */}
                         {selectedBetType === 'arbitrage' ? (
