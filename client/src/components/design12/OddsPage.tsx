@@ -1692,17 +1692,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           {sortedPicks.length} {sortedPicks.length === 1 ? 'pick' : 'picks'} found
         </div>
         <div className={`flex items-center gap-2 text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-          {isRefreshing && (
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-emerald-500 font-medium">Updating...</span>
-            </div>
-          )}
-          {lastUpdated && !isRefreshing && (
-            <span>
-              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          )}
           <button
             onClick={() => refetch()}
             className={`p-1.5 rounded-lg transition-all ${
@@ -1714,6 +1703,17 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
+          {isRefreshing && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-emerald-500 font-medium">Updating...</span>
+            </div>
+          )}
+          {lastUpdated && !isRefreshing && (
+            <span>
+              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
         </div>
       </div>
 
