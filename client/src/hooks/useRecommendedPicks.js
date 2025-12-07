@@ -6,16 +6,17 @@ import { withApiBase } from '../config/api';
  * Hook to fetch recommended picks for the dashboard
  * Gets high EV picks from the odds API
  */
-// Major sportsbooks to show in recommended picks
+// Major sportsbooks to show in recommended picks (expanded list for more data points)
 const RECOMMENDED_SPORTSBOOKS = [
   'fanduel', 'draftkings', 'caesars', 'betmgm', 'fanatics',
-  'williamhill_us' // Caesars was formerly William Hill
+  'williamhill_us', 'pointsbetus', 'betrivers', 'unibet', 'wynnbet',
+  'superbook', 'bovada', 'betonlineag', 'pinnacle', 'bet365'
 ];
 
 export function useRecommendedPicks(options = {}) {
   const {
     limit = 4,
-    minEV = 2, // Minimum 2% EV (lowered from 5% to show more picks)
+    minEV = 1, // Minimum 1% EV to show more picks
     enabled = true,
     sportsbooks = RECOMMENDED_SPORTSBOOKS, // Default to major books
   } = options;
