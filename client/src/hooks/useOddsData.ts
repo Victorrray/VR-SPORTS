@@ -221,6 +221,27 @@ function normalizeBookName(bookName: string): string {
 function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] = []): OddsPick[] {
   if (!Array.isArray(games)) return [];
   
+  // DFS apps list - these have faster-changing lines and need stricter stale thresholds
+  const DFS_BOOK_KEYS = [
+    'dabble', 'dabble_au', 'prizepicks', 'underdog', 'sleeper', 'fliff', 
+    'chalkboard', 'parlay', 'pick6', 'draftkings_pick6', 'betr', 'betrdfs'
+  ];
+  
+  // Stale thresholds - DFS apps change lines much faster
+  const STALE_THRESHOLD_DFS_MS = 5 * 60 * 1000;  // 5 minutes for DFS apps
+  const STALE_THRESHOLD_STANDARD_MS = 30 * 60 * 1000;  // 30 minutes for standard books
+  
+  // Helper to check if a book is a DFS app
+  const isDFSBook = (bookKey: string): boolean => {
+    const normalizedKey = bookKey?.toLowerCase() || '';
+    return DFS_BOOK_KEYS.some(dfs => normalizedKey.includes(dfs));
+  };
+  
+  // Helper to get appropriate stale threshold for a book
+  const getStaleThreshold = (bookKey: string): number => {
+    return isDFSBook(bookKey) ? STALE_THRESHOLD_DFS_MS : STALE_THRESHOLD_STANDARD_MS;
+  };
+  
   // Helper to check if a book should be included based on filter
   const isBookIncluded = (bookKey: string, bookName: string): boolean => {
     if (selectedSportsbooks.length === 0) return true; // No filter = include all
@@ -268,8 +289,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // PLAYER PROPS MODE: Create one pick per player per market (combining all lines)
       const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey" (no line in key)
       
-      // Filter out stale bookmakers (odds not updated in the last 30 minutes)
-      const STALE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
       const now = Date.now();
       
       // Collect ALL books for the mini table (no filtering here)
@@ -277,9 +296,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const bookKey = bm.key || '';
         const bookName = normalizeBookName(bm.title || bm.key);
         
-        // Check if bookmaker data is stale
+        // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
         const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-        const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+        const staleThreshold = getStaleThreshold(bookKey);
+        const isStale = (now - lastUpdate) > staleThreshold;
         if (isStale) return; // Skip stale bookmakers
         
         bm.markets?.forEach((market: any) => {
@@ -821,8 +841,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         'h2h_3_way_1st_1_innings', 'h2h_3_way_1st_3_innings', 'h2h_3_way_1st_5_innings', 'h2h_3_way_1st_7_innings'
       ];
       
-      // Filter out stale bookmakers (odds not updated in the last 30 minutes)
-      const STALE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minutes
       const now = Date.now();
       
       // Process standard markets (h2h, spreads, totals)
@@ -836,9 +854,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookKey = bm.key || '';
           const bookName = normalizeBookName(bm.title || bm.key);
           
-          // Check if bookmaker data is stale
+          // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
           const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+          const staleThreshold = getStaleThreshold(bookKey);
+          const isStale = (now - lastUpdate) > staleThreshold;
           if (isStale) return; // Skip stale bookmakers
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
@@ -1026,9 +1045,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookKey = bm.key || '';
           const bookName = normalizeBookName(bm.title || bm.key);
           
-          // Check if bookmaker data is stale
+          // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
           const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+          const staleThreshold = getStaleThreshold(bookKey);
+          const isStale = (now - lastUpdate) > staleThreshold;
           if (isStale) return;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
@@ -1193,8 +1213,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const bookKey = bm.key || '';
             const bookName = normalizeBookName(bm.title || bm.key);
             
+            // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
             const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-            const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+            const staleThreshold = getStaleThreshold(bookKey);
+            const isStale = (now - lastUpdate) > staleThreshold;
             if (isStale) return;
             
             if (!bm.markets || !Array.isArray(bm.markets)) return;
@@ -1343,8 +1365,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const bookKey = bm.key || '';
             const bookName = normalizeBookName(bm.title || bm.key);
             
+            // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
             const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-            const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+            const staleThreshold = getStaleThreshold(bookKey);
+            const isStale = (now - lastUpdate) > staleThreshold;
             if (isStale) return;
             
             if (!bm.markets || !Array.isArray(bm.markets)) return;
@@ -1472,8 +1496,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookKey = bm.key || '';
           const bookName = normalizeBookName(bm.title || bm.key);
           
+          // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
           const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+          const staleThreshold = getStaleThreshold(bookKey);
+          const isStale = (now - lastUpdate) > staleThreshold;
           if (isStale) return;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
@@ -1573,8 +1599,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookKey = bm.key || '';
           const bookName = normalizeBookName(bm.title || bm.key);
           
+          // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
           const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const isStale = (now - lastUpdate) > STALE_THRESHOLD_MS;
+          const staleThreshold = getStaleThreshold(bookKey);
+          const isStale = (now - lastUpdate) > staleThreshold;
           if (isStale) return;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
