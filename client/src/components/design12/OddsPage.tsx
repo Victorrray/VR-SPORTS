@@ -1824,10 +1824,14 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             // Determine which side is which based on the pick
                             const isOver = pick.pick.includes('Over');
                             const isUnder = pick.pick.includes('Under');
+                            const isTotal = isOver || isUnder;
                             const side1Label = pick.pick;
                             const side2Label = isOver ? pick.pick.replace('Over', 'Under').replace(String(line1), String(line2))
                               : isUnder ? pick.pick.replace('Under', 'Over').replace(String(line1), String(line2))
                               : `${pick.team2 || 'Opposite'} ${line2 > 0 ? '+' : ''}${line2}`;
+                            
+                            // Format line display - no +/- for totals
+                            const formatLine = (line: number) => isTotal ? line : (line > 0 ? `+${line}` : line);
                             
                             return (
                               <>
@@ -1844,7 +1848,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                     </div>
                                     <div>
                                       <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Line</div>
-                                      <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{line1 > 0 ? `+${line1}` : line1}</div>
+                                      <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>{formatLine(line1)}</div>
                                     </div>
                                   </div>
                                   
@@ -1861,7 +1865,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                       </div>
                                       <div>
                                         <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-1`}>Line</div>
-                                        <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{line2 > 0 ? `+${line2}` : line2}</div>
+                                        <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>{formatLine(line2)}</div>
                                       </div>
                                     </div>
                                   ) : (
