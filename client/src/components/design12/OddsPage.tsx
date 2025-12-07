@@ -770,9 +770,9 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       </p>
       <button
         onClick={() => {
+          // Reset filters but keep the current bet type mode (straight/props/arbitrage/middles)
           setSelectedSport('all');
           setSelectedMarket('all');
-          setSelectedBetType('straight');
           setSelectedDate('all_upcoming');
         }}
         className={`px-6 py-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-white hover:from-purple-500/30 hover:to-indigo-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
