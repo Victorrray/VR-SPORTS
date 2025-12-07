@@ -5,6 +5,9 @@ const BetSlipContext = createContext();
 // LocalStorage key for bet slip persistence
 const BET_SLIP_STORAGE_KEY = 'vr_odds_bet_slip';
 
+// Disable verbose logging in production
+const DEBUG_LOGGING = process.env.NODE_ENV === 'development';
+
 export const useBetSlip = () => {
   const context = useContext(BetSlipContext);
   if (!context) {
@@ -19,14 +22,12 @@ const loadBetsFromStorage = () => {
     const stored = localStorage.getItem(BET_SLIP_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Validate that it's an array
       if (Array.isArray(parsed)) {
-        console.log('🎯 BetSlip: Loaded', parsed.length, 'bets from localStorage');
         return parsed;
       }
     }
   } catch (error) {
-    console.error('🎯 BetSlip: Failed to load from localStorage:', error);
+    console.error('BetSlip: Failed to load from localStorage');
   }
   return [];
 };
@@ -39,37 +40,20 @@ export const BetSlipProvider = ({ children }) => {
   useEffect(() => {
     try {
       localStorage.setItem(BET_SLIP_STORAGE_KEY, JSON.stringify(bets));
-      console.log('🎯 BetSlip: Saved', bets.length, 'bets to localStorage');
     } catch (error) {
-      console.error('🎯 BetSlip: Failed to save to localStorage:', error);
+      console.error('BetSlip: Failed to save to localStorage');
     }
-  }, [bets]);
-  
-  // Debug: Log whenever bets state changes
-  useEffect(() => {
-    console.log('🎯 BetSlip State Changed:', { 
-      betCount: bets.length, 
-      bets: bets.map(b => ({ id: b.id, selection: b.selection })),
-      timestamp: new Date().toISOString()
-    });
   }, [bets]);
 
   const addBet = useCallback((bet) => {
-    console.log('🎯 BetSlip: addBet called', { betId: bet.id, betCount: bets.length + 1, timestamp: new Date().toISOString() });
     setBets(prevBets => {
-      // Check if bet already exists
       const existingIndex = prevBets.findIndex(b => b.id === bet.id);
       if (existingIndex !== -1) {
-        // Update existing bet
         const updated = [...prevBets];
         updated[existingIndex] = { ...updated[existingIndex], ...bet };
-        console.log('🎯 BetSlip: Updated existing bet', { betId: bet.id, totalBets: updated.length });
         return updated;
       }
-      // Add new bet
-      const newBets = [...prevBets, bet];
-      console.log('🎯 BetSlip: Added new bet', { betId: bet.id, totalBets: newBets.length });
-      return newBets;
+      return [...prevBets, bet];
     });
     
     // Auto-open bet slip when adding first bet
@@ -79,16 +63,10 @@ export const BetSlipProvider = ({ children }) => {
   }, [bets.length]);
 
   const removeBet = useCallback((betId) => {
-    console.log('🎯 BetSlip: removeBet called', { betId, timestamp: new Date().toISOString() });
-    setBets(prevBets => {
-      const filtered = prevBets.filter(bet => bet.id !== betId);
-      console.log('🎯 BetSlip: Removed bet', { betId, remainingBets: filtered.length });
-      return filtered;
-    });
+    setBets(prevBets => prevBets.filter(bet => bet.id !== betId));
   }, []);
 
   const updateBet = useCallback((betId, updates) => {
-    console.log('🎯 BetSlip: updateBet called', { betId, updates, timestamp: new Date().toISOString() });
     setBets(prevBets => 
       prevBets.map(bet => 
         bet.id === betId ? { ...bet, ...updates } : bet
@@ -97,7 +75,6 @@ export const BetSlipProvider = ({ children }) => {
   }, []);
 
   const clearAllBets = useCallback(() => {
-    console.log('🎯 BetSlip: clearAllBets called', { timestamp: new Date().toISOString(), stackTrace: new Error().stack });
     setBets([]);
   }, []);
 
@@ -110,14 +87,6 @@ export const BetSlipProvider = ({ children }) => {
   }, []);
 
   const placeBets = useCallback((placedBets) => {
-    // Here you would typically send the bets to your backend
-    console.log('🎯 BetSlip: placeBets called', { 
-      betCount: placedBets.length, 
-      timestamp: new Date().toISOString(),
-      stackTrace: new Error().stack 
-    });
-    
-    // For now, we'll just save them to localStorage as placed bets
     try {
       const existingBets = JSON.parse(localStorage.getItem('placed_bets') || '[]');
       const newBets = placedBets.map(bet => ({
@@ -128,17 +97,10 @@ export const BetSlipProvider = ({ children }) => {
       }));
       
       localStorage.setItem('placed_bets', JSON.stringify([...existingBets, ...newBets]));
-      
-      // Clear the bet slip
-      console.log('🎯 BetSlip: Clearing bets after placement');
       clearAllBets();
       closeBetSlip();
-      
-      // Show success notification (you could integrate with a toast library)
-      console.log(`✅ BetSlip: Successfully placed ${placedBets.length} bet(s)`);
-      
     } catch (error) {
-      console.error('❌ BetSlip: Failed to place bets:', error);
+      console.error('BetSlip: Failed to place bets');
     }
   }, [clearAllBets, closeBetSlip]);
 

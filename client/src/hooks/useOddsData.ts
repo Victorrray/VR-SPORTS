@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiClient } from '../utils/apiClient';
 import { useAuth } from './SimpleAuth';
 
+// Disable verbose logging in production for performance
+const DEBUG_LOGGING = process.env.NODE_ENV === 'development';
+
 export interface OddsBook {
   name: string;
   odds: string;
@@ -263,8 +266,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     });
   };
   
-  // Log first game structure to debug
-  if (games.length > 0) {
+  // Log first game structure to debug (only in dev)
+  if (DEBUG_LOGGING && games.length > 0) {
     console.log('📋 First game structure:', games[0]);
     console.log('📋 First game keys:', Object.keys(games[0]));
   }
@@ -277,8 +280,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     const bookmakers = game.bookmakers || [];
     const gameMatchup = `${team1} @ ${team2}`;
     
-    // Log first game's bookmakers
-    if (gameIdx === 0) {
+    // Log first game's bookmakers (only in dev)
+    if (DEBUG_LOGGING && gameIdx === 0) {
       console.log(`📋 First game bookmakers:`, bookmakers);
       console.log(`📋 First game bookmakers length:`, bookmakers.length);
       const bookKeys = bookmakers.map((b: any) => b.key);
@@ -2098,8 +2101,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const filterForMiddles = (picks: OddsPick[]) => {
         if (betType !== 'middles') return picks;
         
-        console.log('🎯 Middles filter: Starting with', picks.length, 'picks');
-        
         // Group picks by game and market type to combine alternate lines
         const gameMarketGroups = new Map<string, any[]>();
         
@@ -2183,8 +2184,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             isBest: false
           }));
           
-          console.log('🎯 Middle found:', basePick.pick, 'Gap:', maxGap, 'Lines:', uniqueLines);
-          
           filtered.push({
             ...basePick,
             books: filteredBooks,
@@ -2197,8 +2196,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         
         // Sort by gap (highest first)
         filtered.sort((a, b) => (b.middleGap || 0) - (a.middleGap || 0));
-        
-        console.log('🎯 Middles filter: Found', filtered.length, 'middle opportunities');
         return filtered;
       };
 
@@ -2207,7 +2204,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         return picks.filter(pick => {
           // If it's an alternate market and best book is Dabble, filter it out
           if (pick.isAlternate && pick.bestBook?.toLowerCase().includes('dabble')) {
-            console.log('🚫 Filtering Dabble alternate:', pick.pick);
             return false;
           }
           return true;
@@ -2236,13 +2232,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForMiddles(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
-        console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
-        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
-        if (betType === 'props') {
-          console.log('🏈 Player props response received:', transformedPicks.length, 'player prop picks');
-        }
-        if (transformedPicks.length === 0 && sport !== 'all') {
-          console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
+        if (DEBUG_LOGGING) {
+          console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
         }
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
@@ -2254,29 +2245,18 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForMiddles(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
-        console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
-        console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
-        if (betType === 'props') {
-          console.log('🏈 Player props response received:', transformedPicks.length, 'player prop picks');
-        }
-        if (transformedPicks.length === 0 && sport !== 'all') {
-          console.warn('⚠️ No results found for sport:', sport, 'This could mean no upcoming games or API returned empty');
+        if (DEBUG_LOGGING) {
+          console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
         }
       } else {
-        console.warn('⚠️ Unexpected response format:', response.data);
-        if (betType === 'props') {
-          console.error('🏈 Player props error - unexpected response format');
-        }
+        console.warn('⚠️ Unexpected response format');
         setError('Invalid response format from API');
       }
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch odds data';
-      console.error('❌ Error fetching odds data:', errorMessage);
-      if (betType === 'props') {
-        console.error('🏈 Player props error:');
-        console.error('🏈 Status:', err.response?.status);
-        console.error('🏈 Message:', errorMessage);
-        console.error('🏈 Full error:', err);
+      console.error('❌ Error fetching odds:', errorMessage);
+      if (DEBUG_LOGGING && betType === 'props') {
+        console.error('🏈 Player props error - Status:', err.response?.status);
       }
       setError(errorMessage);
       setPicks([]);
@@ -2303,9 +2283,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
     // Set up auto-refresh if enabled
     if (autoRefresh && enabled && user && !authLoading) {
-      console.log(`🔄 Auto-refresh enabled: refreshing every ${refreshInterval / 1000}s`);
+      if (DEBUG_LOGGING) console.log(`🔄 Auto-refresh enabled: refreshing every ${refreshInterval / 1000}s`);
       refreshTimerRef.current = setInterval(() => {
-        console.log('🔄 Auto-refreshing odds data...');
         fetchOddsData(true);
       }, refreshInterval);
     }
