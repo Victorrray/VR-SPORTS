@@ -8,6 +8,7 @@ export interface OddsBook {
   team2Odds: string;
   ev: string;
   isBest: boolean;
+  line?: number | null;
 }
 
 export interface OddsPick {
@@ -2001,6 +2002,60 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           return roi >= 1; // Only keep picks with 1% or higher ROI
         });
       };
+
+      // DFS apps to exclude from middles
+      const DFS_APPS = ['underdog', 'prizepicks', 'sleeper', 'fliff', 'chalkboard', 'parlay', 'pick6', 'betr'];
+      
+      // Filter for middles - only spreads/totals/props with different lines, exclude DFS
+      const filterForMiddles = (picks: OddsPick[]) => {
+        if (betType !== 'middles') return picks;
+        
+        return picks.filter(pick => {
+          // Only include spreads, totals, and player props (markets with lines)
+          const marketKey = pick.marketKey || '';
+          const isSpread = marketKey.includes('spread') || pick.pick.includes('+') || pick.pick.includes('-');
+          const isTotal = marketKey.includes('total') || pick.pick.includes('Over') || pick.pick.includes('Under');
+          const isPlayerProp = pick.isPlayerProp || marketKey.includes('player_');
+          
+          if (!isSpread && !isTotal && !isPlayerProp) return false;
+          
+          // Must have a line value
+          if (pick.line === null || pick.line === undefined) return false;
+          
+          // Filter out DFS apps from books
+          const books = (pick.allBooks || pick.books || []).filter((b: any) => {
+            const bookName = (b.name || '').toLowerCase();
+            return !DFS_APPS.some(dfs => bookName.includes(dfs));
+          });
+          
+          if (books.length < 2) return false;
+          
+          // Check if there are different lines available (middle opportunity)
+          const line1 = pick.line;
+          const booksWithDiffLines = books.filter((b: any) => 
+            b.line !== undefined && b.line !== null && b.line !== line1
+          );
+          
+          // Must have at least one book with a different line
+          return booksWithDiffLines.length > 0;
+        }).map(pick => {
+          // Also filter DFS from the books arrays
+          const filteredBooks = (pick.books || []).filter((b: any) => {
+            const bookName = (b.name || '').toLowerCase();
+            return !DFS_APPS.some(dfs => bookName.includes(dfs));
+          });
+          const filteredAllBooks = (pick.allBooks || []).filter((b: any) => {
+            const bookName = (b.name || '').toLowerCase();
+            return !DFS_APPS.some(dfs => bookName.includes(dfs));
+          });
+          
+          return {
+            ...pick,
+            books: filteredBooks,
+            allBooks: filteredAllBooks
+          };
+        });
+      };
       
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
@@ -2008,6 +2063,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
+        transformedPicks = filterForMiddles(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
@@ -2023,6 +2079,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
+        transformedPicks = filterForMiddles(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
