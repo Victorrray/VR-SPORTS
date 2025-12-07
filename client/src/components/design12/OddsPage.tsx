@@ -1732,7 +1732,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               if (booksWithDiffLines.length === 0) {
                                 return (
                                   <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
-                                    0 pts
+                                    0
                                   </div>
                                 );
                               }
@@ -1745,7 +1745,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               
                               return (
                                 <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
-                                  {gap} pts
+                                  {gap}
                                 </div>
                               );
                             } else {
@@ -2105,7 +2105,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             return (
                               <div className={`px-2.5 py-1 ${isLight ? 'bg-amber-100' : 'bg-amber-500/20'} rounded-full`}>
                                 <span className={`${isLight ? 'text-amber-700' : 'text-amber-400'} font-bold text-xs`}>
-                                  {gap} pts
+                                  {gap}
                                 </span>
                               </div>
                             );
