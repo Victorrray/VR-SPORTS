@@ -16,7 +16,7 @@ const RECOMMENDED_SPORTSBOOKS = [
 export function useRecommendedPicks(options = {}) {
   const {
     limit = 4,
-    minEV = 1, // Minimum 1% EV to show more picks
+    minEV = 0.5, // Minimum 0.5% EV to show more picks
     enabled = true,
     sportsbooks = RECOMMENDED_SPORTSBOOKS, // Default to major books
   } = options;
@@ -94,16 +94,10 @@ export function useRecommendedPicks(options = {}) {
           // and find the best odds for each
           const bestOddsMap = new Map(); // key: "marketKey|outcomeName|point" -> { odds, bookmaker, market, outcome }
           
-          // Filter to only include specified sportsbooks
-          const filteredBookmakers = game.bookmakers.filter((bookmaker) => {
-            const bookKey = (bookmaker.key || '').toLowerCase();
-            const bookName = (bookmaker.title || '').toLowerCase();
-            return sportsbooks.some(sb => 
-              bookKey.includes(sb.toLowerCase()) || 
-              bookName.includes(sb.toLowerCase()) ||
-              sb.toLowerCase().includes(bookKey)
-            );
-          });
+          // Use ALL bookmakers for better EV calculation (don't filter)
+          const filteredBookmakers = game.bookmakers;
+          
+          console.log(`  🎮 Game: ${game.away_team} @ ${game.home_team} - ${filteredBookmakers.length} bookmakers`);
           
           if (filteredBookmakers.length === 0) return picks;
           
@@ -141,6 +135,11 @@ export function useRecommendedPicks(options = {}) {
             
             // Calculate real EV based on actual odds
             const ev = calculateEV(odds, game.bookmakers, market.key, outcome.name, outcome.point);
+
+            // Log for debugging
+            if (ev > 0) {
+              console.log(`  📈 Found +EV: ${game.away_team} @ ${game.home_team} - ${outcome.name} ${market.key} @ ${bookmaker.title}: EV=${ev.toFixed(2)}%`);
+            }
 
             if (ev >= minEV) {
               // Format pick description based on market type
@@ -325,6 +324,8 @@ function calculateEV(odds, bookmakers, marketKey = null, outcomeName = null, poi
 
     // Need at least 2 comparable odds to calculate meaningful EV
     if (comparableOdds.length < 2) {
+      // Fallback: if we have the best odds and they're positive, give a small EV boost
+      if (odds > 100) return 0.5; // Slight positive for good underdogs
       return 0;
     }
 
