@@ -182,14 +182,16 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const dateOptions = useMemo(() => generateDateOptions(), []);
 
   // Fetch real odds data from API
-  const { picks: apiPicks, loading: apiLoading, error: apiError, refetch } = useOddsData({
+  const { picks: apiPicks, loading: apiLoading, error: apiError, refetch, lastUpdated, isRefreshing } = useOddsData({
     sport: selectedSport,
     marketType: selectedMarket,
     betType: selectedBetType,
     sportsbooks: selectedSportsbooks,
     date: selectedDate,
     minDataPoints: minDataPoints,
-    enabled: true
+    enabled: true,
+    autoRefresh: autoRefresh,
+    refreshInterval: 30000
   });
 
   // Filter picks by selected date
@@ -238,17 +240,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     setCurrentPage(1); // Reset to first page when filters change
   }, [selectedSport, selectedMarket, selectedBetType, selectedDate]);
 
-  // Auto-refresh effect - refresh odds every 30 seconds when enabled
-  useEffect(() => {
-    if (!autoRefresh) return;
-    
-    const refreshInterval = setInterval(() => {
-      console.log('🔄 Auto-refreshing player props data...');
-      refetch();
-    }, 30000); // 30 seconds
-    
-    return () => clearInterval(refreshInterval);
-  }, [autoRefresh, refetch]);
+  // Auto-refresh is now handled by useOddsData hook
 
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
@@ -1269,6 +1261,20 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           {/* End Side Panel */}
         </>
       )}
+
+      {/* Picks Count and Updated Time */}
+      <div className={`flex items-center justify-between mb-3 px-1`}>
+        <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+          {sortedPicks.length} {sortedPicks.length === 1 ? 'pick' : 'picks'} found
+        </div>
+        <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+          {isRefreshing ? (
+            <span className="text-emerald-500 font-medium">Updating...</span>
+          ) : lastUpdated && (
+            <span>Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          )}
+        </div>
+      </div>
 
       {/* Odds Table */}
       <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden`}>
