@@ -2145,7 +2145,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                         min="1"
                                         value={arbitrageStake}
                                         onChange={(e) => setArbitrageStake(Math.max(1, parseInt(e.target.value) || 100))}
-                                        className={`w-24 pl-7 pr-3 py-1.5 rounded-lg text-sm font-bold ${isLight ? 'bg-gray-100 border-gray-300 text-gray-900' : 'bg-white/10 border-white/20 text-white'} border focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                                        className={`w-24 pl-7 pr-3 py-1.5 rounded-full text-sm font-bold ${isLight ? 'bg-gray-100 border-gray-300 text-gray-900' : 'bg-white/10 border-white/20 text-white'} border focus:outline-none focus:ring-2 focus:ring-purple-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                                       />
                                     </div>
                                   </div>
