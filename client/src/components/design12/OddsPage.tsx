@@ -1795,17 +1795,17 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               </div>
                               
                               {/* Stakes Column */}
-                              <div className="col-span-2 flex flex-col justify-center">
-                                <div className={`p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
-                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-2 text-center`}>Stakes ($100)</div>
-                                  <div className="space-y-2">
+                              <div className="col-span-2 flex flex-col">
+                                <div className={`h-full p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl flex flex-col justify-center`}>
+                                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold uppercase mb-3 text-center`}>Stakes ($100)</div>
+                                  <div className="space-y-3">
                                     <div className="flex justify-between items-center">
-                                      <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs`}>Side 1:</span>
-                                      <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-sm`}>${stake1.toFixed(2)}</span>
+                                      <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>Side 1:</span>
+                                      <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>${stake1.toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                      <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs`}>Side 2:</span>
-                                      <span className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm`}>${stake2.toFixed(2)}</span>
+                                      <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm`}>Side 2:</span>
+                                      <span className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-base`}>${stake2.toFixed(2)}</span>
                                     </div>
                                   </div>
                                 </div>
