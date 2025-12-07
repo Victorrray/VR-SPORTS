@@ -1934,11 +1934,50 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           return bookCount >= minDataPoints;
         });
       };
+
+      // Filter out Unibet from arbitrage bets
+      const filterUnibetForArbitrage = (picks: OddsPick[]) => {
+        if (betType !== 'arbitrage') return picks;
+        return picks.map(pick => {
+          // Filter Unibet from books array
+          const filteredBooks = (pick.books || []).filter((book: OddsBook) => 
+            !book.name.toLowerCase().includes('unibet')
+          );
+          const filteredAllBooks = (pick.allBooks || []).filter((book: OddsBook) => 
+            !book.name.toLowerCase().includes('unibet')
+          );
+          // Skip picks where bestBook is Unibet
+          if (pick.bestBook?.toLowerCase().includes('unibet')) {
+            // Find new best book from filtered list
+            if (filteredBooks.length > 0) {
+              const newBest = filteredBooks.reduce((best: OddsBook, b: OddsBook) => {
+                const bestOdds = parseInt(best.odds, 10);
+                const bOdds = parseInt(b.odds, 10);
+                return bOdds > bestOdds ? b : best;
+              }, filteredBooks[0]);
+              return {
+                ...pick,
+                bestBook: newBest.name,
+                bestOdds: newBest.odds,
+                books: filteredBooks,
+                allBooks: filteredAllBooks
+              };
+            }
+            return null; // No valid books left
+          }
+          return {
+            ...pick,
+            books: filteredBooks,
+            allBooks: filteredAllBooks
+          };
+        }).filter((pick) => pick !== null) as OddsPick[];
+      };
       
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
+        transformedPicks = filterUnibetForArbitrage(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
@@ -1952,6 +1991,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
+        transformedPicks = filterUnibetForArbitrage(transformedPicks);
         setPicks(transformedPicks);
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
