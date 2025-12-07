@@ -2253,9 +2253,9 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       </div>
 
                       {/* Books Table */}
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {/* Table Header */}
-                        <div className={`grid grid-cols-4 gap-2 px-3 py-2 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-xl`}>
+                        <div className={`grid grid-cols-4 gap-3 px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs`}>Book</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp ? 'Over' : pick.team1.split(' ').pop()}</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp ? 'Under' : pick.team2.split(' ').pop()}</div>
@@ -2266,7 +2266,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
                           <div 
                             key={idx}
-                            className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl items-center`}
+                            className={`grid grid-cols-4 gap-3 px-4 py-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-2xl items-center`}
                           >
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
                             <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{typeof book.odds === 'number' ? (book.odds > 0 ? `+${book.odds}` : book.odds) : (typeof book.odds === 'string' && !book.odds.startsWith('-') && !book.odds.startsWith('+') && book.odds !== '--' ? `+${book.odds}` : book.odds)}</div>
@@ -2353,66 +2353,57 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         </div>
                       </div>
 
-                      {/* Compact Books Table */}
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className={`border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
-                              <th className={`text-left py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>Book</th>
-                              <th className={`text-center py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>{pick.team1}</th>
-                              <th className={`text-center py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>{pick.team2}</th>
-                              <th className={`text-right py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>Pick</th>
-                            </tr>
-                          </thead>
-                          <tbody className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
-                            {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
-                              <tr 
-                                key={idx}
-                                className={`transition-all ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'}`}
-                              >
-                                <td className="py-2 px-3">
-                                  <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
-                                </td>
-                                <td className="py-2 px-3 text-center">
-                                  <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{typeof book.odds === 'number' ? (book.odds > 0 ? `+${book.odds}` : book.odds) : (typeof book.odds === 'string' && !book.odds.startsWith('-') && !book.odds.startsWith('+') && book.odds !== '--' ? `+${book.odds}` : book.odds)}</span>
-                                </td>
-                                <td className="py-2 px-3 text-center">
-                                  <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm`}>{book.team2Odds}</span>
-                                </td>
-                                <td className="py-2 px-3 text-right">
-                                  {isPickAdded(pick, book.name) ? (
-                                    <button
-                                      className="p-1.5 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg cursor-default"
-                                      disabled
-                                    >
-                                      <Check className="w-4 h-4 text-white" />
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onAddPick({
-                                          teams: pick.game,
-                                          time: 'Sun, Nov 10 7:00 PM PST',
-                                          pick: pick.pick,
-                                          odds: book.odds,
-                                          sportsbook: book.name,
-                                          ev: book.ev,
-                                          sport: pick.sport,
-                                          confidence: 'High',
-                                          analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
-                                        });
-                                      }}
-                                      className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
-                                    >
-                                      <Plus className="w-4 h-4 text-white" />
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                      {/* Books Cards */}
+                      <div className="space-y-3">
+                        {/* Header */}
+                        <div className={`grid grid-cols-4 gap-4 px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm`}>Book</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-center`}>{pick.team1}</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-center`}>{pick.team2}</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-right`}>Pick</div>
+                        </div>
+
+                        {/* Rows */}
+                        {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
+                          <div 
+                            key={idx}
+                            className={`grid grid-cols-4 gap-4 px-4 py-3 ${isLight ? 'bg-white border-gray-200 hover:bg-gray-50' : 'bg-white/5 border-white/10 hover:bg-white/10'} border rounded-2xl items-center transition-all`}
+                          >
+                            <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
+                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{typeof book.odds === 'number' ? (book.odds > 0 ? `+${book.odds}` : book.odds) : (typeof book.odds === 'string' && !book.odds.startsWith('-') && !book.odds.startsWith('+') && book.odds !== '--' ? `+${book.odds}` : book.odds)}</div>
+                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{book.team2Odds}</div>
+                            <div className="flex justify-end">
+                              {isPickAdded(pick, book.name) ? (
+                                <button
+                                  className="p-2 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl cursor-default"
+                                  disabled
+                                >
+                                  <Check className="w-4 h-4 text-white" />
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onAddPick({
+                                      teams: pick.game,
+                                      time: 'Sun, Nov 10 7:00 PM PST',
+                                      pick: pick.pick,
+                                      odds: book.odds,
+                                      sportsbook: book.name,
+                                      ev: book.ev,
+                                      sport: pick.sport,
+                                      confidence: 'High',
+                                      analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
+                                    });
+                                  }}
+                                  className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
+                                >
+                                  <Plus className="w-4 h-4 text-white" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
 
                       {/* View More Button */}
