@@ -2039,63 +2039,109 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const DFS_APPS = ['underdog', 'prizepicks', 'sleeper', 'fliff', 'chalkboard', 'parlay', 'pick6', 'betr'];
       
       // Filter for middles - only spreads/totals/props with different lines, exclude DFS
+      // Also combines alternate lines from the same game to find bigger gaps
       const filterForMiddles = (picks: OddsPick[]) => {
         if (betType !== 'middles') return picks;
         
         console.log('🎯 Middles filter: Starting with', picks.length, 'picks');
         
-        const filtered = picks.filter(pick => {
-          // Only include spreads, totals, and player props (markets with lines)
+        // Group picks by game and market type to combine alternate lines
+        const gameMarketGroups = new Map<string, any[]>();
+        
+        picks.forEach(pick => {
           const marketKey = pick.marketKey || '';
           const isSpread = marketKey.includes('spread') || pick.pick.includes('+') || pick.pick.includes('-');
           const isTotal = marketKey.includes('total') || pick.pick.includes('Over') || pick.pick.includes('Under');
           const isPlayerProp = pick.isPlayerProp || marketKey.includes('player_');
           
-          if (!isSpread && !isTotal && !isPlayerProp) {
-            return false;
+          if (!isSpread && !isTotal && !isPlayerProp) return;
+          
+          // Create a group key based on game and market type (spread vs total)
+          const marketType = isTotal ? 'total' : isSpread ? 'spread' : 'prop';
+          const groupKey = `${pick.game}-${marketType}${isPlayerProp ? `-${pick.playerName || ''}` : ''}`;
+          
+          if (!gameMarketGroups.has(groupKey)) {
+            gameMarketGroups.set(groupKey, []);
           }
-          
-          // Filter out DFS apps from books
-          const books = (pick.allBooks || pick.books || []).filter((b: any) => {
-            const bookName = (b.name || '').toLowerCase();
-            return !DFS_APPS.some(dfs => bookName.includes(dfs));
-          });
-          
-          if (books.length < 2) {
-            return false;
-          }
-          
-          // Get all unique lines from books
-          const linesFromBooks = books
-            .map((b: any) => b.line)
-            .filter((l: any) => l !== undefined && l !== null);
-          
-          const uniqueLines = [...new Set(linesFromBooks)];
-          
-          // Must have at least 2 different lines for a middle opportunity
-          if (uniqueLines.length < 2) {
-            return false;
-          }
-          
-          console.log('🎯 Middle found:', pick.pick, 'Lines:', uniqueLines);
-          return true;
-        }).map(pick => {
-          // Also filter DFS from the books arrays
-          const filteredBooks = (pick.books || []).filter((b: any) => {
-            const bookName = (b.name || '').toLowerCase();
-            return !DFS_APPS.some(dfs => bookName.includes(dfs));
-          });
-          const filteredAllBooks = (pick.allBooks || []).filter((b: any) => {
-            const bookName = (b.name || '').toLowerCase();
-            return !DFS_APPS.some(dfs => bookName.includes(dfs));
-          });
-          
-          return {
-            ...pick,
-            books: filteredBooks,
-            allBooks: filteredAllBooks
-          };
+          gameMarketGroups.get(groupKey)!.push(pick);
         });
+        
+        const filtered: any[] = [];
+        
+        gameMarketGroups.forEach((groupPicks, groupKey) => {
+          // Collect ALL lines from ALL picks in this group (including alternates)
+          const allLinesWithBooks: { line: number; book: string; odds: string; pick: any; isOver?: boolean }[] = [];
+          
+          groupPicks.forEach(pick => {
+            const books = (pick.allBooks || pick.books || []).filter((b: any) => {
+              const bookName = (b.name || '').toLowerCase();
+              return !DFS_APPS.some(dfs => bookName.includes(dfs));
+            });
+            
+            books.forEach((b: any) => {
+              if (b.line !== undefined && b.line !== null) {
+                allLinesWithBooks.push({
+                  line: b.line,
+                  book: b.name,
+                  odds: b.odds,
+                  pick: pick,
+                  isOver: pick.pick.includes('Over') || pick.pickSide === 'Over'
+                });
+              }
+            });
+          });
+          
+          if (allLinesWithBooks.length < 2) return;
+          
+          // Find unique lines
+          const uniqueLines = [...new Set(allLinesWithBooks.map(l => l.line))].sort((a, b) => a - b);
+          
+          if (uniqueLines.length < 2) return;
+          
+          // Calculate the maximum gap
+          const minLine = uniqueLines[0];
+          const maxLine = uniqueLines[uniqueLines.length - 1];
+          const maxGap = maxLine - minLine;
+          
+          if (maxGap <= 0) return;
+          
+          // Use the first pick as the base, but enhance it with all lines info
+          const basePick = groupPicks[0];
+          
+          // Find the best books for each side of the middle
+          const booksAtMinLine = allLinesWithBooks.filter(l => l.line === minLine);
+          const booksAtMaxLine = allLinesWithBooks.filter(l => l.line === maxLine);
+          
+          // Filter DFS from books
+          const filteredBooks = (basePick.books || []).filter((b: any) => {
+            const bookName = (b.name || '').toLowerCase();
+            return !DFS_APPS.some(dfs => bookName.includes(dfs));
+          });
+          
+          // Create enhanced allBooks with all lines from the group
+          const enhancedAllBooks = allLinesWithBooks.map(l => ({
+            name: l.book,
+            line: l.line,
+            odds: l.odds,
+            team2Odds: '--',
+            ev: '--',
+            isBest: false
+          }));
+          
+          console.log('🎯 Middle found:', basePick.pick, 'Gap:', maxGap, 'Lines:', uniqueLines);
+          
+          filtered.push({
+            ...basePick,
+            books: filteredBooks,
+            allBooks: enhancedAllBooks,
+            middleGap: maxGap,
+            middleLines: uniqueLines,
+            line: minLine // Use min line as the base
+          });
+        });
+        
+        // Sort by gap (highest first)
+        filtered.sort((a, b) => (b.middleGap || 0) - (a.middleGap || 0));
         
         console.log('🎯 Middles filter: Found', filtered.length, 'middle opportunities');
         return filtered;

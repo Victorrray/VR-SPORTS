@@ -672,7 +672,13 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   };
 
   // Helper function to calculate middle gap for sorting
+  // Uses pre-calculated middleGap if available, otherwise calculates from books
   const calculateMiddleGap = (pick: any) => {
+    // Use pre-calculated gap if available (from enhanced middles filter)
+    if (pick.middleGap !== undefined) {
+      return pick.middleGap;
+    }
+    
     const books = pick.allBooks || pick.books || [];
     const line1 = pick.line || 0;
     const booksWithDiffLines = books.filter((b: any) => b.line && b.line !== line1);
@@ -1726,22 +1732,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             const books = pick.allBooks || pick.books || [];
                             
                             if (selectedBetType === 'middles') {
-                              // Calculate middle gap (difference in lines)
-                              const line1 = pick.line || 0;
-                              const booksWithDiffLines = books.filter((b: any) => b.line && b.line !== line1);
-                              if (booksWithDiffLines.length === 0) {
-                                return (
-                                  <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
-                                    0
-                                  </div>
-                                );
-                              }
-                              const bestMiddleBook = booksWithDiffLines.reduce((best: any, b: any) => {
-                                const gap = Math.abs(b.line - line1);
-                                const bestGap = Math.abs(best.line - line1);
-                                return gap > bestGap ? b : best;
-                              }, booksWithDiffLines[0]);
-                              const gap = Math.abs(bestMiddleBook.line - line1);
+                              // Use pre-calculated gap if available, otherwise calculate
+                              const gap = (pick as any).middleGap !== undefined ? (pick as any).middleGap : calculateMiddleGap(pick);
                               
                               return (
                                 <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
