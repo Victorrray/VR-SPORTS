@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiClient } from '../utils/apiClient';
 import { useAuth } from './SimpleAuth';
 
@@ -51,6 +51,8 @@ export interface UseOddsDataOptions {
   limit?: number;
   enabled?: boolean;
   minDataPoints?: number;
+  autoRefresh?: boolean;  // Enable auto-refresh (default: true)
+  refreshInterval?: number;  // Refresh interval in ms (default: 45000 = 45 seconds)
 }
 
 export interface UseOddsDataResult {
@@ -58,6 +60,8 @@ export interface UseOddsDataResult {
   loading: boolean;
   error: string | null;
   refetch: () => void;
+  lastUpdated: Date | null;  // Timestamp of last successful fetch
+  isRefreshing: boolean;  // True when auto-refreshing (not initial load)
 }
 
 // Book weighting for EV calculations
@@ -1734,21 +1738,32 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
     limit = 50,
     enabled = true,
     minDataPoints = 4,
+    autoRefresh = true,
+    refreshInterval = 45000,  // 45 seconds default
   } = options;
 
   const { user, authLoading } = useAuth();
   const [picks, setPicks] = useState<OddsPick[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLoadRef = useRef(true);
 
-  const fetchOddsData = async () => {
+  const fetchOddsData = useCallback(async (isAutoRefresh = false) => {
     if (!enabled || !user || authLoading) {
       setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
+      // For auto-refresh, use isRefreshing instead of loading to avoid UI flicker
+      if (isAutoRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
       // Build query parameters - match backend API expectations
@@ -2155,6 +2170,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
         setPicks(transformedPicks);
+        setLastUpdated(new Date());
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
         if (betType === 'props') {
@@ -2171,6 +2187,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
         setPicks(transformedPicks);
+        setLastUpdated(new Date());
         console.log('✅ Odds data fetched and transformed successfully:', transformedPicks.length, 'picks');
         console.log('📊 Filtered results - Sport:', sport, 'Market:', marketType, 'BetType:', betType, 'Sportsbooks:', sportsbooks, 'Results:', transformedPicks.length);
         if (betType === 'props') {
@@ -2199,17 +2216,49 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       setPicks([]);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
+      isInitialLoadRef.current = false;
     }
-  };
+  }, [enabled, user, authLoading, sport, date, marketType, betType, sportsbooks, limit, minDataPoints]);
 
+  // Initial fetch and when dependencies change
   useEffect(() => {
-    fetchOddsData();
-  }, [sport, date, marketType, betType, sportsbooks.join(','), limit, enabled, user, authLoading]);
+    isInitialLoadRef.current = true;
+    fetchOddsData(false);
+  }, [fetchOddsData]);
+
+  // Auto-refresh interval
+  useEffect(() => {
+    // Clear any existing timer
+    if (refreshTimerRef.current) {
+      clearInterval(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    // Set up auto-refresh if enabled
+    if (autoRefresh && enabled && user && !authLoading) {
+      console.log(`🔄 Auto-refresh enabled: refreshing every ${refreshInterval / 1000}s`);
+      refreshTimerRef.current = setInterval(() => {
+        console.log('🔄 Auto-refreshing odds data...');
+        fetchOddsData(true);
+      }, refreshInterval);
+    }
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      if (refreshTimerRef.current) {
+        clearInterval(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+    };
+  }, [autoRefresh, refreshInterval, enabled, user, authLoading, fetchOddsData]);
 
   return {
     picks,
     loading,
     error,
-    refetch: fetchOddsData,
+    refetch: () => fetchOddsData(false),
+    lastUpdated,
+    isRefreshing,
   };
 }

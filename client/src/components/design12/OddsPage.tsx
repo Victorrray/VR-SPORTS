@@ -244,15 +244,24 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   // Generate date options dynamically
   const dateOptions = useMemo(() => generateDateOptions(), []);
 
-  // Fetch real odds data from API
-  const { picks: apiPicks, loading: apiLoading, error: apiError, refetch } = useOddsData({
+  // Fetch real odds data from API with auto-refresh
+  const { 
+    picks: apiPicks, 
+    loading: apiLoading, 
+    error: apiError, 
+    refetch,
+    lastUpdated,
+    isRefreshing 
+  } = useOddsData({
     sport: selectedSport,
     marketType: selectedMarket,
     betType: selectedBetType,
     sportsbooks: selectedSportsbooks,
     date: selectedDate,
     minDataPoints: minDataPoints,
-    enabled: true
+    enabled: true,
+    autoRefresh: true,
+    refreshInterval: 45000  // 45 seconds
   });
 
   // Filter picks by selected date
@@ -1686,6 +1695,37 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           {/* End Side Panel */}
         </>
       )}
+
+      {/* Last Updated Indicator */}
+      <div className={`flex items-center justify-between mb-3 px-1`}>
+        <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+          {sortedPicks.length} {sortedPicks.length === 1 ? 'pick' : 'picks'} found
+        </div>
+        <div className={`flex items-center gap-2 text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+          {isRefreshing && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-emerald-500 font-medium">Updating...</span>
+            </div>
+          )}
+          {lastUpdated && !isRefreshing && (
+            <span>
+              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          <button
+            onClick={() => refetch()}
+            className={`p-1.5 rounded-lg transition-all ${
+              isLight 
+                ? 'hover:bg-gray-100 text-gray-500 hover:text-gray-700' 
+                : 'hover:bg-white/10 text-white/50 hover:text-white'
+            }`}
+            title="Refresh odds"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
 
       {/* Odds Table */}
       <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl overflow-hidden`}>

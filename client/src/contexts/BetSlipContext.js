@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const BetSlipContext = createContext();
+
+// LocalStorage key for bet slip persistence
+const BET_SLIP_STORAGE_KEY = 'vr_odds_bet_slip';
 
 export const useBetSlip = () => {
   const context = useContext(BetSlipContext);
@@ -10,12 +13,40 @@ export const useBetSlip = () => {
   return context;
 };
 
+// Load bets from localStorage on initial render
+const loadBetsFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(BET_SLIP_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Validate that it's an array
+      if (Array.isArray(parsed)) {
+        console.log('🎯 BetSlip: Loaded', parsed.length, 'bets from localStorage');
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.error('🎯 BetSlip: Failed to load from localStorage:', error);
+  }
+  return [];
+};
+
 export const BetSlipProvider = ({ children }) => {
-  const [bets, setBets] = useState([]);
+  const [bets, setBets] = useState(loadBetsFromStorage);
   const [isOpen, setIsOpen] = useState(false);
   
+  // Save bets to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(BET_SLIP_STORAGE_KEY, JSON.stringify(bets));
+      console.log('🎯 BetSlip: Saved', bets.length, 'bets to localStorage');
+    } catch (error) {
+      console.error('🎯 BetSlip: Failed to save to localStorage:', error);
+    }
+  }, [bets]);
+  
   // Debug: Log whenever bets state changes
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('🎯 BetSlip State Changed:', { 
       betCount: bets.length, 
       bets: bets.map(b => ({ id: b.id, selection: b.selection })),
