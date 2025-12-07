@@ -227,14 +227,23 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     'chalkboard', 'parlay', 'pick6', 'draftkings_pick6', 'betr', 'betrdfs'
   ];
   
-  // Stale thresholds - DFS apps change lines much faster
-  const STALE_THRESHOLD_DFS_MS = 5 * 60 * 1000;  // 5 minutes for DFS apps
-  const STALE_THRESHOLD_STANDARD_MS = 30 * 60 * 1000;  // 30 minutes for standard books
+  // Books to exclude from alternate markets (their alternate lines are often stale/unavailable)
+  const EXCLUDE_FROM_ALTERNATES = ['dabble', 'dabble_au'];
+  
+  // Stale thresholds - DFS apps change lines much faster (reduced for fresher data)
+  const STALE_THRESHOLD_DFS_MS = 3 * 60 * 1000;  // 3 minutes for DFS apps (was 5)
+  const STALE_THRESHOLD_STANDARD_MS = 15 * 60 * 1000;  // 15 minutes for standard books (was 30)
   
   // Helper to check if a book is a DFS app
   const isDFSBook = (bookKey: string): boolean => {
     const normalizedKey = bookKey?.toLowerCase() || '';
     return DFS_BOOK_KEYS.some(dfs => normalizedKey.includes(dfs));
+  };
+  
+  // Helper to check if a book should be excluded from alternate markets
+  const shouldExcludeFromAlternates = (bookKey: string): boolean => {
+    const normalizedKey = bookKey?.toLowerCase() || '';
+    return EXCLUDE_FROM_ALTERNATES.some(excluded => normalizedKey.includes(excluded));
   };
   
   // Helper to get appropriate stale threshold for a book
@@ -1496,7 +1505,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookKey = bm.key || '';
           const bookName = normalizeBookName(bm.title || bm.key);
           
-          // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
+          // Skip books that should be excluded from alternate markets (e.g., Dabble)
+          if (shouldExcludeFromAlternates(bookKey)) return;
+          
+          // Check if bookmaker data is stale (DFS apps have stricter threshold)
           const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
           const staleThreshold = getStaleThreshold(bookKey);
           const isStale = (now - lastUpdate) > staleThreshold;
@@ -2189,11 +2201,36 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         console.log('🎯 Middles filter: Found', filtered.length, 'middle opportunities');
         return filtered;
       };
+
+      // Filter out Dabble from alternate market picks (their alternate lines are often stale)
+      const filterDabbleFromAlternates = (picks: OddsPick[]) => {
+        return picks.filter(pick => {
+          // If it's an alternate market and best book is Dabble, filter it out
+          if (pick.isAlternate && pick.bestBook?.toLowerCase().includes('dabble')) {
+            console.log('🚫 Filtering Dabble alternate:', pick.pick);
+            return false;
+          }
+          return true;
+        }).map(pick => {
+          // Also remove Dabble from books arrays for alternate picks
+          if (pick.isAlternate) {
+            const filteredBooks = (pick.books || []).filter((b: OddsBook) => 
+              !b.name.toLowerCase().includes('dabble')
+            );
+            const filteredAllBooks = (pick.allBooks || []).filter((b: OddsBook) => 
+              !b.name.toLowerCase().includes('dabble')
+            );
+            return { ...pick, books: filteredBooks, allBooks: filteredAllBooks };
+          }
+          return pick;
+        });
+      };
       
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
+        transformedPicks = filterDabbleFromAlternates(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
@@ -2211,6 +2248,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
+        transformedPicks = filterDabbleFromAlternates(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
