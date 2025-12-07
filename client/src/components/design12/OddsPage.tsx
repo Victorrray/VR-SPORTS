@@ -2539,16 +2539,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
 
                     {/* Desktop Expanded - Compact Table (only for non-arbitrage) */}
-                    <div className="hidden lg:block space-y-4">
+                    <div className="hidden lg:block space-y-6">
                       {/* Three Column Stats */}
-                      <div className={`grid grid-cols-3 gap-4 pb-4 mb-4 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className={`grid grid-cols-3 gap-8 pb-6 mb-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
                         {/* Best Line */}
                         <div className="flex flex-col items-center text-center">
-                          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-2`}>
+                          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-3`}>
                             Best Line
                           </div>
-                          <div className={`px-3 py-2 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-full`}>
-                            <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-base`}>
+                          <div className={`px-5 py-3 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-2xl`}>
+                            <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-lg`}>
                               {formatOdds(pick.bestOdds)}
                             </span>
                           </div>
@@ -2556,11 +2556,11 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
                         {/* Average Odds */}
                         <div className="flex flex-col items-center text-center">
-                          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-2`}>
+                          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-3`}>
                             Average Odds
                           </div>
-                          <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
-                            <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
+                          <div className={`px-5 py-3 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-2xl`}>
+                            <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>
                               {calculateAverageOdds(pick.allBooks || pick.books)}
                             </span>
                           </div>
@@ -2568,11 +2568,11 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
                         {/* DeVig Odds */}
                         <div className="flex flex-col items-center text-center">
-                          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-2`}>
+                          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm mb-3`}>
                             DeVig Odds
                           </div>
-                          <div className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-xl`}>
-                            <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>
+                          <div className={`px-5 py-3 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} backdrop-blur-xl border rounded-2xl`}>
+                            <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>
                               {calculateDevigOdds(pick.allBooks || pick.books)}
                             </span>
                           </div>
@@ -2582,7 +2582,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       {/* Books Cards */}
                       <div className="space-y-3">
                         {/* Header */}
-                        <div className={`grid grid-cols-4 gap-4 px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
+                        <div className={`grid grid-cols-4 gap-6 px-6 py-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm`}>Book</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-center`}>{pick.team1}</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-sm text-center`}>{pick.team2}</div>
@@ -2593,15 +2593,15 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
                           <div 
                             key={idx}
-                            className={`grid grid-cols-4 gap-4 px-4 py-3 ${isLight ? 'bg-white border-gray-200 hover:bg-gray-50' : 'bg-white/5 border-white/10 hover:bg-white/10'} border rounded-2xl items-center transition-all`}
+                            className={`grid grid-cols-4 gap-6 px-6 py-4 ${isLight ? 'bg-white border-gray-200 hover:bg-gray-50' : 'bg-white/5 border-white/10 hover:bg-white/10'} border rounded-2xl items-center transition-all`}
                           >
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{typeof book.odds === 'number' ? (book.odds > 0 ? `+${book.odds}` : book.odds) : (typeof book.odds === 'string' && !book.odds.startsWith('-') && !book.odds.startsWith('+') && book.odds !== '--' ? `+${book.odds}` : book.odds)}</div>
-                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{book.team2Odds}</div>
+                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-base text-center`}>{typeof book.odds === 'number' ? (book.odds > 0 ? `+${book.odds}` : book.odds) : (typeof book.odds === 'string' && !book.odds.startsWith('-') && !book.odds.startsWith('+') && book.odds !== '--' ? `+${book.odds}` : book.odds)}</div>
+                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-base text-center`}>{book.team2Odds}</div>
                             <div className="flex justify-end">
                               {isPickAdded(pick, book.name) ? (
                                 <button
-                                  className="p-2 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl cursor-default"
+                                  className="p-2.5 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl cursor-default"
                                   disabled
                                 >
                                   <Check className="w-4 h-4 text-white" />
@@ -2622,7 +2622,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                                       analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
                                     });
                                   }}
-                                  className="p-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
+                                  className="p-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
                                 >
                                   <Plus className="w-4 h-4 text-white" />
                                 </button>
@@ -2634,10 +2634,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
                       {/* View More Button */}
                       {pick.allBooks.length > 5 && (
-                        <div className="flex justify-center mt-3">
+                        <div className="flex justify-center mt-4">
                           <button 
                             onClick={() => toggleSportsbook(pick.id)}
-                            className={`flex items-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+                            className={`flex items-center gap-2 px-5 py-2.5 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
                           >
                             <ChevronDown className={`w-4 h-4 transition-transform ${expandedSportsbooks.includes(pick.id) ? 'rotate-180' : ''}`} />
                             <span>{expandedSportsbooks.includes(pick.id) ? 'View Less' : 'View More'}</span>
