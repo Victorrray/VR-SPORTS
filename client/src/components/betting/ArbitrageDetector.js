@@ -219,9 +219,12 @@ const ArbitrageDetector = ({
     games.forEach(game => {
       if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
 
-      // Process both upcoming AND live games for arbitrage opportunities
-      // Live games often have the BEST arbitrage due to rapid line movements
-      // Only skip completed games if we have that status
+      // Skip games that have already started (past games)
+      const gameTime = new Date(game.commence_time);
+      const currentTime = new Date();
+      if (gameTime <= currentTime) return; // Game has already started or is in the past
+      
+      // Also skip completed games if we have that status
       if (game.status === 'final' || game.completed) return;
 
       // DFS apps to exclude from arbitrage (can't arbitrage on DFS)
@@ -229,13 +232,13 @@ const ArbitrageDetector = ({
       
       // Stale threshold - skip bookmakers with data older than 30 minutes
       const STALE_THRESHOLD_MS = 30 * 60 * 1000;
-      const now = Date.now();
+      const nowMs = Date.now();
       
       // Helper to check if bookmaker data is stale
       const isBookmakerStale = (bookmaker) => {
         if (!bookmaker.last_update) return false; // If no timestamp, assume fresh
         const lastUpdate = new Date(bookmaker.last_update).getTime();
-        return (now - lastUpdate) > STALE_THRESHOLD_MS;
+        return (nowMs - lastUpdate) > STALE_THRESHOLD_MS;
       };
       
       // Collect all market keys available across bookmakers
