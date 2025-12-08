@@ -227,13 +227,11 @@ const ArbitrageDetector = ({
       
       // Strict check: skip ANY game that has started
       if (gameTime <= currentTime) {
-        console.log('⏭️ Skipping started game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
         return;
       }
       
       // Also skip completed games if we have that status
       if (game.status === 'final' || game.completed) {
-        console.log('⏭️ Skipping completed game:', game.away_team, '@', game.home_team);
         return;
       }
 
@@ -423,7 +421,6 @@ const ArbitrageDetector = ({
       if (opp.commence_time) {
         const gameTime = new Date(opp.commence_time);
         if (gameTime <= now) {
-          console.log('🚫 Filtering out started game opportunity:', opp.game, '- started:', gameTime.toISOString());
           return false;
         }
       }

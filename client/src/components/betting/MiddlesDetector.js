@@ -64,13 +64,11 @@ const MiddlesDetector = ({
       // Only process games that haven't started yet
       const gameTime = new Date(game.commence_time);
       if (gameTime <= now) {
-        console.log('⏭️ Middles: Skipping started game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
         return;
       }
       
       // Skip completed games
       if (game.status === 'final' || game.completed) {
-        console.log('⏭️ Middles: Skipping completed game:', game.away_team, '@', game.home_team);
         return;
       }
 
@@ -318,7 +316,6 @@ const MiddlesDetector = ({
       if (opp.commence_time) {
         const gameTime = new Date(opp.commence_time);
         if (gameTime <= now) {
-          console.log('🚫 Middles: Filtering out started game opportunity:', opp.game, '- started:', gameTime.toISOString());
           return false;
         }
       }

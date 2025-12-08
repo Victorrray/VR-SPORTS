@@ -871,26 +871,32 @@ export default function OddsTable({
 
   /* ---------- Build rows (game mode) ---------- */
   const allRows = useMemo(() => {
+    // Check if games is empty or undefined
+    if (!games || games.length === 0) {
+      return [];
+    }
+    
+    // CRITICAL: Filter out games that have already started
+    const now = new Date();
+    const upcomingGames = games.filter(game => {
+      if (!game.commence_time) return false;
+      const gameTime = new Date(game.commence_time);
+      return gameTime > now;
+    });
+    
+    // Use upcomingGames instead of games for all processing below
+    const gamesToProcess = upcomingGames;
+    
     // Debug: Check if we have any DFS app data
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au'];
+    
     let dfsAppCount = 0;
     let dfsMarketCount = 0;
     let dfsOutcomeCount = 0;
     let dfsAppGames = new Set();
     
-    console.log('🔍 DFS DEBUG: Starting allRows calculation with bookFilter:', bookFilter);
-    console.log('🔍 DFS DEBUG: Mode:', mode);
-    console.log('🔍 DFS DEBUG: Market filter:', marketFilter);
-    console.log('🔍 DFS DEBUG: Games count:', games?.length || 0);
-    
-    // Check if games is empty or undefined
-    if (!games || games.length === 0) {
-      console.log('🔍 DFS DEBUG: No games data available!');
-      return [];
-    }
-    
-    if (games && games.length > 0) {
-      games.forEach(game => {
+    if (gamesToProcess && gamesToProcess.length > 0) {
+      gamesToProcess.forEach(game => {
         if (game.bookmakers) {
           game.bookmakers.forEach(bookmaker => {
             const bookmakerKeyLower = bookmaker.key?.toLowerCase() || '';
@@ -962,7 +968,7 @@ export default function OddsTable({
         let hasDFSPlayerProps = false;
         
         // Check if we have any DFS apps with player props
-        games?.forEach(game => {
+        gamesToProcess?.forEach(game => {
           if (game.bookmakers) {
             game.bookmakers.forEach(bookmaker => {
               if (propsDfsApps.some(app => (bookmaker.key || '').toLowerCase().includes(app))) {
@@ -986,7 +992,7 @@ export default function OddsTable({
       const dfsBookmakers = new Set();
       const tyreekHillBookmakers = new Set();
       
-      games?.forEach((game, idx) => {
+      gamesToProcess?.forEach((game, idx) => {
         console.log(`Game ${idx + 1} (${game.id}):`, {
           sport: game.sport_key,
           teams: `${game.away_team} @ ${game.home_team}`,
@@ -1031,7 +1037,7 @@ export default function OddsTable({
       console.log(`🎯 TYREEK HILL BOOKMAKERS:`, Array.from(tyreekHillBookmakers));
       
       
-      games?.forEach(game => {
+      gamesToProcess?.forEach(game => {
         if (!game.bookmakers) {
           console.log('Game has no bookmakers:', game.id);
           return;
@@ -1912,11 +1918,9 @@ export default function OddsTable({
     };
 
     const gameRows = [];
-    console.log(`🎯 OddsTable: Processing ${games?.length || 0} games with marketFilter:`, marketFilter);
-    games?.forEach((game) => {
+    gamesToProcess?.forEach((game) => {
       const baseKeys = ["h2h", "spreads", "totals"];
       const keys = (marketFilter && marketFilter.length) ? marketFilter : baseKeys;
-      console.log(`🎯 OddsTable: Game ${game.home_team} - Using markets:`, keys);
 
       keys.forEach((mktKey) => {
         const allMarketOutcomes = [];

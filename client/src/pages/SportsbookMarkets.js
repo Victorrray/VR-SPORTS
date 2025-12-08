@@ -775,7 +775,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     let sportFilteredGames = marketGames;
     if (filters.sports && filters.sports.length > 0) {
       sportFilteredGames = marketGames.filter(game => filters.sports.includes(game.sport_key));
-      console.log(`🏆 Sport filter (${filters.sports.join(', ')}) - showing:`, sportFilteredGames.length, 'of', marketGames.length, 'total');
     }
     
     // ALWAYS filter out games that have already started (past/completed games)
@@ -786,16 +785,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       const gameTime = new Date(game.commence_time);
       const hasStarted = gameTime <= now;
       if (hasStarted) {
-        console.log('⏭️ Filtering out started game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
       }
       return !hasStarted;
     });
     
-    console.log(`🕐 Active games filter - showing:`, activeGames.length, 'upcoming of', sportFilteredGames.length, '(filtered out', sportFilteredGames.length - activeGames.length, 'started games)');
     
     // If no date filter is selected, return active games (past games already filtered)
     if (!filters.date || filters.date === "") {
-      console.log('🗓️ No date filter - showing all active games:', activeGames.length);
       return activeGames;
     }
     
@@ -809,7 +805,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         const isLive = gameTime <= now && gameTime > fourHoursAgo;
         return isLive;
       });
-      console.log('🔴 Live games filter - showing:', liveGames.length, 'of', sportFilteredGames.length);
       return liveGames;
     }
     
@@ -829,7 +824,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       return isOnSelectedDate && hasNotStarted;
     });
     
-    console.log(`🗓️ Date filter (${filters.date}) - showing:`, dateFilteredGames.length, 'upcoming games of', activeGames.length, 'total');
     return dateFilteredGames;
   }, [marketGames, filters.date, filters.sports]);
 
@@ -840,7 +834,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // For arbitrage, we want ALL games (upcoming + live)
     // Arbitrage opportunities exist across all active markets
-    console.log('⚡ Arbitrage games - showing all active games:', marketGames.length);
     return marketGames;
   }, [marketGames]);
 
