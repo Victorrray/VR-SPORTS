@@ -355,6 +355,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
   const betTypes = [
     { id: 'straight', name: 'Straight Bets' },
+    { id: 'exchanges', name: 'Exchanges' },
     { id: 'props', name: 'Player Props' },
     { id: 'arbitrage', name: 'Arbitrage' },
     { id: 'middles', name: 'Middles' }
@@ -1744,6 +1745,14 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
               <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Stakes</div>
             )}
           </div>
+        ) : selectedBetType === 'exchanges' ? (
+          <div className={`hidden lg:grid lg:grid-cols-12 gap-4 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
+            <div className={`col-span-1 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Edge</div>
+            <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Match</div>
+            <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Bet</div>
+            <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Exchange</div>
+            <div className={`col-span-3 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>Best Book</div>
+          </div>
         ) : (
           <div className={`hidden lg:grid lg:grid-cols-12 gap-4 lg:gap-6 p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-r from-white/5 to-transparent border-white/10'} border-b`}>
             <div className={`col-span-2 ${isLight ? lightModeColors.textLight : 'text-white/60'} font-bold text-sm uppercase tracking-wide`}>EV%</div>
@@ -1766,8 +1775,107 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                   onClick={() => toggleRow(pick.id)}
                   className={`w-full p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all cursor-pointer`}
                 >
-                  {/* Arbitrage/Middles Layout - Shows both sides stacked */}
-                  {(selectedBetType === 'arbitrage' || selectedBetType === 'middles') ? (
+                  {/* Exchanges Layout - Shows exchange vs best book comparison */}
+                  {selectedBetType === 'exchanges' ? (
+                    <div className="hidden lg:block">
+                      <div className="grid grid-cols-12 gap-4 items-center">
+                        {/* Edge Badge */}
+                        <div className="col-span-1 flex items-center justify-center">
+                          <div className={`px-3 py-1 rounded-full font-bold text-sm ${isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                            {(pick as any).edgeVsExchange?.toFixed(1) || pick.ev?.replace('%', '')}%
+                          </div>
+                        </div>
+
+                        {/* Match Info */}
+                        <div className="col-span-3 flex flex-col justify-center">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                              {pick.sport}
+                            </span>
+                          </div>
+                          <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                            {pick.game}
+                          </div>
+                          {isGameLive(pick.commenceTime) ? (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500 rounded text-white text-xs font-bold">
+                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                LIVE
+                              </span>
+                            </div>
+                          ) : (
+                            <div className={`flex items-center gap-1 ${isLight ? 'text-gray-600' : 'text-white/50'} text-xs font-bold mt-1`}>
+                              <Clock className="w-3 h-3" />
+                              {pick.commenceTime ? new Date(pick.commenceTime).toLocaleString('en-US', { 
+                                weekday: 'short', month: 'short', day: 'numeric',
+                                hour: 'numeric', minute: '2-digit', hour12: true,
+                                timeZone: 'America/Los_Angeles'
+                              }) : 'Time TBD'}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Bet Description */}
+                        <div className="col-span-3 flex flex-col justify-center">
+                          <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
+                            {pick.pick}
+                          </div>
+                          {pick.line && (
+                            <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>
+                              Line: {pick.line}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Exchange Odds */}
+                        <div className="col-span-2 flex flex-col justify-center">
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs mb-1`}>
+                            {(pick as any).exchangeBook || 'Exchange'}
+                          </div>
+                          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-base`}>
+                            {formatOdds((pick as any).exchangeOdds || '--')}
+                          </div>
+                        </div>
+
+                        {/* Best Book Odds */}
+                        <div className="col-span-3 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} text-xs mb-1`}>
+                              {pick.bestBook}
+                            </div>
+                            <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-lg`}>
+                              {formatOdds(pick.bestOdds)}
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!addedPicks.includes(pick.id)) {
+                                onAddPick({
+                                  ...pick,
+                                  confidence: 'High'
+                                });
+                                setAddedPicks([...addedPicks, pick.id]);
+                                toast.success('Bet added to My Picks!');
+                              }
+                            }}
+                            disabled={addedPicks.includes(pick.id)}
+                            className={`px-4 py-2 ${
+                              addedPicks.includes(pick.id)
+                                ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
+                            } text-white rounded-xl transition-all font-bold text-sm border`}
+                          >
+                            {addedPicks.includes(pick.id) ? (
+                              <Check className="w-4 h-4" />
+                            ) : (
+                              'Bet'
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (selectedBetType === 'arbitrage' || selectedBetType === 'middles') ? (
                     <div className="hidden lg:block">
                       {/* Arbitrage/Middles Header Row */}
                       <div className="grid grid-cols-12 gap-4 items-center">
