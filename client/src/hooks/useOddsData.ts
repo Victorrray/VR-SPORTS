@@ -1963,7 +1963,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // For exchanges mode, fetch straight bets data (we'll filter for exchange opportunities client-side)
       const apiBetType = betType === 'exchanges' ? 'straight' : betType;
       if (apiBetType && apiBetType !== 'all') params.append('betType', apiBetType);
-      if (sportsbooks && sportsbooks.length > 0) {
+      // For exchanges mode, DON'T filter by sportsbooks - we need ALL books to find +EV opportunities
+      if (betType !== 'exchanges' && sportsbooks && sportsbooks.length > 0) {
         params.append('sportsbooks', sportsbooks.join(','));
       }
       if (limit) params.append('limit', limit.toString());
