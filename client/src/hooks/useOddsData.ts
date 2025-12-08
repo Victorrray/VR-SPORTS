@@ -1960,7 +1960,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       
       // Optional: date, betType, sportsbooks (if backend supports them)
       if (date && date !== 'all') params.append('date', date);
-      if (betType && betType !== 'all') params.append('betType', betType);
+      // For exchanges mode, fetch straight bets data (we'll filter for exchange opportunities client-side)
+      const apiBetType = betType === 'exchanges' ? 'straight' : betType;
+      if (apiBetType && apiBetType !== 'all') params.append('betType', apiBetType);
       if (sportsbooks && sportsbooks.length > 0) {
         params.append('sportsbooks', sportsbooks.join(','));
       }
@@ -1976,6 +1978,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         console.log('🏈 sport:', sport);
         console.log('🏈 sportsbooks filter:', sportsbooks);
         console.log('🏈 Fetching from:', endpoint);
+      }
+      
+      if (betType === 'exchanges') {
+        console.log('💱💱💱 EXCHANGES MODE - FETCHING 💱💱💱', fetchTimestamp);
+        console.log('💱 Looking for +EV vs Novig/ProphetX');
+        console.log('💱 Fetching straight bets data to filter');
       }
       
       console.log('📊 Fetching odds data from:', endpoint, 'at', fetchTimestamp);
@@ -2229,10 +2237,11 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         return filtered;
       };
 
-      // Exchange books to use as sharp reference lines
-      const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange', 'pinnacle'];
+      // Exchange books to use as sharp reference lines (Novig and ProphetX only)
+      const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
       
       // Filter for exchanges - find bets where exchange books have worse odds than other sportsbooks
+      // This works for both straight bets AND player props
       // This indicates +EV opportunities when you can get better odds elsewhere
       const filterForExchanges = (picks: OddsPick[]) => {
         if (betType !== 'exchanges') return picks;
