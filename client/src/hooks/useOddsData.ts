@@ -860,6 +860,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       const now = Date.now();
       
       // Process standard markets (h2h, spreads, totals)
+      let marketsProcessed = 0;
+      let booksSkippedStale = 0;
+      let booksProcessed = 0;
+      
       standardMarkets.forEach(marketKey => {
         const booksArray: any[] = [];
         const filteredBooksArray: any[] = [];
@@ -874,7 +878,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
           const staleThreshold = getStaleThreshold(bookKey);
           const isStale = (now - lastUpdate) > staleThreshold;
-          if (isStale) return; // Skip stale bookmakers
+          if (isStale) {
+            booksSkippedStale++;
+            if (gameIdx === 0 && marketKey === 'h2h' && booksSkippedStale <= 3) {
+              console.log(`⏰ Stale book skipped: ${bookKey}, lastUpdate: ${bm.last_update}, age: ${Math.round((now - lastUpdate) / 1000)}s, threshold: ${staleThreshold / 1000}s`);
+            }
+            return; // Skip stale bookmakers
+          }
+          booksProcessed++;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
           
@@ -1048,7 +1059,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           gameTime: game.commence_time || game.gameTime || undefined,
           commenceTime: game.commence_time || game.gameTime || undefined
         });
+        marketsProcessed++;
       });
+      
+      // Log summary for first game
+      if (gameIdx === 0) {
+        console.log(`📊 First game processing summary: ${marketsProcessed} markets, ${booksProcessed} books processed, ${booksSkippedStale} books skipped (stale)`);
+      }
       
       // Process soccer-specific markets (h2h_3_way, draw_no_bet, btts)
       soccerMarkets.forEach(marketKey => {
