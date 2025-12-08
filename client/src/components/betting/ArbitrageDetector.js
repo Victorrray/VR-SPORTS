@@ -215,17 +215,29 @@ const ArbitrageDetector = ({
   // Calculate arbitrage opportunities from real data
   const calculateArbitrage = (games) => {
     const opportunities = [];
+    const currentTime = new Date();
+    
+    console.log('🎯 Arbitrage: Processing', games.length, 'games at', currentTime.toISOString());
     
     games.forEach(game => {
       if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
 
       // Skip games that have already started (past games)
       const gameTime = new Date(game.commence_time);
-      const currentTime = new Date();
-      if (gameTime <= currentTime) return; // Game has already started or is in the past
+      
+      // More robust check: skip if game started more than 30 minutes ago
+      // This accounts for live games that might still have value
+      const thirtyMinutesAgo = new Date(currentTime.getTime() - 30 * 60 * 1000);
+      if (gameTime <= thirtyMinutesAgo) {
+        console.log('⏭️ Skipping past game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
+        return;
+      }
       
       // Also skip completed games if we have that status
-      if (game.status === 'final' || game.completed) return;
+      if (game.status === 'final' || game.completed) {
+        console.log('⏭️ Skipping completed game:', game.away_team, '@', game.home_team);
+        return;
+      }
 
       // DFS apps to exclude from arbitrage (can't arbitrage on DFS)
       const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'prophetx'];
@@ -405,9 +417,21 @@ const ArbitrageDetector = ({
 
   // Filter and sort opportunities
   const filteredOpportunities = useMemo(() => {
-    let filtered = allOpportunities.filter(opp => 
-      opp.opportunities.some(arb => arb.profit_percentage >= minProfit)
-    );
+    const now = new Date();
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    
+    // Double-check: filter out any opportunities for games that have already started
+    let filtered = allOpportunities.filter(opp => {
+      // Check if game has started (using commence_time from the opportunity)
+      if (opp.commence_time) {
+        const gameTime = new Date(opp.commence_time);
+        if (gameTime <= thirtyMinutesAgo) {
+          console.log('🚫 Filtering out past game opportunity:', opp.game, '- started:', gameTime.toISOString());
+          return false;
+        }
+      }
+      return opp.opportunities.some(arb => arb.profit_percentage >= minProfit);
+    });
 
     // Sort opportunities
     filtered.sort((a, b) => {

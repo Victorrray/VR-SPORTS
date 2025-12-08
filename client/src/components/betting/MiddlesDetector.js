@@ -54,14 +54,26 @@ const MiddlesDetector = ({
   // Calculate middle opportunities from real data
   const calculateMiddles = (gamesData) => {
     const opportunities = [];
+    const now = new Date();
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    
+    console.log('🎪 Middles: Processing', gamesData.length, 'games at', now.toISOString());
     
     gamesData.forEach(game => {
       if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
 
-      // Only process games that haven't started yet
+      // Only process games that haven't started yet (or started within last 30 min for live)
       const gameTime = new Date(game.commence_time);
-      const now = new Date();
-      if (gameTime <= now) return;
+      if (gameTime <= thirtyMinutesAgo) {
+        console.log('⏭️ Middles: Skipping past game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
+        return;
+      }
+      
+      // Skip completed games
+      if (game.status === 'final' || game.completed) {
+        console.log('⏭️ Middles: Skipping completed game:', game.away_team, '@', game.home_team);
+        return;
+      }
 
       // Stale threshold - skip bookmakers with data older than 30 minutes
       const STALE_THRESHOLD_MS = 30 * 60 * 1000;
@@ -299,9 +311,21 @@ const MiddlesDetector = ({
   }, [realGamesData, selectedMarkets, minMiddleGap, minProbability, maxStake]);
 
   const filteredOpportunities = useMemo(() => {
-    let filtered = realMiddleOpportunities.filter(opp => 
-      opp.probability >= minProbability && opp.gap >= minMiddleGap
-    );
+    const now = new Date();
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    
+    // Double-check: filter out any opportunities for games that have already started
+    let filtered = realMiddleOpportunities.filter(opp => {
+      // Check if game has started (using commence_time from the opportunity)
+      if (opp.commence_time) {
+        const gameTime = new Date(opp.commence_time);
+        if (gameTime <= thirtyMinutesAgo) {
+          console.log('🚫 Middles: Filtering out past game opportunity:', opp.game, '- started:', gameTime.toISOString());
+          return false;
+        }
+      }
+      return opp.probability >= minProbability && opp.gap >= minMiddleGap;
+    });
 
     filtered.sort((a, b) => {
       switch (sortBy) {
