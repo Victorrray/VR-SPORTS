@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { withApiBase } from '../config/api';
+import { getAccessTokenSync } from '../lib/supabase';
 
 // Global authentication failure tracking
 let lastAuthFailure = 0;
@@ -138,10 +139,15 @@ export const useCachedFetch = (url, options = {}) => {
       const fullUrl = url.startsWith('http') ? url : withApiBase(url);
       const queryParams = options.params ? `?${new URLSearchParams(options.params)}` : '';
       
+      // Get auth token for API requests
+      const authToken = getAccessTokenSync();
+      const authHeaders = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+      
       const response = await fetch(`${fullUrl}${queryParams}`, {
         signal: abortControllerRef.current.signal,
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders,
           ...options.headers
         },
         ...options.fetchOptions
