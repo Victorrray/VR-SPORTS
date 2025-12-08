@@ -770,7 +770,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     if (!Array.isArray(marketGames)) return [];
     
     const now = new Date();
-    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
     
     // First, filter by sport (selected sports)
     let sportFilteredGames = marketGames;
@@ -779,19 +778,20 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       console.log(`🏆 Sport filter (${filters.sports.join(', ')}) - showing:`, sportFilteredGames.length, 'of', marketGames.length, 'total');
     }
     
-    // ALWAYS filter out games that started more than 30 minutes ago (past/completed games)
+    // ALWAYS filter out games that have already started (past/completed games)
     // This prevents stale cached data from showing old games
+    // NO EXCEPTIONS - if the game has started, it should not appear in regular views
     const activeGames = sportFilteredGames.filter(game => {
-      if (!game.commence_time) return true; // Keep games without time info
+      if (!game.commence_time) return false; // Skip games without time info (can't verify if past)
       const gameTime = new Date(game.commence_time);
-      const isPastGame = gameTime <= thirtyMinutesAgo;
-      if (isPastGame) {
-        console.log('⏭️ Filtering out past game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
+      const hasStarted = gameTime <= now;
+      if (hasStarted) {
+        console.log('⏭️ Filtering out started game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
       }
-      return !isPastGame;
+      return !hasStarted;
     });
     
-    console.log(`🕐 Active games filter - showing:`, activeGames.length, 'of', sportFilteredGames.length, '(filtered out', sportFilteredGames.length - activeGames.length, 'past games)');
+    console.log(`🕐 Active games filter - showing:`, activeGames.length, 'upcoming of', sportFilteredGames.length, '(filtered out', sportFilteredGames.length - activeGames.length, 'started games)');
     
     // If no date filter is selected, return active games (past games already filtered)
     if (!filters.date || filters.date === "") {
@@ -799,15 +799,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       return activeGames;
     }
     
-    // Filter for live games only (started within last 30 min to ~4 hours)
+    // Filter for live games only (started within last 4 hours - still in progress)
     if (filters.date === "live") {
-      const liveGames = activeGames.filter(game => {
+      const fourHoursAgo = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+      const liveGames = sportFilteredGames.filter(game => {
         if (!game.commence_time) return false;
         const gameTime = new Date(game.commence_time);
-        const isLive = gameTime <= now && gameTime > thirtyMinutesAgo;
+        // Live = started but not more than 4 hours ago (game likely still in progress)
+        const isLive = gameTime <= now && gameTime > fourHoursAgo;
         return isLive;
       });
-      console.log('🔴 Live games filter - showing:', liveGames.length, 'of', activeGames.length);
+      console.log('🔴 Live games filter - showing:', liveGames.length, 'of', sportFilteredGames.length);
       return liveGames;
     }
     

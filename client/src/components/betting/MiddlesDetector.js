@@ -55,17 +55,16 @@ const MiddlesDetector = ({
   const calculateMiddles = (gamesData) => {
     const opportunities = [];
     const now = new Date();
-    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
     
     console.log('🎪 Middles: Processing', gamesData.length, 'games at', now.toISOString());
     
     gamesData.forEach(game => {
       if (!Array.isArray(game.bookmakers) || game.bookmakers.length < 2) return;
 
-      // Only process games that haven't started yet (or started within last 30 min for live)
+      // Only process games that haven't started yet
       const gameTime = new Date(game.commence_time);
-      if (gameTime <= thirtyMinutesAgo) {
-        console.log('⏭️ Middles: Skipping past game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
+      if (gameTime <= now) {
+        console.log('⏭️ Middles: Skipping started game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
         return;
       }
       
@@ -312,15 +311,14 @@ const MiddlesDetector = ({
 
   const filteredOpportunities = useMemo(() => {
     const now = new Date();
-    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
     
     // Double-check: filter out any opportunities for games that have already started
     let filtered = realMiddleOpportunities.filter(opp => {
       // Check if game has started (using commence_time from the opportunity)
       if (opp.commence_time) {
         const gameTime = new Date(opp.commence_time);
-        if (gameTime <= thirtyMinutesAgo) {
-          console.log('🚫 Middles: Filtering out past game opportunity:', opp.game, '- started:', gameTime.toISOString());
+        if (gameTime <= now) {
+          console.log('🚫 Middles: Filtering out started game opportunity:', opp.game, '- started:', gameTime.toISOString());
           return false;
         }
       }

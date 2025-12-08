@@ -225,11 +225,9 @@ const ArbitrageDetector = ({
       // Skip games that have already started (past games)
       const gameTime = new Date(game.commence_time);
       
-      // More robust check: skip if game started more than 30 minutes ago
-      // This accounts for live games that might still have value
-      const thirtyMinutesAgo = new Date(currentTime.getTime() - 30 * 60 * 1000);
-      if (gameTime <= thirtyMinutesAgo) {
-        console.log('⏭️ Skipping past game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
+      // Strict check: skip ANY game that has started
+      if (gameTime <= currentTime) {
+        console.log('⏭️ Skipping started game:', game.away_team, '@', game.home_team, '- started:', gameTime.toISOString());
         return;
       }
       
@@ -418,15 +416,14 @@ const ArbitrageDetector = ({
   // Filter and sort opportunities
   const filteredOpportunities = useMemo(() => {
     const now = new Date();
-    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
     
     // Double-check: filter out any opportunities for games that have already started
     let filtered = allOpportunities.filter(opp => {
       // Check if game has started (using commence_time from the opportunity)
       if (opp.commence_time) {
         const gameTime = new Date(opp.commence_time);
-        if (gameTime <= thirtyMinutesAgo) {
-          console.log('🚫 Filtering out past game opportunity:', opp.game, '- started:', gameTime.toISOString());
+        if (gameTime <= now) {
+          console.log('🚫 Filtering out started game opportunity:', opp.game, '- started:', gameTime.toISOString());
           return false;
         }
       }
