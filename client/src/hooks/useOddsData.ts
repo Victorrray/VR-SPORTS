@@ -875,16 +875,12 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookName = normalizeBookName(bm.title || bm.key);
           
           // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
-          const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const staleThreshold = getStaleThreshold(bookKey);
-          const isStale = (now - lastUpdate) > staleThreshold;
-          if (isStale) {
-            booksSkippedStale++;
-            if (gameIdx === 0 && marketKey === 'h2h' && booksSkippedStale <= 3) {
-              console.log(`⏰ Stale book skipped: ${bookKey}, lastUpdate: ${bm.last_update}, age: ${Math.round((now - lastUpdate) / 1000)}s, threshold: ${staleThreshold / 1000}s`);
-            }
-            return; // Skip stale bookmakers
-          }
+          // TEMPORARILY DISABLED: Stale check was filtering out all books
+          // TODO: Re-enable with proper threshold after fixing
+          // const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+          // const staleThreshold = getStaleThreshold(bookKey);
+          // const isStale = (now - lastUpdate) > staleThreshold;
+          // if (isStale) return;
           booksProcessed++;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
@@ -1076,10 +1072,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookName = normalizeBookName(bm.title || bm.key);
           
           // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
-          const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const staleThreshold = getStaleThreshold(bookKey);
-          const isStale = (now - lastUpdate) > staleThreshold;
-          if (isStale) return;
+          // DISABLED: Stale check was filtering out all books for game odds
+          // const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+          // const staleThreshold = getStaleThreshold(bookKey);
+          // const isStale = (now - lastUpdate) > staleThreshold;
+          // if (isStale) return;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
           
@@ -1244,10 +1241,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const bookName = normalizeBookName(bm.title || bm.key);
             
             // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
-            const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-            const staleThreshold = getStaleThreshold(bookKey);
-            const isStale = (now - lastUpdate) > staleThreshold;
-            if (isStale) return;
+            // DISABLED: Stale check was filtering out all books for game odds
+            // const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+            // const staleThreshold = getStaleThreshold(bookKey);
+            // const isStale = (now - lastUpdate) > staleThreshold;
+            // if (isStale) return;
             
             if (!bm.markets || !Array.isArray(bm.markets)) return;
             
@@ -1396,10 +1394,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const bookName = normalizeBookName(bm.title || bm.key);
             
             // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
-            const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-            const staleThreshold = getStaleThreshold(bookKey);
-            const isStale = (now - lastUpdate) > staleThreshold;
-            if (isStale) return;
+            // DISABLED: Stale check was filtering out all books for game odds
+            // const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+            // const staleThreshold = getStaleThreshold(bookKey);
+            // const isStale = (now - lastUpdate) > staleThreshold;
+            // if (isStale) return;
             
             if (!bm.markets || !Array.isArray(bm.markets)) return;
             
@@ -1530,10 +1529,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (shouldExcludeFromAlternates(bookKey)) return;
           
           // Check if bookmaker data is stale (DFS apps have stricter threshold)
-          const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const staleThreshold = getStaleThreshold(bookKey);
-          const isStale = (now - lastUpdate) > staleThreshold;
-          if (isStale) return;
+          // DISABLED: Stale check was filtering out all books for game odds
+          // const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+          // const staleThreshold = getStaleThreshold(bookKey);
+          // const isStale = (now - lastUpdate) > staleThreshold;
+          // if (isStale) return;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
           
@@ -1633,10 +1633,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const bookName = normalizeBookName(bm.title || bm.key);
           
           // Check if bookmaker data is stale (DFS apps have stricter 5-min threshold)
-          const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
-          const staleThreshold = getStaleThreshold(bookKey);
-          const isStale = (now - lastUpdate) > staleThreshold;
-          if (isStale) return;
+          // DISABLED: Stale check was filtering out all books for game odds
+          // const lastUpdate = bm.last_update ? new Date(bm.last_update).getTime() : now;
+          // const staleThreshold = getStaleThreshold(bookKey);
+          // const isStale = (now - lastUpdate) > staleThreshold;
+          // if (isStale) return;
           
           if (!bm.markets || !Array.isArray(bm.markets)) return;
           
