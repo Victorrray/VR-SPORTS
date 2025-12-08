@@ -981,14 +981,17 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (!isNaN(bestOddsNum)) {
             const bestProb = toProb(bestOddsNum);
             const edge = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${Math.abs(Math.round(edge * 100) / 100).toFixed(2)}%`;
+            // Don't use Math.abs - show negative EV when odds are worse than fair value
+            const roundedEdge = Math.round(edge * 100) / 100;
+            ev = `${roundedEdge >= 0 ? '' : ''}${roundedEdge.toFixed(2)}%`;
             
             booksArray.forEach(b => {
               const o = parseInt(b.odds, 10);
               if (!isNaN(o)) {
                 const p = toProb(o);
                 const bookEdge = ((avgProb - p) / p) * 100;
-                b.ev = `${(Math.round(bookEdge * 100) / 100).toFixed(2)}%`;
+                const roundedBookEdge = Math.round(bookEdge * 100) / 100;
+                b.ev = `${roundedBookEdge.toFixed(2)}%`;
               }
               b.isBest = b.name === bestBook;
             });
