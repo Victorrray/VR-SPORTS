@@ -2257,8 +2257,14 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         if (betType !== 'exchanges') return picks;
         
         const filtered: OddsPick[] = [];
-        let debugStats = { total: 0, noBooks: 0, noExchange: 0, noOther: 0, badOdds: 0, noBetter: 0, lowEdge: 0, passed: 0, pastGames: 0 };
+        let debugStats = { total: 0, noBooks: 0, noExchange: 0, noOther: 0, badOdds: 0, noBetter: 0, lowEdge: 0, passed: 0, pastGames: 0, notInFilter: 0 };
         const now = new Date();
+        
+        // Check if user has a sportsbook filter for exchanges
+        const userHasSportsbookFilter = sportsbooks && sportsbooks.length > 0;
+        const filterBookKeys = userHasSportsbookFilter 
+          ? sportsbooks.map((s: string) => s.toLowerCase()) 
+          : [];
         
         picks.forEach(pick => {
           debugStats.total++;
@@ -2326,12 +2332,27 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             return;
           }
           
-          // Get the best book among non-exchange books
-          const bestOtherBook = betterBooks.reduce((best: any, book: any) => {
+          // If user has a sportsbook filter, only consider books in their filter
+          let booksToConsider = betterBooks;
+          if (userHasSportsbookFilter) {
+            booksToConsider = betterBooks.filter((b: any) => {
+              const bookKey = (b.key || b.name || '').toLowerCase();
+              return filterBookKeys.some((fk: string) => bookKey.includes(fk) || fk.includes(bookKey));
+            });
+            
+            // If none of the user's filtered books have better odds, skip this pick
+            if (booksToConsider.length === 0) {
+              debugStats.notInFilter++;
+              return;
+            }
+          }
+          
+          // Get the best book among the books to consider
+          const bestOtherBook = booksToConsider.reduce((best: any, book: any) => {
             const bestOdds = parseInt(best.odds, 10);
             const bookOdds = parseInt(book.odds, 10);
             return bookOdds > bestOdds ? book : best;
-          }, betterBooks[0]);
+          }, booksToConsider[0]);
           
           const bestOtherOdds = parseInt(bestOtherBook.odds, 10);
           
