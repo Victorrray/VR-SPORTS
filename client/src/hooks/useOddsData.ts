@@ -2281,10 +2281,15 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         if (betType !== 'exchanges') return picks;
         
         const filtered: OddsPick[] = [];
+        let debugStats = { total: 0, noBooks: 0, noExchange: 0, noOther: 0, badOdds: 0, noBetter: 0, lowEdge: 0, passed: 0 };
         
         picks.forEach(pick => {
+          debugStats.total++;
           const books = pick.allBooks || pick.books || [];
-          if (books.length < 2) return;
+          if (books.length < 2) {
+            debugStats.noBooks++;
+            return;
+          }
           
           // Find exchange book odds (these are the "sharp" reference lines)
           const exchangeBooks = books.filter((b: any) => {
@@ -2298,7 +2303,14 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             return !EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
           });
           
-          if (exchangeBooks.length === 0 || otherBooks.length === 0) return;
+          if (exchangeBooks.length === 0) {
+            debugStats.noExchange++;
+            return;
+          }
+          if (otherBooks.length === 0) {
+            debugStats.noOther++;
+            return;
+          }
           
           // Get the best exchange odds (this is our reference "fair" line)
           const bestExchangeBook = exchangeBooks.reduce((best: any, book: any) => {
@@ -2308,7 +2320,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }, exchangeBooks[0]);
           
           const exchangeOdds = parseInt(bestExchangeBook.odds, 10);
-          if (isNaN(exchangeOdds)) return;
+          if (isNaN(exchangeOdds)) {
+            debugStats.badOdds++;
+            return;
+          }
           
           // Find books with better odds than the exchange
           const betterBooks = otherBooks.filter((b: any) => {
@@ -2318,7 +2333,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             return bookOdds > exchangeOdds;
           });
           
-          if (betterBooks.length === 0) return;
+          if (betterBooks.length === 0) {
+            debugStats.noBetter++;
+            return;
+          }
           
           // Get the best book among non-exchange books
           const bestOtherBook = betterBooks.reduce((best: any, book: any) => {
@@ -2336,7 +2354,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           const edge = ((exchangeProb - otherProb) / otherProb) * 100;
           
           // Only include if there's meaningful edge (at least 1%)
-          if (edge < 1) return;
+          if (edge < 1) {
+            debugStats.lowEdge++;
+            return;
+          }
+          
+          debugStats.passed++;
           
           // Create a modified pick showing the exchange comparison
           filtered.push({
@@ -2358,6 +2381,11 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         
         // Sort by edge (highest first)
         filtered.sort((a: any, b: any) => (b.edgeVsExchange || 0) - (a.edgeVsExchange || 0));
+        
+        // Log debug stats for exchanges filtering
+        console.log('💱 EXCHANGES FILTER DEBUG:', debugStats);
+        console.log('💱 Filtered results:', filtered.length, 'picks with +EV vs exchanges');
+        
         return filtered;
       };
 
