@@ -798,7 +798,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       });
     } else {
       // GAME ODDS MODE: Create separate picks for each market type
-      if (gameIdx === 0) console.log(`📊 GAME ODDS MODE for game: ${gameMatchup}`);
+      if (gameIdx === 0) {
+        console.log(`📊 GAME ODDS MODE for game: ${gameMatchup}`);
+        console.log(`📊 Bookmakers count: ${bookmakers.length}`);
+        if (bookmakers.length > 0) {
+          console.log(`📊 First bookmaker:`, bookmakers[0].key, 'markets:', bookmakers[0].markets?.map((m: any) => m.key));
+        }
+      }
       // Standard markets: h2h, spreads, totals
       // Additional markets: alternate_spreads, alternate_totals, team_totals, alternate_team_totals
       // Soccer markets: h2h_3_way, draw_no_bet, btts
@@ -935,7 +941,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         });
         
         // Skip this market if no books have odds for it
-        if (booksArray.length === 0) return;
+        if (booksArray.length === 0) {
+          if (gameIdx === 0) console.log(`📊 Market ${marketKey}: 0 books found`);
+          return;
+        }
+        if (gameIdx === 0) console.log(`📊 Market ${marketKey}: ${booksArray.length} books found`);
         
         // ALWAYS find the best odds across ALL books (not just filtered ones)
         const bestBookDataOverall = booksArray.reduce((best: any, book: any) => {
