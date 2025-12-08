@@ -247,6 +247,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     setTimeout(() => { setSportsbooksExpanded(false); setSportsbooksClosing(false); }, 280);
   };
   const [autoRefresh, setAutoRefresh] = useState(true); // Always enabled by default for better UX
+  const [showLiveGames, setShowLiveGames] = useState(false); // Off by default - only show upcoming games
   const [minDataPoints, setMinDataPoints] = useState(cachedFilters?.minDataPoints || 4);
 
   // Save filters to localStorage when they change
@@ -295,8 +296,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     
     let filtered = apiPicks;
     
-    // Filter out live games for non-Platinum users (Gold and below only see pre-match)
-    if (!hasPlatinum) {
+    // Filter out live games based on toggle (and Platinum access)
+    // Non-Platinum users never see live games
+    // Platinum users only see live games if toggle is ON
+    if (!hasPlatinum || !showLiveGames) {
       filtered = filtered.filter(pick => !isGameLive(pick.commenceTime));
     }
     
@@ -329,7 +332,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     });
     
     return filtered;
-  }, [apiPicks, selectedDate, hasPlatinum]);
+  }, [apiPicks, selectedDate, hasPlatinum, showLiveGames]);
 
   // Use date-filtered picks
   const topPicks = dateFilteredPicks;
@@ -1269,6 +1272,32 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       onChange={(e) => setAutoRefresh(e.target.checked)}
                     />
                     <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500`}></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Show Live Games Toggle - Platinum Only */}
+              <div>
+                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className={`w-5 h-5 flex items-center justify-center ${showLiveGames ? 'text-red-500' : (isLight ? 'text-gray-400' : 'text-white/40')}`}>
+                      {showLiveGames ? '🔴' : '⚪'}
+                    </div>
+                    <div>
+                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>Show Live Games</div>
+                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold`}>
+                        {showLiveGames ? 'Including games in progress' : 'Only showing upcoming games'}
+                      </div>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={showLiveGames}
+                      onChange={(e) => setShowLiveGames(e.target.checked)}
+                    />
+                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-red-500 peer-checked:to-orange-500`}></div>
                   </label>
                 </div>
               </div>
