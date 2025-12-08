@@ -825,16 +825,32 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const MAX_CONCURRENT = 15; // Increased from 10 to 15
       const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
       
+      // Explicitly include DFS apps for player props (including soccer)
+      const dfsBookmakersForProps = ['prizepicks', 'underdog', 'draftkings_pick6', 'pick6', 'dabble_au', 'sleeper', 'fliff', 'chalkboard', 'betr', 'betrdfs'];
+      const allPlayerPropsBookmakers = [...new Set([...bookmakerList.split(','), ...dfsBookmakersForProps])].join(',');
+      console.log(`🎯 Player props bookmakers (including DFS for soccer): ${allPlayerPropsBookmakers}`);
+      
       for (let i = 0; i < allEvents.length; i += MAX_CONCURRENT) {
         const batch = allEvents.slice(i, i + MAX_CONCURRENT);
         const batchPromises = batch.map(event => 
           (async () => {
             try {
-              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&includeBetLimits=true`;
+              // Include bookmakers parameter to explicitly request DFS apps for all sports including soccer
+              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${allPlayerPropsBookmakers}&includeBetLimits=true`;
               
               const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 15000 }); // Reduced timeout
               
               if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
+                // Log DFS apps found for soccer events
+                if (event.sport_key?.startsWith('soccer_')) {
+                  const dfsFound = playerPropsResponse.data.bookmakers.filter(bk => 
+                    dfsBookmakersForProps.some(dfs => bk.key?.toLowerCase().includes(dfs))
+                  );
+                  if (dfsFound.length > 0) {
+                    console.log(`⚽🎯 DFS APPS FOUND FOR SOCCER: ${event.home_team} vs ${event.away_team} - ${dfsFound.map(b => b.key).join(', ')}`);
+                  }
+                }
+                
                 const eventWithProps = {
                   ...playerPropsResponse.data,
                   bookmakers: playerPropsResponse.data.bookmakers
