@@ -63,12 +63,24 @@ const MiddlesDetector = ({
       const now = new Date();
       if (gameTime <= now) return;
 
+      // Stale threshold - skip bookmakers with data older than 30 minutes
+      const STALE_THRESHOLD_MS = 30 * 60 * 1000;
+      const nowMs = Date.now();
+      
+      // Helper to check if bookmaker data is stale
+      const isBookmakerStale = (bookmaker) => {
+        if (!bookmaker.last_update) return false; // If no timestamp, assume fresh
+        const lastUpdate = new Date(bookmaker.last_update).getTime();
+        return (nowMs - lastUpdate) > STALE_THRESHOLD_MS;
+      };
+
       selectedMarkets.forEach(marketKey => {
         // Collect all lines for this market across bookmakers
         const marketLines = [];
         
         game.bookmakers.forEach(bookmaker => {
           if (bookFilter.length > 0 && !bookFilter.includes(bookmaker.key)) return;
+          if (isBookmakerStale(bookmaker)) return; // Skip stale bookmakers
           
           const gameMarket = bookmaker?.markets?.find(m => m.key === marketKey);
           if (!gameMarket || !gameMarket.outcomes) return;

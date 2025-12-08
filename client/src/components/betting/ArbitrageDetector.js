@@ -227,12 +227,24 @@ const ArbitrageDetector = ({
       // DFS apps to exclude from arbitrage (can't arbitrage on DFS)
       const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper', 'prophetx'];
       
+      // Stale threshold - skip bookmakers with data older than 30 minutes
+      const STALE_THRESHOLD_MS = 30 * 60 * 1000;
+      const now = Date.now();
+      
+      // Helper to check if bookmaker data is stale
+      const isBookmakerStale = (bookmaker) => {
+        if (!bookmaker.last_update) return false; // If no timestamp, assume fresh
+        const lastUpdate = new Date(bookmaker.last_update).getTime();
+        return (now - lastUpdate) > STALE_THRESHOLD_MS;
+      };
+      
       // Collect all market keys available across bookmakers
       const marketKeys = new Set();
       game.bookmakers.forEach(bookmaker => {
         // Skip DFS apps
         if (dfsApps.includes(bookmaker.key?.toLowerCase())) return;
         if (bookFilter.length > 0 && !bookFilter.includes(bookmaker.key)) return; // Apply book filter
+        if (isBookmakerStale(bookmaker)) return; // Skip stale bookmakers
         bookmaker?.markets?.forEach(market => {
           if (market?.key && selectedMarkets.includes(market.key)) {
             marketKeys.add(market.key);
@@ -248,6 +260,7 @@ const ArbitrageDetector = ({
           // Skip DFS apps
           if (dfsApps.includes(bookmaker.key?.toLowerCase())) return;
           if (bookFilter.length > 0 && !bookFilter.includes(bookmaker.key)) return; // Apply book filter
+          if (isBookmakerStale(bookmaker)) return; // Skip stale bookmakers
           
           const gameMarket = bookmaker?.markets?.find(m => m.key === marketKey);
           if (!gameMarket || !gameMarket.outcomes) return;
