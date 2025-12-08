@@ -942,28 +942,22 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
         const hasFilteredBooks = filteredBooksArray.length > 0;
         
-        // If user filtered for specific books, only show picks where filtered book has the BEST odds
+        // If user filtered for specific books, show picks where filtered book has odds
+        // For straight bets, we show ALL picks available at the filtered book (not just best odds)
         if (userHasFilter) {
           if (!hasFilteredBooks) {
             return; // Skip - the filtered book doesn't have this market at all
           }
           
-          // Find the best book among filtered books
+          // Find the best book among filtered books for display
           const bestFilteredBook = filteredBooksArray.reduce((best: any, book: any) => {
             const bestOddsNum = parseInt(best.odds, 10);
             const bookOddsNum = parseInt(book.odds, 10);
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooksArray[0]);
           
-          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
-          const overallBestOdds = parseInt(bestOdds, 10);
-          
-          // Skip if filtered book doesn't have the best odds
-          if (filteredOdds < overallBestOdds) {
-            return; // Skip - another book has better odds
-          }
-          
           // Use the filtered book as the best book for display
+          // (Show the best odds from the user's selected sportsbooks)
           bestOdds = bestFilteredBook.odds;
           bestBook = bestFilteredBook.name;
         }
