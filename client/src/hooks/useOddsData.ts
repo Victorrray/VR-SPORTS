@@ -2282,10 +2282,22 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         if (betType !== 'exchanges') return picks;
         
         const filtered: OddsPick[] = [];
-        let debugStats = { total: 0, noBooks: 0, noExchange: 0, noOther: 0, badOdds: 0, noBetter: 0, lowEdge: 0, passed: 0 };
+        let debugStats = { total: 0, noBooks: 0, noExchange: 0, noOther: 0, badOdds: 0, noBetter: 0, lowEdge: 0, passed: 0, pastGames: 0 };
+        const now = new Date();
         
         picks.forEach(pick => {
           debugStats.total++;
+          
+          // Filter out past games - only show upcoming games
+          const commenceTime = pick.commence_time || pick.commenceTime;
+          if (commenceTime) {
+            const gameTime = new Date(commenceTime);
+            if (gameTime < now) {
+              debugStats.pastGames++;
+              return; // Skip past games
+            }
+          }
+          
           const books = pick.allBooks || pick.books || [];
           if (books.length < 2) {
             debugStats.noBooks++;
