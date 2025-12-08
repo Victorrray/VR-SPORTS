@@ -225,8 +225,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
   if (!Array.isArray(games)) return [];
   
   // DFS apps list - these have faster-changing lines and need stricter stale thresholds
+  // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
   const DFS_BOOK_KEYS = [
-    'dabble', 'dabble_au', 'prizepicks', 'underdog', 'sleeper', 'fliff', 
+    'dabble', 'dabble_au', 'prizepicks', 'underdog', 'sleeper',
     'chalkboard', 'parlay', 'pick6', 'draftkings_pick6', 'betr', 'betrdfs'
   ];
   
@@ -2133,8 +2134,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         });
       };
 
-      // DFS apps to exclude from middles
-      const DFS_APPS = ['underdog', 'prizepicks', 'sleeper', 'fliff', 'chalkboard', 'parlay', 'pick6', 'betr'];
+      // DFS apps to exclude from middles (they don't offer traditional bets)
+      // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
+      const DFS_APPS = ['underdog', 'prizepicks', 'sleeper', 'chalkboard', 'parlay', 'pick6', 'betr', 'betr_us_dfs', 'dabble', 'dabble_au'];
       
       // Filter for middles - find opportunities where you can bet OVER at a lower line
       // and UNDER at a higher line from DIFFERENT books, creating a "middle" gap
