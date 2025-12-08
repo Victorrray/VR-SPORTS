@@ -916,29 +916,49 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           {/* Dropdown Menu - Positioned relative to button */}
           {isBetTypeDropdownOpen && (
             <div className={`absolute top-full mt-2 left-0 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
-              {betTypes.map((betType) => (
-                <button
-                  key={betType.id}
-                  onClick={() => {
-                    setSelectedBetType(betType.id);
-                    setIsBetTypeDropdownOpen(false);
-                  }}
-                  className={`w-full px-4 py-3 text-left font-bold transition-all flex items-center justify-between ${
-                    selectedBetType === betType.id
-                      ? isLight 
-                        ? 'bg-purple-50 text-purple-700' 
-                        : 'bg-purple-500/10 text-purple-300'
-                      : isLight 
-                        ? 'text-gray-700 hover:bg-gray-50' 
-                        : 'text-white/80 hover:bg-white/5'
-                  }`}
-                >
-                  <span>{betType.name}</span>
-                  {selectedBetType === betType.id && (
-                    <Check className="w-5 h-5" />
-                  )}
-                </button>
-              ))}
+              {betTypes.map((betType) => {
+                // Exchanges is platinum-only
+                const isPlatinumOnly = betType.id === 'exchanges';
+                const isLocked = isPlatinumOnly && !hasPlatinum;
+                
+                return (
+                  <button
+                    key={betType.id}
+                    onClick={() => {
+                      if (isLocked) return; // Don't allow selection if locked
+                      setSelectedBetType(betType.id);
+                      setIsBetTypeDropdownOpen(false);
+                    }}
+                    className={`w-full px-4 py-3 text-left font-bold transition-all flex items-center justify-between ${
+                      isLocked
+                        ? isLight
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-white/40 cursor-not-allowed'
+                        : selectedBetType === betType.id
+                          ? isLight 
+                            ? 'bg-purple-50 text-purple-700' 
+                            : 'bg-purple-500/10 text-purple-300'
+                          : isLight 
+                            ? 'text-gray-700 hover:bg-gray-50' 
+                            : 'text-white/80 hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      {betType.name}
+                      {isPlatinumOnly && (
+                        <span className={`px-1.5 py-0.5 text-[10px] rounded flex items-center gap-0.5 ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
+                          <Crown className="w-3 h-3" />
+                        </span>
+                      )}
+                    </span>
+                    {isLocked ? (
+                      <Lock className="w-4 h-4" />
+                    ) : selectedBetType === betType.id ? (
+                      <Check className="w-5 h-5" />
+                    ) : null}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -977,29 +997,49 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         {/* Dropdown Menu - Positioned relative to button */}
         {isBetTypeDropdownOpen && (
           <div className={`absolute top-full mt-2 left-0 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
-            {betTypes.map((betType) => (
-              <button
-                key={betType.id}
-                onClick={() => {
-                  setSelectedBetType(betType.id);
-                  setIsBetTypeDropdownOpen(false);
-                }}
-                className={`w-full px-4 py-3 text-left font-bold transition-all flex items-center justify-between ${
-                  selectedBetType === betType.id
-                    ? isLight 
-                      ? 'bg-purple-50 text-purple-700' 
-                      : 'bg-purple-500/10 text-purple-300'
-                    : isLight 
-                      ? 'text-gray-700 hover:bg-gray-50' 
-                      : 'text-white/80 hover:bg-white/5'
-                }`}
-              >
-                <span>{betType.name}</span>
-                {selectedBetType === betType.id && (
-                  <Check className="w-5 h-5" />
-                )}
-              </button>
-            ))}
+            {betTypes.map((betType) => {
+              // Exchanges is platinum-only
+              const isPlatinumOnly = betType.id === 'exchanges';
+              const isLocked = isPlatinumOnly && !hasPlatinum;
+              
+              return (
+                <button
+                  key={betType.id}
+                  onClick={() => {
+                    if (isLocked) return; // Don't allow selection if locked
+                    setSelectedBetType(betType.id);
+                    setIsBetTypeDropdownOpen(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left font-bold transition-all flex items-center justify-between ${
+                    isLocked
+                      ? isLight
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-white/40 cursor-not-allowed'
+                      : selectedBetType === betType.id
+                        ? isLight 
+                          ? 'bg-purple-50 text-purple-700' 
+                          : 'bg-purple-500/10 text-purple-300'
+                        : isLight 
+                          ? 'text-gray-700 hover:bg-gray-50' 
+                          : 'text-white/80 hover:bg-white/5'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {betType.name}
+                    {isPlatinumOnly && (
+                      <span className={`px-1.5 py-0.5 text-[10px] rounded flex items-center gap-0.5 ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
+                        <Crown className="w-3 h-3" />
+                      </span>
+                    )}
+                  </span>
+                  {isLocked ? (
+                    <Lock className="w-4 h-4" />
+                  ) : selectedBetType === betType.id ? (
+                    <Check className="w-5 h-5" />
+                  ) : null}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
