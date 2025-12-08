@@ -2409,8 +2409,11 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         });
       };
       
+      // For exchanges mode, don't apply sportsbook filtering - we need ALL books
+      const sportsbooksForTransform = betType === 'exchanges' ? [] : sportsbooks;
+      
       if (response.data && Array.isArray(response.data)) {
-        let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
+        let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooksForTransform);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
@@ -2424,7 +2427,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
         }
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
-        let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
+        let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooksForTransform);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
