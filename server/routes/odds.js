@@ -254,7 +254,17 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           'player_receptions', 'player_reception_yds', 'player_reception_tds', 'player_reception_longest',
           'player_anytime_td', 'player_1st_td', 'player_last_td', 'player_tds_over',
           'player_assists', 'player_defensive_interceptions', 'player_field_goals', 'player_kicking_points',
-          'player_pats', 'player_sacks', 'player_solo_tackles', 'player_tackles_assists'
+          'player_pats', 'player_sacks', 'player_solo_tackles', 'player_tackles_assists',
+          // Alternate props (same as NFL)
+          'player_assists_alternate', 'player_field_goals_alternate', 'player_kicking_points_alternate',
+          'player_pass_attempts_alternate', 'player_pass_completions_alternate', 'player_pass_interceptions_alternate',
+          'player_pass_longest_completion_alternate', 'player_pass_rush_yds_alternate',
+          'player_pass_rush_reception_tds_alternate', 'player_pass_rush_reception_yds_alternate',
+          'player_pass_tds_alternate', 'player_pass_yds_alternate', 'player_pats_alternate',
+          'player_receptions_alternate', 'player_reception_longest_alternate', 'player_reception_tds_alternate', 'player_reception_yds_alternate',
+          'player_rush_attempts_alternate', 'player_rush_longest_alternate', 'player_rush_reception_tds_alternate', 'player_rush_reception_yds_alternate',
+          'player_rush_tds_alternate', 'player_rush_yds_alternate',
+          'player_sacks_alternate', 'player_solo_tackles_alternate', 'player_tackles_assists_alternate'
         ],
         'americanfootball_cfl': [
           // CFL uses same markets as NFL/NCAAF
@@ -282,13 +292,23 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           'player_points', 'player_rebounds', 'player_assists', 'player_threes',
           'player_steals', 'player_blocks', 'player_turnovers',
           'player_points_rebounds_assists', 'player_points_rebounds', 'player_points_assists', 'player_rebounds_assists',
-          'player_double_double'
+          'player_double_double',
+          // Alternate props (same as NBA)
+          'player_points_alternate', 'player_rebounds_alternate', 'player_assists_alternate',
+          'player_blocks_alternate', 'player_steals_alternate', 'player_turnovers_alternate', 'player_threes_alternate',
+          'player_points_assists_alternate', 'player_points_rebounds_alternate', 'player_rebounds_assists_alternate',
+          'player_points_rebounds_assists_alternate'
         ],
         'basketball_wnba': [
           'player_points', 'player_rebounds', 'player_assists', 'player_threes',
           'player_steals', 'player_blocks', 'player_turnovers',
           'player_points_rebounds_assists', 'player_points_rebounds', 'player_points_assists', 'player_rebounds_assists',
-          'player_double_double', 'player_triple_double'
+          'player_double_double', 'player_triple_double',
+          // Alternate props
+          'player_points_alternate', 'player_rebounds_alternate', 'player_assists_alternate',
+          'player_blocks_alternate', 'player_steals_alternate', 'player_turnovers_alternate', 'player_threes_alternate',
+          'player_points_assists_alternate', 'player_points_rebounds_alternate', 'player_rebounds_assists_alternate',
+          'player_points_rebounds_assists_alternate'
         ],
         'baseball_mlb': [
           // Batter props
