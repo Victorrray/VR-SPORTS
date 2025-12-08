@@ -1983,7 +1983,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       if (betType === 'exchanges') {
         console.log('💱💱💱 EXCHANGES MODE - FETCHING 💱💱💱', fetchTimestamp);
         console.log('💱 Looking for +EV vs Novig/ProphetX');
-        console.log('💱 Fetching straight bets data to filter');
+        console.log('💱 Fetching BOTH straight bets AND player props');
       }
       
       console.log('📊 Fetching odds data from:', endpoint, 'at', fetchTimestamp);
@@ -1996,7 +1996,41 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         isNCAAFootball: sport === 'ncaa-football'
       });
 
-      const response = await apiClient.get(endpoint);
+      // For exchanges mode, fetch both straight bets AND player props in parallel
+      let response;
+      if (betType === 'exchanges') {
+        // Build player props endpoint
+        const propsParams = new URLSearchParams(params);
+        propsParams.set('betType', 'props');
+        const propsEndpoint = `/api/odds?${propsParams.toString()}`;
+        
+        console.log('💱 Fetching straight bets from:', endpoint);
+        console.log('💱 Fetching player props from:', propsEndpoint);
+        
+        // Fetch both in parallel
+        const [straightResponse, propsResponse] = await Promise.all([
+          apiClient.get(endpoint),
+          apiClient.get(propsEndpoint).catch(err => {
+            console.warn('💱 Player props fetch failed (continuing with straight bets):', err.message);
+            return { data: [] };
+          })
+        ]);
+        
+        // Combine the results
+        const straightData = Array.isArray(straightResponse.data) ? straightResponse.data : 
+          (straightResponse.data?.picks || []);
+        const propsData = Array.isArray(propsResponse.data) ? propsResponse.data : 
+          (propsResponse.data?.picks || []);
+        
+        console.log('💱 Straight bets fetched:', straightData.length, 'games');
+        console.log('💱 Player props fetched:', propsData.length, 'events');
+        
+        // Merge into single response
+        response = { data: [...straightData, ...propsData] };
+        console.log('💱 Combined total:', response.data.length, 'items');
+      } else {
+        response = await apiClient.get(endpoint);
+      }
       
       console.log('📦 API Response:', response.data);
       console.log('📦 Response type:', typeof response.data);

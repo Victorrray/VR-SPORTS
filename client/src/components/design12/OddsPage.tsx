@@ -1792,6 +1792,12 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                               {pick.sport}
                             </span>
+                            {/* Show prop badge for player props */}
+                            {pick.isPlayerProp && (
+                              <span className={`px-2 py-0.5 ${isLight ? 'bg-amber-100 border-amber-200 text-amber-700' : 'bg-amber-500/20 border-amber-400/30 text-amber-400'} border rounded-full font-bold text-xs`}>
+                                PROP
+                              </span>
+                            )}
                           </div>
                           <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
                             {pick.game}
@@ -1817,6 +1823,12 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
                         {/* Bet Description */}
                         <div className="col-span-3 flex flex-col justify-center">
+                          {/* Show player name for player props */}
+                          {pick.isPlayerProp && pick.playerName && (
+                            <div className={`${isLight ? 'text-purple-600' : 'text-purple-400'} font-bold text-xs mb-0.5`}>
+                              {pick.playerName}
+                            </div>
+                          )}
                           <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
                             {pick.pick}
                           </div>
