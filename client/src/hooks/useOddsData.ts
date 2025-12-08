@@ -275,6 +275,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
   
   const allPicks: OddsPick[] = [];
   
+  console.log(`🔄 Processing ${games.length} games, selectedSportsbooks:`, selectedSportsbooks);
+  
   games.forEach((game, gameIdx) => {
     const team1 = game.away_team || 'Team A';
     const team2 = game.home_team || 'Team B';
@@ -796,6 +798,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       });
     } else {
       // GAME ODDS MODE: Create separate picks for each market type
+      if (gameIdx === 0) console.log(`📊 GAME ODDS MODE for game: ${gameMatchup}`);
       // Standard markets: h2h, spreads, totals
       // Additional markets: alternate_spreads, alternate_totals, team_totals, alternate_team_totals
       // Soccer markets: h2h_3_way, draw_no_bet, btts
@@ -1762,6 +1765,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     const bBooks = b.bookCount || b.books?.length || 0;
     return bBooks - aBooks;
   });
+  
+  // Debug: Log transformation results
+  console.log(`🔄 transformOddsApiToOddsPick: ${games.length} games -> ${allPicks.length} picks`);
+  if (allPicks.length === 0 && games.length > 0) {
+    console.warn('⚠️ No picks generated from games! Check transformation logic.');
+    console.log('📋 Sample game:', games[0]);
+  }
   
   return allPicks;
 }
