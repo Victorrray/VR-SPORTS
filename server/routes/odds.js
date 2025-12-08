@@ -299,17 +299,17 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           'player_points_assists_alternate', 'player_points_rebounds_alternate', 'player_rebounds_assists_alternate',
           'player_points_rebounds_assists_alternate'
         ],
-        'basketball_wnba': [
-          'player_points', 'player_rebounds', 'player_assists', 'player_threes',
-          'player_steals', 'player_blocks', 'player_turnovers',
-          'player_points_rebounds_assists', 'player_points_rebounds', 'player_points_assists', 'player_rebounds_assists',
-          'player_double_double', 'player_triple_double',
-          // Alternate props
-          'player_points_alternate', 'player_rebounds_alternate', 'player_assists_alternate',
-          'player_blocks_alternate', 'player_steals_alternate', 'player_turnovers_alternate', 'player_threes_alternate',
-          'player_points_assists_alternate', 'player_points_rebounds_alternate', 'player_rebounds_assists_alternate',
-          'player_points_rebounds_assists_alternate'
-        ],
+        // WNBA - Offseason (May-October typically)
+        // 'basketball_wnba': [
+        //   'player_points', 'player_rebounds', 'player_assists', 'player_threes',
+        //   'player_steals', 'player_blocks', 'player_turnovers',
+        //   'player_points_rebounds_assists', 'player_points_rebounds', 'player_points_assists', 'player_rebounds_assists',
+        //   'player_double_double', 'player_triple_double',
+        //   'player_points_alternate', 'player_rebounds_alternate', 'player_assists_alternate',
+        //   'player_blocks_alternate', 'player_steals_alternate', 'player_turnovers_alternate', 'player_threes_alternate',
+        //   'player_points_assists_alternate', 'player_points_rebounds_alternate', 'player_rebounds_assists_alternate',
+        //   'player_points_rebounds_assists_alternate'
+        // ],
         'baseball_mlb': [
           // Batter props
           'batter_home_runs', 'batter_first_home_run', 'batter_hits', 'batter_total_bases',
