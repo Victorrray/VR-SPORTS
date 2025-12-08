@@ -458,22 +458,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     
     // Step 1: Fetch base odds
     if (baseMarkets.length > 0) {
+      const marketsToFetch = baseMarkets;
       const supabase = req.app.locals.supabase;
       const oddsCacheService = req.app.locals.oddsCacheService;
       
       for (const sport of sportsArray) {
-        // Filter markets to only those supported by THIS specific sport
-        const supportedMarketsForSport = getSupportedMarketsForSport(sport);
-        const marketsToFetch = baseMarkets.filter(m => supportedMarketsForSport.includes(m));
-        
-        // Skip if no supported markets for this sport
-        if (marketsToFetch.length === 0) {
-          console.log(`⏭️ Skipping ${sport} - no supported markets from requested list`);
-          continue;
-        }
-        
-        console.log(`🎯 Markets for ${sport}: ${marketsToFetch.join(', ')}`);
-        
         try {
           const userProfile = req.__userProfile || { plan: 'free' };
           const allowedBookmakers = getBookmakersForPlan(userProfile.plan);

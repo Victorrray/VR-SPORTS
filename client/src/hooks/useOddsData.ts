@@ -942,14 +942,30 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
         const hasFilteredBooks = filteredBooksArray.length > 0;
         
-        // If user filtered for specific books, show picks where filtered book has odds
-        // But still show the BEST odds overall (for line shopping comparison)
+        // If user filtered for specific books, only show picks where filtered book has the BEST odds
         if (userHasFilter) {
           if (!hasFilteredBooks) {
             return; // Skip - the filtered book doesn't have this market at all
           }
-          // Keep bestOdds/bestBook as the overall best - this shows users where to get the best line
-          // The filtered book's odds will be visible in the mini-table
+          
+          // Find the best book among filtered books
+          const bestFilteredBook = filteredBooksArray.reduce((best: any, book: any) => {
+            const bestOddsNum = parseInt(best.odds, 10);
+            const bookOddsNum = parseInt(book.odds, 10);
+            return bookOddsNum > bestOddsNum ? book : best;
+          }, filteredBooksArray[0]);
+          
+          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
+          const overallBestOdds = parseInt(bestOdds, 10);
+          
+          // Skip if filtered book doesn't have the best odds
+          if (filteredOdds < overallBestOdds) {
+            return; // Skip - another book has better odds
+          }
+          
+          // Use the filtered book as the best book for display
+          bestOdds = bestFilteredBook.odds;
+          bestBook = bestFilteredBook.name;
         }
         
         // Calculate EV - require minimum 4 books for meaningful EV calculation
@@ -1916,11 +1932,20 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               'soccer_uefa_champs_league': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards']
             };
             
-            // TheOddsAPI only supports: h2h, spreads, totals, outrights
-            // Quarter/half/period markets are NOT supported by TheOddsAPI
-            // The sportMarkets above are kept for reference but not used
-            // Just return base markets for all sports
-            return baseMarkets.join(',');
+            // Get sport-specific markets
+            const additionalMarkets = sportMarkets[sportKey] || [];
+            
+            // If multiple sports (all), include common period markets
+            if (sportKey.includes(',') || !sportKey) {
+              // For "all sports", include quarter and half markets (most common)
+              const allSportsMarkets = [
+                'h2h_q1', 'h2h_h1', 'spreads_q1', 'spreads_h1', 'totals_q1', 'totals_h1',
+                'h2h_p1', 'spreads_p1', 'totals_p1' // NHL periods
+              ];
+              return [...baseMarkets, ...allSportsMarkets].join(',');
+            }
+            
+            return [...baseMarkets, ...additionalMarkets].join(',');
           }
         }
       };
@@ -2257,14 +2282,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         if (betType !== 'exchanges') return picks;
         
         const filtered: OddsPick[] = [];
-        let debugStats = { total: 0, noBooks: 0, noExchange: 0, noOther: 0, badOdds: 0, noBetter: 0, lowEdge: 0, passed: 0, pastGames: 0, notInFilter: 0 };
+        let debugStats = { total: 0, noBooks: 0, noExchange: 0, noOther: 0, badOdds: 0, noBetter: 0, lowEdge: 0, passed: 0, pastGames: 0 };
         const now = new Date();
-        
-        // Check if user has a sportsbook filter for exchanges
-        const userHasSportsbookFilter = sportsbooks && sportsbooks.length > 0;
-        const filterBookKeys = userHasSportsbookFilter 
-          ? sportsbooks.map((s: string) => s.toLowerCase()) 
-          : [];
         
         picks.forEach(pick => {
           debugStats.total++;
@@ -2314,15 +2333,30 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }, exchangeBooks[0]);
           
           const exchangeOdds = parseInt(bestExchangeBook.odds, 10);
+          const exchangeLine = bestExchangeBook.line;
+          
           if (isNaN(exchangeOdds)) {
             debugStats.badOdds++;
             return;
           }
           
-          // Find books with better odds than the exchange
+          // CRITICAL: For player props, only compare books with the SAME LINE
+          // Different lines are different bets - can't compare -443 on 149.5 to -125 on 196.5
+          const isPlayerProp = pick.isPlayerProp || pick.playerName;
+          
+          // Find books with better odds than the exchange (and same line for props)
           const betterBooks = otherBooks.filter((b: any) => {
             const bookOdds = parseInt(b.odds, 10);
             if (isNaN(bookOdds)) return false;
+            
+            // For player props, only compare books with the same line
+            if (isPlayerProp && exchangeLine !== undefined && exchangeLine !== null) {
+              const bookLine = b.line;
+              // Lines must match (allow small tolerance for rounding)
+              if (bookLine === undefined || bookLine === null) return false;
+              if (Math.abs(bookLine - exchangeLine) > 0.5) return false;
+            }
+            
             // Better odds = higher number (less negative or more positive)
             return bookOdds > exchangeOdds;
           });
@@ -2332,27 +2366,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             return;
           }
           
-          // If user has a sportsbook filter, only consider books in their filter
-          let booksToConsider = betterBooks;
-          if (userHasSportsbookFilter) {
-            booksToConsider = betterBooks.filter((b: any) => {
-              const bookKey = (b.key || b.name || '').toLowerCase();
-              return filterBookKeys.some((fk: string) => bookKey.includes(fk) || fk.includes(bookKey));
-            });
-            
-            // If none of the user's filtered books have better odds, skip this pick
-            if (booksToConsider.length === 0) {
-              debugStats.notInFilter++;
-              return;
-            }
-          }
-          
-          // Get the best book among the books to consider
-          const bestOtherBook = booksToConsider.reduce((best: any, book: any) => {
+          // Get the best book among non-exchange books
+          const bestOtherBook = betterBooks.reduce((best: any, book: any) => {
             const bestOdds = parseInt(best.odds, 10);
             const bookOdds = parseInt(book.odds, 10);
             return bookOdds > bestOdds ? book : best;
-          }, booksToConsider[0]);
+          }, betterBooks[0]);
           
           const bestOtherOdds = parseInt(bestOtherBook.odds, 10);
           
@@ -2421,11 +2440,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         });
       };
       
-      // For exchanges mode, don't apply sportsbook filtering - we need ALL books
-      const sportsbooksForTransform = betType === 'exchanges' ? [] : sportsbooks;
-      
       if (response.data && Array.isArray(response.data)) {
-        let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooksForTransform);
+        let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
@@ -2439,7 +2455,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
         }
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
-        let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooksForTransform);
+        let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);

@@ -1375,14 +1375,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const dfsApps = getDFSApps();
     const missingDFSApps = dfsApps.filter(dfs => !marketBookKeys.has(dfs.key));
     
-    // DFS apps list - they only offer player props, not straight bets/arbitrage/middles
-    const dfsAppKeys = [
-      'prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 
-      'dabble', 'dabble_au', 'sleeper', 'betr', 'betr_us_dfs',
-      'chalkboard', 'parlay', 'hotstreak'
-    ];
-    
-    // For Player Props mode, filter to only supported books (include DFS apps)
+    // For Player Props mode, filter to only supported books
     let enhancedBooks;
     if (showPlayerProps) {
       // Filter to only books that actually support player props
@@ -1404,8 +1397,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         supported: enhancedBooks.map(b => b.key)
       });
     } else {
-      // For Straight Bets, Arbitrage, Middles, and Exchanges modes - EXCLUDE DFS apps
+      // For Straight Bets mode, EXCLUDE DFS apps (they don't offer straight bets)
       // DFS apps only offer player props, not traditional moneyline/spread/totals
+      const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au'];
       enhancedBooks = (booksToUse || []).filter(book => 
         !dfsAppKeys.includes(book.key?.toLowerCase())
       );
