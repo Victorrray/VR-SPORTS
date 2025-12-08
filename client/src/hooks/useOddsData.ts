@@ -942,30 +942,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
         const hasFilteredBooks = filteredBooksArray.length > 0;
         
-        // If user filtered for specific books, only show picks where filtered book has the BEST odds
+        // If user filtered for specific books, show picks where filtered book has odds
+        // But still show the BEST odds overall (for line shopping comparison)
         if (userHasFilter) {
           if (!hasFilteredBooks) {
             return; // Skip - the filtered book doesn't have this market at all
           }
-          
-          // Find the best book among filtered books
-          const bestFilteredBook = filteredBooksArray.reduce((best: any, book: any) => {
-            const bestOddsNum = parseInt(best.odds, 10);
-            const bookOddsNum = parseInt(book.odds, 10);
-            return bookOddsNum > bestOddsNum ? book : best;
-          }, filteredBooksArray[0]);
-          
-          const filteredOdds = parseInt(bestFilteredBook.odds, 10);
-          const overallBestOdds = parseInt(bestOdds, 10);
-          
-          // Skip if filtered book doesn't have the best odds
-          if (filteredOdds < overallBestOdds) {
-            return; // Skip - another book has better odds
-          }
-          
-          // Use the filtered book as the best book for display
-          bestOdds = bestFilteredBook.odds;
-          bestBook = bestFilteredBook.name;
+          // Keep bestOdds/bestBook as the overall best - this shows users where to get the best line
+          // The filtered book's odds will be visible in the mini-table
         }
         
         // Calculate EV - require minimum 4 books for meaningful EV calculation
