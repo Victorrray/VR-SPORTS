@@ -1916,20 +1916,11 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               'soccer_uefa_champs_league': ['h2h_h1', 'h2h_h2', 'spreads_h1', 'totals_h1', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance', 'alternate_totals_corners', 'alternate_totals_cards']
             };
             
-            // Get sport-specific markets
-            const additionalMarkets = sportMarkets[sportKey] || [];
-            
-            // If multiple sports (all), include common period markets
-            if (sportKey.includes(',') || !sportKey) {
-              // For "all sports", include quarter and half markets (most common)
-              const allSportsMarkets = [
-                'h2h_q1', 'h2h_h1', 'spreads_q1', 'spreads_h1', 'totals_q1', 'totals_h1',
-                'h2h_p1', 'spreads_p1', 'totals_p1' // NHL periods
-              ];
-              return [...baseMarkets, ...allSportsMarkets].join(',');
-            }
-            
-            return [...baseMarkets, ...additionalMarkets].join(',');
+            // TheOddsAPI only supports: h2h, spreads, totals, outrights
+            // Quarter/half/period markets are NOT supported by TheOddsAPI
+            // The sportMarkets above are kept for reference but not used
+            // Just return base markets for all sports
+            return baseMarkets.join(',');
           }
         }
       };
