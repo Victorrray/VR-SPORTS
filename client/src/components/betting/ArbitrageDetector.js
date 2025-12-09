@@ -284,10 +284,17 @@ const ArbitrageDetector = ({
             const hasPoint = outcome.point !== undefined && outcome.point !== null;
             const key = hasPoint ? `${outcome.name}_${outcome.point}` : outcome.name;
             
-            // For arbitrage, we want the BEST odds for each outcome (highest positive, least negative)
-            if (!outcomeOdds[key] || 
-                (outcome.price > 0 && outcome.price > outcomeOdds[key].price) ||
-                (outcome.price < 0 && Math.abs(outcome.price) < Math.abs(outcomeOdds[key].price))) {
+            // Convert to decimal odds for proper comparison
+            const currentDecimal = outcome.price > 0 ? (outcome.price / 100) + 1 : (100 / Math.abs(outcome.price)) + 1;
+            const existingDecimal = outcomeOdds[key] ? 
+              (outcomeOdds[key].price > 0 ? (outcomeOdds[key].price / 100) + 1 : (100 / Math.abs(outcomeOdds[key].price)) + 1) : 0;
+            
+            // For arbitrage, we want the BEST odds (highest decimal odds = best payout)
+            if (!outcomeOdds[key] || currentDecimal > existingDecimal) {
+              // Debug: Log when we find better odds
+              if (outcomeOdds[key]) {
+                console.log(`🔄 Better odds found for ${outcome.name} ${outcome.point || ''}: ${outcome.price} (${bookmaker.title || bookmaker.key}) beats ${outcomeOdds[key].price} (${outcomeOdds[key].bookmaker})`);
+              }
               outcomeOdds[key] = {
                 ...outcome,
                 bookmaker: bookmaker.title || bookmaker.key
@@ -362,6 +369,11 @@ const ArbitrageDetector = ({
             const underOutcome = groupOutcomes.find(o => o.name === 'Under');
             
             if (overOutcome && underOutcome) {
+              // Debug: Log the actual odds being used
+              console.log(`🎯 Arbitrage pair found for ${game.away_team} @ ${game.home_team} - ${marketKey} ${point}:`);
+              console.log(`   Over ${point}: ${overOutcome.price} from ${overOutcome.bookmaker}`);
+              console.log(`   Under ${point}: ${underOutcome.price} from ${underOutcome.bookmaker}`);
+              
               const arb = calculateTwoWayArbitrage([overOutcome, underOutcome], game, { key: marketKey });
               if (arb && arb.profit_percentage >= minProfit) {
                 opportunities.push({
