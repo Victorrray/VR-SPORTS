@@ -300,9 +300,11 @@ const ArbitrageDetector = ({
         // For markets with point values, we need to find Over/Under pairs with matching points
         const outcomes = Object.values(outcomeOdds);
         
-        // For player props, totals, etc. - find matching Over/Under pairs
-        const isPointBasedMarket = marketKey === 'totals' || marketKey.includes('player_') || 
-                                   marketKey.includes('batter_') || marketKey.includes('pitcher_');
+        // For spreads, totals, player props - these are point-based markets
+        // We need to ensure we're comparing the same lines
+        const isPointBasedMarket = marketKey === 'spreads' || marketKey === 'totals' || 
+                                   marketKey.includes('player_') || marketKey.includes('batter_') || 
+                                   marketKey.includes('pitcher_');
         
         if (isPointBasedMarket) {
           // Group outcomes by point value
@@ -315,7 +317,46 @@ const ArbitrageDetector = ({
             }
           });
           
-          // Check each point group for Over/Under pairs
+          // For SPREADS: Find pairs with OPPOSITE points (e.g., Team A +1.5 vs Team B -1.5)
+          if (marketKey === 'spreads') {
+            const pointValues = Object.keys(pointGroups).map(p => parseFloat(p));
+            const processedPairs = new Set(); // Track processed pairs to avoid duplicates
+            
+            // Find opposite point pairs
+            pointValues.forEach(point1 => {
+              const oppositePoint = -point1;
+              const pairKey = Math.abs(point1).toString(); // Use absolute value as pair key
+              
+              // Skip if we've already processed this pair (e.g., +1.5/-1.5 and -1.5/+1.5 are the same)
+              if (processedPairs.has(pairKey)) return;
+              
+              if (pointGroups[point1] && pointGroups[oppositePoint]) {
+                processedPairs.add(pairKey);
+                
+                // Get the best outcome from each point group
+                const outcome1 = pointGroups[point1][0]; // Team with +X.X
+                const outcome2 = pointGroups[oppositePoint][0]; // Team with -X.X
+                
+                // Ensure they're different teams
+                if (outcome1.name !== outcome2.name) {
+                  const arb = calculateTwoWayArbitrage([outcome1, outcome2], game, { key: marketKey });
+                  if (arb && arb.profit_percentage >= minProfit) {
+                    opportunities.push({
+                      id: `${game.id}-${marketKey}-${pairKey}-${Date.now()}`,
+                      game: `${game.away_team} @ ${game.home_team}`,
+                      market: marketKey,
+                      sport: game.sport_key,
+                      commence_time: game.commence_time,
+                      opportunities: [arb]
+                    });
+                  }
+                }
+              }
+            });
+            return; // Skip other logic for spreads
+          }
+          
+          // For TOTALS and PLAYER PROPS: Find Over/Under pairs with SAME point
           Object.entries(pointGroups).forEach(([point, groupOutcomes]) => {
             const overOutcome = groupOutcomes.find(o => o.name === 'Over');
             const underOutcome = groupOutcomes.find(o => o.name === 'Under');
@@ -339,14 +380,22 @@ const ArbitrageDetector = ({
         
         if (outcomes.length === 2) {
           // For spreads, require EXACT opposite lines for true arbitrage
-          // Example: +3.5 and -3.5 (guaranteed profit regardless of outcome)
+          // Example: Team A +3.5 and Team B -3.5 (guaranteed profit regardless of outcome)
+          // CRITICAL: Spreads MUST have point values - if missing, it's likely moneyline data mixed in
           if (marketKey === 'spreads') {
             const point1 = outcomes[0].point;
             const point2 = outcomes[1].point;
             
-            // Skip if points don't exist or aren't exact opposites
+            // Skip if points don't exist - spreads ALWAYS have point values
+            // If point is missing, this is likely moneyline data incorrectly included
+            if (point1 === undefined || point1 === null || point2 === undefined || point2 === null) {
+              console.log(`⚠️ Skipping invalid spread: ${outcomes[0].name} (point: ${point1}) vs ${outcomes[1].name} (point: ${point2}) - missing point values`);
+              return;
+            }
+            
+            // Skip if points aren't exact opposites
             // Middles (0.5-1.5 point gaps) will be handled by the Middles tool
-            if (!point1 || !point2 || Math.abs(point1 + point2) > 0.01) {
+            if (Math.abs(point1 + point2) > 0.01) {
               console.log(`⚠️ Skipping spread arbitrage: ${outcomes[0].name} ${point1} vs ${outcomes[1].name} ${point2} (lines don't match - use Middles tool for gaps)`);
               return;
             }
