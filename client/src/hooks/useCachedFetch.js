@@ -79,8 +79,11 @@ export const useCachedFetch = (url, options = {}) => {
     onError,
     transform,
     staleWhileRevalidate = true,
-    backgroundRefresh = false
+    backgroundRefresh = false,
+    pollingInterval = null // Add polling support
   } = options;
+  
+  const pollingRef = useRef(null);
 
   // Generate cache key
   const cacheKey = customCacheKey || oddsCacheManager.generateKey(url, options.params);
@@ -305,6 +308,28 @@ export const useCachedFetch = (url, options = {}) => {
     
     return unsubscribe;
   }, [cacheKey, url, options.params]);
+
+  // Polling effect - auto-refresh at specified interval
+  useEffect(() => {
+    if (!enabled || !pollingInterval || pollingInterval <= 0) {
+      return;
+    }
+    
+    console.log(`🔄 Starting polling for ${url} every ${pollingInterval / 1000}s`);
+    
+    pollingRef.current = setInterval(() => {
+      console.log(`🔄 Polling refresh for ${url}`);
+      fetchData(true); // Force refresh to bypass cache
+    }, pollingInterval);
+    
+    return () => {
+      if (pollingRef.current) {
+        console.log(`🔄 Stopping polling for ${url}`);
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+  }, [enabled, pollingInterval, url, fetchData]);
 
   return {
     data,

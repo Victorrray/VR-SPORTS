@@ -141,7 +141,7 @@ const ArbitrageDetector = ({
       markets: selectedMarkets.join(','),
       regions: 'us,uk,eu,au'
     },
-    pollingInterval: autoRefresh ? 120000 : null, // 2 minutes when auto-refresh is on
+    pollingInterval: autoRefresh ? 30000 : null, // 30 seconds when auto-refresh is on
     transform: (data) => data || []
   });
 
@@ -153,7 +153,7 @@ const ArbitrageDetector = ({
       markets: selectedMarkets.filter(m => m.includes('player_')).join(','), // Only player prop markets
       regions: 'us,us_dfs'
     },
-    pollingInterval: autoRefresh ? 120000 : null,
+    pollingInterval: autoRefresh ? 30000 : null, // 30 seconds when auto-refresh is on
     transform: (data) => {
       console.log('🎯 Player props data received for arbitrage:', data?.length || 0, 'games');
       return data || [];
