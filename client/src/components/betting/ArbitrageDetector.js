@@ -279,7 +279,11 @@ const ArbitrageDetector = ({
           gameMarket.outcomes.forEach(outcome => {
             if (!outcome.name || typeof outcome.price !== 'number') return;
             
-            const key = outcome.name;
+            // For markets with point values (spreads, totals, player props), include point in key
+            // This ensures we only compare same lines (Over 6.5 vs Under 6.5, not Over 6.5 vs Under 6)
+            const hasPoint = outcome.point !== undefined && outcome.point !== null;
+            const key = hasPoint ? `${outcome.name}_${outcome.point}` : outcome.name;
+            
             // For arbitrage, we want the BEST odds for each outcome (highest positive, least negative)
             if (!outcomeOdds[key] || 
                 (outcome.price > 0 && outcome.price > outcomeOdds[key].price) ||
@@ -292,8 +296,47 @@ const ArbitrageDetector = ({
           });
         });
         
-        // Calculate arbitrage for two-way markets (moneyline, totals, spreads)
+        // Calculate arbitrage for two-way markets (moneyline, totals, spreads, player props)
+        // For markets with point values, we need to find Over/Under pairs with matching points
         const outcomes = Object.values(outcomeOdds);
+        
+        // For player props, totals, etc. - find matching Over/Under pairs
+        const isPointBasedMarket = marketKey === 'totals' || marketKey.includes('player_') || 
+                                   marketKey.includes('batter_') || marketKey.includes('pitcher_');
+        
+        if (isPointBasedMarket) {
+          // Group outcomes by point value
+          const pointGroups = {};
+          outcomes.forEach(outcome => {
+            const point = outcome.point;
+            if (point !== undefined && point !== null) {
+              if (!pointGroups[point]) pointGroups[point] = [];
+              pointGroups[point].push(outcome);
+            }
+          });
+          
+          // Check each point group for Over/Under pairs
+          Object.entries(pointGroups).forEach(([point, groupOutcomes]) => {
+            const overOutcome = groupOutcomes.find(o => o.name === 'Over');
+            const underOutcome = groupOutcomes.find(o => o.name === 'Under');
+            
+            if (overOutcome && underOutcome) {
+              const arb = calculateTwoWayArbitrage([overOutcome, underOutcome], game, { key: marketKey });
+              if (arb && arb.profit_percentage >= minProfit) {
+                opportunities.push({
+                  id: `${game.id}-${marketKey}-${point}-${Date.now()}`,
+                  game: `${game.away_team} @ ${game.home_team}`,
+                  market: marketKey,
+                  sport: game.sport_key,
+                  commence_time: game.commence_time,
+                  opportunities: [arb]
+                });
+              }
+            }
+          });
+          return; // Skip the old 2-outcome logic for point-based markets
+        }
+        
         if (outcomes.length === 2) {
           // For spreads, require EXACT opposite lines for true arbitrage
           // Example: +3.5 and -3.5 (guaranteed profit regardless of outcome)
@@ -319,6 +362,24 @@ const ArbitrageDetector = ({
             // Middles (0.5-1.5 point gaps) will be handled by the Middles tool
             if (!point1 || !point2 || Math.abs(point1 - point2) > 0.01) {
               console.log(`⚠️ Skipping totals arbitrage: Over ${point1} vs Under ${point2} (lines don't match - use Middles tool for gaps)`);
+              return;
+            }
+          }
+          
+          // For player props, require EXACT matching lines for true arbitrage
+          // Example: Over 6.5 receptions and Under 6.5 receptions (same line)
+          // Different lines (Over 6.5 vs Under 6) are NOT true arbitrage
+          if (marketKey.includes('player_') || marketKey.includes('batter_') || marketKey.includes('pitcher_')) {
+            const point1 = outcomes[0].point;
+            const point2 = outcomes[1].point;
+            
+            // Skip if points don't exist or don't match exactly
+            if (point1 === undefined || point2 === undefined || point1 === null || point2 === null) {
+              console.log(`⚠️ Skipping player prop arbitrage: ${marketKey} - missing point values`);
+              return;
+            }
+            if (Math.abs(point1 - point2) > 0.01) {
+              console.log(`⚠️ Skipping player prop arbitrage: ${marketKey} Over ${point1} vs Under ${point2} (lines don't match - not true arbitrage)`);
               return;
             }
           }
