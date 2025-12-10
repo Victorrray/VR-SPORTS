@@ -3970,15 +3970,26 @@ export default function OddsTable({
                                 const teamLower = String(teamName).toLowerCase();
                                 const within = (a, b) => Math.abs(Number(a) - Number(b)) < 0.11; // small tolerance
 
-                                // For spreads, find the outcome for this specific team
-                                // Don't worry about the point value - just match the team name
-                                let match = outs.find(o => o && String(o.name).toLowerCase() === teamLower);
+                                // For spreads, find the outcome for this specific team WITH MATCHING POINT VALUE
+                                // This is critical - Buffalo Sabres -1.5 is NOT the same as Buffalo Sabres +1.5
+                                const rowPoint = row.out?.point;
+                                let match = outs.find(o => {
+                                  if (!o || String(o.name).toLowerCase() !== teamLower) return false;
+                                  // Must match the point value (with small tolerance for floating point)
+                                  if (rowPoint !== undefined && rowPoint !== null && o.point !== undefined && o.point !== null) {
+                                    return within(o.point, rowPoint);
+                                  }
+                                  return false;
+                                });
 
                                 if (match) {
                                   const result = match.price ?? match.odds ?? '';
-                                  console.log(`🎯 SPREAD GRAB: Team=${teamName}, Column=${top ? 'Home' : 'Away'}, Result=${result}`);
+                                  console.log(`🎯 SPREAD GRAB: Team=${teamName}, Point=${rowPoint}, BookPoint=${match.point}, Column=${top ? 'Home' : 'Away'}, Result=${result}`);
                                   return result;
                                 }
+                                // No match found for this specific spread line
+                                console.log(`🎯 SPREAD GRAB: No match for Team=${teamName}, Point=${rowPoint}`);
+                                return '';
                               }
                               if (isML) {
                                 const name = top ? row.game.home_team : row.game.away_team;
