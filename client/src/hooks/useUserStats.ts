@@ -24,9 +24,9 @@ function calculateStatsFromPicks(picks: any[]): Omit<UserStats, 'loading' | 'err
     };
   }
 
-  // Calculate active bets (pending status)
+  // Calculate active bets (pending status OR no status yet - new picks)
   const activePicks = picks.filter((p: any) => 
-    p.status === 'active' || p.status === 'pending'
+    !p.status || p.status === 'active' || p.status === 'pending'
   );
   
   // Calculate completed picks for win rate
@@ -90,7 +90,7 @@ function getLocalStoragePicks(): any[] {
   }
 }
 
-export function useUserStats(): UserStats {
+export function useUserStats(localPicks?: any[]): UserStats {
   const { user } = useAuth();
   const [stats, setStats] = useState<UserStats>({
     winRate: '0%',
@@ -107,8 +107,13 @@ export function useUserStats(): UserStats {
       try {
         let picks: any[] = [];
         
+        // If localPicks are provided, use them directly (reactive to changes)
+        if (localPicks && localPicks.length > 0) {
+          picks = localPicks;
+          console.log('📊 Stats: Using provided picks:', picks.length);
+        }
         // Try to fetch from Supabase if user is logged in
-        if (user && supabase) {
+        else if (user && supabase) {
           const { data: supabasePicks, error: picksError } = await supabase
             .from('picks')
             .select('*')
@@ -120,7 +125,7 @@ export function useUserStats(): UserStats {
           }
         }
         
-        // Fallback to localStorage picks if no Supabase picks
+        // Fallback to localStorage picks if no other picks
         if (picks.length === 0) {
           picks = getLocalStoragePicks();
           console.log('📊 Stats: Using localStorage picks:', picks.length);
@@ -144,7 +149,7 @@ export function useUserStats(): UserStats {
     };
 
     fetchUserStats();
-  }, [user]);
+  }, [user, localPicks]); // Re-run when localPicks changes
 
   return stats;
 }

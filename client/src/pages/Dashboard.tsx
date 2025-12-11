@@ -100,8 +100,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     enabled: true,
   });
 
-  // Fetch user stats from database
-  const userStats = useUserStats();
+  // Fetch user stats - pass savedPicks so stats update when picks change
+  const userStats = useUserStats(savedPicks);
 
   const addPickToMyPicks = (pick: any) => {
     console.log('📌 Adding pick to My Picks:', pick);
