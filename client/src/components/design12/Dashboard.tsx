@@ -568,7 +568,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             )}
             {currentView === "settings" && <SettingsPage onNavigateToChangePlan={() => setCurrentView("changePlan")} onNavigateToCancelSubscription={() => setCurrentView("cancelSubscription")} />}
             {currentView === "calculator" && <CalculatorPage />}
-            {currentView === "bankroll" && <BankrollPage />}
+            {currentView === "bankroll" && <BankrollPage savedPicks={savedPicks} />}
             {currentView === "cancelSubscription" && (
               <CancelSubscriptionPage onBack={() => setCurrentView("account")} />
             )}

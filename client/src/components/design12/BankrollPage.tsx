@@ -21,7 +21,24 @@ interface BetHistory {
   profit: number;
 }
 
-export function BankrollPage() {
+interface SavedPick {
+  id: number;
+  teams?: string;
+  pick?: string;
+  odds?: string | number;
+  sportsbook?: string;
+  ev?: string;
+  sport?: string;
+  time?: string;
+  betAmount?: number;
+  status?: 'pending' | 'won' | 'lost';
+}
+
+interface BankrollPageProps {
+  savedPicks?: SavedPick[];
+}
+
+export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   
@@ -436,16 +453,88 @@ export function BankrollPage() {
             Recent Activity
           </h3>
 
-          {/* Empty State - Will be populated by bets placed from My Picks */}
-          <div className="flex flex-col items-center justify-center py-12 px-4">
-            <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
-              <Activity className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+          {savedPicks.length === 0 ? (
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
+                <Activity className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+              </div>
+              <h4 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg mb-2`}>No Activity Yet</h4>
+              <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-center text-sm max-w-md`}>
+                Your betting activity will appear here when you place bets from My Picks. Track deposits, withdrawals, wins, and losses.
+              </p>
             </div>
-            <h4 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg mb-2`}>No Activity Yet</h4>
-            <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-center text-sm max-w-md`}>
-              Your betting activity will appear here when you place bets from My Picks. Track deposits, withdrawals, wins, and losses.
-            </p>
-          </div>
+          ) : (
+            /* Activity List */
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {savedPicks.slice(0, 10).map((pick, index) => {
+                const isWon = pick.status === 'won';
+                const isLost = pick.status === 'lost';
+                const isPending = !pick.status || pick.status === 'pending';
+                
+                // Calculate potential win
+                const betAmount = pick.betAmount || 0;
+                const oddsNum = parseInt(String(pick.odds || '+100').replace('+', ''), 10);
+                const potentialWin = oddsNum > 0 
+                  ? betAmount * (oddsNum / 100)
+                  : betAmount * (100 / Math.abs(oddsNum));
+                
+                return (
+                  <div 
+                    key={pick.id || index}
+                    className={`p-4 rounded-xl border ${
+                      isWon 
+                        ? isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-400/20'
+                        : isLost
+                          ? isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-400/20'
+                          : isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                            isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'
+                          }`}>
+                            {pick.sport || 'Sports'}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                            isWon 
+                              ? isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'
+                              : isLost
+                                ? isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400'
+                                : isLight ? 'bg-blue-100 text-blue-700' : 'bg-blue-500/20 text-blue-400'
+                          }`}>
+                            {isWon ? 'Won' : isLost ? 'Lost' : 'Pending'}
+                          </span>
+                        </div>
+                        <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm truncate`}>
+                          {pick.teams || 'Game'}
+                        </p>
+                        <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs truncate`}>
+                          {pick.pick} @ {pick.sportsbook}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className={`font-bold text-sm ${
+                          isWon 
+                            ? isLight ? 'text-emerald-600' : 'text-emerald-400'
+                            : isLost
+                              ? isLight ? 'text-red-600' : 'text-red-400'
+                              : isLight ? 'text-gray-900' : 'text-white'
+                        }`}>
+                          {isWon ? `+$${potentialWin.toFixed(2)}` : isLost ? `-$${betAmount.toFixed(2)}` : `$${betAmount.toFixed(2)}`}
+                        </p>
+                        <p className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-xs`}>
+                          {pick.odds}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
