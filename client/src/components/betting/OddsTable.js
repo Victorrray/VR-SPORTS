@@ -2072,6 +2072,15 @@ export default function OddsTable({
             }
           });
 
+          // Debug: Log what's in allBooksForOutcome for spreads
+          if (isSpreadMarket) {
+            console.log(`🎯 SPREAD ROW CREATION: groupKey=${groupKey}, basePoint=${basePoint}`);
+            console.log(`   allBooksForOutcome count: ${allBooksForOutcome.length}`);
+            allBooksForOutcome.forEach(o => {
+              console.log(`   - ${o.bookmaker?.key || o.book}: point=${o.point}`);
+            });
+          }
+          
           const gameRow = {
             key: `${game.id}-${mktKey}-${groupKey}`,
             game,
