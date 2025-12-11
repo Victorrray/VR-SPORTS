@@ -344,6 +344,14 @@ const ArbitrageDetector = ({
                 const outcome1 = pointGroups[point1][0]; // Team with +X.X
                 const outcome2 = pointGroups[oppositePoint][0]; // Team with -X.X
                 
+                // CRITICAL: Verify BOTH outcomes have valid point values
+                // This prevents mixing spread data with moneyline data
+                if (outcome1.point === undefined || outcome1.point === null ||
+                    outcome2.point === undefined || outcome2.point === null) {
+                  console.log(`⚠️ Skipping spread pair: ${outcome1.name} (point: ${outcome1.point}) vs ${outcome2.name} (point: ${outcome2.point}) - missing point values`);
+                  return;
+                }
+                
                 // Ensure they're different teams
                 if (outcome1.name !== outcome2.name) {
                   const arb = calculateTwoWayArbitrage([outcome1, outcome2], game, { key: marketKey });
@@ -391,9 +399,8 @@ const ArbitrageDetector = ({
         }
         
         if (outcomes.length === 2) {
-          // For spreads, require EXACT opposite lines for true arbitrage
-          // Example: Team A +3.5 and Team B -3.5 (guaranteed profit regardless of outcome)
-          // CRITICAL: Spreads MUST have point values - if missing, it's likely moneyline data mixed in
+          // CRITICAL: For spreads, BOTH outcomes MUST have point values
+          // If one has a point and one doesn't, they're from different market types (spread vs moneyline)
           if (marketKey === 'spreads') {
             const point1 = outcomes[0].point;
             const point2 = outcomes[1].point;
@@ -401,7 +408,7 @@ const ArbitrageDetector = ({
             // Skip if points don't exist - spreads ALWAYS have point values
             // If point is missing, this is likely moneyline data incorrectly included
             if (point1 === undefined || point1 === null || point2 === undefined || point2 === null) {
-              console.log(`⚠️ Skipping invalid spread: ${outcomes[0].name} (point: ${point1}) vs ${outcomes[1].name} (point: ${point2}) - missing point values`);
+              console.log(`⚠️ Skipping invalid spread: ${outcomes[0].name} (point: ${point1}) vs ${outcomes[1].name} (point: ${point2}) - missing point values (likely moneyline mixed in)`);
               return;
             }
             
@@ -409,6 +416,19 @@ const ArbitrageDetector = ({
             // Middles (0.5-1.5 point gaps) will be handled by the Middles tool
             if (Math.abs(point1 + point2) > 0.01) {
               console.log(`⚠️ Skipping spread arbitrage: ${outcomes[0].name} ${point1} vs ${outcomes[1].name} ${point2} (lines don't match - use Middles tool for gaps)`);
+              return;
+            }
+          }
+          
+          // CRITICAL: For h2h (moneyline), outcomes should NOT have point values
+          // If they have points, they're likely spread data mixed in
+          if (marketKey === 'h2h') {
+            const point1 = outcomes[0].point;
+            const point2 = outcomes[1].point;
+            
+            // If either outcome has a point value, it's not a true moneyline bet
+            if ((point1 !== undefined && point1 !== null) || (point2 !== undefined && point2 !== null)) {
+              console.log(`⚠️ Skipping invalid moneyline: ${outcomes[0].name} (point: ${point1}) vs ${outcomes[1].name} (point: ${point2}) - has point values (likely spread mixed in)`);
               return;
             }
           }
