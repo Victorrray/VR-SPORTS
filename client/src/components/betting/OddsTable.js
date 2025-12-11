@@ -580,7 +580,33 @@ function consensusDevigProb(row) {
         const denom = pHome + pAway; if (denom <= 0) return;
         const pSel = sideName === game.home_team ? (pHome / denom) : (pAway / denom);
         if (pSel > 0 && pSel < 1) pairs.push(pSel);
-      } else if (isTotals || isSpreads) {
+      } else if (isSpreads) {
+        // SPREADS: Use team names with matching point values
+        // Each team has opposite points (e.g., Chiefs -1.5, Bills +1.5)
+        // We need to find BOTH sides with the SAME absolute point value
+        const selectedPoint = parseFloat(pointStr);
+        if (isNaN(selectedPoint)) return;
+        
+        // Find the outcome for the selected side (matching name AND point)
+        const selectedOutcome = mkt.outcomes.find(o => 
+          o && o.name === sideName && Math.abs(parseFloat(o.point ?? 0) - selectedPoint) < 0.01
+        );
+        if (!selectedOutcome) return;
+        
+        // Find the opposite side - must have opposite point value (same absolute value, opposite sign)
+        const oppositePoint = -selectedPoint;
+        const oppositeOutcome = mkt.outcomes.find(o => 
+          o && o.name !== sideName && Math.abs(parseFloat(o.point ?? 0) - oppositePoint) < 0.01
+        );
+        if (!oppositeOutcome) return;
+        
+        const pSelected = americanToProb(selectedOutcome.price ?? selectedOutcome.odds);
+        const pOpposite = americanToProb(oppositeOutcome.price ?? oppositeOutcome.odds);
+        if (!(pSelected > 0 && pSelected < 1 && pOpposite > 0 && pOpposite < 1)) return;
+        const denom = pSelected + pOpposite; if (denom <= 0) return;
+        const pSel = pSelected / denom;
+        if (pSel > 0 && pSel < 1) pairs.push(pSel);
+      } else if (isTotals) {
         const over = mkt.outcomes.find(o => o && o.name === "Over" && String(o.point ?? "") === pointStr);
         const under = mkt.outcomes.find(o => o && o.name === "Under" && String(o.point ?? "") === pointStr);
         if (!over || !under) return;
@@ -619,7 +645,23 @@ function devigPairCount(row) {
         const pHome = americanToProb(home?.price ?? home?.odds);
         const pAway = americanToProb(away?.price ?? away?.odds);
         if (pHome > 0 && pHome < 1 && pAway > 0 && pAway < 1) count += 1;
-      } else if (isTotals || isSpreads) {
+      } else if (isSpreads) {
+        // SPREADS: Count pairs with matching opposite point values
+        const selectedPoint = parseFloat(pointStr);
+        if (isNaN(selectedPoint)) return;
+        
+        const selectedOutcome = mkt.outcomes.find(o => 
+          o && Math.abs(parseFloat(o.point ?? 0) - selectedPoint) < 0.01
+        );
+        const oppositePoint = -selectedPoint;
+        const oppositeOutcome = mkt.outcomes.find(o => 
+          o && Math.abs(parseFloat(o.point ?? 0) - oppositePoint) < 0.01
+        );
+        
+        const pSelected = americanToProb(selectedOutcome?.price ?? selectedOutcome?.odds);
+        const pOpposite = americanToProb(oppositeOutcome?.price ?? oppositeOutcome?.odds);
+        if (pSelected > 0 && pSelected < 1 && pOpposite > 0 && pOpposite < 1) count += 1;
+      } else if (isTotals) {
         const over = mkt.outcomes.find(o => o && o.name === "Over" && String(o.point ?? "") === pointStr);
         const under = mkt.outcomes.find(o => o && o.name === "Under" && String(o.point ?? "") === pointStr);
         const pOver = americanToProb(over?.price ?? over?.odds);
