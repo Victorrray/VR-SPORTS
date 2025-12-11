@@ -10,6 +10,7 @@ const sportsRoutes = require('./sports');
 const billingRoutes = require('./billing');
 const oddsRoutes = require('./odds');
 const featuredRoutes = require('./featured');
+const gradesRoutes = require('./grades');
 
 /**
  * Register all routes with the Express app
@@ -39,6 +40,9 @@ function registerRoutes(app) {
   
   // Featured routes
   app.use('/api/featured', featuredRoutes);
+  
+  // Grades routes (bet grading)
+  app.use('/api', gradesRoutes);
 }
 
 module.exports = {
@@ -49,4 +53,5 @@ module.exports = {
   sportsRoutes,
   billingRoutes,
   oddsRoutes,
+  gradesRoutes,
 };

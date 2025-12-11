@@ -1,15 +1,96 @@
-import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight, X, Calculator, Trash2, Check, XCircle } from 'lucide-react';
-import { useState } from 'react';
+import { TrendingUp, Clock, Target, Filter, Search, ChevronDown, Sparkles, ArrowUpRight, X, Calculator, Trash2, Check, XCircle, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { toast } from 'sonner';
+import { useGradePicks } from '../../hooks/useGradePicks';
 
-export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, onNavigateToCalculator }: { savedPicks?: any[], onRemovePick?: (index: number) => void, onUpdatePickStatus?: (index: number, status: 'won' | 'lost' | 'pending') => void, onNavigateToCalculator?: () => void }) {
+export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, onNavigateToCalculator }: { savedPicks?: any[], onRemovePick?: (index: number) => void, onUpdatePickStatus?: (index: number, status: 'won' | 'lost' | 'pending' | 'push') => void, onNavigateToCalculator?: () => void }) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const [showFilters, setShowFilters] = useState(false);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [selectedConfidence, setSelectedConfidence] = useState<string[]>([]);
   const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
+  const { gradePicks, grading } = useGradePicks();
+  const [hasAutoGraded, setHasAutoGraded] = useState(false);
+
+  // Auto-grade picks on page load (only once)
+  useEffect(() => {
+    const autoGrade = async () => {
+      if (hasAutoGraded || savedPicks.length === 0) return;
+      
+      // Only grade picks that have eventId and are pending
+      const picksToGrade = savedPicks.filter(
+        p => p.eventId && p.sportKey && (!p.status || p.status === 'pending')
+      );
+      
+      if (picksToGrade.length === 0) {
+        setHasAutoGraded(true);
+        return;
+      }
+      
+      try {
+        const gradedResults = await gradePicks(picksToGrade);
+        
+        // Update pick statuses based on grading results
+        let updatedCount = 0;
+        gradedResults.forEach(result => {
+          if (result.status === 'won' || result.status === 'lost' || result.status === 'push') {
+            const pickIndex = savedPicks.findIndex(p => p.eventId === result.eventId);
+            if (pickIndex !== -1 && onUpdatePickStatus) {
+              onUpdatePickStatus(pickIndex, result.status as 'won' | 'lost' | 'pending');
+              updatedCount++;
+            }
+          }
+        });
+        
+        if (updatedCount > 0) {
+          toast.success(`Auto-graded ${updatedCount} pick${updatedCount > 1 ? 's' : ''}!`);
+        }
+      } catch (error) {
+        console.error('Auto-grade error:', error);
+      }
+      
+      setHasAutoGraded(true);
+    };
+    
+    autoGrade();
+  }, [savedPicks, hasAutoGraded, gradePicks, onUpdatePickStatus]);
+
+  // Manual grade button handler
+  const handleGradeAll = async () => {
+    const picksToGrade = savedPicks.filter(
+      p => p.eventId && p.sportKey && (!p.status || p.status === 'pending')
+    );
+    
+    if (picksToGrade.length === 0) {
+      toast.info('No pending picks to grade');
+      return;
+    }
+    
+    try {
+      const gradedResults = await gradePicks(picksToGrade);
+      
+      let updatedCount = 0;
+      gradedResults.forEach(result => {
+        if (result.status === 'won' || result.status === 'lost' || result.status === 'push') {
+          const pickIndex = savedPicks.findIndex(p => p.eventId === result.eventId);
+          if (pickIndex !== -1 && onUpdatePickStatus) {
+            onUpdatePickStatus(pickIndex, result.status as 'won' | 'lost' | 'pending');
+            updatedCount++;
+          }
+        }
+      });
+      
+      if (updatedCount > 0) {
+        toast.success(`Graded ${updatedCount} pick${updatedCount > 1 ? 's' : ''}!`);
+      } else {
+        toast.info('No completed games found to grade');
+      }
+    } catch (error) {
+      toast.error('Failed to grade picks');
+    }
+  };
 
   // Check if a pick's game has ended (compare game time to now)
   const isGameEnded = (pick: any) => {
@@ -68,18 +149,37 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
         <div className="flex-1">
           <div className="flex items-center justify-between gap-4 mb-2">
             <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl md:text-3xl font-bold`}>My Picks</h1>
-            <button 
-              onClick={() => {
-                onNavigateToCalculator?.();
-              }}
-              className={`md:hidden flex items-center gap-2 px-3 py-3 rounded-xl font-bold transition-all shrink-0 ${
-                isLight 
-                  ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600' 
-                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
-              }`}
-            >
-              <Calculator className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Grade Picks Button */}
+              {savedPicks.length > 0 && (
+                <button 
+                  onClick={handleGradeAll}
+                  disabled={grading}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-sm transition-all ${
+                    grading
+                      ? 'bg-gray-500/50 text-white/50 cursor-not-allowed'
+                      : isLight 
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
+                        : 'bg-emerald-500/80 hover:bg-emerald-500 text-white'
+                  }`}
+                >
+                  <RefreshCw className={`w-4 h-4 ${grading ? 'animate-spin' : ''}`} />
+                  {grading ? 'Grading...' : 'Grade Picks'}
+                </button>
+              )}
+              <button 
+                onClick={() => {
+                  onNavigateToCalculator?.();
+                }}
+                className={`md:hidden flex items-center gap-2 px-3 py-3 rounded-xl font-bold transition-all shrink-0 ${
+                  isLight 
+                    ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600' 
+                    : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
+                }`}
+              >
+                <Calculator className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold`}>Expert-recommended betting opportunities with positive expected value</p>
         </div>

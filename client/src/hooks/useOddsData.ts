@@ -30,6 +30,9 @@ export interface OddsPick {
   allBooks?: OddsBook[];  // For compatibility with mini table
   gameTime?: string;  // ISO 8601 format (e.g., "2025-11-18T19:00:00Z")
   commenceTime?: string;  // Alias for gameTime
+  // For bet grading
+  eventId?: string;  // TheOddsAPI event ID for fetching scores
+  sportKey?: string;  // Sport key for API calls (e.g., "americanfootball_nfl")
   // Market data fields
   bookCount?: number;  // Number of books with odds for this market
   hasEnoughData?: boolean;  // Whether there's enough data for EV calculation (min 4 books)
@@ -1043,7 +1046,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           bookCount: booksArray.length, // Number of books with odds for this market
           hasEnoughData, // Whether there's enough data for EV calculation
           gameTime: game.commence_time || game.gameTime || undefined,
-          commenceTime: game.commence_time || game.gameTime || undefined
+          commenceTime: game.commence_time || game.gameTime || undefined,
+          // For bet grading
+          eventId: game.id || undefined,
+          sportKey: game.sport_key || undefined
         });
       });
       
