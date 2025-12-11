@@ -12,6 +12,8 @@ import {
   Star,
   Loader2,
   Download,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
@@ -40,6 +42,18 @@ export function AccountPage({
   const { me, loading: meLoading } = useMe();
   const [portalLoading, setPortalLoading] = useState(false);
   const [passwordResetLoading, setPasswordResetLoading] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
+  
+  // Mask email for privacy
+  const maskEmail = (email: string) => {
+    if (!email) return 'Not available';
+    const [localPart, domain] = email.split('@');
+    if (!domain) return '••••••••';
+    const maskedLocal = localPart.length > 2 
+      ? localPart[0] + '•'.repeat(Math.min(localPart.length - 2, 6)) + localPart[localPart.length - 1]
+      : '••';
+    return `${maskedLocal}@${domain}`;
+  };
   
   // Determine plan display
   const userPlan = me?.plan || 'free';
@@ -183,9 +197,26 @@ export function AccountPage({
                 Email
               </span>
             </div>
-            <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-              {user?.email || 'Not available'}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                {showEmail ? (user?.email || 'Not available') : maskEmail(user?.email || '')}
+              </p>
+              <button
+                onClick={() => setShowEmail(!showEmail)}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  isLight 
+                    ? 'hover:bg-gray-200 text-gray-500' 
+                    : 'hover:bg-white/10 text-white/50'
+                }`}
+                title={showEmail ? 'Hide email' : 'Show email'}
+              >
+                {showEmail ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
