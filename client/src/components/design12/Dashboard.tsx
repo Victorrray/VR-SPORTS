@@ -173,7 +173,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     let totalProfit = 0;
     savedPicks.forEach(pick => {
       const betAmount = pick.betAmount || 0;
-      const oddsStr = pick.odds || '+100';
+      const oddsStr = String(pick.odds || '+100');
       const oddsNum = parseInt(oddsStr.replace('+', ''), 10);
       
       if (pick.result === 'win') {
@@ -196,7 +196,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     let potentialProfit = 0;
     savedPicks.filter(p => !p.result || p.result === 'pending').forEach(pick => {
       const betAmount = pick.betAmount || 0;
-      const oddsStr = pick.odds || '+100';
+      const oddsStr = String(pick.odds || '+100');
       const oddsNum = parseInt(oddsStr.replace('+', ''), 10);
       if (oddsNum > 0) {
         potentialProfit += betAmount * (oddsNum / 100);
