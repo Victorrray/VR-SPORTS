@@ -3748,19 +3748,19 @@ export default function OddsTable({
 
                             const combinedBooksUnfiltered = [...sortedPrioritized, ...sortedFallback].slice(0, maxMiniBooks);
                             
-                            // For spreads market, filter out books with different spread lines
+                            // For spreads market, STRICTLY filter to only show books with the EXACT same spread line
                             const mobileIsSpreadMarket = row.mkt?.key?.includes('spread');
                             const mobileMainPoint = row.out?.point;
-                            const mobileTolerance = 0.11;
+                            const mobileStrictTolerance = 0.01; // Very strict - only allow tiny floating point differences
                             
                             const combinedBooks = mobileIsSpreadMarket && mobileMainPoint !== undefined
                               ? combinedBooksUnfiltered.filter(book => {
                                   // Each book entry already has the point value for this specific outcome
                                   const bookPoint = book.point;
                                   
-                                  // Include if points match within tolerance
-                                  if (bookPoint === undefined || bookPoint === null) return false; // Exclude books without point data for spreads
-                                  return Math.abs(Number(mobileMainPoint) - Number(bookPoint)) < mobileTolerance;
+                                  // Exclude books without point data for spreads
+                                  if (bookPoint === undefined || bookPoint === null) return false;
+                                  return Math.abs(Number(mobileMainPoint) - Number(bookPoint)) < mobileStrictTolerance;
                                 })
                               : combinedBooksUnfiltered;
 
@@ -4420,36 +4420,34 @@ export default function OddsTable({
                               );
                               const allBooks = mainBook ? [mainBook, ...otherBooks] : allBooksUnsorted;
                               
-                              // For spreads market, filter out books with different spread lines
+                              // For spreads market, STRICTLY filter to only show books with the EXACT same spread line
                               const isSpreadMarket = row.mkt?.key?.includes('spread');
                               const mainPoint = row.out?.point;
-                              const tolerance = 0.11;
+                              const strictTolerance = 0.01; // Very strict - only allow tiny floating point differences
                               
                               const filteredBooks = isSpreadMarket && mainPoint !== undefined
                                 ? allBooks.filter(book => {
                                     // Each book entry already has the point value for this specific outcome
                                     const bookPoint = book.point;
                                     
-                                    // Include if points match within tolerance
-                                    if (bookPoint === undefined || bookPoint === null) return false; // Exclude books without point data for spreads
+                                    // Exclude books without point data for spreads
+                                    if (bookPoint === undefined || bookPoint === null) return false;
                                     
                                     const mainPt = Number(mainPoint);
                                     const bookPt = Number(bookPoint);
                                     const diff = Math.abs(mainPt - bookPt);
-                                    const matches = diff < tolerance;
+                                    const matches = diff < strictTolerance;
                                     
                                     // Debug logging for spread filtering
-                                    if (!matches) {
-                                      console.log(`🚫 SPREAD FILTER: Excluding ${book.bookmaker?.key || book.book} - mainPoint=${mainPt}, bookPoint=${bookPt}, diff=${diff}`);
-                                    }
+                                    console.log(`📊 SPREAD CHECK: ${book.bookmaker?.key || book.book} - mainPoint=${mainPt}, bookPoint=${bookPt}, diff=${diff}, matches=${matches}`);
                                     
                                     return matches;
                                   })
                                 : allBooks;
                               
-                              // Log if filtering removed books
-                              if (isSpreadMarket && allBooks.length !== filteredBooks.length) {
-                                console.log(`📊 SPREAD FILTER: Filtered ${allBooks.length} -> ${filteredBooks.length} books for point ${mainPoint}`);
+                              // Log filtering results
+                              if (isSpreadMarket) {
+                                console.log(`📊 SPREAD FILTER RESULT: ${allBooks.length} -> ${filteredBooks.length} books for line ${mainPoint}`);
                               }
                               
                               // Check if mini table is expanded to show all books
