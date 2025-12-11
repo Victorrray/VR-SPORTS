@@ -66,7 +66,9 @@ export function AccountPage({
   const openCustomerPortal = async () => {
     setPortalLoading(true);
     try {
+      console.log('Opening customer portal...');
       const response = await apiClient.post('/api/billing/customer-portal');
+      console.log('Customer portal response:', response.data);
       
       if (!response.data?.url) {
         throw new Error('No portal URL returned');
@@ -76,8 +78,9 @@ export function AccountPage({
       window.location.href = response.data.url;
     } catch (error: any) {
       console.error('Error opening customer portal:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Please try again later';
       toast.error('Unable to open billing portal', {
-        description: error.message || 'Please try again later'
+        description: errorMessage
       });
     } finally {
       setPortalLoading(false);
