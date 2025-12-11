@@ -272,7 +272,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
                     </div>
                     <div className={`${isLight ? 'text-emerald-700' : 'text-emerald-300'} font-bold`}>
                       ${(() => {
-                        const odds = parseInt((pick.odds || '+100').replace('+', ''), 10);
+                        const odds = parseInt(String(pick.odds || '+100').replace('+', ''), 10);
                         const stake = pick.betAmount || 0;
                         if (odds > 0) {
                           return (stake * (odds / 100)).toFixed(2);
