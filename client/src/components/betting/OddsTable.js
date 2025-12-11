@@ -3751,18 +3751,15 @@ export default function OddsTable({
                             // For spreads market, filter out books with different spread lines
                             const mobileIsSpreadMarket = row.mkt?.key?.includes('spread');
                             const mobileMainPoint = row.out?.point;
-                            const mobileMainTeam = row.out?.name;
                             const mobileTolerance = 0.11;
                             
                             const combinedBooks = mobileIsSpreadMarket && mobileMainPoint !== undefined
                               ? combinedBooksUnfiltered.filter(book => {
-                                  // Get the book's point for the same team as the main row
-                                  const bookOutcomes = book.market?.outcomes || [];
-                                  const bookOutcome = bookOutcomes.find(o => o.name === mobileMainTeam);
-                                  const bookPoint = bookOutcome?.point ?? book.point;
+                                  // Each book entry already has the point value for this specific outcome
+                                  const bookPoint = book.point;
                                   
                                   // Include if points match within tolerance
-                                  if (bookPoint === undefined) return true; // Keep books without point data
+                                  if (bookPoint === undefined || bookPoint === null) return false; // Exclude books without point data for spreads
                                   return Math.abs(Number(mobileMainPoint) - Number(bookPoint)) < mobileTolerance;
                                 })
                               : combinedBooksUnfiltered;
@@ -4426,18 +4423,15 @@ export default function OddsTable({
                               // For spreads market, filter out books with different spread lines
                               const isSpreadMarket = row.mkt?.key?.includes('spread');
                               const mainPoint = row.out?.point;
-                              const mainTeam = row.out?.name;
                               const tolerance = 0.11;
                               
                               const filteredBooks = isSpreadMarket && mainPoint !== undefined
                                 ? allBooks.filter(book => {
-                                    // Get the book's point for the same team as the main row
-                                    const bookOutcomes = book.market?.outcomes || [];
-                                    const bookOutcome = bookOutcomes.find(o => o.name === mainTeam);
-                                    const bookPoint = bookOutcome?.point ?? book.point;
+                                    // Each book entry already has the point value for this specific outcome
+                                    const bookPoint = book.point;
                                     
                                     // Include if points match within tolerance
-                                    if (bookPoint === undefined) return true; // Keep books without point data
+                                    if (bookPoint === undefined || bookPoint === null) return false; // Exclude books without point data for spreads
                                     return Math.abs(Number(mainPoint) - Number(bookPoint)) < tolerance;
                                   })
                                 : allBooks;
@@ -4463,49 +4457,16 @@ export default function OddsTable({
                                         )}
                                         <span>{cleanBookTitle(p.book)}</span>
                                       </div>
-                                      {/* Show spread line for spreads market - normalize to match the main row's team */}
-                                      {mode !== "props" && row.mkt?.key?.includes('spread') && (() => {
-                                        // Get the main row's point (the spread we're displaying)
-                                        const mainPoint = row.out?.point;
-                                        // Get this book's point from the market outcomes
-                                        const bookOutcomes = p.market?.outcomes || [];
-                                        // Find the outcome for the same team as the main row
-                                        const mainTeam = row.out?.name;
-                                        const bookOutcome = bookOutcomes.find(o => o.name === mainTeam);
-                                        const bookPoint = bookOutcome?.point ?? p.point;
-                                        
-                                        // Only show if the book has the same spread line (within tolerance)
-                                        const tolerance = 0.11;
-                                        const pointsMatch = mainPoint !== undefined && bookPoint !== undefined && 
-                                          Math.abs(Number(mainPoint) - Number(bookPoint)) < tolerance;
-                                        
-                                        if (pointsMatch && bookPoint !== undefined) {
-                                          const formattedPoint = Number(bookPoint) > 0 ? `+${bookPoint}` : `${bookPoint}`;
-                                          return (
-                                            <span style={{ 
-                                              fontSize: '0.75em', 
-                                              color: 'rgba(255,255,255,0.6)',
-                                              fontWeight: '500'
-                                            }}>
-                                              {formattedPoint}
-                                            </span>
-                                          );
-                                        }
-                                        // If points don't match, show with warning color
-                                        if (bookPoint !== undefined && !pointsMatch) {
-                                          const formattedPoint = Number(bookPoint) > 0 ? `+${bookPoint}` : `${bookPoint}`;
-                                          return (
-                                            <span style={{ 
-                                              fontSize: '0.75em', 
-                                              color: '#f59e0b', // Warning color for different line
-                                              fontWeight: '500'
-                                            }}>
-                                              {formattedPoint} ⚠️
-                                            </span>
-                                          );
-                                        }
-                                        return null;
-                                      })()}
+                                      {/* Show spread line for spreads market */}
+                                      {mode !== "props" && row.mkt?.key?.includes('spread') && p.point !== undefined && (
+                                        <span style={{ 
+                                          fontSize: '0.75em', 
+                                          color: 'rgba(255,255,255,0.6)',
+                                          fontWeight: '500'
+                                        }}>
+                                          {Number(p.point) > 0 ? `+${p.point}` : `${p.point}`}
+                                        </span>
+                                      )}
                                     </div>
                                   </td>
                                   
