@@ -4432,9 +4432,25 @@ export default function OddsTable({
                                     
                                     // Include if points match within tolerance
                                     if (bookPoint === undefined || bookPoint === null) return false; // Exclude books without point data for spreads
-                                    return Math.abs(Number(mainPoint) - Number(bookPoint)) < tolerance;
+                                    
+                                    const mainPt = Number(mainPoint);
+                                    const bookPt = Number(bookPoint);
+                                    const diff = Math.abs(mainPt - bookPt);
+                                    const matches = diff < tolerance;
+                                    
+                                    // Debug logging for spread filtering
+                                    if (!matches) {
+                                      console.log(`🚫 SPREAD FILTER: Excluding ${book.bookmaker?.key || book.book} - mainPoint=${mainPt}, bookPoint=${bookPt}, diff=${diff}`);
+                                    }
+                                    
+                                    return matches;
                                   })
                                 : allBooks;
+                              
+                              // Log if filtering removed books
+                              if (isSpreadMarket && allBooks.length !== filteredBooks.length) {
+                                console.log(`📊 SPREAD FILTER: Filtered ${allBooks.length} -> ${filteredBooks.length} books for point ${mainPoint}`);
+                              }
                               
                               // Check if mini table is expanded to show all books
                               const isMiniTableExpanded = expandedMiniTables[row.key];
