@@ -3806,8 +3806,8 @@ export default function OddsTable({
                             
                             const combinedBooks = mobileIsSpreadMarket && mobileMainPoint !== undefined
                               ? combinedBooksUnfiltered.filter(book => {
-                                  // Each book entry already has the point value for this specific outcome
-                                  const bookPoint = book.point;
+                                  // Check both 'point' and 'line' properties (data comes from different sources)
+                                  const bookPoint = book.point ?? book.line;
                                   
                                   // Exclude books without point data for spreads
                                   if (bookPoint === undefined || bookPoint === null) return false;
@@ -4478,8 +4478,8 @@ export default function OddsTable({
                               
                               const filteredBooks = isSpreadMarket && mainPoint !== undefined
                                 ? allBooks.filter(book => {
-                                    // Each book entry already has the point value for this specific outcome
-                                    const bookPoint = book.point;
+                                    // Check both 'point' and 'line' properties (data comes from different sources)
+                                    const bookPoint = book.point ?? book.line;
                                     
                                     // Exclude books without point data for spreads
                                     if (bookPoint === undefined || bookPoint === null) return false;
@@ -4488,9 +4488,6 @@ export default function OddsTable({
                                     const bookPt = Number(bookPoint);
                                     const diff = Math.abs(mainPt - bookPt);
                                     const matches = diff < strictTolerance;
-                                    
-                                    // Debug logging for spread filtering
-                                    console.log(`📊 SPREAD CHECK: ${book.bookmaker?.key || book.book} - mainPoint=${mainPt}, bookPoint=${bookPt}, diff=${diff}, matches=${matches}`);
                                     
                                     return matches;
                                   })
@@ -4523,13 +4520,13 @@ export default function OddsTable({
                                         <span>{cleanBookTitle(p.book)}</span>
                                       </div>
                                       {/* Show spread line for spreads market */}
-                                      {mode !== "props" && row.mkt?.key?.includes('spread') && p.point !== undefined && (
+                                      {mode !== "props" && row.mkt?.key?.includes('spread') && (p.point ?? p.line) !== undefined && (
                                         <span style={{ 
                                           fontSize: '0.75em', 
                                           color: 'rgba(255,255,255,0.6)',
                                           fontWeight: '500'
                                         }}>
-                                          {Number(p.point) > 0 ? `+${p.point}` : `${p.point}`}
+                                          {Number(p.point ?? p.line) > 0 ? `+${p.point ?? p.line}` : `${p.point ?? p.line}`}
                                         </span>
                                       )}
                                     </div>

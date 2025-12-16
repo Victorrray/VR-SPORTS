@@ -138,7 +138,7 @@ router.post('/webhook',
           console.log(`✅ Plan set to ${planToSet} via webhook: ${userId}, expires: ${subscriptionEndDate}`);
         }
         
-        // Handle subscription cancellation/deletion
+        // Handle subscription cancellation/deletion/update
         else if (event.type === 'customer.subscription.deleted' || event.type === 'customer.subscription.updated') {
           const subscription = event.data.object;
           
@@ -146,19 +146,24 @@ router.post('/webhook',
           if (supabase && subscription.customer) {
             const { data: users, error: findError } = await supabase
               .from('users')
-              .select('id')
+              .select('id, plan')
               .eq('stripe_customer_id', subscription.customer);
               
             if (!findError && users && users.length > 0) {
               const userId = users[0].id;
+              const currentPlan = users[0].plan;
               
-              // If subscription is canceled or deleted, remove plan access
+              console.log(`📊 Subscription status update for user ${userId}: ${subscription.status}`);
+              
+              // If subscription is canceled, unpaid, or deleted - remove plan access immediately
               if (subscription.status === 'canceled' || subscription.status === 'unpaid' || event.type === 'customer.subscription.deleted') {
                 const { error } = await supabase
                   .from('users')
                   .update({ 
                     plan: null,
-                    subscription_end_date: null
+                    subscription_end_date: null,
+                    subscription_status: subscription.status,
+                    updated_at: new Date().toISOString()
                   })
                   .eq('id', userId);
                   
@@ -167,8 +172,129 @@ router.post('/webhook',
                   throw error;
                 }
                 
-                console.log(`✅ Plan access removed via webhook: ${userId}`);
+                console.log(`✅ Plan access removed via webhook: ${userId} (status: ${subscription.status})`);
               }
+              // If subscription is past_due - give 3-day grace period before restricting
+              else if (subscription.status === 'past_due') {
+                // Calculate grace period end (3 days from now)
+                const gracePeriodEnd = new Date();
+                gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 3);
+                
+                const { error } = await supabase
+                  .from('users')
+                  .update({ 
+                    subscription_status: 'past_due',
+                    grace_period_end: gracePeriodEnd.toISOString(),
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', userId);
+                  
+                if (error) {
+                  console.error('❌ Failed to update past_due status in Supabase:', error);
+                  throw error;
+                }
+                
+                console.log(`⚠️ Subscription past_due for user ${userId} - grace period until ${gracePeriodEnd.toISOString()}`);
+              }
+              // If subscription is active again (payment succeeded after past_due)
+              else if (subscription.status === 'active' && currentPlan) {
+                const { error } = await supabase
+                  .from('users')
+                  .update({ 
+                    subscription_status: 'active',
+                    grace_period_end: null,
+                    subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', userId);
+                  
+                if (error) {
+                  console.error('❌ Failed to update active status in Supabase:', error);
+                  throw error;
+                }
+                
+                console.log(`✅ Subscription reactivated for user ${userId}`);
+              }
+            }
+          }
+        }
+        
+        // Handle invoice payment failed - this fires when a payment attempt fails
+        else if (event.type === 'invoice.payment_failed') {
+          const invoice = event.data.object;
+          const customerId = invoice.customer;
+          const attemptCount = invoice.attempt_count || 1;
+          
+          console.log(`💳 Payment failed for customer ${customerId} (attempt ${attemptCount})`);
+          
+          if (supabase && customerId) {
+            const { data: users, error: findError } = await supabase
+              .from('users')
+              .select('id, email, plan')
+              .eq('stripe_customer_id', customerId);
+              
+            if (!findError && users && users.length > 0) {
+              const userId = users[0].id;
+              const userEmail = users[0].email;
+              
+              // Update payment failure tracking
+              const { error } = await supabase
+                .from('users')
+                .update({ 
+                  last_payment_failure: new Date().toISOString(),
+                  payment_failure_count: attemptCount,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+                
+              if (error) {
+                console.error('❌ Failed to update payment failure in Supabase:', error);
+              }
+              
+              console.log(`⚠️ Payment failed for user ${userId} (${userEmail}) - attempt ${attemptCount}`);
+              
+              // After 3 failed attempts, Stripe will typically cancel the subscription
+              // The customer.subscription.updated webhook will handle plan removal
+              if (attemptCount >= 3) {
+                console.log(`🚨 Multiple payment failures for user ${userId} - subscription may be canceled soon`);
+              }
+            }
+          }
+        }
+        
+        // Handle invoice payment succeeded - clear any payment failure flags
+        else if (event.type === 'invoice.payment_succeeded') {
+          const invoice = event.data.object;
+          const customerId = invoice.customer;
+          
+          console.log(`✅ Payment succeeded for customer ${customerId}`);
+          
+          if (supabase && customerId) {
+            const { data: users, error: findError } = await supabase
+              .from('users')
+              .select('id')
+              .eq('stripe_customer_id', customerId);
+              
+            if (!findError && users && users.length > 0) {
+              const userId = users[0].id;
+              
+              // Clear payment failure tracking
+              const { error } = await supabase
+                .from('users')
+                .update({ 
+                  last_payment_failure: null,
+                  payment_failure_count: 0,
+                  subscription_status: 'active',
+                  grace_period_end: null,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', userId);
+                
+              if (error) {
+                console.error('❌ Failed to clear payment failure in Supabase:', error);
+              }
+              
+              console.log(`✅ Payment success recorded for user ${userId}`);
             }
           }
         }
