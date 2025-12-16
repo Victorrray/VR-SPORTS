@@ -45,17 +45,23 @@ router.get('/me', async (req, res) => {
       return res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
     }
 
+    // Only apply grace period logic to Stripe subscribers (users with stripe_customer_id)
+    // Manually upgraded users via Supabase should always have access
+    const isStripeSubscriber = !!data.stripe_customer_id;
+    
     // Check if user is in grace period (past_due but still has access)
-    const isInGracePeriod = data.subscription_status === 'past_due' && 
+    const isInGracePeriod = isStripeSubscriber && 
+      data.subscription_status === 'past_due' && 
       data.grace_period_end && 
       new Date(data.grace_period_end) > new Date();
     
-    // Check if grace period has expired (should restrict access)
-    const gracePeriodExpired = data.subscription_status === 'past_due' && 
+    // Check if grace period has expired (should restrict access) - ONLY for Stripe subscribers
+    const gracePeriodExpired = isStripeSubscriber && 
+      data.subscription_status === 'past_due' && 
       data.grace_period_end && 
       new Date(data.grace_period_end) <= new Date();
 
-    // Platinum or grandfathered = unlimited (unless grace period expired)
+    // Platinum or grandfathered = unlimited (unless grace period expired for Stripe subscribers)
     if ((data.plan === 'platinum' || data.grandfathered) && !gracePeriodExpired) {
       console.log(`✅ User ${userId} has platinum plan${isInGracePeriod ? ' (grace period)' : ''}`);
       return res.json({
