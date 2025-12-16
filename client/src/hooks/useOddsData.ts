@@ -967,8 +967,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
         
         // Calculate EV - require minimum 4 books for meaningful EV calculation
+        // For spreads, ONLY use books with the SAME spread line to avoid comparing +1.5 vs -1.5
         const MIN_BOOKS_FOR_EV = 4;
-        const numericOdds = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
+        const strictTolerance = 0.01;
+        const booksForEV = (marketKey === 'spreads' && marketPoint !== null)
+          ? booksArray.filter(b => b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < strictTolerance)
+          : booksArray;
+        const numericOdds = booksForEV.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
         const hasEnoughData = numericOdds.length >= MIN_BOOKS_FOR_EV;
         
         if (hasEnoughData) {
@@ -985,11 +990,16 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             
             booksArray.forEach(b => {
               const o = parseInt(b.odds, 10);
-              if (!isNaN(o)) {
+              // Only calculate EV for books with the same spread line
+              const isSameLine = marketKey !== 'spreads' || marketPoint === null || 
+                (b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < strictTolerance);
+              if (!isNaN(o) && isSameLine) {
                 const p = toProb(o);
                 const bookEdge = ((avgProb - p) / p) * 100;
                 const roundedBookEdge = Math.round(bookEdge * 100) / 100;
                 b.ev = `${roundedBookEdge.toFixed(2)}%`;
+              } else if (!isSameLine) {
+                b.ev = '--'; // Different spread line, can't compare
               }
               b.isBest = b.name === bestBook;
             });
