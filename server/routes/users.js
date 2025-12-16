@@ -36,7 +36,7 @@ router.get('/me', async (req, res) => {
 
     const { data, error } = await supabase
       .from('users')
-      .select('plan, api_request_count, grandfathered, subscription_end_date, stripe_customer_id, subscription_status, grace_period_end, last_payment_failure, payment_failure_count')
+      .select('plan, api_request_count, grandfathered, subscription_end_date, stripe_customer_id')
       .eq('id', userId)
       .single();
 
@@ -45,25 +45,9 @@ router.get('/me', async (req, res) => {
       return res.json({ plan: 'free', remaining: 250, limit: 250, unlimited: false });
     }
 
-    // Only apply grace period logic to Stripe subscribers (users with stripe_customer_id)
-    // Manually upgraded users via Supabase should always have access
-    const isStripeSubscriber = !!data.stripe_customer_id;
-    
-    // Check if user is in grace period (past_due but still has access)
-    const isInGracePeriod = isStripeSubscriber && 
-      data.subscription_status === 'past_due' && 
-      data.grace_period_end && 
-      new Date(data.grace_period_end) > new Date();
-    
-    // Check if grace period has expired (should restrict access) - ONLY for Stripe subscribers
-    const gracePeriodExpired = isStripeSubscriber && 
-      data.subscription_status === 'past_due' && 
-      data.grace_period_end && 
-      new Date(data.grace_period_end) <= new Date();
-
-    // Platinum or grandfathered = unlimited (unless grace period expired for Stripe subscribers)
-    if ((data.plan === 'platinum' || data.grandfathered) && !gracePeriodExpired) {
-      console.log(`✅ User ${userId} has platinum plan${isInGracePeriod ? ' (grace period)' : ''}`);
+    // Platinum or grandfathered = unlimited
+    if (data.plan === 'platinum' || data.grandfathered) {
+      console.log(`✅ User ${userId} has platinum plan (grandfathered: ${data.grandfathered})`);
       return res.json({
         plan: 'platinum',
         remaining: null,
@@ -71,26 +55,7 @@ router.get('/me', async (req, res) => {
         unlimited: true,
         used: data.api_request_count || 0,
         subscription_end_date: data.subscription_end_date,
-        has_billing: !!data.stripe_customer_id,
-        subscription_status: data.subscription_status,
-        grace_period_end: data.grace_period_end,
-        is_past_due: data.subscription_status === 'past_due',
-        payment_issue: !!data.last_payment_failure
-      });
-    }
-    
-    // If grace period expired, downgrade to free
-    if (gracePeriodExpired) {
-      console.log(`⚠️ User ${userId} grace period expired - restricting access`);
-      return res.json({
-        plan: 'free',
-        remaining: 250,
-        limit: 250,
-        unlimited: false,
-        used: data.api_request_count || 0,
-        subscription_status: 'expired',
-        payment_issue: true,
-        grace_period_expired: true
+        has_billing: !!data.stripe_customer_id
       });
     }
 
@@ -104,10 +69,7 @@ router.get('/me', async (req, res) => {
         unlimited: false,
         used: data.api_request_count || 0,
         subscription_end_date: data.subscription_end_date,
-        has_billing: !!data.stripe_customer_id,
-        subscription_status: data.subscription_status,
-        is_past_due: data.subscription_status === 'past_due',
-        payment_issue: !!data.last_payment_failure
+        has_billing: !!data.stripe_customer_id
       });
     }
 
