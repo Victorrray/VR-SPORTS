@@ -1504,20 +1504,25 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             <button
                               key={book.id}
                               onClick={() => toggleSportsbookFilter(book.id)}
-                              className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                              className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center gap-3 ${
                                 selectedSportsbooks.includes(book.id)
                                   ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                                   : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                               }`}
                             >
-                              <span>{book.name}</span>
-                              {selectedSportsbooks.includes(book.id) && (
-                                <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
+                              {/* Checkbox indicator */}
+                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                                selectedSportsbooks.includes(book.id)
+                                  ? isLight ? 'bg-purple-600 border-purple-600' : 'bg-purple-500 border-purple-500'
+                                  : isLight ? 'border-gray-300 bg-white' : 'border-white/30 bg-transparent'
+                              }`}>
+                                {selectedSportsbooks.includes(book.id) && (
                                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                   </svg>
-                                </div>
-                              )}
+                                )}
+                              </div>
+                              <span className="flex-1">{book.name}</span>
                             </button>
                           ))}
                         </div>
