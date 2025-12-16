@@ -1169,20 +1169,24 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       {/* Filter Side Panel */}
       {isFilterMenuOpen && (
         <>
-          {/* Backdrop - positioned to the right of the filter panel */}
+          {/* Backdrop - Desktop only (to the right of panel) */}
           <div 
-            className={`fixed top-0 right-0 bottom-0 bg-black/50 backdrop-blur-md z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
+            className={`hidden lg:block fixed top-0 right-0 bottom-0 bg-black/50 backdrop-blur-md z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
             style={{ left: '320px' }}
+            onClick={closeFilterMenu}
+          />
+          
+          {/* Mobile Backdrop - Full screen, no blur */}
+          <div 
+            className={`lg:hidden fixed inset-0 bg-black/60 z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
             onClick={closeFilterMenu}
           />
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`!fixed !top-0 !left-0 !bottom-0 max-lg:pb-24 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} backdrop-blur-2xl lg:border-r border-t lg:border-t-0 lg:rounded-none rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} w-80`}
+            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!top-0 lg:!left-0 lg:!bottom-0 max-lg:pb-24 max-lg:max-h-[85vh] ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} lg:border-r max-lg:border-t lg:rounded-none max-lg:rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} lg:w-80 max-lg:w-full`}
             style={{
               zIndex: 9999,
-              marginTop: 0,
-              paddingTop: 0,
             }}
           >
             {/* Sticky Header */}
