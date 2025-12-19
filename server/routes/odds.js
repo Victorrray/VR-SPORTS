@@ -694,6 +694,24 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     });
     console.log(`🗑️ Filtered out ${beforeFilter - allGames.length} past games. Remaining: ${allGames.length} upcoming games`);
     
+    // If a specific date is requested, filter to only games on that date
+    if (date && date !== 'all_upcoming' && date !== 'all') {
+      const beforeDateFilter = allGames.length;
+      // Parse the date string (YYYY-MM-DD format)
+      const [year, month, day] = date.split('-').map(Number);
+      const filterDate = new Date(year, month - 1, day);
+      const nextDay = new Date(filterDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      allGames = allGames.filter((game) => {
+        if (!game.commence_time) return false;
+        const gameTime = new Date(game.commence_time);
+        // Check if game is on the specified date (between start of day and start of next day)
+        return gameTime >= filterDate && gameTime < nextDay;
+      });
+      console.log(`📅 Filtered by date ${date}: ${beforeDateFilter} games -> ${allGames.length} games on that date`);
+    }
+    
     // Step 2: Fetch quarter/half/period markets if requested
     // NOTE: Period markets require /events/{eventId}/odds endpoint (one call per game)
     // This is much more expensive, so we're strategic:
