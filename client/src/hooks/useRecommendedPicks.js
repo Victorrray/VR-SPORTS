@@ -77,7 +77,12 @@ export function useRecommendedPicks(options = {}) {
       games = games.filter((game) => {
         if (!game.commence_time) return false;
         const gameTime = new Date(game.commence_time);
-        return gameTime > now; // Only include future games
+        // Exclude any game that has already started (commence_time must be in the future)
+        const isUpcoming = gameTime > now;
+        if (!isUpcoming) {
+          console.log(`  ⏭️ Filtering out past game: ${game.away_team} @ ${game.home_team} (${game.commence_time})`);
+        }
+        return isUpcoming;
       });
 
       console.log(`📅 Filtered ${beforeFilter} games down to ${games.length} upcoming games`);
@@ -161,10 +166,14 @@ export function useRecommendedPicks(options = {}) {
                 }
               }
 
+              const gameStartTime = new Date(game.commence_time);
+              const currentTime = new Date();
+              const status = gameStartTime <= currentTime ? 'live' : 'active';
+              
               picks.push({
                 id: `${game.id}-${market.key}-${outcome.name}-${outcome.point || ''}`,
                 teams: `${game.away_team} @ ${game.home_team}`,
-                time: new Date(game.commence_time).toLocaleString('en-US', {
+                time: gameStartTime.toLocaleString('en-US', {
                   weekday: 'short',
                   month: 'short',
                   day: 'numeric',
@@ -177,7 +186,7 @@ export function useRecommendedPicks(options = {}) {
                 sportsbook: normalizeBookName(bookmaker.title || bookmaker.key),
                 ev: `${ev.toFixed(2)}%`,
                 sport: getSportLabel(game.sport_key),
-                status: new Date(game.commence_time) <= new Date() ? 'live' : 'active',
+                status: status,
                 confidence: ev > 10 ? 'High' : ev > 7 ? 'Medium' : 'Low',
                 bookmakers: game.bookmakers,
                 marketKey: market.key,
