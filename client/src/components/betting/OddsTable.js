@@ -2065,6 +2065,7 @@ export default function OddsTable({
           }, outcomes[0]);
 
           const basePoint = filteredOutcome?.point != null ? Number(filteredOutcome.point) : null;
+          const baseOutcomeName = filteredOutcome?.name; // e.g., "Winnipeg Jets", "Over", "Under"
           // STRICT matching: only allow tiny floating point differences (0.001)
           const strictTolerance = 0.001;
 
@@ -2077,7 +2078,18 @@ export default function OddsTable({
             return Math.abs(entryPoint - basePoint) < strictTolerance;
           };
 
-          const allBooksForOutcome = allMarketOutcomes.filter(o => outcomeGroupKey(o) === groupKey && matchesPoint(o));
+          const matchesOutcome = (entry) => {
+            // For spreads, must match the outcome name (team/side)
+            // +1.5 Winnipeg is different from -1.5 Winnipeg
+            if (isSpreadMarket && entry?.name !== baseOutcomeName) {
+              return false;
+            }
+            return true;
+          };
+
+          const allBooksForOutcome = allMarketOutcomes.filter(o => 
+            outcomeGroupKey(o) === groupKey && matchesPoint(o) && matchesOutcome(o)
+          );
           
           // Debug: Log grouping for spreads/totals
           if (isSpreadMarket || isTotalMarket) {
