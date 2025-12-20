@@ -926,6 +926,8 @@ export default function OddsTable({
       return gameTime > now;
     });
     
+    console.log(`🎯 OddsTable: Filtered ${games.length} games down to ${upcomingGames.length} upcoming games`);
+    
     // Use upcomingGames instead of games for all processing below
     const gamesToProcess = upcomingGames;
     
