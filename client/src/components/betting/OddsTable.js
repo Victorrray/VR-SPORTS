@@ -4510,20 +4510,29 @@ export default function OddsTable({
                               );
                               const allBooks = mainBook ? [mainBook, ...otherBooks] : allBooksUnsorted;
                               
-                              // For spreads and totals, STRICTLY filter to only show books with the EXACT same line
+                              // For spreads and totals, STRICTLY filter to only show books with the EXACT same line AND outcome
                               const isSpreadMarket = row.mkt?.key?.includes('spread');
                               const isTotalMarket = row.mkt?.key?.includes('total');
                               const isLineBasedMarket = isSpreadMarket || isTotalMarket;
                               const mainPoint = row.out?.point;
+                              const mainOutcomeName = row.out?.name; // e.g., "Winnipeg Jets", "Over", "Under"
                               const strictTolerance = 0.001; // Very strict - only allow tiny floating point differences
                               
                               const filteredBooks = isLineBasedMarket && mainPoint !== undefined
                                 ? allBooks.filter(book => {
                                     // Check both 'point' and 'line' properties (data comes from different sources)
                                     const bookPoint = book.point ?? book.line;
+                                    const bookOutcomeName = book.name; // e.g., "Winnipeg Jets", "Over", "Under"
                                     
                                     // Exclude books without point data for spreads/totals
                                     if (bookPoint === undefined || bookPoint === null) return false;
+                                    
+                                    // CRITICAL: For spreads, must match BOTH the outcome name AND the point
+                                    // +1.5 Winnipeg is different from -1.5 Winnipeg
+                                    // Over 6 is different from Under 6
+                                    if (isSpreadMarket && bookOutcomeName !== mainOutcomeName) {
+                                      return false;
+                                    }
                                     
                                     const mainPt = Number(mainPoint);
                                     const bookPt = Number(bookPoint);
@@ -4537,7 +4546,7 @@ export default function OddsTable({
                               
                               // Log filtering results
                               if (isLineBasedMarket) {
-                                console.log(`📊 LINE FILTER RESULT (${isSpreadMarket ? 'SPREAD' : 'TOTAL'}): ${allBooks.length} -> ${filteredBooks.length} books for line ${mainPoint}`);
+                                console.log(`📊 LINE FILTER RESULT (${isSpreadMarket ? 'SPREAD' : 'TOTAL'}): ${allBooks.length} -> ${filteredBooks.length} books for ${mainOutcomeName} ${mainPoint}`);
                               }
                               
                               // Check if mini table is expanded to show all books
