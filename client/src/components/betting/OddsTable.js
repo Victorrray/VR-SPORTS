@@ -3698,7 +3698,16 @@ export default function OddsTable({
                             ) : (
                               <>
                                 <div className="mini-header-odds">
-                                  {String(row.mkt?.key).includes('total') ? 'Over' : shortTeam(row.game.home_team, row.game.sport_key)}
+                                  {String(row.mkt?.key).includes('total') ? 'Over' : (
+                                    <>
+                                      {shortTeam(row.game.home_team, row.game.sport_key)}
+                                      {String(row.mkt?.key).includes('spread') && row.out?.point !== undefined && (
+                                        <span style={{ fontSize: '0.85em', opacity: 0.7, marginLeft: '4px' }}>
+                                          {Number(row.out.point) > 0 ? `+${row.out.point}` : row.out.point}
+                                        </span>
+                                      )}
+                                    </>
+                                  )}
                                 </div>
                                 <div className="mini-header-odds">
                                   {String(row.mkt?.key).includes('total') ? 'Under' : shortTeam(row.game.away_team, row.game.sport_key)}
