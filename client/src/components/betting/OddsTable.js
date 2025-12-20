@@ -2405,7 +2405,27 @@ export default function OddsTable({
     }
     
     // Fallback to weighted consensus method for regular markets using all books
-    const bookData = allBooks
+    // CRITICAL: For spreads/totals, only compare books with the SAME line
+    const isSpreadOrTotal = row.mkt?.key && (row.mkt.key.includes('spread') || row.mkt.key.includes('total'));
+    const targetPoint = row.out?.point;
+    
+    let booksForEV = allBooks;
+    if (isSpreadOrTotal && targetPoint !== undefined && targetPoint !== null) {
+      // Filter to only books with matching spread/total line
+      booksForEV = allBooks.filter(b => {
+        const bookPoint = b.point ?? b.line;
+        return bookPoint === targetPoint || Math.abs(Number(bookPoint) - Number(targetPoint)) < 0.01;
+      });
+      
+      console.log(`🎯 SPREAD/TOTAL EV FILTER: Target point ${targetPoint}, filtered ${allBooks.length} -> ${booksForEV.length} books with same line`);
+      
+      if (booksForEV.length < 2) {
+        console.log(`⚠️ EV CALC SKIPPED: Not enough books with same line (${targetPoint}) - only ${booksForEV.length} books`);
+        return null;
+      }
+    }
+    
+    const bookData = booksForEV
       .map(b => ({
         prob: americanToProb(b.price ?? b.odds),
         weight: getBookWeight(b.bookmaker?.key || b.book),
@@ -2418,9 +2438,9 @@ export default function OddsTable({
     const probs = bookData.map(d => d.prob);
     const weights = bookData.map(d => d.weight);
     const consensusProb = weightedMedian(probs, weights);
-    const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
+    const uniqCnt = new Set(booksForEV.map(b => b.bookmaker?.key || b.book || '')).size;
     
-    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Minimum 3 books for reliable EV
+    if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 2) { // Minimum 2 books for spreads/totals with same line
       const fairDec = 1 / consensusProb;
       return calculateEV(userOdds, decimalToAmerican(fairDec), bookmakerKey);
     }
