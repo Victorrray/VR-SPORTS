@@ -2038,6 +2038,7 @@ export default function OddsTable({
         const outcomeGroupKey = (outcome) => {
           const base = outcome?.name || '';
           if (isSpreadMarket || isTotalMarket) {
+            // Use exact point value for grouping - no tolerance, each line is separate
             const pt = outcome?.point != null ? Number(outcome.point).toFixed(2) : 'NA';
             return `${base}@@${pt}`;
           }
@@ -2064,17 +2065,24 @@ export default function OddsTable({
           }, outcomes[0]);
 
           const basePoint = filteredOutcome?.point != null ? Number(filteredOutcome.point) : null;
-          const tolerance = 0.051;
+          // STRICT matching: only allow tiny floating point differences (0.001)
+          const strictTolerance = 0.001;
 
           const matchesPoint = (entry) => {
             if (!(isSpreadMarket || isTotalMarket)) return true;
             if (basePoint == null) return entry?.point == null;
             const entryPoint = entry?.point != null ? Number(entry.point) : null;
             if (entryPoint == null) return false;
-            return Math.abs(entryPoint - basePoint) < tolerance;
+            // STRICT: Only match if points are virtually identical (within 0.001)
+            return Math.abs(entryPoint - basePoint) < strictTolerance;
           };
 
           const allBooksForOutcome = allMarketOutcomes.filter(o => outcomeGroupKey(o) === groupKey && matchesPoint(o));
+          
+          // Debug: Log grouping for spreads/totals
+          if (isSpreadMarket || isTotalMarket) {
+            console.log(`🎯 STRICT LINE GROUPING: ${groupKey} - Found ${allBooksForOutcome.length} books with exact line ${basePoint}`);
+          }
           
           // Debug logging for quarter markets
           if (mktKey.includes('_q') || mktKey.includes('_h') || mktKey.includes('_p')) {
