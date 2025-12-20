@@ -4570,14 +4570,18 @@ export default function OddsTable({
                                         )}
                                         <span>{cleanBookTitle(p.book)}</span>
                                       </div>
-                                      {/* Show spread line for spreads market */}
+                                      {/* Show spread line for spreads market - CLEAR display with sign */}
                                       {mode !== "props" && row.mkt?.key?.includes('spread') && (p.point ?? p.line) !== undefined && (
                                         <span style={{ 
-                                          fontSize: '0.75em', 
-                                          color: 'rgba(255,255,255,0.6)',
-                                          fontWeight: '500'
+                                          fontSize: '0.8em', 
+                                          color: 'rgba(255,255,255,0.8)',
+                                          fontWeight: '600',
+                                          letterSpacing: '0.5px'
                                         }}>
-                                          {Number(p.point ?? p.line) > 0 ? `+${p.point ?? p.line}` : `${p.point ?? p.line}`}
+                                          {(() => {
+                                            const pt = Number(p.point ?? p.line);
+                                            return pt > 0 ? `+${pt.toFixed(1)}` : `${pt.toFixed(1)}`;
+                                          })()}
                                         </span>
                                       )}
                                     </div>
