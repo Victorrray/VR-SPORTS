@@ -2113,9 +2113,10 @@ export default function OddsTable({
           };
 
           const matchesOutcome = (entry) => {
-            // For spreads, must match the outcome name (team/side)
+            // For spreads AND totals, must match the outcome name
             // +1.5 Winnipeg is different from -1.5 Winnipeg
-            if (isSpreadMarket && entry?.name !== baseOutcomeName) {
+            // Over 6.5 is different from Under 6.5
+            if ((isSpreadMarket || isTotalMarket) && entry?.name !== baseOutcomeName) {
               return false;
             }
             return true;
