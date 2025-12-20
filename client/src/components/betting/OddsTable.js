@@ -4448,10 +4448,20 @@ export default function OddsTable({
                           <tbody>
                             {(() => {
                               const seenMiniBooks = new Set();
+                              // CRITICAL: For spreads, filter books to only match the row's outcome name
+                              const isRowSpreadMarket = row.mkt?.key?.includes('spread');
+                              const rowOutcomeName = row.out?.name;
+                              
                               const dedupedBooks = (row.allBooks || []).filter(book => {
                                 const rawKey = book?.bookmaker?.key || book?.book || '';
                                 const key = normalizeBookKey(rawKey);
                                 if (!key || seenMiniBooks.has(key)) return false;
+                                
+                                // For spreads, only include books with matching outcome name
+                                if (isRowSpreadMarket && book.name !== rowOutcomeName) {
+                                  return false;
+                                }
+                                
                                 seenMiniBooks.add(key);
                                 return true;
                               });
