@@ -4483,9 +4483,12 @@ export default function OddsTable({
                           <tbody>
                             {(() => {
                               const seenMiniBooks = new Set();
-                              // CRITICAL: For spreads, filter books to only match the row's outcome name
+                              // CRITICAL: For spreads/totals, filter books to only match the row's line and outcome
                               const isRowSpreadMarket = row.mkt?.key?.includes('spread');
+                              const isRowTotalMarket = row.mkt?.key?.includes('total');
                               const rowOutcomeName = row.out?.name;
+                              const rowPoint = row.out?.point;
+                              const miniTableStrictTolerance = 0.001;
                               
                               const dedupedBooks = (row.allBooks || []).filter(book => {
                                 const rawKey = book?.bookmaker?.key || book?.book || '';
@@ -4495,6 +4498,14 @@ export default function OddsTable({
                                 // For spreads, only include books with matching outcome name
                                 if (isRowSpreadMarket && book.name !== rowOutcomeName) {
                                   return false;
+                                }
+                                
+                                // For totals, include both Over and Under, but ONLY for the same line
+                                if (isRowTotalMarket && rowPoint !== undefined) {
+                                  const bookPoint = book.point ?? book.line;
+                                  if (bookPoint === undefined || Math.abs(Number(bookPoint) - Number(rowPoint)) >= miniTableStrictTolerance) {
+                                    return false;
+                                  }
                                 }
                                 
                                 seenMiniBooks.add(key);
