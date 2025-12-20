@@ -607,7 +607,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 console.log(`✅ FLIFF FOUND in ${sport}: ${Array.from(fliffData).join(', ')}`);
               } else {
                 console.log(`❌ FLIFF NOT FOUND in ${sport} response`);
-                console.log(`📋 ALL BOOKMAKERS IN RESPONSE: ${Array.from(marketsByBook.keys()).join(', ')}`);
+                console.log(`📋 ALL BOOKMAKERS IN RESPONSE (${marketsByBook.size} total):`);
+                Array.from(marketsByBook.keys()).forEach((book, idx) => {
+                  console.log(`   ${idx + 1}. ${book}`);
+                });
               }
               
               // Log first game details
