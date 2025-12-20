@@ -4510,22 +4510,25 @@ export default function OddsTable({
                               );
                               const allBooks = mainBook ? [mainBook, ...otherBooks] : allBooksUnsorted;
                               
-                              // For spreads market, STRICTLY filter to only show books with the EXACT same spread line
+                              // For spreads and totals, STRICTLY filter to only show books with the EXACT same line
                               const isSpreadMarket = row.mkt?.key?.includes('spread');
+                              const isTotalMarket = row.mkt?.key?.includes('total');
+                              const isLineBasedMarket = isSpreadMarket || isTotalMarket;
                               const mainPoint = row.out?.point;
-                              const strictTolerance = 0.01; // Very strict - only allow tiny floating point differences
+                              const strictTolerance = 0.001; // Very strict - only allow tiny floating point differences
                               
-                              const filteredBooks = isSpreadMarket && mainPoint !== undefined
+                              const filteredBooks = isLineBasedMarket && mainPoint !== undefined
                                 ? allBooks.filter(book => {
                                     // Check both 'point' and 'line' properties (data comes from different sources)
                                     const bookPoint = book.point ?? book.line;
                                     
-                                    // Exclude books without point data for spreads
+                                    // Exclude books without point data for spreads/totals
                                     if (bookPoint === undefined || bookPoint === null) return false;
                                     
                                     const mainPt = Number(mainPoint);
                                     const bookPt = Number(bookPoint);
                                     const diff = Math.abs(mainPt - bookPt);
+                                    // STRICT: Only match if points are virtually identical
                                     const matches = diff < strictTolerance;
                                     
                                     return matches;
@@ -4533,8 +4536,8 @@ export default function OddsTable({
                                 : allBooks;
                               
                               // Log filtering results
-                              if (isSpreadMarket) {
-                                console.log(`📊 SPREAD FILTER RESULT: ${allBooks.length} -> ${filteredBooks.length} books for line ${mainPoint}`);
+                              if (isLineBasedMarket) {
+                                console.log(`📊 LINE FILTER RESULT (${isSpreadMarket ? 'SPREAD' : 'TOTAL'}): ${allBooks.length} -> ${filteredBooks.length} books for line ${mainPoint}`);
                               }
                               
                               // Check if mini table is expanded to show all books
