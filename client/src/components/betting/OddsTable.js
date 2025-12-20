@@ -2055,14 +2055,48 @@ export default function OddsTable({
         Object.entries(grouped).forEach(([groupKey, outcomes]) => {
           if (!outcomes.length) return;
 
-          const filteredOutcome = outcomes.reduce((best, current) => {
-            if (!best) return current;
-            const bestOdds = Number(best.price ?? best.odds ?? 0);
-            const currentOdds = Number(current.price ?? current.odds ?? 0);
-            const bestDecimal = americanToDecimal(bestOdds) || -Infinity;
-            const currentDecimal = americanToDecimal(currentOdds) || -Infinity;
-            return currentDecimal > bestDecimal ? current : best;
-          }, outcomes[0]);
+          // For spreads/totals, group by point value first, then select best odds within each line
+          let filteredOutcome;
+          if (isSpreadMarket || isTotalMarket) {
+            // Group outcomes by their point value
+            const outcomesByPoint = {};
+            outcomes.forEach(outcome => {
+              const pt = outcome?.point != null ? Number(outcome.point).toFixed(2) : 'NA';
+              if (!outcomesByPoint[pt]) outcomesByPoint[pt] = [];
+              outcomesByPoint[pt].push(outcome);
+            });
+            
+            // Find the line with the most books (most common line)
+            let bestLine = null;
+            let maxBooks = 0;
+            Object.entries(outcomesByPoint).forEach(([line, lineOutcomes]) => {
+              if (lineOutcomes.length > maxBooks) {
+                maxBooks = lineOutcomes.length;
+                bestLine = line;
+              }
+            });
+            
+            // Select best odds from the most common line
+            const outcomesForBestLine = outcomesByPoint[bestLine] || outcomes;
+            filteredOutcome = outcomesForBestLine.reduce((best, current) => {
+              if (!best) return current;
+              const bestOdds = Number(best.price ?? best.odds ?? 0);
+              const currentOdds = Number(current.price ?? current.odds ?? 0);
+              const bestDecimal = americanToDecimal(bestOdds) || -Infinity;
+              const currentDecimal = americanToDecimal(currentOdds) || -Infinity;
+              return currentDecimal > bestDecimal ? current : best;
+            }, outcomesForBestLine[0]);
+          } else {
+            // For non-spread markets, just pick best odds
+            filteredOutcome = outcomes.reduce((best, current) => {
+              if (!best) return current;
+              const bestOdds = Number(best.price ?? best.odds ?? 0);
+              const currentOdds = Number(current.price ?? current.odds ?? 0);
+              const bestDecimal = americanToDecimal(bestOdds) || -Infinity;
+              const currentDecimal = americanToDecimal(currentOdds) || -Infinity;
+              return currentDecimal > bestDecimal ? current : best;
+            }, outcomes[0]);
+          }
 
           const basePoint = filteredOutcome?.point != null ? Number(filteredOutcome.point) : null;
           const baseOutcomeName = filteredOutcome?.name; // e.g., "Winnipeg Jets", "Over", "Under"
