@@ -601,6 +601,15 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 bookCount++;
               }
               
+              // CRITICAL: Check if Fliff is in the response
+              const fliffData = marketsByBook.get('fliff');
+              if (fliffData) {
+                console.log(`✅ FLIFF FOUND in ${sport}: ${Array.from(fliffData).join(', ')}`);
+              } else {
+                console.log(`❌ FLIFF NOT FOUND in ${sport} response`);
+                console.log(`📋 ALL BOOKMAKERS IN RESPONSE: ${Array.from(marketsByBook.keys()).join(', ')}`);
+              }
+              
               // Log first game details
               const firstGame = responseData[0];
               console.log(`\n🎮 First game: ${firstGame.away_team} @ ${firstGame.home_team}`);
@@ -667,6 +676,20 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
       
+      console.log(`\n🔍 BOOKMAKER FILTERING DEBUG:`);
+      console.log(`👤 User plan: ${userProfile.plan}`);
+      console.log(`✅ Allowed bookmakers: ${allowedBookmakers.join(', ')}`);
+      console.log(`🔎 Is 'fliff' in allowed list? ${allowedBookmakers.includes('fliff')}`);
+      
+      // Count Fliff before filtering
+      let fliffCountBefore = 0;
+      allGames.forEach(game => {
+        if (game.bookmakers) {
+          fliffCountBefore += game.bookmakers.filter(b => b.key === 'fliff').length;
+        }
+      });
+      console.log(`📊 Fliff bookmakers BEFORE filtering: ${fliffCountBefore}`);
+      
       // Only filter game odds bookmakers, not player props
       allGames.forEach(game => {
         if (game.bookmakers) {
@@ -681,6 +704,14 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         }
       });
       
+      // Count Fliff after filtering
+      let fliffCountAfter = 0;
+      allGames.forEach(game => {
+        if (game.bookmakers) {
+          fliffCountAfter += game.bookmakers.filter(b => b.key === 'fliff').length;
+        }
+      });
+      console.log(`📊 Fliff bookmakers AFTER filtering: ${fliffCountAfter}`);
       console.log(`Filtered to ${allowedBookmakers.length} allowed bookmakers for user plan: ${userProfile.plan}`);
     }
     
