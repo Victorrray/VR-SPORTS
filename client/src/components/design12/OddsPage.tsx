@@ -945,11 +945,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                   >
                     <span className="flex items-center gap-2">
                       {betType.name}
-                      {isPlatinumOnly && (
-                        <span className={`px-1.5 py-0.5 text-[10px] rounded flex items-center gap-0.5 ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
-                          <Crown className="w-3 h-3" />
-                        </span>
-                      )}
                     </span>
                     {isLocked ? (
                       <Lock className="w-4 h-4" />
@@ -1026,11 +1021,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 >
                   <span className="flex items-center gap-2">
                     {betType.name}
-                    {isPlatinumOnly && (
-                      <span className={`px-1.5 py-0.5 text-[10px] rounded flex items-center gap-0.5 ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
-                        <Crown className="w-3 h-3" />
-                      </span>
-                    )}
                   </span>
                   {isLocked ? (
                     <Lock className="w-4 h-4" />
@@ -1251,10 +1241,6 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
               <div>
                 <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 flex items-center gap-2`}>
                   Auto Refresh
-                  <span className={`px-1.5 py-0.5 text-[10px] rounded ${isLight ? 'bg-amber-100 text-amber-700' : 'bg-amber-500/20 text-amber-400'}`}>
-                    <Crown className="w-3 h-3 inline mr-0.5" />
-                    PLATINUM
-                  </span>
                 </label>
                 <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
                   <div className="flex items-center gap-3 flex-1">
