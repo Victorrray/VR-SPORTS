@@ -704,7 +704,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pb-4 space-y-4 lg:border-b border-b-0`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-0 pb-4 space-y-4 lg:border-b border-b-0`}>
               {/* Drag Handle - Mobile Only */}
               <div className="lg:hidden flex justify-center mb-2">
                 <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
