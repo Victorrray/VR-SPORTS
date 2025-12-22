@@ -686,7 +686,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           {/* Backdrop - Desktop only (to the right of panel) */}
           <div 
             className={`hidden lg:block fixed right-0 bottom-0 bg-black/50 backdrop-blur-md z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
-            style={{ left: '320px', top: 0 }}
+            style={{ left: '320px', top: '-24px' }}
             onClick={closeFilterMenu}
           />
           
