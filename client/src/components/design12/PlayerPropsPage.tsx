@@ -695,7 +695,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           {/* Mobile Backdrop - Full screen, no blur */}
           <div 
             className={`lg:hidden fixed right-0 left-0 bg-black/60 z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
-            style={{ top: 0, bottom: 0 }}
+            style={{ top: '-100px', bottom: 0 }}
             onClick={closeFilterMenu}
           />
           
