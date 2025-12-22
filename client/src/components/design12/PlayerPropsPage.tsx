@@ -109,8 +109,10 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const formatOdds = (odds: any): string => convertOdds(odds, oddsFormat);
   const { me } = useMe();
   const hasPlatinum = me?.plan === 'platinum' || me?.unlimited === true;
-  const [selectedSport, setSelectedSport] = useState('all');
+  const [selectedSports, setSelectedSports] = useState<string[]>(['all']);
   const [selectedMarket, setSelectedMarket] = useState('all');
+  // Derive single sport for API calls - if multiple selected, use 'all'
+  const selectedSport = selectedSports.length === 1 ? selectedSports[0] : 'all';
   const [selectedBetType] = useState('props');
   const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
   const [expandedSportsbooks, setExpandedSportsbooks] = useState<(string | number)[]>([]);
@@ -737,7 +739,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 </button>
                 <button
                   onClick={() => {
-                    setSelectedSport('all');
+                    setSelectedSports(['all']);
                     setSelectedMarket('all');
                     setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
@@ -1048,7 +1050,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     isLight ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
                   }`}
                 >
-                  <span>{sports.find(s => s.id === selectedSport)?.name}</span>
+                  <span>{selectedSports.length === 1 && selectedSports[0] === 'all' ? 'All Sports' : selectedSports.length === 1 ? sports.find(s => s.id === selectedSports[0])?.name : `${selectedSports.length} Sports`}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sportExpanded ? 'rotate-180' : ''}`} />
                 </button>
                 
@@ -1059,17 +1061,31 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       <button
                         key={sport.id}
                         onClick={() => {
-                          setSelectedSport(sport.id);
-                          setSportExpanded(false);
+                          if (sport.id === 'all') {
+                            setSelectedSports(['all']);
+                          } else {
+                            const newSports = selectedSports.includes(sport.id)
+                              ? selectedSports.filter(s => s !== sport.id)
+                              : selectedSports.filter(s => s !== 'all').concat(sport.id);
+                            setSelectedSports(newSports.length === 0 ? ['all'] : newSports);
+                          }
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
-                          selectedSport === sport.id
+                          selectedSports.includes(sport.id)
                             ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
-                        <span>{sport.name}</span>
-                        <span className={`text-xs ${selectedSport === sport.id ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
+                        <span className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedSports.includes(sport.id)}
+                            onChange={() => {}}
+                            className="w-4 h-4 rounded"
+                          />
+                          {sport.name}
+                        </span>
+                        <span className={`text-xs ${selectedSports.includes(sport.id) ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
                           {sport.count}
                         </span>
                       </button>
@@ -1098,7 +1114,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     {/* Header */}
                     <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
                       <div className="flex items-center justify-between">
-                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sport</h3>
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sports</h3>
                         <button
                           onClick={closeSportDrawer}
                           className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
@@ -1114,17 +1130,31 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                         <button
                           key={sport.id}
                           onClick={() => {
-                            setSelectedSport(sport.id);
-                            setSportExpanded(false);
+                            if (sport.id === 'all') {
+                              setSelectedSports(['all']);
+                            } else {
+                              const newSports = selectedSports.includes(sport.id)
+                                ? selectedSports.filter(s => s !== sport.id)
+                                : selectedSports.filter(s => s !== 'all').concat(sport.id);
+                              setSelectedSports(newSports.length === 0 ? ['all'] : newSports);
+                            }
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
-                            selectedSport === sport.id
+                            selectedSports.includes(sport.id)
                               ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
-                          <span>{sport.name}</span>
-                          <span className={`text-xs ${selectedSport === sport.id ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
+                          <span className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={selectedSports.includes(sport.id)}
+                              onChange={() => {}}
+                              className="w-4 h-4 rounded"
+                            />
+                            {sport.name}
+                          </span>
+                          <span className={`text-xs ${selectedSports.includes(sport.id) ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
                             {sport.count}
                           </span>
                         </button>
@@ -1244,7 +1274,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 {/* Reset Button */}
                 <button
                   onClick={() => {
-                    setSelectedSport('all');
+                    setSelectedSports(['all']);
                     setSelectedMarket('all');
                     setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
