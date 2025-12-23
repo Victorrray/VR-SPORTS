@@ -1991,7 +1991,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       params.append('oddsFormat', 'american');
       
       // Optional: date, betType, sportsbooks (if backend supports them)
-      if (date && date !== 'all') params.append('date', date);
+      // Don't send date parameter if it's 'all_upcoming' - backend doesn't recognize it
+      if (date && date !== 'all' && date !== 'all_upcoming') params.append('date', date);
       // For exchanges mode, fetch straight bets data (we'll filter for exchange opportunities client-side)
       const apiBetType = betType === 'exchanges' ? 'straight' : betType;
       if (apiBetType && apiBetType !== 'all') params.append('betType', apiBetType);
