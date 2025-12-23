@@ -2068,8 +2068,14 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       console.log('📦 API Response:', response.data);
       console.log('📦 Response type:', typeof response.data);
       console.log('📦 Is array?:', Array.isArray(response.data));
+      console.log('📦 Response length:', Array.isArray(response.data) ? response.data.length : 'N/A');
       if (response.data && typeof response.data === 'object') {
         console.log('📦 Response keys:', Object.keys(response.data));
+      }
+      
+      // Debug: Log first few items if array
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        console.log('📦 First item sample:', response.data[0]);
       }
 
       // DFS apps that only offer Over bets (no Under)
