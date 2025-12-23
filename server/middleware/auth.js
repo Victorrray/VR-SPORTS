@@ -255,11 +255,15 @@ async function authenticate(req, _res, next) {
       // Use getUser() to verify the token - this is the correct Supabase method
       const { data, error } = await supabaseAuth.auth.getUser(token);
       
+      console.log(`🔐 Token verification result: error=${!!error}, hasUser=${!!data?.user}`);
+      
       if (!error && data?.user) {
         req.user = data.user;
         console.log(`✅ JWT verified: ${data.user.id}`);
       } else if (error) {
-        console.warn(`⚠️ JWT verification failed: ${error.message}`);
+        console.warn(`⚠️ JWT verification failed: ${error.message} (code: ${error.code})`);
+      } else {
+        console.warn(`⚠️ JWT verification returned no user and no error`);
       }
     } catch (tokenError) {
       console.warn(`⚠️ JWT verification exception: ${tokenError.message}`);
