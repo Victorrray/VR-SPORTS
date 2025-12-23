@@ -571,14 +571,15 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       {/* Search & Filters Bar */}
       <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between">
         <div className="flex flex-col md:flex-row gap-3 md:items-center w-full md:w-auto">
-          <div className="relative w-full md:w-64">
+          {/* Search bar commented out - can be re-enabled later if needed */}
+          {/* <div className="relative w-full md:w-64">
             <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
             <input 
               type="text"
               placeholder="Search..."
               className={`w-full h-[44px] pl-10 pr-4 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100' : 'bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/40 focus:bg-white/10'} backdrop-blur-2xl border rounded-xl focus:outline-none font-bold transition-all text-sm`}
             />
-          </div>
+          </div> */}
           <div className="flex items-center justify-center gap-2 overflow-x-auto overflow-y-visible -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide w-full md:w-auto">
             {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date
                 - Shows purple/active styling when filters are applied or panel is open
