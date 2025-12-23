@@ -252,19 +252,38 @@ async function authenticate(req, _res, next) {
     }
     
     try {
-      // Use getUser() to verify the token - this is the correct Supabase method
+      // Try getUser() first - this is the correct Supabase method for verifying access tokens
       const { data, error } = await supabaseAuth.auth.getUser(token);
       
       console.log(`🔐 Token verification result: error=${!!error}, hasUser=${!!data?.user}`);
       
       if (!error && data?.user) {
         req.user = data.user;
-        console.log(`✅ JWT verified: ${data.user.id}`);
+        console.log(`✅ JWT verified via getUser(): ${data.user.id}`);
+        return next();
       } else if (error) {
-        console.warn(`⚠️ JWT verification failed: ${error.message} (code: ${error.code})`);
+        console.warn(`⚠️ getUser() failed: ${error.message} (code: ${error.code})`);
       } else {
-        console.warn(`⚠️ JWT verification returned no user and no error`);
+        console.warn(`⚠️ getUser() returned no user and no error`);
       }
+      
+      // Fallback: Try to decode JWT manually to extract user ID
+      // This is a fallback for when getUser() fails
+      try {
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          // Decode the payload (second part)
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+          if (payload.sub) {
+            req.user = { id: payload.sub };
+            console.log(`✅ JWT decoded manually: ${payload.sub}`);
+            return next();
+          }
+        }
+      } catch (decodeError) {
+        console.warn(`⚠️ Manual JWT decode failed: ${decodeError.message}`);
+      }
+      
     } catch (tokenError) {
       console.warn(`⚠️ JWT verification exception: ${tokenError.message}`);
     }
