@@ -1074,10 +1074,24 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
             {/* Manual Refresh Button */}
             <button 
               onClick={() => {
+                // Clear stale data - filter out bets with expired dates
+                const now = new Date();
+                const stalePicksCount = apiPicks.filter(pick => {
+                  const gameTime = new Date(pick.commenceTime || pick.gameTime || 0);
+                  return gameTime < now;
+                }).length;
+                
                 refetch();
-                toast.success('Refreshing odds...', {
-                  description: 'Fetching latest odds data'
-                });
+                
+                if (stalePicksCount > 0) {
+                  toast.success('Refreshing odds...', {
+                    description: `Clearing ${stalePicksCount} expired bet${stalePicksCount !== 1 ? 's' : ''}`
+                  });
+                } else {
+                  toast.success('Refreshing odds...', {
+                    description: 'Fetching latest odds data'
+                  });
+                }
               }}
               disabled={isLoading}
               className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${

@@ -2472,6 +2472,15 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           return pick;
         });
       };
+
+      // Filter out stale/expired bets (those with game times in the past)
+      const filterExpiredBets = (picks: OddsPick[]) => {
+        const now = new Date();
+        return picks.filter(pick => {
+          const gameTime = new Date(pick.commenceTime || pick.gameTime || 0);
+          return gameTime >= now; // Keep only future games
+        });
+      };
       
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
@@ -2482,6 +2491,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
         transformedPicks = filterForExchanges(transformedPicks);
+        transformedPicks = filterExpiredBets(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
@@ -2496,6 +2506,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
         transformedPicks = filterForExchanges(transformedPicks);
+        transformedPicks = filterExpiredBets(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
