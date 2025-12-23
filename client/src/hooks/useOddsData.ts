@@ -960,6 +960,22 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             return bookOddsNum > bestOddsNum ? book : best;
           }, filteredBooksArray[0]);
           
+          // Find the overall best odds across ALL books
+          const overallBestBook = booksArray.reduce((best: any, book: any) => {
+            const bestOddsNum = parseInt(best.odds, 10);
+            const bookOddsNum = parseInt(book.odds, 10);
+            return bookOddsNum > bestOddsNum ? book : best;
+          }, booksArray[0]);
+          
+          // Check if filtered book has competitive odds (at least as good as overall best)
+          const filteredOddsNum = parseInt(bestFilteredBook.odds, 10);
+          const overallBestOddsNum = parseInt(overallBestBook.odds, 10);
+          
+          // Skip if filtered book's odds are worse than the best available odds
+          if (!isNaN(filteredOddsNum) && !isNaN(overallBestOddsNum) && filteredOddsNum < overallBestOddsNum) {
+            return; // Skip - filtered book has worse odds than available elsewhere
+          }
+          
           // Use the filtered book as the best book for display
           // (Show the best odds from the user's selected sportsbooks)
           bestOdds = bestFilteredBook.odds;
