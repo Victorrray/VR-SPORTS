@@ -2477,8 +2477,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const filterExpiredBets = (picks: OddsPick[]) => {
         const now = new Date();
         return picks.filter(pick => {
-          const gameTime = new Date(pick.commenceTime || pick.gameTime || 0);
-          return gameTime >= now; // Keep only future games
+          // Skip filtering for player props - they don't have reliable game times
+          if (pick.isPlayerProp) {
+            return true;
+          }
+          
+          // For regular picks, filter out those with past game times
+          const gameTime = pick.commenceTime || pick.gameTime;
+          if (!gameTime) {
+            return true; // Keep picks without game time info
+          }
+          
+          const gameDate = new Date(gameTime);
+          return gameDate >= now; // Keep only future games
         });
       };
       
