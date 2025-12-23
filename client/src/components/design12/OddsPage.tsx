@@ -900,7 +900,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   if (selectedBetType === 'props') {
     return (
       <div className="space-y-6">
-        <div className="relative">
+        <div className="relative flex justify-center">
           <button
             onClick={() => setIsBetTypeDropdownOpen(!isBetTypeDropdownOpen)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
