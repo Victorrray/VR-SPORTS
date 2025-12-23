@@ -486,7 +486,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
         
         // Calculate EV for BOTH Over and Under to determine which side is better
-        const MIN_BOOKS_FOR_EV = 4;
+        // When user has a sportsbook filter, require more books for confidence
+        // When viewing all sports, be more lenient since some sports have fewer books
+        const MIN_BOOKS_FOR_EV = userHasFilter ? 4 : 2;
         const booksForEV = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
         const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
         
