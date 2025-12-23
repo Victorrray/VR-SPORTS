@@ -976,7 +976,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   return (
     <div className="space-y-6">
       {/* Dynamic Bet Type Heading */}
-      <div className="relative">
+      <div className="relative flex justify-center">
         <button
           onClick={() => setIsBetTypeDropdownOpen(!isBetTypeDropdownOpen)}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
