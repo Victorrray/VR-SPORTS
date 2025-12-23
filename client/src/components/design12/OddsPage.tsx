@@ -297,8 +297,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     
     const now = new Date();
     let filtered = apiPicks;
+    const startCount = filtered.length;
     
     // Remove stale data (bets from past dates)
+    const beforeStaleFilter = filtered.length;
     filtered = filtered.filter(pick => {
       // If no game time, include the pick
       if (!pick.commenceTime && !pick.gameTime) return true;
@@ -307,13 +309,17 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       // Only keep bets with future game times
       return gameDate >= now;
     });
+    const staleRemoved = beforeStaleFilter - filtered.length;
     
     // Filter out live games for non-Platinum users (Gold and below only see pre-match)
     if (!hasPlatinum) {
+      const beforeLiveFilter = filtered.length;
       filtered = filtered.filter(pick => !isGameLive(pick.commenceTime));
+      console.log(`🎯 OddsPage: Removed ${beforeLiveFilter - filtered.length} live games (non-Platinum)`);
     }
     
     // Filter out DFS apps from live games (DFS apps don't offer live betting, so data is stale)
+    const beforeDFSLiveFilter = filtered.length;
     filtered = filtered.filter(pick => {
       if (isGameLive(pick.commenceTime) && isDFSApp(pick.bestBook || '')) {
         return false; // Exclude DFS app picks for live games
@@ -323,10 +329,12 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     
     // If "all_upcoming" is selected, return filtered picks (no date filter)
     if (selectedDate === 'all_upcoming') {
+      console.log(`🎯 OddsPage Filtering: ${startCount} → ${filtered.length} picks (stale: ${staleRemoved}, DFS live: ${beforeDFSLiveFilter - filtered.length})`);
       return filtered;
     }
     
     // Filter by specific date (YYYY-MM-DD format in local timezone)
+    const beforeDateFilter = filtered.length;
     filtered = filtered.filter(pick => {
       // If no game time, include the pick (don't filter it out)
       if (!pick.commenceTime && !pick.gameTime) return true;
@@ -341,6 +349,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       return gameDateStr === selectedDate;
     });
     
+    console.log(`🎯 OddsPage Filtering: ${startCount} → ${filtered.length} picks (stale: ${staleRemoved}, date: ${beforeDateFilter - filtered.length}, selectedDate: ${selectedDate})`);
     return filtered;
   }, [apiPicks, selectedDate, hasPlatinum]);
 
