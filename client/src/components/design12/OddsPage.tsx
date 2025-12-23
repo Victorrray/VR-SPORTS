@@ -295,7 +295,18 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const dateFilteredPicks = useMemo(() => {
     if (!apiPicks || apiPicks.length === 0) return [];
     
+    const now = new Date();
     let filtered = apiPicks;
+    
+    // Remove stale data (bets from past dates)
+    filtered = filtered.filter(pick => {
+      // If no game time, include the pick
+      if (!pick.commenceTime && !pick.gameTime) return true;
+      
+      const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
+      // Only keep bets with future game times
+      return gameDate >= now;
+    });
     
     // Filter out live games for non-Platinum users (Gold and below only see pre-match)
     if (!hasPlatinum) {

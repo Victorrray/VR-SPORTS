@@ -200,13 +200,25 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const dateFilteredPicks = useMemo(() => {
     if (!apiPicks || apiPicks.length === 0) return [];
     
-    // If "all_upcoming" is selected, show all games (no date filter)
+    const now = new Date();
+    
+    // First, remove stale data (bets from past dates)
+    const nonStalePicks = apiPicks.filter(pick => {
+      // If no game time, include the pick
+      if (!pick.commenceTime && !pick.gameTime) return true;
+      
+      const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
+      // Only keep bets with future game times
+      return gameDate >= now;
+    });
+    
+    // If "all_upcoming" is selected, show all non-stale games
     if (selectedDate === 'all_upcoming') {
-      return apiPicks;
+      return nonStalePicks;
     }
     
     // Filter by specific date (YYYY-MM-DD format)
-    return apiPicks.filter(pick => {
+    return nonStalePicks.filter(pick => {
       // If no game time, include the pick (don't filter it out)
       if (!pick.commenceTime && !pick.gameTime) return true;
       
