@@ -235,9 +235,9 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                       <label className="flex items-center gap-2 cursor-pointer group">
                         <input
                           type="checkbox"
-                          className="w-3.5 h-3.5 md:w-4 md:h-4 rounded-sm bg-slate-950/50 border-white/20 text-purple-500 focus:ring-2 focus:ring-purple-500/50"
+                          className="w-3.5 h-3.5 md:w-4 md:h-4 rounded-sm bg-slate-950/50 border border-white/20 text-purple-500 focus:outline-none focus:ring-0"
                         />
-                        <span className="text-white/70 group-hover:text-white/90 font-semibold">
+                        <span className="text-white/70 group-hover:text-white/90 font-semibold transition-colors">
                           Remember me
                         </span>
                       </label>
