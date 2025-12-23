@@ -109,8 +109,24 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const formatOdds = (odds: any): string => convertOdds(odds, oddsFormat);
   const { me } = useMe();
   const hasPlatinum = me?.plan === 'platinum' || me?.unlimited === true;
-  const [selectedSports, setSelectedSports] = useState<string[]>(['all']);
-  const [selectedMarket, setSelectedMarket] = useState('all');
+  
+  // Load cached filters from localStorage
+  const FILTERS_CACHE_KEY = 'vr-player-props-filters';
+  const getCachedFilters = () => {
+    try {
+      const cached = localStorage.getItem(FILTERS_CACHE_KEY);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+    } catch (e) {
+      console.warn('Failed to load cached filters:', e);
+    }
+    return null;
+  };
+  const cachedFilters = getCachedFilters();
+  
+  const [selectedSports, setSelectedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
+  const [selectedMarket, setSelectedMarket] = useState(cachedFilters?.market || 'all');
   // Derive single sport for API calls - if multiple selected, use 'all'
   const selectedSport = selectedSports.length === 1 ? selectedSports[0] : 'all';
   const [selectedBetType] = useState('props');
@@ -120,10 +136,10 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('all_upcoming');
+  const [selectedDate, setSelectedDate] = useState(cachedFilters?.date || 'all_upcoming');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isFilterClosing, setIsFilterClosing] = useState(false);
-  const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
+  const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>(cachedFilters?.sportsbooks || []);
   
   // Close filter with animation
   const closeFilterMenu = () => {
@@ -148,7 +164,23 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const [sportsbooksClosing, setSportsbooksClosing] = useState(false);
   const [addedPicks, setAddedPicks] = useState<(string | number)[]>([]); // Track which picks have been added
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [minDataPoints, setMinDataPoints] = useState(4);
+  const [minDataPoints, setMinDataPoints] = useState(cachedFilters?.minDataPoints || 4);
+  
+  // Save filters to localStorage when they change
+  useEffect(() => {
+    try {
+      const filtersToCache = {
+        sports: selectedSports,
+        market: selectedMarket,
+        date: selectedDate,
+        sportsbooks: selectedSportsbooks,
+        minDataPoints: minDataPoints
+      };
+      localStorage.setItem(FILTERS_CACHE_KEY, JSON.stringify(filtersToCache));
+    } catch (e) {
+      console.warn('Failed to cache filters:', e);
+    }
+  }, [selectedSports, selectedMarket, selectedDate, selectedSportsbooks, minDataPoints]);
   
   // Auto-adjust minDataPoints when sport changes
   // Soccer has fewer books (1-2), so lower the threshold
