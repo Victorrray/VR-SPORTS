@@ -356,7 +356,7 @@ export function AccountPage({
                   </div>
                   <div>
                     <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Free Plan</div>
-                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Limited access - {me?.remaining || 0} API calls remaining</div>
+                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Limited access</div>
                   </div>
                 </div>
                 <div className="text-right">
