@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeft, ChevronDown, X, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ChevronDown, X, Loader2, Check, Crown, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
@@ -6,9 +6,10 @@ import { toast } from 'sonner';
 
 interface CancelSubscriptionPageProps {
   onBack: () => void;
+  onNavigateToChangePlan?: () => void;
 }
 
-export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) {
+export function CancelSubscriptionPage({ onBack, onNavigateToChangePlan }: CancelSubscriptionPageProps) {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const { me, refetch } = useMe();
@@ -23,6 +24,8 @@ export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) 
   const userPlan = me?.plan || 'free';
   const isPlatinum = userPlan === 'platinum' || me?.unlimited === true;
   const isGold = userPlan === 'gold';
+  const isFree = userPlan === 'free' && !me?.unlimited;
+  const hasActivePlan = isPlatinum || isGold;
   const planDisplayName = isPlatinum ? 'Platinum' : isGold ? 'Gold' : 'Free';
   const planPrice = isPlatinum ? '$25' : isGold ? '$15' : '$0';
   
@@ -211,6 +214,124 @@ export function CancelSubscriptionPage({ onBack }: CancelSubscriptionPageProps) 
         <p className={`${isLight ? lightModeColors.textMuted : 'text-white/40'} text-center text-xs`}>
           Changed your mind? Click "Go Back" to keep your subscription
         </p>
+      </div>
+    );
+  }
+
+  // If user doesn't have an active plan, show upgrade cards
+  if (!hasActivePlan) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-xl transition-all`}
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-xl md:text-2xl`}>
+              No Active Subscription
+            </h1>
+            <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm mt-1`}>
+              Upgrade to unlock premium features
+            </p>
+          </div>
+        </div>
+
+        {/* Plan Cards */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Gold Plan */}
+          <div className={`p-6 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-yellow-100' : 'bg-yellow-500/20'} flex items-center justify-center`}>
+                <Zap className={`w-6 h-6 ${isLight ? 'text-yellow-600' : 'text-yellow-400'}`} />
+              </div>
+              <div>
+                <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg`}>Gold</h3>
+                <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>For serious bettors</p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-3xl`}>$10</span>
+              <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} ml-2`}>/month</span>
+            </div>
+            <ul className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm space-y-2 mb-6`}>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                Real-time odds from 40+ sportsbooks
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                EV tool access
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                Player Props tool
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                Performance tracking
+              </li>
+            </ul>
+            <button
+              onClick={onNavigateToChangePlan}
+              className={`w-full px-4 py-3 ${isLight ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'} rounded-xl font-bold transition-all`}
+            >
+              Upgrade to Gold
+            </button>
+          </div>
+
+          {/* Platinum Plan */}
+          <div className={`p-6 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/50'} backdrop-blur-2xl border rounded-2xl`}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-purple-100' : 'bg-purple-500/20'} flex items-center justify-center`}>
+                <Crown className={`w-6 h-6 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              </div>
+              <div>
+                <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg`}>Platinum</h3>
+                <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Maximum value</p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-3xl`}>$25</span>
+              <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} ml-2`}>/month</span>
+            </div>
+            <ul className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm space-y-2 mb-6`}>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                Everything in Gold, plus:
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                Arbitrage detection
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                Middles tool
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-green-400" />
+                Advanced analytics
+              </li>
+            </ul>
+            <button
+              onClick={onNavigateToChangePlan}
+              className={`w-full px-4 py-3 ${isLight ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'} rounded-xl font-bold transition-all`}
+            >
+              Upgrade to Platinum
+            </button>
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <button
+          onClick={onBack}
+          className={`w-full px-6 py-3 ${isLight ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-white/5 text-white hover:bg-white/10'} rounded-xl font-bold transition-all`}
+        >
+          Back to Account
+        </button>
       </div>
     );
   }
