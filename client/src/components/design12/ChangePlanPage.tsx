@@ -3,6 +3,8 @@ import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '../../lib/supabase';
+import { useState } from 'react';
 
 interface ChangePlanPageProps {
   onBack: () => void;
@@ -13,6 +15,7 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
   const isLight = colorMode === 'light';
   const { me } = useMe();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   
   // Get user's current plan
   const currentPlan = me?.plan || 'free';
@@ -71,7 +74,7 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
     },
   ];
 
-  const handleSelectPlan = (planName: string) => {
+  const handleSelectPlan = async (planName: string) => {
     const planLower = planName.toLowerCase();
     
     // If already on this plan, do nothing
@@ -80,8 +83,52 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
       return;
     }
     
-    // Navigate to subscribe page to handle the upgrade/change
-    navigate('/subscribe');
+    try {
+      setLoading(true);
+      
+      // Get the session token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        navigate('/login');
+        return;
+      }
+      
+      // Create Stripe checkout session
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || 'http://localhost:10000'}/api/billing/create-checkout-session`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ plan: planLower })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        const errorMsg = data.message || data.detail || data.error || 'Checkout failed';
+        toast.error(errorMsg);
+        setLoading(false);
+        return;
+      }
+      
+      if (data?.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        toast.error('No checkout URL received');
+        setLoading(false);
+      }
+      
+    } catch (error) {
+      console.error('Failed to handle plan selection:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to process upgrade');
+      setLoading(false);
+    }
   };
 
   return (
