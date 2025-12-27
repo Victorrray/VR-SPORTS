@@ -1611,6 +1611,13 @@ export default function OddsTable({
           });
           
           // Find best line + odds combination for each side (from filtered books)
+          console.log(`🎯 OVER BOOKS TO USE for ${propData.playerName}:`, overBooksToUse.map(b => ({
+            key: b.bookmaker?.key,
+            point: b.point,
+            line: b.line,
+            price: b.price
+          })));
+          
           const bestOverBook = overBooksToUse.length > 0 ? overBooksToUse.reduce((best, book) => {
             const bestLine = parseFloat(best.point || best.line || 0);
             const bookLine = parseFloat(book.point || book.line || 0);
@@ -1630,6 +1637,13 @@ export default function OddsTable({
             const bookDecimal = americanToDecimal(book.price);
             return bookDecimal > bestDecimal ? book : best;
           }) : null;
+          
+          console.log(`🎯 BEST OVER BOOK for ${propData.playerName}:`, {
+            key: bestOverBook?.bookmaker?.key,
+            point: bestOverBook?.point,
+            line: bestOverBook?.line,
+            price: bestOverBook?.price
+          });
           
           const bestUnderBook = underBooksToUse.length > 0 ? underBooksToUse.reduce((best, book) => {
             const bestLine = parseFloat(best.point || best.line || 0);
