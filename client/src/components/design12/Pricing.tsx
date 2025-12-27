@@ -53,7 +53,7 @@ export function Pricing() {
           <p className="text-white/60 max-w-2xl mx-auto font-medium">
             Choose the plan that works best for you
           </p>
-          <div className="mt-4 inline-block px-4 py-2 bg-purple-500/10 border border-purple-400/30 rounded-lg">
+          <div className="mt-4 inline-block px-4 py-2 bg-purple-500/10 border border-purple-400/30 rounded-full">
             <p className="text-purple-300 text-sm font-medium">
               🎉 Legacy Pricing - Lock in these rates now
             </p>
