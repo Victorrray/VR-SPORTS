@@ -1615,7 +1615,15 @@ export default function OddsTable({
             key: b.bookmaker?.key,
             point: b.point,
             line: b.line,
-            price: b.price
+            price: b.price,
+            outcomeName: b.outcomeName
+          })));
+          console.log(`🎯 UNDER BOOKS TO USE for ${propData.playerName}:`, underBooksToUse.map(b => ({
+            key: b.bookmaker?.key,
+            point: b.point,
+            line: b.line,
+            price: b.price,
+            outcomeName: b.outcomeName
           })));
           
           const bestOverBook = overBooksToUse.length > 0 ? overBooksToUse.reduce((best, book) => {
@@ -1690,6 +1698,10 @@ export default function OddsTable({
             showOver: showOver,
             primaryBookKey: primaryBook?.bookmaker?.key,
             primaryBookTitle: primaryBook?.bookmaker?.title,
+            primaryBookOutcomeName: primaryBook?.outcomeName,
+            primaryBookPrice: primaryBook?.price,
+            bestOverBookPrice: bestOverBook?.price,
+            bestUnderBookPrice: bestUnderBook?.price,
             bookFilter: bookFilter,
             hasFilter: hasFilter
           });
