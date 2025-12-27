@@ -298,14 +298,24 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     : ["h2h", "spreads", "totals", "team_totals", "alternate_spreads", "alternate_totals", "alternate_team_totals"]; // Include all regular markets
   const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
   
+  // Helper function to expand 'all' to actual sports list
+  const expandSports = (sports) => {
+    if (!sports || sports.length === 0) return [];
+    if (sports.includes('all')) {
+      // Return all available sports from sportList
+      return sportList.map(s => s.key);
+    }
+    return sports;
+  };
+
   // For player props, use selected sports or default to NFL only if none selected
   // For regular mode, use all selected sports (no longer limiting to single sport)
   // For arbitrage mode, use all major sports by default to find maximum opportunities
   const sportsForMode = isPlayerPropsMode 
-    ? (filters.sports.length > 0 ? filters.sports : ["americanfootball_nfl"]) 
+    ? (filters.sports.length > 0 ? expandSports(filters.sports) : ["americanfootball_nfl"]) 
     : isArbitrageMode
-    ? (filters.sports.length > 0 ? filters.sports : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
-    : filters.sports;
+    ? (filters.sports.length > 0 ? expandSports(filters.sports) : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
+    : expandSports(filters.sports);
     
   // Log the sports being used for the current mode
   console.log(`🎯 Sports for ${isPlayerPropsMode ? 'Player Props' : 'Straight Bets'} mode:`, sportsForMode);
