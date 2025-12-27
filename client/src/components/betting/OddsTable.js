@@ -4526,7 +4526,7 @@ export default function OddsTable({
                           <thead>
                             <tr>
                               <th>Sportsbook</th>
-                              {mode === "props" ? (
+                              {(mode === "props" || row.isCombinedProp) ? (
                                 <>
                                   <th>Over</th>
                                   <th>Under</th>
