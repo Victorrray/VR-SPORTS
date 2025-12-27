@@ -44,7 +44,12 @@ export default function Landing() {
         <HowItWorks />
         <Pricing />
         <FAQ />
-        <Footer />
+        <Footer 
+          onRoadmapClick={handleRoadmapClick}
+          onPrivacyClick={handlePrivacyClick}
+          onTermsClick={handleTermsClick}
+          onDisclaimerClick={handleDisclaimerClick}
+        />
       </div>
     </div>
   );
