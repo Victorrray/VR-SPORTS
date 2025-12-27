@@ -60,7 +60,7 @@ export function Pricing() {
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto auto-rows-max">
           {plans.map((plan, index) => (
             <motion.div
               key={index}
@@ -68,7 +68,7 @@ export function Pricing() {
                 plan.popular ? 'border-purple-400/50' : 'border-purple-400/30'
               } rounded-2xl p-6 md:p-8 shadow-xl ${
                 plan.popular ? 'shadow-purple-500/20' : 'shadow-purple-500/10'
-              }`}
+              } h-fit`}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
