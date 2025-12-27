@@ -1757,7 +1757,7 @@ export default function OddsTable({
               primaryBookPoint: primaryBook.point,
               primaryBookLine: primaryBook.line,
               propDataPoint: propData.point,
-              finalPoint: primaryBook.point || primaryBook.line || propData.point
+              finalPoint: primaryBook.point !== undefined ? primaryBook.point : (primaryBook.line !== undefined ? primaryBook.line : propData.point)
             });
             
             // Create the main row with both sides data
@@ -1770,7 +1770,7 @@ export default function OddsTable({
                 description: propData.playerName,
                 price: primaryBook.price,
                 odds: primaryBook.price,
-                point: primaryBook.point || primaryBook.line || propData.point, // Use best book's line
+                point: primaryBook.point !== undefined ? primaryBook.point : (primaryBook.line !== undefined ? primaryBook.line : propData.point), // Use best book's line - check for undefined not falsy
                 bookmaker: primaryBook.bookmaker,
                 book: primaryBook.bookmaker?.key
               },
