@@ -1508,7 +1508,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 gap-2">
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1517,41 +1517,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           className={`px-3 py-2 ${isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-xs text-center`}
                         >
                           Compare Odds
-                        </button>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!addedPicks.includes(pick.id)) {
-                              onAddPick({
-                                id: Date.now(),
-                                teams: pick.game,
-                                time: 'Sun, Nov 10 7:00 PM PST',
-                                pick: pick.pick,
-                                odds: pick.bestOdds,
-                                sportsbook: pick.bestBook,
-                                ev: pick.ev,
-                                sport: pick.sport,
-                                confidence: 'High'
-                              });
-                              setAddedPicks([...addedPicks, pick.id]);
-                              toast.success('Bet added to My Picks!');
-                            }
-                          }}
-                          disabled={addedPicks.includes(pick.id)}
-                          className={`px-3 py-2 ${
-                            addedPicks.includes(pick.id)
-                              ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
-                          } text-white rounded-xl transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
-                        >
-                          {addedPicks.includes(pick.id) ? (
-                            <>
-                              <Check className="w-3.5 h-3.5" />
-                              Added
-                            </>
-                          ) : (
-                            'Place Bet'
-                          )}
                         </button>
                       </div>
                     </div>
