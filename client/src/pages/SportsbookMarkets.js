@@ -1042,7 +1042,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setShowMobileSearch(false);
   };
 
-  // Fetch sports list for filters - Major US Sports only
+  // Fetch sports list for filters - Include ALL available sports
   useEffect(() => {
     const fetchSports = async () => {
       try {
@@ -1056,16 +1056,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             sports: sports.map(s => ({ key: s.key, title: s.title }))
           });
           
-          // Filter to only major US sports
-          const majorUSsports = ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl'];
-          const filteredSports = sports.filter(sport => majorUSsports.includes(sport.key));
-          
-          console.log('🏈 Filtered sports:', { 
-            filtered: filteredSports.length, 
-            sports: filteredSports.map(s => ({ key: s.key, title: s.title }))
-          });
-          
-          setSportList(filteredSports.length > 0 ? filteredSports : AVAILABLE_SPORTS);
+          // Use ALL sports from the API, not just major US sports
+          // This allows users to select "all sports" and see all available sports
+          setSportList(sports.length > 0 ? sports : AVAILABLE_SPORTS);
         } else {
           console.error('❌ Sports API error:', { 
             status: response.status, 
@@ -1078,7 +1071,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       } catch (error) {
         console.error('❌ Failed to fetch sports list:', error);
         console.warn('⚠️ Using fallback sports list');
-        // Fallback to major US sports only
+        // Fallback to available sports
         setSportList(AVAILABLE_SPORTS);
       }
     };
