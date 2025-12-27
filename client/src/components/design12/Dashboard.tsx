@@ -367,7 +367,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <Zap className="w-5 h-5" />
                 Odds
               </button>
-              <button
+              {/* My Picks - Hidden for now */}
+              {/* <button
                 onClick={() => setCurrentView("picks")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "picks"
@@ -377,7 +378,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               >
                 <Target className="w-5 h-5" />
                 My Picks
-              </button>
+              </button> */}
 
               <button
                 onClick={() => setCurrentView("calculator")}
@@ -391,7 +392,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 Calculator
               </button>
 
-              <button
+              {/* Bankroll - Hidden for now */}
+              {/* <button
                 onClick={() => setCurrentView("bankroll")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "bankroll"
@@ -401,7 +403,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               >
                 <Wallet className="w-5 h-5" />
                 Bankroll
-              </button>
+              </button> */}
 
               <button
                 onClick={() => setCurrentView("account")}
