@@ -73,7 +73,7 @@ const BillingCancel = () => {
           </p>
           
           <div className="action-buttons">
-            <Link to="/subscribe" className="btn btn-primary">
+            <Link to="/account?tab=changePlan" className="btn btn-primary">
               View Plans Again
             </Link>
             <Link to="/account" className="btn btn-secondary">
@@ -108,7 +108,7 @@ const BillingCancel = () => {
             <Link to="/account" className="btn btn-primary">
               Back to Account
             </Link>
-            <Link to="/subscribe" className="btn btn-secondary">
+            <Link to="/account?tab=changePlan" className="btn btn-secondary">
               View Plans
             </Link>
           </div>
