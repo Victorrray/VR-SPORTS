@@ -1615,6 +1615,9 @@ export default function OddsTable({
             const bestLine = parseFloat(best.point || best.line || 0);
             const bookLine = parseFloat(book.point || book.line || 0);
             
+            // DEBUG: Log all books being compared
+            console.log(`🎯 OVER BOOK COMPARE: ${book.bookmaker?.key} point=${book.point} line=${book.line} vs best point=${best.point} line=${best.line}`);
+            
             // For OVER: prefer lower lines (easier to hit)
             if (bookLine < bestLine) {
               console.log(`🎯 Line Shopping OVER: Found better line ${bookLine} vs ${bestLine} at ${book.bookmaker?.key || book.book}`);
