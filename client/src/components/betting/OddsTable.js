@@ -1688,10 +1688,18 @@ export default function OddsTable({
               showOver = false;
               console.log(`🎯 BEST ODDS: Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key} beats Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key}`);
             }
+          } else if (bestOverBook) {
+            // Only Over side available
+            primaryBook = bestOverBook;
+            showOver = true;
+          } else if (bestUnderBook) {
+            // Only Under side available
+            primaryBook = bestUnderBook;
+            showOver = false;
           } else {
-            // Only one side available
-            primaryBook = bestOverBook || bestUnderBook;
-            showOver = !!bestOverBook;
+            // No books available
+            primaryBook = null;
+            showOver = false;
           }
           
           console.log(`🎯 PRIMARY BOOK SELECTED: ${propData.playerName}`, {
@@ -1705,6 +1713,12 @@ export default function OddsTable({
             bookFilter: bookFilter,
             hasFilter: hasFilter
           });
+          
+          // Skip if no primaryBook was selected
+          if (!primaryBook) {
+            console.log(`⏭️ Skipping ${propData.playerName} - no primaryBook selected`);
+            return;
+          }
           
           // CRITICAL: Validate that primaryBook is actually from the filtered list
           console.log(`🚨 VALIDATION CHECK for ${propData.playerName}: hasFilter=${hasFilter}, primaryBook=${primaryBook?.bookmaker?.key}, bookFilter=${JSON.stringify(bookFilter)}`);
