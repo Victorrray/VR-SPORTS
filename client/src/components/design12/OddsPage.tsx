@@ -888,7 +888,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         {/* CTA Buttons */}
         <div className="space-y-3">
           <button
-            onClick={() => navigate('/subscribe')}
+            onClick={() => navigate('/dashboard?view=account')}
             className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2"
           >
             <Crown className="w-5 h-5" />
