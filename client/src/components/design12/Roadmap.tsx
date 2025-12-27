@@ -108,7 +108,7 @@ export function Roadmap() {
         onRoadmapClick={handleRoadmapClick}
         onSignupClick={handleSignUpClick}
       />
-      <div className="py-16 md:py-24">
+      <div className="pt-20 md:pt-24 pb-16 md:pb-24">
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12 md:mb-16">
