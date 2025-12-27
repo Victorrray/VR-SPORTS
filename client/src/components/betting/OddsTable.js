@@ -1751,6 +1751,15 @@ export default function OddsTable({
             );
             const isLocked = isMarketLikelyLocked(primaryBook, isDFSApp);
             
+            // DEBUG: Log the primaryBook point value
+            console.log(`🎯 PRIMARY BOOK LINE DEBUG for ${propData.playerName}:`, {
+              bookKey: primaryBook.bookmaker?.key,
+              primaryBookPoint: primaryBook.point,
+              primaryBookLine: primaryBook.line,
+              propDataPoint: propData.point,
+              finalPoint: primaryBook.point || primaryBook.line || propData.point
+            });
+            
             // Create the main row with both sides data
             const finalPropData = {
               key: propData.key,
@@ -3480,7 +3489,11 @@ export default function OddsTable({
                               : (row.out?.name || '')}
                           {/* Add line inline with team name */}
                           {mode === "props" 
-                            ? (row.out?.point ? ` ${row.out.point}` : '')
+                            ? (() => {
+                                const displayPoint = row.out?.point;
+                                console.log(`🎯 DISPLAY DEBUG for ${row.playerName}: point=${displayPoint}, type=${typeof displayPoint}`);
+                                return displayPoint ? ` ${displayPoint}` : '';
+                              })()
                             : ((row.mkt?.key || '') !== 'h2h' && row.out?.point ? ` ${formatLine(row.out.point, row.mkt.key, 'game')}` : '')}
                         </span>
                       </div>
