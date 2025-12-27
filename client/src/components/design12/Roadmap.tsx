@@ -1,4 +1,7 @@
 import { Check, Clock, Lightbulb, Rocket, Target, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/SimpleAuth';
+import { Header } from './Header';
 
 interface RoadmapItem {
   title: string;
@@ -44,6 +47,20 @@ const roadmapData: RoadmapItem[] = [
 ];
 
 export function Roadmap() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleLoginClick = () => navigate('/login');
+  const handleDashboardClick = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
+  const handleRoadmapClick = () => navigate('/roadmap');
+  const handleSignUpClick = () => navigate('/signup');
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
@@ -84,10 +101,17 @@ export function Roadmap() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 py-16 md:py-24">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12 md:mb-16">
+    <div className="min-h-screen bg-gray-900">
+      <Header 
+        onLoginClick={handleLoginClick}
+        onDashboardClick={handleDashboardClick}
+        onRoadmapClick={handleRoadmapClick}
+        onSignupClick={handleSignUpClick}
+      />
+      <div className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          {/* Header */}
+          <div className="text-center mb-12 md:mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-full mb-6">
             <Rocket className="w-4 h-4 text-purple-400" />
             <span className="text-purple-400 text-sm font-medium">Product Roadmap</span>
@@ -186,6 +210,7 @@ export function Roadmap() {
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
