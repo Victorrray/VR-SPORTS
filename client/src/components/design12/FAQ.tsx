@@ -7,6 +7,10 @@ export function FAQ() {
 
   const faqs = [
     {
+      question: 'Is OddSightSeer a sportsbook?',
+      answer: 'No, OddSightSeer is not a sportsbook. We are strictly a sports data and analytics platform. We do not facilitate betting or hold user funds. We provide real-time odds data, +EV analysis, and betting tools to help you make informed decisions on the sportsbooks of your choice.',
+    },
+    {
       question: 'How does OddSightSeer find +EV bets?',
       answer: 'Our proprietary algorithm scans odds across 40+ sportsbooks in real-time, calculates true probability, and identifies bets where the implied odds are in your favor.',
     },
