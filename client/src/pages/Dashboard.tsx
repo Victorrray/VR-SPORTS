@@ -369,8 +369,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     </p>
                   </div>
 
-                  {/* Stats Grid - TODO: This mock data will be sourced from My Picks page in the future */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                  {/* Stats Grid - Hidden for now */}
+                  {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     {stats.map((stat, idx) => (
                       <div
                         key={idx}
@@ -399,7 +399,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Bets Section */}
