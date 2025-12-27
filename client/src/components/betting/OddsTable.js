@@ -1806,7 +1806,20 @@ export default function OddsTable({
             
             // CRITICAL: Always use primaryBook's point value, never fall back to propData.point
             // propData.point is from the first book processed and may be different from the selected book's line
-            const displayPoint = primaryBook.point !== undefined ? primaryBook.point : primaryBook.line;
+            // For combined props, find the actual book entry from allBooks to get the correct line
+            let displayPoint = primaryBook.point !== undefined ? primaryBook.point : primaryBook.line;
+            
+            // Verify the line matches by checking allBooks for the same book
+            if (primaryBook && primaryBook.bookmaker?.key) {
+              const matchingBook = (propData.allBooks || []).find(b => 
+                normalizeBookKey(b.bookmaker?.key) === normalizeBookKey(primaryBook.bookmaker?.key) &&
+                b.outcomeName === primaryBook.outcomeName
+              );
+              if (matchingBook && (matchingBook.point !== undefined || matchingBook.line !== undefined)) {
+                displayPoint = matchingBook.point !== undefined ? matchingBook.point : matchingBook.line;
+                console.log(`🎯 CORRECTED DISPLAY POINT: Using actual book line ${displayPoint} instead of ${primaryBook.point || primaryBook.line}`);
+              }
+            }
             
             // Create the main row with both sides data
             const finalPropData = {
