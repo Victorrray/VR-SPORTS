@@ -914,6 +914,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const allEvents = allEventsArrays.flat();
       console.log(`📅 Total events across all sports: ${allEvents.length}`);
       
+      // Log events by sport
+      const eventsBySport = {};
+      allEvents.forEach(event => {
+        eventsBySport[event.sport_key] = (eventsBySport[event.sport_key] || 0) + 1;
+      });
+      console.log(`📅 Events by sport:`, eventsBySport);
+      
       // OPTIMIZATION: Fetch player props for all events in larger parallel batches
       const MAX_CONCURRENT = 15; // Increased from 10 to 15
       const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
