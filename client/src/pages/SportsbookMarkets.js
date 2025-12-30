@@ -693,7 +693,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       'player_receiving_tds': 'player_reception_tds', 
       'player_receiving_longest': 'player_reception_longest',
       'player_2_plus_tds': null, // Remove this market as it's not supported
-      'draftkings_pick6': 'pick6' // Migrate old DFS key to new one
+      'pick6': 'draftkings_pick6' // Migrate old generic key to proper DraftKings Pick6 key
     };
     
     return markets
@@ -1352,7 +1352,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     'draftkings', 'fanduel', 'betmgm', 'caesars', 'pointsbetus', 'betrivers',
     'unibet_us', 'wynnbet', 'espnbet', 'fanatics', 'hardrock',
     // DFS Apps (primary player props providers)
-    'prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6',
+    'prizepicks', 'underdog', 'draftkings_pick6', 'dabble_au', 'betr',
     // Other books with player props support
     'bovada', 'betonline', 'mybookieag',
     // Sharp/Specialty books
@@ -1417,8 +1417,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       // DFS apps only offer player props, not traditional moneyline/spread/totals
       // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds for all bet types
       const dfsAppKeys = [
-        'prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 
-        'dabble', 'dabble_au', 'sleeper', 'betr', 'betr_us_dfs',
+        'prizepicks', 'underdog', 'draftkings_pick6', 
+        'dabble', 'dabble_au', 'sleeper', 'betr',
         'chalkboard', 'parlay', 'hotstreak'
       ];
       enhancedBooks = (booksToUse || []).filter(book => 

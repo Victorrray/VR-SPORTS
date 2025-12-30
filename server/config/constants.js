@@ -35,7 +35,7 @@ const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 // Bookmaker lists
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "pick6", "draftkings_pick6", "dabble_au",
+  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // US region books
@@ -50,7 +50,7 @@ const FOCUSED_BOOKMAKERS = [
 // Trial user bookmaker restrictions
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "pick6", "draftkings_pick6", "dabble_au",
+  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr",
   // Sharp books and exchanges (high priority)
   "pinnacle", "prophet_exchange", "rebet",
   // Major sportsbooks

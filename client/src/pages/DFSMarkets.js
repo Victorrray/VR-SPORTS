@@ -8,8 +8,8 @@ import { secureFetch } from "../utils/security";
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
 
-// Only these 3 DFS apps
-const DFS_KEYS = ["prizepicks", "underdog", "pick6"];
+// Only these 5 DFS apps
+const DFS_KEYS = ["prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr"];
 
 const MARKET_MAP = {
   // Basketball

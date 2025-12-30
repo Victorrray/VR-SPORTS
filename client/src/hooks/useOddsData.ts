@@ -231,7 +231,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
   // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
   const DFS_BOOK_KEYS = [
     'dabble', 'dabble_au', 'prizepicks', 'underdog', 'sleeper',
-    'chalkboard', 'parlay', 'pick6', 'draftkings_pick6', 'betr', 'betrdfs'
+    'chalkboard', 'parlay', 'draftkings_pick6', 'betr'
   ];
   
   // Books to exclude from alternate markets (their alternate lines are often stale/unavailable)
@@ -2083,7 +2083,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
       // DFS apps that only offer Over bets (no Under)
       // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
-      const dfsAppsNoUnder = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'betr', 'betr_us_dfs', 'dabble', 'dabble_au', 'sleeper'];
+      const dfsAppsNoUnder = ['prizepicks', 'underdog', 'draftkings_pick6', 'betr', 'dabble', 'dabble_au', 'sleeper'];
       const isDFSOnlyFilter = sportsbooks && sportsbooks.length > 0 && 
         sportsbooks.every(sb => dfsAppsNoUnder.includes(sb.toLowerCase()));
       
@@ -2182,7 +2182,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
       // DFS apps to exclude from middles (they don't offer traditional bets)
       // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
-      const DFS_APPS = ['underdog', 'prizepicks', 'sleeper', 'chalkboard', 'parlay', 'pick6', 'betr', 'betr_us_dfs', 'dabble', 'dabble_au'];
+      const DFS_APPS = ['underdog', 'prizepicks', 'sleeper', 'chalkboard', 'parlay', 'draftkings_pick6', 'betr', 'dabble', 'dabble_au'];
       
       // Filter for middles - find opportunities where you can bet OVER at a lower line
       // and UNDER at a higher line from DIFFERENT books, creating a "middle" gap

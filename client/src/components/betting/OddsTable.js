@@ -180,7 +180,7 @@ function isMarketLikelyLocked(book, isDFSApp = false) {
 
 /* ---------- DFS Apps Odds Override (must be before calculateEV) ---------- */
 // DFS apps (PrizePicks, Underdog, DraftKings Pick 6, Dabble, Betr) always have -119 odds
-const DFS_APPS_LIST = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au', 'betr', 'betrdfs'];
+const DFS_APPS_LIST = ['prizepicks', 'underdog', 'draftkings_pick6', 'dabble', 'dabble_au', 'betr'];
 const DFS_FIXED_ODDS = -119;
 
 function isDFSAppForEV(bookKey) {
@@ -532,8 +532,8 @@ function getSportLeague(sportKey='', sportTitle=''){
 }
 
 /* ---------- DFS Apps Odds Override ---------- */
-// DFS apps (PrizePicks, Underdog, DraftKings Pick 6, Dabble) always have -119 odds
-const DFS_APPS = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble', 'dabble_au'];
+// DFS apps (PrizePicks, Underdog, DraftKings Pick 6, Dabble, Betr) always have -119 odds
+const DFS_APPS = ['prizepicks', 'underdog', 'draftkings_pick6', 'dabble', 'dabble_au', 'betr'];
 function isDFSApp(bookKey) {
   if (!bookKey) return false;
   const normalized = String(bookKey).toLowerCase();
