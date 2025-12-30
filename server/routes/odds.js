@@ -187,16 +187,10 @@ const SPORT_MARKET_SUPPORT = {
  * Main odds endpoint - returns game odds with optional player props
  */
 
-// Debug: Log all requests to this router
-router.use((req, res, next) => {
-  console.log('📍 Odds router received request:', { path: req.path, method: req.method, url: req.url });
-  next();
-});
 
 router.get('/', requireUser, checkPlanAccess, async (req, res) => {
   try {
     const { sports, regions = "us,us2", markets = "h2h,spreads,totals", oddsFormat = "american", date, betType } = req.query;
-    console.log('🔍 /api/odds called with:', { sports, regions, markets, date, betType, userId: req.__userId });
     
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
     if (!API_KEY) {
@@ -391,14 +385,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     const playerPropsMarkets = [];
     sportsArray.forEach(sport => {
       if (playerPropsMarketMap[sport]) {
-        console.log(`🏈 Adding markets for ${sport}:`, playerPropsMarketMap[sport]);
         playerPropsMarkets.push(...playerPropsMarketMap[sport]);
       } else if (sport.startsWith('soccer_')) {
         // Use default soccer player props for any soccer league
-        console.log(`⚽ Adding default soccer markets for ${sport}:`, defaultSoccerPlayerProps);
         playerPropsMarkets.push(...defaultSoccerPlayerProps);
-      } else {
-        console.log(`🏈 No player props markets found for ${sport}`);
       }
     });
     
@@ -429,20 +419,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       });
     });
     
-    console.log('🎯 Sport-specific market filtering:');
-    sportsArray.forEach(sport => {
-      const supportedForSport = getSupportedMarketsForSport(sport);
-      console.log(`  ${sport}: ${supportedForSport.join(', ')}`);
-    });
-    
     // Separate quarter/half/period markets from base markets
-    const quarterMarketPatterns = ['_q1', '_q2', '_q3', '_q4', '_h1', '_h2', '_p1', '_p2', '_p3', '_1st_'];
+    const quarterMarketPatterns = ['_q', '_h', '_p', '_1st_', '_3_', '_5_'];
     const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
     const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
-    
-    console.log('📊 Market separation:');
-    console.log('  Base markets:', baseMarkets);
-    console.log('  Quarter/Half/Period markets:', quarterMarkets);
     
     // Step 1: Fetch base odds (and always include player props)
     if (baseMarkets.length > 0 || playerPropMarkets.length > 0) {
@@ -459,8 +439,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
           const bookmakerList = gameOddsBookmakers.join(',');
           
-          console.log(`🎯 Game odds bookmakers for ${sport}: ${bookmakerList}`);
-          
           // Check Supabase cache first (but skip if player props are requested - they need fresh data)
           let supabaseCachedData = null;
           const hasPlayerProps = playerPropMarkets.length > 0;
@@ -472,23 +450,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               });
               
               if (cachedOdds && cachedOdds.length > 0) {
-                console.log(`📦 Supabase cache HIT for ${sport}: ${cachedOdds.length} cached entries`);
                 supabaseCachedData = transformCachedOddsToApiFormat(cachedOdds);
-                console.log(`✅ Using ${supabaseCachedData.length} games from Supabase cache`);
-              } else {
-                console.log(`📦 Supabase cache MISS for ${sport}`);
               }
             } catch (cacheErr) {
-              console.warn(`⚠️ Supabase cache error for ${sport}:`, cacheErr.message);
+              // Silently skip cache errors
             }
-          } else if (hasPlayerProps) {
-            console.log(`⏭️ Skipping Supabase cache for ${sport} - player props requested (need fresh data)`);
           }
           
           // Use Supabase cache if available
           if (supabaseCachedData && supabaseCachedData.length > 0) {
             allGames.push(...supabaseCachedData);
-            console.log(`💰 Saved API call for ${sport} using Supabase cache`);
             continue;
           }
           
