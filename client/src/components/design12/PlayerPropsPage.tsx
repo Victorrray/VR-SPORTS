@@ -127,8 +127,22 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   
   const [selectedSports, setSelectedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
   const [selectedMarket, setSelectedMarket] = useState(cachedFilters?.market || 'all');
+  
+  // Map filter IDs to API sport keys
+  const sportKeyMap: Record<string, string> = {
+    'nfl': 'americanfootball_nfl',
+    'ncaa-football': 'americanfootball_ncaaf',
+    'nba': 'basketball_nba',
+    'ncaa-basketball': 'basketball_ncaab',
+    'nhl': 'icehockey_nhl',
+    'mlb': 'baseball_mlb',
+    'soccer': 'soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx',
+  };
+  
   // For API calls, pass comma-separated sports (or 'all' if 'all' is selected)
-  const selectedSport = selectedSports.includes('all') ? 'all' : selectedSports.join(',');
+  const selectedSport = selectedSports.includes('all') 
+    ? 'all' 
+    : selectedSports.map(sport => sportKeyMap[sport] || sport).join(',');
   const [selectedBetType] = useState('props');
   const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
   const [expandedSportsbooks, setExpandedSportsbooks] = useState<(string | number)[]>([]);
