@@ -461,11 +461,18 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // Skip this pick if user has a sportsbook filter and the filtered book doesn't have this prop
         const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
         const hasFilteredBooks = propData.filteredBooks.length > 0;
+        const hasAllBooks = propData.books.length > 0;
         
         // CRITICAL: If user filtered for specific sportsbooks but none of them have this prop, skip it
         if (userHasFilter && !hasFilteredBooks) {
           skippedNoFilteredBooks++;
           return; // Don't show picks where the filtered sportsbook doesn't offer the line
+        }
+        
+        // If no filter is active but we have no books at all, skip this prop
+        if (!userHasFilter && !hasAllBooks) {
+          skippedNoBooks++;
+          return;
         }
         
         const filteredBooksAtConsensus = hasFilteredBooks 
