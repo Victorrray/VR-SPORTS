@@ -264,6 +264,18 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     const normalizedKey = bookKey?.toLowerCase();
     const normalizedName = bookName?.toLowerCase();
     
+    // Map of filter names to API bookmaker keys
+    const filterToApiKeyMap: { [key: string]: string[] } = {
+      'betr': ['betr_us_dfs', 'betr'],
+      'pick6': ['pick6', 'draftkings_pick6'],
+      'draftkings_pick6': ['pick6', 'draftkings_pick6'],
+      'betr_us_dfs': ['betr_us_dfs', 'betr'],
+      'prizepicks': ['prizepicks'],
+      'underdog': ['underdog'],
+      'dabble': ['dabble', 'dabble_au'],
+      'dabble_au': ['dabble', 'dabble_au']
+    };
+    
     const result = selectedSportsbooks.some(sb => {
       const normalizedSb = sb.toLowerCase();
       
@@ -272,6 +284,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       
       // Exact name match
       if (normalizedName === normalizedSb) return true;
+      
+      // Check if this filter has mapped API keys
+      const mappedKeys = filterToApiKeyMap[normalizedSb];
+      if (mappedKeys && mappedKeys.includes(normalizedKey)) return true;
       
       // Key includes filter (e.g., 'betr_us_dfs' includes 'betr')
       if (normalizedKey?.includes(normalizedSb)) return true;
@@ -285,9 +301,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       return false;
     });
     
-    // Debug logging for Betr specifically
-    if (normalizedKey?.includes('betr') || normalizedName?.includes('betr')) {
-      console.log(`🎯 BETR FILTER CHECK: key="${bookKey}", name="${bookName}"`, {
+    // Debug logging for DFS apps
+    if (normalizedKey?.includes('betr') || normalizedKey?.includes('pick6') || 
+        normalizedName?.includes('betr') || normalizedName?.includes('pick6')) {
+      console.log(`🎯 DFS FILTER CHECK: key="${bookKey}", name="${bookName}"`, {
         normalizedKey,
         normalizedName,
         selectedSportsbooks,
