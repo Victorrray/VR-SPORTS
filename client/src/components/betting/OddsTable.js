@@ -1389,8 +1389,41 @@ export default function OddsTable({
 
       // Second pass: include all props and apply sportsbook filter
       console.log(`Total prop groups collected: ${propGroups.size}`);
+      
+      // Count DFS apps in prop groups
+      let dfsPropsCount = 0;
+      propGroups.forEach((propData) => {
+        const allBooks = propData.allBooks || [];
+        const overBooks = propData.overBooks || [];
+        const underBooks = propData.underBooks || [];
+        const allBooksToCheck = [...allBooks, ...overBooks, ...underBooks];
+        
+        if (allBooksToCheck.some(b => b.bookmaker?.key?.toLowerCase().includes('draftkings_pick6') || b.bookmaker?.key?.toLowerCase().includes('betr'))) {
+          dfsPropsCount++;
+        }
+      });
+      console.log(`🎯 DFS PROPS IN GROUPS: ${dfsPropsCount} props with DraftKings Pick 6 or Betr`);
+      
       propGroups.forEach((propData, propKey) => {
         const bookCount = propData.allBooks?.length || (propData.overBooks?.length || 0) + (propData.underBooks?.length || 0);
+        
+        // Debug logging for DraftKings Pick 6 and Betr props
+        const allBooks = propData.allBooks || [];
+        const overBooks = propData.overBooks || [];
+        const underBooks = propData.underBooks || [];
+        const allBooksToCheck = [...allBooks, ...overBooks, ...underBooks];
+        const hasDFS = allBooksToCheck.some(b => b.bookmaker?.key?.toLowerCase().includes('draftkings_pick6') || b.bookmaker?.key?.toLowerCase().includes('betr'));
+        
+        if (hasDFS) {
+          console.log(`🎯 PROCESSING DFS PROP: ${propData.playerName} - ${propData.mkt?.key}`, {
+            bookCount,
+            allBooks: allBooks.length,
+            overBooks: overBooks.length,
+            underBooks: underBooks.length,
+            dfsBooks: allBooksToCheck.filter(b => b.bookmaker?.key?.toLowerCase().includes('draftkings_pick6') || b.bookmaker?.key?.toLowerCase().includes('betr')).map(b => b.bookmaker?.key)
+          });
+        }
+        
         console.log(`Processing prop group: ${propKey} with ${bookCount} books`);
         
         // Apply sportsbook filter if active
