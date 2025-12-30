@@ -561,40 +561,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <div className={`${isLight ? 'bg-white/80 border-gray-200' : 'bg-slate-950/60 border-white/10'} backdrop-blur-xl border rounded-full px-2 py-2.5`}>
           <div className="flex items-center justify-around gap-1">
             <button
-              onClick={() => setCurrentView("bankroll")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "bankroll"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <Wallet
-                className={`w-5 h-5 ${currentView === "bankroll" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "bankroll" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-              >
-                Bankroll
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentView("picks")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "picks"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <Target
-                className={`w-5 h-5 ${currentView === "picks" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "picks" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-              >
-                Picks
-              </span>
-            </button>
-            <button
               onClick={() => setCurrentView("dashboard")}
               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
                 currentView === "dashboard"
