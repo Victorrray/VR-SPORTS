@@ -858,8 +858,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       
       // Explicitly include DFS apps and sharp books for player props (including soccer)
       const dfsBookmakersForProps = [
-        // DFS Apps
-        'prizepicks', 'underdog', 'draftkings_pick6', 'dabble_au', 'fliff', 'betr', 'prophetx',
+        // DFS Apps (verified to have player props data)
+        'prizepicks', 'underdog', 'pick6', 'dabble_au', 'fliff', 'prophetx',
         // Sharp/Exchange books with player props
         'pinnacle', 'prophet_exchange', 'rebet', 'betopenly'
       ];
