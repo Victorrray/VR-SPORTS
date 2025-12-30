@@ -377,12 +377,24 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
                   underOdds
                 };
                 
+                // Debug logging for DraftKings Pick 6 and Betr
+                if (bookKey?.toLowerCase().includes('draftkings_pick6') || bookKey?.toLowerCase().includes('betr')) {
+                  console.log(`🎯 DFS APP COLLECTED: ${bookKey} (${bookName}) for ${playerName} - ${market.key} @ ${overOutcome.point}`, {
+                    overOdds,
+                    underOdds,
+                    isIncluded: isBookIncluded(bookKey, bookName)
+                  });
+                }
+                
                 // Add to ALL books (for mini table)
                 propData.books.push(bookData);
                 
                 // Also add to filtered books if it matches the filter (for main card)
                 if (isBookIncluded(bookKey, bookName)) {
                   propData.filteredBooks.push(bookData);
+                  if (bookKey?.toLowerCase().includes('draftkings_pick6') || bookKey?.toLowerCase().includes('betr')) {
+                    console.log(`✅ DFS APP ADDED TO FILTERED: ${bookKey} for ${playerName}`);
+                  }
                 }
               }
             }
@@ -392,6 +404,24 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       
       // Log player props summary
       console.log(`🏈 Player props found: ${playerPropsMap.size} unique props`);
+      
+      // Count DFS apps in collected props
+      let dfsAppCount = 0;
+      let draftKingsCount = 0;
+      let betrCount = 0;
+      playerPropsMap.forEach((propData) => {
+        propData.books.forEach((book: any) => {
+          if (book.key?.toLowerCase().includes('draftkings_pick6')) {
+            draftKingsCount++;
+            dfsAppCount++;
+          } else if (book.key?.toLowerCase().includes('betr')) {
+            betrCount++;
+            dfsAppCount++;
+          }
+        });
+      });
+      console.log(`🎯 DFS APPS IN PROPS: Total DFS=${dfsAppCount}, DraftKings Pick 6=${draftKingsCount}, Betr=${betrCount}`);
+      
       if (playerPropsMap.size > 0) {
         const firstProp = playerPropsMap.values().next().value;
         console.log(`🏈 Sample prop books count: ${firstProp?.books?.length}, books:`, firstProp?.books?.map((b: any) => b.name));
@@ -463,9 +493,27 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const hasFilteredBooks = propData.filteredBooks.length > 0;
         const hasAllBooks = propData.books.length > 0;
         
+        // Debug logging for DraftKings Pick 6 and Betr
+        const hasDraftKings = propData.books.some((b: any) => b.key?.toLowerCase().includes('draftkings_pick6'));
+        const hasBetr = propData.books.some((b: any) => b.key?.toLowerCase().includes('betr'));
+        if (hasDraftKings || hasBetr) {
+          console.log(`🎯 DFS FILTERING CHECK: ${propData.playerName} - ${propData.marketKey}`, {
+            userHasFilter,
+            hasFilteredBooks,
+            hasAllBooks,
+            hasDraftKings,
+            hasBetr,
+            allBooks: propData.books.map((b: any) => b.key),
+            filteredBooks: propData.filteredBooks.map((b: any) => b.key)
+          });
+        }
+        
         // CRITICAL: If user filtered for specific sportsbooks but none of them have this prop, skip it
         if (userHasFilter && !hasFilteredBooks) {
           skippedNoFilteredBooks++;
+          if (hasDraftKings || hasBetr) {
+            console.log(`⏭️ SKIPPED DFS: ${propData.playerName} - no filtered books match`);
+          }
           return; // Don't show picks where the filtered sportsbook doesn't offer the line
         }
         
@@ -497,6 +545,16 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // When viewing all sports, be more lenient since some sports have fewer books
         const MIN_BOOKS_FOR_EV = userHasFilter ? 4 : 2;
         const booksForEV = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
+        
+        // Debug logging for DraftKings Pick 6 and Betr EV calculation
+        if (hasDraftKings || hasBetr) {
+          console.log(`🎯 DFS EV CALC: ${propData.playerName} - ${propData.marketKey}`, {
+            booksForEV: booksForEV.length,
+            minRequired: MIN_BOOKS_FOR_EV,
+            consensusLine,
+            books: booksForEV.map((b: any) => ({ name: b.name, line: b.line }))
+          });
+        }
         const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
         
         // Get Over odds
