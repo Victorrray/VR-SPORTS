@@ -263,11 +263,39 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     if (selectedSportsbooks.length === 0) return true; // No filter = include all
     const normalizedKey = bookKey?.toLowerCase();
     const normalizedName = bookName?.toLowerCase();
-    return selectedSportsbooks.some(sb => {
+    
+    const result = selectedSportsbooks.some(sb => {
       const normalizedSb = sb.toLowerCase();
-      return normalizedKey === normalizedSb || normalizedName === normalizedSb || 
-             normalizedKey?.includes(normalizedSb) || normalizedName?.includes(normalizedSb);
+      
+      // Exact key match
+      if (normalizedKey === normalizedSb) return true;
+      
+      // Exact name match
+      if (normalizedName === normalizedSb) return true;
+      
+      // Key includes filter (e.g., 'betr_us_dfs' includes 'betr')
+      if (normalizedKey?.includes(normalizedSb)) return true;
+      
+      // Name includes filter
+      if (normalizedName?.includes(normalizedSb)) return true;
+      
+      // Filter includes key (reverse match for DFS apps)
+      if (normalizedSb?.includes(normalizedKey)) return true;
+      
+      return false;
     });
+    
+    // Debug logging for Betr specifically
+    if (normalizedKey?.includes('betr') || normalizedName?.includes('betr')) {
+      console.log(`🎯 BETR FILTER CHECK: key="${bookKey}", name="${bookName}"`, {
+        normalizedKey,
+        normalizedName,
+        selectedSportsbooks,
+        isIncluded: result
+      });
+    }
+    
+    return result;
   };
   
   // Log first game structure to debug (only in dev)
