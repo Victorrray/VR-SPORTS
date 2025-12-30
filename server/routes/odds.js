@@ -213,16 +213,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // Define DFS apps list at top level for use throughout the function
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
     
-    // Handle player props bet type
-    if (betType === 'props') {
-      console.log('🏈🏈🏈 PLAYER PROPS REQUESTED 🏈🏈🏈');
-      console.log('🏈 betType:', betType);
-      console.log('🏈 ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
-      console.log('🏈 Requested sports:', sportsArray);
-      
-      // Map sports to their player props markets (using TheOddsAPI market names)
-      // Reference: https://the-odds-api.com/sports-odds-data/betting-markets.html
-      const playerPropsMarketMap = {
+    // Map sports to their player props markets (using TheOddsAPI market names)
+    // Reference: https://the-odds-api.com/sports-odds-data/betting-markets.html
+    // This is defined outside the betType check so we always have access to player props markets
+    const playerPropsMarketMap = {
         'americanfootball_nfl': [
           // Standard props
           'player_pass_yds', 'player_pass_tds', 'player_pass_completions', 'player_pass_attempts', 'player_pass_interceptions',
@@ -385,41 +379,35 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           'player_try_scorer_first', 'player_try_scorer_last', 'player_try_scorer_anytime', 'player_try_scorer_over'
         ]
       };
-      
-      // Default soccer player props markets (for any soccer league not explicitly defined)
-      const defaultSoccerPlayerProps = [
-        'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
-        'player_to_receive_card', 'player_to_receive_red_card',
-        'player_shots_on_target', 'player_shots', 'player_assists'
-      ];
-      
-      // Get player props markets for requested sports
-      const playerPropsMarkets = [];
-      sportsArray.forEach(sport => {
-        if (playerPropsMarketMap[sport]) {
-          console.log(`🏈 Adding markets for ${sport}:`, playerPropsMarketMap[sport]);
-          playerPropsMarkets.push(...playerPropsMarketMap[sport]);
-        } else if (sport.startsWith('soccer_')) {
-          // Use default soccer player props for any soccer league
-          console.log(`⚽ Adding default soccer markets for ${sport}:`, defaultSoccerPlayerProps);
-          playerPropsMarkets.push(...defaultSoccerPlayerProps);
-        } else {
-          console.log(`🏈 No player props markets found for ${sport}`);
-        }
-      });
-      
-      if (playerPropsMarkets.length > 0) {
-        // Deduplicate markets (same markets may be added for multiple sports)
-        marketsArray = [...new Set(playerPropsMarkets)];
-        console.log('🏈 Final player props markets (deduplicated):', marketsArray);
+    
+    // Default soccer player props markets (for any soccer league not explicitly defined)
+    const defaultSoccerPlayerProps = [
+      'player_goal_scorer_anytime', 'player_first_goal_scorer', 'player_last_goal_scorer',
+      'player_to_receive_card', 'player_to_receive_red_card',
+      'player_shots_on_target', 'player_shots', 'player_assists'
+    ];
+    
+    // Get player props markets for requested sports (always, not just for betType === 'props')
+    const playerPropsMarkets = [];
+    sportsArray.forEach(sport => {
+      if (playerPropsMarketMap[sport]) {
+        console.log(`🏈 Adding markets for ${sport}:`, playerPropsMarketMap[sport]);
+        playerPropsMarkets.push(...playerPropsMarketMap[sport]);
+      } else if (sport.startsWith('soccer_')) {
+        // Use default soccer player props for any soccer league
+        console.log(`⚽ Adding default soccer markets for ${sport}:`, defaultSoccerPlayerProps);
+        playerPropsMarkets.push(...defaultSoccerPlayerProps);
       } else {
-        console.log('🏈 WARNING: No player props markets mapped!');
+        console.log(`🏈 No player props markets found for ${sport}`);
       }
-    }
+    });
+    
+    // Always include player props markets in the fetch (in addition to regular markets)
+    const allMarketsToFetch = [...new Set([...marketsArray, ...playerPropsMarkets])];
     
     // Separate player props from regular markets
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
-    const playerPropMarkets = marketsArray.filter(m => m.includes('player_') || m.includes('batter_') || m.includes('pitcher_'));
+    const playerPropMarkets = playerPropsMarkets;
     
     // Helper to get supported markets for a sport (use soccer_default for unlisted soccer leagues)
     const getSupportedMarketsForSport = (sport) => {
@@ -456,9 +444,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     console.log('  Base markets:', baseMarkets);
     console.log('  Quarter/Half/Period markets:', quarterMarkets);
     
-    // Step 1: Fetch base odds
-    if (baseMarkets.length > 0) {
-      const marketsToFetch = baseMarkets;
+    // Step 1: Fetch base odds (and always include player props)
+    if (baseMarkets.length > 0 || playerPropMarkets.length > 0) {
+      const marketsToFetch = [...new Set([...baseMarkets, ...playerPropMarkets])];
       const supabase = req.app.locals.supabase;
       const oddsCacheService = req.app.locals.oddsCacheService;
       
