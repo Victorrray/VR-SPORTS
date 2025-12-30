@@ -116,10 +116,10 @@ export function BetCard({ bet, variant = 'default', showActions = true }: BetCar
           <div className={`${
             isHero || isDark ? 'text-purple-300' : 'text-purple-600'
           } font-bold uppercase tracking-wide mb-1 text-xs`}>
-            Recommended Pick
+            Pick
           </div>
-          <div className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold`}>
-            {bet.pick}
+          <div className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-sm`}>
+            {bet.pick && bet.pick !== 'Yes' ? bet.pick : `${bet.teams}`}
           </div>
         </div>
 
