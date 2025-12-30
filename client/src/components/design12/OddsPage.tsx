@@ -8,6 +8,15 @@ import { PlayerPropsPage } from './PlayerPropsPage';
 import { toast } from 'sonner';
 import { formatOdds as convertOdds } from '../../utils/oddsConverter';
 
+// Get today's date in YYYY-MM-DD format
+function getTodayDateString() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // Generate date options: All Upcoming, Today (with day name), then next 6 days
 function generateDateOptions() {
   const options = [{ id: 'all_upcoming', name: 'All Upcoming' }];
@@ -202,7 +211,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(cachedFilters?.date || 'all_upcoming');
+  const [selectedDate, setSelectedDate] = useState(cachedFilters?.date || getTodayDateString());
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isFilterClosing, setIsFilterClosing] = useState(false);
   const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>(cachedFilters?.sportsbooks || []);
@@ -1249,7 +1258,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     setSelectedSports(['all']);
                     setSelectedMarket('all');
                     setSelectedBetType('straight');
-                    setSelectedDate('today');
+                    setSelectedDate(getTodayDateString());
                     setSelectedSportsbooks([]);
                     setMinDataPoints(4);
                     toast.success('Filters reset', {
@@ -1792,7 +1801,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     setSelectedSports(['all']);
                     setSelectedMarket('all');
                     setSelectedBetType('straight');
-                    setSelectedDate('today');
+                    setSelectedDate(getTodayDateString());
                     setSelectedSportsbooks([]);
                     setMinDataPoints(4);
                     toast.success('Filters reset', {
