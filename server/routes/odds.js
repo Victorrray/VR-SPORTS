@@ -886,8 +886,21 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         try {
           const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
           const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
-          const events = eventsResponse.data || [];
-          console.log(`📅 Got ${events.length} events for ${sport}`);
+          let events = eventsResponse.data || [];
+          
+          // Filter events by date if requested
+          if (date && date !== 'all_upcoming') {
+            const targetDate = new Date(date);
+            const nextDay = new Date(targetDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            
+            events = events.filter(event => {
+              const eventDate = new Date(event.commence_time);
+              return eventDate >= targetDate && eventDate < nextDay;
+            });
+          }
+          
+          console.log(`📅 Got ${events.length} events for ${sport}${date && date !== 'all_upcoming' ? ` on ${date}` : ''}`);
           return events.map(e => ({ ...e, sport_key: sport }));
         } catch (err) {
           console.warn(`⚠️ Failed to fetch events for ${sport}:`, err.message);
