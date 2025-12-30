@@ -2579,26 +2579,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         return filtered;
       };
 
-      // Filter out Dabble from alternate market picks (their alternate lines are often stale)
+      // Filter out Dabble from alternate market picks (their alternate lines are often stale/low EV)
       const filterDabbleFromAlternates = (picks: OddsPick[]) => {
         return picks.filter(pick => {
-          // If it's an alternate market and best book is Dabble, filter it out
-          if (pick.isAlternate && pick.bestBook?.toLowerCase().includes('dabble')) {
-            return false;
+          // Completely exclude any alternate market pick where Dabble is involved
+          if (pick.isAlternate) {
+            const hasDabble = (pick.books || []).some((b: OddsBook) => 
+              b.name.toLowerCase().includes('dabble')
+            );
+            if (hasDabble) {
+              return false; // Filter out entire pick if Dabble is in the books
+            }
           }
           return true;
-        }).map(pick => {
-          // Also remove Dabble from books arrays for alternate picks
-          if (pick.isAlternate) {
-            const filteredBooks = (pick.books || []).filter((b: OddsBook) => 
-              !b.name.toLowerCase().includes('dabble')
-            );
-            const filteredAllBooks = (pick.allBooks || []).filter((b: OddsBook) => 
-              !b.name.toLowerCase().includes('dabble')
-            );
-            return { ...pick, books: filteredBooks, allBooks: filteredAllBooks };
-          }
-          return pick;
         });
       };
 
