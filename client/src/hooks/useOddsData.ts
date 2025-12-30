@@ -231,7 +231,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
   // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
   const DFS_BOOK_KEYS = [
     'dabble', 'dabble_au', 'prizepicks', 'underdog', 'sleeper',
-    'chalkboard', 'parlay', 'draftkings_pick6', 'betr'
+    'chalkboard', 'parlay', 'pick6', 'betr_us_dfs'
   ];
   
   // Books to exclude from alternate markets (their alternate lines are often stale/unavailable)
@@ -319,7 +319,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       const bookKeys = bookmakers.map((b: any) => b.key);
       console.log(`📋 Bookmaker keys in response:`, bookKeys);
       // Check for DFS apps specifically
-      const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'sleeper'];
+      const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper'];
       const foundDFS = bookKeys.filter((key: string) => dfsApps.includes(key?.toLowerCase()));
       console.log(`🎮 DFS Apps in response:`, foundDFS.length > 0 ? foundDFS : 'NONE - API not returning DFS apps');
     }
@@ -390,7 +390,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               
               // DFS apps always have -119 odds, traditional sportsbooks use actual odds
               // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
-              const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper'];
+              const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'dabble'];
               const isDFS = dfsApps.includes(bookKey?.toLowerCase());
               const overOdds = isDFS ? '-119' : normalizeAmericanOdds(overOutcome.price);
               const underOdds = isDFS ? '-119' : (underOutcome ? normalizeAmericanOdds(underOutcome.price) : null);
@@ -479,7 +479,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         // DFS apps that offer pick'em style betting (not traditional odds)
         // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
-        const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper'];
+        const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'dabble'];
         
         // Separate traditional sportsbooks from DFS apps
         const traditionalBooks = propData.books.filter((b: any) => !dfsAppKeys.includes(b.key?.toLowerCase()));
@@ -2176,7 +2176,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
       // DFS apps that only offer Over bets (no Under)
       // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
-      const dfsAppsNoUnder = ['prizepicks', 'underdog', 'draftkings_pick6', 'betr', 'dabble', 'dabble_au', 'sleeper'];
+      const dfsAppsNoUnder = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble', 'dabble_au', 'sleeper'];
       const isDFSOnlyFilter = sportsbooks && sportsbooks.length > 0 && 
         sportsbooks.every(sb => dfsAppsNoUnder.includes(sb.toLowerCase()));
       

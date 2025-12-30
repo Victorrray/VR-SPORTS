@@ -932,7 +932,7 @@ export default function OddsTable({
     const gamesToProcess = upcomingGames;
     
     // Debug: Check if we have any DFS app data
-    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr', 'draftkings_pick6'];
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs'];
     
     let dfsAppCount = 0;
     let dfsMarketCount = 0;
@@ -996,7 +996,7 @@ export default function OddsTable({
         console.log('🔍 PROPS DEBUG: marketFilter =', marketFilter);
         
         // Check if we're filtering for DFS apps only
-        const propsDfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr', 'draftkings_pick6'];
+        const propsDfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs'];
         const propsFilteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => propsDfsApps.includes(book));
         console.log('🔍 PROPS DEBUG: propsFilteringForDFSOnly =', propsFilteringForDFSOnly);
       
@@ -1434,7 +1434,7 @@ export default function OddsTable({
           console.log(`🎯 Filtering prop ${propKey} with bookFilter:`, bookFilter);
           
           // Define DFS apps list once for this scope
-          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'betr'];
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au'];
           
           // Check allBooks for regular props
           if (propData.allBooks && propData.allBooks.length > 0) {
@@ -2114,7 +2114,7 @@ export default function OddsTable({
           const keyMatch = normalizedFilter.includes(bookKey);
           
           // Also check for DFS apps with partial matching
-          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'betr'];
+          const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au'];
           const isDFSMatch = dfsApps.some(app => bookKey.includes(app));
           const filteringForDFS = normalizedFilter.some(f => dfsApps.includes(f));
           
@@ -2694,7 +2694,7 @@ export default function OddsTable({
     // where the primary book (row.bk) is selected from filtered books.
     // We skip the additional filtering here to avoid double-filtering.
     // For game mode, we apply the filter here.
-    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au'];
     const hasBookFilter = bookFilter && bookFilter.length > 0;
     
     console.log('🔍 SPORTSBOOK FILTER DEBUG: bookFilter =', bookFilter);
@@ -2876,7 +2876,7 @@ export default function OddsTable({
     if (evOnlyPositive || (typeof evMin === 'number' && !Number.isNaN(evMin))) {
       r = r.filter(row => {
         // Check if this is a DFS app - always show DFS app bets regardless of EV
-        const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'betr'];
+        const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au'];
         const bookmakerKey = (row?.bk?.key || row?.out?.bookmaker?.key || row?.out?.book || '').toLowerCase();
         const isDFSApp = dfsApps.some(app => bookmakerKey.includes(app));
         
@@ -3127,7 +3127,7 @@ export default function OddsTable({
   console.log('🔍 FINAL DEBUG: Has pick6 data? =', uniqueBookmakers.includes('pick6'));
   
   // Check if we're filtering for DFS apps only
-  const finalDfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'betr'];
+  const finalDfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au'];
   const finalFilteringForDFSOnly = bookFilter && bookFilter.length > 0 && bookFilter.every(book => finalDfsApps.includes(book));
   console.log('🔍 FINAL DEBUG: finalFilteringForDFSOnly =', finalFilteringForDFSOnly);
   
