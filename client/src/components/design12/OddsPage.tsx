@@ -937,7 +937,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
           {/* Dropdown Menu - Positioned relative to button */}
           {isBetTypeDropdownOpen && (
-            <div className={`absolute top-full mt-2 left-0 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
+            <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
               {betTypes.map((betType) => {
                 // Exchanges is platinum-only
                 const isPlatinumOnly = betType.id === 'exchanges';
@@ -1013,7 +1013,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
         {/* Dropdown Menu - Positioned relative to button */}
         {isBetTypeDropdownOpen && (
-          <div className={`absolute top-full mt-2 left-0 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
+          <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
             {betTypes.map((betType) => {
               // Exchanges is platinum-only
               const isPlatinumOnly = betType.id === 'exchanges';
