@@ -493,97 +493,17 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           if (canUseAllCached) {
             responseData = [];
             if (cachedRegularData) {
-              console.log(`📦 Using cached regular markets data for ${sport}`);
               responseData = [...responseData, ...cachedRegularData];
             }
             if (cachedAlternateData) {
-              console.log(`📦 Using cached alternate markets data for ${sport}`);
               responseData = [...responseData, ...cachedAlternateData];
             }
             if (cachedData) {
-              console.log(`📦 Using combined cached data for ${sport}`);
               responseData = cachedData;
             }
           } else {
-            console.log(`🌐 API call for ${sport}`);
-            console.log(`🔗 Full URL: ${url}`);
             const response = await axios.get(url);
             responseData = response.data;
-            console.log(`📦 ${sport} returned ${responseData?.length || 0} games`);
-            
-            // Debug: Log comprehensive market summary
-            if (responseData && responseData.length > 0) {
-              console.log(`\n${'='.repeat(60)}`);
-              console.log(`📊 MARKET SUMMARY FOR ${sport.toUpperCase()}`);
-              console.log(`${'='.repeat(60)}`);
-              console.log(`📦 Games returned: ${responseData.length}`);
-              
-              // Collect all unique markets across all games and bookmakers
-              const allMarketsFound = new Set();
-              const marketsByBook = new Map();
-              let totalBookmakers = 0;
-              
-              responseData.forEach(game => {
-                if (game.bookmakers) {
-                  game.bookmakers.forEach(book => {
-                    totalBookmakers++;
-                    if (!marketsByBook.has(book.key)) {
-                      marketsByBook.set(book.key, new Set());
-                    }
-                    if (book.markets) {
-                      book.markets.forEach(market => {
-                        allMarketsFound.add(market.key);
-                        marketsByBook.get(book.key).add(market.key);
-                      });
-                    }
-                  });
-                }
-              });
-              
-              console.log(`📚 Total bookmaker entries: ${totalBookmakers}`);
-              console.log(`📊 Unique markets found: ${allMarketsFound.size}`);
-              console.log(`📊 Markets requested: ${marketsToFetch.join(', ')}`);
-              console.log(`📊 Markets returned: ${Array.from(allMarketsFound).sort().join(', ')}`);
-              
-              // Check which requested markets were NOT returned
-              const missingMarkets = marketsToFetch.filter(m => !allMarketsFound.has(m));
-              if (missingMarkets.length > 0) {
-                console.log(`⚠️ MISSING MARKETS (requested but not returned): ${missingMarkets.join(', ')}`);
-              }
-              
-              // Log markets by bookmaker (first 5 bookmakers)
-              console.log(`\n📚 Markets by Bookmaker (sample):`);
-              let bookCount = 0;
-              for (const [bookKey, markets] of marketsByBook) {
-                if (bookCount >= 5) break;
-                console.log(`   ${bookKey}: ${Array.from(markets).join(', ')}`);
-                bookCount++;
-              }
-              
-              // CRITICAL: Check if Fliff is in the response
-              const fliffData = marketsByBook.get('fliff');
-              if (fliffData) {
-                console.log(`✅ FLIFF FOUND in ${sport}: ${Array.from(fliffData).join(', ')}`);
-              } else {
-                console.log(`❌ FLIFF NOT FOUND in ${sport} response`);
-                console.log(`📋 ALL BOOKMAKERS IN RESPONSE (${marketsByBook.size} total):`);
-                Array.from(marketsByBook.keys()).forEach((book, idx) => {
-                  console.log(`   ${idx + 1}. ${book}`);
-                });
-              }
-              
-              // Log first game details
-              const firstGame = responseData[0];
-              console.log(`\n🎮 First game: ${firstGame.away_team} @ ${firstGame.home_team}`);
-              console.log(`📚 Bookmakers for this game: ${firstGame.bookmakers ? firstGame.bookmakers.length : 0}`);
-              console.log(`${'='.repeat(60)}\n`);
-            }
-            
-            // Log quota information from response headers
-            const quotaRemaining = response.headers['x-requests-remaining'];
-            const quotaUsed = response.headers['x-requests-used'];
-            const quotaLast = response.headers['x-requests-last'];
-            console.log(`📊 Quota - Remaining: ${quotaRemaining}, Used: ${quotaUsed}, Last Call Cost: ${quotaLast}`);
             
             // Cache the data
             if (needsRegularMarkets && needsAlternateMarkets) {
@@ -617,31 +537,23 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             // Save to Supabase
             if (supabase && oddsCacheService && responseData && responseData.length > 0) {
               try {
-                console.log(`💾 Saving ${responseData.length} games to Supabase cache for ${sport}`);
                 await saveOddsToSupabase(responseData, sport, supabase);
-                console.log(`✅ Successfully cached ${responseData.length} games in Supabase`);
               } catch (supabaseSaveErr) {
-                console.warn(`⚠️ Failed to save to Supabase cache:`, supabaseSaveErr.message);
+                // Silently skip cache errors
               }
             }
           }
           
           const sportGames = responseData || [];
-          console.log(`Got ${sportGames.length} games for ${sport}`);
           allGames.push(...sportGames);
         } catch (sportErr) {
-          console.warn(`Failed to fetch games for sport ${sport}:`, sportErr.response?.status, sportErr.response?.data || sportErr.message);
+          // Silently skip sport fetch errors
         }
       }
       
       // Filter bookmakers based on user plan
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-      
-      console.log(`\n🔍 BOOKMAKER FILTERING DEBUG:`);
-      console.log(`👤 User plan: ${userProfile.plan}`);
-      console.log(`✅ Allowed bookmakers: ${allowedBookmakers.join(', ')}`);
-      console.log(`🔎 Is 'fliff' in allowed list? ${allowedBookmakers.includes('fliff')}`);
       
       // Count Fliff before filtering
       let fliffCountBefore = 0;
@@ -650,7 +562,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           fliffCountBefore += game.bookmakers.filter(b => b.key === 'fliff').length;
         }
       });
-      console.log(`📊 Fliff bookmakers BEFORE filtering: ${fliffCountBefore}`);
       
       // Only filter game odds bookmakers, not player props
       allGames.forEach(game => {
@@ -673,8 +584,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           fliffCountAfter += game.bookmakers.filter(b => b.key === 'fliff').length;
         }
       });
-      console.log(`📊 Fliff bookmakers AFTER filtering: ${fliffCountAfter}`);
-      console.log(`Filtered to ${allowedBookmakers.length} allowed bookmakers for user plan: ${userProfile.plan}`);
     }
     
     // Filter out games that have already started (past games)
@@ -685,7 +594,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const gameTime = new Date(game.commence_time);
       return gameTime > now; // Only include future games
     });
-    console.log(`🗑️ Filtered out ${beforeFilter - allGames.length} past games. Remaining: ${allGames.length} upcoming games`);
     
     // If a specific date is requested, filter to only games on that date
     if (date && date !== 'all_upcoming' && date !== 'all') {
@@ -702,7 +610,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         // Check if game is on the specified date (between start of day and start of next day)
         return gameTime >= filterDate && gameTime < nextDay;
       });
-      console.log(`📅 Filtered by date ${date}: ${beforeDateFilter} games -> ${allGames.length} games on that date`);
     }
     
     // Step 2: Fetch quarter/half/period markets if requested
@@ -711,9 +618,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // - Only fetch for top 5 games per sport
     // - Only fetch selected period markets (not all variants)
     // - Cache for 24 hours
-    console.log('🔍 STEP 2 CHECK: quarterMarkets.length =', quarterMarkets.length, 'quarterMarkets =', quarterMarkets);
     if (quarterMarkets.length > 0) {
-      console.log('🎯 Step 2: Fetching quarter/half/period markets:', quarterMarkets);
       
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
@@ -721,8 +626,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       // For game odds, filter out DFS apps (they only have player props)
       const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
       const bookmakerList = gameOddsBookmakers.join(',');
-      
-      console.log(`🎯 Quarter/Period markets bookmakers: ${bookmakerList}`);
       
       // Strategic approach: Only fetch for top 5 games per sport using /events/{eventId}/odds
       const MAX_GAMES_FOR_PERIOD_MARKETS = 5;
@@ -734,11 +637,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const sportGames = allGames.filter(g => g.sport_key === sport).slice(0, MAX_GAMES_FOR_PERIOD_MARKETS);
           
           if (sportGames.length === 0) {
-            console.log(`⏭️ No games found for ${sport}`);
             continue;
           }
-          
-          console.log(`🎯 Fetching period markets for top ${sportGames.length} ${sport} games using /events/{eventId}/odds`);
           
           // Fetch period markets for each game individually
           for (const game of sportGames) {
@@ -749,7 +649,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               // Check cache first
               const cached = await getCachedResponse(cacheKey, PERIOD_MARKET_CACHE_HOURS * 60 * 60 * 1000);
               if (cached) {
-                console.log(`📦 Period markets cache HIT for ${eventId}`);
                 // Merge cached data
                 if (cached.bookmakers) {
                   cached.bookmakers.forEach(cBookmaker => {
@@ -770,11 +669,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               // Fetch from API
               const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${quarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}`;
               
-              console.log(`🌐 Fetching period markets for event ${eventId}`);
               const response = await axios.get(url);
               const eventData = response.data || {};
-              
-              console.log(`📊 Period Markets Quota - Remaining: ${response.headers['x-requests-remaining']}, Used: ${response.headers['x-requests-used']}`);
               
               // Cache the result
               if (eventData.bookmakers) {
@@ -792,32 +688,23 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                         existingBookmaker.markets.push(pMarket);
                       }
                     });
-                    console.log(`✅ Merged ${pBookmaker.markets.length} period markets for ${pBookmaker.key}`);
                   }
                 });
               }
             } catch (gameErr) {
-              console.warn(`⚠️ Failed to fetch period markets for event ${game.id}:`, gameErr.response?.status, gameErr.response?.data?.message || gameErr.message);
+              // Silently skip period market errors
             }
           }
         } catch (sportErr) {
-          console.warn(`⚠️ Failed to process period markets for ${sport}:`, sportErr.message);
+          // Silently skip sport period market errors
         }
       }
-      
-      console.log(`✅ Period markets fetch complete`);
     }
     
     // Step 3: Fetch player props if requested
     // NOTE: Player props must be fetched using /events/{eventId}/odds endpoint, one event at a time
-    console.log('🏈 PLAYER PROPS CHECK:');
-    console.log('🏈   playerPropMarkets.length:', playerPropMarkets.length);
-    console.log('🏈   playerPropMarkets:', playerPropMarkets);
-    console.log('🏈   ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
-    console.log('🏈   Will fetch player props?', playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2);
     
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
-      console.log('🎯 STARTING PLAYER PROPS FETCH for markets:', playerPropMarkets);
       
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
@@ -827,30 +714,22 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const playerPropsBookmakers = allowedBookmakers;
       const bookmakerList = playerPropsBookmakers.join(',');
       
-      console.log(`🎯 Player props bookmakers for ${sportsArray.join(', ')}: ${bookmakerList}`);
-      console.log(`🔍 Player props bookmakers details: ${JSON.stringify(playerPropsBookmakers)}`);
-      console.log(`🔍 Total bookmakers requested: ${playerPropsBookmakers.length}`);
-      
       let playerPropsCount = 0;
       
       // OPTIMIZATION: Fetch all sports' events in parallel first
-      console.log(`🚀 Fetching events for all ${sportsArray.length} sports in parallel...`);
       const eventsPromises = sportsArray.map(async (sport) => {
         try {
           const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
           const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
           const events = eventsResponse.data || [];
-          console.log(`📅 Got ${events.length} events for ${sport}`);
           return events.map(e => ({ ...e, sport_key: sport }));
         } catch (err) {
-          console.warn(`⚠️ Failed to fetch events for ${sport}:`, err.message);
           return [];
         }
       });
       
       const allEventsArrays = await Promise.all(eventsPromises);
       const allEvents = allEventsArrays.flat();
-      console.log(`📅 Total events across all sports: ${allEvents.length}`);
       
       // OPTIMIZATION: Fetch player props for all events in larger parallel batches
       const MAX_CONCURRENT = 15; // Increased from 10 to 15
@@ -864,7 +743,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         'pinnacle', 'prophet_exchange', 'rebet', 'betopenly'
       ];
       const allPlayerPropsBookmakers = [...new Set([...bookmakerList.split(','), ...dfsBookmakersForProps])].join(',');
-      console.log(`🎯 Player props bookmakers (including DFS for soccer): ${allPlayerPropsBookmakers}`);
       
       for (let i = 0; i < allEvents.length; i += MAX_CONCURRENT) {
         const batch = allEvents.slice(i, i + MAX_CONCURRENT);
@@ -882,9 +760,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                   const dfsFound = playerPropsResponse.data.bookmakers.filter(bk => 
                     dfsBookmakersForProps.some(dfs => bk.key?.toLowerCase().includes(dfs))
                   );
-                  if (dfsFound.length > 0) {
-                    console.log(`⚽🎯 DFS APPS FOUND FOR SOCCER: ${event.home_team} vs ${event.away_team} - ${dfsFound.map(b => b.key).join(', ')}`);
-                  }
+                  // DFS apps found for soccer
                 }
                 
                 const eventWithProps = {
@@ -898,50 +774,25 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 };
                 
                 if (eventWithProps.bookmakers.length > 0) {
-                  console.log(`✅ Props: ${event.home_team} vs ${event.away_team} (${eventWithProps.bookmakers.length} books)`);
                   allGames.push(eventWithProps);
                   playerPropsCount++;
                 }
               }
             } catch (eventErr) {
-              // Silently skip failed events to reduce log noise
-              if (eventErr.response?.status !== 422 && eventErr.code !== 'ECONNABORTED') {
-                console.warn(`⚠️ Props error for ${event.id}:`, eventErr.message);
-              }
+              // Silently skip failed events
             }
           })()
         );
         
         await Promise.all(batchPromises);
-        
-        // Log progress every batch
-        const progress = Math.min(i + MAX_CONCURRENT, allEvents.length);
-        console.log(`⏳ Progress: ${progress}/${allEvents.length} events processed`);
       }
-      
-      console.log(`✅ Total player props events fetched: ${playerPropsCount}`);
-      console.log(`🏈 Player props fetch complete - returning ${playerPropsCount} events`);
-    } else if (betType === 'props') {
-      console.log('🏈 WARNING: betType is props but ENABLE_PLAYER_PROPS_V2 is disabled or playerPropMarkets is empty');
-      console.log('🏈 ENABLE_PLAYER_PROPS_V2:', ENABLE_PLAYER_PROPS_V2);
-      console.log('🏈 playerPropMarkets:', playerPropMarkets);
-    }
-    
-    console.log(`📊 Final response: ${allGames.length} total games/events (including ${allGames.filter(g => g.bookmakers?.some(b => dfsApps.includes(b.key))).length} with player props)`);
-    if (betType === 'props') {
-      console.log(`🏈 Player props response: ${allGames.length} events with player props`);
     }
     
     // Filter bookmakers' markets to only include requested markets (if not fetching all)
     const allRequestedMarkets = [...regularMarkets, ...playerPropMarkets];
-    console.log('🎯 All requested markets:', allRequestedMarkets);
-    console.log('🎯 betType:', betType);
-    console.log('🎯 regularMarkets:', regularMarkets);
-    console.log('🎯 playerPropMarkets:', playerPropMarkets);
     
     if (allRequestedMarkets.length > 0 && betType !== 'props') {
       // For regular game odds, filter to only requested markets
-      console.log('🔍 Filtering bookmakers to only include markets:', allRequestedMarkets);
       allGames.forEach(game => {
         if (game.bookmakers) {
           game.bookmakers = game.bookmakers.map(bookmaker => ({
@@ -950,34 +801,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           })).filter(bookmaker => bookmaker.markets && bookmaker.markets.length > 0);
         }
       });
-      console.log('✅ Filtered bookmakers to only requested markets');
-    } else {
-      console.log('⏭️ Skipping market filtering - allRequestedMarkets.length:', allRequestedMarkets.length, 'betType:', betType);
     }
-    
-    // Debug: Count markets in response
-    const marketCounts = {};
-    allGames.forEach(game => {
-      game.bookmakers?.forEach(book => {
-        book.markets?.forEach(market => {
-          marketCounts[market.key] = (marketCounts[market.key] || 0) + 1;
-        });
-      });
-    });
-    console.log('📊 FINAL MARKETS IN RESPONSE:', Object.keys(marketCounts).sort().join(', '));
-    console.log('📊 MARKET COUNTS:', marketCounts);
-    
-    // Log the games being returned
-    console.log(`\n✅ RETURNING ${allGames.length} GAMES TO FRONTEND:`);
-    allGames.slice(0, 3).forEach((game, idx) => {
-      console.log(`  Game ${idx + 1}: ${game.away_team} @ ${game.home_team}`);
-      console.log(`    Commence: ${game.commence_time}`);
-      console.log(`    Bookmakers: ${game.bookmakers?.length || 0}`);
-      if (game.bookmakers?.length > 0) {
-        console.log(`    First bookmaker: ${game.bookmakers[0].key} with ${game.bookmakers[0].markets?.length || 0} markets`);
-      }
-    });
-    console.log('');
     
     res.json(allGames);
   } catch (err) {
