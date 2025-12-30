@@ -856,8 +856,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const MAX_CONCURRENT = 15; // Increased from 10 to 15
       const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
       
-      // Explicitly include DFS apps for player props (including soccer)
-      const dfsBookmakersForProps = ['prizepicks', 'underdog', 'draftkings_pick6', 'dabble_au', 'sleeper', 'fliff', 'chalkboard', 'betr'];
+      // Explicitly include DFS apps and sharp books for player props (including soccer)
+      const dfsBookmakersForProps = [
+        // DFS Apps
+        'prizepicks', 'underdog', 'draftkings_pick6', 'dabble_au', 'sleeper', 'fliff', 'chalkboard', 'betr', 'prophetx',
+        // Sharp/Exchange books with player props
+        'pinnacle', 'prophet_exchange', 'rebet', 'betopenly'
+      ];
       const allPlayerPropsBookmakers = [...new Set([...bookmakerList.split(','), ...dfsBookmakersForProps])].join(',');
       console.log(`🎯 Player props bookmakers (including DFS for soccer): ${allPlayerPropsBookmakers}`);
       
