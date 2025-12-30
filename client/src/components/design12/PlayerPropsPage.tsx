@@ -188,7 +188,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     if (selectedSport === 'soccer') {
       setMinDataPoints(1); // Soccer only has 1-2 books
     } else if (selectedSport === 'all') {
-      setMinDataPoints(2); // Mixed sports, use moderate threshold
+      setMinDataPoints(4); // Mixed sports, use moderate threshold
     } else {
       setMinDataPoints(4); // US sports have more books
     }
