@@ -146,7 +146,11 @@ export function useRecommendedPicks(options = {}) {
               console.log(`  📈 Found +EV: ${game.away_team} @ ${game.home_team} - ${outcome.name} ${market.key} @ ${bookmaker.title}: EV=${ev.toFixed(2)}%`);
             }
 
-            if (ev >= minEV) {
+            // Only include straight line bets (h2h, spreads, totals)
+            // Skip alternate markets, player props, and other market types
+            const isStraitBet = ['h2h', 'spreads', 'totals'].includes(market.key);
+            
+            if (ev >= minEV && isStraitBet) {
               // Format pick description based on market type
               let pickDescription = outcome.name;
               if (market.key === 'h2h') {
@@ -158,12 +162,6 @@ export function useRecommendedPicks(options = {}) {
               } else if (market.key === 'totals') {
                 const point = outcome.point;
                 pickDescription = `${outcome.name} ${point}`;
-              } else if (market.key.includes('player_') || market.key.includes('alternate')) {
-                // Player props - include point value
-                const point = outcome.point;
-                if (point !== null && point !== undefined) {
-                  pickDescription = `${outcome.name} ${point}`;
-                }
               }
 
               const gameStartTime = new Date(game.commence_time);
