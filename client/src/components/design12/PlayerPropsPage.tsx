@@ -755,7 +755,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-0 pb-4 space-y-4 lg:border-b border-b-0 -mt-6 lg:rounded-none max-lg:rounded-t-2xl`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-4 pb-4 space-y-4 lg:border-b border-b-0 -mt-6 lg:rounded-none max-lg:rounded-t-2xl`}>
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl`}>Filters</h3>
