@@ -127,8 +127,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   
   const [selectedSports, setSelectedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
   const [selectedMarket, setSelectedMarket] = useState(cachedFilters?.market || 'all');
-  // Derive single sport for API calls - if multiple selected, use 'all'
-  const selectedSport = selectedSports.length === 1 ? selectedSports[0] : 'all';
+  // For API calls, pass comma-separated sports (or 'all' if 'all' is selected)
+  const selectedSport = selectedSports.includes('all') ? 'all' : selectedSports.join(',');
   const [selectedBetType] = useState('props');
   const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
   const [expandedSportsbooks, setExpandedSportsbooks] = useState<(string | number)[]>([]);
@@ -505,7 +505,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     };
   }).filter(pick => {
     // Filter by sport - compare against API sport value
-    if (selectedSport !== 'all') {
+    if (!selectedSports.includes('all')) {
       // Map filter IDs to API sport values
       const sportMap: Record<string, string[]> = {
         'nfl': ['americanfootball_nfl', 'nfl', 'NFL'],
@@ -517,14 +517,16 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
         'soccer': ['soccer_', 'soccer', 'Soccer']  // Match API keys (soccer_epl) or display label (Soccer)
       };
       
-      const allowedSports = sportMap[selectedSport] || [];
       const pickSport = pick.sport?.toLowerCase() || '';
-      // Check if pick sport matches any allowed value (case-insensitive)
-      const matches = allowedSports.some(sport => {
-        const sportLower = sport.toLowerCase();
-        // For soccer_, check if pickSport starts with it (for API keys like soccer_epl)
-        // Otherwise check for exact match or includes
-        return pickSport === sportLower || pickSport.includes(sportLower) || sportLower.includes(pickSport);
+      // Check if pick sport matches any of the selected sports
+      const matches = selectedSports.some(sportId => {
+        const allowedSports = sportMap[sportId] || [];
+        return allowedSports.some(sport => {
+          const sportLower = sport.toLowerCase();
+          // For soccer_, check if pickSport starts with it (for API keys like soccer_epl)
+          // Otherwise check for exact match or includes
+          return pickSport === sportLower || pickSport.includes(sportLower) || sportLower.includes(pickSport);
+        });
       });
       
       if (!matches) {
