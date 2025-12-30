@@ -206,7 +206,25 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       });
     }
     
-    const sportsArray = sports.split(',');
+    let sportsArray = sports.split(',');
+    
+    // If 'all' is requested, expand to all available sports
+    if (sportsArray.includes('all')) {
+      sportsArray = [
+        'americanfootball_nfl',
+        'americanfootball_ncaaf',
+        'basketball_nba',
+        'basketball_ncaab',
+        'baseball_mlb',
+        'icehockey_nhl',
+        'soccer_epl',
+        'soccer_spain_la_liga',
+        'soccer_germany_bundesliga',
+        'soccer_usa_mls',
+        'soccer_mexico_ligamx'
+      ];
+    }
+    
     let marketsArray = markets.split(',');
     let allGames = [];
     
