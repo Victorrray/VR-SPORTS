@@ -1973,9 +1973,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       
       // Map frontend filters to backend parameter names
       // Default sports if not specified (include NCAA sports and major soccer leagues)
-      const sportsList = sport && sport !== 'all' 
-        ? (sportKeyMap[sport] || sport)
-        : 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
+      let sportsList: string;
+      if (sport && sport !== 'all') {
+        // If sport contains comma, it's already a comma-separated list of API keys (from multiple selection)
+        if (sport.includes(',')) {
+          sportsList = sport;
+        } else {
+          // Single sport - map it through sportKeyMap
+          sportsList = sportKeyMap[sport] || sport;
+        }
+      } else {
+        // Default to all sports
+        sportsList = 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
+      }
       params.append('sports', sportsList);
       
       // Map market types to API format
