@@ -210,6 +210,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     
     // If 'all' is requested, expand to all available sports
     if (sportsArray.includes('all')) {
+      console.log('🎯 EXPANDING "all" to full sports list');
       sportsArray = [
         'americanfootball_nfl',
         'americanfootball_ncaaf',
@@ -223,6 +224,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         'soccer_usa_mls',
         'soccer_mexico_ligamx'
       ];
+      console.log('🎯 Expanded sportsArray:', sportsArray);
     }
     
     let marketsArray = markets.split(',');
