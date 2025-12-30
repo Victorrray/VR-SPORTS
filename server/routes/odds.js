@@ -206,27 +206,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       });
     }
     
-    let sportsArray = sports.split(',');
-    
-    // If 'all' is requested, expand to all available sports
-    if (sportsArray.includes('all')) {
-      console.log('🎯 EXPANDING "all" to full sports list');
-      sportsArray = [
-        'americanfootball_nfl',
-        'americanfootball_ncaaf',
-        'basketball_nba',
-        'basketball_ncaab',
-        'baseball_mlb',
-        'icehockey_nhl',
-        'soccer_epl',
-        'soccer_spain_la_liga',
-        'soccer_germany_bundesliga',
-        'soccer_usa_mls',
-        'soccer_mexico_ligamx'
-      ];
-      console.log('🎯 Expanded sportsArray:', sportsArray);
-    }
-    
+    const sportsArray = sports.split(',');
     let marketsArray = markets.split(',');
     let allGames = [];
     
@@ -888,21 +868,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         try {
           const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
           const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
-          let events = eventsResponse.data || [];
-          
-          // Filter events by date if requested
-          if (date && date !== 'all_upcoming') {
-            const targetDate = new Date(date);
-            const nextDay = new Date(targetDate);
-            nextDay.setDate(nextDay.getDate() + 1);
-            
-            events = events.filter(event => {
-              const eventDate = new Date(event.commence_time);
-              return eventDate >= targetDate && eventDate < nextDay;
-            });
-          }
-          
-          console.log(`📅 Got ${events.length} events for ${sport}${date && date !== 'all_upcoming' ? ` on ${date}` : ''}`);
+          const events = eventsResponse.data || [];
+          console.log(`📅 Got ${events.length} events for ${sport}`);
           return events.map(e => ({ ...e, sport_key: sport }));
         } catch (err) {
           console.warn(`⚠️ Failed to fetch events for ${sport}:`, err.message);
@@ -913,13 +880,6 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const allEventsArrays = await Promise.all(eventsPromises);
       const allEvents = allEventsArrays.flat();
       console.log(`📅 Total events across all sports: ${allEvents.length}`);
-      
-      // Log events by sport
-      const eventsBySport = {};
-      allEvents.forEach(event => {
-        eventsBySport[event.sport_key] = (eventsBySport[event.sport_key] || 0) + 1;
-      });
-      console.log(`📅 Events by sport:`, eventsBySport);
       
       // OPTIMIZATION: Fetch player props for all events in larger parallel batches
       const MAX_CONCURRENT = 15; // Increased from 10 to 15

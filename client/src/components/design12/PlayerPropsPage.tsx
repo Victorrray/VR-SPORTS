@@ -127,22 +127,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   
   const [selectedSports, setSelectedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
   const [selectedMarket, setSelectedMarket] = useState(cachedFilters?.market || 'all');
-  
-  // Map filter IDs to API sport keys
-  const sportKeyMap: Record<string, string> = {
-    'nfl': 'americanfootball_nfl',
-    'ncaa-football': 'americanfootball_ncaaf',
-    'nba': 'basketball_nba',
-    'ncaa-basketball': 'basketball_ncaab',
-    'nhl': 'icehockey_nhl',
-    'mlb': 'baseball_mlb',
-    'soccer': 'soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx',
-  };
-  
   // For API calls, pass comma-separated sports (or 'all' if 'all' is selected)
-  const selectedSport = selectedSports.includes('all') 
-    ? 'all' 
-    : selectedSports.map(sport => sportKeyMap[sport] || sport).join(',');
+  const selectedSport = selectedSports.includes('all') ? 'all' : selectedSports.join(',');
   const [selectedBetType] = useState('props');
   const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
   const [expandedSportsbooks, setExpandedSportsbooks] = useState<(string | number)[]>([]);
@@ -302,50 +288,14 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
 
   // Auto-refresh is now handled by useOddsData hook
 
-  // Calculate sport counts dynamically from API response
-  const sportCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      'all': 0,
-      'ncaa-football': 0,
-      'nfl': 0,
-      'nba': 0,
-      'nhl': 0,
-      'ncaa-basketball': 0,
-      'soccer': 0,
-    };
-
-    if (apiPicks && apiPicks.length > 0) {
-      apiPicks.forEach(pick => {
-        const sport = pick.sport?.toLowerCase() || '';
-        counts['all']++;
-        
-        if (sport.includes('ncaa') && sport.includes('football')) {
-          counts['ncaa-football']++;
-        } else if (sport.includes('nfl') || sport === 'americanfootball_nfl') {
-          counts['nfl']++;
-        } else if (sport.includes('nba') || sport === 'basketball_nba') {
-          counts['nba']++;
-        } else if (sport.includes('nhl') || sport === 'icehockey_nhl') {
-          counts['nhl']++;
-        } else if (sport.includes('ncaa') && sport.includes('basketball')) {
-          counts['ncaa-basketball']++;
-        } else if (sport.includes('soccer')) {
-          counts['soccer']++;
-        }
-      });
-    }
-
-    return counts;
-  }, [apiPicks]);
-
   const sports = [
-    { id: 'all', name: 'All Sports', count: sportCounts['all'], active: true },
-    { id: 'ncaa-football', name: 'NCAA Football', count: sportCounts['ncaa-football'], active: false },
-    { id: 'nfl', name: 'NFL', count: sportCounts['nfl'], active: false },
-    { id: 'nba', name: 'NBA', count: sportCounts['nba'], active: false },
-    { id: 'nhl', name: 'NHL', count: sportCounts['nhl'], active: false },
-    { id: 'ncaa-basketball', name: 'NCAA Basketball', count: sportCounts['ncaa-basketball'], active: false },
-    { id: 'soccer', name: 'Soccer', count: sportCounts['soccer'], active: false },
+    { id: 'all', name: 'All Sports', count: 124, active: true },
+    { id: 'ncaa-football', name: 'NCAA Football', count: 45, active: false },
+    { id: 'nfl', name: 'NFL', count: 12, active: false },
+    { id: 'nba', name: 'NBA', count: 18, active: false },
+    { id: 'nhl', name: 'NHL', count: 24, active: false },
+    { id: 'ncaa-basketball', name: 'NCAA Basketball', count: 25, active: false },
+    { id: 'soccer', name: 'Soccer', count: 50, active: false },
   ];
 
   const betTypes = [

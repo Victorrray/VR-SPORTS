@@ -482,37 +482,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     </p>
                   </div>
 
-                  {/* Stats Grid - TODO: This mock data will be sourced from My Picks page in the future */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
-                    {stats.map((stat, idx) => (
-                      <div
-                        key={idx}
-                        className={`p-3 md:p-4 lg:p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent backdrop-blur-2xl border-white/10'} border rounded-xl md:rounded-2xl lg:rounded-2xl`}
-                      >
-                        <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-2">
-                          <div className={`p-1.5 md:p-2 ${isLight ? lightModeColors.statsIcon : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-xl border`}>
-                            <stat.icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isLight ? lightModeColors.statsIconColor : 'text-purple-300'}`} />
-                          </div>
-                          <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-[10px] md:text-xs lg:text-sm uppercase tracking-wide leading-tight`}>
-                            {stat.label}
-                          </span>
-                        </div>
-                        <div className={`${isLight ? lightModeColors.text : 'text-white'} text-lg md:text-xl lg:text-2xl font-bold leading-tight`}>
-                          {stat.value}
-                        </div>
-                        <div
-                          className={`flex items-center gap-1 mt-1.5 md:mt-2 text-[10px] md:text-xs font-bold ${stat.positive ? "text-emerald-600" : "text-red-600"}`}
-                        >
-                          {stat.positive ? (
-                            <ArrowUpRight className="w-3 h-3" />
-                          ) : (
-                            <ArrowDownRight className="w-3 h-3" />
-                          )}
-                          <span>{stat.change}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Bets Section */}
@@ -587,98 +556,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe px-4 pb-4">
-        <div className={`${isLight ? 'bg-white/80 border-gray-200' : 'bg-slate-950/60 border-white/10'} backdrop-blur-xl border rounded-full px-2 py-2.5`}>
-          <div className="flex items-center justify-around gap-1">
-            <button
-              onClick={() => setCurrentView("bankroll")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "bankroll"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <Wallet
-                className={`w-5 h-5 ${currentView === "bankroll" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "bankroll" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-              >
-                Bankroll
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentView("picks")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "picks"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <Target
-                className={`w-5 h-5 ${currentView === "picks" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "picks" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-              >
-                Picks
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentView("dashboard")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "dashboard"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <Home
-                className={`w-5 h-5 ${currentView === "dashboard" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "dashboard" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-              >
-                Home
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentView("odds")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "odds"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <Zap
-                className={`w-5 h-5 ${currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "odds" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-              >
-                Odds
-              </span>
-            </button>
-            <button
-              onClick={() => setCurrentView("account")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "account"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <User
-                className={`w-5 h-5 ${currentView === "account" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "account" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-              >
-                Account
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Bet Slip */}
       <BetSlip
