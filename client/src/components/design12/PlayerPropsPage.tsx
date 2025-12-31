@@ -1435,7 +1435,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
 
                     {/* Team/Line - Recommended pick (spread, total, moneyline, etc.) */}
                     <div className="lg:col-span-3 min-w-0">
-                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base leading-tight`}>{pick.pick}</div>
+                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base leading-tight line-clamp-2`}>{pick.pick}</div>
                     </div>
 
                     {/* Book - Best sportsbook for this pick */}
