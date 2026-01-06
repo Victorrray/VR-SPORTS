@@ -2742,8 +2742,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             className={`grid grid-cols-4 gap-3 px-4 py-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-2xl items-center`}
                           >
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{formatOdds(book.odds)}</div>
-                            <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{formatOdds(book.team2Odds)}</div>
+                            <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.odds)}</div>
+                            <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.team2Odds)}</div>
                             <div className="flex justify-end">
                               <button
                                 onClick={(e) => {
@@ -2846,8 +2846,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
                               {book.line && <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{book.line}</div>}
                             </div>
-                            <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-base text-center`}>{formatOdds(book.odds)}</div>
-                            <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-base text-center`}>{book.team2Odds && book.team2Odds !== '--' ? formatOdds(book.team2Odds) : '--'}</div>
+                            <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{formatOdds(book.odds)}</div>
+                            <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{book.team2Odds && book.team2Odds !== '--' ? formatOdds(book.team2Odds) : '--'}</div>
                             <div className="flex justify-end">
                               {isPickAdded(pick, book.name) ? (
                                 <button

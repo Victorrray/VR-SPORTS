@@ -772,6 +772,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // Filter out books with different lines to avoid confusion
         const booksAtExactConsensus = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
         
+        // CRITICAL: displayBooks should always show Over in first column, Under in second
+        // The header says "Over" / "Under" so we keep consistent column order
+        // But we highlight the correct side based on pickSide
         const displayBooks = booksAtExactConsensus.map((b: any) => {
           return {
             name: b.name,
@@ -779,9 +782,12 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             line: b.line,
             odds: b.overOdds,
             team2Odds: b.underOdds || '--',
+            overOdds: b.overOdds,
+            underOdds: b.underOdds || '--',
             ev: hasEnoughData ? '0%' : '--',
             isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
-            isAtConsensus: true
+            isAtConsensus: true,
+            pickSide: pickSide // Track which side is the pick
           };
         }).sort((a: any, b: any) => {
           // Best book should always be first
