@@ -1683,87 +1683,103 @@ export default function OddsTable({
             outcomeName: b.outcomeName
           })));
           
-          const bestOverBook = overBooksToUse.length > 0 ? overBooksToUse.reduce((best, book) => {
-            const bestLine = parseFloat(best.point || best.line || 0);
-            const bookLine = parseFloat(book.point || book.line || 0);
-            
-            // DEBUG: Log all books being compared
-            console.log(`🎯 OVER BOOK COMPARE: ${book.bookmaker?.key} point=${book.point} line=${book.line} vs best point=${best.point} line=${best.line}`);
-            
-            // For OVER: prefer lower lines (easier to hit)
-            if (bookLine < bestLine) {
-              console.log(`🎯 Line Shopping OVER: Found better line ${bookLine} vs ${bestLine} at ${book.bookmaker?.key || book.book}`);
-              return book;
-            }
-            if (bookLine > bestLine) return best;
-            
-            // Same line: prefer better odds
-            const bestDecimal = americanToDecimal(best.price);
-            const bookDecimal = americanToDecimal(book.price);
-            return bookDecimal > bestDecimal ? book : best;
-          }) : null;
+          // Find the ABSOLUTE BEST odds across all Over and Under books
+          // This ensures we display whichever side has the best odds, regardless of book
+          let bestOverBook = null;
+          let bestUnderBook = null;
+          let primaryBook = null;
+          let showOver = false;
           
-          console.log(`🎯 BEST OVER BOOK for ${propData.playerName}:`, {
-            key: bestOverBook?.bookmaker?.key,
-            point: bestOverBook?.point,
-            line: bestOverBook?.line,
-            price: bestOverBook?.price
-          });
-          
-          const bestUnderBook = underBooksToUse.length > 0 ? underBooksToUse.reduce((best, book) => {
-            const bestLine = parseFloat(best.point || best.line || 0);
-            const bookLine = parseFloat(book.point || book.line || 0);
+          // Find best Over book (prefer lower lines, then better odds)
+          if (overBooksToUse.length > 0) {
+            bestOverBook = overBooksToUse.reduce((best, book) => {
+              const bestLine = parseFloat(best.point || best.line || 0);
+              const bookLine = parseFloat(book.point || book.line || 0);
+              
+              console.log(`🎯 OVER BOOK COMPARE: ${book.bookmaker?.key} point=${book.point} vs best point=${best.point}`);
+              
+              // For OVER: prefer lower lines (easier to hit)
+              if (bookLine < bestLine) {
+                console.log(`🎯 Line Shopping OVER: Found better line ${bookLine} vs ${bestLine} at ${book.bookmaker?.key}`);
+                return book;
+              }
+              if (bookLine > bestLine) return best;
+              
+              // Same line: prefer better odds
+              const bestDecimal = americanToDecimal(best.price);
+              const bookDecimal = americanToDecimal(book.price);
+              return bookDecimal > bestDecimal ? book : best;
+            });
             
-            // For UNDER: prefer higher lines (easier to hit)
-            if (bookLine > bestLine) {
-              console.log(`🎯 Line Shopping UNDER: Found better line ${bookLine} vs ${bestLine} at ${book.bookmaker?.key || book.book}`);
-              return book;
-            }
-            if (bookLine < bestLine) return best;
+            console.log(`🎯 BEST OVER BOOK for ${propData.playerName}:`, {
+              key: bestOverBook?.bookmaker?.key,
+              price: bestOverBook?.price,
+              decimal: americanToDecimal(bestOverBook?.price).toFixed(3)
+            });
+          }
+          
+          // Find best Under book (prefer higher lines, then better odds)
+          if (underBooksToUse.length > 0) {
+            bestUnderBook = underBooksToUse.reduce((best, book) => {
+              const bestLine = parseFloat(best.point || best.line || 0);
+              const bookLine = parseFloat(book.point || book.line || 0);
+              
+              console.log(`🎯 UNDER BOOK COMPARE: ${book.bookmaker?.key} point=${book.point} vs best point=${best.point}`);
+              
+              // For UNDER: prefer higher lines (easier to hit)
+              if (bookLine > bestLine) {
+                console.log(`🎯 Line Shopping UNDER: Found better line ${bookLine} vs ${bestLine} at ${book.bookmaker?.key}`);
+                return book;
+              }
+              if (bookLine < bestLine) return best;
+              
+              // Same line: prefer better odds
+              const bestDecimal = americanToDecimal(best.price);
+              const bookDecimal = americanToDecimal(book.price);
+              return bookDecimal > bestDecimal ? book : best;
+            });
             
-            // Same line: prefer better odds
-            const bestDecimal = americanToDecimal(best.price);
-            const bookDecimal = americanToDecimal(book.price);
-            return bookDecimal > bestDecimal ? book : best;
-          }) : null;
+            console.log(`🎯 BEST UNDER BOOK for ${propData.playerName}:`, {
+              key: bestUnderBook?.bookmaker?.key,
+              price: bestUnderBook?.price,
+              decimal: americanToDecimal(bestUnderBook?.price).toFixed(3)
+            });
+          }
           
-          // Find the ABSOLUTE BEST book across both sides (best odds overall)
-          let primaryBook;
-          let showOver;
-          
+          // Now compare the best Over and best Under to find absolute best odds
           if (bestOverBook && bestUnderBook) {
-            // Compare odds directly - pick the book with best odds
             const overDec = americanToDecimal(bestOverBook.price);
             const underDec = americanToDecimal(bestUnderBook.price);
             
-            // Strictly greater than - if Over has better odds, show Over
-            // Otherwise show Under
+            console.log(`🎯 COMPARING BEST ODDS: Over ${overDec.toFixed(3)} vs Under ${underDec.toFixed(3)}`);
+            
+            // Pick whichever side has better odds
             if (overDec > underDec) {
               primaryBook = bestOverBook;
               showOver = true;
-              console.log(`🎯 BEST ODDS: Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key} beats Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key}`);
+              console.log(`🎯 ABSOLUTE BEST: Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key}`);
             } else if (underDec > overDec) {
               primaryBook = bestUnderBook;
               showOver = false;
-              console.log(`🎯 BEST ODDS: Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key} beats Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key}`);
+              console.log(`🎯 ABSOLUTE BEST: Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key}`);
             } else {
               // Equal odds - prefer Over
               primaryBook = bestOverBook;
               showOver = true;
-              console.log(`🎯 BEST ODDS: Over and Under have equal odds, defaulting to Over`);
+              console.log(`🎯 ABSOLUTE BEST: Equal odds, defaulting to Over`);
             }
           } else if (bestOverBook) {
-            // Only Over side available
             primaryBook = bestOverBook;
             showOver = true;
+            console.log(`🎯 ABSOLUTE BEST: Only Over available`);
           } else if (bestUnderBook) {
-            // Only Under side available
             primaryBook = bestUnderBook;
             showOver = false;
+            console.log(`🎯 ABSOLUTE BEST: Only Under available`);
           } else {
-            // No books available
             primaryBook = null;
             showOver = false;
+            console.log(`🎯 ABSOLUTE BEST: No books available`);
           }
           
           console.log(`🎯 PRIMARY BOOK SELECTED: ${propData.playerName}`, {
