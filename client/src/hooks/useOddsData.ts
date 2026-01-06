@@ -2398,86 +2398,168 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             return;
           }
           
-          // Get the best exchange odds (this is our reference "fair" line)
-          const bestExchangeBook = exchangeBooks.reduce((best: any, book: any) => {
-            const bestOdds = parseInt(best.odds, 10);
-            const bookOdds = parseInt(book.odds, 10);
-            return bookOdds > bestOdds ? book : best;
-          }, exchangeBooks[0]);
-          
-          const exchangeOdds = parseInt(bestExchangeBook.odds, 10);
-          const exchangeLine = bestExchangeBook.line;
-          
-          if (isNaN(exchangeOdds)) {
-            debugStats.badOdds++;
-            return;
-          }
-          
-          // CRITICAL: For player props, only compare books with the SAME LINE
-          // Different lines are different bets - can't compare -443 on 149.5 to -125 on 196.5
           const isPlayerProp = pick.isPlayerProp || pick.playerName;
+          const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
           
-          // Find books with better odds than the exchange (and same line for props)
-          const betterBooks = otherBooks.filter((b: any) => {
-            const bookOdds = parseInt(b.odds, 10);
-            if (isNaN(bookOdds)) return false;
+          // For player props, we need to check BOTH Over and Under sides
+          // and pick the one with better edge vs the exchange
+          if (isPlayerProp) {
+            // Get exchange book's Over and Under odds
+            const exchangeBook = exchangeBooks[0]; // Use first exchange book
+            const exchangeOverOdds = parseInt(exchangeBook.overOdds || exchangeBook.odds, 10);
+            const exchangeUnderOdds = parseInt(exchangeBook.underOdds || exchangeBook.team2Odds, 10);
+            const exchangeLine = exchangeBook.line;
             
-            // For player props, only compare books with the same line
-            if (isPlayerProp && exchangeLine !== undefined && exchangeLine !== null) {
-              const bookLine = b.line;
-              // Lines must match (allow small tolerance for rounding)
-              if (bookLine === undefined || bookLine === null) return false;
-              if (Math.abs(bookLine - exchangeLine) > 0.5) return false;
+            if (isNaN(exchangeOverOdds) && isNaN(exchangeUnderOdds)) {
+              debugStats.badOdds++;
+              return;
             }
             
-            // Better odds = higher number (less negative or more positive)
-            return bookOdds > exchangeOdds;
-          });
-          
-          if (betterBooks.length === 0) {
-            debugStats.noBetter++;
-            return;
+            // Find best Over and Under odds from other books (at same line)
+            let bestOverBook: any = null;
+            let bestUnderBook: any = null;
+            let bestOverOdds = -9999;
+            let bestUnderOdds = -9999;
+            
+            otherBooks.forEach((b: any) => {
+              // Only compare books with same line
+              if (exchangeLine !== undefined && b.line !== undefined) {
+                if (Math.abs(b.line - exchangeLine) > 0.5) return;
+              }
+              
+              const overOdds = parseInt(b.overOdds || b.odds, 10);
+              const underOdds = parseInt(b.underOdds || b.team2Odds, 10);
+              
+              if (!isNaN(overOdds) && overOdds > bestOverOdds) {
+                bestOverOdds = overOdds;
+                bestOverBook = { ...b, odds: b.overOdds || b.odds };
+              }
+              if (!isNaN(underOdds) && underOdds > bestUnderOdds) {
+                bestUnderOdds = underOdds;
+                bestUnderBook = { ...b, odds: b.underOdds || b.team2Odds };
+              }
+            });
+            
+            // Calculate edge for both sides
+            let overEdge = 0;
+            let underEdge = 0;
+            
+            if (bestOverBook && !isNaN(exchangeOverOdds) && bestOverOdds > exchangeOverOdds) {
+              const exchangeProb = toProb(exchangeOverOdds);
+              const otherProb = toProb(bestOverOdds);
+              overEdge = ((exchangeProb - otherProb) / otherProb) * 100;
+            }
+            
+            if (bestUnderBook && !isNaN(exchangeUnderOdds) && bestUnderOdds > exchangeUnderOdds) {
+              const exchangeProb = toProb(exchangeUnderOdds);
+              const otherProb = toProb(bestUnderOdds);
+              underEdge = ((exchangeProb - otherProb) / otherProb) * 100;
+            }
+            
+            // Pick the side with better edge
+            const bestEdge = Math.max(overEdge, underEdge);
+            if (bestEdge < 1) {
+              debugStats.lowEdge++;
+              return;
+            }
+            
+            const isOverBetter = overEdge >= underEdge;
+            const bestBook = isOverBetter ? bestOverBook : bestUnderBook;
+            const bestOdds = isOverBetter ? bestOverOdds : bestUnderOdds;
+            const exchangeOddsForSide = isOverBetter ? exchangeOverOdds : exchangeUnderOdds;
+            const pickSide = isOverBetter ? 'Over' : 'Under';
+            
+            if (!bestBook) {
+              debugStats.noBetter++;
+              return;
+            }
+            
+            debugStats.passed++;
+            
+            // Update pick description to reflect correct side
+            const marketName = pick.pick?.split(' ').slice(-1)[0] || '';
+            const playerName = pick.playerName || pick.pick?.split(' ')[0] || '';
+            const line = pick.line || exchangeLine;
+            const newPickDescription = `${playerName} ${pickSide} ${line} ${marketName}`;
+            
+            filtered.push({
+              ...pick,
+              pick: newPickDescription,
+              pickSide: pickSide,
+              bestOdds: String(bestOdds),
+              bestBook: bestBook.name,
+              ev: `${bestEdge.toFixed(1)}%`,
+              exchangeOdds: String(exchangeOddsForSide),
+              exchangeBook: exchangeBook.name,
+              edgeVsExchange: bestEdge,
+              books: [
+                { ...bestBook, isBest: true, ev: `${bestEdge.toFixed(1)}%` },
+                { ...exchangeBook, odds: String(exchangeOddsForSide), isBest: false, ev: '0%', isExchange: true },
+                ...otherBooks.filter((b: any) => b.name !== bestBook.name).slice(0, 3)
+              ],
+              allBooks: books
+            } as any);
+          } else {
+            // Non-player prop logic (straight bets) - use original logic
+            const bestExchangeBook = exchangeBooks.reduce((best: any, book: any) => {
+              const bestOdds = parseInt(best.odds, 10);
+              const bookOdds = parseInt(book.odds, 10);
+              return bookOdds > bestOdds ? book : best;
+            }, exchangeBooks[0]);
+            
+            const exchangeOdds = parseInt(bestExchangeBook.odds, 10);
+            
+            if (isNaN(exchangeOdds)) {
+              debugStats.badOdds++;
+              return;
+            }
+            
+            // Find books with better odds than the exchange
+            const betterBooks = otherBooks.filter((b: any) => {
+              const bookOdds = parseInt(b.odds, 10);
+              if (isNaN(bookOdds)) return false;
+              return bookOdds > exchangeOdds;
+            });
+            
+            if (betterBooks.length === 0) {
+              debugStats.noBetter++;
+              return;
+            }
+            
+            const bestOtherBook = betterBooks.reduce((best: any, book: any) => {
+              const bestOdds = parseInt(best.odds, 10);
+              const bookOdds = parseInt(book.odds, 10);
+              return bookOdds > bestOdds ? book : best;
+            }, betterBooks[0]);
+            
+            const bestOtherOdds = parseInt(bestOtherBook.odds, 10);
+            const exchangeProb = toProb(exchangeOdds);
+            const otherProb = toProb(bestOtherOdds);
+            const edge = ((exchangeProb - otherProb) / otherProb) * 100;
+            
+            if (edge < 1) {
+              debugStats.lowEdge++;
+              return;
+            }
+            
+            debugStats.passed++;
+            
+            filtered.push({
+              ...pick,
+              bestOdds: bestOtherBook.odds,
+              bestBook: bestOtherBook.name,
+              ev: `${edge.toFixed(1)}%`,
+              exchangeOdds: bestExchangeBook.odds,
+              exchangeBook: bestExchangeBook.name,
+              edgeVsExchange: edge,
+              books: [
+                { ...bestOtherBook, isBest: true, ev: `${edge.toFixed(1)}%` },
+                { ...bestExchangeBook, isBest: false, ev: '0%', isExchange: true },
+                ...otherBooks.filter((b: any) => b.name !== bestOtherBook.name).slice(0, 3)
+              ],
+              allBooks: books
+            } as any);
           }
-          
-          // Get the best book among non-exchange books
-          const bestOtherBook = betterBooks.reduce((best: any, book: any) => {
-            const bestOdds = parseInt(best.odds, 10);
-            const bookOdds = parseInt(book.odds, 10);
-            return bookOdds > bestOdds ? book : best;
-          }, betterBooks[0]);
-          
-          const bestOtherOdds = parseInt(bestOtherBook.odds, 10);
-          
-          // Calculate the edge (how much better the other book is)
-          const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
-          const exchangeProb = toProb(exchangeOdds);
-          const otherProb = toProb(bestOtherOdds);
-          const edge = ((exchangeProb - otherProb) / otherProb) * 100;
-          
-          // Only include if there's meaningful edge (at least 1%)
-          if (edge < 1) {
-            debugStats.lowEdge++;
-            return;
-          }
-          
-          debugStats.passed++;
-          
-          // Create a modified pick showing the exchange comparison
-          filtered.push({
-            ...pick,
-            bestOdds: bestOtherBook.odds,
-            bestBook: bestOtherBook.name,
-            ev: `${edge.toFixed(2)}%`,
-            exchangeOdds: bestExchangeBook.odds,
-            exchangeBook: bestExchangeBook.name,
-            edgeVsExchange: edge,
-            books: [
-              { ...bestOtherBook, isBest: true, ev: `${edge.toFixed(2)}%` },
-              { ...bestExchangeBook, isBest: false, ev: '0%', isExchange: true },
-              ...otherBooks.filter((b: any) => b.name !== bestOtherBook.name).slice(0, 3)
-            ],
-            allBooks: books
-          } as any);
         });
         
         // Sort by edge (highest first)
