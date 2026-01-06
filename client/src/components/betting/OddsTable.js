@@ -1746,27 +1746,56 @@ export default function OddsTable({
             });
           }
           
-          // Now compare the best Over and best Under to find absolute best odds
+          // Now compare the best Over and best Under to find absolute best EV
           if (bestOverBook && bestUnderBook) {
-            const overDec = americanToDecimal(bestOverBook.price);
-            const underDec = americanToDecimal(bestUnderBook.price);
+            // Use EV to determine which side to display
+            const hasOverEV = overEV !== null && overEV !== undefined;
+            const hasUnderEV = underEV !== null && underEV !== undefined;
             
-            console.log(`🎯 COMPARING BEST ODDS: Over ${overDec.toFixed(3)} vs Under ${underDec.toFixed(3)}`);
+            console.log(`🎯 COMPARING BEST EV: Over EV=${overEV?.toFixed(2) || 'null'}% vs Under EV=${underEV?.toFixed(2) || 'null'}%`);
             
-            // Pick whichever side has better odds
-            if (overDec > underDec) {
+            // Pick whichever side has better EV
+            if (hasOverEV && hasUnderEV) {
+              if (overEV > underEV) {
+                primaryBook = bestOverBook;
+                showOver = true;
+                console.log(`🎯 ABSOLUTE BEST: Over EV ${overEV.toFixed(2)}% beats Under EV ${underEV.toFixed(2)}%`);
+              } else if (underEV > overEV) {
+                primaryBook = bestUnderBook;
+                showOver = false;
+                console.log(`🎯 ABSOLUTE BEST: Under EV ${underEV.toFixed(2)}% beats Over EV ${overEV.toFixed(2)}%`);
+              } else {
+                // Equal EV - prefer Over
+                primaryBook = bestOverBook;
+                showOver = true;
+                console.log(`🎯 ABSOLUTE BEST: Equal EV, defaulting to Over`);
+              }
+            } else if (hasOverEV) {
+              // Only Over has EV
               primaryBook = bestOverBook;
               showOver = true;
-              console.log(`🎯 ABSOLUTE BEST: Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key}`);
-            } else if (underDec > overDec) {
+              console.log(`🎯 ABSOLUTE BEST: Only Over has EV (${overEV.toFixed(2)}%)`);
+            } else if (hasUnderEV) {
+              // Only Under has EV
               primaryBook = bestUnderBook;
               showOver = false;
-              console.log(`🎯 ABSOLUTE BEST: Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key}`);
+              console.log(`🎯 ABSOLUTE BEST: Only Under has EV (${underEV.toFixed(2)}%)`);
             } else {
-              // Equal odds - prefer Over
-              primaryBook = bestOverBook;
-              showOver = true;
-              console.log(`🎯 ABSOLUTE BEST: Equal odds, defaulting to Over`);
+              // No EV available, fall back to odds comparison
+              const overDec = americanToDecimal(bestOverBook.price);
+              const underDec = americanToDecimal(bestUnderBook.price);
+              console.log(`🎯 NO EV AVAILABLE: Falling back to odds comparison - Over ${overDec.toFixed(3)} vs Under ${underDec.toFixed(3)}`);
+              
+              if (overDec > underDec) {
+                primaryBook = bestOverBook;
+                showOver = true;
+              } else if (underDec > overDec) {
+                primaryBook = bestUnderBook;
+                showOver = false;
+              } else {
+                primaryBook = bestOverBook;
+                showOver = true;
+              }
             }
           } else if (bestOverBook) {
             primaryBook = bestOverBook;
