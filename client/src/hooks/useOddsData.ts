@@ -301,17 +301,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       return false;
     });
     
-    // Debug logging for DFS apps
-    if (normalizedKey?.includes('betr') || normalizedKey?.includes('pick6') || 
-        normalizedName?.includes('betr') || normalizedName?.includes('pick6')) {
-      console.log(`🎯 DFS FILTER CHECK: key="${bookKey}", name="${bookName}"`, {
-        normalizedKey,
-        normalizedName,
-        selectedSportsbooks,
-        isIncluded: result
-      });
-    }
-    
     return result;
   };
   
@@ -382,10 +371,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const overOutcome = outcomes.find(o => o.name === 'Over');
             const underOutcome = outcomes.find(o => o.name === 'Under');
             
-            // Debug: Log when Under is missing or same as Over
-            if (overOutcome && !underOutcome) {
-              console.log(`⚠️ Missing Under for ${playerName} at ${bookName}:`, outcomes.map(o => o.name));
-            }
             
             if (overOutcome) {
               // Group by player + market only (NOT by line) to combine all books
@@ -420,7 +405,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               } else if (isDFS) {
                 // Create synthetic Under for DFS apps that only return Over
                 underOdds = '-119';
-                console.log(`🔧 SYNTHETIC UNDER CREATED: ${playerName} at ${bookName} - Under @ -119`);
               } else {
                 // For traditional sportsbooks without Under, set to null
                 underOdds = null;
@@ -436,24 +420,12 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
                   underOdds
                 };
                 
-                // Debug logging for DraftKings Pick 6 and Betr
-                if (bookKey?.toLowerCase().includes('draftkings_pick6') || bookKey?.toLowerCase().includes('betr')) {
-                  console.log(`🎯 DFS APP COLLECTED: ${bookKey} (${bookName}) for ${playerName} - ${market.key} @ ${overOutcome.point}`, {
-                    overOdds,
-                    underOdds,
-                    isIncluded: isBookIncluded(bookKey, bookName)
-                  });
-                }
-                
                 // Add to ALL books (for mini table)
                 propData.books.push(bookData);
                 
                 // Also add to filtered books if it matches the filter (for main card)
                 if (isBookIncluded(bookKey, bookName)) {
                   propData.filteredBooks.push(bookData);
-                  if (bookKey?.toLowerCase().includes('draftkings_pick6') || bookKey?.toLowerCase().includes('betr')) {
-                    console.log(`✅ DFS APP ADDED TO FILTERED: ${bookKey} for ${playerName}`);
-                  }
                 }
               }
             }
@@ -461,37 +433,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         });
       });
       
-      // Log player props summary
-      console.log(`🏈 Player props found: ${playerPropsMap.size} unique props`);
-      
-      // Count DFS apps in collected props
-      let dfsAppCount = 0;
-      let draftKingsCount = 0;
-      let betrCount = 0;
-      playerPropsMap.forEach((propData) => {
-        propData.books.forEach((book: any) => {
-          if (book.key?.toLowerCase().includes('draftkings_pick6')) {
-            draftKingsCount++;
-            dfsAppCount++;
-          } else if (book.key?.toLowerCase().includes('betr')) {
-            betrCount++;
-            dfsAppCount++;
-          }
-        });
-      });
-      console.log(`🎯 DFS APPS IN PROPS: Total DFS=${dfsAppCount}, DraftKings Pick 6=${draftKingsCount}, Betr=${betrCount}`);
-      
-      if (playerPropsMap.size > 0) {
-        const firstProp = playerPropsMap.values().next().value;
-        console.log(`🏈 Sample prop books count: ${firstProp?.books?.length}, books:`, firstProp?.books?.map((b: any) => b.name));
-        console.log(`🏈 Sample prop data:`, {
-          playerName: firstProp?.playerName,
-          marketKey: firstProp?.marketKey,
-          point: firstProp?.point,
-          booksCount: firstProp?.books?.length,
-          firstBook: firstProp?.books?.[0]
-        });
-      }
       
       // Convert player props map to picks
       let skippedNoBooks = 0;
@@ -552,27 +493,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const hasFilteredBooks = propData.filteredBooks.length > 0;
         const hasAllBooks = propData.books.length > 0;
         
-        // Debug logging for DraftKings Pick 6 and Betr
-        const hasDraftKings = propData.books.some((b: any) => b.key?.toLowerCase().includes('draftkings_pick6'));
-        const hasBetr = propData.books.some((b: any) => b.key?.toLowerCase().includes('betr'));
-        if (hasDraftKings || hasBetr) {
-          console.log(`🎯 DFS FILTERING CHECK: ${propData.playerName} - ${propData.marketKey}`, {
-            userHasFilter,
-            hasFilteredBooks,
-            hasAllBooks,
-            hasDraftKings,
-            hasBetr,
-            allBooks: propData.books.map((b: any) => b.key),
-            filteredBooks: propData.filteredBooks.map((b: any) => b.key)
-          });
-        }
-        
         // CRITICAL: If user filtered for specific sportsbooks but none of them have this prop, skip it
         if (userHasFilter && !hasFilteredBooks) {
           skippedNoFilteredBooks++;
-          if (hasDraftKings || hasBetr) {
-            console.log(`⏭️ SKIPPED DFS: ${propData.playerName} - no filtered books match`);
-          }
           return; // Don't show picks where the filtered sportsbook doesn't offer the line
         }
         
@@ -606,15 +529,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const MIN_BOOKS_FOR_EV = userHasFilter ? 1 : 2; // Lowered from 4 to 1 for filtered views
         const booksForEV = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
         
-        // Debug logging for DraftKings Pick 6 and Betr EV calculation
-        if (hasDraftKings || hasBetr) {
-          console.log(`🎯 DFS EV CALC: ${propData.playerName} - ${propData.marketKey}`, {
-            booksForEV: booksForEV.length,
-            minRequired: MIN_BOOKS_FOR_EV,
-            consensusLine,
-            books: booksForEV.map((b: any) => ({ name: b.name, line: b.line }))
-          });
-        }
         const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
         
         // Get Over odds
@@ -628,15 +542,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           .map((o: any) => parseInt(o, 10))
           .filter((o: number) => !isNaN(o));
         const hasEnoughUnderData = underOddsArray.length >= MIN_BOOKS_FOR_EV;
-        
-        // Debug: Log Under data availability
-        console.log(`📊 UNDER DATA CHECK: ${propData.playerName} - ${propData.marketKey}`, {
-          underOddsArray,
-          underOddsCount: underOddsArray.length,
-          minRequired: MIN_BOOKS_FOR_EV,
-          hasEnoughUnderData,
-          booksWithUnder: booksForEV.filter((b: any) => b.underOdds && b.underOdds !== '--').map((b: any) => ({ name: b.name, underOdds: b.underOdds }))
-        });
         
         // Calculate WEIGHTED average implied probability for both sides
         // Get book keys for weighting
@@ -950,17 +855,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         });
       });
       
-      // Log filter summary for debugging
-      console.log(`🏈 Player props filter summary:`, {
-        totalProps: playerPropsMap.size,
-        successfulPicks,
-        skippedNoBooks,
-        skippedNoFilteredBooks,
-        skippedNoConsensusBooks,
-        skippedNoValidOdds,
-        skippedNoFilteredBestOdds,
-        skippedForcedSide
-      });
     } else {
       // GAME ODDS MODE: Create separate picks for each market type
       // Standard markets: h2h, spreads, totals
@@ -2158,7 +2052,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       
       const marketsList = getMarketsForFilter(marketType || 'all', sportsList);
       params.append('markets', marketsList);
-      console.log('📊 Filters applied - Sport:', sport, '-> API:', sportsList, 'Market:', marketType, '-> API:', marketsList);
       
       // Add other parameters the backend expects
       params.append('regions', 'us');
@@ -2180,29 +2073,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const endpoint = `/api/odds${queryString ? `?${queryString}` : ''}`;
       const fetchTimestamp = new Date().toISOString();
 
-      if (betType === 'props') {
-        console.log('🏈🏈🏈 PLAYER PROPS HOOK - FETCHING 🏈🏈🏈', fetchTimestamp);
-        console.log('🏈 betType:', betType);
-        console.log('🏈 sport:', sport);
-        console.log('🏈 sportsbooks filter:', sportsbooks);
-        console.log('🏈 Fetching from:', endpoint);
-      }
-      
-      if (betType === 'exchanges') {
-        console.log('💱💱💱 EXCHANGES MODE - FETCHING 💱💱💱', fetchTimestamp);
-        console.log('💱 Looking for +EV vs Novig/ProphetX');
-        console.log('💱 Fetching BOTH straight bets AND player props');
-      }
-      
-      console.log('📊 Fetching odds data from:', endpoint, 'at', fetchTimestamp);
-      console.log('📊 Full filter params:', Object.fromEntries(params));
-      console.log('📊 Sport filter details:', {
-        selectedSport: sport,
-        mappedToAPI: sportsList,
-        marketFilter: marketsList,
-        betType: betType,
-        isNCAAFootball: sport === 'ncaa-football'
-      });
 
       // For exchanges mode, fetch both straight bets AND player props in parallel
       let response;
@@ -2212,8 +2082,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         propsParams.set('betType', 'props');
         const propsEndpoint = `/api/odds?${propsParams.toString()}`;
         
-        console.log('💱 Fetching straight bets from:', endpoint);
-        console.log('💱 Fetching player props from:', propsEndpoint);
         
         // Fetch both in parallel
         const [straightResponse, propsResponse] = await Promise.all([
@@ -2230,28 +2098,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         const propsData = Array.isArray(propsResponse.data) ? propsResponse.data : 
           (propsResponse.data?.picks || []);
         
-        console.log('💱 Straight bets fetched:', straightData.length, 'games');
-        console.log('💱 Player props fetched:', propsData.length, 'events');
         
         // Merge into single response
         response = { data: [...straightData, ...propsData] };
-        console.log('💱 Combined total:', response.data.length, 'items');
       } else {
         response = await apiClient.get(endpoint);
       }
       
-      console.log('📦 API Response:', response.data);
-      console.log('📦 Response type:', typeof response.data);
-      console.log('📦 Is array?:', Array.isArray(response.data));
-      console.log('📦 Response length:', Array.isArray(response.data) ? response.data.length : 'N/A');
-      if (response.data && typeof response.data === 'object') {
-        console.log('📦 Response keys:', Object.keys(response.data));
-      }
-      
-      // Debug: Log first few items if array
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        console.log('📦 First item sample:', response.data[0]);
-      }
 
       // DFS apps that only offer Over bets (no Under) - DEPRECATED
       // Note: We now create synthetic Unders for DFS apps, so we should NOT filter them out
@@ -2266,10 +2119,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const filterUnderForDFS = (picks: OddsPick[]) => {
         // CRITICAL: Do NOT filter out Unders anymore - we want to show them
         // DFS apps now have synthetic Unders created in the processing logic
-        if (isDFSOnlyFilter) {
-          console.log(`🎮 DFS filter active but NOT filtering Unders - synthetic Unders enabled`);
-        }
-        return picks; // Return all picks including Unders
+        return picks; // Return all picks including Unders (synthetic Unders enabled for DFS)
       };
       
       // Filter picks by minimum data points (book count)
@@ -2620,10 +2470,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         // Sort by edge (highest first)
         filtered.sort((a: any, b: any) => (b.edgeVsExchange || 0) - (a.edgeVsExchange || 0));
         
-        // Log debug stats for exchanges filtering
-        console.log('💱 EXCHANGES FILTER DEBUG:', debugStats);
-        console.log('💱 Filtered results:', filtered.length, 'picks with +EV vs exchanges');
-        
         return filtered;
       };
 
@@ -2663,9 +2509,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           return gameDate >= now; // Keep only future games
         });
         
-        if (beforeCount !== filtered.length) {
-          console.log(`🗑️ filterExpiredBets: Removed ${beforeCount - filtered.length} expired bets (${beforeCount} → ${filtered.length})`);
-        }
         return filtered;
       };
       
