@@ -2474,28 +2474,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             let overEdge = 0;
             let underEdge = 0;
             
-            // Debug: Log the comparison values
-            console.log(`💱 EXCHANGE COMPARISON for ${pick.playerName}:`, {
-              exchangeOver: exchangeOverOdds,
-              exchangeUnder: exchangeUnderOdds,
-              bestOver: bestOverOdds,
-              bestUnder: bestUnderOdds,
-              overBeatsExchange: bestOverOdds > exchangeOverOdds,
-              underBeatsExchange: bestUnderOdds > exchangeUnderOdds
-            });
-            
+            // Only calculate edge if filtered book BEATS exchange (higher odds number)
             if (bestOverBook && !isNaN(exchangeOverOdds) && bestOverOdds > exchangeOverOdds) {
               const exchangeProb = toProb(exchangeOverOdds);
               const otherProb = toProb(bestOverOdds);
               overEdge = ((exchangeProb - otherProb) / otherProb) * 100;
-              console.log(`✅ Over edge: ${overEdge.toFixed(2)}% (${bestOverOdds} beats ${exchangeOverOdds})`);
             }
             
             if (bestUnderBook && !isNaN(exchangeUnderOdds) && bestUnderOdds > exchangeUnderOdds) {
               const exchangeProb = toProb(exchangeUnderOdds);
               const otherProb = toProb(bestUnderOdds);
               underEdge = ((exchangeProb - otherProb) / otherProb) * 100;
-              console.log(`✅ Under edge: ${underEdge.toFixed(2)}% (${bestUnderOdds} beats ${exchangeUnderOdds})`);
             }
             
             // Pick the side with better edge
