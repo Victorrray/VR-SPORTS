@@ -1571,7 +1571,10 @@ export default function OddsTable({
             if (!books || books.length === 0) return null;
             const probs = books.map(b => americanToProb(b.price ?? b.odds)).filter(p => typeof p === "number" && p > 0 && p < 1);
             const consensusProb = median(probs);
-            if (consensusProb && consensusProb > 0 && consensusProb < 1 && books.length >= 3) {
+            // For DFS apps with few books, allow EV calculation with just 1 book
+            // For traditional books, require at least 3 books for consensus
+            const minBooksRequired = books.some(b => ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'].includes(b.bookmaker?.key?.toLowerCase())) ? 1 : 3;
+            if (consensusProb && consensusProb > 0 && consensusProb < 1 && books.length >= minBooksRequired) {
               const fairDec = 1 / consensusProb;
               
               // Find best line + odds combination (same logic as above)
