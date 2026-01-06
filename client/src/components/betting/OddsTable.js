@@ -1051,6 +1051,17 @@ export default function OddsTable({
           console.log(`📊 GAME: ${game.home_team} vs ${game.away_team} has ${game.bookmakers.length} bookmakers:`, 
             game.bookmakers.map(b => b.key));
           
+          // Log PrizePicks specifically
+          const prizepicks = game.bookmakers.find(b => b.key?.toLowerCase() === 'prizepicks');
+          if (prizepicks) {
+            console.log(`🎯 PRIZEPICKS FOUND:`, {
+              key: prizepicks.key,
+              title: prizepicks.title,
+              marketCount: prizepicks.markets?.length || 0,
+              markets: prizepicks.markets?.map(m => ({ key: m.key, outcomes: m.outcomes?.length || 0 }))
+            });
+          }
+          
           game.bookmakers.forEach(bookmaker => {
             allBookmakers.add(bookmaker.key);
             if (['prizepicks', 'underdog', 'draftkings_pick6', 'pick6', 'dabble_au'].includes(bookmaker.key?.toLowerCase())) {
