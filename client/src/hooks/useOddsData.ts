@@ -2467,19 +2467,35 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             });
             
             // Calculate edge for both sides
+            // CRITICAL: For +EV, the filtered book must have BETTER odds than exchange
+            // Better odds = higher number (less negative or more positive)
+            // e.g., -104 is better than -119, so -104 > -119
+            // We want: filteredBookOdds > exchangeOdds (filtered book beats exchange)
             let overEdge = 0;
             let underEdge = 0;
+            
+            // Debug: Log the comparison values
+            console.log(`💱 EXCHANGE COMPARISON for ${pick.playerName}:`, {
+              exchangeOver: exchangeOverOdds,
+              exchangeUnder: exchangeUnderOdds,
+              bestOver: bestOverOdds,
+              bestUnder: bestUnderOdds,
+              overBeatsExchange: bestOverOdds > exchangeOverOdds,
+              underBeatsExchange: bestUnderOdds > exchangeUnderOdds
+            });
             
             if (bestOverBook && !isNaN(exchangeOverOdds) && bestOverOdds > exchangeOverOdds) {
               const exchangeProb = toProb(exchangeOverOdds);
               const otherProb = toProb(bestOverOdds);
               overEdge = ((exchangeProb - otherProb) / otherProb) * 100;
+              console.log(`✅ Over edge: ${overEdge.toFixed(2)}% (${bestOverOdds} beats ${exchangeOverOdds})`);
             }
             
             if (bestUnderBook && !isNaN(exchangeUnderOdds) && bestUnderOdds > exchangeUnderOdds) {
               const exchangeProb = toProb(exchangeUnderOdds);
               const otherProb = toProb(bestUnderOdds);
               underEdge = ((exchangeProb - otherProb) / otherProb) * 100;
+              console.log(`✅ Under edge: ${underEdge.toFixed(2)}% (${bestUnderOdds} beats ${exchangeUnderOdds})`);
             }
             
             // Pick the side with better edge
