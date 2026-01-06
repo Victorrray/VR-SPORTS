@@ -799,13 +799,20 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         });
         
         // For middles: include ALL books with their lines (not just consensus)
+        // CRITICAL: Use the correct odds based on pickSide (Over or Under)
+        // This ensures exchanges mode compares the right side's odds
         const allBooksWithLines = propData.books.map((b: any) => {
+          // Use the odds for the chosen side (Over or Under)
+          const primaryOdds = isOverBetter ? b.overOdds : (b.underOdds || b.overOdds);
+          const secondaryOdds = isOverBetter ? (b.underOdds || '--') : b.overOdds;
           return {
             name: b.name,
             rawName: b.name,
             line: b.line,
-            odds: b.overOdds,
-            team2Odds: b.underOdds || '--',
+            odds: primaryOdds,
+            team2Odds: secondaryOdds,
+            overOdds: b.overOdds,
+            underOdds: b.underOdds || '--',
             ev: hasEnoughData ? '0%' : '--',
             isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
             isAtConsensus: b.line === consensusLine
