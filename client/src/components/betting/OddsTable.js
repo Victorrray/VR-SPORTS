@@ -1191,6 +1191,22 @@ export default function OddsTable({
               
               Object.entries(playerGroups).forEach(([playerName, outcomes]) => {
                 console.log(`🔍 DFS DEBUG: Processing player ${playerName} with ${outcomes.length} outcomes`);
+                
+                // For DFS apps, if we only have Over, create a synthetic Under with -119 odds
+                if (isDFSSite && outcomes.length === 1) {
+                  const onlyOutcome = outcomes[0];
+                  if (onlyOutcome.name === 'Over') {
+                    console.log(`🔍 DFS SYNTHETIC UNDER: Creating synthetic Under for ${playerName} at ${bookmaker.key}`);
+                    // Create synthetic Under outcome with -119 odds
+                    outcomes.push({
+                      name: 'Under',
+                      point: onlyOutcome.point,
+                      price: -119, // DFS standard Under odds
+                      description: onlyOutcome.description
+                    });
+                  }
+                }
+                
                 if (outcomes.length >= 2) { // Need both Over and Under
                   const overOutcome = outcomes.find(o => o.name === 'Over');
                   const underOutcome = outcomes.find(o => o.name === 'Under');
