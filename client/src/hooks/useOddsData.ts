@@ -803,11 +803,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
         // If both have data, use the one with better EV (already determined above)
         
-        // Only force Over if the best Under book is a DFS app AND Under was chosen AND we have a valid alternative
-        if (!isOverBetter && bestUnderBookIsDFS && hasEnoughOverData) {
-          console.log(`⚠️ Forcing Over for ${propData.playerName}: Under was better EV but best Under book is DFS app (doesn't offer Unders)`);
-          isOverBetter = true;
-        }
+        // DFS apps now support Unders with -119 odds, so don't force Over anymore
+        // Allow Unders to show when they have better EV, even from DFS apps
+        // Removed forced Over logic since DFS apps return both Over and Under outcomes
         
         // If user has a filter and the filtered book only has best odds for one side,
         // we MUST use that side. If EV says otherwise, skip this pick.
