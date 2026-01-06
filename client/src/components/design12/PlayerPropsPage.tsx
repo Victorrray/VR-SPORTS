@@ -304,7 +304,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     { id: 'nba', name: 'NBA', count: 18, active: false },
     { id: 'nhl', name: 'NHL', count: 24, active: false },
     { id: 'ncaa-basketball', name: 'NCAA Basketball', count: 25, active: false },
-    { id: 'soccer', name: 'Soccer', count: 50, active: false },
   ];
 
   const betTypes = [
