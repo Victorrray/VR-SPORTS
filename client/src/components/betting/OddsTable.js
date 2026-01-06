@@ -1722,14 +1722,21 @@ export default function OddsTable({
             const overDec = americanToDecimal(bestOverBook.price);
             const underDec = americanToDecimal(bestUnderBook.price);
             
+            // Strictly greater than - if Over has better odds, show Over
+            // Otherwise show Under
             if (overDec > underDec) {
               primaryBook = bestOverBook;
               showOver = true;
               console.log(`🎯 BEST ODDS: Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key} beats Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key}`);
-            } else {
+            } else if (underDec > overDec) {
               primaryBook = bestUnderBook;
               showOver = false;
               console.log(`🎯 BEST ODDS: Under ${bestUnderBook.price} (${underDec.toFixed(3)}) at ${bestUnderBook.bookmaker?.key} beats Over ${bestOverBook.price} (${overDec.toFixed(3)}) at ${bestOverBook.bookmaker?.key}`);
+            } else {
+              // Equal odds - prefer Over
+              primaryBook = bestOverBook;
+              showOver = true;
+              console.log(`🎯 BEST ODDS: Over and Under have equal odds, defaulting to Over`);
             }
           } else if (bestOverBook) {
             // Only Over side available
