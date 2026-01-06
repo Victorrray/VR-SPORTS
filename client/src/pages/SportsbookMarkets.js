@@ -1426,24 +1426,19 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       );
     }
     
-    // Log different messages based on mode
-    if (showPlayerProps) {
-      console.log('🎯 Player Props Sportsbooks:', {
-        totalAvailable: enhancedBooks.length,
-        apiBooks: marketBooks?.length || 0,
-        configuredBooks: hasPlatinum ? AVAILABLE_SPORTSBOOKS.length : 3,
-        dfsApps: missingDFSApps.length,
-        allBooks: enhancedBooks.map(b => b.key)
-      });
-    } else {
-      console.log('📈 Straight Bets Sportsbooks:', {
-        totalAvailable: enhancedBooks.length,
-        apiBooks: marketBooks?.length || 0,
-        configuredBooks: hasPlatinum ? AVAILABLE_SPORTSBOOKS.length : 3,
-        dfsApps: missingDFSApps.length,
-        allBooks: enhancedBooks.map(b => b.key)
-      });
-    }
+    // Hide Betr and DraftKings Pick6 unless they have actual data from the API
+    // These books rarely return data, so only show them when they do
+    const booksToHideUnlessHaveData = ['betr', 'draftkings_pick6'];
+    const apiBookKeys = new Set((marketBooks || []).map(book => book.key?.toLowerCase()));
+    
+    enhancedBooks = enhancedBooks.filter(book => {
+      const bookKeyLower = book.key?.toLowerCase();
+      // If this book is in the "hide unless has data" list, only show if API returned it
+      if (booksToHideUnlessHaveData.includes(bookKeyLower)) {
+        return apiBookKeys.has(bookKeyLower);
+      }
+      return true;
+    });
     
     return enhancedBooks;
   }, [marketBooks, hasPlatinum, showPlayerProps]);
