@@ -407,7 +407,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               
               // DFS apps always have -119 odds, traditional sportsbooks use actual odds
               // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
-              const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'dabble', 'betrivers'];
+              // Note: BetRivers is NOT a DFS app - it's a traditional sportsbook
+              const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'dabble'];
               const isDFS = dfsApps.includes(bookKey?.toLowerCase());
               const overOdds = isDFS ? '-119' : normalizeAmericanOdds(overOutcome.price);
               
@@ -2252,27 +2253,23 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         console.log('📦 First item sample:', response.data[0]);
       }
 
-      // DFS apps that only offer Over bets (no Under)
-      // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
+      // DFS apps that only offer Over bets (no Under) - DEPRECATED
+      // Note: We now create synthetic Unders for DFS apps, so we should NOT filter them out
+      // This allows users to see +EV Under opportunities even on DFS platforms
       const dfsAppsNoUnder = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble', 'dabble_au', 'sleeper'];
       const isDFSOnlyFilter = sportsbooks && sportsbooks.length > 0 && 
         sportsbooks.every(sb => dfsAppsNoUnder.includes(sb.toLowerCase()));
       
       // Filter function to remove Under picks when only DFS apps are selected
+      // DISABLED: We now create synthetic Unders with -119 odds for DFS apps
+      // This allows Unders to display when they have better EV than Overs
       const filterUnderForDFS = (picks: OddsPick[]) => {
-        if (!isDFSOnlyFilter) return picks;
-        
-        const filtered = picks.filter(pick => {
-          // For player props, check if it's an Under pick
-          if (pick.isPlayerProp && pick.pickSide === 'Under') {
-            console.log(`🚫 Filtering out Under pick for DFS filter: ${pick.pick}`);
-            return false;
-          }
-          return true;
-        });
-        
-        console.log(`🎮 DFS filter: Removed ${picks.length - filtered.length} Under picks`);
-        return filtered;
+        // CRITICAL: Do NOT filter out Unders anymore - we want to show them
+        // DFS apps now have synthetic Unders created in the processing logic
+        if (isDFSOnlyFilter) {
+          console.log(`🎮 DFS filter active but NOT filtering Unders - synthetic Unders enabled`);
+        }
+        return picks; // Return all picks including Unders
       };
       
       // Filter picks by minimum data points (book count)
