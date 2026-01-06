@@ -1784,7 +1784,10 @@ export default function OddsTable({
             const hasOverEV = overEV !== null && overEV !== undefined;
             const hasUnderEV = underEV !== null && underEV !== undefined;
             
-            console.log(`🎯 COMPARING BEST EV: Over EV=${overEV?.toFixed(2) || 'null'}% vs Under EV=${underEV?.toFixed(2) || 'null'}%`);
+            console.log(`🎯 COMPARING BEST EV: Over EV=${overEV?.toFixed(2) || 'null'}% vs Under EV=${underEV?.toFixed(2) || 'null'}%`, {
+              bestOverBook: { key: bestOverBook?.bookmaker?.key, price: bestOverBook?.price, outcomeName: bestOverBook?.outcomeName },
+              bestUnderBook: { key: bestUnderBook?.bookmaker?.key, price: bestUnderBook?.price, outcomeName: bestUnderBook?.outcomeName }
+            });
             
             // Pick whichever side has better EV
             if (hasOverEV && hasUnderEV) {
@@ -1816,17 +1819,23 @@ export default function OddsTable({
               // No EV available, fall back to odds comparison
               const overDec = americanToDecimal(bestOverBook.price);
               const underDec = americanToDecimal(bestUnderBook.price);
-              console.log(`🎯 NO EV AVAILABLE: Falling back to odds comparison - Over ${overDec.toFixed(3)} vs Under ${underDec.toFixed(3)}`);
+              console.log(`🎯 NO EV AVAILABLE: Falling back to odds comparison - Over ${overDec.toFixed(3)} vs Under ${underDec.toFixed(3)}`, {
+                bestOverBook: { key: bestOverBook?.bookmaker?.key, price: bestOverBook?.price, outcomeName: bestOverBook?.outcomeName },
+                bestUnderBook: { key: bestUnderBook?.bookmaker?.key, price: bestUnderBook?.price, outcomeName: bestUnderBook?.outcomeName }
+              });
               
               if (overDec > underDec) {
                 primaryBook = bestOverBook;
                 showOver = true;
+                console.log(`🎯 FALLBACK: Over ${overDec.toFixed(3)} wins`);
               } else if (underDec > overDec) {
                 primaryBook = bestUnderBook;
                 showOver = false;
+                console.log(`🎯 FALLBACK: Under ${underDec.toFixed(3)} wins`);
               } else {
                 primaryBook = bestOverBook;
                 showOver = true;
+                console.log(`🎯 FALLBACK: Equal odds, defaulting to Over`);
               }
             }
           } else if (bestOverBook) {
