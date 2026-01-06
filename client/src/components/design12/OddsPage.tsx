@@ -2831,8 +2831,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         {/* Header Row */}
                         <div className={`grid grid-cols-4 gap-6 px-6 py-3 ${isLight ? 'border-gray-200' : 'border-white/10'} border-b`}>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm`}>Book</div>
-                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.team1 || 'Side 1'}</div>
-                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.team2 || 'Side 2'}</div>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp ? 'Over' : (pick.team1 || 'Side 1')}</div>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp ? 'Under' : (pick.team2 || 'Side 2')}</div>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-right`}>Pick</div>
                         </div>
 
