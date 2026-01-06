@@ -224,6 +224,8 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       
       if (isPlayerPropsRequest) {
         console.log('🏈 useMarkets: Detected PLAYER PROPS request');
+      } else {
+        console.log('🎮 useMarkets: Detected STRAIGHT BETS request (game odds)');
       }
       
       const params = new URLSearchParams({
@@ -235,10 +237,13 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         _t: Date.now() // Cache buster
       });
 
-      // Add betType=props for player props requests
+      // Add betType parameter to distinguish between straight bets and player props
       if (isPlayerPropsRequest) {
         params.append('betType', 'props');
         console.log('🏈 useMarkets: Added betType=props to request');
+      } else {
+        params.append('betType', 'straight');
+        console.log('🎮 useMarkets: Added betType=straight to request');
       }
 
       // Add date parameter if provided
