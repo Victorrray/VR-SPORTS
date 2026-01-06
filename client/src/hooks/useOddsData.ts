@@ -2425,8 +2425,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           if (isPlayerProp) {
             // Get exchange book's Over and Under odds
             const exchangeBook = exchangeBooks[0]; // Use first exchange book
-            const exchangeOverOdds = parseInt(exchangeBook.overOdds || exchangeBook.odds, 10);
-            const exchangeUnderOdds = parseInt(exchangeBook.underOdds || exchangeBook.team2Odds, 10);
+            const exchOverRaw = exchangeBook.overOdds ?? exchangeBook.odds;
+            const exchUnderRaw = exchangeBook.underOdds ?? exchangeBook.team2Odds;
+            const exchangeOverOdds = typeof exchOverRaw === 'string' ? parseInt(exchOverRaw, 10) : exchOverRaw;
+            const exchangeUnderOdds = typeof exchUnderRaw === 'string' ? parseInt(exchUnderRaw, 10) : exchUnderRaw;
             const exchangeLine = exchangeBook.line;
             
             if (isNaN(exchangeOverOdds) && isNaN(exchangeUnderOdds)) {
@@ -2446,8 +2448,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 if (Math.abs(b.line - exchangeLine) > 0.5) return;
               }
               
-              const overOdds = parseInt(b.overOdds || b.odds, 10);
-              const underOdds = parseInt(b.underOdds || b.team2Odds, 10);
+              // Parse odds - handle both string and number formats
+              // For player props, odds field contains the primary side, team2Odds contains the other
+              // But we need to check overOdds/underOdds if available, otherwise use odds/team2Odds
+              const overOddsRaw = b.overOdds ?? b.odds;
+              const underOddsRaw = b.underOdds ?? b.team2Odds;
+              const overOdds = typeof overOddsRaw === 'string' ? parseInt(overOddsRaw, 10) : overOddsRaw;
+              const underOdds = typeof underOddsRaw === 'string' ? parseInt(underOddsRaw, 10) : underOddsRaw;
               
               if (!isNaN(overOdds) && overOdds > bestOverOdds) {
                 bestOverOdds = overOdds;
