@@ -2425,10 +2425,18 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           if (isPlayerProp) {
             // Get exchange book's Over and Under odds
             const exchangeBook = exchangeBooks[0]; // Use first exchange book
-            const exchOverRaw = exchangeBook.overOdds ?? exchangeBook.odds;
-            const exchUnderRaw = exchangeBook.underOdds ?? exchangeBook.team2Odds;
-            const exchangeOverOdds = typeof exchOverRaw === 'string' ? parseInt(exchOverRaw, 10) : exchOverRaw;
-            const exchangeUnderOdds = typeof exchUnderRaw === 'string' ? parseInt(exchUnderRaw, 10) : exchUnderRaw;
+            // For exchanges, we need the ACTUAL Over and Under odds, not the pre-selected side
+            // The odds field contains the pre-selected side, team2Odds contains the other
+            // overOdds/underOdds are the explicit Over/Under if available
+            const exchOverRaw = exchangeBook.overOdds || exchangeBook.odds;
+            const exchUnderRaw = exchangeBook.underOdds || exchangeBook.team2Odds;
+            // Handle '--' string which means no odds available
+            const exchangeOverOdds = (exchOverRaw && exchOverRaw !== '--') 
+              ? (typeof exchOverRaw === 'string' ? parseInt(exchOverRaw, 10) : exchOverRaw)
+              : NaN;
+            const exchangeUnderOdds = (exchUnderRaw && exchUnderRaw !== '--')
+              ? (typeof exchUnderRaw === 'string' ? parseInt(exchUnderRaw, 10) : exchUnderRaw)
+              : NaN;
             const exchangeLine = exchangeBook.line;
             
             if (isNaN(exchangeOverOdds) && isNaN(exchangeUnderOdds)) {
@@ -2449,12 +2457,16 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               }
               
               // Parse odds - handle both string and number formats
-              // For player props, odds field contains the primary side, team2Odds contains the other
-              // But we need to check overOdds/underOdds if available, otherwise use odds/team2Odds
-              const overOddsRaw = b.overOdds ?? b.odds;
-              const underOddsRaw = b.underOdds ?? b.team2Odds;
-              const overOdds = typeof overOddsRaw === 'string' ? parseInt(overOddsRaw, 10) : overOddsRaw;
-              const underOdds = typeof underOddsRaw === 'string' ? parseInt(underOddsRaw, 10) : underOddsRaw;
+              // For player props, overOdds/underOdds contain the actual Over/Under odds
+              // Handle '--' string which means no odds available
+              const overOddsRaw = b.overOdds || b.odds;
+              const underOddsRaw = b.underOdds || b.team2Odds;
+              const overOdds = (overOddsRaw && overOddsRaw !== '--')
+                ? (typeof overOddsRaw === 'string' ? parseInt(overOddsRaw, 10) : overOddsRaw)
+                : NaN;
+              const underOdds = (underOddsRaw && underOddsRaw !== '--')
+                ? (typeof underOddsRaw === 'string' ? parseInt(underOddsRaw, 10) : underOddsRaw)
+                : NaN;
               
               if (!isNaN(overOdds) && overOdds > bestOverOdds) {
                 bestOverOdds = overOdds;
