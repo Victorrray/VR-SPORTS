@@ -407,10 +407,23 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               
               // DFS apps always have -119 odds, traditional sportsbooks use actual odds
               // Note: Fliff is NOT a DFS app - it's a social sportsbook with real odds
-              const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'dabble'];
+              const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper', 'dabble', 'betrivers'];
               const isDFS = dfsApps.includes(bookKey?.toLowerCase());
               const overOdds = isDFS ? '-119' : normalizeAmericanOdds(overOutcome.price);
-              const underOdds = isDFS ? '-119' : (underOutcome ? normalizeAmericanOdds(underOutcome.price) : null);
+              
+              // CRITICAL: Create synthetic Under with -119 odds when Under is missing
+              // This allows EV calculation for both sides even when API only returns Over
+              let underOdds: string | null;
+              if (underOutcome) {
+                underOdds = isDFS ? '-119' : normalizeAmericanOdds(underOutcome.price);
+              } else if (isDFS) {
+                // Create synthetic Under for DFS apps that only return Over
+                underOdds = '-119';
+                console.log(`🔧 SYNTHETIC UNDER CREATED: ${playerName} at ${bookName} - Under @ -119`);
+              } else {
+                // For traditional sportsbooks without Under, set to null
+                underOdds = null;
+              }
               
               // Only add books with valid odds
               if (overOdds) {
