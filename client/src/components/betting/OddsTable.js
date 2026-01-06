@@ -2080,6 +2080,13 @@ export default function OddsTable({
       const keys = (marketFilter && marketFilter.length) ? marketFilter : baseKeys;
 
       keys.forEach((mktKey) => {
+        // CRITICAL: In game mode, NEVER process player prop markets
+        // Player props should ONLY appear in props mode
+        if (mktKey.startsWith('player_') || mktKey.startsWith('batter_') || mktKey.startsWith('pitcher_')) {
+          console.log(`🚫 GAME MODE: Skipping player prop market ${mktKey} - only for props mode`);
+          return; // Skip player prop markets in game mode
+        }
+        
         const allMarketOutcomes = [];
         game.bookmakers?.forEach(bk => {
           const mkt = bk.markets?.find(m => m.key === mktKey);
