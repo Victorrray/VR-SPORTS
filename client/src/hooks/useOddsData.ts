@@ -599,9 +599,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         }
         
         // Calculate EV for BOTH Over and Under to determine which side is better
-        // When user has a sportsbook filter, require more books for confidence
-        // When viewing all sports, be more lenient since some sports have fewer books
-        const MIN_BOOKS_FOR_EV = userHasFilter ? 4 : 2;
+        // When user has a sportsbook filter, require fewer books since they're filtering for specific books
+        // When viewing all sports, require more books for confidence
+        // CRITICAL: For synthetic Unders (DFS apps), we need to allow EV calculation with fewer books
+        const MIN_BOOKS_FOR_EV = userHasFilter ? 1 : 2; // Lowered from 4 to 1 for filtered views
         const booksForEV = booksAtConsensusLine.filter((b: any) => b.line === consensusLine);
         
         // Debug logging for DraftKings Pick 6 and Betr EV calculation
@@ -626,6 +627,15 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           .map((o: any) => parseInt(o, 10))
           .filter((o: number) => !isNaN(o));
         const hasEnoughUnderData = underOddsArray.length >= MIN_BOOKS_FOR_EV;
+        
+        // Debug: Log Under data availability
+        console.log(`📊 UNDER DATA CHECK: ${propData.playerName} - ${propData.marketKey}`, {
+          underOddsArray,
+          underOddsCount: underOddsArray.length,
+          minRequired: MIN_BOOKS_FOR_EV,
+          hasEnoughUnderData,
+          booksWithUnder: booksForEV.filter((b: any) => b.underOdds && b.underOdds !== '--').map((b: any) => ({ name: b.name, underOdds: b.underOdds }))
+        });
         
         // Calculate WEIGHTED average implied probability for both sides
         // Get book keys for weighting
