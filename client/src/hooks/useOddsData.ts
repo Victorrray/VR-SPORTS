@@ -2487,6 +2487,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             let underEdge = 0;
             
             // Only calculate edge if filtered book BEATS exchange (higher odds number)
+            // CRITICAL: For +EV, filtered book odds must be HIGHER (less negative) than exchange
+            // e.g., -104 (exchange) vs -119 (filtered) -> -119 > -104 is FALSE, no edge
+            // e.g., -130 (exchange) vs -119 (filtered) -> -119 > -130 is TRUE, has edge
             if (bestOverBook && !isNaN(exchangeOverOdds) && bestOverOdds > exchangeOverOdds) {
               const exchangeProb = toProb(exchangeOverOdds);
               const otherProb = toProb(bestOverOdds);
@@ -2499,8 +2502,23 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               underEdge = ((exchangeProb - otherProb) / otherProb) * 100;
             }
             
-            // Pick the side with better edge
+            // Pick the side with better edge - BOTH must be checked
             const bestEdge = Math.max(overEdge, underEdge);
+            
+            // Debug: Log when a bet passes or fails
+            console.log(`💱 EXCHANGE CHECK: ${pick.playerName}`, {
+              exchangeOver: exchangeOverOdds,
+              exchangeUnder: exchangeUnderOdds,
+              bestOver: bestOverOdds,
+              bestUnder: bestUnderOdds,
+              overBeats: bestOverOdds > exchangeOverOdds,
+              underBeats: bestUnderOdds > exchangeUnderOdds,
+              overEdge: overEdge.toFixed(2),
+              underEdge: underEdge.toFixed(2),
+              bestEdge: bestEdge.toFixed(2),
+              passes: bestEdge >= 1
+            });
+            
             if (bestEdge < 1) {
               debugStats.lowEdge++;
               return;
