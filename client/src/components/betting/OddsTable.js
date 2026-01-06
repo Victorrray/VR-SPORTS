@@ -1108,7 +1108,12 @@ export default function OddsTable({
           console.log(`Bookmaker ${bookmaker.key} has ${bookmaker.markets.length} markets:`, bookmaker.markets.map(m => m.key));
           bookmaker.markets.forEach(market => {
             // Filter markets based on mode
-            const isDFSSite = ['prizepicks', 'underdog', 'pick6', 'dabble_au'].includes(bookmaker.key?.toLowerCase());
+            const isDFSSite = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'].includes(bookmaker.key?.toLowerCase());
+            
+            // Log DFS detection for debugging
+            if (bookmaker.key?.toLowerCase().includes('prize') || bookmaker.key?.toLowerCase().includes('pick')) {
+              console.log(`🔍 DFS DETECTION: bookmaker.key="${bookmaker.key}", isDFSSite=${isDFSSite}`);
+            }
             const isPlayerPropMarket = market.key?.includes('player_') || market.key?.includes('batter_') || market.key?.includes('pitcher_');
             const isRegularMarket = ['h2h', 'spreads', 'totals'].includes(market.key);
             
