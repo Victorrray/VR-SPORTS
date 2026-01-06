@@ -1188,11 +1188,16 @@ export default function OddsTable({
               console.log(`🔍 DFS DEBUG: Player groups for ${market.key}:`, playerGroups);
               
               Object.entries(playerGroups).forEach(([playerName, outcomes]) => {
-                console.log(`🔍 DFS DEBUG: Processing player ${playerName} with ${outcomes.length} outcomes`);
+                console.log(`🔍 DFS DEBUG: Processing player ${playerName} with ${outcomes.length} outcomes`, {
+                  isDFSSite,
+                  bookmakerKey: bookmaker.key,
+                  outcomesNames: outcomes.map(o => o.name)
+                });
                 
                 // For DFS apps, if we only have Over, create a synthetic Under with -119 odds
                 if (isDFSSite && outcomes.length === 1) {
                   const onlyOutcome = outcomes[0];
+                  console.log(`🔍 DFS SINGLE OUTCOME: ${onlyOutcome.name} for ${playerName} at ${bookmaker.key}`);
                   if (onlyOutcome.name === 'Over') {
                     console.log(`🔍 DFS SYNTHETIC UNDER: Creating synthetic Under for ${playerName} at ${bookmaker.key}`);
                     // Create synthetic Under outcome with -119 odds
@@ -1202,13 +1207,21 @@ export default function OddsTable({
                       price: -119, // DFS standard Under odds
                       description: onlyOutcome.description
                     });
+                    console.log(`🔍 DFS SYNTHETIC UNDER CREATED: Now have ${outcomes.length} outcomes`);
+                  } else {
+                    console.log(`🔍 DFS SINGLE OUTCOME IS NOT OVER: ${onlyOutcome.name} - skipping synthetic creation`);
                   }
+                } else if (isDFSSite && outcomes.length > 1) {
+                  console.log(`🔍 DFS MULTIPLE OUTCOMES: Already have ${outcomes.length} outcomes, no synthetic needed`);
                 }
                 
                 if (outcomes.length >= 2) { // Need both Over and Under
                   const overOutcome = outcomes.find(o => o.name === 'Over');
                   const underOutcome = outcomes.find(o => o.name === 'Under');
-                  console.log(`🔍 DFS DEBUG: Found over/under outcomes:`, { over: overOutcome, under: underOutcome });
+                  console.log(`🔍 DFS DEBUG: Found over/under outcomes:`, { 
+                    over: overOutcome ? { name: overOutcome.name, price: overOutcome.price, point: overOutcome.point } : null, 
+                    under: underOutcome ? { name: underOutcome.name, price: underOutcome.price, point: underOutcome.point } : null 
+                  });
                   
                   if (overOutcome && underOutcome && overOutcome.point !== undefined) {
                     // Keep market key as-is to separate standard and alternate lines
