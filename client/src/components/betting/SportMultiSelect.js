@@ -151,8 +151,12 @@ export default function SportMultiSelect({
     
     // Filter out DFS apps if showDFSApps is false
     if (isSportsbook && !showDFSApps) {
-      const dfsAppKeys = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'sleeper', 'prophetx'];
-      filtered = filtered.filter(item => !dfsAppKeys.includes(item.key));
+      const dfsAppKeys = [
+        'prizepicks', 'underdog', 'draftkings_pick6', 'pick6',
+        'dabble', 'dabble_au', 'sleeper', 'betr',
+        'chalkboard', 'parlay', 'hotstreak'
+      ];
+      filtered = filtered.filter(item => !dfsAppKeys.includes(item.key?.toLowerCase()));
     }
     
     // Apply search filter
