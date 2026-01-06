@@ -985,7 +985,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 
                 {/* Desktop Inline Dropdown */}
                 {sportsbooksExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-80 overflow-y-auto`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-80 overflow-y-auto scrollbar-hide`}>
                     {sportsbooksByTier.map((tierGroup, tierIndex) => (
                       <div key={tierIndex}>
                         {/* Tier Header */}
