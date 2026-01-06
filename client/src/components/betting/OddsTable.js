@@ -1824,18 +1824,15 @@ export default function OddsTable({
                 bestUnderBook: { key: bestUnderBook?.bookmaker?.key, price: bestUnderBook?.price, outcomeName: bestUnderBook?.outcomeName }
               });
               
-              if (overDec > underDec) {
+              // CRITICAL: Always pick the side with better odds
+              if (overDec >= underDec) {
                 primaryBook = bestOverBook;
                 showOver = true;
-                console.log(`🎯 FALLBACK: Over ${overDec.toFixed(3)} wins`);
-              } else if (underDec > overDec) {
+                console.log(`🎯 FALLBACK: Over ${overDec.toFixed(3)} wins (>= ${underDec.toFixed(3)})`);
+              } else {
                 primaryBook = bestUnderBook;
                 showOver = false;
-                console.log(`🎯 FALLBACK: Under ${underDec.toFixed(3)} wins`);
-              } else {
-                primaryBook = bestOverBook;
-                showOver = true;
-                console.log(`🎯 FALLBACK: Equal odds, defaulting to Over`);
+                console.log(`🎯 FALLBACK: Under ${underDec.toFixed(3)} wins (> ${overDec.toFixed(3)})`);
               }
             }
           } else if (bestOverBook) {
