@@ -2505,20 +2505,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             // Pick the side with better edge - BOTH must be checked
             const bestEdge = Math.max(overEdge, underEdge);
             
-            // Debug: Log when a bet passes or fails
-            console.log(`💱 EXCHANGE CHECK: ${pick.playerName}`, {
-              exchangeOver: exchangeOverOdds,
-              exchangeUnder: exchangeUnderOdds,
-              bestOver: bestOverOdds,
-              bestUnder: bestUnderOdds,
-              overBeats: bestOverOdds > exchangeOverOdds,
-              underBeats: bestUnderOdds > exchangeUnderOdds,
-              overEdge: overEdge.toFixed(2),
-              underEdge: underEdge.toFixed(2),
-              bestEdge: bestEdge.toFixed(2),
-              passes: bestEdge >= 1
-            });
-            
             if (bestEdge < 1) {
               debugStats.lowEdge++;
               return;
