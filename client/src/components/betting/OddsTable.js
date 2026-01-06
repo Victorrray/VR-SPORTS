@@ -1558,6 +1558,16 @@ export default function OddsTable({
           const overEV = calculateSideEV(propData.overBooks, true);
           const underEV = calculateSideEV(propData.underBooks, false);
           
+          // Debug: Log EV comparison
+          console.log(`📊 PLAYER PROPS EV COMPARISON: ${propData.playerName}`, {
+            overEV: overEV ? overEV.toFixed(2) + '%' : 'null',
+            underEV: underEV ? underEV.toFixed(2) + '%' : 'null',
+            overBooksCount: propData.overBooks?.length || 0,
+            underBooksCount: propData.underBooks?.length || 0,
+            hasOverBooks: !!propData.overBooks && propData.overBooks.length > 0,
+            hasUnderBooks: !!propData.underBooks && propData.underBooks.length > 0
+          });
+          
           // Determine which books to use based on filter
           // If bookFilter is active, only use books that match the filter
           const hasFilter = bookFilter && bookFilter.length > 0;

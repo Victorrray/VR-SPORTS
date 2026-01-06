@@ -761,6 +761,22 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           }
         }
         
+        // Debug logging for EV comparison
+        if (DEBUG_LOGGING) {
+          console.log(`📊 EV COMPARISON for ${propData.playerName} ${formatMarketName(propData.marketKey)}:`, {
+            overEV: overEV.toFixed(2) + '%',
+            underEV: underEV.toFixed(2) + '%',
+            hasEnoughOverData,
+            hasEnoughUnderData,
+            overAvgProb: overAvgProb.toFixed(3),
+            underAvgProb: underAvgProb.toFixed(3),
+            bestOverOdds: bestOverBook?.overOdds,
+            bestUnderOdds: bestUnderBook?.underOdds,
+            bestOverBook: bestOverBook?.name,
+            bestUnderBook: bestUnderBook?.name
+          });
+        }
+        
         // Determine which side is better (higher EV)
         // DFS apps only offer Over bets, so if the best book is a DFS app, force Over
         const bestOverBookIsDFS = dfsAppKeys.includes(bestOverBook?.key?.toLowerCase());
@@ -769,13 +785,27 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // Check if we have a forced side from the filter logic
         const forcedSide = (propData as any).forceSide;
         
-        // If Under would be chosen but the best Under book is a DFS app (which doesn't offer Under), use Over instead
-        let isOverBetter = overEV >= underEV || !hasEnoughUnderData;
+        // Determine which side has better EV (strictly greater than, not equal)
+        // This allows Unders to show when they have better EV than Overs
+        let isOverBetter = overEV > underEV;
         
-        // Force Over if the best book for the card would be a DFS app and we'd pick Under
-        // DFS apps don't offer Under bets
-        if (!isOverBetter && bestUnderBookIsDFS) {
-          console.log(`⚠️ Forcing Over for ${propData.playerName}: Under was better EV but best Under book is DFS app`);
+        // If both sides have insufficient data, default to Over
+        if (!hasEnoughOverData && !hasEnoughUnderData) {
+          isOverBetter = true;
+        }
+        // If only Over has enough data, use Over
+        else if (hasEnoughOverData && !hasEnoughUnderData) {
+          isOverBetter = true;
+        }
+        // If only Under has enough data, use Under
+        else if (!hasEnoughOverData && hasEnoughUnderData) {
+          isOverBetter = false;
+        }
+        // If both have data, use the one with better EV (already determined above)
+        
+        // Only force Over if the best Under book is a DFS app AND Under was chosen AND we have a valid alternative
+        if (!isOverBetter && bestUnderBookIsDFS && hasEnoughOverData) {
+          console.log(`⚠️ Forcing Over for ${propData.playerName}: Under was better EV but best Under book is DFS app (doesn't offer Unders)`);
           isOverBetter = true;
         }
         
