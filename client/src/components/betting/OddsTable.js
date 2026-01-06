@@ -1117,24 +1117,21 @@ export default function OddsTable({
                 console.log(`✅ PROCESSING DFS: ${bookmaker.key} market ${market.key}`);
               }
               
-              // For DFS sites, ensure we're using correct odds
+              // For DFS sites, ensure we're using fixed odds
               if (isDFSSite) {
-                console.log(`Processing DFS site ${bookmaker.key} for market ${market.key}`);
-                // DFS apps return Over with positive odds and Under with -119
+                const dfsOdds = -119;
+                console.log(`Processing DFS site ${bookmaker.key} with fixed ${dfsOdds} odds for market ${market.key}`);
+                // Force fixed odds for all DFS app outcomes (both Over and Under)
                 if (market.outcomes && market.outcomes.length > 0) {
                   console.log(`DFS site ${bookmaker.key} has ${market.outcomes.length} outcomes for market ${market.key}`);
                   
                   market.outcomes.forEach(outcome => {
-                    // Only set -119 for Under outcomes, keep Over odds as-is
-                    if (outcome.name === 'Under' && outcome.price !== -119) {
-                      console.log(`Setting -119 odds for Under in ${market.key}`);
-                      outcome.price = -119;
-                    } else {
-                      console.log(`Keeping ${outcome.price} odds for ${outcome.name} in ${market.key}`);
-                    }
+                    console.log(`Setting ${dfsOdds} odds for ${outcome.name} in ${market.key}`);
+                    outcome.price = dfsOdds;
                     
                     // Keep original name for clean display
                     outcome._originalName = outcome.name;
+                    // Don't modify the name - keep it clean (e.g., just "Over" instead of "Over (DFS)")
                   });
                 } else {
                   console.log(`WARNING: DFS site ${bookmaker.key} has no outcomes for market ${market.key}`);
