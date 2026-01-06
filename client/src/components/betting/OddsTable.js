@@ -1861,7 +1861,8 @@ export default function OddsTable({
             bestOverBookPrice: bestOverBook?.price,
             bestUnderBookPrice: bestUnderBook?.price,
             bookFilter: bookFilter,
-            hasFilter: hasFilter
+            hasFilter: hasFilter,
+            MISMATCH_CHECK: `showOver=${showOver} but primaryBook.outcomeName=${primaryBook?.outcomeName} ${showOver !== (primaryBook?.outcomeName === 'Over') ? '⚠️ MISMATCH!' : '✅ MATCH'}`
           });
           
           // Skip if no primaryBook was selected
