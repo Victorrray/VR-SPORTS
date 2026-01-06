@@ -343,7 +343,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
 
   const sportsbooksByTier = [
     {
-      tier: '🎮 DFS & Pick\'em',
+      tier: 'DFS & Pick\'em',
       books: [
         { id: 'prizepicks', name: 'PrizePicks' },
         { id: 'underdog', name: 'Underdog' },
@@ -353,7 +353,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       ]
     },
     {
-      tier: '📱 Major Sportsbooks',
+      tier: 'Major Sportsbooks',
       books: [
         { id: 'draftkings', name: 'DraftKings' },
         { id: 'fanduel', name: 'FanDuel' },
@@ -364,7 +364,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       ]
     },
     {
-      tier: '🏆 More Sportsbooks',
+      tier: 'More Sportsbooks',
       books: [
         { id: 'hardrock', name: 'Hard Rock' },
         { id: 'betrivers', name: 'BetRivers' },
@@ -375,7 +375,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       ]
     },
     {
-      tier: '📊 Sharp Books',
+      tier: 'Sharp Books',
       books: [
         { id: 'pinnacle', name: 'Pinnacle' },
         { id: 'novig', name: 'NoVig' },
@@ -383,7 +383,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       ]
     },
     {
-      tier: '💱 Exchanges',
+      tier: 'Exchanges',
       books: [
         { id: 'kalshi', name: 'Kalshi' },
         { id: 'prophetx', name: 'ProphetX' },
@@ -392,7 +392,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
       ]
     },
     {
-      tier: '🌐 Offshore',
+      tier: 'Offshore',
       books: [
         { id: 'bovada', name: 'Bovada' },
         { id: 'betonline', name: 'BetOnline' },
