@@ -192,6 +192,25 @@ function isPlayerPropMarket(marketKey: string): boolean {
 // Format market key to readable name (e.g., "player_assists" -> "Assists")
 function formatMarketName(marketKey: string): string {
   if (!marketKey) return '';
+  
+  // Handle combo markets with explicit mappings
+  const marketNameMap: { [key: string]: string } = {
+    'player_rebounds_assists': 'Rebounds + Assists',
+    'player_points_rebounds': 'Points + Rebounds',
+    'player_points_assists': 'Points + Assists',
+    'player_points_rebounds_assists': 'Points + Rebounds + Assists',
+    'player_pass_rush_yds': 'Pass + Rush Yards',
+    'player_rush_reception_yds': 'Rush + Receiving Yards',
+    'player_pass_rush_reception_yds': 'Pass + Rush + Receiving Yards',
+    'player_pass_rush_reception_tds': 'Pass + Rush + Receiving TDs',
+    'player_rush_reception_tds': 'Rush + Receiving TDs',
+    'player_blocks_steals': 'Blocks + Steals',
+  };
+  
+  if (marketNameMap[marketKey]) {
+    return marketNameMap[marketKey];
+  }
+  
   return marketKey
     .replace('player_', '')
     .replace('batter_', '')
