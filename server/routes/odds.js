@@ -392,12 +392,18 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       }
     });
     
-    // Always include player props markets in the fetch (in addition to regular markets)
-    const allMarketsToFetch = [...new Set([...marketsArray, ...playerPropsMarkets])];
+    // Only include player props markets when betType is 'props'
+    // For straight bets (betType='straight' or no betType), only fetch regular markets
+    const isPlayerPropsRequest = betType === 'props';
+    const allMarketsToFetch = isPlayerPropsRequest 
+      ? [...new Set([...marketsArray, ...playerPropsMarkets])]
+      : marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
+    
+    console.log(`📊 Odds API: betType=${betType}, isPlayerPropsRequest=${isPlayerPropsRequest}, marketsToFetch=${allMarketsToFetch.length}`);
     
     // Separate player props from regular markets
     const regularMarkets = marketsArray.filter(m => !m.includes('player_') && !m.includes('batter_') && !m.includes('pitcher_'));
-    const playerPropMarkets = playerPropsMarkets;
+    const playerPropMarkets = isPlayerPropsRequest ? playerPropsMarkets : [];
     
     // Helper to get supported markets for a sport (use soccer_default for unlisted soccer leagues)
     const getSupportedMarketsForSport = (sport) => {
@@ -424,9 +430,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
     const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
     
-    // Step 1: Fetch base odds (and always include player props)
-    if (baseMarkets.length > 0 || playerPropMarkets.length > 0) {
-      const marketsToFetch = [...new Set([...baseMarkets, ...playerPropMarkets])];
+    // Step 1: Fetch base odds (only include player props if betType=props)
+    if (baseMarkets.length > 0 || (isPlayerPropsRequest && playerPropMarkets.length > 0)) {
+      const marketsToFetch = isPlayerPropsRequest 
+        ? [...new Set([...baseMarkets, ...playerPropMarkets])]
+        : baseMarkets;
       const supabase = req.app.locals.supabase;
       const oddsCacheService = req.app.locals.oddsCacheService;
       
