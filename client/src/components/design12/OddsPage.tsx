@@ -632,9 +632,11 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     }
     
     // Filter by sportsbooks (if any selected, check if pick has at least one selected book)
+    // For exchanges mode, also check allBooks since the filtered books array may not include all available books
     if (selectedSportsbooks.length > 0) {
-      const hasSelectedBook = pick.books.some(book => {
-        const bookNameLower = book.name.toLowerCase();
+      const booksToCheck = pick.allBooks || pick.books;
+      const hasSelectedBook = booksToCheck.some((book: any) => {
+        const bookNameLower = (book.name || '').toLowerCase();
         return selectedSportsbooks.some(selectedId => {
           const matchingNames = sportsbookMap[selectedId] || [];
           return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
