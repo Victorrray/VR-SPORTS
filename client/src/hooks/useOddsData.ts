@@ -2538,7 +2538,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             debugStats.passed++;
             
             // Update pick description to reflect correct side
-            const marketName = pick.pick?.split(' ').slice(-1)[0] || '';
+            // Use the original marketKey/marketName to preserve combo market names like "Rebounds + Assists"
+            const marketName = pick.marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || pick.pick?.split(' ').slice(-1)[0] || '';
             const playerName = pick.playerName || pick.pick?.split(' ')[0] || '';
             const line = pick.line || exchangeLine;
             const newPickDescription = `${playerName} ${pickSide} ${line} ${marketName}`;
