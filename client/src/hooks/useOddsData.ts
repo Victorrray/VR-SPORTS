@@ -2477,19 +2477,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               : NaN;
             const exchangeLine = exchangeBook.line;
             
+            // SPECIAL CASE: One-sided market detection
+            // If exchange only offers one side (e.g., Over at +134 but no Under),
+            // the missing side is very likely to hit - they won't offer it
+            const hasOnlyOver = !isNaN(exchangeOverOdds) && isNaN(exchangeUnderOdds);
+            const hasOnlyUnder = isNaN(exchangeOverOdds) && !isNaN(exchangeUnderOdds);
+            const isOneSidedMarket = hasOnlyOver || hasOnlyUnder;
+            
             if (isNaN(exchangeOverOdds) && isNaN(exchangeUnderOdds)) {
               debugStats.badOdds++;
               return;
             }
             
-            // Find best Over and Under odds from other books (at same line)
-            // IMPORTANT: If sportsbooks filter is set, only consider those books for best odds
-            let bestOverBook: any = null;
-            let bestUnderBook: any = null;
-            let bestOverOdds = -9999;
-            let bestUnderOdds = -9999;
-            
-            // Filter otherBooks by sportsbook filter if set
+            // Filter otherBooks by sportsbook filter if set (needed for both one-sided and normal processing)
             const filteredOtherBooks = sportsbooks && sportsbooks.length > 0
               ? otherBooks.filter((b: any) => {
                   const bookKey = (b.key || b.name || '').toLowerCase();
@@ -2506,6 +2506,79 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               debugStats.noOther++;
               return;
             }
+            
+            // For one-sided markets, we want to bet the OPPOSITE side (the one exchange won't offer)
+            if (isOneSidedMarket) {
+              const missingSide = hasOnlyOver ? 'Under' : 'Over';
+              const availableSide = hasOnlyOver ? 'Over' : 'Under';
+              const exchangeAvailableOdds = hasOnlyOver ? exchangeOverOdds : exchangeUnderOdds;
+              
+              // Find the best odds for the MISSING side from filtered books
+              let bestMissingSideBook: any = null;
+              let bestMissingSideOdds = -9999;
+              
+              filteredOtherBooks.forEach((b: any) => {
+                // Only compare books with same line
+                if (exchangeLine !== undefined && b.line !== undefined) {
+                  if (Math.abs(b.line - exchangeLine) > 0.5) return;
+                }
+                
+                // Get the missing side odds
+                const missingSideOddsRaw = missingSide === 'Under' 
+                  ? (b.underOdds || b.team2Odds)
+                  : (b.overOdds || b.odds);
+                const missingSideOdds = (missingSideOddsRaw && missingSideOddsRaw !== '--')
+                  ? (typeof missingSideOddsRaw === 'string' ? parseInt(missingSideOddsRaw, 10) : missingSideOddsRaw)
+                  : NaN;
+                
+                if (!isNaN(missingSideOdds) && missingSideOdds > bestMissingSideOdds) {
+                  bestMissingSideOdds = missingSideOdds;
+                  bestMissingSideBook = { ...b, odds: missingSideOddsRaw };
+                }
+              });
+              
+              if (bestMissingSideBook) {
+                // Calculate implied edge - exchange won't offer this side, so it's likely +EV
+                // Use a high confidence indicator since exchange refuses to offer this side
+                const impliedEdge = 15; // High confidence signal
+                
+                const marketName = pick.marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || pick.pick?.split(' ').slice(-1)[0] || '';
+                const playerName = pick.playerName || pick.pick?.split(' ')[0] || '';
+                const line = pick.line || exchangeLine;
+                const newPickDescription = `${playerName} ${missingSide} ${line} ${marketName}`;
+                
+                console.log(`🎯 ONE-SIDED MARKET: ${playerName} - Exchange only offers ${availableSide} at ${exchangeAvailableOdds}, betting ${missingSide} at ${bestMissingSideOdds}`);
+                
+                debugStats.passed++;
+                filtered.push({
+                  ...pick,
+                  pick: newPickDescription,
+                  pickSide: missingSide,
+                  bestOdds: String(bestMissingSideOdds),
+                  bestBook: bestMissingSideBook.name,
+                  ev: `${impliedEdge.toFixed(1)}%`,
+                  exchangeOdds: `${availableSide} only: ${exchangeAvailableOdds}`,
+                  exchangeBook: exchangeBook.name,
+                  edgeVsExchange: impliedEdge,
+                  isOneSidedMarket: true,
+                  oneSidedInfo: `Exchange only offers ${availableSide}`,
+                  books: [
+                    { ...bestMissingSideBook, isBest: true, ev: `${impliedEdge.toFixed(1)}%` },
+                    { ...exchangeBook, odds: `${availableSide}: ${exchangeAvailableOdds}`, isBest: false, ev: 'N/A', isExchange: true, oneSided: true },
+                    ...otherBooks.filter((b: any) => b.name !== bestMissingSideBook.name).slice(0, 3)
+                  ],
+                  allBooks: books
+                } as any);
+              }
+              return; // Skip normal processing for one-sided markets
+            }
+            
+            // Find best Over and Under odds from other books (at same line)
+            // filteredOtherBooks was already defined above for one-sided market check
+            let bestOverBook: any = null;
+            let bestUnderBook: any = null;
+            let bestOverOdds = -9999;
+            let bestUnderOdds = -9999;
             
             filteredOtherBooks.forEach((b: any) => {
               // Only compare books with same line
