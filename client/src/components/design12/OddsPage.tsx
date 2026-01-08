@@ -1015,17 +1015,17 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           </div>
         </div>
         
-        {/* CTA Buttons - Both redirect to account subscription page */}
+        {/* CTA Buttons - Both redirect to subscribe page */}
         <div className="space-y-3">
           <button
-            onClick={() => navigate('/account')}
+            onClick={() => navigate('/subscribe')}
             className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2"
           >
             <Crown className="w-5 h-5" />
             Upgrade to Gold - $10/mo
           </button>
           <button
-            onClick={() => navigate('/account')}
+            onClick={() => navigate('/subscribe')}
             className={`w-full py-3 px-6 ${isLight ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-white/5 hover:bg-white/10 text-white/80'} font-bold rounded-xl transition-all flex items-center justify-center gap-2`}
           >
             <Sparkles className="w-4 h-4" />

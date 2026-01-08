@@ -21,7 +21,7 @@ export function MobileBottomBar() {
       label: 'Home',
       icon: Home,
       href: '/dashboard'
-    },
+    }
     // Picks tab hidden for free version
     // {
     //   key: 'picks',
@@ -29,12 +29,13 @@ export function MobileBottomBar() {
     //   icon: TrendingUp,
     //   href: '/picks'
     // },
-    {
-      key: 'account',
-      label: 'Account',
-      icon: Settings,
-      href: '/account'
-    }
+    // Account tab removed - /account route no longer exists
+    // {
+    //   key: 'account',
+    //   label: 'Account',
+    //   icon: Settings,
+    //   href: '/account'
+    // }
   ];
 
   const isActive = (href: string) => {

@@ -131,18 +131,18 @@ function AppRoutes() {
             <Routes>
               <Route path="/" element={user ? <DashboardPage /> : <Landing />} />
               <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
-              <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
+              {/* <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} /> */}
               {/* /sportsbooks route removed - old page */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
-              <Route path="/pricing" element={<Landing />} />
+              {/* <Route path="/pricing" element={<Landing />} /> */}
               <Route path="/subscribe" element={<PrivateRoute><Subscribe /></PrivateRoute>} />
-              <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
-              <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />
-              <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
+              {/* <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} /> */}
+              {/* <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} /> */}
+              {/* <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} /> */}
               {/* /picks route hidden for free version */}
               {/* <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} /> */}
               <Route path="/roadmap" element={<Roadmap />} />
