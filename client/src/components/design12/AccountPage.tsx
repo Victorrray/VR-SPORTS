@@ -37,7 +37,8 @@ export function AccountPage({
   onNavigateToChangePlan,
 }: AccountPageProps) {
   const { colorMode } = useTheme();
-  const isLight = colorMode === 'light';
+  // Dark mode only - no light mode support
+  const isLight = false;
   const { user, profile } = useAuth();
   const { me, loading: meLoading } = useMe();
   const [portalLoading, setPortalLoading] = useState(false);
