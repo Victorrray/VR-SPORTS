@@ -369,9 +369,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     const hasBetr = Array.from(allBooksInData).some(b => b?.toLowerCase().includes('betr'));
     const hasPick6 = Array.from(allBooksInData).some(b => b?.toLowerCase().includes('pick6'));
     console.log(`📚 Books in data: ${allBooksInData.size} unique books. Betr: ${hasBetr ? '✅' : '❌'}, Pick6: ${hasPick6 ? '✅' : '❌'}`);
-    if (!hasBetr || !hasPick6) {
-      console.log(`📚 All book keys:`, Array.from(allBooksInData).sort());
-    }
+    console.log(`📚 All book keys:`, Array.from(allBooksInData).sort());
     return filtered;
   }, [apiPicks, selectedDate, hasPlatinum]);
 

@@ -205,7 +205,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     let allGames = [];
     
     // Define DFS apps list at top level for use throughout the function
-    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'draftkings_pick6'];
+    // Use correct API keys: betr_us_dfs (not betr), pick6 (not draftkings_pick6)
+    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs'];
     
     // Map sports to their player props markets (using TheOddsAPI market names)
     // Reference: https://the-odds-api.com/sports-odds-data/betting-markets.html
