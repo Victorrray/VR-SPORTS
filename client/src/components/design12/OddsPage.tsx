@@ -359,6 +359,19 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     });
     
     console.log(`🎯 OddsPage Filtering: ${startCount} → ${filtered.length} picks (stale: ${staleRemoved}, date: ${beforeDateFilter - filtered.length}, selectedDate: ${selectedDate})`);
+    
+    // Debug: Check for Betr and Pick6 in the data
+    const allBooksInData = new Set<string>();
+    filtered.forEach(pick => {
+      (pick.books || []).forEach((b: any) => allBooksInData.add(b.key || b.name));
+      (pick.allBooks || []).forEach((b: any) => allBooksInData.add(b.key || b.name));
+    });
+    const hasBetr = Array.from(allBooksInData).some(b => b?.toLowerCase().includes('betr'));
+    const hasPick6 = Array.from(allBooksInData).some(b => b?.toLowerCase().includes('pick6'));
+    console.log(`📚 Books in data: ${allBooksInData.size} unique books. Betr: ${hasBetr ? '✅' : '❌'}, Pick6: ${hasPick6 ? '✅' : '❌'}`);
+    if (!hasBetr || !hasPick6) {
+      console.log(`📚 All book keys:`, Array.from(allBooksInData).sort());
+    }
     return filtered;
   }, [apiPicks, selectedDate, hasPlatinum]);
 

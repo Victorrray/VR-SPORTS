@@ -745,8 +745,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       
       // Explicitly include DFS apps and sharp books for player props (including soccer)
       const dfsBookmakersForProps = [
-        // DFS Apps (weight 0)
-        'prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr',
+        // DFS Apps (weight 0) - use correct API keys
+        'prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs',
         // Sharp/Exchange books (same weighting as DFS apps)
         'pinnacle', 'prophet_exchange', 'rebet', 'betopenly'
       ];
@@ -1011,11 +1011,15 @@ router.get('/player-props', requireUser, checkPlanAccess, async (req, res) => {
       oddsFormat: 'american'
     };
     
-    // Use DFS apps for player props
-    const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au'];
-    params.bookmakers = bookmakers || dfsApps.join(',');
+    // Use DFS apps for player props - include betr_us_dfs
+    // NOTE: Do NOT pass bookmakers parameter - it overrides regions
+    // Per TheOddsAPI docs: "when both regions and bookmakers are specified, bookmakers takes priority"
+    // We want regions=us,us_dfs to get ALL bookmakers from both regions
+    // const dfsApps = ['prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'dabble_au', 'betr_us_dfs'];
+    // params.bookmakers = bookmakers || dfsApps.join(',');
+    // REMOVED: bookmakers parameter - let regions handle it
 
-    console.log('🎯 Fetching player props:', { sportKey, markets: marketsList.join(','), bookmakers: params.bookmakers });
+    console.log('🎯 Fetching player props:', { sportKey, markets: marketsList.join(','), regions: params.regions });
 
     // Fetch from TheOddsAPI using /odds endpoint
     const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sportKey)}/odds`;
