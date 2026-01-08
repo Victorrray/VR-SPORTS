@@ -310,15 +310,19 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     
     // Remove stale data (bets from past dates)
     const beforeStaleFilter = filtered.length;
-    filtered = filtered.filter(pick => {
-      // If no game time, include the pick
-      if (!pick.commenceTime && !pick.gameTime) return true;
-      
-      const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
-      // Only keep bets with future game times
-      return gameDate >= now;
-    });
-    const staleRemoved = beforeStaleFilter - filtered.length;
+    
+    // Debug: Check sample of game times before filtering
+    const samplePicks = filtered.slice(0, 3);
+    console.log(`🕐 Now: ${now.toISOString()} (local: ${now.toLocaleDateString()})`);
+    
+    // Skip stale filter - backend already filters out past games
+    // The frontend was double-filtering and removing valid picks
+    // filtered = filtered.filter(pick => {
+    //   if (!pick.commenceTime && !pick.gameTime) return true;
+    //   const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
+    //   return gameDate >= now;
+    // });
+    const staleRemoved = 0; // Disabled - backend handles this
     
     // Filter out live games for non-Platinum users (Gold and below only see pre-match)
     if (!hasPlatinum) {
@@ -344,6 +348,28 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     
     // Filter by specific date (YYYY-MM-DD format in local timezone)
     const beforeDateFilter = filtered.length;
+    
+    // Debug: Show sample of dates after stale filter
+    if (filtered.length > 0) {
+      const sampleDates = filtered.slice(0, 10).map(pick => {
+        const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
+        const year = gameDate.getFullYear();
+        const month = String(gameDate.getMonth() + 1).padStart(2, '0');
+        const day = String(gameDate.getDate()).padStart(2, '0');
+        return { date: `${year}-${month}-${day}`, sport: pick.sport, raw: pick.commenceTime };
+      });
+      console.log(`📅 Sample game dates after stale filter:`, sampleDates, `selectedDate: ${selectedDate}`);
+      
+      // Count picks by date
+      const dateCount: Record<string, number> = {};
+      filtered.forEach(pick => {
+        const gameDate = new Date(pick.commenceTime || pick.gameTime || '');
+        const dateStr = `${gameDate.getFullYear()}-${String(gameDate.getMonth() + 1).padStart(2, '0')}-${String(gameDate.getDate()).padStart(2, '0')}`;
+        dateCount[dateStr] = (dateCount[dateStr] || 0) + 1;
+      });
+      console.log(`📅 Picks by date:`, dateCount);
+    }
+    
     filtered = filtered.filter(pick => {
       // If no game time, include the pick (don't filter it out)
       if (!pick.commenceTime && !pick.gameTime) return true;
@@ -367,9 +393,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       (pick.allBooks || []).forEach((b: any) => allBooksInData.add(b.key || b.name));
     });
     const hasBetr = Array.from(allBooksInData).some(b => b?.toLowerCase().includes('betr'));
-    const hasPick6 = Array.from(allBooksInData).some(b => b?.toLowerCase().includes('pick6'));
+    const hasPick6 = Array.from(allBooksInData).some(b => b?.toLowerCase().includes('pick6') || b?.toLowerCase().includes('pick 6'));
     console.log(`📚 Books in data: ${allBooksInData.size} unique books. Betr: ${hasBetr ? '✅' : '❌'}, Pick6: ${hasPick6 ? '✅' : '❌'}`);
     console.log(`📚 All book keys:`, Array.from(allBooksInData).sort());
+    
+    // Debug: Count picks with Pick6
+    const picksWithPick6 = filtered.filter(pick => {
+      const books = [...(pick.books || []), ...(pick.allBooks || [])];
+      return books.some((b: any) => (b.key || b.name || '').toLowerCase().includes('pick6') || (b.key || b.name || '').toLowerCase().includes('pick 6'));
+    });
+    console.log(`📚 Picks with Pick6: ${picksWithPick6.length}`);
     return filtered;
   }, [apiPicks, selectedDate, hasPlatinum]);
 
@@ -652,13 +685,18 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         return selectedSportsbooks.some(selectedId => {
           const matchingNames = sportsbookMap[selectedId] || [];
           // Check both book name AND book key against all aliases
-          return matchingNames.some(name => 
+          const matched = matchingNames.some(name => 
             bookNameLower.includes(name) || 
             name.includes(bookNameLower) ||
             bookKeyLower.includes(name) ||
             name.includes(bookKeyLower) ||
             bookKeyLower === name
           );
+          // Debug Pick6 specifically
+          if (selectedId === 'pick6' && (bookKeyLower.includes('pick') || bookNameLower.includes('pick'))) {
+            console.log(`🔍 Pick6 filter debug: selectedId=${selectedId}, bookKey=${bookKeyLower}, bookName=${bookNameLower}, matchingNames=${JSON.stringify(matchingNames)}, matched=${matched}`);
+          }
+          return matched;
         });
       });
       
