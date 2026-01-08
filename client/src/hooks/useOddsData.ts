@@ -2235,7 +2235,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // Filter out arbitrage opportunities with less than 1% ROI
       const filterLowROIArbitrage = (picks: OddsPick[]) => {
         if (betType !== 'arbitrage') return picks;
-        return picks.filter(pick => {
+        console.log(`🎰 Arbitrage filter: Starting with ${picks.length} picks`);
+        const filtered = picks.filter(pick => {
           const books = pick.allBooks || pick.books || [];
           const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
           const booksWithTeam2 = books.filter((b: OddsBook) => b.team2Odds && b.team2Odds !== '--');
@@ -2259,6 +2260,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           
           return roi >= 1; // Only keep picks with 1% or higher ROI
         });
+        console.log(`🎰 Arbitrage filter: ${filtered.length} picks with ROI >= 1%`);
+        return filtered;
       };
 
       // DFS apps to exclude from middles (they don't offer traditional bets)
@@ -2269,6 +2272,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // and UNDER at a higher line from DIFFERENT books, creating a "middle" gap
       const filterForMiddles = (picks: OddsPick[]) => {
         if (betType !== 'middles') return picks;
+        console.log(`🎯 Middles filter: Starting with ${picks.length} picks`);
         
         // Group picks by game and market type
         const gameMarketGroups = new Map<string, any[]>();
@@ -2392,6 +2396,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         
         // Sort by gap (highest first)
         filtered.sort((a, b) => (b.middleGap || 0) - (a.middleGap || 0));
+        console.log(`🎯 Middles filter: Found ${filtered.length} middle opportunities`);
         return filtered;
       };
 
