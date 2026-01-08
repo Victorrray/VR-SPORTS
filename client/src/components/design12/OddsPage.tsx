@@ -531,6 +531,53 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     );
   };
 
+  // Exchange books for comparison
+  const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
+  
+  // Filter books for mini table based on bet type
+  // For exchanges: only show filtered sportsbook + exchange comparison book
+  const getMinitableBooks = (allBooks: any[], pickData: any) => {
+    if (selectedBetType === 'exchanges') {
+      // For exchanges, only show:
+      // 1. The filtered sportsbook(s) the user selected
+      // 2. The exchange book used for comparison (Novig/ProphetX)
+      const filteredBooks: any[] = [];
+      
+      // Add filtered sportsbooks
+      if (selectedSportsbooks.length > 0) {
+        allBooks.forEach(book => {
+          const bookKey = (book.key || book.name || '').toLowerCase();
+          const bookName = (book.name || '').toLowerCase();
+          const isFiltered = selectedSportsbooks.some(sb => {
+            const sbLower = sb.toLowerCase();
+            return bookKey.includes(sbLower) || bookName.includes(sbLower) || sbLower.includes(bookKey);
+          });
+          if (isFiltered && !filteredBooks.find(b => b.name === book.name)) {
+            filteredBooks.push(book);
+          }
+        });
+      } else {
+        // If no filter, add the best book
+        const bestBook = allBooks.find(b => b.name === pickData.bestBook);
+        if (bestBook) filteredBooks.push(bestBook);
+      }
+      
+      // Add exchange book (Novig or ProphetX)
+      const exchangeBook = allBooks.find(book => {
+        const bookName = (book.name || '').toLowerCase();
+        return EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
+      });
+      if (exchangeBook && !filteredBooks.find(b => b.name === exchangeBook.name)) {
+        filteredBooks.push(exchangeBook);
+      }
+      
+      return filteredBooks;
+    }
+    
+    // For other bet types, return all books
+    return allBooks;
+  };
+
   const toggleSportsbookFilter = (bookId: string) => {
     setSelectedSportsbooks(prev =>
       prev.includes(bookId) ? prev.filter(id => id !== bookId) : [...prev, bookId]
@@ -2811,7 +2858,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         </div>
 
                         {/* Table Rows */}
-                        {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
+                        {(() => {
+                          const booksToShow = getMinitableBooks(pick.allBooks || [], pick);
+                          const displayBooks = expandedSportsbooks.includes(pick.id) ? booksToShow : booksToShow.slice(0, 5);
+                          return displayBooks.map((book, idx) => (
                           <div 
                             key={idx}
                             className={`grid grid-cols-4 gap-3 px-4 py-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-2xl items-center`}
@@ -2845,11 +2895,14 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               </button>
                             </div>
                           </div>
-                        ))}
+                        ));
+                        })()}
                       </div>
 
                       {/* View More Button */}
-                      {pick.allBooks.length > 5 && (
+                      {(() => {
+                        const booksToShow = getMinitableBooks(pick.allBooks || [], pick);
+                        return booksToShow.length > 5 ? (
                         <button 
                           onClick={() => toggleSportsbook(pick.id)}
                           className={`w-full flex items-center justify-center gap-2 px-4 py-2 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
@@ -2857,7 +2910,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                           <ChevronDown className={`w-4 h-4 transition-transform ${expandedSportsbooks.includes(pick.id) ? 'rotate-180' : ''}`} />
                           <span>{expandedSportsbooks.includes(pick.id) ? 'View Less' : 'View More'}</span>
                         </button>
-                      )}
+                      ) : null;
+                      })()}
                     </div>
 
                     {/* Desktop Expanded - Compact Table (only for non-arbitrage) */}
@@ -2912,7 +2966,10 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         </div>
 
                         {/* Data Rows */}
-                        {(expandedSportsbooks.includes(pick.id) ? pick.allBooks : pick.allBooks.slice(0, 5)).map((book, idx) => (
+                        {(() => {
+                          const booksToShow = getMinitableBooks(pick.allBooks || [], pick);
+                          const displayBooks = expandedSportsbooks.includes(pick.id) ? booksToShow : booksToShow.slice(0, 5);
+                          return displayBooks.map((book, idx) => (
                           <div 
                             key={idx}
                             className={`grid grid-cols-4 gap-6 px-6 py-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} items-center transition-all ${idx !== 0 ? (isLight ? 'border-t border-gray-100' : 'border-t border-white/5') : ''}`}
@@ -2954,11 +3011,14 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                               )}
                             </div>
                           </div>
-                        ))}
+                        ));
+                        })()}
                       </div>
 
                       {/* View More Button */}
-                      {pick.allBooks.length > 5 && (
+                      {(() => {
+                        const booksToShow = getMinitableBooks(pick.allBooks || [], pick);
+                        return booksToShow.length > 5 ? (
                         <div className="flex justify-center mt-4">
                           <button 
                             onClick={() => toggleSportsbook(pick.id)}
@@ -2968,7 +3028,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                             <span>{expandedSportsbooks.includes(pick.id) ? 'View Less' : 'View More'}</span>
                           </button>
                         </div>
-                      )}
+                      ) : null;
+                      })()}
                     </div>
                     </>
                     )}
