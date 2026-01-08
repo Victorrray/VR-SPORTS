@@ -321,6 +321,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       return false;
     });
     
+    // Debug logging for DFS apps
+    if (DEBUG_LOGGING && (normalizedKey?.includes('prizepicks') || normalizedKey?.includes('pick6'))) {
+      console.log(`🔍 isBookIncluded: key=${normalizedKey}, name=${normalizedName}, filter=${selectedSportsbooks.join(',')}, result=${result}`);
+    }
+    
     return result;
   };
   
