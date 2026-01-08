@@ -1041,10 +1041,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     </div>
   );
 
-  // Show paywall for free users (after loading completes)
-  if (!meLoading && !hasPaidPlan) {
-    return <PaywallOverlay />;
-  }
+  // FREE USERS CAN ACCESS STRAIGHT BETS - no paywall for basic features
+  // Only show paywalls for premium features (Player Props, Exchanges, Arbitrage, Middles)
 
   // Show PlayerPropsPage when props are selected
   if (selectedBetType === 'props') {
