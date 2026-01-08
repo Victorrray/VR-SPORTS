@@ -1918,14 +1918,15 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 {/* Reset Button */}
                 <button
                   onClick={() => {
+                    // Reset filters but keep the current tool/bet type selection
                     setSelectedSports(['all']);
                     setSelectedMarket('all');
-                    setSelectedBetType('straight');
+                    // Don't reset selectedBetType - keep current tool selection (straight/props/exchanges/arbitrage/middles)
                     setSelectedDate(getTodayDateString());
                     setSelectedSportsbooks([]);
                     setMinDataPoints(4);
                     toast.success('Filters reset', {
-                      description: 'All filters have been cleared'
+                      description: 'All filters have been cleared (tool selection preserved)'
                     });
                   }}
                   className={`w-full px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
