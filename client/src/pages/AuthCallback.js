@@ -81,7 +81,7 @@ export default function AuthCallback() {
 
         // Determine final intent and returnTo
         const finalIntent = urlIntent || storedIntent?.intent;
-        let finalReturnTo = urlReturnTo || storedIntent?.returnTo || '/app';
+        let finalReturnTo = urlReturnTo || storedIntent?.returnTo || '/dashboard';
 
         // Clear stored intent since we're processing it
         localStorage.removeItem('pricingIntent');
@@ -101,8 +101,8 @@ export default function AuthCallback() {
           navigate('/pricing?intent=upgrade&autostart=1', { replace: true });
         } else if (finalIntent === 'start-free') {
           setStatus('Authentication successful! Welcome to your free trial!');
-          debugRedirectDecision('/auth/callback', '/app', 'start-free intent');
-          navigate('/app', { replace: true });
+          debugRedirectDecision('/auth/callback', '/dashboard', 'start-free intent');
+          navigate('/dashboard', { replace: true });
         } else {
           setStatus('Authentication successful! Redirecting...');
           debugRedirectDecision('/auth/callback', finalReturnTo, 'default redirect');

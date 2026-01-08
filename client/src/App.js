@@ -132,12 +132,12 @@ function AppRoutes() {
               <Route path="/" element={user ? <DashboardPage /> : <Landing />} />
               <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
-              <Route path="/sportsbooks" element={<PrivateRoute><OddsPage /></PrivateRoute>} />
+              {/* /sportsbooks route removed - old page */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/app" element={user ? <Navigate to="/sportsbooks" replace /> : <Navigate to="/login" replace />} />
+              <Route path="/app" element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<Landing />} />
               <Route path="/subscribe" element={<PrivateRoute><Subscribe /></PrivateRoute>} />
               <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
