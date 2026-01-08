@@ -2130,8 +2130,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // These modes filter client-side but need the base straight bets data
       const apiBetType = ['exchanges', 'arbitrage', 'middles'].includes(betType) ? 'straight' : betType;
       if (apiBetType && apiBetType !== 'all') params.append('betType', apiBetType);
-      // For exchanges, arbitrage, and middles modes, DON'T filter by sportsbooks - we need ALL books to find opportunities
-      const needsAllBooks = ['exchanges', 'arbitrage', 'middles'].includes(betType);
+      // For exchanges, arbitrage, middles, AND player props modes, DON'T filter by sportsbooks
+      // - exchanges/arbitrage/middles need ALL books to find opportunities
+      // - player props should return all books and filter client-side (backend doesn't properly filter DFS apps)
+      const needsAllBooks = ['exchanges', 'arbitrage', 'middles', 'props'].includes(betType);
       if (!needsAllBooks && sportsbooks && sportsbooks.length > 0) {
         params.append('sportsbooks', sportsbooks.join(','));
       }
