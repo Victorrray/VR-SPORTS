@@ -1381,8 +1381,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 </div>
               </div>
 
-              {/* Minimum Data Points Slider - Hidden for arbitrage and exchanges */}
-              {selectedBetType !== 'arbitrage' && selectedBetType !== 'exchanges' && (
+              {/* Minimum Data Points Slider - Hidden for arbitrage, middles, and exchanges */}
+              {selectedBetType !== 'arbitrage' && selectedBetType !== 'middles' && selectedBetType !== 'exchanges' && (
                 <div>
                   <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
                     Minimum Data Points
