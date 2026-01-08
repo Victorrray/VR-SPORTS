@@ -17,23 +17,18 @@ export function MobileBottomBar() {
 
   const tabs: Tab[] = [
     {
-      key: 'sportsbooks',
-      label: 'Odds',
-      icon: BarChart3,
-      href: '/sportsbooks'
-    },
-    {
       key: 'home',
       label: 'Home',
       icon: Home,
       href: '/dashboard'
     },
-    {
-      key: 'picks',
-      label: 'Picks',
-      icon: TrendingUp,
-      href: '/picks'
-    },
+    // Picks tab hidden for free version
+    // {
+    //   key: 'picks',
+    //   label: 'Picks',
+    //   icon: TrendingUp,
+    //   href: '/picks'
+    // },
     {
       key: 'account',
       label: 'Account',

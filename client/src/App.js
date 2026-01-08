@@ -143,7 +143,8 @@ function AppRoutes() {
               <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
               <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} />
               <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} />
-              <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} />
+              {/* /picks route hidden for free version */}
+              {/* <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} /> */}
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/billing/success" element={<BillingSuccess />} />
               <Route path="/billing/cancel" element={<BillingCancel />} />
