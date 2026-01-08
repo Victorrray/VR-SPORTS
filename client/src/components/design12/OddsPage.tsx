@@ -173,8 +173,9 @@ const calculateDevigOdds = (books: any[]): string => {
 };
 
 export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
-  const { colorMode, oddsFormat } = useTheme();
-  const isLight = colorMode === 'light';
+  const { oddsFormat } = useTheme();
+  // Dark mode only - no light mode support
+  const isLight = false;
   
   // Format odds based on user's selected format
   const formatOdds = (odds: any): string => convertOdds(odds, oddsFormat);

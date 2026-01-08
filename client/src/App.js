@@ -20,6 +20,7 @@ import Landing from './pages/Landing';
 import DashboardPage from './pages/DashboardPage';
 import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
+import { OddsPageWrapper as OddsPage } from './components/design12/OddsPageWrapper';
 import { LoginPageWrapper as Login } from './components/design12/LoginPageWrapper';
 import { SignUpPageWrapper as SignUp } from './components/design12/SignUpPageWrapper';
 import { ForgotPasswordPageWrapper as ForgotPassword } from './components/design12/ForgotPasswordPageWrapper';
@@ -131,7 +132,7 @@ function AppRoutes() {
               <Route path="/" element={user ? <DashboardPage /> : <Landing />} />
               <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
               <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} />
-              <Route path="/sportsbooks" element={<PrivateRoute><SportsbookMarkets onRegisterMobileSearch={setMobileSearchCallback} /></PrivateRoute>} />
+              <Route path="/sportsbooks" element={<PrivateRoute><OddsPage /></PrivateRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
