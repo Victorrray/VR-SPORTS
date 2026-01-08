@@ -33,6 +33,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTheme, lightModeColors, themeConfig } from "../../contexts/ThemeContext";
 import { useAuth } from "../../hooks/SimpleAuth";
 import { useMe } from "../../hooks/useMe";
@@ -58,6 +59,7 @@ interface DashboardProps {
 export function Dashboard({ onSignOut }: DashboardProps) {
   const { theme, colorMode } = useTheme();
   const config = themeConfig[theme];
+  const [searchParams] = useSearchParams();
   const isLight = colorMode === "light";
   const { user, profile } = useAuth();
   const { me } = useMe();
@@ -79,9 +81,16 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const PlanIcon = planConfig.icon;
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");
+  
+  // Check URL params for initial view (e.g., /dashboard?view=changePlan)
+  const urlView = searchParams.get('view');
+  const initialView = urlView && ['dashboard', 'picks', 'odds', 'account', 'settings', 'calculator', 'bankroll', 'cancelSubscription', 'deleteAccount', 'changePlan'].includes(urlView) 
+    ? urlView as "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll" | "cancelSubscription" | "deleteAccount" | "changePlan"
+    : "dashboard";
+  
   const [currentView, setCurrentView] = useState<
     "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll" | "cancelSubscription" | "deleteAccount" | "changePlan"
-  >("dashboard");
+  >(initialView);
   const [savedPicks, setSavedPicks] = useState<any[]>([]);
   const [previousView, setPreviousView] = useState<string>("account");
   const [betSlipOpen, setBetSlipOpen] = useState(false);
