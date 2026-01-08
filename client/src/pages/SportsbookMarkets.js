@@ -2584,14 +2584,14 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
                   <span>📊 Data Points</span>
-                  <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700 }}>{filters.filters.dataPoints}</span>
+                  <span style={{ fontSize: '14px', color: 'var(--accent)', fontWeight: 700 }}>{filters.dataPoints || 10}</span>
                 </label>
                 <input 
                   type="range" 
                   min="3" 
                   max="10" 
-                  value={filters.filters.dataPoints}
-                  onChange={(e) => updateFilter('filters.dataPoints', parseInt(e.target.value, 10))}
+                  value={filters.dataPoints || 10}
+                  onChange={(e) => updateFilter('dataPoints', parseInt(e.target.value, 10))}
                   style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'rgba(139, 92, 246, 0.3)', outline: 'none', cursor: 'pointer', accentColor: 'var(--accent)', WebkitAppearance: 'none', appearance: 'none', padding: '0' }}
                 />
               </div>
