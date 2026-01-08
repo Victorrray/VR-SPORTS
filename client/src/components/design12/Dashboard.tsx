@@ -64,6 +64,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   
   // Get plan display info
   const userPlan = me?.plan || 'free';
+  const hasPaidPlan = userPlan === 'gold' || userPlan === 'platinum' || me?.unlimited === true;
   const getPlanConfig = () => {
     switch (userPlan) {
       case 'platinum':
@@ -86,9 +87,9 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [betSlipOpen, setBetSlipOpen] = useState(false);
   const [pendingBet, setPendingBet] = useState<any>(null);
 
-  // Fetch recommended picks from API
+  // Fetch recommended picks from API - limit to 4 for free users to minimize API costs
   const { picks: recommendedPicks, loading: picksLoading } = useRecommendedPicks({
-    limit: 4,
+    limit: 4, // Free users only get 4 picks
     minEV: 5,
     enabled: true,
   });
@@ -356,17 +357,20 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <Home className="w-5 h-5" />
                 Dashboard
               </button>
-              <button
-                onClick={() => setCurrentView("odds")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                  currentView === "odds"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
-                    : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
-                }`}
-              >
-                <Zap className="w-5 h-5" />
-                Odds
-              </button>
+              {/* Odds button - only show for paid users */}
+              {hasPaidPlan && (
+                <button
+                  onClick={() => setCurrentView("odds")}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                    currentView === "odds"
+                      ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                      : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
+                  }`}
+                >
+                  <Zap className="w-5 h-5" />
+                  Odds
+                </button>
+              )}
               {/* My Picks - Hidden for now */}
               {/* <button
                 onClick={() => setCurrentView("picks")}
@@ -528,7 +532,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             )}
 
             {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} onUpdatePickStatus={updatePickStatus} onNavigateToCalculator={() => setCurrentView("calculator")} />}
-            {currentView === "odds" && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} />}
+            {/* Only render OddsPage for paid users to avoid unnecessary API calls */}
+            {currentView === "odds" && hasPaidPlan && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} />}
             {currentView === "account" && (
               <AccountPage
                 onNavigateToSettings={() => setCurrentView("settings")}
@@ -577,23 +582,26 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 Home
               </span>
             </button>
-            <button
-              onClick={() => setCurrentView("odds")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                currentView === "odds"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-              }`}
-            >
-              <Zap
-                className={`w-5 h-5 ${currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-bold ${currentView === "odds" ? isLight ? "text-purple-900" : "text-white" : ""}`}
+            {/* Odds button - only show for paid users */}
+            {hasPaidPlan && (
+              <button
+                onClick={() => setCurrentView("odds")}
+                className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
+                  currentView === "odds"
+                    ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
+                    : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
+                }`}
               >
-                Odds
-              </span>
-            </button>
+                <Zap
+                  className={`w-5 h-5 ${currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
+                />
+                <span
+                  className={`text-[10px] font-bold ${currentView === "odds" ? isLight ? "text-purple-900" : "text-white" : ""}`}
+                >
+                  Odds
+                </span>
+              </button>
+            )}
             <button
               onClick={() => setCurrentView("account")}
               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
