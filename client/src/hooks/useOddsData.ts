@@ -2121,11 +2121,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // Optional: date, betType, sportsbooks (if backend supports them)
       // Don't send date parameter if it's 'all_upcoming' - backend doesn't recognize it
       if (date && date !== 'all' && date !== 'all_upcoming') params.append('date', date);
-      // For exchanges mode, fetch straight bets data (we'll filter for exchange opportunities client-side)
-      const apiBetType = betType === 'exchanges' ? 'straight' : betType;
+      // For exchanges, arbitrage, and middles modes, fetch straight bets data
+      // These modes filter client-side but need the base straight bets data
+      const apiBetType = ['exchanges', 'arbitrage', 'middles'].includes(betType) ? 'straight' : betType;
       if (apiBetType && apiBetType !== 'all') params.append('betType', apiBetType);
-      // For exchanges mode, DON'T filter by sportsbooks - we need ALL books to find +EV opportunities
-      if (betType !== 'exchanges' && sportsbooks && sportsbooks.length > 0) {
+      // For exchanges, arbitrage, and middles modes, DON'T filter by sportsbooks - we need ALL books to find opportunities
+      const needsAllBooks = ['exchanges', 'arbitrage', 'middles'].includes(betType);
+      if (!needsAllBooks && sportsbooks && sportsbooks.length > 0) {
         params.append('sportsbooks', sportsbooks.join(','));
       }
       if (limit) params.append('limit', limit.toString());
