@@ -1397,7 +1397,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
             </div>
 
             {/* Content - auto height on mobile, scrollable on desktop */}
-            <div className="lg:overflow-y-auto lg:flex-1 p-6 pt-4 space-y-5">
+            <div className="lg:overflow-y-auto lg:flex-1 p-6 pt-4 space-y-5 scrollbar-hide">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div>
@@ -1474,7 +1474,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 
                 {/* Desktop Inline Dropdown */}
                 {dateExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-64 overflow-y-auto`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-64 overflow-y-auto scrollbar-hide`}>
                     {dateOptions.map((date) => (
                       <button
                         key={date.id}
@@ -1526,7 +1526,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
                       {dateOptions.map((date) => (
                         <button
                           key={date.id}
@@ -1637,7 +1637,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options - Grouped by Tier */}
-                    <div className="overflow-y-auto max-h-[calc(70vh-80px)]">
+                    <div className="overflow-y-auto max-h-[calc(70vh-80px)] scrollbar-hide">
                       {sportsbooksByTier
                         .filter(tierGroup => {
                           // Hide DFS & Pick'em category when in straight bets mode
@@ -1771,7 +1771,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
                       {sports.map((sport) => (
                         <button
                           key={sport.id}
@@ -1879,7 +1879,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
                       {marketTypes.map((market) => (
                         <button
                           key={market.id}
