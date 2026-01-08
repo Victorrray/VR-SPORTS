@@ -2174,83 +2174,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             />
           </div>
         ) : null
-      ) : !hasGoldOrBetter ? (
-        // Paywall for free users on Straight Bets
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05))',
-          border: '2px solid rgba(139, 92, 246, 0.3)',
-          borderRadius: '16px',
-          padding: '48px 32px',
-          margin: '20px 0',
-          textAlign: 'center',
-          maxWidth: '600px',
-          marginLeft: 'auto',
-          marginRight: 'auto'
-        }}>
-          <div style={{ 
-            width: '80px', 
-            height: '80px', 
-            background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-            borderRadius: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 24px'
-          }}>
-            <BarChart3 size={40} color="white" />
-          </div>
-          <h2 style={{ color: 'white', margin: '0 0 12px 0', fontSize: '24px', fontWeight: '700' }}>
-            Unlock Odds Comparison
-          </h2>
-          <p style={{ color: 'rgba(255, 255, 255, 0.7)', margin: '0 0 24px 0', fontSize: '16px', lineHeight: '1.6' }}>
-            Compare odds across 40+ sportsbooks in real-time. Find the best lines and maximize your profits with our premium odds comparison tool.
-          </p>
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '12px',
-            marginBottom: '24px',
-            textAlign: 'left',
-            maxWidth: '300px',
-            margin: '0 auto 24px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
-              <Check size={20} color="#22c55e" />
-              <span>Real-time odds from 40+ books</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
-              <Check size={20} color="#22c55e" />
-              <span>Find +EV betting opportunities</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
-              <Check size={20} color="#22c55e" />
-              <span>Line movement tracking</span>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate('/pricing')}
-            style={{
-              background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-              color: 'white',
-              border: 'none',
-              padding: '14px 32px',
-              borderRadius: '12px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              fontSize: '16px',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)'
-            }}
-            onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-            onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-          >
-            Upgrade Now
-          </button>
-          <p style={{ color: 'rgba(255, 255, 255, 0.5)', margin: '16px 0 0 0', fontSize: '14px' }}>
-            Starting at $15/month
-          </p>
-        </div>
       ) : !isOverQuota ? (
+        // Straight Bets mode - available to ALL users (free, gold, platinum)
         <div style={{ position: 'relative' }}>
           {/* Refresh Overlay */}
           {isRefreshing && (
