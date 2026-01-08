@@ -2186,8 +2186,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
       
       // Filter picks by minimum data points (book count)
+      // Skip for arbitrage, middles, and exchanges - they have their own filtering logic
       const filterByMinDataPoints = (picks: OddsPick[]) => {
         if (minDataPoints <= 1) return picks; // No filtering needed
+        if (['arbitrage', 'middles', 'exchanges'].includes(betType)) return picks; // These don't need min data points
         return picks.filter(pick => {
           const bookCount = pick.books?.length || pick.bookCount || 0;
           return bookCount >= minDataPoints;
