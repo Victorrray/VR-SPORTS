@@ -321,11 +321,6 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       return false;
     });
     
-    // Debug logging for DFS apps
-    if (DEBUG_LOGGING && (normalizedKey?.includes('prizepicks') || normalizedKey?.includes('pick6'))) {
-      console.log(`🔍 isBookIncluded: key=${normalizedKey}, name=${normalizedName}, filter=${selectedSportsbooks.join(',')}, result=${result}`);
-    }
-    
     return result;
   };
   
@@ -2244,7 +2239,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // Filter out arbitrage opportunities with less than 1% ROI
       const filterLowROIArbitrage = (picks: OddsPick[]) => {
         if (betType !== 'arbitrage') return picks;
-        console.log(`🎰 Arbitrage filter: Starting with ${picks.length} picks`);
         const filtered = picks.filter(pick => {
           const books = pick.allBooks || pick.books || [];
           const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
@@ -2269,7 +2263,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           
           return roi >= 1; // Only keep picks with 1% or higher ROI
         });
-        console.log(`🎰 Arbitrage filter: ${filtered.length} picks with ROI >= 1%`);
         return filtered;
       };
 
@@ -2281,7 +2274,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // and UNDER at a higher line from DIFFERENT books, creating a "middle" gap
       const filterForMiddles = (picks: OddsPick[]) => {
         if (betType !== 'middles') return picks;
-        console.log(`🎯 Middles filter: Starting with ${picks.length} picks`);
         
         // Group picks by game and market type
         const gameMarketGroups = new Map<string, any[]>();
@@ -2405,7 +2397,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         
         // Sort by gap (highest first)
         filtered.sort((a, b) => (b.middleGap || 0) - (a.middleGap || 0));
-        console.log(`🎯 Middles filter: Found ${filtered.length} middle opportunities`);
         return filtered;
       };
 
@@ -2554,7 +2545,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 const line = pick.line || exchangeLine;
                 const newPickDescription = `${playerName} ${missingSide} ${line} ${marketName}`;
                 
-                console.log(`🎯 ONE-SIDED MARKET: ${playerName} - Exchange only offers ${availableSide} at ${exchangeAvailableOdds}, betting ${missingSide} at ${bestMissingSideOdds} from ${bestMissingSideBook.name}`);
                 
                 debugStats.passed++;
                 filtered.push({
@@ -2642,19 +2632,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             // Pick the side with better edge - BOTH must be checked
             const bestEdge = Math.max(overEdge, underEdge);
             
-            // Debug: Log when a bet passes or fails
-            console.log(`💱 EXCHANGE CHECK: ${pick.playerName}`, {
-              exchangeOver: exchangeOverOdds,
-              exchangeUnder: exchangeUnderOdds,
-              bestOver: bestOverOdds,
-              bestUnder: bestUnderOdds,
-              overBeats: bestOverOdds > exchangeOverOdds,
-              underBeats: bestUnderOdds > exchangeUnderOdds,
-              overEdge: overEdge.toFixed(2),
-              underEdge: underEdge.toFixed(2),
-              bestEdge: bestEdge.toFixed(2),
-              passes: bestEdge >= 1
-            });
             
             if (bestEdge < 1) {
               debugStats.lowEdge++;
