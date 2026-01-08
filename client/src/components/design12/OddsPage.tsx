@@ -637,9 +637,17 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       const booksToCheck = pick.allBooks || pick.books;
       const hasSelectedBook = booksToCheck.some((book: any) => {
         const bookNameLower = (book.name || '').toLowerCase();
+        const bookKeyLower = (book.key || '').toLowerCase();
         return selectedSportsbooks.some(selectedId => {
           const matchingNames = sportsbookMap[selectedId] || [];
-          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+          // Check both book name AND book key against all aliases
+          return matchingNames.some(name => 
+            bookNameLower.includes(name) || 
+            name.includes(bookNameLower) ||
+            bookKeyLower.includes(name) ||
+            name.includes(bookKeyLower) ||
+            bookKeyLower === name
+          );
         });
       });
       
@@ -656,10 +664,18 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     let displayBooks = pick.books;
     if (selectedSportsbooks.length > 0) {
       displayBooks = pick.books.filter(book => {
-        const bookNameLower = book.name.toLowerCase();
+        const bookNameLower = (book.name || '').toLowerCase();
+        const bookKeyLower = (book.key || '').toLowerCase();
         return selectedSportsbooks.some(selectedId => {
           const matchingNames = sportsbookMap[selectedId] || [];
-          return matchingNames.some(name => bookNameLower.includes(name) || name.includes(bookNameLower));
+          // Check both book name AND book key against all aliases
+          return matchingNames.some(name => 
+            bookNameLower.includes(name) || 
+            name.includes(bookNameLower) ||
+            bookKeyLower.includes(name) ||
+            name.includes(bookKeyLower) ||
+            bookKeyLower === name
+          );
         });
       });
     }
