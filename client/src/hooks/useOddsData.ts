@@ -2483,12 +2483,31 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             }
             
             // Find best Over and Under odds from other books (at same line)
+            // IMPORTANT: If sportsbooks filter is set, only consider those books for best odds
             let bestOverBook: any = null;
             let bestUnderBook: any = null;
             let bestOverOdds = -9999;
             let bestUnderOdds = -9999;
             
-            otherBooks.forEach((b: any) => {
+            // Filter otherBooks by sportsbook filter if set
+            const filteredOtherBooks = sportsbooks && sportsbooks.length > 0
+              ? otherBooks.filter((b: any) => {
+                  const bookKey = (b.key || b.name || '').toLowerCase();
+                  const bookName = (b.name || '').toLowerCase();
+                  return sportsbooks.some(sb => {
+                    const sbLower = sb.toLowerCase();
+                    return bookKey.includes(sbLower) || bookName.includes(sbLower) || sbLower.includes(bookKey) || sbLower.includes(bookName);
+                  });
+                })
+              : otherBooks;
+            
+            // If no filtered books match, skip this pick
+            if (sportsbooks && sportsbooks.length > 0 && filteredOtherBooks.length === 0) {
+              debugStats.noOther++;
+              return;
+            }
+            
+            filteredOtherBooks.forEach((b: any) => {
               // Only compare books with same line
               if (exchangeLine !== undefined && b.line !== undefined) {
                 if (Math.abs(b.line - exchangeLine) > 0.5) return;
@@ -2614,8 +2633,26 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               return;
             }
             
+            // Filter otherBooks by sportsbook filter if set (same as player props)
+            const filteredOtherBooks = sportsbooks && sportsbooks.length > 0
+              ? otherBooks.filter((b: any) => {
+                  const bookKey = (b.key || b.name || '').toLowerCase();
+                  const bookName = (b.name || '').toLowerCase();
+                  return sportsbooks.some(sb => {
+                    const sbLower = sb.toLowerCase();
+                    return bookKey.includes(sbLower) || bookName.includes(sbLower) || sbLower.includes(bookKey) || sbLower.includes(bookName);
+                  });
+                })
+              : otherBooks;
+            
+            // If no filtered books match, skip this pick
+            if (sportsbooks && sportsbooks.length > 0 && filteredOtherBooks.length === 0) {
+              debugStats.noOther++;
+              return;
+            }
+            
             // Find books with better odds than the exchange
-            const betterBooks = otherBooks.filter((b: any) => {
+            const betterBooks = filteredOtherBooks.filter((b: any) => {
               const bookOdds = parseInt(b.odds, 10);
               if (isNaN(bookOdds)) return false;
               return bookOdds > exchangeOdds;
