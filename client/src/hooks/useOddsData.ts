@@ -232,6 +232,7 @@ function normalizeBookName(bookName: string): string {
     'betonlineag': 'BetOnline',
     'Betr DFS': 'Betr',
     'betrdfs': 'Betr',
+    'betr_us_dfs': 'Betr',
     'DraftKings Pick6': 'Pick 6',
     'draftkings_pick6': 'Pick 6',
     'pick6': 'Pick 6',
