@@ -1021,13 +1021,43 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // Skip this market if no books have odds for it
         if (booksArray.length === 0) return;
         
-        // ALWAYS find the best odds across ALL books (not just filtered ones)
-        const bestBookDataOverall = booksArray.reduce((best: any, book: any) => {
+        // For spreads, find the CONSENSUS line (most common line among books)
+        // This prevents comparing +1.5 vs -1.5 which are completely different bets
+        if (marketKey === 'spreads') {
+          const lineCount = new Map<number, number>();
+          booksArray.forEach(b => {
+            if (b.line !== null && b.line !== undefined) {
+              lineCount.set(b.line, (lineCount.get(b.line) || 0) + 1);
+            }
+          });
+          
+          // Find the most common line
+          let maxCount = 0;
+          lineCount.forEach((count, line) => {
+            if (count > maxCount) {
+              maxCount = count;
+              marketPoint = line; // Update to consensus line
+            }
+          });
+        }
+        
+        // For spreads, ONLY consider books with the SAME spread line for best odds
+        // This prevents comparing +1.5 vs -1.5 which gives false +EV
+        const strictTolerance = 0.01;
+        const booksForComparison = (marketKey === 'spreads' && marketPoint !== null)
+          ? booksArray.filter(b => b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < strictTolerance)
+          : booksArray;
+        
+        // Skip if no books have the consensus line
+        if (booksForComparison.length === 0) return;
+        
+        // ALWAYS find the best odds across books with the SAME LINE (not just filtered ones)
+        const bestBookDataOverall = booksForComparison.reduce((best: any, book: any) => {
           const bestOddsNum = parseInt(best.odds, 10);
           const bookOddsNum = parseInt(book.odds, 10);
           // Higher is better for American odds (both positive and negative)
           return bookOddsNum > bestOddsNum ? book : best;
-        }, booksArray[0]);
+        }, booksForComparison[0]);
         
         let bestOdds = bestBookDataOverall.odds;
         let bestBook = bestBookDataOverall.name;
@@ -1076,10 +1106,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         // Calculate EV - require minimum 4 books for meaningful EV calculation
         // For spreads, ONLY use books with the SAME spread line to avoid comparing +1.5 vs -1.5
         const MIN_BOOKS_FOR_EV = 4;
-        const strictTolerance = 0.01;
-        const booksForEV = (marketKey === 'spreads' && marketPoint !== null)
-          ? booksArray.filter(b => b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < strictTolerance)
-          : booksArray;
+        // Use booksForComparison which already filters by same line for spreads
+        const booksForEV = booksForComparison;
         const numericOdds = booksForEV.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
         const hasEnoughData = numericOdds.length >= MIN_BOOKS_FOR_EV;
         
@@ -1099,7 +1127,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               const o = parseInt(b.odds, 10);
               // Only calculate EV for books with the same spread line
               const isSameLine = marketKey !== 'spreads' || marketPoint === null || 
-                (b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < strictTolerance);
+                (b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < 0.01);
               if (!isNaN(o) && isSameLine) {
                 const p = toProb(o);
                 const bookEdge = ((avgProb - p) / p) * 100;
