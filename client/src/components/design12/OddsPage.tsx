@@ -777,18 +777,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     }
 
     // Recalculate bestBook and bestOdds based on filtered books
-    // For exchanges mode: If sportsbook filter is applied, recalculate from filtered books
-    // Otherwise keep the original bestBook/bestOdds from the exchanges filter
+    // For exchanges mode: NEVER recalculate - the exchanges filter already determined the correct best book
+    // based on the sportsbook filter. Recalculating here would pick the wrong book.
     let bestBook = pick.bestBook;
     let bestOdds = pick.bestOdds;
     
     const isExchangesMode = selectedBetType === 'exchanges';
-    const hasSportsbookFilter = selectedSportsbooks.length > 0;
     
-    // Recalculate best book from filtered books if:
-    // 1. Not in exchanges mode, OR
-    // 2. In exchanges mode but a sportsbook filter is applied
-    if (displayBooks.length > 0 && (!isExchangesMode || hasSportsbookFilter)) {
+    // Recalculate best book from filtered books ONLY if NOT in exchanges mode
+    // Exchanges mode already handles sportsbook filtering in useOddsData.ts
+    if (displayBooks.length > 0 && !isExchangesMode) {
       // Find the best odds from filtered books
       const bestBookData = displayBooks.reduce((best, current) => {
         const currentOdds = typeof current.odds === 'number' ? current.odds : parseInt(current.odds) || 0;

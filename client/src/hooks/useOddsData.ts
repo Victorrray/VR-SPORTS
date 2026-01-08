@@ -2547,7 +2547,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 const line = pick.line || exchangeLine;
                 const newPickDescription = `${playerName} ${missingSide} ${line} ${marketName}`;
                 
-                console.log(`🎯 ONE-SIDED MARKET: ${playerName} - Exchange only offers ${availableSide} at ${exchangeAvailableOdds}, betting ${missingSide} at ${bestMissingSideOdds}`);
+                console.log(`🎯 ONE-SIDED MARKET: ${playerName} - Exchange only offers ${availableSide} at ${exchangeAvailableOdds}, betting ${missingSide} at ${bestMissingSideOdds} from ${bestMissingSideBook.name}`);
                 
                 debugStats.passed++;
                 filtered.push({
@@ -2565,7 +2565,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                   books: [
                     { ...bestMissingSideBook, isBest: true, ev: `${impliedEdge.toFixed(1)}%` },
                     { ...exchangeBook, odds: `${availableSide}: ${exchangeAvailableOdds}`, isBest: false, ev: 'N/A', isExchange: true, oneSided: true },
-                    ...otherBooks.filter((b: any) => b.name !== bestMissingSideBook.name).slice(0, 3)
+                    ...filteredOtherBooks.filter((b: any) => b.name !== bestMissingSideBook.name).slice(0, 3)
                   ],
                   allBooks: books
                 } as any);
