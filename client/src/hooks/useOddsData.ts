@@ -2842,7 +2842,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         console.error('🏈 Player props error - Status:', err.response?.status);
       }
       setError(errorMessage);
-      setPicks([]);
+      // Only clear picks on initial load errors, preserve existing data during auto-refresh failures
+      if (!isAutoRefresh) {
+        setPicks([]);
+      } else {
+        console.log('⚠️ Auto-refresh failed, keeping existing data');
+      }
     } finally {
       setLoading(false);
       setIsRefreshing(false);
