@@ -152,11 +152,11 @@ export function CancelSubscriptionPage({ onBack, onNavigateToChangePlan }: Cance
           <div className="space-y-3">
             <div className="flex justify-between">
               <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Plan</span>
-              <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>Platinum Monthly</span>
+              <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{planDisplayName} Monthly</span>
             </div>
             <div className="flex justify-between">
               <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Access until</span>
-              <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>December 15, 2025</span>
+              <span className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>{formatBillingDate(me?.subscription_end_date)}</span>
             </div>
             <div className="flex justify-between">
               <span className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} text-sm`}>Final charge</span>
