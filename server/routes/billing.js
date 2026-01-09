@@ -363,7 +363,7 @@ router.post('/create-checkout-session', requireUser, async (req, res) => {
         price: priceId,
         quantity: 1,
       }],
-      success_url: `${FRONTEND_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${FRONTEND_URL}/billing/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan.toLowerCase()}`,
       cancel_url: `${FRONTEND_URL}/billing/cancel`,
       allow_promotion_codes: true,
       metadata: { 
