@@ -266,17 +266,10 @@ export function AccountPage({
                 </div>
               </div>
               
-              {me?.subscription_end_date ? (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
-                  <Calendar className="w-4 h-4" />
-                  <span>Next billing date: {new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                </div>
-              ) : (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
-                  <Calendar className="w-4 h-4" />
-                  <span>Active Subscription</span>
-                </div>
-              )}
+              <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                <Calendar className="w-4 h-4" />
+                <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
+              </div>
 
               <div className="flex gap-2">
                 <button 
@@ -305,17 +298,10 @@ export function AccountPage({
                 </div>
               </div>
               
-              {me?.subscription_end_date ? (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
-                  <Calendar className="w-4 h-4" />
-                  <span>Next billing date: {new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                </div>
-              ) : (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
-                  <Calendar className="w-4 h-4" />
-                  <span>Active Subscription</span>
-                </div>
-              )}
+              <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                <Calendar className="w-4 h-4" />
+                <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
+              </div>
 
               <div className="flex gap-2">
                 <button 
