@@ -1334,7 +1334,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
             </div>
 
             {/* Content - auto height on mobile, scrollable on desktop */}
-            <div className="lg:overflow-y-auto lg:flex-1 p-6 pt-6 space-y-5 scrollbar-hide">
+            <div className="lg:overflow-y-auto lg:flex-1 p-6 pt-8 space-y-5 scrollbar-hide">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div className={!hasPlatinum ? 'opacity-50' : ''}>
