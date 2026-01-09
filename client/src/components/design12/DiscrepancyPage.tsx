@@ -294,7 +294,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
         propType: marketKey || 'player_points',
         propLabel: getPropLabel(marketKey || 'player_points'),
         commenceTime: pick.commenceTime || pick.gameTime || new Date().toISOString(),
-        sport: getSportLabel(pick.sportKey || selectedSport),
+        sport: pick.sport || getSportLabel(pick.sportKey || (selectedSport !== 'all' ? selectedSport : 'basketball_nba')),
         primaryBook: selectedBookInfo.name,
         primaryLine,
         primaryOdds: -110,
