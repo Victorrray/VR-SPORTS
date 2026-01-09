@@ -1465,7 +1465,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide swipe-scroll">
                       {dateOptions.map((date) => (
                         <button
                           key={date.id}
@@ -1584,7 +1584,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options - Grouped by Tier */}
-                    <div className="overflow-y-auto max-h-[calc(70vh-80px)] scrollbar-hide">
+                    <div className="overflow-y-auto max-h-[calc(70vh-80px)] scrollbar-hide swipe-scroll">
                       {sportsbooksByTier
                         .filter(tierGroup => {
                           // Hide DFS & Pick'em category when in straight bets mode
@@ -1701,7 +1701,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide swipe-scroll">
                       {sports.map((sport) => (
                         <button
                           key={sport.id}
@@ -1792,7 +1792,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide swipe-scroll">
                       {marketTypes.map((market) => (
                         <button
                           key={market.id}
