@@ -366,20 +366,21 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <Home className="w-5 h-5" />
                 Dashboard
               </button>
-              {/* Odds button - only show for paid users */}
-              {hasPaidPlan && (
-                <button
-                  onClick={() => setCurrentView("odds")}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                    currentView === "odds"
+              {/* Odds button - grayed out for free users, redirects to subscription */}
+              <button
+                onClick={() => hasPaidPlan ? setCurrentView("odds") : setCurrentView("changePlan")}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                  !hasPaidPlan
+                    ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
+                    : currentView === "odds"
                       ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
                       : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
-                  }`}
-                >
-                  <Zap className="w-5 h-5" />
-                  Odds
-                </button>
-              )}
+                }`}
+              >
+                <Zap className="w-5 h-5" />
+                Odds
+                {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
+              </button>
               {/* My Picks - Hidden for now */}
               {/* <button
                 onClick={() => setCurrentView("picks")}
@@ -591,26 +592,26 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 Home
               </span>
             </button>
-            {/* Odds button - only show for paid users */}
-            {hasPaidPlan && (
-              <button
-                onClick={() => setCurrentView("odds")}
-                className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
-                  currentView === "odds"
+            {/* Odds button - grayed out for free users, redirects to subscription */}
+            <button
+              onClick={() => hasPaidPlan ? setCurrentView("odds") : setCurrentView("changePlan")}
+              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
+                !hasPaidPlan
+                  ? isLight ? "text-gray-400 opacity-50" : "text-white/30 opacity-50"
+                  : currentView === "odds"
                     ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
                     : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
-                }`}
+              }`}
+            >
+              <Zap
+                className={`w-5 h-5 ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
+              />
+              <span
+                className={`text-[10px] font-bold ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-900" : "text-white" : ""}`}
               >
-                <Zap
-                  className={`w-5 h-5 ${currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
-                />
-                <span
-                  className={`text-[10px] font-bold ${currentView === "odds" ? isLight ? "text-purple-900" : "text-white" : ""}`}
-                >
-                  Odds
-                </span>
-              </button>
-            )}
+                Odds
+              </span>
+            </button>
             <button
               onClick={() => setCurrentView("account")}
               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
