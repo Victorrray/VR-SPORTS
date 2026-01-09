@@ -231,8 +231,8 @@ export function AccountPage({
               </span>
             </div>
             <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-              {user?.created_at 
-                ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+              {me?.created_at 
+                ? new Date(me.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
                 : 'Not available'}
             </p>
           </div>
