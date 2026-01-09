@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
+import { useOddsData } from '../../hooks/useOddsData';
 import { ChevronDown, ChevronRight, ChevronLeft, Filter, RefreshCw, ArrowUp, ArrowDown, Check, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -84,7 +85,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
 
   // Filter state
   const [selectedBook, setSelectedBook] = useState('prizepicks');
-  const [selectedSport, setSelectedSport] = useState('all');
+  const [selectedSport, setSelectedSport] = useState('basketball_nba');
   const [selectedPropType, setSelectedPropType] = useState('all');
   const [minDiscrepancy, setMinDiscrepancy] = useState(1);
   
@@ -94,11 +95,31 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const [bookExpanded, setBookExpanded] = useState(false);
   const [sportExpanded, setSportExpanded] = useState(false);
   const [propTypeExpanded, setPropTypeExpanded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const itemsPerPage = 10;
+
+  // Map DFS book IDs to display names and API keys
+  const DFS_BOOK_MAP: Record<string, { name: string; keys: string[] }> = {
+    'prizepicks': { name: 'PrizePicks', keys: ['prizepicks'] },
+    'underdog': { name: 'Underdog', keys: ['underdog'] },
+    'draftkings_pick6': { name: 'Pick 6', keys: ['pick6', 'draftkings_pick6'] },
+    'sleeper': { name: 'Sleeper', keys: ['sleeper'] },
+    'fliff': { name: 'Fliff', keys: ['fliff'] },
+    'betr': { name: 'Betr', keys: ['betr', 'betr_us_dfs'] },
+  };
+
+  // Fetch player props data from API
+  const { picks: apiPicks, loading: isLoading, error: apiError, refetch, lastUpdated, isRefreshing } = useOddsData({
+    sport: selectedSport === 'all' ? 'basketball_nba' : selectedSport,
+    marketType: selectedPropType === 'all' ? 'player_points' : selectedPropType,
+    betType: 'props',
+    sportsbooks: [], // Get all sportsbooks
+    date: 'all_upcoming',
+    minDataPoints: 1,
+    enabled: true,
+    autoRefresh: false,
+  });
 
   // Toggle row expansion
   const toggleRowExpansion = (id: string) => {
@@ -116,203 +137,149 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
     }, 280);
   };
 
-  // Mock data for demonstration - in production this would come from API
-  const mockDiscrepancies: DiscrepancyPick[] = useMemo(() => [
-    {
-      id: '1',
-      playerName: 'LeBron James',
-      team: 'LAL',
-      opponent: 'GSW',
-      propType: 'player_points_rebounds_assists',
-      propLabel: 'Pts+Reb+Ast',
-      commenceTime: new Date(Date.now() + 3600000).toISOString(),
-      sport: 'NBA',
-      primaryBook: 'PrizePicks',
-      primaryLine: 42.5,
-      primaryOdds: -110,
-      marketAverage: 46.8,
-      discrepancy: 4.3,
-      discrepancyPercent: 9.2,
-      recommendation: 'over',
-      confidence: 'high',
-      allBooks: [
-        { bookmaker: 'PrizePicks', line: 42.5, odds: -110 },
-        { bookmaker: 'DraftKings', line: 47.5, odds: -110 },
-        { bookmaker: 'FanDuel', line: 46.5, odds: -112 },
-        { bookmaker: 'BetMGM', line: 46.5, odds: -108 },
-      ]
-    },
-    {
-      id: '2',
-      playerName: 'Stephen Curry',
-      team: 'GSW',
-      opponent: 'LAL',
-      propType: 'player_threes',
-      propLabel: '3-Pointers',
-      commenceTime: new Date(Date.now() + 3600000).toISOString(),
-      sport: 'NBA',
-      primaryBook: 'PrizePicks',
-      primaryLine: 4.5,
-      primaryOdds: -110,
-      marketAverage: 5.8,
-      discrepancy: 1.3,
-      discrepancyPercent: 22.4,
-      recommendation: 'over',
-      confidence: 'high',
-      allBooks: [
-        { bookmaker: 'PrizePicks', line: 4.5, odds: -110 },
-        { bookmaker: 'DraftKings', line: 5.5, odds: -115 },
-        { bookmaker: 'FanDuel', line: 6.5, odds: -110 },
-        { bookmaker: 'Underdog', line: 5.5, odds: -110 },
-      ]
-    },
-    {
-      id: '3',
-      playerName: 'Jayson Tatum',
-      team: 'BOS',
-      opponent: 'MIA',
-      propType: 'player_points',
-      propLabel: 'Points',
-      commenceTime: new Date(Date.now() + 7200000).toISOString(),
-      sport: 'NBA',
-      primaryBook: 'PrizePicks',
-      primaryLine: 32.5,
-      primaryOdds: -110,
-      marketAverage: 29.2,
-      discrepancy: -3.3,
-      discrepancyPercent: -11.3,
-      recommendation: 'under',
-      confidence: 'high',
-      allBooks: [
-        { bookmaker: 'PrizePicks', line: 32.5, odds: -110 },
-        { bookmaker: 'DraftKings', line: 29.5, odds: -110 },
-        { bookmaker: 'FanDuel', line: 28.5, odds: -108 },
-        { bookmaker: 'BetMGM', line: 29.5, odds: -112 },
-      ]
-    },
-    {
-      id: '4',
-      playerName: 'Luka Doncic',
-      team: 'DAL',
-      opponent: 'PHX',
-      propType: 'player_assists',
-      propLabel: 'Assists',
-      commenceTime: new Date(Date.now() + 10800000).toISOString(),
-      sport: 'NBA',
-      primaryBook: 'PrizePicks',
-      primaryLine: 8.5,
-      primaryOdds: -110,
-      marketAverage: 9.8,
-      discrepancy: 1.3,
-      discrepancyPercent: 13.3,
-      recommendation: 'over',
-      confidence: 'medium',
-      allBooks: [
-        { bookmaker: 'PrizePicks', line: 8.5, odds: -110 },
-        { bookmaker: 'DraftKings', line: 9.5, odds: -105 },
-        { bookmaker: 'FanDuel', line: 10.5, odds: -110 },
-        { bookmaker: 'Underdog', line: 9.5, odds: -110 },
-      ]
-    },
-    {
-      id: '5',
-      playerName: 'Nikola Jokic',
-      team: 'DEN',
-      opponent: 'MIN',
-      propType: 'player_rebounds',
-      propLabel: 'Rebounds',
-      commenceTime: new Date(Date.now() + 14400000).toISOString(),
-      sport: 'NBA',
-      primaryBook: 'PrizePicks',
-      primaryLine: 11.5,
-      primaryOdds: -110,
-      marketAverage: 13.2,
-      discrepancy: 1.7,
-      discrepancyPercent: 12.9,
-      recommendation: 'over',
-      confidence: 'high',
-      allBooks: [
-        { bookmaker: 'PrizePicks', line: 11.5, odds: -110 },
-        { bookmaker: 'DraftKings', line: 13.5, odds: -110 },
-        { bookmaker: 'FanDuel', line: 13.5, odds: -115 },
-        { bookmaker: 'BetMGM', line: 12.5, odds: -108 },
-      ]
-    },
-    {
-      id: '6',
-      playerName: 'Anthony Edwards',
-      team: 'MIN',
-      opponent: 'DEN',
-      propType: 'player_points',
-      propLabel: 'Points',
-      commenceTime: new Date(Date.now() + 14400000).toISOString(),
-      sport: 'NBA',
-      primaryBook: 'PrizePicks',
-      primaryLine: 24.5,
-      primaryOdds: -110,
-      marketAverage: 27.1,
-      discrepancy: 2.6,
-      discrepancyPercent: 9.6,
-      recommendation: 'over',
-      confidence: 'high',
-      allBooks: [
-        { bookmaker: 'PrizePicks', line: 24.5, odds: -110 },
-        { bookmaker: 'DraftKings', line: 27.5, odds: -110 },
-        { bookmaker: 'FanDuel', line: 26.5, odds: -112 },
-        { bookmaker: 'BetMGM', line: 27.5, odds: -108 },
-      ]
-    },
-    {
-      id: '7',
-      playerName: 'Tyrese Haliburton',
-      team: 'IND',
-      opponent: 'CLE',
-      propType: 'player_assists',
-      propLabel: 'Assists',
-      commenceTime: new Date(Date.now() + 18000000).toISOString(),
-      sport: 'NBA',
-      primaryBook: 'PrizePicks',
-      primaryLine: 9.5,
-      primaryOdds: -110,
-      marketAverage: 11.2,
-      discrepancy: 1.7,
-      discrepancyPercent: 15.2,
-      recommendation: 'over',
-      confidence: 'high',
-      allBooks: [
-        { bookmaker: 'PrizePicks', line: 9.5, odds: -110 },
-        { bookmaker: 'DraftKings', line: 11.5, odds: -110 },
-        { bookmaker: 'FanDuel', line: 11.5, odds: -108 },
-        { bookmaker: 'Underdog', line: 10.5, odds: -110 },
-      ]
-    },
-  ], []);
+  // Get prop label from market key
+  const getPropLabel = (marketKey: string): string => {
+    const labelMap: Record<string, string> = {
+      'player_points': 'Points',
+      'player_rebounds': 'Rebounds',
+      'player_assists': 'Assists',
+      'player_points_rebounds_assists': 'PRA',
+      'player_threes': '3-Pointers',
+      'player_steals': 'Steals',
+      'player_blocks': 'Blocks',
+      'player_turnovers': 'Turnovers',
+      'player_pass_yds': 'Pass Yds',
+      'player_rush_yds': 'Rush Yds',
+      'player_reception_yds': 'Rec Yds',
+      'player_pass_tds': 'Pass TDs',
+      'player_rush_tds': 'Rush TDs',
+      'player_receptions': 'Receptions',
+    };
+    return labelMap[marketKey] || marketKey.replace('player_', '').replace(/_/g, ' ');
+  };
+
+  // Get sport label from sport key
+  const getSportLabel = (sportKey: string): string => {
+    const sportMap: Record<string, string> = {
+      'basketball_nba': 'NBA',
+      'basketball_ncaab': 'NCAAB',
+      'americanfootball_nfl': 'NFL',
+      'americanfootball_ncaaf': 'NCAAF',
+      'baseball_mlb': 'MLB',
+      'icehockey_nhl': 'NHL',
+    };
+    return sportMap[sportKey] || sportKey;
+  };
+
+  // Process API picks to find discrepancies
+  const processedDiscrepancies: DiscrepancyPick[] = useMemo(() => {
+    if (!apiPicks || apiPicks.length === 0) return [];
+
+    const selectedBookInfo = DFS_BOOK_MAP[selectedBook];
+    if (!selectedBookInfo) return [];
+
+    const discrepancies: DiscrepancyPick[] = [];
+
+    apiPicks.forEach((pick, idx) => {
+      // Only process player props
+      if (!pick.isPlayerProp || !pick.playerName) return;
+
+      // Get all books for this pick
+      const allBooks = pick.allBooks || pick.books || [];
+      if (allBooks.length < 2) return; // Need at least 2 books to compare
+
+      // Find the selected DFS book's line
+      const primaryBookData = allBooks.find((b: any) => 
+        selectedBookInfo.keys.some(key => 
+          b.key?.toLowerCase() === key.toLowerCase() || 
+          b.name?.toLowerCase().includes(selectedBookInfo.name.toLowerCase())
+        )
+      );
+
+      if (!primaryBookData || primaryBookData.line === undefined) return;
+
+      // Get other books (excluding the selected DFS book)
+      const otherBooks = allBooks.filter((b: any) => 
+        !selectedBookInfo.keys.some(key => 
+          b.key?.toLowerCase() === key.toLowerCase() || 
+          b.name?.toLowerCase().includes(selectedBookInfo.name.toLowerCase())
+        )
+      );
+
+      if (otherBooks.length === 0) return;
+
+      // Calculate market average from other books
+      const validLines = otherBooks
+        .filter((b: any) => b.line !== undefined && b.line !== null)
+        .map((b: any) => b.line);
+
+      if (validLines.length === 0) return;
+
+      const marketAverage = validLines.reduce((sum: number, line: number) => sum + line, 0) / validLines.length;
+      const primaryLine = primaryBookData.line;
+      const discrepancy = marketAverage - primaryLine;
+      const discrepancyPercent = (discrepancy / marketAverage) * 100;
+
+      // Determine recommendation
+      // If primary line < average, take OVER (you're getting a lower line)
+      // If primary line > average, take UNDER (you're getting a higher line)
+      const recommendation: 'over' | 'under' = discrepancy > 0 ? 'over' : 'under';
+
+      // Determine confidence based on discrepancy percentage
+      const absPercent = Math.abs(discrepancyPercent);
+      const confidence: 'high' | 'medium' | 'low' = 
+        absPercent >= 10 ? 'high' : 
+        absPercent >= 5 ? 'medium' : 'low';
+
+      // Parse game info from pick
+      const gameInfo = pick.game || '';
+      const teams = gameInfo.split(' @ ');
+      const team = teams[0] || '';
+      const opponent = teams[1] || '';
+
+      // Build allBooks array for mini-table
+      const bookLines: BookLine[] = allBooks.map((b: any) => ({
+        bookmaker: b.name || b.key || 'Unknown',
+        line: b.line || 0,
+        odds: parseInt(b.overOdds?.replace('+', '') || b.odds?.replace('+', '') || '-110', 10),
+      }));
+
+      discrepancies.push({
+        id: `${pick.id || idx}-${pick.playerName}-${pick.marketKey}`,
+        playerName: pick.playerName,
+        team,
+        opponent,
+        propType: pick.marketKey || 'player_points',
+        propLabel: getPropLabel(pick.marketKey || 'player_points'),
+        commenceTime: pick.commenceTime || pick.gameTime || new Date().toISOString(),
+        sport: getSportLabel(pick.sportKey || selectedSport),
+        primaryBook: selectedBookInfo.name,
+        primaryLine,
+        primaryOdds: -110,
+        marketAverage,
+        discrepancy,
+        discrepancyPercent,
+        recommendation,
+        allBooks: bookLines,
+        confidence,
+      });
+    });
+
+    return discrepancies;
+  }, [apiPicks, selectedBook, selectedSport]);
 
   // Filter discrepancies based on selections
   const filteredDiscrepancies = useMemo(() => {
-    return mockDiscrepancies.filter(d => {
+    return processedDiscrepancies.filter(d => {
       // Filter by minimum discrepancy
       if (Math.abs(d.discrepancy) < minDiscrepancy) return false;
-      
-      // Filter by sport
-      if (selectedSport !== 'all') {
-        const sportMap: Record<string, string> = {
-          'basketball_nba': 'NBA',
-          'basketball_ncaab': 'NCAAB',
-          'americanfootball_nfl': 'NFL',
-          'americanfootball_ncaaf': 'NCAAF',
-          'baseball_mlb': 'MLB',
-          'icehockey_nhl': 'NHL',
-        };
-        if (d.sport !== sportMap[selectedSport]) return false;
-      }
       
       // Filter by prop type
       if (selectedPropType !== 'all' && d.propType !== selectedPropType) return false;
       
       return true;
     }).sort((a, b) => Math.abs(b.discrepancyPercent) - Math.abs(a.discrepancyPercent));
-  }, [mockDiscrepancies, minDiscrepancy, selectedSport, selectedPropType]);
+  }, [processedDiscrepancies, minDiscrepancy, selectedPropType]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filteredDiscrepancies.length / itemsPerPage));
@@ -338,19 +305,16 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
 
   // Format last updated time
   const formatLastUpdated = () => {
+    if (!lastUpdated) return 'Never';
     return lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   };
 
-  // Refresh handler
+  // Refresh handler - use the refetch from useOddsData
   const handleRefresh = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setLastUpdated(new Date());
-      toast.success('Discrepancies refreshed', {
-        description: 'Fetching latest line comparisons'
-      });
-    }, 1500);
+    refetch();
+    toast.success('Refreshing discrepancies...', {
+      description: 'Fetching latest line comparisons'
+    });
   };
 
   return (
