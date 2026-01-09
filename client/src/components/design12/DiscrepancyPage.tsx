@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 // Types for discrepancy data
 interface BookLine {
   bookmaker: string;
+  bookKey?: string; // API key for the book (for DFS detection)
   line: number;
   odds: number;
   isDFS?: boolean; // Whether this is a DFS app (excluded from market average)
@@ -274,6 +275,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
       // But mark which are DFS vs traditional
       const bookLines: BookLine[] = allBooks.map((b: any) => ({
         bookmaker: b.name || b.key || 'Unknown',
+        bookKey: b.key || '', // Preserve key for DFS detection
         line: b.line || 0,
         odds: parseInt(b.overOdds?.replace('+', '') || b.odds?.replace('+', '') || '-110', 10),
         isDFS: isDFSBook(b.key || '', b.name || ''),
@@ -732,6 +734,9 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                       <div className={`grid grid-cols-3 gap-4 px-4 py-3 ${isLight ? 'bg-gray-100 border-t border-gray-200' : 'bg-white/5 border-t border-white/10'}`}>
                         <div className={`font-bold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>
                           Market Average
+                          <span className={`ml-2 text-xs font-normal ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                            ({pick.traditionalBookCount || pick.allBooks.filter(b => !b.isDFS).length} book{(pick.traditionalBookCount || pick.allBooks.filter(b => !b.isDFS).length) !== 1 ? 's' : ''})
+                          </span>
                         </div>
                         <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} text-center`}>
                           {pick.marketAverage.toFixed(1)}

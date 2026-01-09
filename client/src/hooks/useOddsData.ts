@@ -834,6 +834,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           return {
             name: b.name,
             rawName: b.name,
+            key: b.key, // Include key for DFS detection in Discrepancy tool
             line: b.line,
             odds: primaryOdds,
             team2Odds: secondaryOdds,
