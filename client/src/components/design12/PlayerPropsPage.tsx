@@ -811,7 +811,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             </div>
 
             {/* Content - auto height on mobile, scrollable on desktop */}
-            <div className="lg:overflow-y-auto lg:flex-1 p-6 pt-4 space-y-5">
+            <div className="lg:overflow-y-auto lg:flex-1 p-6 pt-8 space-y-5">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div>
