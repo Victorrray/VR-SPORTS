@@ -985,7 +985,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 
                 {/* Desktop Inline Dropdown */}
                 {sportsbooksExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-80 overflow-y-auto scrollbar-hide`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
                     {sportsbooksByTier.map((tierGroup, tierIndex) => (
                       <div key={tierIndex}>
                         {/* Tier Header */}
@@ -997,20 +997,13 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           <button
                             key={book.id}
                             onClick={() => toggleSportsbookFilter(book.id)}
-                            className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                            className={`w-full text-left px-4 py-3 font-bold transition-all ${
                               selectedSportsbooks.includes(book.id)
                                 ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                                 : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                             }`}
                           >
-                            <span>{book.name}</span>
-                            {selectedSportsbooks.includes(book.id) && (
-                              <div className={`w-4 h-4 rounded ${isLight ? 'bg-purple-600' : 'bg-purple-400'} flex items-center justify-center`}>
-                                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                            )}
+                            {book.name}
                           </button>
                         ))}
                       </div>
@@ -1050,7 +1043,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     </div>
                     
                     {/* Options - Grouped by Tier */}
-                    <div className="overflow-y-auto max-h-[calc(70vh-80px)]">
+                    <div className="overflow-y-auto max-h-[calc(70vh-80px)] scrollbar-hide">
                       {sportsbooksByTier.map((tierGroup, tierIndex) => (
                         <div key={tierIndex}>
                           {/* Tier Header */}
@@ -1062,25 +1055,13 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                             <button
                               key={book.id}
                               onClick={() => toggleSportsbookFilter(book.id)}
-                              className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center gap-3 ${
+                              className={`w-full text-left px-6 py-4 font-bold transition-all ${
                                 selectedSportsbooks.includes(book.id)
                                   ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                                   : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                               }`}
                             >
-                              {/* Checkbox indicator */}
-                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
-                                selectedSportsbooks.includes(book.id)
-                                  ? isLight ? 'bg-purple-600 border-purple-600' : 'bg-purple-500 border-purple-500'
-                                  : isLight ? 'border-gray-300 bg-white' : 'border-white/30 bg-transparent'
-                              }`}>
-                                {selectedSportsbooks.includes(book.id) && (
-                                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                )}
-                              </div>
-                              <span className="flex-1">{book.name}</span>
+                              {book.name}
                             </button>
                           ))}
                         </div>
@@ -1112,33 +1093,16 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       <button
                         key={sport.id}
                         onClick={() => {
-                          if (sport.id === 'all') {
-                            setSelectedSports(['all']);
-                          } else {
-                            const newSports = selectedSports.includes(sport.id)
-                              ? selectedSports.filter(s => s !== sport.id)
-                              : selectedSports.filter(s => s !== 'all').concat(sport.id);
-                            setSelectedSports(newSports.length === 0 ? ['all'] : newSports);
-                          }
+                          setSelectedSports([sport.id]);
+                          setSportExpanded(false);
                         }}
-                        className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                        className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedSports.includes(sport.id)
                             ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
-                        <span className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedSports.includes(sport.id)}
-                            onChange={() => {}}
-                            className="w-4 h-4 rounded"
-                          />
-                          {sport.name}
-                        </span>
-                        <span className={`text-xs ${selectedSports.includes(sport.id) ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
-                          {sport.count}
-                        </span>
+                        {sport.name}
                       </button>
                     ))}
                   </div>
@@ -1176,38 +1140,21 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
                       {sports.map((sport) => (
                         <button
                           key={sport.id}
                           onClick={() => {
-                            if (sport.id === 'all') {
-                              setSelectedSports(['all']);
-                            } else {
-                              const newSports = selectedSports.includes(sport.id)
-                                ? selectedSports.filter(s => s !== sport.id)
-                                : selectedSports.filter(s => s !== 'all').concat(sport.id);
-                              setSelectedSports(newSports.length === 0 ? ['all'] : newSports);
-                            }
+                            setSelectedSports([sport.id]);
+                            closeSportDrawer();
                           }}
-                          className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                          className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedSports.includes(sport.id)
                               ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
-                          <span className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedSports.includes(sport.id)}
-                              onChange={() => {}}
-                              className="w-4 h-4 rounded"
-                            />
-                            {sport.name}
-                          </span>
-                          <span className={`text-xs ${selectedSports.includes(sport.id) ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
-                            {sport.count}
-                          </span>
+                          {sport.name}
                         </button>
                       ))}
                     </div>
@@ -1284,7 +1231,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     </div>
                     
                     {/* Options */}
-                    <div className="overflow-y-auto max-h-[calc(60vh-80px)]">
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
                       {marketTypes.map((market) => (
                         <button
                           key={market.id}
