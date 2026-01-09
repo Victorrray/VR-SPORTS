@@ -58,8 +58,8 @@ const SPORTS = [
   { id: 'basketball_ncaab', name: 'NCAA Basketball' },
   { id: 'americanfootball_nfl', name: 'NFL' },
   { id: 'americanfootball_ncaaf', name: 'NCAA Football' },
-  { id: 'baseball_mlb', name: 'MLB' },
   { id: 'icehockey_nhl', name: 'NHL' },
+  // MLB removed - not in season (add back around March/April)
 ];
 
 // Prop types
