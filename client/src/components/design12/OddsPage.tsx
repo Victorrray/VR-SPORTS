@@ -1719,33 +1719,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                       <button
                         key={sport.id}
                         onClick={() => {
-                          if (sport.id === 'all') {
-                            setSelectedSports(['all']);
-                          } else {
-                            const newSports = selectedSports.includes(sport.id)
-                              ? selectedSports.filter(s => s !== sport.id)
-                              : selectedSports.filter(s => s !== 'all').concat(sport.id);
-                            setSelectedSports(newSports.length === 0 ? ['all'] : newSports);
-                          }
+                          setSelectedSports([sport.id]);
+                          setSportExpanded(false);
                         }}
-                        className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                        className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedSports.includes(sport.id)
                             ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
-                        <span className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedSports.includes(sport.id)}
-                            onChange={() => {}}
-                            className="w-4 h-4 rounded"
-                          />
-                          {sport.name}
-                        </span>
-                        <span className={`text-xs ${selectedSports.includes(sport.id) ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
-                          {sport.count}
-                        </span>
+                        {sport.name}
                       </button>
                     ))}
                   </div>
@@ -1788,33 +1771,16 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                         <button
                           key={sport.id}
                           onClick={() => {
-                            if (sport.id === 'all') {
-                              setSelectedSports(['all']);
-                            } else {
-                              const newSports = selectedSports.includes(sport.id)
-                                ? selectedSports.filter(s => s !== sport.id)
-                                : selectedSports.filter(s => s !== 'all').concat(sport.id);
-                              setSelectedSports(newSports.length === 0 ? ['all'] : newSports);
-                            }
+                            setSelectedSports([sport.id]);
+                            closeSportDrawer();
                           }}
-                          className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                          className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedSports.includes(sport.id)
                               ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
-                          <span className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedSports.includes(sport.id)}
-                              onChange={() => {}}
-                              className="w-4 h-4 rounded"
-                            />
-                            {sport.name}
-                          </span>
-                          <span className={`text-xs ${selectedSports.includes(sport.id) ? isLight ? 'text-purple-600' : 'text-purple-300' : isLight ? 'text-gray-500' : 'text-white/40'}`}>
-                            {sport.count}
-                          </span>
+                          {sport.name}
                         </button>
                       ))}
                     </div>
