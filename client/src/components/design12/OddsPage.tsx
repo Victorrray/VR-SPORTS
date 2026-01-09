@@ -1281,7 +1281,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-6 lg:pt-20 pb-4 space-y-4 lg:border-b border-b-0 -mt-6 lg:rounded-none max-lg:rounded-t-2xl`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-6 lg:pt-16 pb-4 space-y-4 lg:border-b lg:border-t border-b-0 -mt-6 lg:rounded-none max-lg:rounded-t-2xl`}>
               {/* Drag Handle - Mobile Only */}
               <div className="flex lg:hidden justify-center pt-3 pb-2 -mt-6">
                 <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
