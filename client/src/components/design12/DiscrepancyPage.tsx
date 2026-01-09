@@ -500,9 +500,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                     {/* Edge Badge */}
                     <div className="col-span-1 flex items-center justify-center">
                       <div className={`px-3 py-2 rounded-xl font-bold text-lg ${
-                        pick.discrepancy > 0
-                          ? isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
-                          : isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400'
+                        isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
                       }`}>
                         {Math.abs(pick.discrepancyPercent).toFixed(1)}%
                       </div>
@@ -599,9 +597,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                       </div>
                       <div className="flex items-center gap-2">
                         <div className={`px-3 py-2 rounded-xl font-bold ${
-                          pick.discrepancy > 0
-                            ? isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
-                            : isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400'
+                          isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
                         }`}>
                           {Math.abs(pick.discrepancyPercent).toFixed(1)}%
                         </div>
