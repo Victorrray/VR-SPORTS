@@ -10,6 +10,7 @@ interface BookLine {
   bookmaker: string;
   line: number;
   odds: number;
+  isDFS?: boolean; // Whether this is a DFS app (excluded from market average)
 }
 
 interface DiscrepancyPick {
@@ -30,6 +31,7 @@ interface DiscrepancyPick {
   recommendation: 'over' | 'under';
   allBooks: BookLine[];
   confidence: 'high' | 'medium' | 'low';
+  traditionalBookCount?: number; // Number of traditional sportsbooks used in average
 }
 
 // Props for the component
@@ -109,6 +111,26 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
     'betr': { name: 'Betr', keys: ['betr', 'betr_us_dfs'] },
   };
 
+  // ALL DFS app keys - used to exclude from market average calculation
+  const ALL_DFS_KEYS = [
+    'prizepicks', 'underdog', 'pick6', 'draftkings_pick6', 'sleeper', 
+    'fliff', 'betr', 'betr_us_dfs', 'dabble', 'dabble_au', 'chalkboard', 'parlay'
+  ];
+
+  // Check if a book is a DFS app
+  const isDFSBook = (bookKey: string, bookName: string): boolean => {
+    const key = bookKey?.toLowerCase() || '';
+    const name = bookName?.toLowerCase() || '';
+    return ALL_DFS_KEYS.some(dfs => key.includes(dfs) || name.includes(dfs));
+  };
+
+  // Check if market key is an alternate line (should be excluded)
+  const isAlternateLine = (marketKey: string): boolean => {
+    if (!marketKey) return false;
+    const key = marketKey.toLowerCase();
+    return key.includes('alternate') || key.includes('_alt');
+  };
+
   // Fetch player props data from API
   const { picks: apiPicks, loading: isLoading, error: apiError, refetch, lastUpdated, isRefreshing } = useOddsData({
     sport: selectedSport === 'all' ? 'basketball_nba' : selectedSport,
@@ -184,6 +206,10 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
       // Only process player props
       if (!pick.isPlayerProp || !pick.playerName) return;
 
+      // SKIP alternate lines - they create false discrepancies
+      const marketKey = pick.marketKey || '';
+      if (isAlternateLine(marketKey)) return;
+
       // Get all books for this pick
       const allBooks = pick.allBooks || pick.books || [];
       if (allBooks.length < 2) return; // Need at least 2 books to compare
@@ -198,18 +224,19 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
 
       if (!primaryBookData || primaryBookData.line === undefined) return;
 
-      // Get other books (excluding the selected DFS book)
-      const otherBooks = allBooks.filter((b: any) => 
-        !selectedBookInfo.keys.some(key => 
-          b.key?.toLowerCase() === key.toLowerCase() || 
-          b.name?.toLowerCase().includes(selectedBookInfo.name.toLowerCase())
-        )
-      );
+      // Get ONLY traditional sportsbooks for market average (exclude ALL DFS apps)
+      const traditionalBooks = allBooks.filter((b: any) => {
+        const bookKey = b.key || '';
+        const bookName = b.name || '';
+        // Exclude all DFS apps from market average calculation
+        return !isDFSBook(bookKey, bookName);
+      });
 
-      if (otherBooks.length === 0) return;
+      // Need at least 1 traditional sportsbook to compare against
+      if (traditionalBooks.length === 0) return;
 
-      // Calculate market average from other books
-      const validLines = otherBooks
+      // Calculate market average from TRADITIONAL sportsbooks only
+      const validLines = traditionalBooks
         .filter((b: any) => b.line !== undefined && b.line !== null)
         .map((b: any) => b.line);
 
@@ -218,7 +245,13 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
       const marketAverage = validLines.reduce((sum: number, line: number) => sum + line, 0) / validLines.length;
       const primaryLine = primaryBookData.line;
       const discrepancy = marketAverage - primaryLine;
+      
+      // Avoid division by zero and handle edge cases
+      if (marketAverage === 0) return;
       const discrepancyPercent = (discrepancy / marketAverage) * 100;
+
+      // Skip if discrepancy is unreasonably high (likely bad data)
+      if (Math.abs(discrepancyPercent) > 100) return;
 
       // Determine recommendation
       // If primary line < average, take OVER (you're getting a lower line)
@@ -237,11 +270,13 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
       const team = teams[0] || '';
       const opponent = teams[1] || '';
 
-      // Build allBooks array for mini-table
+      // Build allBooks array for mini-table - show DFS apps AND traditional books
+      // But mark which are DFS vs traditional
       const bookLines: BookLine[] = allBooks.map((b: any) => ({
         bookmaker: b.name || b.key || 'Unknown',
         line: b.line || 0,
         odds: parseInt(b.overOdds?.replace('+', '') || b.odds?.replace('+', '') || '-110', 10),
+        isDFS: isDFSBook(b.key || '', b.name || ''),
       }));
 
       discrepancies.push({
@@ -249,8 +284,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
         playerName: pick.playerName,
         team,
         opponent,
-        propType: pick.marketKey || 'player_points',
-        propLabel: getPropLabel(pick.marketKey || 'player_points'),
+        propType: marketKey || 'player_points',
+        propLabel: getPropLabel(marketKey || 'player_points'),
         commenceTime: pick.commenceTime || pick.gameTime || new Date().toISOString(),
         sport: getSportLabel(pick.sportKey || selectedSport),
         primaryBook: selectedBookInfo.name,
@@ -262,6 +297,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
         recommendation,
         allBooks: bookLines,
         confidence,
+        traditionalBookCount: traditionalBooks.length,
       });
     });
 
@@ -611,24 +647,24 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                         <div className={`${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide text-right`}>vs Avg</div>
                       </div>
                       
-                      {/* Book Lines */}
-                      {pick.allBooks.map((book, idx) => {
+                      {/* Traditional Sportsbooks Section */}
+                      <div className={`px-4 py-2 ${isLight ? 'bg-blue-50 border-blue-100' : 'bg-blue-500/10 border-blue-500/20'} border-b`}>
+                        <span className={`text-xs font-bold uppercase tracking-wide ${isLight ? 'text-blue-600' : 'text-blue-400'}`}>
+                          Traditional Sportsbooks (Used in Average)
+                        </span>
+                      </div>
+                      {pick.allBooks.filter(b => !b.isDFS).map((book, idx) => {
                         const diffFromAvg = book.line - pick.marketAverage;
-                        const isPrimaryBook = book.bookmaker === pick.primaryBook;
+                        const traditionalBooks = pick.allBooks.filter(b => !b.isDFS);
                         return (
                           <div 
-                            key={idx}
+                            key={`trad-${idx}`}
                             className={`grid grid-cols-3 gap-4 px-4 py-3 ${
-                              idx !== pick.allBooks.length - 1 ? (isLight ? 'border-b border-gray-100' : 'border-b border-white/5') : ''
-                            } ${isPrimaryBook ? (isLight ? 'bg-purple-50' : 'bg-purple-500/10') : ''}`}
+                              idx !== traditionalBooks.length - 1 ? (isLight ? 'border-b border-gray-100' : 'border-b border-white/5') : ''
+                            }`}
                           >
                             <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} flex items-center gap-2`}>
                               {book.bookmaker}
-                              {isPrimaryBook && (
-                                <span className={`text-xs px-2 py-0.5 rounded-full ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'}`}>
-                                  Selected
-                                </span>
-                              )}
                             </div>
                             <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} text-center`}>
                               {book.line}
@@ -645,6 +681,52 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                           </div>
                         );
                       })}
+
+                      {/* DFS Apps Section */}
+                      {pick.allBooks.filter(b => b.isDFS).length > 0 && (
+                        <>
+                          <div className={`px-4 py-2 ${isLight ? 'bg-purple-50 border-purple-100' : 'bg-purple-500/10 border-purple-500/20'} border-y`}>
+                            <span className={`text-xs font-bold uppercase tracking-wide ${isLight ? 'text-purple-600' : 'text-purple-400'}`}>
+                              DFS Apps (Not in Average)
+                            </span>
+                          </div>
+                          {pick.allBooks.filter(b => b.isDFS).map((book, idx) => {
+                            const diffFromAvg = book.line - pick.marketAverage;
+                            const isPrimaryBook = book.bookmaker.toLowerCase().includes(pick.primaryBook.toLowerCase()) || 
+                                                  pick.primaryBook.toLowerCase().includes(book.bookmaker.toLowerCase());
+                            const dfsBooks = pick.allBooks.filter(b => b.isDFS);
+                            return (
+                              <div 
+                                key={`dfs-${idx}`}
+                                className={`grid grid-cols-3 gap-4 px-4 py-3 ${
+                                  idx !== dfsBooks.length - 1 ? (isLight ? 'border-b border-gray-100' : 'border-b border-white/5') : ''
+                                } ${isPrimaryBook ? (isLight ? 'bg-purple-50' : 'bg-purple-500/10') : ''}`}
+                              >
+                                <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} flex items-center gap-2`}>
+                                  {book.bookmaker}
+                                  {isPrimaryBook && (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'}`}>
+                                      Selected
+                                    </span>
+                                  )}
+                                </div>
+                                <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} text-center`}>
+                                  {book.line}
+                                </div>
+                                <div className={`font-bold text-right ${
+                                  diffFromAvg < 0
+                                    ? isLight ? 'text-green-600' : 'text-green-400'
+                                    : diffFromAvg > 0
+                                      ? isLight ? 'text-red-600' : 'text-red-400'
+                                      : isLight ? 'text-gray-500' : 'text-white/50'
+                                }`}>
+                                  {diffFromAvg > 0 ? '+' : ''}{diffFromAvg.toFixed(1)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </>
+                      )}
                       
                       {/* Market Average Row */}
                       <div className={`grid grid-cols-3 gap-4 px-4 py-3 ${isLight ? 'bg-gray-100 border-t border-gray-200' : 'bg-white/5 border-t border-white/10'}`}>
