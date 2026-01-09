@@ -91,6 +91,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const [selectedSport, setSelectedSport] = useState('basketball_nba');
   const [selectedPropType, setSelectedPropType] = useState('all');
   const [minDiscrepancy, setMinDiscrepancy] = useState(1);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   
   // UI state
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
@@ -141,7 +142,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
     date: 'all_upcoming',
     minDataPoints: 1,
     enabled: true,
-    autoRefresh: false,
+    autoRefresh: autoRefresh,
+    refreshInterval: 45000, // 45 seconds
   });
 
   // Toggle row expansion
@@ -939,6 +941,35 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Auto-Refresh Toggle */}
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                  Auto-Refresh
+                </label>
+                <button
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                    isLight 
+                      ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' 
+                      : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
+                    {autoRefresh ? 'Auto-refresh ON (45s)' : 'Auto-refresh OFF'}
+                  </span>
+                  <div className={`w-12 h-6 rounded-full p-1 transition-all ${
+                    autoRefresh 
+                      ? isLight ? 'bg-purple-500' : 'bg-purple-500' 
+                      : isLight ? 'bg-gray-300' : 'bg-white/20'
+                  }`}>
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                      autoRefresh ? 'translate-x-6' : 'translate-x-0'
+                    }`} />
+                  </div>
+                </button>
               </div>
 
               {/* Apply & Reset Buttons */}
