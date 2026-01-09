@@ -1577,7 +1577,15 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 {/* Desktop Inline Dropdown */}
                 {sportsbooksExpanded && (
                   <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-80 overflow-y-auto scrollbar-hide`}>
-                    {sportsbooksByTier.map((tierGroup, tierIndex) => (
+                    {sportsbooksByTier
+                      .filter(tierGroup => {
+                        // Hide DFS & Pick'em category when in straight bets mode
+                        if (selectedBetType === 'straight' && tierGroup.tier.includes('DFS')) {
+                          return false;
+                        }
+                        return true;
+                      })
+                      .map((tierGroup, tierIndex) => (
                       <div key={tierIndex}>
                         {/* Tier Header */}
                         <div className={`px-4 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider`}>
