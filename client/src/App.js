@@ -147,7 +147,7 @@ function AppRoutes() {
               {/* <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} /> */}
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/billing/success" element={<BillingSuccess />} />
-              <Route path="/billing/cancel" element={<BillingCancel />} />
+              <Route path="/billing/cancel" element={<Navigate to="/dashboard?view=changePlan" replace />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
