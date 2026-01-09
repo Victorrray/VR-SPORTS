@@ -271,15 +271,10 @@ export function AccountPage({
                   <Calendar className="w-4 h-4" />
                   <span>Next billing date: {new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                 </div>
-              ) : !me?.has_billing ? (
+              ) : (
                 <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
                   <Calendar className="w-4 h-4" />
-                  <span>Lifetime Access — No billing required</span>
-                </div>
-              ) : (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
-                  <Calendar className="w-4 h-4" />
-                  <span>Billing date unavailable</span>
+                  <span>Active Subscription</span>
                 </div>
               )}
 
@@ -289,12 +284,6 @@ export function AccountPage({
                   className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
                 >
                   Change Plan
-                </button>
-                <button 
-                  onClick={onNavigateToCancelSubscription}
-                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
-                >
-                  Cancel Subscription
                 </button>
               </div>
             </div>
@@ -311,7 +300,7 @@ export function AccountPage({
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>$15</div>
+                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>$10</div>
                   <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>per month</div>
                 </div>
               </div>
@@ -321,15 +310,10 @@ export function AccountPage({
                   <Calendar className="w-4 h-4" />
                   <span>Next billing date: {new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                 </div>
-              ) : !me?.has_billing ? (
+              ) : (
                 <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
                   <Calendar className="w-4 h-4" />
-                  <span>Lifetime Access — No billing required</span>
-                </div>
-              ) : (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold mb-4`}>
-                  <Calendar className="w-4 h-4" />
-                  <span>Billing date unavailable</span>
+                  <span>Active Subscription</span>
                 </div>
               )}
 
@@ -339,12 +323,6 @@ export function AccountPage({
                   className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
                 >
                   Change Plan
-                </button>
-                <button 
-                  onClick={onNavigateToCancelSubscription}
-                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
-                >
-                  Cancel Subscription
                 </button>
               </div>
             </div>
