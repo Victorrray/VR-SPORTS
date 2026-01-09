@@ -116,49 +116,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         </div>
       </div>
 
-      {/* Bankroll Settings */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
-        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
-          <DollarSign className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-          Bankroll Settings
-        </h2>
-
-        <div className="space-y-4">
-          <button 
-            onClick={() => {
-              setBankrollInput(startingBankroll > 0 ? startingBankroll.toString() : '');
-              setShowBankrollModal(true);
-            }}
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
-          >
-            <div className="flex items-center gap-3">
-              <DollarSign className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Starting Bankroll</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
-                  {startingBankroll > 0 ? `$${startingBankroll.toLocaleString()}` : 'Set your initial bankroll amount'}
-                </div>
-              </div>
-            </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
-          </button>
-
-          <button 
-            onClick={() => setShowResetModal(true)}
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
-          >
-            <div className="flex items-center gap-3">
-              <Trash2 className={`w-5 h-5 ${isLight ? 'text-red-500' : 'text-red-400'}`} />
-              <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Reset Bankroll</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Clear all bankroll data and start fresh</div>
-              </div>
-            </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
-          </button>
-        </div>
-      </div>
-
+      {/* Bankroll Settings - Hidden for now */}
       {/* Security Section */}
 
       {/* Data & Performance */}
