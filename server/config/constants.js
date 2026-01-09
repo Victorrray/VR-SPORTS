@@ -3,10 +3,10 @@
  * Centralized configuration for cache durations, bookmakers, markets, and API settings
  */
 
-// Cache durations - reduced for fresher data
-const CACHE_DURATION_MS = 2 * 60 * 1000; // 2 minutes for regular markets (was 5)
-const PLAYER_PROPS_CACHE_DURATION_MS = 30 * 1000; // 30 seconds for player props (faster refresh)
-const ALTERNATE_MARKETS_CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes for alternate markets (was 30)
+// Cache durations - balanced for freshness vs API cost/memory
+const CACHE_DURATION_MS = 3 * 60 * 1000; // 3 minutes for regular markets
+const PLAYER_PROPS_CACHE_DURATION_MS = 2 * 60 * 1000; // 2 minutes for player props (was 30s - too aggressive)
+const ALTERNATE_MARKETS_CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes for alternate markets (change less frequently)
 const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 // API configuration

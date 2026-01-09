@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { requireUser, checkPlanAccess, enforceUsage } = require('../middleware/auth');
-const { getCacheKey, getCachedResponse, setCachedResponse } = require('../services/cache');
+const { getCacheKey, getCachedResponse, setCachedResponse, getOddsInFlight, setOddsInFlight, deleteOddsInFlight } = require('../services/cache');
 const {
   getBookmakersForPlan,
   transformCachedOddsToApiFormat,
@@ -511,44 +511,71 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               responseData = cachedData;
             }
           } else {
-            const response = await axios.get(url);
-            responseData = response.data;
-            
-            // Cache the data
-            if (needsRegularMarkets && needsAlternateMarkets) {
-              const regularData = responseData.map(game => ({
-                ...game,
-                bookmakers: game.bookmakers.map(bookmaker => ({
-                  ...bookmaker,
-                  markets: bookmaker.markets.filter(market => !ALTERNATE_MARKETS.includes(market.key))
-                })).filter(bookmaker => bookmaker.markets.length > 0)
-              })).filter(game => game.bookmakers.length > 0);
-              
-              const alternateData = responseData.map(game => ({
-                ...game,
-                bookmakers: game.bookmakers.map(bookmaker => ({
-                  ...bookmaker,
-                  markets: bookmaker.markets.filter(market => ALTERNATE_MARKETS.includes(market.key))
-                })).filter(bookmaker => bookmaker.markets.length > 0)
-              })).filter(game => game.bookmakers.length > 0);
-              
-              if (regularData.length > 0) {
-                setCachedResponse(regularCacheKey, regularData);
+            // Check if there's already an in-flight request for this exact data
+            const inFlightPromise = getOddsInFlight(cacheKey);
+            if (inFlightPromise) {
+              console.log(`⏳ Waiting for in-flight request: ${cacheKey.substring(0, 80)}...`);
+              try {
+                responseData = await inFlightPromise;
+              } catch (err) {
+                // If the in-flight request failed, we'll make our own request below
+                responseData = null;
               }
-              if (alternateData.length > 0) {
-                setCachedResponse(alternateCacheKey, alternateData);
-              }
-              setCachedResponse(cacheKey, responseData);
-            } else {
-              setCachedResponse(cacheKey, responseData);
             }
             
-            // Save to Supabase
-            if (supabase && oddsCacheService && responseData && responseData.length > 0) {
+            // If no in-flight or it failed, make the request
+            if (!responseData) {
+              const fetchPromise = (async () => {
+                const response = await axios.get(url);
+                return response.data;
+              })();
+              
+              // Register this request as in-flight
+              setOddsInFlight(cacheKey, fetchPromise);
+              
               try {
-                await saveOddsToSupabase(responseData, sport, supabase);
-              } catch (supabaseSaveErr) {
-                // Silently skip cache errors
+                responseData = await fetchPromise;
+                
+                // Cache the data
+                if (needsRegularMarkets && needsAlternateMarkets) {
+                  const regularData = responseData.map(game => ({
+                    ...game,
+                    bookmakers: game.bookmakers.map(bookmaker => ({
+                      ...bookmaker,
+                      markets: bookmaker.markets.filter(market => !ALTERNATE_MARKETS.includes(market.key))
+                    })).filter(bookmaker => bookmaker.markets.length > 0)
+                  })).filter(game => game.bookmakers.length > 0);
+                  
+                  const alternateData = responseData.map(game => ({
+                    ...game,
+                    bookmakers: game.bookmakers.map(bookmaker => ({
+                      ...bookmaker,
+                      markets: bookmaker.markets.filter(market => ALTERNATE_MARKETS.includes(market.key))
+                    })).filter(bookmaker => bookmaker.markets.length > 0)
+                  })).filter(game => game.bookmakers.length > 0);
+                  
+                  if (regularData.length > 0) {
+                    setCachedResponse(regularCacheKey, regularData);
+                  }
+                  if (alternateData.length > 0) {
+                    setCachedResponse(alternateCacheKey, alternateData);
+                  }
+                  setCachedResponse(cacheKey, responseData);
+                } else {
+                  setCachedResponse(cacheKey, responseData);
+                }
+                
+                // Save to Supabase
+                if (supabase && oddsCacheService && responseData && responseData.length > 0) {
+                  try {
+                    await saveOddsToSupabase(responseData, sport, supabase);
+                  } catch (supabaseSaveErr) {
+                    // Silently skip cache errors
+                  }
+                }
+              } finally {
+                // Always clean up in-flight tracking
+                deleteOddsInFlight(cacheKey);
               }
             }
           }

@@ -17,6 +17,7 @@ const apiCache = new Map();
 const planCache = new Map();
 const playerPropsCache = new Map();
 const playerPropsInFlight = new Map();
+const oddsInFlight = new Map(); // Prevent thundering herd for odds API calls
 
 // Player props metrics
 const playerPropsMetrics = {
@@ -199,6 +200,28 @@ function clearAllCaches() {
   planCache.clear();
   playerPropsCache.clear();
   playerPropsInFlight.clear();
+  oddsInFlight.clear();
+}
+
+/**
+ * Get odds in-flight promise (prevents thundering herd)
+ */
+function getOddsInFlight(key) {
+  return oddsInFlight.get(key);
+}
+
+/**
+ * Set odds in-flight promise
+ */
+function setOddsInFlight(key, promise) {
+  oddsInFlight.set(key, promise);
+}
+
+/**
+ * Delete odds in-flight promise
+ */
+function deleteOddsInFlight(key) {
+  oddsInFlight.delete(key);
 }
 
 module.exports = {
@@ -208,6 +231,11 @@ module.exports = {
   // API response caching
   getCachedResponse,
   setCachedResponse,
+  
+  // Odds request deduplication (thundering herd prevention)
+  getOddsInFlight,
+  setOddsInFlight,
+  deleteOddsInFlight,
   
   // Plan caching
   getCachedPlan,
