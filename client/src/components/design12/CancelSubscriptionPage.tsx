@@ -423,8 +423,8 @@ export function CancelSubscriptionPage({ onBack, onNavigateToChangePlan }: Cance
                 onClick={() => setShowReasonDropdown(false)}
               />
               
-              {/* Dropdown */}
-              <div className={`absolute top-full mt-2 left-0 right-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-50 backdrop-blur-xl`}>
+              {/* Dropdown - opens upward to avoid overlapping buttons */}
+              <div className={`absolute bottom-full mb-2 left-0 right-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-50 backdrop-blur-xl shadow-xl`}>
                 {reasons.map((reason) => (
                   <button
                     key={reason}
