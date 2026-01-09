@@ -201,11 +201,23 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   };
   const cachedFilters = getCachedFilters();
   
+  // UI filter state (what user sees and modifies in the filter panel)
   const [selectedSports, setSelectedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
   const [selectedMarket, setSelectedMarket] = useState(cachedFilters?.market || 'all');
-  // Derive single sport for API calls - if multiple selected, use 'all'
-  const selectedSport = selectedSports.length === 1 ? selectedSports[0] : 'all';
   const [selectedBetType, setSelectedBetType] = useState(cachedFilters?.betType || 'straight');
+  
+  // Applied filter state (what the API actually uses - only updates on Apply Filters click)
+  const [appliedSports, setAppliedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
+  const [appliedMarket, setAppliedMarket] = useState(cachedFilters?.market || 'all');
+  const [appliedBetType, setAppliedBetType] = useState(cachedFilters?.betType || 'straight');
+  const [appliedDate, setAppliedDate] = useState(cachedFilters?.date || 'all_upcoming');
+  const [appliedSportsbooks, setAppliedSportsbooks] = useState<string[]>(cachedFilters?.sportsbooks || []);
+  const [appliedMinDataPoints, setAppliedMinDataPoints] = useState(cachedFilters?.minDataPoints || 4);
+  
+  // Derive single sport for API calls and UI filtering - if multiple selected, use 'all'
+  const appliedSport = appliedSports.length === 1 ? appliedSports[0] : 'all';
+  // For UI filtering of displayed picks, use applied sport
+  const selectedSport = appliedSport;
   const [expandedRows, setExpandedRows] = useState<(string | number)[]>([]);
   const [expandedSportsbooks, setExpandedSportsbooks] = useState<(string | number)[]>([]);
   const [isMarketDropdownOpen, setIsMarketDropdownOpen] = useState(false);
@@ -281,7 +293,21 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   // Generate date options dynamically
   const dateOptions = useMemo(() => generateDateOptions(), []);
 
-  // Fetch real odds data from API with auto-refresh
+  // Apply filters function - syncs UI state to applied state
+  const applyFilters = () => {
+    setAppliedSports(selectedSports);
+    setAppliedMarket(selectedMarket);
+    setAppliedBetType(selectedBetType);
+    setAppliedDate(selectedDate);
+    setAppliedSportsbooks(selectedSportsbooks);
+    setAppliedMinDataPoints(minDataPoints);
+    closeFilterMenu();
+    toast.success('Filters applied', {
+      description: 'Odds table updated with new filters'
+    });
+  };
+  
+  // Fetch real odds data from API with auto-refresh - uses APPLIED filters only
   const { 
     picks: apiPicks, 
     loading: apiLoading, 
@@ -290,12 +316,12 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     lastUpdated,
     isRefreshing 
   } = useOddsData({
-    sport: selectedSport,
-    marketType: selectedMarket,
-    betType: selectedBetType,
-    sportsbooks: selectedSportsbooks,
-    date: selectedDate,
-    minDataPoints: minDataPoints,
+    sport: appliedSport,
+    marketType: appliedMarket,
+    betType: appliedBetType,
+    sportsbooks: appliedSportsbooks,
+    date: appliedDate,
+    minDataPoints: appliedMinDataPoints,
     enabled: true,
     autoRefresh: autoRefresh && hasPlatinum,  // Controlled by user toggle, Platinum only
     refreshInterval: 30000  // 30 seconds for faster updates
@@ -321,7 +347,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
     });
     
     // If "all_upcoming" is selected, return filtered picks (no date filter)
-    if (selectedDate === 'all_upcoming') {
+    if (appliedDate === 'all_upcoming') {
       return filtered;
     }
     
@@ -337,20 +363,20 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
       const day = String(gameDate.getDate()).padStart(2, '0');
       const gameDateStr = `${year}-${month}-${day}`;
       
-      return gameDateStr === selectedDate;
+      return gameDateStr === appliedDate;
     });
     
     return filtered;
-  }, [apiPicks, selectedDate, hasPlatinum]);
+  }, [apiPicks, appliedDate, hasPlatinum]);
 
   // Use date-filtered picks
   const topPicks = dateFilteredPicks;
   const isLoading = apiLoading;
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when applied filters change
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when filters change
-  }, [selectedSport, selectedMarket, selectedBetType, selectedDate]);
+  }, [appliedSport, appliedMarket, appliedBetType, appliedDate]);
 
   // Auto-refresh is now handled by useOddsData hook (45 second interval)
   // The hook uses isRefreshing state to update data in background without showing loading state
@@ -1301,7 +1327,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
               {/* Apply and Reset Buttons - Mobile Only */}
               <div className="flex lg:hidden gap-2">
                 <button
-                  onClick={closeFilterMenu}
+                  onClick={applyFilters}
                   className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
                     isLight 
                       ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600' 
@@ -1312,12 +1338,20 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 </button>
                 <button
                   onClick={() => {
+                    // Reset both UI and applied filters
                     setSelectedSports(['all']);
                     setSelectedMarket('all');
                     setSelectedBetType('straight');
                     setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
                     setMinDataPoints(4);
+                    // Also reset applied filters immediately
+                    setAppliedSports(['all']);
+                    setAppliedMarket('all');
+                    setAppliedBetType('straight');
+                    setAppliedDate('all_upcoming');
+                    setAppliedSportsbooks([]);
+                    setAppliedMinDataPoints(4);
                     toast.success('Filters reset', {
                       description: 'All filters have been cleared'
                     });
@@ -1799,7 +1833,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
               <div className="hidden lg:block pt-4 space-y-3">
                 {/* Apply Button */}
                 <button
-                  onClick={closeFilterMenu}
+                  onClick={applyFilters}
                   className={`w-full px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
                     isLight 
                       ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700 hover:from-purple-200 hover:to-indigo-200' 
@@ -1812,15 +1846,20 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                 {/* Reset Button */}
                 <button
                   onClick={() => {
-                    // Reset filters but keep the current tool/bet type selection
+                    // Reset both UI and applied filters
                     setSelectedSports(['all']);
                     setSelectedMarket('all');
-                    // Don't reset selectedBetType - keep current tool selection (straight/props/exchanges/arbitrage/middles)
                     setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
                     setMinDataPoints(4);
+                    // Also reset applied filters immediately
+                    setAppliedSports(['all']);
+                    setAppliedMarket('all');
+                    setAppliedDate('all_upcoming');
+                    setAppliedSportsbooks([]);
+                    setAppliedMinDataPoints(4);
                     toast.success('Filters reset', {
-                      description: 'All filters have been cleared (tool selection preserved)'
+                      description: 'All filters have been cleared'
                     });
                   }}
                   className={`w-full px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
