@@ -3,6 +3,9 @@ import { useAuth } from './SimpleAuth';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
+// Set to true only when debugging plan issues
+const DEBUG_PLAN = false;
+
 export function usePlan() {
   const { user, authLoading } = useAuth();
   const [plan, setPlan] = useState(null);
@@ -10,7 +13,7 @@ export function usePlan() {
 
   const fetchPlan = async () => {
     if (!user) {
-      console.log('🔄 No user, skipping plan fetch');
+      if (DEBUG_PLAN) console.log('🔄 No user, skipping plan fetch');
       setPlan(null);
       setPlanLoading(false);
       return;
@@ -18,8 +21,8 @@ export function usePlan() {
 
     setPlanLoading(true);
     try {
-      console.log('🔄 Fetching plan for user:', user.id);
-      console.log('🔄 API URL:', `${API_BASE_URL}/api/me`);
+      if (DEBUG_PLAN) console.log('🔄 Fetching plan for user:', user.id);
+      if (DEBUG_PLAN) console.log('🔄 API URL:', `${API_BASE_URL}/api/me`);
       
       // Get Supabase session token for authentication
       const { supabase } = await import('../lib/supabase');
@@ -30,8 +33,8 @@ export function usePlan() {
       }
       
       const token = session?.access_token;
-      console.log('🔐 Session token available:', !!token);
-      console.log('🔐 Session user:', session?.user?.id);
+      if (DEBUG_PLAN) console.log('🔐 Session token available:', !!token);
+      if (DEBUG_PLAN) console.log('🔐 Session user:', session?.user?.id);
       
       // Generate unique cache buster
       const cacheBuster = Date.now();
@@ -50,7 +53,7 @@ export function usePlan() {
         headers['Authorization'] = `Bearer ${token}`;
       }
       
-      console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token, cacheBuster });
+      if (DEBUG_PLAN) console.log('🔄 Request headers:', { 'x-user-id': user.id, hasAuth: !!token, cacheBuster });
       
       // Use axios config to prevent caching
       const res = await axios.get(`${API_BASE_URL}/api/me?t=${cacheBuster}&_=${cacheBuster}`, { 
@@ -63,12 +66,12 @@ export function usePlan() {
         }
       });
       
-      console.log('✅ Plan API response:', res.data);
-      console.log('✅ Plan value:', res.data.plan);
-      console.log('✅ Unlimited:', res.data.unlimited);
-      console.log('✅ Used:', res.data.used);
-      console.log('✅ Remaining:', res.data.remaining);
-      console.log('✅ Response headers:', res.headers);
+      if (DEBUG_PLAN) console.log('✅ Plan API response:', res.data);
+      if (DEBUG_PLAN) console.log('✅ Plan value:', res.data.plan);
+      if (DEBUG_PLAN) console.log('✅ Unlimited:', res.data.unlimited);
+      if (DEBUG_PLAN) console.log('✅ Used:', res.data.used);
+      if (DEBUG_PLAN) console.log('✅ Remaining:', res.data.remaining);
+      if (DEBUG_PLAN) console.log('✅ Response headers:', res.headers);
       
       // Validate response
       if (!res.data || !res.data.plan) {
@@ -95,14 +98,14 @@ export function usePlan() {
     
     // Reset plan when user changes (sign out/sign in)
     if (!user) {
-      console.log('🔄 User signed out - clearing plan');
+      if (DEBUG_PLAN) console.log('🔄 User signed out - clearing plan');
       setPlan(null);
       setPlanLoading(false);
       return;
     }
     
-    console.log('🔄 User changed - fetching plan for:', user.id);
-    console.log('🔄 Current plan state:', plan);
+    if (DEBUG_PLAN) console.log('🔄 User changed - fetching plan for:', user.id);
+    if (DEBUG_PLAN) console.log('🔄 Current plan state:', plan);
     fetchPlan();
   }, [user?.id, authLoading]);
 
@@ -112,7 +115,7 @@ export function usePlan() {
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('🔄 Page visible - refreshing plan');
+        if (DEBUG_PLAN) console.log('🔄 Page visible - refreshing plan');
         fetchPlan();
       }
     };
@@ -126,7 +129,7 @@ export function usePlan() {
   const refreshPlan = async () => {
     if (!user) return null;
     
-    console.log('🔄 Manual plan refresh triggered for user:', user.id);
+    if (DEBUG_PLAN) console.log('🔄 Manual plan refresh triggered for user:', user.id);
     
     // Clear any cached data
     try {
@@ -134,21 +137,21 @@ export function usePlan() {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
       localStorage.removeItem('plan');
-      console.log('✅ Cleared localStorage cache');
+      if (DEBUG_PLAN) console.log('✅ Cleared localStorage cache');
     } catch (e) {
       console.warn('⚠️ Could not clear localStorage:', e);
     }
     
     // Force a fresh fetch by clearing any browser cache
     await fetchPlan();
-    console.log('✅ Plan refresh complete, new plan:', plan);
+    if (DEBUG_PLAN) console.log('✅ Plan refresh complete, new plan:', plan);
     return plan;
   };
 
   // Listen for plan update events from admin panel
   useEffect(() => {
     const handlePlanUpdate = () => {
-      console.log('📢 Plan update event received, refreshing...');
+      if (DEBUG_PLAN) console.log('📢 Plan update event received, refreshing...');
       fetchPlan();
     };
 
@@ -160,7 +163,7 @@ export function usePlan() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('👁️ Page became visible - clearing cache and refreshing plan');
+        if (DEBUG_PLAN) console.log('👁️ Page became visible - clearing cache and refreshing plan');
         // Clear plan cache
         try {
           localStorage.removeItem('userPlan');
@@ -180,7 +183,7 @@ export function usePlan() {
 
   // Auto-clear plan cache on page load/mount (preserve user preferences)
   useEffect(() => {
-    console.log('🧹 Clearing plan cache on component mount (preserving bankroll & sportsbooks)');
+    if (DEBUG_PLAN) console.log('🧹 Clearing plan cache on component mount (preserving bankroll & sportsbooks)');
     try {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
@@ -217,7 +220,7 @@ export function useMe() {
   };
 
   // Debug logging for useMe hook
-  console.log('🎯 useMe hook - returning me object:', {
+  if (DEBUG_PLAN) console.log('🎯 useMe hook - returning me object:', {
     plan: me.plan,
     unlimited: me.unlimited,
     rawPlan: plan,
