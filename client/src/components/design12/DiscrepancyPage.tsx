@@ -238,8 +238,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
         return !isDFSBook(bookKey, bookName);
       });
 
-      // Need at least 1 traditional sportsbook to compare against
-      if (traditionalBooks.length === 0) return;
+      // Need at least 5 traditional sportsbooks to compare against for reliable discrepancy
+      if (traditionalBooks.length < 5) return;
 
       // Calculate market average from TRADITIONAL sportsbooks only
       const validLines = traditionalBooks
