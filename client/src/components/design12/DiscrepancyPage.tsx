@@ -137,8 +137,9 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const emptySportsbooks = useRef<string[]>([]).current;
 
   // Fetch player props data from API
+  // When "all" is selected, pass 'all' to let useOddsData fetch from all sports
   const { picks: apiPicks, loading: isLoading, error: apiError, refetch, lastUpdated, isRefreshing } = useOddsData({
-    sport: selectedSport === 'all' ? 'basketball_nba' : selectedSport,
+    sport: selectedSport, // Pass 'all' or specific sport - useOddsData handles the mapping
     marketType: selectedPropType === 'all' ? 'player_points' : selectedPropType,
     betType: 'props',
     sportsbooks: emptySportsbooks, // Get all sportsbooks - stable reference
