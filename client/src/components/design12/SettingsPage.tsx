@@ -1,4 +1,4 @@
-import { Settings, Bell, Shield, Globe, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign, Check, X, AlertTriangle } from 'lucide-react';
+import { Settings, Bell, Shield, Globe, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign, Check, X, AlertTriangle, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors, OddsFormat } from '../../contexts/ThemeContext';
 import { useBankroll } from '../../contexts/BankrollContext';
@@ -179,6 +179,64 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
             </div>
             <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
           </button>
+        </div>
+      </div>
+
+      {/* Legal Links */}
+      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
+        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
+          <Shield className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+          Legal
+        </h2>
+
+        <div className="space-y-3">
+          <a 
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all`}
+          >
+            <div className="flex items-center gap-3">
+              <FileText className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Privacy Policy</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>How we handle your data</div>
+              </div>
+            </div>
+            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+          </a>
+
+          <a 
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all`}
+          >
+            <div className="flex items-center gap-3">
+              <FileText className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Terms of Service</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Rules and guidelines</div>
+              </div>
+            </div>
+            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+          </a>
+
+          <a 
+            href="/disclaimer"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all`}
+          >
+            <div className="flex items-center gap-3">
+              <AlertTriangle className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Disclaimer</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Important legal notices</div>
+              </div>
+            </div>
+            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+          </a>
         </div>
       </div>
 
