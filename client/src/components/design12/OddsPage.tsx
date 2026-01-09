@@ -431,8 +431,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
   const betTypes = [
     { id: 'straight', name: 'Straight Bets' },
-    { id: 'exchanges', name: 'Exchanges' },
     { id: 'props', name: 'Player Props' },
+    { id: 'exchanges', name: 'Exchanges' },
     { id: 'arbitrage', name: 'Arbitrage' },
     { id: 'middles', name: 'Middles' }
   ];
@@ -1070,8 +1070,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
           {isBetTypeDropdownOpen && (
             <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
               {betTypes.map((betType) => {
-                // Exchanges is platinum-only
-                const isPlatinumOnly = betType.id === 'exchanges';
+                // Exchanges, Arbitrage, and Middles are platinum-only
+                const isPlatinumOnly = betType.id === 'exchanges' || betType.id === 'arbitrage' || betType.id === 'middles';
                 const isLocked = isPlatinumOnly && !hasPlatinum;
                 
                 return (
@@ -1146,8 +1146,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
         {isBetTypeDropdownOpen && (
           <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-white/10'} border rounded-xl overflow-hidden z-40 shadow-xl`}>
             {betTypes.map((betType) => {
-              // Exchanges is platinum-only
-              const isPlatinumOnly = betType.id === 'exchanges';
+              // Exchanges, Arbitrage, and Middles are platinum-only
+              const isPlatinumOnly = betType.id === 'exchanges' || betType.id === 'arbitrage' || betType.id === 'middles';
               const isLocked = isPlatinumOnly && !hasPlatinum;
               
               return (
