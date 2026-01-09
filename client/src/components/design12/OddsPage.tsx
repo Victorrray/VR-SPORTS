@@ -212,7 +212,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
   const [isBetTypeDropdownOpen, setIsBetTypeDropdownOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(cachedFilters?.date || getTodayDateString());
+  const [selectedDate, setSelectedDate] = useState(cachedFilters?.date || 'all_upcoming');
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isFilterClosing, setIsFilterClosing] = useState(false);
   const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>(cachedFilters?.sportsbooks || []);
@@ -1380,7 +1380,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     setSelectedSports(['all']);
                     setSelectedMarket('all');
                     setSelectedBetType('straight');
-                    setSelectedDate(getTodayDateString());
+                    setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
                     setMinDataPoints(4);
                     toast.success('Filters reset', {
@@ -1926,7 +1926,7 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
                     setSelectedSports(['all']);
                     setSelectedMarket('all');
                     // Don't reset selectedBetType - keep current tool selection (straight/props/exchanges/arbitrage/middles)
-                    setSelectedDate(getTodayDateString());
+                    setSelectedDate('all_upcoming');
                     setSelectedSportsbooks([]);
                     setMinDataPoints(4);
                     toast.success('Filters reset', {
