@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
 import { useOddsData } from '../../hooks/useOddsData';
@@ -133,12 +133,15 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
     return key.includes('alternate') || key.includes('_alt');
   };
 
+  // Stable empty array reference to prevent infinite re-renders
+  const emptySportsbooks = useRef<string[]>([]).current;
+
   // Fetch player props data from API
   const { picks: apiPicks, loading: isLoading, error: apiError, refetch, lastUpdated, isRefreshing } = useOddsData({
     sport: selectedSport === 'all' ? 'basketball_nba' : selectedSport,
     marketType: selectedPropType === 'all' ? 'player_points' : selectedPropType,
     betType: 'props',
-    sportsbooks: [], // Get all sportsbooks
+    sportsbooks: emptySportsbooks, // Get all sportsbooks - stable reference
     date: 'all_upcoming',
     minDataPoints: 1,
     enabled: true,
