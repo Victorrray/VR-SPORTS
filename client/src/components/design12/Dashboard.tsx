@@ -613,6 +613,23 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </span>
             </button>
             <button
+              onClick={() => setCurrentView("calculator")}
+              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
+                currentView === "calculator"
+                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
+                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
+              }`}
+            >
+              <Calculator
+                className={`w-5 h-5 ${currentView === "calculator" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
+              />
+              <span
+                className={`text-[10px] font-bold ${currentView === "calculator" ? isLight ? "text-purple-900" : "text-white" : ""}`}
+              >
+                Calc
+              </span>
+            </button>
+            <button
               onClick={() => setCurrentView("account")}
               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
                 currentView === "account"
