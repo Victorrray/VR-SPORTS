@@ -97,7 +97,15 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const itemsPerPage = 10;
+
+  // Toggle row expansion
+  const toggleRowExpansion = (id: string) => {
+    setExpandedRows(prev => 
+      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+    );
+  };
 
   // Close filter with animation
   const closeFilterMenu = () => {
@@ -474,98 +482,27 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
         ) : (
           <div className="divide-y divide-white/5">
             {paginatedDiscrepancies.map((pick) => (
-              <div key={pick.id} className={`p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all`}>
-                {/* Desktop Layout */}
-                <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center">
-                  {/* Edge Badge */}
-                  <div className="col-span-1 flex items-center justify-center">
-                    <div className={`px-3 py-2 rounded-xl font-bold text-lg ${
-                      pick.discrepancy > 0
-                        ? isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
-                        : isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {Math.abs(pick.discrepancyPercent).toFixed(1)}%
-                    </div>
-                  </div>
-
-                  {/* Match Info */}
-                  <div className="col-span-3">
-                    <div className={`inline-block px-2.5 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'} rounded-full font-bold text-xs mb-2`}>
-                      {pick.sport}
-                    </div>
-                    <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                      {pick.playerName}
-                    </div>
-                    <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                      {pick.team} @ {pick.opponent}
-                    </div>
-                    <div className={`flex items-center gap-1 text-xs ${isLight ? 'text-gray-400' : 'text-white/40'} mt-1`}>
-                      <Clock className="w-3 h-3" />
-                      {formatTime(pick.commenceTime)}
-                    </div>
-                  </div>
-
-                  {/* Lines Comparison */}
-                  <div className="col-span-6">
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Primary Book Line */}
-                      <div className={`p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
-                        <div className={`text-xs font-bold uppercase ${isLight ? 'text-gray-500' : 'text-white/50'} mb-1`}>
-                          {pick.primaryBook}
-                        </div>
-                        <div className={`font-bold text-xl ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                          {pick.propLabel}: {pick.primaryLine}
-                        </div>
-                      </div>
-                      
-                      {/* Market Average */}
-                      <div className={`p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
-                        <div className={`text-xs font-bold uppercase ${isLight ? 'text-gray-500' : 'text-white/50'} mb-1`}>
-                          Market Average
-                        </div>
-                        <div className={`font-bold text-xl ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                          {pick.propLabel}: {pick.marketAverage.toFixed(1)}
-                        </div>
-                        <div className={`text-xs ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
-                          Diff: {pick.discrepancy > 0 ? '+' : ''}{pick.discrepancy.toFixed(1)} pts
-                        </div>
+              <div key={pick.id}>
+                {/* Clickable Row */}
+                <button 
+                  onClick={() => toggleRowExpansion(pick.id)}
+                  className={`w-full p-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} transition-all text-left`}
+                >
+                  {/* Desktop Layout */}
+                  <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center">
+                    {/* Edge Badge */}
+                    <div className="col-span-1 flex items-center justify-center">
+                      <div className={`px-3 py-2 rounded-xl font-bold text-lg ${
+                        pick.discrepancy > 0
+                          ? isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
+                          : isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        {Math.abs(pick.discrepancyPercent).toFixed(1)}%
                       </div>
                     </div>
-                  </div>
 
-                  {/* Recommendation */}
-                  <div className="col-span-2 flex flex-col items-center">
-                    <div className={`w-full p-3 ${
-                      pick.recommendation === 'over'
-                        ? isLight ? 'bg-green-50 border-green-200' : 'bg-green-500/10 border-green-500/20'
-                        : isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-500/20'
-                    } border rounded-xl text-center`}>
-                      <div className="flex items-center justify-center gap-2 mb-1">
-                        {pick.recommendation === 'over' ? (
-                          <ArrowUp className={`w-5 h-5 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
-                        ) : (
-                          <ArrowDown className={`w-5 h-5 ${isLight ? 'text-red-600' : 'text-red-400'}`} />
-                        )}
-                        <span className={`font-bold text-lg ${
-                          pick.recommendation === 'over'
-                            ? isLight ? 'text-green-700' : 'text-green-400'
-                            : isLight ? 'text-red-700' : 'text-red-400'
-                        }`}>
-                          {pick.recommendation.toUpperCase()}
-                        </span>
-                      </div>
-                      <div className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                        on {pick.primaryBook}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mobile Layout */}
-                <div className="lg:hidden space-y-3">
-                  {/* Header Row */}
-                  <div className="flex items-start justify-between">
-                    <div>
+                    {/* Match Info */}
+                    <div className="col-span-3">
                       <div className={`inline-block px-2.5 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'} rounded-full font-bold text-xs mb-2`}>
                         {pick.sport}
                       </div>
@@ -573,50 +510,193 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                         {pick.playerName}
                       </div>
                       <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                        {pick.team} @ {pick.opponent} • {pick.propLabel}
+                        {pick.team} @ {pick.opponent}
+                      </div>
+                      <div className={`flex items-center gap-1 text-xs ${isLight ? 'text-gray-400' : 'text-white/40'} mt-1`}>
+                        <Clock className="w-3 h-3" />
+                        {formatTime(pick.commenceTime)}
                       </div>
                     </div>
-                    <div className={`px-3 py-2 rounded-xl font-bold ${
-                      pick.discrepancy > 0
-                        ? isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
-                        : isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400'
-                    }`}>
-                      {Math.abs(pick.discrepancyPercent).toFixed(1)}%
+
+                    {/* Lines Comparison */}
+                    <div className="col-span-6">
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Primary Book Line */}
+                        <div className={`p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
+                          <div className={`text-xs font-bold uppercase ${isLight ? 'text-gray-500' : 'text-white/50'} mb-1`}>
+                            {pick.primaryBook}
+                          </div>
+                          <div className={`font-bold text-xl ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                            {pick.propLabel}: {pick.primaryLine}
+                          </div>
+                        </div>
+                        
+                        {/* Market Average */}
+                        <div className={`p-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
+                          <div className={`text-xs font-bold uppercase ${isLight ? 'text-gray-500' : 'text-white/50'} mb-1`}>
+                            Market Average
+                          </div>
+                          <div className={`font-bold text-xl ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                            {pick.propLabel}: {pick.marketAverage.toFixed(1)}
+                          </div>
+                          <div className={`text-xs ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
+                            Diff: {pick.discrepancy > 0 ? '+' : ''}{pick.discrepancy.toFixed(1)} pts
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recommendation + Expand Arrow */}
+                    <div className="col-span-2 flex items-center gap-2">
+                      <div className={`flex-1 p-3 ${
+                        pick.recommendation === 'over'
+                          ? isLight ? 'bg-green-50 border-green-200' : 'bg-green-500/10 border-green-500/20'
+                          : isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-500/20'
+                      } border rounded-xl text-center`}>
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          {pick.recommendation === 'over' ? (
+                            <ArrowUp className={`w-5 h-5 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
+                          ) : (
+                            <ArrowDown className={`w-5 h-5 ${isLight ? 'text-red-600' : 'text-red-400'}`} />
+                          )}
+                          <span className={`font-bold text-lg ${
+                            pick.recommendation === 'over'
+                              ? isLight ? 'text-green-700' : 'text-green-400'
+                              : isLight ? 'text-red-700' : 'text-red-400'
+                          }`}>
+                            {pick.recommendation.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                          on {pick.primaryBook}
+                        </div>
+                      </div>
+                      <ChevronDown className={`w-5 h-5 ${isLight ? 'text-gray-400' : 'text-white/40'} transition-transform ${expandedRows.includes(pick.id) ? 'rotate-180' : ''}`} />
                     </div>
                   </div>
 
-                  {/* Lines */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
-                      <div className={`text-xs font-bold ${isLight ? 'text-gray-500' : 'text-white/50'}`}>{pick.primaryBook}</div>
-                      <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{pick.primaryLine}</div>
+                  {/* Mobile Layout */}
+                  <div className="lg:hidden space-y-3">
+                    {/* Header Row */}
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className={`inline-block px-2.5 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'} rounded-full font-bold text-xs mb-2`}>
+                          {pick.sport}
+                        </div>
+                        <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                          {pick.playerName}
+                        </div>
+                        <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                          {pick.team} @ {pick.opponent} • {pick.propLabel}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`px-3 py-2 rounded-xl font-bold ${
+                          pick.discrepancy > 0
+                            ? isLight ? 'bg-green-100 text-green-700' : 'bg-green-500/20 text-green-400'
+                            : isLight ? 'bg-red-100 text-red-700' : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {Math.abs(pick.discrepancyPercent).toFixed(1)}%
+                        </div>
+                        <ChevronDown className={`w-5 h-5 ${isLight ? 'text-gray-400' : 'text-white/40'} transition-transform ${expandedRows.includes(pick.id) ? 'rotate-180' : ''}`} />
+                      </div>
                     </div>
-                    <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
-                      <div className={`text-xs font-bold ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Avg</div>
-                      <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{pick.marketAverage.toFixed(1)}</div>
-                    </div>
-                  </div>
 
-                  {/* Recommendation */}
-                  <div className={`p-3 ${
-                    pick.recommendation === 'over'
-                      ? isLight ? 'bg-green-50 border-green-200' : 'bg-green-500/10 border-green-500/20'
-                      : isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-500/20'
-                  } border rounded-xl flex items-center justify-center gap-2`}>
-                    {pick.recommendation === 'over' ? (
-                      <ArrowUp className={`w-5 h-5 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
-                    ) : (
-                      <ArrowDown className={`w-5 h-5 ${isLight ? 'text-red-600' : 'text-red-400'}`} />
-                    )}
-                    <span className={`font-bold ${
+                    {/* Lines */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
+                        <div className={`text-xs font-bold ${isLight ? 'text-gray-500' : 'text-white/50'}`}>{pick.primaryBook}</div>
+                        <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{pick.primaryLine}</div>
+                      </div>
+                      <div className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
+                        <div className={`text-xs font-bold ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Avg</div>
+                        <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{pick.marketAverage.toFixed(1)}</div>
+                      </div>
+                    </div>
+
+                    {/* Recommendation */}
+                    <div className={`p-3 ${
                       pick.recommendation === 'over'
-                        ? isLight ? 'text-green-700' : 'text-green-400'
-                        : isLight ? 'text-red-700' : 'text-red-400'
-                    }`}>
-                      Take {pick.recommendation.toUpperCase()} on {pick.primaryBook}
-                    </span>
+                        ? isLight ? 'bg-green-50 border-green-200' : 'bg-green-500/10 border-green-500/20'
+                        : isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-500/20'
+                    } border rounded-xl flex items-center justify-center gap-2`}>
+                      {pick.recommendation === 'over' ? (
+                        <ArrowUp className={`w-5 h-5 ${isLight ? 'text-green-600' : 'text-green-400'}`} />
+                      ) : (
+                        <ArrowDown className={`w-5 h-5 ${isLight ? 'text-red-600' : 'text-red-400'}`} />
+                      )}
+                      <span className={`font-bold ${
+                        pick.recommendation === 'over'
+                          ? isLight ? 'text-green-700' : 'text-green-400'
+                          : isLight ? 'text-red-700' : 'text-red-400'
+                      }`}>
+                        Take {pick.recommendation.toUpperCase()} on {pick.primaryBook}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </button>
+
+                {/* Expanded Mini-Table - All Book Lines */}
+                {expandedRows.includes(pick.id) && (
+                  <div className={`px-4 pb-4 ${isLight ? 'bg-gray-50' : 'bg-white/[0.02]'}`}>
+                    <div className={`${isLight ? 'bg-white border-gray-200' : 'bg-slate-900/50 border-white/10'} border rounded-xl overflow-hidden`}>
+                      {/* Mini-Table Header */}
+                      <div className={`grid grid-cols-3 gap-4 px-4 py-3 ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10'} border-b`}>
+                        <div className={`${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide`}>Sportsbook</div>
+                        <div className={`${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide text-center`}>Line</div>
+                        <div className={`${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs uppercase tracking-wide text-right`}>vs Avg</div>
+                      </div>
+                      
+                      {/* Book Lines */}
+                      {pick.allBooks.map((book, idx) => {
+                        const diffFromAvg = book.line - pick.marketAverage;
+                        const isPrimaryBook = book.bookmaker === pick.primaryBook;
+                        return (
+                          <div 
+                            key={idx}
+                            className={`grid grid-cols-3 gap-4 px-4 py-3 ${
+                              idx !== pick.allBooks.length - 1 ? (isLight ? 'border-b border-gray-100' : 'border-b border-white/5') : ''
+                            } ${isPrimaryBook ? (isLight ? 'bg-purple-50' : 'bg-purple-500/10') : ''}`}
+                          >
+                            <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} flex items-center gap-2`}>
+                              {book.bookmaker}
+                              {isPrimaryBook && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'}`}>
+                                  Selected
+                                </span>
+                              )}
+                            </div>
+                            <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} text-center`}>
+                              {book.line}
+                            </div>
+                            <div className={`font-bold text-right ${
+                              diffFromAvg < 0
+                                ? isLight ? 'text-green-600' : 'text-green-400'
+                                : diffFromAvg > 0
+                                  ? isLight ? 'text-red-600' : 'text-red-400'
+                                  : isLight ? 'text-gray-500' : 'text-white/50'
+                            }`}>
+                              {diffFromAvg > 0 ? '+' : ''}{diffFromAvg.toFixed(1)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      
+                      {/* Market Average Row */}
+                      <div className={`grid grid-cols-3 gap-4 px-4 py-3 ${isLight ? 'bg-gray-100 border-t border-gray-200' : 'bg-white/5 border-t border-white/10'}`}>
+                        <div className={`font-bold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>
+                          Market Average
+                        </div>
+                        <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'} text-center`}>
+                          {pick.marketAverage.toFixed(1)}
+                        </div>
+                        <div className={`font-bold ${isLight ? 'text-gray-500' : 'text-white/50'} text-right`}>
+                          —
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
