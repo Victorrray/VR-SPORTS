@@ -1,0 +1,7 @@
+node_modules/
+client/
+Figma Design.12/
+coverage/
+logs/
+*.log
+package-lock.json
