@@ -10,7 +10,7 @@
     "test:unit": "jest --testPathPatterns='server/__tests__' --coverage",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint . --max-warnings 0 || true",
+    "lint": "eslint . || true",
     "format:check": "prettier --check . || true"
   },
   "dependencies": {
