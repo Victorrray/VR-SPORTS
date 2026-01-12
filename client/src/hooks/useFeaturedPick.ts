@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { withApiBase } from '../config/api';
 
 export interface FeaturedBet {
   id: string;
@@ -40,7 +41,7 @@ export function useFeaturedPick() {
         }
 
         // Fetch from API
-        const response = await fetch('/api/featured');
+        const response = await fetch(withApiBase('/api/featured'));
 
         if (!response.ok) {
           throw new Error(`API returned ${response.status}`);
