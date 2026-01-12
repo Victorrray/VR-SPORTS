@@ -22,11 +22,14 @@ router.get('/', async (req, res) => {
     const url = `https://api.the-odds-api.com/v4/sports/basketball_nba/odds?apiKey=${API_KEY}&regions=us&markets=h2h&oddsFormat=american&limit=10`;
     const response = await axios.get(url, { timeout: 10000 });
 
-    if (!response.data?.events || response.data.events.length === 0) {
+    // TheOddsAPI returns array directly, not under 'events' key
+    const games = response.data;
+    if (!games || !Array.isArray(games) || games.length === 0) {
       return res.json({ bet: null });
     }
 
-    const upcomingGames = response.data.events.filter(game => game.commence_time > Date.now() / 1000);
+    const now = new Date().toISOString();
+    const upcomingGames = games.filter(game => game.commence_time > now);
     if (upcomingGames.length === 0) {
       return res.json({ bet: null });
     }

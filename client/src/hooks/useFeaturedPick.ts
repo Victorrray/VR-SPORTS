@@ -74,49 +74,15 @@ export function useFeaturedPick() {
           localStorage.setItem(cacheKey, JSON.stringify(formattedBet));
           console.log('✅ Featured bet loaded from API:', formattedBet.teams);
         } else {
-          // Fallback data when API returns no bet
-          const fallbackBet: FeaturedBet = {
-            id: 'fallback',
-            sport: 'NBA',
-            teams: 'Boston Celtics @ Miami Heat',
-            gameTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleString('en-US', {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
-              timeZoneName: 'short'
-            }),
-            pick: 'Boston Celtics -4.5',
-            odds: -110,
-            sportsbook: 'DraftKings',
-            ev: '+3.2%'
-          };
-          setBet(fallbackBet);
-          console.log('⚠️ Using fallback featured bet');
+          // No featured bet available - don't show fake data
+          setBet(null);
+          console.log('ℹ️ No featured bet available from API');
         }
       } catch (err) {
         console.error('Error fetching featured bet:', err);
-        // Show fallback data on error
-        const fallbackBet: FeaturedBet = {
-          id: 'fallback-error',
-          sport: 'NBA',
-          teams: 'Boston Celtics @ Miami Heat',
-          gameTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            timeZoneName: 'short'
-          }),
-          pick: 'Boston Celtics -4.5',
-          odds: -110,
-          sportsbook: 'DraftKings',
-          ev: '+3.2%'
-        };
-        setBet(fallbackBet);
-        console.log('⚠️ Using fallback featured bet due to API error');
+        // Don't show fake data on error - just show nothing
+        setBet(null);
+        setError('Failed to load featured bet');
       } finally {
         setLoading(false);
       }
