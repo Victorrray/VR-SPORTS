@@ -47,6 +47,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
       
+      - name: Remove server node_modules (prevent module conflicts)
+        run: rm -rf server/node_modules
+      
       - name: Run backend tests
         run: npm run test:unit
         env:
