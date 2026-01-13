@@ -290,41 +290,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         {/* Sidebar */}
         <aside className={`hidden lg:flex lg:flex-col w-72 h-screen border-r rounded-2xl ${isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-slate-950/30'} backdrop-blur-2xl`}>
           <div className="flex-1 flex flex-col">
-            {/* Logo */}
-            <div className={`p-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'} relative overflow-hidden`}>
-              {/* Background decoration */}
-              <div className={`absolute inset-0 ${isLight ? 'bg-gray-100/50' : 'bg-white/5'} opacity-50`} />
-              
-              <div className="relative flex flex-col gap-4">
-                {/* Logo */}
-                <div className="flex items-center gap-3">
-                  <div className="relative group">
-                    {/* Glow effect */}
-                    <div className={`absolute inset-0 rounded-2xl ${isLight ? 'bg-purple-400' : 'bg-purple-500'} blur-xl opacity-40 group-hover:opacity-60 transition-opacity`} />
-                    
-                    {/* Logo container */}
-                    <div className={`relative w-12 h-12 rounded-2xl ${isLight ? 'bg-purple-500' : 'bg-purple-500'} flex items-center justify-center transform transition-transform group-hover:scale-105`}>
-                      <span className="text-white font-bold text-lg">
-                        OS
-                      </span>
-                      {/* Shine effect */}
-                      
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col">
-                    <span className={`${isLight ? 'text-purple-500' : 'text-purple-400'} font-bold text-lg tracking-tight`}>
-                      OddSightSeer
-                    </span>
-                    <span className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/40'} font-bold tracking-wide`}>
-                      PREMIUM ANALYTICS
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* User Profile */}
+            {/* User Profile - Now at top */}
             <div className={`p-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
               <button
                 onClick={() => setCurrentView("account")}
