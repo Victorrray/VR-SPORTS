@@ -97,11 +97,39 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [isFilterClosing, setIsFilterClosing] = useState(false);
   const [bookExpanded, setBookExpanded] = useState(false);
+  const [bookClosing, setBookClosing] = useState(false);
   const [sportExpanded, setSportExpanded] = useState(false);
+  const [sportClosing, setSportClosing] = useState(false);
   const [propTypeExpanded, setPropTypeExpanded] = useState(false);
+  const [propTypeClosing, setPropTypeClosing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const itemsPerPage = 10;
+
+  // Close drawer functions with animation
+  const closeBookDrawer = () => {
+    setBookClosing(true);
+    setTimeout(() => {
+      setBookExpanded(false);
+      setBookClosing(false);
+    }, 300);
+  };
+
+  const closeSportDrawer = () => {
+    setSportClosing(true);
+    setTimeout(() => {
+      setSportExpanded(false);
+      setSportClosing(false);
+    }, 300);
+  };
+
+  const closePropTypeDrawer = () => {
+    setPropTypeClosing(true);
+    setTimeout(() => {
+      setPropTypeExpanded(false);
+      setPropTypeClosing(false);
+    }, 300);
+  };
 
   // Map DFS book IDs to display names and API keys
   const DFS_BOOK_MAP: Record<string, { name: string; keys: string[] }> = {
@@ -876,8 +904,9 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${bookExpanded ? 'rotate-180' : ''}`} />
                 </button>
                 
+                {/* Desktop Inline Dropdown */}
                 {bookExpanded && (
-                  <div className={`mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
                     {DFS_SPORTSBOOKS.map((book) => (
                       <button
                         key={book.id}
@@ -899,6 +928,60 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                 )}
               </div>
 
+              {/* Book Drawer - Mobile Only */}
+              {bookExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${bookClosing ? 'opacity-0' : 'opacity-100'}`}
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    onClick={closeBookDrawer}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${bookClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Compare Against</h3>
+                        <button
+                          onClick={closeBookDrawer}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options */}
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
+                      {DFS_SPORTSBOOKS.map((book) => (
+                        <button
+                          key={book.id}
+                          onClick={() => {
+                            setSelectedBook(book.id);
+                            closeBookDrawer();
+                          }}
+                          className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                            selectedBook === book.id
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          {book.name}
+                          {selectedBook === book.id && <Check className="w-4 h-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Sport Filter */}
               <div className="relative">
                 <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
@@ -914,8 +997,9 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${sportExpanded ? 'rotate-180' : ''}`} />
                 </button>
                 
+                {/* Desktop Inline Dropdown */}
                 {sportExpanded && (
-                  <div className={`mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
                     {SPORTS.map((sport) => (
                       <button
                         key={sport.id}
@@ -937,6 +1021,60 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                 )}
               </div>
 
+              {/* Sport Drawer - Mobile Only */}
+              {sportExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${sportClosing ? 'opacity-0' : 'opacity-100'}`}
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    onClick={closeSportDrawer}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${sportClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Sport</h3>
+                        <button
+                          onClick={closeSportDrawer}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options */}
+                    <div className="overflow-y-auto max-h-[calc(60vh-80px)] scrollbar-hide">
+                      {SPORTS.map((sport) => (
+                        <button
+                          key={sport.id}
+                          onClick={() => {
+                            setSelectedSport(sport.id);
+                            closeSportDrawer();
+                          }}
+                          className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                            selectedSport === sport.id
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          {sport.name}
+                          {selectedSport === sport.id && <Check className="w-4 h-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* Prop Type Filter */}
               <div className="relative">
                 <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
@@ -952,8 +1090,9 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${propTypeExpanded ? 'rotate-180' : ''}`} />
                 </button>
                 
+                {/* Desktop Inline Dropdown */}
                 {propTypeExpanded && (
-                  <div className={`mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-64 overflow-y-auto scrollbar-hide`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-64 overflow-y-auto scrollbar-hide`}>
                     {PROP_TYPES.map((prop) => (
                       <button
                         key={prop.id}
@@ -974,6 +1113,60 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                   </div>
                 )}
               </div>
+
+              {/* Prop Type Drawer - Mobile Only */}
+              {propTypeExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${propTypeClosing ? 'opacity-0' : 'opacity-100'}`}
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    onClick={closePropTypeDrawer}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${propTypeClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Prop Type</h3>
+                        <button
+                          onClick={closePropTypeDrawer}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options */}
+                    <div className="overflow-y-auto max-h-[calc(70vh-80px)] scrollbar-hide">
+                      {PROP_TYPES.map((prop) => (
+                        <button
+                          key={prop.id}
+                          onClick={() => {
+                            setSelectedPropType(prop.id);
+                            closePropTypeDrawer();
+                          }}
+                          className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                            selectedPropType === prop.id
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          {prop.name}
+                          {selectedPropType === prop.id && <Check className="w-4 h-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* Minimum Edge Slider */}
               <div>
