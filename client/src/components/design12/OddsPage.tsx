@@ -1033,7 +1033,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   if (selectedBetType === 'props') {
     return (
       <div className="space-y-6">
-        <div className="relative flex justify-center">
+        {/* Dynamic Bet Type Heading - Hidden on desktop (controlled via sidebar), shown on mobile */}
+        <div className="relative flex justify-center lg:hidden">
           <button
             onClick={() => setIsBetTypeDropdownOpen(!isBetTypeDropdownOpen)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
@@ -1110,7 +1111,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   if (selectedBetType === 'discrepancy') {
     return (
       <div className="space-y-6">
-        <div className="relative flex justify-center">
+        {/* Dynamic Bet Type Heading - Hidden on desktop (controlled via sidebar), shown on mobile */}
+        <div className="relative flex justify-center lg:hidden">
           <button
             onClick={() => setIsBetTypeDropdownOpen(!isBetTypeDropdownOpen)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
@@ -1137,7 +1139,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                   <button
                     key={betType.id}
                     onClick={() => {
-                      if (isLocked) return;
+                      if (isLocked) return; // Don't allow selection if locked
                       setSelectedBetType(betType.id);
                       setIsBetTypeDropdownOpen(false);
                     }}
@@ -1170,7 +1172,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           )}
         </div>
 
-        {/* Backdrop to close dropdown */}
+        {/* Backdrop - Rendered outside relative container */}
         {isBetTypeDropdownOpen && (
           <div 
             className="fixed inset-0 z-30" 
