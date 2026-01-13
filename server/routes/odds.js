@@ -204,6 +204,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     let marketsArray = markets.split(',');
     let allGames = [];
     
+    console.log(`🏟️ Odds API Request: sports=${sportsArray.length} sports: [${sportsArray.join(', ')}]`);
+    
     // Define DFS apps list at top level for use throughout the function
     // Use correct API keys: betr_us_dfs (not betr), pick6 (not draftkings_pick6)
     const dfsApps = ['prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs'];
@@ -842,6 +844,15 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         }
       });
     }
+    
+    // Log summary of games by sport
+    const sportCounts = {};
+    allGames.forEach(game => {
+      const sport = game.sport_key || 'unknown';
+      sportCounts[sport] = (sportCounts[sport] || 0) + 1;
+    });
+    console.log(`📊 Final games by sport:`, sportCounts);
+    console.log(`📊 Total games returned: ${allGames.length}`);
     
     res.json(allGames);
   } catch (err) {
