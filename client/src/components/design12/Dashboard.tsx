@@ -295,10 +295,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             <div className={`p-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
               <button
                 onClick={() => setCurrentView("account")}
-                className={`w-full p-4 ${isLight ? 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200 hover:border-purple-300' : 'bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-transparent border-white/10 hover:border-purple-400/30'} border backdrop-blur-xl rounded-2xl transition-all`}
+                className={`w-full p-4 ${isLight ? 'bg-gray-100 border-gray-200 hover:border-gray-300' : 'bg-white/5 border-white/10 hover:border-white/20'} border backdrop-blur-xl rounded-2xl transition-all`}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-gradient-to-br from-purple-100 to-indigo-100 border-purple-300' : 'bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-gray-200 border-gray-300' : 'bg-white/10 border-white/20'} border flex items-center justify-center backdrop-blur-xl`}>
                     <User className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
                   </div>
                   <div className="flex-1 text-left">
