@@ -406,6 +406,42 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 Exchanges
                 {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
               </button>
+              <button
+                onClick={() => {
+                  if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                  setSelectedBetType('arbitrage');
+                  setCurrentView("odds");
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                  !hasPaidPlan
+                    ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
+                    : currentView === "odds" && selectedBetType === 'arbitrage'
+                      ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
+                      : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
+                }`}
+              >
+                <Zap className="w-5 h-5" />
+                Arbitrage
+                {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
+              </button>
+              <button
+                onClick={() => {
+                  if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                  setSelectedBetType('middles');
+                  setCurrentView("odds");
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                  !hasPaidPlan
+                    ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
+                    : currentView === "odds" && selectedBetType === 'middles'
+                      ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
+                      : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
+                }`}
+              >
+                <Target className="w-5 h-5" />
+                Middles
+                {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
+              </button>
               {/* My Picks - Hidden for now */}
               {/* <button
                 onClick={() => setCurrentView("picks")}
