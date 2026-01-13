@@ -581,9 +581,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           }
           
           const sportGames = responseData || [];
+          console.log(`🏈 Sport ${sport}: ${sportGames.length} games fetched`);
           allGames.push(...sportGames);
         } catch (sportErr) {
-          // Silently skip sport fetch errors
+          console.error(`❌ Error fetching ${sport}:`, sportErr.message);
         }
       }
       
