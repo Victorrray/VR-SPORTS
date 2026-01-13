@@ -480,18 +480,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 Bankroll
               </button> */}
 
-              <button
-                onClick={() => setCurrentView("account")}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                  currentView === "account"
-                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
-                    : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
-                }`}
-              >
-                <User className="w-5 h-5" />
-                Account
-              </button>
-            </nav>
+              </nav>
 
             {/* Sign Out */}
             <div className={`p-6 border-t ${isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-slate-950/50'} space-y-3`}>
