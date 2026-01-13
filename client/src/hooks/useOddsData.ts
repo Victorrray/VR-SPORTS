@@ -2811,7 +2811,18 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
       
       if (response.data && Array.isArray(response.data)) {
+        // Debug: Log sports in API response
+        const apiSports = new Set(response.data.map((g: any) => g.sport_key));
+        console.log('🏟️ API Response sports:', Array.from(apiSports));
+        console.log('🏟️ API Response games count:', response.data.length);
+        
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
+        
+        // Debug: Log sports after transformation
+        const transformedSports = new Set(transformedPicks.map(p => p.sport));
+        console.log('🏟️ Transformed picks sports:', Array.from(transformedSports));
+        console.log('🏟️ Transformed picks count:', transformedPicks.length);
+        
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
@@ -2821,6 +2832,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForMiddles(transformedPicks);
         transformedPicks = filterForExchanges(transformedPicks);
         transformedPicks = filterExpiredBets(transformedPicks);
+        
+        // Debug: Log sports after all filters
+        const finalSports = new Set(transformedPicks.map(p => p.sport));
+        console.log('🏟️ Final picks sports:', Array.from(finalSports));
+        console.log('🏟️ Final picks count:', transformedPicks.length);
+        
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
