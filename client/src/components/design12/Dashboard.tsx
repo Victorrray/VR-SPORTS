@@ -95,6 +95,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [previousView, setPreviousView] = useState<string>("account");
   const [betSlipOpen, setBetSlipOpen] = useState(false);
   const [pendingBet, setPendingBet] = useState<any>(null);
+  const [selectedBetType, setSelectedBetType] = useState<string>('straight');
 
   // Fetch recommended picks from API - limit to 4 for free users to minimize API costs
   const { picks: recommendedPicks, loading: picksLoading } = useRecommendedPicks({
@@ -332,19 +333,77 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <Home className="w-5 h-5" />
                 Dashboard
               </button>
-              {/* Odds button - grayed out for free users, redirects to subscription */}
+              {/* Odds Section Buttons */}
               <button
-                onClick={() => hasPaidPlan ? setCurrentView("odds") : setCurrentView("changePlan")}
+                onClick={() => {
+                  if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                  setSelectedBetType('straight');
+                  setCurrentView("odds");
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   !hasPaidPlan
                     ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
-                    : currentView === "odds"
+                    : currentView === "odds" && selectedBetType === 'straight'
                       ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
                       : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
                 <Zap className="w-5 h-5" />
-                Odds
+                Straight Bets
+                {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
+              </button>
+              <button
+                onClick={() => {
+                  if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                  setSelectedBetType('props');
+                  setCurrentView("odds");
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                  !hasPaidPlan
+                    ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
+                    : currentView === "odds" && selectedBetType === 'props'
+                      ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                      : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
+                }`}
+              >
+                <Target className="w-5 h-5" />
+                Player Props
+                {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
+              </button>
+              <button
+                onClick={() => {
+                  if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                  setSelectedBetType('discrepancy');
+                  setCurrentView("odds");
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                  !hasPaidPlan
+                    ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
+                    : currentView === "odds" && selectedBetType === 'discrepancy'
+                      ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                      : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
+                }`}
+              >
+                <BarChart2 className="w-5 h-5" />
+                Discrepancy
+                {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
+              </button>
+              <button
+                onClick={() => {
+                  if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                  setSelectedBetType('exchanges');
+                  setCurrentView("odds");
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+                  !hasPaidPlan
+                    ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
+                    : currentView === "odds" && selectedBetType === 'exchanges'
+                      ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                      : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
+                }`}
+              >
+                <TrendingUp className="w-5 h-5" />
+                Exchanges
                 {!hasPaidPlan && <span className="ml-auto text-xs opacity-60">Pro</span>}
               </button>
               {/* My Picks - Hidden for now */}
@@ -509,7 +568,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
             {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} onUpdatePickStatus={updatePickStatus} onNavigateToCalculator={() => setCurrentView("calculator")} />}
             {/* Only render OddsPage for paid users to avoid unnecessary API calls */}
-            {currentView === "odds" && hasPaidPlan && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} />}
+            {currentView === "odds" && hasPaidPlan && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} betType={selectedBetType} onBetTypeChange={setSelectedBetType} />}
             {currentView === "account" && (
               <AccountPage
                 onNavigateToSettings={() => setCurrentView("settings")}

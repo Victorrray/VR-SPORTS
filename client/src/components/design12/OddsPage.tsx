@@ -173,7 +173,14 @@ const calculateDevigOdds = (books: any[]): string => {
   return fairOdds > 0 ? `+${fairOdds}` : String(fairOdds);
 };
 
-export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any) => void, savedPicks?: any[] }) {
+interface OddsPageProps {
+  onAddPick: (pick: any) => void;
+  savedPicks?: any[];
+  betType?: string;
+  onBetTypeChange?: (betType: string) => void;
+}
+
+export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange }: OddsPageProps) {
   const { oddsFormat } = useTheme();
   // Dark mode only - no light mode support
   const isLight = false;
@@ -205,7 +212,23 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
   // UI filter state (what user sees and modifies in the filter panel)
   const [selectedSports, setSelectedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
   const [selectedMarket, setSelectedMarket] = useState(cachedFilters?.market || 'all');
-  const [selectedBetType, setSelectedBetType] = useState(cachedFilters?.betType || 'straight');
+  const [selectedBetType, setSelectedBetTypeInternal] = useState(betType || cachedFilters?.betType || 'straight');
+  
+  // Sync with external betType prop when it changes
+  useEffect(() => {
+    if (betType && betType !== selectedBetType) {
+      setSelectedBetTypeInternal(betType);
+      setAppliedBetType(betType);
+    }
+  }, [betType]);
+  
+  // Wrapper to notify parent of bet type changes
+  const setSelectedBetType = (newBetType: string) => {
+    setSelectedBetTypeInternal(newBetType);
+    if (onBetTypeChange) {
+      onBetTypeChange(newBetType);
+    }
+  };
   
   // Applied filter state (what the API actually uses - only updates on Apply Filters click)
   const [appliedSports, setAppliedSports] = useState<string[]>(cachedFilters?.sports || ['all']);
@@ -1162,8 +1185,8 @@ export function OddsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pick: any
 
   return (
     <div className="space-y-6">
-      {/* Dynamic Bet Type Heading */}
-      <div className="relative flex justify-center">
+      {/* Dynamic Bet Type Heading - Hidden on desktop (controlled via sidebar), shown on mobile */}
+      <div className="relative flex justify-center lg:hidden">
         <button
           onClick={() => setIsBetTypeDropdownOpen(!isBetTypeDropdownOpen)}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
