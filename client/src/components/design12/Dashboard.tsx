@@ -293,7 +293,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             {/* Logo */}
             <div className={`p-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'} relative overflow-hidden`}>
               {/* Background decoration */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${isLight ? 'from-purple-50/50 to-indigo-50/50' : 'from-purple-500/5 to-indigo-500/5'} opacity-50`} />
+              <div className={`absolute inset-0 ${isLight ? 'bg-gray-100/50' : 'bg-white/5'} opacity-50`} />
               
               <div className="relative flex flex-col gap-4">
                 {/* Logo */}
