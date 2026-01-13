@@ -63,7 +63,7 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             {/* Large Headline */}
             <h1 className="text-white mb-6 md:mb-8 leading-[1.1] font-bold" style={{fontSize: 'clamp(2.5rem, 8vw, 5rem)'}}>
               Bet smarter,<br />
-              <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="text-purple-400">
                 Win more.
               </span>
             </h1>
@@ -77,7 +77,7 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 md:gap-6">
               <button 
-                className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold"
+                className="w-full sm:w-auto px-8 py-3 md:py-4 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all text-center font-semibold"
                 onClick={onGetStartedClick}
               >
                 Get started
