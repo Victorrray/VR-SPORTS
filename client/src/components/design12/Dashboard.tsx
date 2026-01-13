@@ -494,7 +494,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             </nav>
 
             {/* Sign Out */}
-            <div className={`p-6 border-t ${isLight ? 'border-gray-200' : 'border-white/10'} space-y-3`}>
+            <div className={`p-6 border-t ${isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-slate-950/50'} space-y-3`}>
               <button
                 onClick={() => setCurrentView("settings")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
