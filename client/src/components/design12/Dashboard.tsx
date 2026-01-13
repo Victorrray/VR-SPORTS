@@ -320,8 +320,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </button>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 p-6 space-y-2">
+            {/* Navigation - scrollable */}
+            <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
               <button
                 onClick={() => setCurrentView("dashboard")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
