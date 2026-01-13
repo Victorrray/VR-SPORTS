@@ -1469,8 +1469,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               </div>
             </div>
 
-            {/* Content - auto height on mobile, scrollable on desktop */}
-            <div className="lg:overflow-y-auto lg:flex-1 p-6 pt-12 space-y-5 scrollbar-hide">
+            {/* Content - scrollable on both mobile and desktop */}
+            <div className="overflow-y-auto flex-1 p-6 pt-12 space-y-5 scrollbar-hide">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div className={!hasPlatinum ? 'opacity-50' : ''}>
