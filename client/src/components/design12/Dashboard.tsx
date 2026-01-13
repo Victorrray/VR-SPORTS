@@ -298,8 +298,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 className={`w-full p-4 ${isLight ? 'bg-gray-100 border-gray-200 hover:border-gray-300' : 'bg-white/5 border-white/10 hover:border-white/20'} border backdrop-blur-xl rounded-2xl transition-all`}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-gray-200 border-gray-300' : 'bg-white/10 border-white/20'} border flex items-center justify-center backdrop-blur-xl`}>
-                    <User className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-purple-100 border-purple-300' : 'bg-purple-500/20 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+                    <User className={`w-5 h-5 ${isLight ? 'text-gray-600' : 'text-white/60'}`} />
                   </div>
                   <div className="flex-1 text-left">
                     <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
