@@ -834,6 +834,33 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
 
             {/* Content - scrollable on both mobile and desktop */}
             <div className="overflow-y-auto flex-1 p-6 pt-2 lg:pt-12 space-y-3 lg:space-y-5 scrollbar-hide">
+              {/* Auto Refresh Toggle */}
+              <div>
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 flex items-center gap-2`}>
+                  Auto Refresh
+                </label>
+                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
+                  <div className="flex items-center gap-3 flex-1">
+                    <RefreshCw className={`w-5 h-5 ${autoRefresh ? (isLight ? 'text-purple-600' : 'text-purple-400') : (isLight ? 'text-gray-400' : 'text-white/40')}`} />
+                    <div>
+                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>Auto Refresh Odds</div>
+                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold`}>
+                        {autoRefresh ? 'Updates every 45 seconds' : 'Update every 45 seconds'}
+                      </div>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={autoRefresh}
+                      onChange={(e) => setAutoRefresh(e.target.checked)}
+                    />
+                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500`}></div>
+                  </label>
+                </div>
+              </div>
+
               {/* Primary Sportsbook */}
               <div className="relative">
                 <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
@@ -973,35 +1000,6 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Auto-Refresh Toggle */}
-              <div>
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
-                  Auto-Refresh
-                </label>
-                <button
-                  onClick={() => setAutoRefresh(!autoRefresh)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                    isLight 
-                      ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' 
-                      : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
-                    {autoRefresh ? 'Auto-refresh ON (45s)' : 'Auto-refresh OFF'}
-                  </span>
-                  <div className={`w-12 h-6 rounded-full p-1 transition-all ${
-                    autoRefresh 
-                      ? isLight ? 'bg-purple-500' : 'bg-purple-500' 
-                      : isLight ? 'bg-gray-300' : 'bg-white/20'
-                  }`}>
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                      autoRefresh ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </div>
-                </button>
               </div>
 
               </div>
