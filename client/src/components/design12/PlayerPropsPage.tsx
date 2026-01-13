@@ -278,30 +278,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
   const topPicks = dateFilteredPicks;
   const isLoading = apiLoading;
   
-  // Debug logging
-  console.log('🎯 PlayerPropsPage Debug:', {
-    apiPicksCount: apiPicks?.length || 0,
-    dateFilteredCount: dateFilteredPicks?.length || 0,
-    selectedSport,
-    selectedMarket,
-    selectedBetType,
-    selectedDate,
-    selectedSportsbooks,
-    isLoading,
-    apiError
-  });
   
-  // Debug: Log all unique book keys in the data
-  if (topPicks.length > 0) {
-    const allBookKeys = new Set<string>();
-    topPicks.forEach(pick => {
-      pick.books?.forEach((book: any) => {
-        allBookKeys.add(`${book.key || 'NO_KEY'}:${book.name}`);
-      });
-    });
-    console.log('📚 All book keys in data:', Array.from(allBookKeys).slice(0, 20));
-  }
-
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1); // Reset to first page when filters change
