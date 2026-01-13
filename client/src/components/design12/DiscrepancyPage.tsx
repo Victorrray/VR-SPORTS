@@ -798,6 +798,38 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                   <span className="lg:hidden text-lg">✕</span>
                 </button>
               </div>
+              
+              {/* Apply and Reset Buttons - Mobile Only */}
+              <div className="flex lg:hidden gap-2">
+                <button
+                  onClick={closeFilterMenu}
+                  className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
+                    isLight 
+                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600' 
+                      : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600'
+                  }`}
+                >
+                  Apply
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedBook('prizepicks');
+                    setSelectedSport('all');
+                    setSelectedPropType('all');
+                    setMinDiscrepancy(1);
+                    toast.success('Filters reset', {
+                      description: 'All filters have been cleared'
+                    });
+                  }}
+                  className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
+                    isLight 
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  Reset
+                </button>
+              </div>
             </div>
 
             {/* Content - scrollable on both mobile and desktop */}
@@ -972,39 +1004,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                 </button>
               </div>
 
-              {/* Apply & Reset Buttons */}
-              <div className="pt-4 space-y-3">
-                <button
-                  onClick={closeFilterMenu}
-                  className={`w-full px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
-                    isLight 
-                      ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700 hover:from-purple-200 hover:to-indigo-200' 
-                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30 text-white'
-                  }`}
-                >
-                  Apply Filters
-                </button>
-
-                <button
-                  onClick={() => {
-                    setSelectedBook('prizepicks');
-                    setSelectedSport('all');
-                    setSelectedPropType('all');
-                    setMinDiscrepancy(1);
-                    toast.success('Filters reset', {
-                      description: 'All filters have been cleared'
-                    });
-                  }}
-                  className={`w-full px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
-                    isLight 
-                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
-                  Reset All Filters
-                </button>
               </div>
-            </div>
           </div>
         </>
       )}
