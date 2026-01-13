@@ -300,10 +300,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="flex items-center gap-3">
                   <div className="relative group">
                     {/* Glow effect */}
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${isLight ? 'from-purple-400 to-indigo-400' : 'from-purple-500 to-indigo-500'} blur-xl opacity-40 group-hover:opacity-60 transition-opacity`} />
+                    <div className={`absolute inset-0 rounded-2xl ${isLight ? 'bg-purple-400' : 'bg-purple-500'} blur-xl opacity-40 group-hover:opacity-60 transition-opacity`} />
                     
                     {/* Logo container */}
-                    <div className={`relative w-12 h-12 rounded-2xl bg-gradient-to-br ${isLight ? lightModeColors.logoGradient : 'from-purple-500 via-purple-600 to-indigo-600'} flex items-center justify-center transform transition-transform group-hover:scale-105`}>
+                    <div className={`relative w-12 h-12 rounded-2xl ${isLight ? 'bg-purple-500' : 'bg-purple-500'} flex items-center justify-center transform transition-transform group-hover:scale-105`}>
                       <span className="text-white font-bold text-lg">
                         OS
                       </span>
@@ -313,7 +313,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   </div>
                   
                   <div className="flex flex-col">
-                    <span className={`bg-gradient-to-r ${isLight ? lightModeColors.logoGradient : 'from-purple-400 via-purple-300 to-indigo-400'} bg-clip-text text-transparent font-bold text-lg tracking-tight`}>
+                    <span className={`${isLight ? 'text-purple-500' : 'text-purple-400'} font-bold text-lg tracking-tight`}>
                       OddSightSeer
                     </span>
                     <span className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/40'} font-bold tracking-wide`}>
