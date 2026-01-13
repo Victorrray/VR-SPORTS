@@ -326,7 +326,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("dashboard")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "dashboard"
-                    ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -344,7 +344,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   !hasPaidPlan
                     ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
                     : currentView === "odds" && selectedBetType === 'straight'
-                      ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                      ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                       : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -362,7 +362,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   !hasPaidPlan
                     ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
                     : currentView === "odds" && selectedBetType === 'props'
-                      ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                      ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                       : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -380,7 +380,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   !hasPaidPlan
                     ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
                     : currentView === "odds" && selectedBetType === 'discrepancy'
-                      ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                      ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                       : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -398,7 +398,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   !hasPaidPlan
                     ? isLight ? "text-gray-400 cursor-pointer opacity-50" : "text-white/30 cursor-pointer opacity-50"
                     : currentView === "odds" && selectedBetType === 'exchanges'
-                      ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                      ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                       : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -411,7 +411,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("picks")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "picks"
-                    ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -423,7 +423,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("calculator")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "calculator"
-                    ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -436,7 +436,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("bankroll")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "bankroll"
-                    ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -448,7 +448,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("account")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "account"
-                    ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -463,7 +463,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("settings")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "settings"
-                    ? isLight ? lightModeColors.navActive : "bg-white/10 backdrop-blur-xl border border-white/20 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
