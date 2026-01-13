@@ -629,7 +629,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               onClick={() => setCurrentView("dashboard")}
               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
                 currentView === "dashboard"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
+                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
                   : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >
@@ -649,7 +649,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 !hasPaidPlan
                   ? isLight ? "text-gray-400 opacity-50" : "text-white/30 opacity-50"
                   : currentView === "odds"
-                    ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
+                    ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
                     : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >
@@ -666,7 +666,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               onClick={() => setCurrentView("calculator")}
               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
                 currentView === "calculator"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
+                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
                   : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >
@@ -683,7 +683,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               onClick={() => setCurrentView("account")}
               className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
                 currentView === "account"
-                  ? isLight ? "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300" : "bg-gradient-to-r from-purple-500/30 to-indigo-500/30 backdrop-blur-xl border border-purple-400/40"
+                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
                   : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >
