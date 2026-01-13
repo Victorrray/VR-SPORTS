@@ -893,6 +893,14 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   );
   
   const totalPages = Math.ceil(sortedPicks.length / itemsPerPage);
+  
+  // Debug: Count picks by sport
+  const sportCounts: Record<string, number> = {};
+  sortedPicks.forEach(pick => {
+    const sport = pick.sport || 'Unknown';
+    sportCounts[sport] = (sportCounts[sport] || 0) + 1;
+  });
+  console.log('🏟️ Sorted picks by sport:', sportCounts);
 
   // Skeleton Loader Component
   const SkeletonRow = () => (
