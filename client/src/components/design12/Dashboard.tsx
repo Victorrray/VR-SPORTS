@@ -513,12 +513,12 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           <header className={`lg:hidden px-4 py-4 border-b ${isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-slate-950/30'} backdrop-blur-2xl`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${isLight ? lightModeColors.logoGradient : 'from-purple-500 to-indigo-500'} flex items-center justify-center`}>
+                <div className={`w-10 h-10 rounded-xl ${isLight ? 'bg-purple-500' : 'bg-purple-500'} flex items-center justify-center`}>
                   <span className="text-white font-bold">
                     OS
                   </span>
                 </div>
-                <span className={`bg-gradient-to-r ${isLight ? lightModeColors.logoGradient : 'from-purple-400 to-indigo-400'} bg-clip-text text-transparent font-bold`}>
+                <span className={`${isLight ? 'text-purple-600' : 'text-purple-400'} font-bold`}>
                   OddSightSeer
                 </span>
               </div>
