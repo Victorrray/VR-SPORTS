@@ -2780,6 +2780,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         });
       };
 
+      // Filter out player props for straight bets mode
+      // This is a safeguard in case the server returns player props data
+      const filterPlayerPropsForStraightBets = (picks: OddsPick[]) => {
+        if (betType !== 'straight') return picks;
+        return picks.filter(pick => !pick.isPlayerProp);
+      };
+
       // Filter out stale/expired bets (those with game times in the past)
       const filterExpiredBets = (picks: OddsPick[]) => {
         const now = new Date();
@@ -2808,6 +2815,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
+        transformedPicks = filterPlayerPropsForStraightBets(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
@@ -2823,6 +2831,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
+        transformedPicks = filterPlayerPropsForStraightBets(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
