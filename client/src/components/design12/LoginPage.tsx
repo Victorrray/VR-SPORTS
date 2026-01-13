@@ -105,7 +105,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
               </button>
 
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500 flex items-center justify-center">
                   <span className="text-white font-bold text-xl">OS</span>
                 </div>
                 <div>
@@ -116,7 +116,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
 
               <h2 className="text-white text-4xl md:text-5xl font-bold leading-tight">
                 Find Your{' '}
-                <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                <span className="text-purple-400">
                   Winning Edge
                 </span>
               </h2>
@@ -174,7 +174,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                     onClick={() => setIsLogin(true)}
                     className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold transition-all text-center text-sm md:text-base ${
                       isLogin
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
+                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
                         : 'text-white/50 hover:text-white/80'
                     }`}
                   >
@@ -184,7 +184,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                     onClick={onSignUp}
                     className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold transition-all text-center text-sm md:text-base ${
                       !isLogin
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
+                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
                         : 'text-white/50 hover:text-white/80'
                     }`}
                   >
@@ -255,7 +255,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 md:py-4 rounded-2xl hover:from-purple-400 hover:to-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-center text-sm md:text-base"
+                    className="w-full bg-purple-500 text-white py-3.5 md:py-4 rounded-2xl hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-center text-sm md:text-base"
                   >
                     {isLoading ? 'Loading...' : (isLogin ? 'Login to your account' : 'Create your account')}
                   </button>
