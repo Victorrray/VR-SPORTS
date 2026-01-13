@@ -621,7 +621,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                           {pick.playerName}
                         </div>
                         <div className={`text-sm ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                          {pick.team} @ {pick.opponent} • {pick.propLabel}
+                          {pick.team} @ {pick.opponent}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -662,7 +662,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                           ? isLight ? 'text-green-700' : 'text-green-400'
                           : isLight ? 'text-red-700' : 'text-red-400'
                       }`}>
-                        Take {pick.recommendation.toUpperCase()} on {pick.primaryBook}
+                        {pick.recommendation.toUpperCase()} {pick.propLabel}
                       </span>
                     </div>
                   </div>
