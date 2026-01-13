@@ -798,6 +798,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const displayBooks = booksAtExactConsensus.map((b: any) => {
           return {
             name: b.name,
+            key: b.key, // CRITICAL: Include the book key for filtering
             rawName: b.name,
             line: b.line,
             odds: b.overOdds,

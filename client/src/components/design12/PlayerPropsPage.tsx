@@ -496,7 +496,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             // Special handling for display names
             if (selectedIdLower === 'dabble_au' && bookNameLower === 'dabble') return true;
             if (selectedIdLower === 'betr_us_dfs' && bookNameLower === 'betr') return true;
-            if (selectedIdLower === 'pick6' && (bookNameLower === 'pick6' || bookNameLower === 'draftkings pick6')) return true;
+            // Pick 6 can appear as "pick6", "pick 6", or "draftkings pick6"
+            if (selectedIdLower === 'pick6' && (bookNameLower === 'pick6' || bookNameLower === 'pick 6' || bookNameLower === 'draftkings pick6')) return true;
           }
           
           return false;
