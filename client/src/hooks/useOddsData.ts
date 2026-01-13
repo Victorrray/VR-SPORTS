@@ -1995,6 +1995,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         // Default to all sports
         sportsList = 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
       }
+      console.log(`🏟️ useOddsData: sport param="${sport}", sportsList="${sportsList}"`);
       params.append('sports', sportsList);
       
       // Map market types to API format
