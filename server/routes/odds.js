@@ -470,6 +470,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           // Use Supabase cache if available
           if (supabaseCachedData && supabaseCachedData.length > 0) {
+            console.log(`📦 Using Supabase cache for ${sport}: ${supabaseCachedData.length} games`);
             allGames.push(...supabaseCachedData);
             continue;
           }
