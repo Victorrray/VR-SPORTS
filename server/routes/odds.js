@@ -937,6 +937,15 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // Check if NHL was requested but not returned
     if (hasNHL && !sportCounts['icehockey_nhl']) {
       console.log(`⚠️ NHL was requested but no NHL games in final response!`);
+      console.log(`⚠️ This could mean: 1) No NHL games scheduled, 2) All games already started, 3) API error`);
+    }
+    
+    // Log which sports were requested vs returned
+    console.log(`📋 Sports requested: [${sportsArray.join(', ')}]`);
+    console.log(`📋 Sports returned: [${Object.keys(sportCounts).join(', ')}]`);
+    const missingSports = sportsArray.filter(s => !sportCounts[s]);
+    if (missingSports.length > 0) {
+      console.log(`⚠️ Missing sports: [${missingSports.join(', ')}]`);
     }
     
     res.json(allGames);
