@@ -1795,6 +1795,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         key={sport.id}
                         onClick={() => {
                           setSelectedSports([sport.id]);
+                          setAppliedSports([sport.id]); // Auto-apply sport filter
                           setSportExpanded(false);
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all ${
@@ -1846,6 +1847,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           key={sport.id}
                           onClick={() => {
                             setSelectedSports([sport.id]);
+                            setAppliedSports([sport.id]); // Auto-apply sport filter
                             closeSportDrawer();
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all ${
