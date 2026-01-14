@@ -1,5 +1,6 @@
 import { TrendingUp, Clock, Search, ChevronDown, Filter, BarChart2, Plus, Zap, RefreshCw, Calendar, Star, ArrowUpRight, Target, Flame, Trophy, TrendingDown, Eye, Bell, ChevronRight, ArrowUp, ArrowDown, Check, Crown } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
 import { useOddsData } from '../../hooks/useOddsData';
@@ -902,8 +903,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 )}
               </div>
 
-              {/* Date Drawer - Mobile Only */}
-              {dateExpanded && (
+              {/* Date Drawer - Mobile Only - Rendered via Portal */}
+              {dateExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -951,7 +952,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               {/* Sportsbooks Filter */}
@@ -1005,8 +1007,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 )}
               </div>
 
-              {/* Sportsbooks Drawer - Mobile Only */}
-              {sportsbooksExpanded && (
+              {/* Sportsbooks Drawer - Mobile Only - Rendered via Portal */}
+              {sportsbooksExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -1060,7 +1062,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               {/* Sport Filter */}
@@ -1101,8 +1104,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 )}
               </div>
 
-              {/* Sport Drawer - Mobile Only */}
-              {sportExpanded && (
+              {/* Sport Drawer - Mobile Only - Rendered via Portal */}
+              {sportExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -1150,7 +1153,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               {/* Market Type Filter */}
@@ -1191,8 +1195,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 )}
               </div>
 
-              {/* Market Type Drawer - Mobile Only */}
-              {marketExpanded && (
+              {/* Market Type Drawer - Mobile Only - Rendered via Portal */}
+              {marketExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -1240,7 +1244,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               {/* Desktop Apply & Reset Buttons */}

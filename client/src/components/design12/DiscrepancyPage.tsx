@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
 import { useOddsData } from '../../hooks/useOddsData';
@@ -996,8 +997,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                 )}
               </div>
 
-              {/* Book Drawer - Mobile Only */}
-              {bookExpanded && (
+              {/* Book Drawer - Mobile Only - Rendered via Portal */}
+              {bookExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -1046,7 +1047,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               {/* Sport Filter */}
@@ -1088,8 +1090,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                 )}
               </div>
 
-              {/* Sport Drawer - Mobile Only */}
-              {sportExpanded && (
+              {/* Sport Drawer - Mobile Only - Rendered via Portal */}
+              {sportExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -1138,7 +1140,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               {/* Prop Type Filter */}
@@ -1180,8 +1183,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                 )}
               </div>
 
-              {/* Prop Type Drawer - Mobile Only */}
-              {propTypeExpanded && (
+              {/* Prop Type Drawer - Mobile Only - Rendered via Portal */}
+              {propTypeExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -1230,7 +1233,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               {/* Date Filter */}
@@ -1275,8 +1279,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                 )}
               </div>
 
-              {/* Date Drawer - Mobile Only */}
-              {dateExpanded && (
+              {/* Date Drawer - Mobile Only - Rendered via Portal */}
+              {dateExpanded && createPortal(
                 <>
                   {/* Backdrop */}
                   <div 
@@ -1325,7 +1329,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                       ))}
                     </div>
                   </div>
-                </>
+                </>,
+                document.body
               )}
 
               </div>
