@@ -1669,8 +1669,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                   <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
                     {sportsbooksByTier
                       .filter(tierGroup => {
-                        // Hide DFS & Pick'em category when in straight bets mode
-                        if (selectedBetType === 'straight' && tierGroup.tier.includes('DFS')) {
+                        // Hide DFS & Pick'em category for straight bets, arbitrage, and middles modes
+                        if (['straight', 'arbitrage', 'middles'].includes(selectedBetType) && tierGroup.tier.includes('DFS')) {
                           return false;
                         }
                         return true;
@@ -1735,8 +1735,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                     <div className="overflow-y-auto max-h-[calc(70vh-80px)] scrollbar-hide swipe-scroll">
                       {sportsbooksByTier
                         .filter(tierGroup => {
-                          // Hide DFS & Pick'em category when in straight bets mode
-                          if (selectedBetType === 'straight' && tierGroup.tier.includes('DFS')) {
+                          // Hide DFS & Pick'em category for straight bets, arbitrage, and middles modes
+                          if (['straight', 'arbitrage', 'middles'].includes(selectedBetType) && tierGroup.tier.includes('DFS')) {
                             return false;
                           }
                           return true;
