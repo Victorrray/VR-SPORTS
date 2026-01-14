@@ -893,6 +893,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     console.log(`📊 Final games by sport:`, sportCounts);
     console.log(`📊 Total games returned: ${allGames.length}`);
     
+    // Check if NHL was requested but not returned
+    if (hasNHL && !sportCounts['icehockey_nhl']) {
+      console.log(`⚠️ NHL was requested but no NHL games in final response!`);
+    }
+    
     res.json(allGames);
   } catch (err) {
     console.error('Odds error:', err);
