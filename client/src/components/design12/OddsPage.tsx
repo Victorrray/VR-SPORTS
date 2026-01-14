@@ -355,10 +355,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   const dateFilteredPicks = useMemo(() => {
     if (!apiPicks || apiPicks.length === 0) return [];
     
-    // Debug: Log sports in API response
-    const apiSports = new Set(apiPicks.map(p => p.sport));
-    console.log(`🏟️ dateFilteredPicks: appliedDate="${appliedDate}", apiPicks=${apiPicks.length}, sports:`, Array.from(apiSports));
-    
     let filtered = apiPicks;
     
     // Filter out live games for non-Platinum users (Gold and below only see pre-match)
@@ -376,12 +372,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
     
     // If "all_upcoming" is selected, return filtered picks (no date filter)
     if (appliedDate === 'all_upcoming') {
-      console.log(`🏟️ all_upcoming: returning ${filtered.length} picks`);
       return filtered;
     }
     
     // Filter by specific date (YYYY-MM-DD format in local timezone)
-    const beforeDateFilter = filtered.length;
     filtered = filtered.filter(pick => {
       // If no game time, include the pick (don't filter it out)
       if (!pick.commenceTime && !pick.gameTime) return true;
@@ -395,10 +389,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
       
       return gameDateStr === appliedDate;
     });
-    
-    // Debug: Log date filtering results
-    const filteredSports = new Set(filtered.map(p => p.sport));
-    console.log(`🏟️ Date filter: ${beforeDateFilter} -> ${filtered.length} picks for date "${appliedDate}", sports:`, Array.from(filteredSports));
     
     return filtered;
   }, [apiPicks, appliedDate, hasPlatinum]);
