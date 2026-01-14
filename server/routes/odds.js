@@ -477,12 +477,22 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             console.log(`📦 Using Supabase cache for ${sport}: ${supabaseCachedData.length} games`);
             // Verify the cached data has the correct sport_key
             const validCachedData = supabaseCachedData.filter(game => game.sport_key === sport);
-            if (validCachedData.length > 0) {
-              allGames.push(...validCachedData);
+            
+            // Also filter out past games from cache
+            const now = new Date();
+            const futureGames = validCachedData.filter(game => {
+              if (!game.commence_time) return false;
+              const gameTime = new Date(game.commence_time);
+              return gameTime > now;
+            });
+            
+            if (futureGames.length > 0) {
+              console.log(`📦 ${sport}: ${futureGames.length} future games from cache (${validCachedData.length - futureGames.length} past games filtered)`);
+              allGames.push(...futureGames);
               continue;
             }
-            // If cached data doesn't match sport, fall through to API call
-            console.log(`⚠️ Supabase cache for ${sport} had mismatched sport_key, fetching fresh data`);
+            // If all cached games are past, fall through to API call
+            console.log(`⚠️ ${sport}: All ${validCachedData.length} cached games are past, fetching fresh data`);
           }
           
           // Make API call
@@ -535,10 +545,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               return gameTime > cacheNow;
             });
             console.log(`📦 Using in-memory cache for ${sport}: ${responseData.length} games (filtered ${beforeCacheFilter - responseData.length} past games)`);
+            if (sport === 'icehockey_nhl') {
+              console.log(`🏒 NHL in-memory cache: ${beforeCacheFilter} total, ${responseData.length} future games`);
+            }
             
             // If all cached games were past, invalidate cache and fetch fresh data
             if (responseData.length === 0 && beforeCacheFilter > 0) {
               console.log(`🔄 All cached games were past for ${sport}, fetching fresh data...`);
+              if (sport === 'icehockey_nhl') {
+                console.log(`🏒 NHL: All cached games expired, will fetch fresh from API`);
+              }
               // Clear the stale cache entries
               if (regularCacheKey) clearCachedResponse(regularCacheKey);
               if (alternateCacheKey) clearCachedResponse(alternateCacheKey);
@@ -621,7 +637,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const sportGames = responseData || [];
           console.log(`🏈 Sport ${sport}: ${sportGames.length} games fetched`);
           if (sport === 'icehockey_nhl') {
-            console.log(`🏒 NHL Debug: ${sportGames.length} games, first game:`, sportGames[0]?.home_team || 'none');
+            console.log(`🏒 NHL Debug: ${sportGames.length} games from API/cache`);
+            if (sportGames.length > 0) {
+              console.log(`🏒 NHL first game: ${sportGames[0]?.away_team} @ ${sportGames[0]?.home_team}, commence: ${sportGames[0]?.commence_time}`);
+            } else {
+              console.log(`🏒 NHL: No games returned from API - check if games are scheduled today`);
+            }
             console.log(`🏒 NHL allGames before push: ${allGames.length}`);
           }
           allGames.push(...sportGames);
@@ -631,7 +652,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         } catch (sportErr) {
           console.error(`❌ Error fetching ${sport}:`, sportErr.message);
           if (sport === 'icehockey_nhl') {
-            console.error(`🏒 NHL Error details:`, sportErr);
+            console.error(`🏒 NHL Error details:`, sportErr.response?.data || sportErr.message);
           }
         }
       }
