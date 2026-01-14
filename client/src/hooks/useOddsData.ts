@@ -2822,13 +2822,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterByMinDataPoints(transformedPicks);
         console.log(`🔄 After minDataPoints: ${transformedPicks.length} picks`);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
+        console.log(`🔄 After filterDabble: ${transformedPicks.length} picks`);
         transformedPicks = filterPlayerPropsForStraightBets(transformedPicks);
+        console.log(`🔄 After filterPlayerProps: ${transformedPicks.length} picks`);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
+        console.log(`🔄 After filterUnibet: ${transformedPicks.length} picks`);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
+        console.log(`🔄 After filterLowROI: ${transformedPicks.length} picks`);
         transformedPicks = filterForMiddles(transformedPicks);
+        console.log(`🔄 After filterMiddles: ${transformedPicks.length} picks`);
         transformedPicks = filterForExchanges(transformedPicks);
+        console.log(`🔄 After filterExchanges: ${transformedPicks.length} picks`);
         transformedPicks = filterExpiredBets(transformedPicks);
-        console.log(`🔄 After all filters: ${transformedPicks.length} picks`);
+        console.log(`🔄 After filterExpired: ${transformedPicks.length} picks`);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
