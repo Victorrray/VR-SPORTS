@@ -534,7 +534,24 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   
   // Filter books for mini table based on bet type
   // For exchanges: only show filtered sportsbook + exchange comparison book
+  // For spreads: only show books with the same line as the pick
   const getMinitableBooks = (allBooks: any[], pickData: any) => {
+    let booksToFilter = allBooks;
+    
+    // For spreads, filter to only show books with the SAME line as the pick
+    // This prevents showing +1.5 when the pick is -1.5
+    const marketKey = pickData.marketKey || '';
+    if (marketKey === 'spreads' || marketKey.startsWith('spreads_')) {
+      const pickLine = pickData.line;
+      if (pickLine !== null && pickLine !== undefined) {
+        booksToFilter = allBooks.filter(book => {
+          // Only include books with the same line (within small tolerance for floating point)
+          if (book.line === null || book.line === undefined) return false;
+          return Math.abs(Number(book.line) - Number(pickLine)) < 0.01;
+        });
+      }
+    }
+    
     if (selectedBetType === 'exchanges') {
       // For exchanges, only show:
       // 1. The filtered sportsbook(s) the user selected
@@ -543,7 +560,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
       
       // Add filtered sportsbooks
       if (selectedSportsbooks.length > 0) {
-        allBooks.forEach(book => {
+        booksToFilter.forEach(book => {
           const bookKey = (book.key || book.name || '').toLowerCase();
           const bookName = (book.name || '').toLowerCase();
           const isFiltered = selectedSportsbooks.some(sb => {
@@ -556,12 +573,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
         });
       } else {
         // If no filter, add the best book
-        const bestBook = allBooks.find(b => b.name === pickData.bestBook);
+        const bestBook = booksToFilter.find(b => b.name === pickData.bestBook);
         if (bestBook) filteredBooks.push(bestBook);
       }
       
       // Add exchange book (Novig or ProphetX)
-      const exchangeBook = allBooks.find(book => {
+      const exchangeBook = booksToFilter.find(book => {
         const bookName = (book.name || '').toLowerCase();
         return EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
       });
@@ -572,8 +589,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
       return filteredBooks;
     }
     
-    // For other bet types, return all books
-    return allBooks;
+    // For other bet types, return filtered books (already filtered by line for spreads)
+    return booksToFilter;
   };
 
   const toggleSportsbookFilter = (bookId: string) => {
