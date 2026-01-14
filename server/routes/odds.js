@@ -513,19 +513,14 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           let responseData;
           
           if (canUseAllCached) {
-            responseData = [];
-            if (cachedRegularData) {
-              // Validate cached data has correct sport_key
-              const validRegular = cachedRegularData.filter(game => game.sport_key === sport);
-              responseData = [...responseData, ...validRegular];
+            // Use cached data directly - the cache key already includes sport
+            // so we don't need to filter by sport_key again
+            responseData = cachedData || [];
+            if (!cachedData && cachedRegularData) {
+              responseData = [...cachedRegularData];
             }
-            if (cachedAlternateData) {
-              const validAlternate = cachedAlternateData.filter(game => game.sport_key === sport);
-              responseData = [...responseData, ...validAlternate];
-            }
-            if (cachedData) {
-              const validCached = cachedData.filter(game => game.sport_key === sport);
-              responseData = validCached;
+            if (!cachedData && cachedAlternateData) {
+              responseData = [...responseData, ...cachedAlternateData];
             }
             console.log(`📦 Using in-memory cache for ${sport}: ${responseData.length} games`);
           } else {
