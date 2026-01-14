@@ -85,6 +85,18 @@ function setCachedResponse(cacheKey, data) {
 }
 
 /**
+ * Clear cached response (used when cache contains stale data like past games)
+ */
+function clearCachedResponse(cacheKey) {
+  if (apiCache.has(cacheKey)) {
+    apiCache.delete(cacheKey);
+    console.log(`🗑️ Cleared stale cache for ${cacheKey}`);
+    return true;
+  }
+  return false;
+}
+
+/**
  * Get cached plan for user
  */
 function getCachedPlan(userId) {
@@ -231,6 +243,7 @@ module.exports = {
   // API response caching
   getCachedResponse,
   setCachedResponse,
+  clearCachedResponse,
   
   // Odds request deduplication (thundering herd prevention)
   getOddsInFlight,

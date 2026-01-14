@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { requireUser, checkPlanAccess, enforceUsage } = require('../middleware/auth');
-const { getCacheKey, getCachedResponse, setCachedResponse, getOddsInFlight, setOddsInFlight, deleteOddsInFlight } = require('../services/cache');
+const { getCacheKey, getCachedResponse, setCachedResponse, clearCachedResponse, getOddsInFlight, setOddsInFlight, deleteOddsInFlight } = require('../services/cache');
 const {
   getBookmakersForPlan,
   transformCachedOddsToApiFormat,
@@ -532,7 +532,20 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               return gameTime > cacheNow;
             });
             console.log(`📦 Using in-memory cache for ${sport}: ${responseData.length} games (filtered ${beforeCacheFilter - responseData.length} past games)`);
-          } else {
+            
+            // If all cached games were past, invalidate cache and fetch fresh data
+            if (responseData.length === 0 && beforeCacheFilter > 0) {
+              console.log(`🔄 All cached games were past for ${sport}, fetching fresh data...`);
+              // Clear the stale cache entries
+              if (regularCacheKey) clearCachedResponse(regularCacheKey);
+              if (alternateCacheKey) clearCachedResponse(alternateCacheKey);
+              if (cacheKey) clearCachedResponse(cacheKey);
+              // Fall through to fetch fresh data
+            }
+          }
+          
+          // If cache was empty or all games were past, fetch fresh data
+          if (!responseData || responseData.length === 0) {
             // Check if there's already an in-flight request for this exact data
             const inFlightPromise = getOddsInFlight(cacheKey);
             if (inFlightPromise) {
