@@ -471,8 +471,14 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           // Use Supabase cache if available
           if (supabaseCachedData && supabaseCachedData.length > 0) {
             console.log(`📦 Using Supabase cache for ${sport}: ${supabaseCachedData.length} games`);
-            allGames.push(...supabaseCachedData);
-            continue;
+            // Verify the cached data has the correct sport_key
+            const validCachedData = supabaseCachedData.filter(game => game.sport_key === sport);
+            if (validCachedData.length > 0) {
+              allGames.push(...validCachedData);
+              continue;
+            }
+            // If cached data doesn't match sport, fall through to API call
+            console.log(`⚠️ Supabase cache for ${sport} had mismatched sport_key, fetching fresh data`);
           }
           
           // Make API call
