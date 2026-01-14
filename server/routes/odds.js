@@ -585,9 +585,15 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           const sportGames = responseData || [];
           console.log(`🏈 Sport ${sport}: ${sportGames.length} games fetched`);
+          if (sport === 'icehockey_nhl') {
+            console.log(`🏒 NHL Debug: ${sportGames.length} games, first game:`, sportGames[0]?.home_team || 'none');
+          }
           allGames.push(...sportGames);
         } catch (sportErr) {
           console.error(`❌ Error fetching ${sport}:`, sportErr.message);
+          if (sport === 'icehockey_nhl') {
+            console.error(`🏒 NHL Error details:`, sportErr);
+          }
         }
       }
       
