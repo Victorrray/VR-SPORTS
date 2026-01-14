@@ -205,6 +205,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     let allGames = [];
     
     console.log(`🏟️ Odds API Request: sports=${sportsArray.length} sports: [${sportsArray.join(', ')}]`);
+    const hasNHL = sportsArray.includes('icehockey_nhl');
+    if (hasNHL) {
+      console.log(`🏒 NHL is in the request - will track processing`);
+    }
     
     // Define DFS apps list at top level for use throughout the function
     // Use correct API keys: betr_us_dfs (not betr), pick6 (not draftkings_pick6)
@@ -598,8 +602,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           console.log(`🏈 Sport ${sport}: ${sportGames.length} games fetched`);
           if (sport === 'icehockey_nhl') {
             console.log(`🏒 NHL Debug: ${sportGames.length} games, first game:`, sportGames[0]?.home_team || 'none');
+            console.log(`🏒 NHL allGames before push: ${allGames.length}`);
           }
           allGames.push(...sportGames);
+          if (sport === 'icehockey_nhl') {
+            console.log(`🏒 NHL allGames after push: ${allGames.length}`);
+          }
         } catch (sportErr) {
           console.error(`❌ Error fetching ${sport}:`, sportErr.message);
           if (sport === 'icehockey_nhl') {
