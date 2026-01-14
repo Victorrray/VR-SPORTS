@@ -522,7 +522,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             if (!cachedData && cachedAlternateData) {
               responseData = [...responseData, ...cachedAlternateData];
             }
-            console.log(`📦 Using in-memory cache for ${sport}: ${responseData.length} games`);
+            
+            // Filter out past games from cached data (cache may contain games that have since started)
+            const cacheNow = new Date();
+            const beforeCacheFilter = responseData.length;
+            responseData = responseData.filter(game => {
+              if (!game.commence_time) return false;
+              const gameTime = new Date(game.commence_time);
+              return gameTime > cacheNow;
+            });
+            console.log(`📦 Using in-memory cache for ${sport}: ${responseData.length} games (filtered ${beforeCacheFilter - responseData.length} past games)`);
           } else {
             // Check if there's already an in-flight request for this exact data
             const inFlightPromise = getOddsInFlight(cacheKey);
