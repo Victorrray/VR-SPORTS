@@ -2137,6 +2137,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       }
       if (limit) params.append('limit', limit.toString());
 
+      // Add cache-busting timestamp to force fresh data
+      params.append('_t', Date.now().toString());
+      
       const queryString = params.toString();
       const endpoint = `/api/odds${queryString ? `?${queryString}` : ''}`;
       const fetchTimestamp = new Date().toISOString();
