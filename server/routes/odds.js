@@ -636,6 +636,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           const sportGames = responseData || [];
           console.log(`🏈 Sport ${sport}: ${sportGames.length} games fetched`);
+          
+          // Log when any sport returns 0 games
+          if (sportGames.length === 0) {
+            console.log(`⚠️ ${sport}: No games returned - may be no games scheduled or all games started`);
+          }
+          
           if (sport === 'icehockey_nhl') {
             console.log(`🏒 NHL Debug: ${sportGames.length} games from API/cache`);
             if (sportGames.length > 0) {
