@@ -2792,12 +2792,23 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
 
       // Filter out stale/expired bets (those with game times in the past)
-      // TEMPORARILY DISABLED: Backend cache is returning stale data, will re-enable after backend fix
       const filterExpiredBets = (picks: OddsPick[]) => {
-        // TEMPORARY: Skip filtering until backend cache is fixed
-        // The backend should be filtering past games, not the client
-        console.log(`⏰ filterExpiredBets: SKIPPED (backend should handle this) - ${picks.length} picks`);
-        return picks;
+        const now = new Date();
+        const filtered = picks.filter(pick => {
+          // Skip filtering for player props - they don't have reliable game times
+          if (pick.isPlayerProp) return true;
+          
+          const gameTime = pick.commenceTime || pick.gameTime;
+          if (!gameTime) return true; // Keep picks without game time info
+          
+          const gameDate = new Date(gameTime);
+          return gameDate > now; // Keep only future games
+        });
+        
+        if (filtered.length < picks.length) {
+          console.log(`⏰ filterExpiredBets: Removed ${picks.length - filtered.length} expired picks, ${filtered.length} remaining`);
+        }
+        return filtered;
       };
       
       if (response.data && Array.isArray(response.data)) {
