@@ -654,11 +654,24 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // Filter out games that have already started (past games)
     const now = new Date();
     const beforeFilter = allGames.length;
+    
+    // Debug: Count NHL games before filter
+    const nhlGamesBefore = allGames.filter(g => g.sport_key === 'icehockey_nhl').length;
+    if (nhlGamesBefore > 0) {
+      console.log(`🏒 NHL games before past-game filter: ${nhlGamesBefore}`);
+    }
+    
     allGames = allGames.filter((game) => {
       if (!game.commence_time) return false;
       const gameTime = new Date(game.commence_time);
       return gameTime > now; // Only include future games
     });
+    
+    // Debug: Count NHL games after filter
+    const nhlGamesAfter = allGames.filter(g => g.sport_key === 'icehockey_nhl').length;
+    if (nhlGamesBefore > 0 || nhlGamesAfter > 0) {
+      console.log(`🏒 NHL games after past-game filter: ${nhlGamesAfter} (was ${nhlGamesBefore})`);
+    }
     
     // If a specific date is requested, filter to only games on that date
     // NOTE: We DON'T filter by date on the backend anymore - let the frontend handle it
