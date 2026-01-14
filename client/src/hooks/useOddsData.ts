@@ -2817,8 +2817,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         console.log(`🏟️ API Response: ${response.data.length} games, sports:`, Array.from(apiSports));
         
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
+        console.log(`🔄 After transform: ${transformedPicks.length} picks`);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
+        console.log(`🔄 After minDataPoints: ${transformedPicks.length} picks`);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
         transformedPicks = filterPlayerPropsForStraightBets(transformedPicks);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
@@ -2826,6 +2828,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForMiddles(transformedPicks);
         transformedPicks = filterForExchanges(transformedPicks);
         transformedPicks = filterExpiredBets(transformedPicks);
+        console.log(`🔄 After all filters: ${transformedPicks.length} picks`);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
