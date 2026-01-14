@@ -2,7 +2,7 @@ import { useState, useMemo, useRef } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
 import { useOddsData } from '../../hooks/useOddsData';
-import { ChevronDown, ChevronRight, ChevronLeft, Filter, RefreshCw, ArrowUp, ArrowDown, Check, Clock } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronLeft, Filter, RefreshCw, ArrowUp, ArrowDown, Check, Clock, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Types for discrepancy data
@@ -62,6 +62,35 @@ const SPORTS = [
   // MLB removed - not in season (add back around March/April)
 ];
 
+// Generate date options for the next 7 days
+function getDateOptions() {
+  const options = [{ id: 'all_upcoming', name: 'All Upcoming' }];
+  const today = new Date();
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    const dayName = dayNames[date.getDay()];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    if (i === 0) {
+      options.push({ id: dateStr, name: `Today (${dayName})` });
+    } else if (i === 1) {
+      options.push({ id: dateStr, name: `Tomorrow (${dayName})` });
+    } else {
+      options.push({ id: dateStr, name: dayName });
+    }
+  }
+  
+  return options;
+}
+
+const DATE_OPTIONS = getDateOptions();
+
 // Prop types
 const PROP_TYPES = [
   { id: 'all', name: 'All Props' },
@@ -90,6 +119,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const [selectedBook, setSelectedBook] = useState('prizepicks');
   const [selectedSport, setSelectedSport] = useState('basketball_nba');
   const [selectedPropType, setSelectedPropType] = useState('all');
+  const [selectedDate, setSelectedDate] = useState('all_upcoming');
   const [minDiscrepancy, setMinDiscrepancy] = useState(1);
   const [autoRefresh, setAutoRefresh] = useState(false);
   
@@ -102,6 +132,8 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const [sportClosing, setSportClosing] = useState(false);
   const [propTypeExpanded, setPropTypeExpanded] = useState(false);
   const [propTypeClosing, setPropTypeClosing] = useState(false);
+  const [dateExpanded, setDateExpanded] = useState(false);
+  const [dateClosing, setDateClosing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const itemsPerPage = 10;
@@ -128,6 +160,14 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
     setTimeout(() => {
       setPropTypeExpanded(false);
       setPropTypeClosing(false);
+    }, 300);
+  };
+
+  const closeDateDrawer = () => {
+    setDateClosing(true);
+    setTimeout(() => {
+      setDateExpanded(false);
+      setDateClosing(false);
     }, 300);
   };
 
@@ -171,7 +211,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
     marketType: selectedPropType === 'all' ? 'player_points' : selectedPropType,
     betType: 'props',
     sportsbooks: emptySportsbooks, // Get all sportsbooks - stable reference
-    date: 'all_upcoming',
+    date: selectedDate,
     minDataPoints: 1,
     enabled: true,
     autoRefresh: autoRefresh,
@@ -844,6 +884,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                     setSelectedBook('prizepicks');
                     setSelectedSport('all');
                     setSelectedPropType('all');
+                    setSelectedDate('all_upcoming');
                     setMinDiscrepancy(1);
                     toast.success('Filters reset', {
                       description: 'All filters have been cleared'
@@ -1188,6 +1229,102 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                         >
                           {prop.name}
                           {selectedPropType === prop.id && <Check className="w-4 h-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Date Filter */}
+              <div className="relative">
+                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                  Date
+                </label>
+                <button
+                  onClick={() => setDateExpanded(!dateExpanded)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${
+                    isLight ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{DATE_OPTIONS.find(d => d.id === selectedDate)?.name || 'All Upcoming'}</span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${dateExpanded ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {/* Desktop Inline Dropdown */}
+                {dateExpanded && (
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden max-h-64 overflow-y-auto scrollbar-hide`}>
+                    {DATE_OPTIONS.map((date) => (
+                      <button
+                        key={date.id}
+                        onClick={() => {
+                          setSelectedDate(date.id);
+                          setDateExpanded(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
+                          selectedDate === date.id
+                            ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                            : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                        }`}
+                      >
+                        {date.name}
+                        {selectedDate === date.id && <Check className="w-4 h-4" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Date Drawer - Mobile Only */}
+              {dateExpanded && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-40 transition-opacity duration-300 ${dateClosing ? 'opacity-0' : 'opacity-100'}`}
+                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    onClick={closeDateDrawer}
+                  />
+                  
+                  {/* Bottom Drawer */}
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-50 overflow-hidden ${dateClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                    {/* Drag Handle */}
+                    <div className="flex justify-center pt-3 pb-2">
+                      <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                    </div>
+                    
+                    {/* Header */}
+                    <div className={`px-6 py-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
+                      <div className="flex items-center justify-between">
+                        <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Select Date</h3>
+                        <button
+                          onClick={closeDateDrawer}
+                          className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                        >
+                          <span className="text-lg">✕</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Options */}
+                    <div className="overflow-y-auto max-h-[calc(70vh-80px)] scrollbar-hide">
+                      {DATE_OPTIONS.map((date) => (
+                        <button
+                          key={date.id}
+                          onClick={() => {
+                            setSelectedDate(date.id);
+                            closeDateDrawer();
+                          }}
+                          className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
+                            selectedDate === date.id
+                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                          }`}
+                        >
+                          {date.name}
+                          {selectedDate === date.id && <Check className="w-4 h-4" />}
                         </button>
                       ))}
                     </div>
