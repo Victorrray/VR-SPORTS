@@ -396,6 +396,9 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   // Use date-filtered picks
   const topPicks = dateFilteredPicks;
   const isLoading = apiLoading;
+  
+  // Debug: Log pick counts through the pipeline
+  console.log(`📊 OddsPage: apiPicks=${apiPicks.length}, dateFilteredPicks=${dateFilteredPicks.length}, topPicks=${topPicks.length}`);
 
   // Reset to page 1 when applied filters change
   useEffect(() => {
