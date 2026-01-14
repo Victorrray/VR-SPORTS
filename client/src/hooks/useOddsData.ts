@@ -1996,6 +1996,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         sportsList = 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
       }
       params.append('sports', sportsList);
+      console.log(`🏟️ useOddsData requesting: sport="${sport}", sportsList="${sportsList}"`);
       
       // Map market types to API format
       // For special markets (periods, alternates), request those specific markets from the API
@@ -2811,6 +2812,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
       
       if (response.data && Array.isArray(response.data)) {
+        // Debug: Log sports in API response
+        const apiSports = new Set(response.data.map((g: any) => g.sport_key));
+        console.log(`🏟️ API Response: ${response.data.length} games, sports:`, Array.from(apiSports));
+        
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
