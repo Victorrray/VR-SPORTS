@@ -512,7 +512,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           let responseData;
           
-          if (canUseAllCached) {
+          // Check for forceRefresh parameter to bypass cache
+          const forceRefresh = req.query.forceRefresh === 'true';
+          
+          if (canUseAllCached && !forceRefresh) {
             // Use cached data directly - the cache key already includes sport
             // so we don't need to filter by sport_key again
             responseData = cachedData || [];
