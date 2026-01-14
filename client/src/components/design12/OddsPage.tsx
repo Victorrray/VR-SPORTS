@@ -1597,13 +1597,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <>
                   {/* Backdrop */}
                   <div 
-                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-[100] transition-opacity duration-300 ${dateClosing ? 'opacity-0' : 'opacity-100'}`}
-                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    className={`lg:hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[10000] transition-opacity duration-300 ${dateClosing ? 'opacity-0' : 'opacity-100'}`}
                     onClick={closeDateDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[101] overflow-hidden ${dateClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[10001] overflow-hidden ${dateClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -1709,13 +1708,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <>
                   {/* Backdrop */}
                   <div 
-                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-[100] transition-opacity duration-300 ${sportsbooksClosing ? 'opacity-0' : 'opacity-100'}`}
-                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    className={`lg:hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[10000] transition-opacity duration-300 ${sportsbooksClosing ? 'opacity-0' : 'opacity-100'}`}
                     onClick={closeSportsbooksDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[101] overflow-hidden ${sportsbooksClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[70vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[10001] overflow-hidden ${sportsbooksClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -1814,13 +1812,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <>
                   {/* Backdrop */}
                   <div 
-                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-[100] transition-opacity duration-300 ${sportClosing ? 'opacity-0' : 'opacity-100'}`}
-                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    className={`lg:hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[10000] transition-opacity duration-300 ${sportClosing ? 'opacity-0' : 'opacity-100'}`}
                     onClick={closeSportDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[101] overflow-hidden ${sportClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[10001] overflow-hidden ${sportClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
@@ -1905,13 +1902,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <>
                   {/* Backdrop */}
                   <div 
-                    className={`lg:hidden fixed bg-black/50 backdrop-blur-md z-[100] transition-opacity duration-300 ${marketClosing ? 'opacity-0' : 'opacity-100'}`}
-                    style={{ top: '-50px', left: 0, right: 0, bottom: 0, height: 'calc(100vh + 50px)', width: '100vw' }}
+                    className={`lg:hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[10000] transition-opacity duration-300 ${marketClosing ? 'opacity-0' : 'opacity-100'}`}
                     onClick={closeMarketDrawer}
                   />
                   
                   {/* Bottom Drawer */}
-                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[101] overflow-hidden ${marketClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
+                  <div className={`lg:hidden fixed bottom-0 left-0 right-0 max-h-[60vh] ${isLight ? 'bg-white' : 'bg-slate-900'} rounded-t-3xl z-[10001] overflow-hidden ${marketClosing ? 'animate-out slide-out-to-bottom' : 'animate-in slide-in-from-bottom'} duration-300`}>
                     {/* Drag Handle */}
                     <div className="flex justify-center pt-3 pb-2">
                       <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
