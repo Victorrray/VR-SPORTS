@@ -2792,6 +2792,18 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const filterExpiredBets = (picks: OddsPick[]) => {
         const now = new Date();
         const beforeCount = picks.length;
+        
+        // Debug: Log first pick's game time
+        if (picks.length > 0) {
+          const firstPick = picks[0];
+          const gameTime = firstPick.commenceTime || firstPick.gameTime;
+          console.log(`⏰ filterExpiredBets debug: now=${now.toISOString()}, firstPick.commenceTime=${firstPick.commenceTime}, gameTime=${gameTime}`);
+          if (gameTime) {
+            const gameDate = new Date(gameTime);
+            console.log(`⏰ Parsed gameDate=${gameDate.toISOString()}, isFuture=${gameDate >= now}`);
+          }
+        }
+        
         const filtered = picks.filter(pick => {
           // Skip filtering for player props - they don't have reliable game times
           if (pick.isPlayerProp) {
@@ -2808,6 +2820,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           return gameDate >= now; // Keep only future games
         });
         
+        console.log(`⏰ filterExpiredBets: ${beforeCount} -> ${filtered.length} picks`);
         return filtered;
       };
       
