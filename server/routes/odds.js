@@ -511,14 +511,19 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           if (canUseAllCached) {
             responseData = [];
             if (cachedRegularData) {
-              responseData = [...responseData, ...cachedRegularData];
+              // Validate cached data has correct sport_key
+              const validRegular = cachedRegularData.filter(game => game.sport_key === sport);
+              responseData = [...responseData, ...validRegular];
             }
             if (cachedAlternateData) {
-              responseData = [...responseData, ...cachedAlternateData];
+              const validAlternate = cachedAlternateData.filter(game => game.sport_key === sport);
+              responseData = [...responseData, ...validAlternate];
             }
             if (cachedData) {
-              responseData = cachedData;
+              const validCached = cachedData.filter(game => game.sport_key === sport);
+              responseData = validCached;
             }
+            console.log(`📦 Using in-memory cache for ${sport}: ${responseData.length} games`);
           } else {
             // Check if there's already an in-flight request for this exact data
             const inFlightPromise = getOddsInFlight(cacheKey);
