@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { useAuth } from '../hooks/SimpleAuth';
 import { usePlan } from '../hooks/SimplePlan';
 import Pricing from '../components/billing/Pricing';
@@ -7,6 +8,7 @@ import { CreditCard, Calendar, CheckCircle, AlertCircle, ArrowLeft } from 'lucid
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../components/design12/ui/dialog';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup, SITE_CONFIG } from '../utils/seo';
 
 const Subscribe = () => {
   const navigate = useNavigate();
@@ -42,6 +44,17 @@ const Subscribe = () => {
 
     return (
       <div style={{ minHeight: '100vh', paddingBottom: '80px', background: 'var(--bg)' }}>
+        <Helmet>
+          <title>{PAGE_TITLES.pricing}</title>
+          <meta name="description" content={PAGE_DESCRIPTIONS.pricing} />
+          <meta name="robots" content="noindex, nofollow" />
+          <link rel="canonical" href={`${SITE_CONFIG.domain}/subscribe`} />
+          <meta property="og:title" content={PAGE_TITLES.pricing} />
+          <meta property="og:description" content={PAGE_DESCRIPTIONS.pricing} />
+          <script type="application/ld+json">
+            {JSON.stringify(generateSchemaMarkup('Product', { lowPrice: '0', highPrice: '99', offerCount: 2 }))}
+          </script>
+        </Helmet>
         <div style={{
           maxWidth: '800px',
           margin: '0 auto',

@@ -1,5 +1,6 @@
 // src/pages/DFSMarkets.jsx
 import React, { useEffect, useMemo, useState } from "react";
+import { Helmet } from '@dr.pogodin/react-helmet';
 import OddsTable from "../components/betting/OddsTable";
 import SportMultiSelect from "../components/betting/SportMultiSelect";
 import useDebounce from "../hooks/useDebounce";
@@ -7,6 +8,7 @@ import { withApiBase } from "../config/api";
 import { secureFetch } from "../utils/security";
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup, SITE_CONFIG } from '../utils/seo';
 
 // Only these 5 DFS apps
 const DFS_KEYS = ["prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr"];
@@ -309,6 +311,17 @@ export default function DFSMarkets() {
   // ---- UI ----
   return (
     <main className="page-wrap">
+      <Helmet>
+        <title>{PAGE_TITLES.dfs}</title>
+        <meta name="description" content={PAGE_DESCRIPTIONS.dfs} />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href={`${SITE_CONFIG.domain}/dfs`} />
+        <meta property="og:title" content={PAGE_TITLES.dfs} />
+        <meta property="og:description" content={PAGE_DESCRIPTIONS.dfs} />
+        <script type="application/ld+json">
+          {JSON.stringify(generateSchemaMarkup('WebApplication'))}
+        </script>
+      </Helmet>
       <div className="market-container">
         <div className="filters-mobile">
           <input

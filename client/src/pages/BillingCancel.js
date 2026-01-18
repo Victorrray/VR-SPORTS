@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { X, ArrowLeft, AlertTriangle, CheckCircle, Loader } from 'lucide-react';
 import { useAuth } from '../hooks/SimpleAuth';
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
+import { SITE_CONFIG } from '../utils/seo';
 import './BillingCancel.css';
 
 const BillingCancel = () => {
@@ -57,6 +59,11 @@ const BillingCancel = () => {
   if (isCheckoutAbandonment) {
     return (
       <div className="billing-cancel-page">
+        <Helmet>
+          <title>Checkout Cancelled — OddSightSeer</title>
+          <meta name="robots" content="noindex, nofollow" />
+          <link rel="canonical" href={`${SITE_CONFIG.domain}/billing/cancel`} />
+        </Helmet>
         <div className="cancel-container">
           <div className="icon-container">
             <AlertTriangle size={48} />

@@ -1,6 +1,8 @@
 import { Shield } from 'lucide-react';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { Header } from '../../components/landing/Header';
 import { Footer } from '../../components/landing/Footer';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, SITE_CONFIG } from '../../utils/seo';
 
 interface PrivacyProps {
   onBack: () => void;
@@ -16,6 +18,15 @@ interface PrivacyProps {
 export function Privacy({ onBack, onLoginClick, onDashboardClick, onSignUpClick, onRoadmapClick, onPrivacyClick, onTermsClick, onDisclaimerClick }: PrivacyProps) {
   return (
     <div className="relative">
+      <Helmet>
+        <title>{PAGE_TITLES.privacy}</title>
+        <meta name="description" content={PAGE_DESCRIPTIONS.privacy} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={`${SITE_CONFIG.domain}/privacy`} />
+        <meta property="og:title" content={PAGE_TITLES.privacy} />
+        <meta property="og:description" content={PAGE_DESCRIPTIONS.privacy} />
+        <meta property="og:url" content={`${SITE_CONFIG.domain}/privacy`} />
+      </Helmet>
       <Header 
         onLoginClick={onLoginClick}
         onDashboardClick={onDashboardClick}

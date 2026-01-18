@@ -1,6 +1,8 @@
 import { FileText } from 'lucide-react';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { Header } from '../../components/landing/Header';
 import { Footer } from '../../components/landing/Footer';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, SITE_CONFIG } from '../../utils/seo';
 
 interface TermsProps {
   onBack: () => void;
@@ -16,6 +18,15 @@ interface TermsProps {
 export function Terms({ onBack, onLoginClick, onDashboardClick, onSignUpClick, onRoadmapClick, onPrivacyClick, onTermsClick, onDisclaimerClick }: TermsProps) {
   return (
     <div className="relative">
+      <Helmet>
+        <title>{PAGE_TITLES.terms}</title>
+        <meta name="description" content={PAGE_DESCRIPTIONS.terms} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={`${SITE_CONFIG.domain}/terms`} />
+        <meta property="og:title" content={PAGE_TITLES.terms} />
+        <meta property="og:description" content={PAGE_DESCRIPTIONS.terms} />
+        <meta property="og:url" content={`${SITE_CONFIG.domain}/terms`} />
+      </Helmet>
       <Header 
         onLoginClick={onLoginClick}
         onDashboardClick={onDashboardClick}

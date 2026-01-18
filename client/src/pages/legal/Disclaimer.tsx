@@ -1,6 +1,8 @@
 import { AlertTriangle } from 'lucide-react';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { Header } from '../../components/landing/Header';
 import { Footer } from '../../components/landing/Footer';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, SITE_CONFIG } from '../../utils/seo';
 
 interface DisclaimerProps {
   onBack: () => void;
@@ -16,6 +18,15 @@ interface DisclaimerProps {
 export function Disclaimer({ onBack, onLoginClick, onDashboardClick, onSignUpClick, onRoadmapClick, onPrivacyClick, onTermsClick, onDisclaimerClick }: DisclaimerProps) {
   return (
     <div className="relative">
+      <Helmet>
+        <title>{PAGE_TITLES.disclaimer}</title>
+        <meta name="description" content={PAGE_DESCRIPTIONS.disclaimer} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={`${SITE_CONFIG.domain}/disclaimer`} />
+        <meta property="og:title" content={PAGE_TITLES.disclaimer} />
+        <meta property="og:description" content={PAGE_DESCRIPTIONS.disclaimer} />
+        <meta property="og:url" content={`${SITE_CONFIG.domain}/disclaimer`} />
+      </Helmet>
       <Header 
         onLoginClick={onLoginClick}
         onDashboardClick={onDashboardClick}

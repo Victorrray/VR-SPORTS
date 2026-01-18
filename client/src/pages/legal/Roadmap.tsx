@@ -1,4 +1,6 @@
 import { Check, Clock, Lightbulb, Rocket, Target, Zap } from 'lucide-react';
+import { Helmet } from '@dr.pogodin/react-helmet';
+import { PAGE_TITLES, PAGE_DESCRIPTIONS, SITE_CONFIG } from '../../utils/seo';
 
 interface RoadmapItem {
   title: string;
@@ -85,6 +87,15 @@ export function Roadmap() {
 
   return (
     <div className="min-h-screen bg-gray-900 py-16 md:py-24">
+      <Helmet>
+        <title>{PAGE_TITLES.roadmap}</title>
+        <meta name="description" content={PAGE_DESCRIPTIONS.roadmap} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={`${SITE_CONFIG.domain}/roadmap`} />
+        <meta property="og:title" content={PAGE_TITLES.roadmap} />
+        <meta property="og:description" content={PAGE_DESCRIPTIONS.roadmap} />
+        <meta property="og:url" content={`${SITE_CONFIG.domain}/roadmap`} />
+      </Helmet>
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">

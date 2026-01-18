@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { Helmet } from '@dr.pogodin/react-helmet';
 import { Check, ArrowRight, Crown, Sparkles } from 'lucide-react';
 import { useAuth } from '../hooks/SimpleAuth';
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
+import { SITE_CONFIG } from '../utils/seo';
 import './BillingSuccess.css';
 
 const BillingSuccess = () => {
@@ -69,6 +71,11 @@ const BillingSuccess = () => {
 
   return (
     <div className="billing-success-container billing-success-bg min-h-screen flex items-center justify-center p-4">
+      <Helmet>
+        <title>Payment Successful — OddSightSeer</title>
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href={`${SITE_CONFIG.domain}/billing/success`} />
+      </Helmet>
       <div className="billing-success-card max-w-lg w-full bg-white/5 backdrop-blur-xl rounded-3xl p-10 text-center border border-white/10 shadow-2xl">
         {/* Success Animation */}
         <div className="crown-container relative mb-8">
