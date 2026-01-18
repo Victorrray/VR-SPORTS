@@ -448,7 +448,8 @@ export const useRealtimeCachedFetch = (url, options = {}) => {
     backgroundRefresh: false // Disabled to reduce API calls
   });
 
-  // Handle visibility change
+  // Handle visibility change - pause polling when tab is hidden to save API costs
+  // NOTE: We intentionally do NOT refresh when tab becomes visible to avoid unnecessary API calls
   useEffect(() => {
     const handleVisibilityChange = () => {
       isHiddenRef.current = document.hidden;
@@ -458,15 +459,15 @@ export const useRealtimeCachedFetch = (url, options = {}) => {
           setIsPolling(false);
         } else {
           setIsPolling(enablePolling);
-          // Refresh immediately when page becomes visible
-          refresh();
+          // REMOVED: Auto-refresh on tab visibility to reduce API costs
+          // Users can manually refresh if they want fresh data
         }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [enablePolling, pauseOnHidden, refresh]);
+  }, [enablePolling, pauseOnHidden]);
 
   // Polling logic
   useEffect(() => {

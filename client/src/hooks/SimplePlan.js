@@ -109,22 +109,20 @@ export function usePlan() {
     fetchPlan();
   }, [user?.id, authLoading]);
 
-  // Refresh plan when page becomes visible (user returns to tab)
-  useEffect(() => {
-    if (!user) return;
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        if (DEBUG_PLAN) console.log('🔄 Page visible - refreshing plan');
-        fetchPlan();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [user?.id]);
+  // DISABLED: Refresh plan when page becomes visible (user returns to tab)
+  // This was causing unnecessary API calls and cascading re-renders when switching tabs
+  // Users can manually refresh if needed, or plan will refresh on next page navigation
+  // useEffect(() => {
+  //   if (!user) return;
+  //   const handleVisibilityChange = () => {
+  //     if (document.visibilityState === 'visible') {
+  //       if (DEBUG_PLAN) console.log('🔄 Page visible - refreshing plan');
+  //       fetchPlan();
+  //     }
+  //   };
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  // }, [user?.id]);
 
   const refreshPlan = async () => {
     if (!user) return null;
@@ -159,27 +157,26 @@ export function usePlan() {
     return () => window.removeEventListener('planUpdated', handlePlanUpdate);
   }, [user?.id]);
 
-  // Listen for visibility changes and clear cache when returning to tab
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        if (DEBUG_PLAN) console.log('👁️ Page became visible - clearing cache and refreshing plan');
-        // Clear plan cache
-        try {
-          localStorage.removeItem('userPlan');
-          localStorage.removeItem('me');
-          localStorage.removeItem('plan');
-        } catch (e) {
-          console.warn('⚠️ Could not clear cache:', e);
-        }
-        // Refresh plan data
-        fetchPlan();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [user?.id]);
+  // DISABLED: Listen for visibility changes and clear cache when returning to tab
+  // This was causing unnecessary API calls and cascading re-renders when switching tabs
+  // Plan data doesn't change frequently enough to justify refreshing on every tab switch
+  // useEffect(() => {
+  //   const handleVisibilityChange = () => {
+  //     if (document.visibilityState === 'visible') {
+  //       if (DEBUG_PLAN) console.log('👁️ Page became visible - clearing cache and refreshing plan');
+  //       try {
+  //         localStorage.removeItem('userPlan');
+  //         localStorage.removeItem('me');
+  //         localStorage.removeItem('plan');
+  //       } catch (e) {
+  //         console.warn('⚠️ Could not clear cache:', e);
+  //       }
+  //       fetchPlan();
+  //     }
+  //   };
+  //   document.addEventListener('visibilitychange', handleVisibilityChange);
+  //   return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  // }, [user?.id]);
 
   // Auto-clear plan cache on page load/mount (preserve user preferences)
   useEffect(() => {
