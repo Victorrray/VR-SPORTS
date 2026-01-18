@@ -12,7 +12,6 @@ import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import { ThemeProvider } from './contexts/ThemeContext';
 import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
-import { preventTabRefresh } from './utils/preventTabRefresh';
 import { initBrowserCompat } from './utils/browserCompat';
 import DebugPanel from './components/debug/DebugPanel';
 // import NavbarRevamped from './components/layout/NavbarRevamped'; // OLD - Using new Header from landing page
@@ -196,9 +195,6 @@ function App() {
       
       // Initialize browser compatibility fixes
       initBrowserCompat();
-      
-      // Prevent forced page refresh when switching tabs
-      preventTabRefresh();
       
       // Unregister any existing service workers to prevent forced refresh on tab switch
       if ('serviceWorker' in navigator) {
