@@ -1,19 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-
-// CRITICAL: Prevent tab refresh BEFORE anything else loads
 import { preventTabRefresh } from "./utils/preventTabRefresh";
 import { initReloadDiagnostics } from "./utils/reloadDiagnostics";
-
-preventTabRefresh();
-initReloadDiagnostics();
-
-// Initialize storage before app renders
 import "./utils/storageInit";
-
 import App from "./App";
 import "./index.css";
+
+// CRITICAL: Prevent tab refresh BEFORE anything else loads
+preventTabRefresh();
+initReloadDiagnostics();
 
 // Unregister service workers to simplify caching
 if ('serviceWorker' in navigator) {
