@@ -47,19 +47,20 @@ export const generateSchemaMarkup = (type, data = {}) => {
         ...baseSchema,
         '@type': 'WebApplication',
         applicationCategory: 'FinanceApplication',
+        operatingSystem: 'Web Browser',
         offers: {
           '@type': 'Offer',
           price: '0',
           priceCurrency: 'USD',
-          description: 'Free tier available'
+          description: 'Free tier available with premium options'
         },
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.9',
-          ratingCount: '2000',
-          bestRating: '5',
-          worstRating: '1'
-        }
+        featureList: [
+          'Real-time odds comparison',
+          '15+ sportsbooks',
+          'Arbitrage detection',
+          'Player props analysis',
+          'Line movement tracking'
+        ]
       };
 
     case 'BreadcrumbList':

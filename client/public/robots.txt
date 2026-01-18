@@ -1,3 +1,19 @@
 # https://www.robotstxt.org/robotstxt.html
+# OddSightSeer - Sports Betting Odds Comparison Platform
+
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow private/auth pages
+Disallow: /auth/
+Disallow: /billing/success
+Disallow: /billing/cancel
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /static/
+
+# Crawl delay to be respectful
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://oddsightseer.com/sitemap.xml
