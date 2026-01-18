@@ -84,7 +84,9 @@ export const analyzeBundleSize = () => {
 
 // Service worker registration for caching
 export const registerServiceWorker = async () => {
-  if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  // Disabled service worker to prevent forced refresh on tab switch
+  // The SW was causing page reloads when switching between tabs
+  if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production' && false) {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
       console.log('Service Worker registered:', registration);

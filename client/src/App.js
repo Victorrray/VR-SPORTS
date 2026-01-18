@@ -196,6 +196,17 @@ function App() {
       // Initialize browser compatibility fixes
       initBrowserCompat();
       
+      // Unregister any existing service workers to prevent forced refresh on tab switch
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => {
+            registration.unregister().then(() => {
+              console.log('Service Worker unregistered');
+            });
+          });
+        });
+      }
+      
       // Register service worker for caching
       registerServiceWorker();
     } catch {}
