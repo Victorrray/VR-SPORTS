@@ -4,7 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 
 // CRITICAL: Prevent tab refresh BEFORE anything else loads
 import { preventTabRefresh } from "./utils/preventTabRefresh";
+import { initReloadDiagnostics } from "./utils/reloadDiagnostics";
+
 preventTabRefresh();
+initReloadDiagnostics();
 
 // Initialize storage before app renders
 import "./utils/storageInit";
