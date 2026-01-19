@@ -599,19 +599,43 @@ useEffect(() => {
   // Set up refresh interval only if autoRefresh is enabled
   let refreshInterval;
   if (autoRefresh) {
+    // Handle visibility changes to pause/resume refresh
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('📱 Tab hidden - pausing auto-refresh');
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+          refreshInterval = null;
+        }
+      } else {
+        console.log('📱 Tab visible - resuming auto-refresh (but NOT refreshing immediately)');
+        // Resume the interval but don't refresh immediately
+        if (!refreshInterval) {
+          refreshInterval = setInterval(refreshMarkets, 30000);
+        }
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Start the refresh interval
     refreshInterval = setInterval(refreshMarkets, 30000); // Refresh every 30 seconds
     console.log('🔄 Auto-refresh enabled (30s interval)');
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+      activeRequest.current = null;
+    };
   } else {
     console.log('⏸️ Auto-refresh disabled');
+    return () => {
+      activeRequest.current = null;
+    };
   }
-  
-  // Clean up
-  return () => {
-    if (refreshInterval) {
-      clearInterval(refreshInterval);
-    }
-    activeRequest.current = null;
-  };
 }, [enabled, autoRefresh, fetchMarkets, refreshMarkets, paramsKey]);
 
 useEffect(() => {
