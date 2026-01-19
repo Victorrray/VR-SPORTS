@@ -3,6 +3,7 @@
  * This disables any automatic reload detection or service worker update checks
  */
 
+let isTabHidden = false;
 let tabHiddenTime = null;
 
 export function preventTabRefresh() {
@@ -31,40 +32,21 @@ export function preventTabRefresh() {
 
   observer.observe(document.head, { childList: true });
 
-  // Track tab visibility changes to prevent refresh on tab switch
+  // Track tab visibility to prevent auto-refresh on tab switch
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+      isTabHidden = true;
       tabHiddenTime = Date.now();
-      console.log('📱 Tab hidden - recording timestamp');
+      console.log('📱 Tab hidden');
     } else {
       const hiddenDuration = tabHiddenTime ? Date.now() - tabHiddenTime : 0;
-      console.log(`📱 Tab visible again after ${hiddenDuration}ms - preventing any refresh`);
+      console.log(`📱 Tab visible again after ${hiddenDuration}ms`);
+      isTabHidden = false;
       
-      // Block any reload attempts that happen right after tab becomes visible
-      const blockReloadUntil = Date.now() + 2000; // Block for 2 seconds after becoming visible
-      
-      // Intercept common refresh patterns
-      const originalFetch = window.fetch;
-      window.fetch = function(...args) {
-        const url = String(args[0]);
-        const now = Date.now();
-        
-        // Block manifest/version checks that might trigger reloads
-        if (now < blockReloadUntil && (url.includes('manifest') || url.includes('version') || url.includes('__version'))) {
-          console.warn(`⚠️ BLOCKED: Fetch to ${url} blocked after tab became visible`);
-          return Promise.reject(new Error('Blocked refresh attempt after tab switch'));
-        }
-        
-        return originalFetch.apply(this, args);
-      };
-      
-      // Re-enable fetch after block period
-      setTimeout(() => {
-        window.fetch = originalFetch;
-        console.log('✅ Fetch blocking disabled after 2 second grace period');
-      }, 2000);
+      // Don't trigger any refreshes when tab becomes visible
+      // Let the normal polling/data fetching handle updates
     }
-  });
+  }, true);
 
   // Prevent any service worker update notifications from triggering reloads
   if ('serviceWorker' in navigator) {
@@ -84,4 +66,9 @@ export function preventTabRefresh() {
   }
 
   console.log('✅ Tab refresh prevention fully enabled');
+}
+
+// Export helper to check if tab is hidden
+export function isTabCurrentlyHidden() {
+  return isTabHidden;
 }
