@@ -196,8 +196,8 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       APICache.delete(cacheKey);
     }
     
-    // Only show loading if we don't have cached data
-    if (!cachedData) {
+    // Only show loading if we don't have cached data AND we're not within cooldown
+    if (!cachedData && !withinCooldown) {
       console.log('🔍 useMarkets: Setting loading to true');
       setIsLoading(true);
     }
