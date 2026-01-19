@@ -649,6 +649,7 @@ useEffect(() => {
   const paramsKey = `${sports.join(',')}-${regions.join(',')}-${markets.join(',')}`;
   
   if (!stableFetch.current || stableFetch.current.paramsKey !== paramsKey) {
+    console.log('🔍 useMarkets: Params changed, creating new debounced fetch:', paramsKey);
     if (stableFetch.current?.cancel) {
       stableFetch.current.cancel();
     }
@@ -656,10 +657,17 @@ useEffect(() => {
     const debouncedFn = debounce(fetchMarkets, 150); // Reduced from 500ms to 150ms for faster sports switching
     debouncedFn.paramsKey = paramsKey;
     stableFetch.current = debouncedFn;
+  } else {
+    console.log('🔍 useMarkets: Params unchanged, skipping new fetch');
   }
   
   stableFetch.current();
 }, [sports, regions, markets, enabled]);
+
+  // Log when games change to debug tab refresh issue
+  useEffect(() => {
+    console.log('🔍 useMarkets: games updated, length:', games.length);
+  }, [games]);
 
   // Memoize the return value to prevent unnecessary re-renders
   return useMemo(() => ({
@@ -673,6 +681,7 @@ useEffect(() => {
     quotaExceeded,
     quotaError,
     refresh: refreshMarkets,
+    quotaExceeded: ts
   }), [
     games, 
     books, 
