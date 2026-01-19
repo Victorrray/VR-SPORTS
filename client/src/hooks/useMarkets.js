@@ -662,7 +662,6 @@ useEffect(() => {
   if (!stableFetch.current || stableFetch.current.paramsKey !== paramsKey) {
     console.log('🔍 useMarkets: Params changed, creating new debounced fetch:', paramsKey);
     console.log('🔍 useMarkets: Old paramsKey:', stableFetch.current?.paramsKey);
-    console.trace('🔍 useMarkets: Params change stack trace');
     if (stableFetch.current?.cancel) {
       stableFetch.current.cancel();
     }
@@ -674,7 +673,14 @@ useEffect(() => {
     console.log('🔍 useMarkets: Params unchanged, skipping new fetch');
   }
   
-  stableFetch.current();
+  // Only call fetch if we're not within cooldown
+  const now = Date.now();
+  const withinCooldown = now - lastFetchTime.current < COOLDOWN_MS;
+  if (!withinCooldown) {
+    stableFetch.current();
+  } else {
+    console.log('🔍 useMarkets: Within cooldown, skipping fetch call');
+  }
 }, [sports, regions, markets, enabled]);
 
   // Log when games change to debug tab refresh issue
