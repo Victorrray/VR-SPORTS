@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [lastSessionId, setLastSessionId] = useState(null);
 
   // Fetch user profile from profiles table
   const fetchProfile = async (userId) => {
@@ -86,6 +87,13 @@ export function AuthProvider({ children }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Skip if session ID hasn't changed (prevents refresh on tab switch)
+      const currentSessionId = session?.user?.id;
+      if (currentSessionId === lastSessionId && _event === 'SIGNED_IN') {
+        console.log('🔐 Auth state SKIPPED (same session on tab switch):', _event);
+        return;
+      }
+      
       console.log('🔐 Auth state changed:', _event, {
         hasSession: !!session,
         hasToken: !!session?.access_token,
@@ -112,6 +120,7 @@ export function AuthProvider({ children }) {
         console.warn('⚠️ Session has NO access token');
       }
       
+      setLastSessionId(currentSessionId);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
