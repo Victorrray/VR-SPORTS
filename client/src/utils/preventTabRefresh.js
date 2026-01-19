@@ -49,28 +49,19 @@ export function preventTabRefresh() {
     }
   }, true);
 
-  // Intercept navigation attempts that would cause a refresh
-  const originalAssign = window.location.assign;
-  const originalReplace = window.location.replace;
-  
-  // Create wrapper functions that check if we should block
-  const checkAndNavigate = (method, url) => {
+  // Intercept fetch calls to detect and block refresh attempts
+  const originalFetch = window.fetch;
+  window.fetch = function(...args) {
+    const url = String(args[0]);
     const now = Date.now();
-    if (now < blockRefreshUntil) {
-      console.warn(`⚠️ BLOCKED: Navigation to ${url} blocked after tab became visible`);
-      return;
+    
+    // Block manifest/version checks that might trigger reloads
+    if (now < blockRefreshUntil && (url.includes('manifest') || url.includes('version') || url.includes('__version'))) {
+      console.warn(`⚠️ BLOCKED: Fetch to ${url} blocked after tab became visible`);
+      return Promise.reject(new Error('Blocked refresh attempt after tab switch'));
     }
-    // Allow the navigation
-    method.call(window.location, url);
-  };
-
-  // Override assign and replace without using Object.defineProperty
-  window.location.assign = function(url) {
-    checkAndNavigate(originalAssign, url);
-  };
-  
-  window.location.replace = function(url) {
-    checkAndNavigate(originalReplace, url);
+    
+    return originalFetch.apply(this, args);
   };
 
   // Prevent any service worker update notifications from triggering reloads
