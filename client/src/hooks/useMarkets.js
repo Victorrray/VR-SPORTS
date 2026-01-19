@@ -660,6 +660,8 @@ useEffect(() => {
   
   if (!stableFetch.current || stableFetch.current.paramsKey !== paramsKey) {
     console.log('🔍 useMarkets: Params changed, creating new debounced fetch:', paramsKey);
+    console.log('🔍 useMarkets: Old paramsKey:', stableFetch.current?.paramsKey);
+    console.trace('🔍 useMarkets: Params change stack trace');
     if (stableFetch.current?.cancel) {
       stableFetch.current.cancel();
     }
