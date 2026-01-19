@@ -293,10 +293,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const isMiddlesMode = showMiddles;
   // TEMPORARY CHANGE: For regular odds mode, include ALL markets
   // For player props mode, use all available player prop markets
-  const marketsForMode = isPlayerPropsMode 
+  const marketsForMode = useMemo(() => isPlayerPropsMode 
     ? PLAYER_PROP_MARKET_KEYS // Use all available player prop markets
-    : ["h2h", "spreads", "totals", "team_totals", "alternate_spreads", "alternate_totals", "alternate_team_totals"]; // Include all regular markets
-  const regionsForMode = isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"];
+    : ["h2h", "spreads", "totals", "team_totals", "alternate_spreads", "alternate_totals", "alternate_team_totals"], // Include all regular markets
+    [isPlayerPropsMode]
+  );
+  const regionsForMode = useMemo(() => isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"], [isPlayerPropsMode]);
   
   // Helper function to expand 'all' to actual sports list
   const expandSports = (sports) => {
@@ -538,7 +540,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   } = useMarketsWithCache(
     sportsForMode,
     regionsForMode,
-    getAllCompatibleMarkets(sportsForMode),
+    marketsForMode,
     { date: filters.date, autoRefresh: autoRefreshEnabled }
   );
 
