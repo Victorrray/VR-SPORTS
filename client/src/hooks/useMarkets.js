@@ -479,8 +479,18 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         console.warn('useMarkets: Failed to enrich games with logos', logoErr);
       }
       
-      // Update state with normalized data
-      setGames(preparedData);
+      // Update state with normalized data - only if data actually changed
+      setGames(prevGames => {
+        // If we have the same number of games and same first game ID, skip update
+        if (prevGames.length === preparedData.length && prevGames.length > 0 && preparedData.length > 0) {
+          if (prevGames[0].id === preparedData[0].id) {
+            console.log('🔍 useMarkets: Games data unchanged, skipping state update');
+            return prevGames;
+          }
+        }
+        console.log('🔍 useMarkets: Games data changed, updating state');
+        return preparedData;
+      });
       
       // Update cache
       APICache.set(cacheKey, preparedData, 2 * 60 * 1000); // 2 minutes cache for odds data
