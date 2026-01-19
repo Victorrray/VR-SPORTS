@@ -165,6 +165,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         return activeRequest.current;
       }
       console.log('🔍 useMarkets: Skipping fetch - within cooldown window');
+      setIsLoading(false);
       return;
     }
     
