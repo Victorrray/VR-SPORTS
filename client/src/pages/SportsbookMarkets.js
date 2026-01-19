@@ -544,6 +544,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     { date: filters.date, autoRefresh: autoRefreshEnabled }
   );
 
+  // Log when marketsLoading changes to debug tab refresh
+  useEffect(() => {
+    console.log('🔍 SportsbookMarkets: marketsLoading changed to:', marketsLoading);
+    console.trace('🔍 SportsbookMarkets: marketsLoading change stack trace');
+  }, [marketsLoading]);
+
   // Cooldown timer effect
   useEffect(() => {
     if (refreshCooldown > 0) {
