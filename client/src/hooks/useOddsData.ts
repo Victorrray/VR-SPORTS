@@ -1949,9 +1949,20 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
   const [isRefreshing, setIsRefreshing] = useState(false);
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoadRef = useRef(true);
+  const lastFetchTimeRef = useRef<number>(0);
+  const COOLDOWN_MS = 10000; // 10 second cooldown to prevent tab switch refreshes
 
   const fetchOddsData = useCallback(async (isAutoRefresh = false) => {
     if (!enabled || !user || authLoading) {
+      setLoading(false);
+      return;
+    }
+
+    // Prevent fetches within cooldown window (prevents tab switch refreshes)
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastFetchTimeRef.current;
+    if (timeSinceLastFetch < COOLDOWN_MS && lastFetchTimeRef.current > 0) {
+      console.log(`🔍 useOddsData: Skipping fetch - within ${COOLDOWN_MS/1000}s cooldown (${timeSinceLastFetch}ms since last fetch)`);
       setLoading(false);
       return;
     }
@@ -1964,6 +1975,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         setLoading(true);
       }
       setError(null);
+      lastFetchTimeRef.current = now;
 
       // Build query parameters - match backend API expectations
       const params = new URLSearchParams();
