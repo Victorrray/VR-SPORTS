@@ -4137,18 +4137,28 @@ export default function OddsTable({
 
                             const combinedBooksUnfiltered = [...sortedPrioritized, ...sortedFallback].slice(0, maxMiniBooks);
                             
-                            // For spreads market, STRICTLY filter to only show books with the EXACT same spread line
+                            // For spreads AND totals markets, STRICTLY filter to only show books with the EXACT same line
                             const mobileIsSpreadMarket = row.mkt?.key?.includes('spread');
+                            const mobileIsTotalsMarket = row.mkt?.key?.includes('total');
                             const mobileMainPoint = row.out?.point;
-                            const mobileStrictTolerance = 0.01; // Very strict - only allow tiny floating point differences
+                            const mobileMainOutcomeName = row.out?.name; // e.g., "Winnipeg Jets", "Over", "Under"
+                            const mobileStrictTolerance = 0.001; // Very strict - only allow tiny floating point differences
                             
-                            const combinedBooks = mobileIsSpreadMarket && mobileMainPoint !== undefined
+                            const combinedBooks = (mobileIsSpreadMarket || mobileIsTotalsMarket) && mobileMainPoint !== undefined
                               ? combinedBooksUnfiltered.filter(book => {
                                   // Check both 'point' and 'line' properties (data comes from different sources)
                                   const bookPoint = book.point ?? book.line;
+                                  const bookOutcomeName = book.name; // e.g., "Winnipeg Jets", "Over", "Under"
                                   
-                                  // Exclude books without point data for spreads
+                                  // Exclude books without point data for spreads/totals
                                   if (bookPoint === undefined || bookPoint === null) return false;
+                                  
+                                  // CRITICAL: For spreads, must match BOTH the outcome name AND the point
+                                  // +1.5 Winnipeg is different from -1.5 Calgary
+                                  if (mobileIsSpreadMarket && bookOutcomeName !== mobileMainOutcomeName) {
+                                    return false;
+                                  }
+                                  
                                   return Math.abs(Number(mobileMainPoint) - Number(bookPoint)) < mobileStrictTolerance;
                                 })
                               : combinedBooksUnfiltered;
