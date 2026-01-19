@@ -113,7 +113,11 @@ export const useMarketsWithCache = (sports = [], regions = [], markets = [], opt
       console.log('🔄 Using direct API data for:', sports.join(', '));
       setGames(apiGames);
       setBooks(apiBooks);
-      setIsLoading(apiLoading);
+      // Only update loading state if we actually have new data or an error
+      // This prevents loading spinner from appearing during cooldown
+      if (apiGames.length > 0 || apiError) {
+        setIsLoading(apiLoading);
+      }
       setError(apiError);
       setLastUpdate(apiLastUpdate);
     }
