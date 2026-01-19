@@ -1951,9 +1951,16 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
   const isInitialLoadRef = useRef(true);
   const lastFetchTimeRef = useRef<number>(0);
   const COOLDOWN_MS = 10000; // 10 second cooldown to prevent tab switch refreshes
+  
+  // Use refs to track auth state without causing re-renders
+  const userRef = useRef(user);
+  const authLoadingRef = useRef(authLoading);
+  userRef.current = user;
+  authLoadingRef.current = authLoading;
 
   const fetchOddsData = useCallback(async (isAutoRefresh = false) => {
-    if (!enabled || !user || authLoading) {
+    // Use refs to check auth state without depending on them
+    if (!enabled || !userRef.current || authLoadingRef.current) {
       setLoading(false);
       return;
     }
@@ -2890,7 +2897,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       setIsRefreshing(false);
       isInitialLoadRef.current = false;
     }
-  }, [enabled, user, authLoading, sport, date, marketType, betType, sportsbooks, limit, minDataPoints]);
+  }, [enabled, sport, date, marketType, betType, sportsbooks, limit, minDataPoints]);
 
   // Initial fetch and when dependencies change
   useEffect(() => {
@@ -2906,8 +2913,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       refreshTimerRef.current = null;
     }
 
-    // Set up auto-refresh if enabled
-    if (autoRefresh && enabled && user && !authLoading) {
+    // Set up auto-refresh if enabled (use refs for auth state to prevent re-triggering)
+    if (autoRefresh && enabled && userRef.current && !authLoadingRef.current) {
       if (DEBUG_LOGGING) console.log(`🔄 Auto-refresh enabled: refreshing every ${refreshInterval / 1000}s`);
       refreshTimerRef.current = setInterval(() => {
         fetchOddsData(true);
@@ -2921,7 +2928,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         refreshTimerRef.current = null;
       }
     };
-  }, [autoRefresh, refreshInterval, enabled, user, authLoading, fetchOddsData]);
+  }, [autoRefresh, refreshInterval, enabled, fetchOddsData]);
 
   return {
     picks,
