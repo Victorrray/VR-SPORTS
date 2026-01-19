@@ -4050,12 +4050,26 @@ export default function OddsTable({
 
                             // Mini-table should ALWAYS show all books for line shopping and comparison
                             // Even if main row is filtered, users need to see all available odds
+                            // BUT: Only show books with the SAME point value (for totals/spreads)
                             let booksToProcess = row.allBooks || [];
+                            
+                            // Get the main row's point value for filtering
+                            const mainRowPoint = row.out?.point ?? row.point ?? row.line;
+                            
+                            // Filter books to only those with matching point values (for totals/spreads)
+                            if ((isTotals || isSpreads) && mainRowPoint !== undefined && mainRowPoint !== null) {
+                              booksToProcess = booksToProcess.filter(book => {
+                                const bookPoint = book.point ?? book.line;
+                                // Only include books with the exact same point value
+                                return bookPoint === mainRowPoint || Math.abs(Number(bookPoint) - Number(mainRowPoint)) < 0.001;
+                              });
+                              console.log(`🎯 MINI TABLE POINT FILTER: Filtered from ${row.allBooks.length} to ${booksToProcess.length} books with point ${mainRowPoint}`);
+                            }
                             
                             const dedupedBooks = (() => {
                               const seenKeys = new Set();
                               
-                              console.log(`🚨 Mini table DEBUG: row.allBooks has ${booksToProcess.length} books`);
+                              console.log(`🚨 Mini table DEBUG: row.allBooks has ${booksToProcess.length} books after point filtering`);
                               console.log(`🚨 Mini table DEBUG: Books are:`, booksToProcess.map(b => b?.bookmaker?.key || b?.book || 'unknown'));
                               
                               // For combined props, collect all unique bookmakers from allBooks (which contains ALL books, not filtered)
@@ -4064,7 +4078,7 @@ export default function OddsTable({
                                 
                                 // Use row.allBooks which contains ALL unfiltered books for both Over and Under
                                 // This ensures the mini-table shows all available odds regardless of main filter
-                                (row.allBooks || []).forEach(book => {
+                                (booksToProcess || []).forEach(book => {
                                   const key = normalizeBookKey(book.bookmaker?.key);
                                   if (key && !allBookmakers.has(key)) {
                                     allBookmakers.set(key, {
