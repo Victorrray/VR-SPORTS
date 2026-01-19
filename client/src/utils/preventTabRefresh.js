@@ -5,7 +5,6 @@
 
 let isTabHidden = false;
 let tabHiddenTime = null;
-let blockRefreshUntil = 0;
 
 export function preventTabRefresh() {
   console.log('🛡️ Starting tab refresh prevention...');
@@ -33,7 +32,7 @@ export function preventTabRefresh() {
 
   observer.observe(document.head, { childList: true });
 
-  // Track tab visibility to prevent auto-refresh on tab switch
+  // Track tab visibility
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       isTabHidden = true;
@@ -41,28 +40,10 @@ export function preventTabRefresh() {
       console.log('📱 Tab hidden');
     } else {
       const hiddenDuration = tabHiddenTime ? Date.now() - tabHiddenTime : 0;
-      console.log(`📱 Tab visible again after ${hiddenDuration}ms - blocking refreshes for 3 seconds`);
+      console.log(`📱 Tab visible again after ${hiddenDuration}ms`);
       isTabHidden = false;
-      
-      // Block any refreshes for 3 seconds after tab becomes visible
-      blockRefreshUntil = Date.now() + 3000;
     }
   }, true);
-
-  // Intercept fetch calls to detect and block refresh attempts
-  const originalFetch = window.fetch;
-  window.fetch = function(...args) {
-    const url = String(args[0]);
-    const now = Date.now();
-    
-    // Block manifest/version checks that might trigger reloads
-    if (now < blockRefreshUntil && (url.includes('manifest') || url.includes('version') || url.includes('__version'))) {
-      console.warn(`⚠️ BLOCKED: Fetch to ${url} blocked after tab became visible`);
-      return Promise.reject(new Error('Blocked refresh attempt after tab switch'));
-    }
-    
-    return originalFetch.apply(this, args);
-  };
 
   // Prevent any service worker update notifications from triggering reloads
   if ('serviceWorker' in navigator) {

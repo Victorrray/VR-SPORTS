@@ -667,6 +667,7 @@ useEffect(() => {
   // Log when games change to debug tab refresh issue
   useEffect(() => {
     console.log('🔍 useMarkets: games updated, length:', games.length);
+    console.trace('🔍 useMarkets: games change stack trace');
   }, [games]);
 
   // Memoize the return value to prevent unnecessary re-renders
