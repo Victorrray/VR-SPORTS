@@ -701,7 +701,6 @@ useEffect(() => {
     quotaExceeded,
     quotaError,
     refresh: refreshMarkets,
-    quotaExceeded: ts
   }), [
     games, 
     books, 
