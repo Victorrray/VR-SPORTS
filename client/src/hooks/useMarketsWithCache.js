@@ -111,7 +111,16 @@ export const useMarketsWithCache = (sports = [], regions = [], markets = [], opt
   useEffect(() => {
     if (!shouldUseCache) {
       console.log('🔄 Using direct API data for:', sports.join(', '));
-      setGames(apiGames);
+      // Only update games if data actually changed
+      setGames(prevGames => {
+        if (prevGames.length === apiGames.length && prevGames.length > 0 && apiGames.length > 0) {
+          if (prevGames[0].id === apiGames[0].id) {
+            console.log('🔍 useMarketsWithCache: API games unchanged, skipping update');
+            return prevGames;
+          }
+        }
+        return apiGames;
+      });
       setBooks(apiBooks);
       // Only update loading state if we actually have new data or an error
       // This prevents loading spinner from appearing during cooldown
