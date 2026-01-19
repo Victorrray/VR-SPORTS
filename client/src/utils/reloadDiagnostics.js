@@ -10,23 +10,20 @@ export function initReloadDiagnostics() {
   window.addEventListener('beforeunload', (e) => {
     console.warn('⚠️ BEFOREUNLOAD event fired', {
       timestamp: new Date().toISOString(),
-      returnValue: e.returnValue,
-      stack: new Error().stack
+      returnValue: e.returnValue
     });
   });
 
   window.addEventListener('unload', (e) => {
     console.warn('⚠️ UNLOAD event fired', {
-      timestamp: new Date().toISOString(),
-      stack: new Error().stack
+      timestamp: new Date().toISOString()
     });
   });
 
   window.addEventListener('pagehide', (e) => {
     console.warn('⚠️ PAGEHIDE event fired', {
       timestamp: new Date().toISOString(),
-      persisted: e.persisted,
-      stack: new Error().stack
+      persisted: e.persisted
     });
   });
 
@@ -37,36 +34,6 @@ export function initReloadDiagnostics() {
       visibilityState: document.visibilityState,
       timestamp: new Date().toISOString()
     });
-  });
-
-  // Track all location changes
-  const originalReplace = window.location.replace;
-  const originalAssign = window.location.assign;
-  const originalHref = Object.getOwnPropertyDescriptor(window.location, 'href');
-
-  window.location.replace = function(url) {
-    console.warn('⚠️ location.replace() called', {
-      url,
-      stack: new Error().stack
-    });
-  };
-
-  window.location.assign = function(url) {
-    console.warn('⚠️ location.assign() called', {
-      url,
-      stack: new Error().stack
-    });
-  };
-
-  Object.defineProperty(window.location, 'href', {
-    get: originalHref.get,
-    set: function(url) {
-      console.warn('⚠️ location.href assignment attempted', {
-        url,
-        stack: new Error().stack
-      });
-    },
-    configurable: true
   });
 
   // Track hash changes
@@ -137,24 +104,6 @@ export function initReloadDiagnostics() {
       timestamp: new Date().toISOString()
     });
   });
-
-  // Track all fetch requests that might be triggering reloads
-  const originalFetch = window.fetch;
-  window.fetch = function(...args) {
-    const url = args[0];
-    const options = args[1] || {};
-    
-    // Log suspicious fetch patterns
-    if (url.includes('manifest') || url.includes('version') || url.includes('build')) {
-      console.log('🔄 Fetch request (potential reload trigger)', {
-        url,
-        method: options.method || 'GET',
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    return originalFetch.apply(this, args);
-  };
 
   console.log('✅ Reload diagnostics initialized - check console for reload triggers');
 }
