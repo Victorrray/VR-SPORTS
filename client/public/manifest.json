@@ -1,12 +1,8 @@
 {
   "short_name": "OddSightSeer",
-  "name": "OddSightSeer - Sports Betting Odds Comparison",
+  "name": "OddSightSeer - Sports Betting Odds Comparison & +EV Finder",
+  "description": "Find +EV bets with real-time odds comparison across 15+ major sportsbooks. Spot arbitrage opportunities and maximize your betting edge.",
   "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
     {
       "src": "favicon.png",
       "type": "image/png",
@@ -15,23 +11,23 @@
     {
       "src": "apple-touch-icon.png",
       "type": "image/png",
-      "sizes": "180x180"
+      "sizes": "180x180",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo192.png",
+      "src": "og-image.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "1200x630"
     }
   ],
-  "start_url": ".",
-  "display": "browser",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#8b5cf6",
   "background_color": "#0a0612",
   "scope": "/",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "categories": ["sports", "finance", "utilities"],
+  "lang": "en-US",
+  "dir": "ltr"
 }

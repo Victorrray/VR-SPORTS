@@ -87,8 +87,8 @@ const SEOHelmet = ({
       <meta name="copyright" content={`© ${new Date().getFullYear()} ${SITE_CONFIG.name}`} />
 
       {/* Preconnect to API */}
-      <link rel="preconnect" href="https://api.oddsightseer.com" />
-      <link rel="dns-prefetch" href="https://api.oddsightseer.com" />
+      <link rel="preconnect" href="https://odds-backend-4e9q.onrender.com" />
+      <link rel="dns-prefetch" href="https://odds-backend-4e9q.onrender.com" />
 
       {/* Favicon */}
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

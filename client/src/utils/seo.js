@@ -7,11 +7,11 @@ export const SITE_CONFIG = {
   name: 'OddSightSeer',
   domain: 'https://oddsightseer.com',
   description: 'Find +EV bets, compare sportsbook odds, and track line movement across 15+ major bookmakers.',
-  keywords: 'sports betting, odds comparison, sportsbooks, +EV bets, arbitrage, line movement, player props, best odds, live odds tracker, betting arbitrage, line shopping',
+  keywords: 'sports betting odds, odds comparison tool, best sportsbook odds, +EV betting, positive expected value bets, arbitrage betting, line movement tracker, player props comparison, NFL odds, NBA odds, MLB odds, NHL odds, DraftKings odds, FanDuel odds, BetMGM odds, line shopping tool, betting edge finder, sports betting analytics, real-time odds, PrizePicks comparison, Underdog Fantasy odds',
   twitterHandle: '@OddSightSeer',
   ogImage: 'https://oddsightseer.com/og-image.png',
   ogImageAlt: 'OddSightSeer - Real-time sports betting odds comparison across 15+ sportsbooks',
-  logo: 'https://oddsightseer.com/logo.png'
+  logo: 'https://oddsightseer.com/og-image.png'
 };
 
 /**
