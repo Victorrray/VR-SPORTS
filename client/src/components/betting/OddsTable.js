@@ -4515,21 +4515,46 @@ export default function OddsTable({
                                       </div>
                                       )
                                     ) : (
-                                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        {logos[ob.bookmaker?.key] && (
-                                          <img 
-                                            src={logos[ob.bookmaker?.key]} 
-                                            alt={cleanBookTitle(ob.book)}
-                                            className="bookmaker-logo"
-                                            style={{
-                                              width: '16px',
-                                              height: '16px',
-                                              marginRight: '4px',
-                                              objectFit: 'contain'
-                                            }}
-                                          />
+                                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                                          {logos[ob.bookmaker?.key] && (
+                                            <img 
+                                              src={logos[ob.bookmaker?.key]} 
+                                              alt={cleanBookTitle(ob.book)}
+                                              className="bookmaker-logo"
+                                              style={{
+                                                width: '16px',
+                                                height: '16px',
+                                                marginRight: '4px',
+                                                objectFit: 'contain'
+                                              }}
+                                            />
+                                          )}
+                                          {cleanBookTitle(ob.book)}
+                                        </div>
+                                        {/* Show spread/total line under book name for spreads and totals markets */}
+                                        {(isSpreads || isTotals) && (ob.point ?? ob.line) !== undefined && (
+                                          <span style={{ 
+                                            fontSize: '0.75em', 
+                                            color: 'rgba(255,255,255,0.7)',
+                                            fontWeight: '600',
+                                            letterSpacing: '0.3px',
+                                            marginLeft: '20px'
+                                          }}>
+                                            {(() => {
+                                              const pt = Number(ob.point ?? ob.line);
+                                              if (isSpreads) {
+                                                return pt > 0 ? `+${pt.toFixed(1)}` : `${pt.toFixed(1)}`;
+                                              } else {
+                                                // For totals, show O/U with the line
+                                                const outcomeName = ob.name || row.out?.name || '';
+                                                const prefix = outcomeName.toLowerCase().includes('over') ? 'O' : 
+                                                              outcomeName.toLowerCase().includes('under') ? 'U' : '';
+                                                return `${prefix} ${pt.toFixed(1)}`;
+                                              }
+                                            })()}
+                                          </span>
                                         )}
-                                        {cleanBookTitle(ob.book)}
                                       </div>
                                     )}
                                   </div>
@@ -4900,8 +4925,8 @@ export default function OddsTable({
                                         )}
                                         <span>{cleanBookTitle(p.book)}</span>
                                       </div>
-                                      {/* Show spread line for spreads market - CLEAR display with sign */}
-                                      {mode !== "props" && row.mkt?.key?.includes('spread') && (p.point ?? p.line) !== undefined && (
+                                      {/* Show spread/total line for spreads and totals markets - CLEAR display with sign */}
+                                      {mode !== "props" && (row.mkt?.key?.includes('spread') || row.mkt?.key?.includes('total')) && (p.point ?? p.line) !== undefined && (
                                         <span style={{ 
                                           fontSize: '0.8em', 
                                           color: 'rgba(255,255,255,0.8)',
@@ -4910,7 +4935,16 @@ export default function OddsTable({
                                         }}>
                                           {(() => {
                                             const pt = Number(p.point ?? p.line);
-                                            return pt > 0 ? `+${pt.toFixed(1)}` : `${pt.toFixed(1)}`;
+                                            const isSpread = row.mkt?.key?.includes('spread');
+                                            if (isSpread) {
+                                              return pt > 0 ? `+${pt.toFixed(1)}` : `${pt.toFixed(1)}`;
+                                            } else {
+                                              // For totals, show O/U with the line
+                                              const outcomeName = p.name || row.out?.name || '';
+                                              const prefix = outcomeName.toLowerCase().includes('over') ? 'O' : 
+                                                            outcomeName.toLowerCase().includes('under') ? 'U' : '';
+                                              return `${prefix} ${pt.toFixed(1)}`;
+                                            }
                                           })()}
                                         </span>
                                       )}
