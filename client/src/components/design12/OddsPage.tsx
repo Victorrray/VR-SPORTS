@@ -295,7 +295,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
     setSportsbooksClosing(true);
     setTimeout(() => { setSportsbooksExpanded(false); setSportsbooksClosing(false); }, 280);
   };
-  const [autoRefresh, setAutoRefresh] = useState(true); // Always enabled by default for better UX
+  const [autoRefresh, setAutoRefresh] = useState(false); // Default OFF - user must enable manually
   const [minDataPoints, setMinDataPoints] = useState(cachedFilters?.minDataPoints || 4);
 
   // Save filters to localStorage when they change

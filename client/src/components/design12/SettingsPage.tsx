@@ -16,7 +16,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
   const [notifications, setNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [twoFactor, setTwoFactor] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   
   // Modal states
   const [showBankrollModal, setShowBankrollModal] = useState(false);
