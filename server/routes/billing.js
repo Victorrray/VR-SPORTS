@@ -146,21 +146,29 @@ router.post('/webhook',
           if (supabase && subscription.customer) {
             const { data: users, error: findError } = await supabase
               .from('users')
-              .select('id, plan, grandfathered')
+              .select('id, plan, grandfathered, stripe_subscription_id')
               .eq('stripe_customer_id', subscription.customer);
               
             if (!findError && users && users.length > 0) {
               const userId = users[0].id;
               const currentPlan = users[0].plan;
               const isGrandfathered = users[0].grandfathered;
+              const hasStripeSubscription = !!users[0].stripe_subscription_id;
               
-              console.log(`📊 Subscription status update for user ${userId}: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end}, grandfathered: ${isGrandfathered}`);
+              console.log(`📊 Subscription status update for user ${userId}: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end}, grandfathered: ${isGrandfathered}, hasStripeSubscription: ${hasStripeSubscription}`);
               
               // NEVER downgrade grandfathered (manually upgraded) users
               if (isGrandfathered) {
                 console.log(`🛡️ User ${userId} is grandfathered - skipping any plan changes`);
                 // Still acknowledge the webhook but don't change anything
                 return res.json({ received: true, skipped: 'grandfathered user' });
+              }
+              
+              // NEVER downgrade manually upgraded users (have a plan but no stripe_subscription_id)
+              // These users were upgraded directly in the database by admin
+              if (currentPlan && !hasStripeSubscription) {
+                console.log(`🛡️ User ${userId} was manually upgraded (plan: ${currentPlan}, no stripe subscription) - skipping any plan changes`);
+                return res.json({ received: true, skipped: 'manually upgraded user' });
               }
               
               // If subscription is set to cancel at period end, DON'T remove access yet
