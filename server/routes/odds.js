@@ -106,8 +106,6 @@ const SPORT_MARKET_SUPPORT = {
     'alternate_totals_h1', 'alternate_totals_h2',
     'team_totals_h1', 'team_totals_h2',
     'alternate_team_totals_h1', 'alternate_team_totals_h2',
-    // Half markets - 3-way
-    'h2h_3_way_h1', 'h2h_3_way_h2'
   ],
   'basketball_ncaab': [
     // Standard markets
@@ -718,6 +716,34 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       if (!game.commence_time) return false;
       const gameTime = new Date(game.commence_time);
       return gameTime > now; // Only include future games
+    });
+    
+    // CRITICAL: Filter out ALL 3-way markets from non-soccer sports
+    // 3-way markets (h2h_3_way) only make sense for soccer (Win/Draw/Loss)
+    // NBA/NFL/NHL games can't end in ties, so 3-way markets are misleading
+    allGames.forEach(game => {
+      const isSoccer = game.sport_key?.startsWith('soccer_');
+      if (!isSoccer && game.bookmakers) {
+        game.bookmakers.forEach(bookmaker => {
+          if (bookmaker.markets) {
+            // Filter out any market containing "3_way" or "3-way"
+            bookmaker.markets = bookmaker.markets.filter(market => {
+              const key = market.key || '';
+              return !key.includes('3_way') && !key.includes('3-way');
+            });
+            // Also strip "(3-Way)" from outcome names
+            bookmaker.markets.forEach(market => {
+              if (market.outcomes) {
+                market.outcomes.forEach(outcome => {
+                  if (outcome.name) {
+                    outcome.name = outcome.name.replace(/\s*\(3-Way\)\s*/gi, '');
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
     });
     
     // Debug: Count NHL games after filter
