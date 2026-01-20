@@ -1204,12 +1204,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       // CRITICAL: Only process these for SOCCER sports - skip for NBA/NFL/NHL
       const gameSportKey = game.sport_key || '';
       const isSoccerGame = gameSportKey.startsWith('soccer_');
-      if (!isSoccerGame) {
-        // Skip soccer-specific markets for non-soccer games
-        return allPicks;
-      }
       
-      soccerMarkets.forEach(marketKey => {
+      // Only process soccer markets if this is a soccer game
+      if (isSoccerGame) {
+        soccerMarkets.forEach(marketKey => {
         const booksArray: any[] = [];
         
         bookmakers.forEach((bm: any) => {
@@ -1353,6 +1351,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           commenceTime: game.commence_time || game.gameTime || undefined
         });
       });
+      } // End of if (isSoccerGame) block
       
       // Helper function to get period label from market key
       const getPeriodLabel = (marketKey: string): string => {
