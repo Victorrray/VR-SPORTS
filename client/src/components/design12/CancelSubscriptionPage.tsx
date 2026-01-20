@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
 import { useMe } from '../../hooks/useMe';
 import { toast } from 'sonner';
+import { apiClient } from '../../utils/apiClient';
 
 interface CancelSubscriptionPageProps {
   onBack: () => void;
@@ -57,29 +58,12 @@ export function CancelSubscriptionPage({ onBack, onNavigateToChangePlan }: Cance
   const handleFinalCancel = async () => {
     setIsCancelling(true);
     try {
-      const response = await fetch('/api/billing/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          reason: selectedReason,
-          feedback: feedback,
-        }),
+      const response = await apiClient.post('/api/billing/cancel-subscription', {
+        reason: selectedReason,
+        feedback: feedback,
       });
 
-      const text = await response.text();
-      let data;
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error('Invalid response from server');
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to cancel subscription');
-      }
+      const data = response.data;
 
       // Format the end date if available
       const endDate = data.current_period_end 

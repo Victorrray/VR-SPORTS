@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/SimpleAuth';
 import { useMe } from '../../hooks/useMe';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
+import { apiClient } from '../../utils/apiClient';
 
 interface DeleteAccountPageProps {
   onBack: () => void;
@@ -35,11 +36,7 @@ export function DeleteAccountPage({ onBack, onDelete }: DeleteAccountPageProps) 
       // First cancel any active subscription
       if (me?.has_billing) {
         try {
-          await fetch('/api/billing/cancel-subscription', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-          });
+          await apiClient.post('/api/billing/cancel-subscription');
         } catch (e) {
           console.warn('Could not cancel subscription:', e);
         }

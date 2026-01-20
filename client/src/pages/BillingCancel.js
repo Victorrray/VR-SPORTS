@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/SimpleAuth';
 import { Button } from '../components/design12/ui/button';
 import { Card } from '../components/design12/ui/card';
 import { SITE_CONFIG } from '../utils/seo';
+import { apiClient } from '../utils/apiClient';
 import './BillingCancel.css';
 
 const BillingCancel = () => {
@@ -30,26 +31,13 @@ const BillingCancel = () => {
     setError('');
 
     try {
-      const response = await fetch('/api/billing/cancel-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.id
-        },
-        credentials: 'include'
-      });
+      const response = await apiClient.post('/api/billing/cancel-subscription');
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setCancelled(true);
-        setShowConfirmation(false);
-      } else {
-        setError(data.error || 'Failed to cancel subscription');
-      }
+      setCancelled(true);
+      setShowConfirmation(false);
     } catch (err) {
       console.error('Error cancelling subscription:', err);
-      setError('Network error. Please try again.');
+      setError(err.response?.data?.error || 'Failed to cancel subscription');
     } finally {
       setLoading(false);
     }
