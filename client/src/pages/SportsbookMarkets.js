@@ -311,9 +311,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         // Period markets (hockey)
         "h2h_p1", "h2h_p2", "h2h_p3",
         "spreads_p1", "spreads_p2", "spreads_p3",
-        "totals_p1", "totals_p2", "totals_p3",
-        // 3-way markets
-        "h2h_3_way"
+        "totals_p1", "totals_p2", "totals_p3"
+        // NOTE: h2h_3_way removed - only for soccer (Win/Draw/Loss)
+        // NHL/NBA use regular h2h since games can't end in ties
       ],
     [isPlayerPropsMode]
   );
