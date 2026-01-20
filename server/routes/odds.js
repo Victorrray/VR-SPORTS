@@ -432,10 +432,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       });
     });
     
+    console.log(`📊 MARKETS DEBUG: Requested ${regularMarkets.length} markets, filtered to ${filteredRegularMarkets.length} supported markets`);
+    console.log(`📊 MARKETS DEBUG: Filtered markets:`, filteredRegularMarkets);
+    
     // Separate quarter/half/period markets from base markets
     const quarterMarketPatterns = ['_q', '_h', '_p', '_1st_', '_3_', '_5_'];
     const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
     const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
+    
+    console.log(`📊 MARKETS DEBUG: Base markets (${baseMarkets.length}):`, baseMarkets);
+    console.log(`📊 MARKETS DEBUG: Period markets (${quarterMarkets.length}):`, quarterMarkets);
     
     // Step 1: Fetch base odds (only include player props if betType=props)
     if (baseMarkets.length > 0 || (isPlayerPropsRequest && playerPropMarkets.length > 0)) {
