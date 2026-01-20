@@ -762,9 +762,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
       const bookmakerList = gameOddsBookmakers.join(',');
       
-      // Strategic approach: Only fetch for top 5 games per sport using /events/{eventId}/odds
-      const MAX_GAMES_FOR_PERIOD_MARKETS = 5;
-      const PERIOD_MARKET_CACHE_HOURS = 24;
+      // Fetch period markets for all games (not just top 5) to ensure they show up
+      const MAX_GAMES_FOR_PERIOD_MARKETS = 50; // Increased from 5 to show more period markets
+      const PERIOD_MARKET_CACHE_HOURS = 1; // Reduced cache time for fresher data
       
       for (const sport of sportsArray) {
         try {

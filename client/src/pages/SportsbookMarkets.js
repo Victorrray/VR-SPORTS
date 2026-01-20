@@ -329,17 +329,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         // Period markets (Hockey: NHL)
         "h2h_p1", "h2h_p2", "h2h_p3",
         "spreads_p1", "spreads_p2", "spreads_p3",
-        "totals_p1", "totals_p2", "totals_p3",
+        "totals_p1", "totals_p2", "totals_p3"
         
-        // ===== SOCCER-SPECIFIC MARKETS =====
-        "h2h_3_way",     // Win/Draw/Loss (3-way moneyline)
-        "draw_no_bet",   // Draw No Bet
-        "btts",          // Both Teams to Score
-        
-        // Soccer half-time markets
-        "h2h_h1_3_way",  // 1st Half 3-Way
-        "totals_h1",     // 1st Half Total (already included above)
-        "spreads_h1"     // 1st Half Spread (already included above)
+        // NOTE: 3-way markets (h2h_3_way) removed - only for soccer, not NBA/NHL
+        // Soccer-specific markets (draw_no_bet, btts) should be requested separately for soccer sports
       ],
     [isPlayerPropsMode]
   );
