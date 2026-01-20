@@ -2564,19 +2564,28 @@ export default function OddsTable({
     
     // For player props, use weighted consensus probability from all available books
     if (row.isPlayerProp || (row.mkt?.key && row.mkt.key.includes('player_'))) {
-      // CRITICAL: Only compare books with the SAME line/point value
-      // Different lines (0.5 vs 1.5 threes) should NOT be mixed in EV calculation
-      const targetPoint = row.point ?? row.line;
-      const sameLineBooks = allBooks.filter(b => {
+      // CRITICAL FIX: Only compare books with the SAME outcome (Over/Under) AND same line
+      // allBooks contains BOTH Over and Under - we must filter to the user's selected side
+      const userOutcomeName = row.out?.name; // "Over" or "Under"
+      const targetPoint = row.point ?? row.line ?? row.out?.point;
+      
+      // First filter by outcome name (Over vs Under)
+      const sameOutcomeBooks = allBooks.filter(b => {
+        const bookOutcome = b.name || b.outcomeName;
+        return bookOutcome === userOutcomeName;
+      });
+      
+      // Then filter by line/point value
+      const sameLineBooks = sameOutcomeBooks.filter(b => {
         const bookPoint = b.point ?? b.line;
         // If we have a target point, only include books with matching point
         if (targetPoint !== undefined && targetPoint !== null) {
-          return bookPoint === targetPoint;
+          return bookPoint === targetPoint || Math.abs(Number(bookPoint) - Number(targetPoint)) < 0.1;
         }
         return true; // No point specified, include all
       });
       
-      console.log(`🎯 EV LINE FILTER: Target point ${targetPoint}, filtered ${allBooks.length} -> ${sameLineBooks.length} books with same line`);
+      console.log(`🎯 EV FILTER: ${userOutcomeName} ${targetPoint} - ${allBooks.length} total -> ${sameOutcomeBooks.length} same outcome -> ${sameLineBooks.length} same line`);
       
       // Need at least 2 books with the same line for meaningful EV
       if (sameLineBooks.length < 2) {
@@ -2600,15 +2609,15 @@ export default function OddsTable({
       const consensusProb = weightedMedian(probs, weights);
       const uniqCnt = new Set(allBooks.map(b => b.bookmaker?.key || b.book || '')).size;
       
-      // Debug logging for weighted calculation
-      if (row.playerName === 'Kendrick Bourne' && row.mkt?.key?.includes('reception')) {
-        console.log(`🔍 WEIGHTED EV for ${row.playerName}:`, {
-          bookData: bookData.map(d => ({ book: d.book, prob: d.prob.toFixed(4), weight: d.weight })),
-          consensusProb: consensusProb?.toFixed(4),
-          unweightedMedian: median(probs)?.toFixed(4),
-          difference: consensusProb && median(probs) ? ((consensusProb - median(probs)) * 100).toFixed(2) + '%' : 'N/A'
-        });
-      }
+      // Debug logging for weighted calculation - log ALL player props to diagnose 50% EV bug
+      console.log(`🔍 WEIGHTED EV for ${row.playerName} ${row.mkt?.key}:`, {
+        bookData: bookData.map(d => ({ book: d.book, prob: d.prob.toFixed(4), weight: d.weight })),
+        consensusProb: consensusProb?.toFixed(4),
+        unweightedMedian: median(probs)?.toFixed(4),
+        userOdds,
+        fairDec: consensusProb ? (1 / consensusProb).toFixed(4) : 'N/A',
+        fairLine: consensusProb ? decimalToAmerican(1 / consensusProb) : 'N/A'
+      });
       
       if (consensusProb && consensusProb > 0 && consensusProb < 1 && uniqCnt >= 3) { // Minimum 3 books for reliable EV
         const fairDec = 1 / consensusProb;
