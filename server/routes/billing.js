@@ -442,12 +442,13 @@ router.post('/cancel-subscription', requireUser, async (req, res) => {
       cancel_at_period_end: true
     });
 
-    // Set subscription end date instead of immediately removing access
+    // Set subscription end date and cancel flag instead of immediately removing access
     const subscriptionEndDate = new Date(subscription.current_period_end * 1000);
     const { error: updateError } = await supabase
       .from('users')
       .update({
         subscription_end_date: subscriptionEndDate.toISOString(),
+        cancel_at_period_end: true,
         updated_at: new Date().toISOString()
       })
       .eq('id', userId);

@@ -207,13 +207,19 @@ export function useMe() {
     remaining: plan.remaining,
     limit: plan.limit,
     calls_made: plan.used || 0,
-    unlimited: plan.unlimited || false
+    unlimited: plan.unlimited || false,
+    subscription_end_date: plan.subscription_end_date,
+    cancel_at_period_end: plan.cancel_at_period_end || false,
+    has_billing: plan.has_billing || false
   } : {
     plan: 'free',
     remaining: 250,
     limit: 250,
     calls_made: 0,
-    unlimited: false
+    unlimited: false,
+    subscription_end_date: null,
+    cancel_at_period_end: false,
+    has_billing: false
   };
 
   // Debug logging for useMe hook

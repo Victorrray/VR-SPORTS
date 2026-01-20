@@ -266,17 +266,24 @@ export function AccountPage({
                 </div>
               </div>
               
-              <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
-                <Calendar className="w-4 h-4" />
-                <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
-              </div>
+              {me?.cancel_at_period_end ? (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-orange-600' : 'text-orange-400'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Subscription Ending{me?.subscription_end_date ? ` · Access until ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
+                </div>
+              ) : (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <button 
                   onClick={onNavigateToChangePlan}
                   className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
                 >
-                  Change Plan
+                  {me?.cancel_at_period_end ? 'Resubscribe' : 'Change Plan'}
                 </button>
               </div>
             </div>
@@ -298,17 +305,24 @@ export function AccountPage({
                 </div>
               </div>
               
-              <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
-                <Calendar className="w-4 h-4" />
-                <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
-              </div>
+              {me?.cancel_at_period_end ? (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-orange-600' : 'text-orange-400'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Subscription Ending{me?.subscription_end_date ? ` · Access until ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
+                </div>
+              ) : (
+                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                  <Calendar className="w-4 h-4" />
+                  <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <button 
                   onClick={onNavigateToChangePlan}
                   className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
                 >
-                  Change Plan
+                  {me?.cancel_at_period_end ? 'Resubscribe' : 'Change Plan'}
                 </button>
               </div>
             </div>

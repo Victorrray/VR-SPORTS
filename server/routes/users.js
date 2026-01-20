@@ -36,7 +36,7 @@ router.get('/me', async (req, res) => {
 
     const { data, error } = await supabase
       .from('users')
-      .select('plan, api_request_count, grandfathered, subscription_end_date, stripe_customer_id, created_at')
+      .select('plan, api_request_count, grandfathered, subscription_end_date, stripe_customer_id, created_at, cancel_at_period_end')
       .eq('id', userId)
       .single();
 
@@ -55,6 +55,7 @@ router.get('/me', async (req, res) => {
         unlimited: true,
         used: data.api_request_count || 0,
         subscription_end_date: data.subscription_end_date,
+        cancel_at_period_end: data.cancel_at_period_end || false,
         has_billing: !!data.stripe_customer_id,
         created_at: data.created_at
       });
@@ -70,6 +71,7 @@ router.get('/me', async (req, res) => {
         unlimited: false,
         used: data.api_request_count || 0,
         subscription_end_date: data.subscription_end_date,
+        cancel_at_period_end: data.cancel_at_period_end || false,
         has_billing: !!data.stripe_customer_id,
         created_at: data.created_at
       });
@@ -88,6 +90,7 @@ router.get('/me', async (req, res) => {
       used,
       unlimited: false,
       subscription_end_date: data.subscription_end_date,
+      cancel_at_period_end: data.cancel_at_period_end || false,
       has_billing: !!data.stripe_customer_id,
       created_at: data.created_at
     });
