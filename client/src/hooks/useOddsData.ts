@@ -1201,6 +1201,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       });
       
       // Process soccer-specific markets (h2h_3_way, draw_no_bet, btts)
+      // CRITICAL: Only process these for SOCCER sports - skip for NBA/NFL/NHL
+      const gameSportKey = game.sport_key || '';
+      const isSoccerGame = gameSportKey.startsWith('soccer_');
+      if (!isSoccerGame) {
+        // Skip soccer-specific markets for non-soccer games
+        return allPicks;
+      }
+      
       soccerMarkets.forEach(marketKey => {
         const booksArray: any[] = [];
         
