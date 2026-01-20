@@ -2030,17 +2030,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           case 'alternate_totals': return 'alternate_totals';
           case 'team_totals': return 'team_totals';
           
-          // 1st Half markets (all sports)
-          case '1st_half': return 'h2h_h1,spreads_h1,totals_h1';
+          // 1st Half markets (NFL, NBA, NCAAF)
+          // IMPORTANT: Always include base markets (h2h,spreads,totals) so API returns games
+          // Period markets are fetched separately via /events/{eventId}/odds endpoint
+          case '1st_half': return 'h2h,spreads,totals,h2h_h1,spreads_h1,totals_h1';
           
           // 2nd Half markets
-          case '2nd_half': return 'h2h_h2,spreads_h2,totals_h2';
+          case '2nd_half': return 'h2h,spreads,totals,h2h_h2,spreads_h2,totals_h2';
           
           // 1st Quarter markets (NFL, NBA)
-          case '1st_quarter': return 'h2h_q1,spreads_q1,totals_q1';
+          case '1st_quarter': return 'h2h,spreads,totals,h2h_q1,spreads_q1,totals_q1';
           
           // 1st Period markets (NHL)
-          case '1st_period': return 'h2h_p1,spreads_p1,totals_p1';
+          case '1st_period': return 'h2h,spreads,totals,h2h_p1,spreads_p1,totals_p1';
           
           // Soccer markets
           case 'btts': return 'btts';
