@@ -112,6 +112,13 @@ export function useRecommendedPicks(options = {}) {
             bookmaker.markets.forEach((market) => {
               if (!market.outcomes) return;
               
+              // CRITICAL: Skip ALL 3-way markets for non-soccer sports
+              // 3-way markets don't make sense for NBA/NFL/NHL (games can't end in ties)
+              const isSoccer = game.sport_key?.startsWith('soccer_');
+              if (!isSoccer && market.key?.includes('3_way')) {
+                return; // Skip 3-way markets
+              }
+              
               market.outcomes.forEach((outcome) => {
                 const key = `${market.key}|${outcome.name}|${outcome.point || 'null'}`;
                 const existing = bestOddsMap.get(key);
