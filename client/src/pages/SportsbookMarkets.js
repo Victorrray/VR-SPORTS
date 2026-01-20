@@ -295,7 +295,26 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // For player props mode, use all available player prop markets
   const marketsForMode = useMemo(() => isPlayerPropsMode 
     ? PLAYER_PROP_MARKET_KEYS // Use all available player prop markets
-    : ["h2h", "spreads", "totals", "team_totals", "alternate_spreads", "alternate_totals", "alternate_team_totals"], // Include all regular markets
+    : [
+        // Base markets
+        "h2h", "spreads", "totals", "team_totals",
+        // Alternate markets
+        "alternate_spreads", "alternate_totals", "alternate_team_totals",
+        // Quarter markets (basketball, football)
+        "h2h_q1", "h2h_q2", "h2h_q3", "h2h_q4",
+        "spreads_q1", "spreads_q2", "spreads_q3", "spreads_q4",
+        "totals_q1", "totals_q2", "totals_q3", "totals_q4",
+        // Half markets (basketball, football)
+        "h2h_h1", "h2h_h2",
+        "spreads_h1", "spreads_h2",
+        "totals_h1", "totals_h2",
+        // Period markets (hockey)
+        "h2h_p1", "h2h_p2", "h2h_p3",
+        "spreads_p1", "spreads_p2", "spreads_p3",
+        "totals_p1", "totals_p2", "totals_p3",
+        // 3-way markets
+        "h2h_3_way"
+      ],
     [isPlayerPropsMode]
   );
   const regionsForMode = useMemo(() => isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"], [isPlayerPropsMode]);
