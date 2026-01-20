@@ -2218,7 +2218,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             pageSize={15}
             mode="game"
             bookFilter={effectiveSelectedBooks}
-            marketFilter={filters.markets} // Use selected markets, empty array shows all
+            marketFilter={(filters.markets || []).filter(m => !m.startsWith('player_') && !m.startsWith('batter_') && !m.startsWith('pitcher_'))} // Filter out player props for Straight Bets
             evMin={filters.minEV === "" ? null : Number(filters.minEV)}
             loading={filtersLoading || marketsLoading}
             error={error || marketsError}
