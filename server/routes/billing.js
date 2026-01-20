@@ -146,14 +146,22 @@ router.post('/webhook',
           if (supabase && subscription.customer) {
             const { data: users, error: findError } = await supabase
               .from('users')
-              .select('id, plan')
+              .select('id, plan, grandfathered')
               .eq('stripe_customer_id', subscription.customer);
               
             if (!findError && users && users.length > 0) {
               const userId = users[0].id;
               const currentPlan = users[0].plan;
+              const isGrandfathered = users[0].grandfathered;
               
-              console.log(`📊 Subscription status update for user ${userId}: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end}`);
+              console.log(`📊 Subscription status update for user ${userId}: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end}, grandfathered: ${isGrandfathered}`);
+              
+              // NEVER downgrade grandfathered (manually upgraded) users
+              if (isGrandfathered) {
+                console.log(`🛡️ User ${userId} is grandfathered - skipping any plan changes`);
+                // Still acknowledge the webhook but don't change anything
+                return res.json({ received: true, skipped: 'grandfathered user' });
+              }
               
               // If subscription is set to cancel at period end, DON'T remove access yet
               // User keeps access until the subscription actually ends
