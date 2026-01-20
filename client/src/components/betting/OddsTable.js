@@ -2230,7 +2230,8 @@ export default function OddsTable({
         }
 
         // Enhanced logging for debugging bookFilter issues
-        console.log(`🎯 Processing market ${mktKey} with ${allMarketOutcomes.length} outcomes. BookFilter:`, 
+        const uniqueBooks = [...new Set(allMarketOutcomes.map(o => o.bookmaker?.key || o.book))];
+        console.log(`🎯 Processing market ${mktKey} with ${allMarketOutcomes.length} outcomes from ${uniqueBooks.length} books: ${uniqueBooks.join(', ')}. BookFilter:`, 
           bookFilter && bookFilter.length ? bookFilter : 'ALL BOOKS (no filter)');
         
         const candidates = allMarketOutcomes.filter(o => {
