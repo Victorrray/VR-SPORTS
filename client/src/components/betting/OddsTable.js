@@ -382,12 +382,23 @@ function formatMarket(key="") {
   if (k === "team_totals_h1") return "1st Half Team Total";
   if (k === "team_totals_h2") return "2nd Half Team Total";
   
-  // Base markets
-  if (k === "h2h") return "MONEYLINE";
-  if (k.includes("spread")) return "SPREAD";
-  if (k.includes("total")) return "TOTAL";
+  // Alternate half markets
+  if (k === "alternate_spreads_h1") return "1st Half Alt Spread";
+  if (k === "alternate_spreads_h2") return "2nd Half Alt Spread";
+  if (k === "alternate_totals_h1") return "1st Half Alt Total";
+  if (k === "alternate_totals_h2") return "2nd Half Alt Total";
+  
+  // Soccer-specific markets
+  if (k === "h2h_h1_3_way") return "1st Half Moneyline";
   if (k === "draw_no_bet") return "Draw No Bet";
   if (k === "btts") return "Both Teams to Score";
+  if (k === "outrights") return "Futures";
+  
+  // Base markets
+  if (k === "h2h") return "MONEYLINE";
+  if (k === "team_totals") return "Team Total";
+  if (k.includes("spread")) return "SPREAD";
+  if (k.includes("total")) return "TOTAL";
   
   // Use our utility function for player props
   if (k.startsWith('player_') || k.startsWith('batter_') || k.startsWith('pitcher_')) {

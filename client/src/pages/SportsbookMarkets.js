@@ -291,29 +291,57 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
   const isMiddlesMode = showMiddles;
-  // TEMPORARY CHANGE: For regular odds mode, include ALL markets
-  // For player props mode, use all available player prop markets
+  // Full list of TheOddsAPI supported markets for straight bets
+  // Reference: https://the-odds-api.com/sports-odds-data/betting-markets.html
   const marketsForMode = useMemo(() => isPlayerPropsMode 
     ? PLAYER_PROP_MARKET_KEYS // Use all available player prop markets
     : [
-        // Base markets
-        "h2h", "spreads", "totals", "team_totals",
-        // Alternate markets
-        "alternate_spreads", "alternate_totals", "alternate_team_totals",
-        // Quarter markets (basketball, football)
+        // ===== FEATURED MARKETS (main /odds endpoint) =====
+        "h2h",           // Moneyline (head-to-head)
+        "spreads",       // Point spreads / handicaps
+        "totals",        // Over/Under totals
+        "outrights",     // Futures (championship winners, etc.)
+        
+        // ===== ADDITIONAL MARKETS (via /events/{eventId}/odds) =====
+        // Team totals
+        "team_totals",
+        
+        // Alternate lines
+        "alternate_spreads",
+        "alternate_totals",
+        "alternate_team_totals",
+        
+        // ===== GAME PERIOD MARKETS =====
+        // Quarter markets (Basketball: NBA, NCAAB, WNBA | Football: NFL, NCAAF)
         "h2h_q1", "h2h_q2", "h2h_q3", "h2h_q4",
         "spreads_q1", "spreads_q2", "spreads_q3", "spreads_q4",
         "totals_q1", "totals_q2", "totals_q3", "totals_q4",
-        // Half markets (basketball, football)
+        "team_totals_q1", "team_totals_q2", "team_totals_q3", "team_totals_q4",
+        "alternate_spreads_q1", "alternate_spreads_q2", "alternate_spreads_q3", "alternate_spreads_q4",
+        "alternate_totals_q1", "alternate_totals_q2", "alternate_totals_q3", "alternate_totals_q4",
+        
+        // Half markets (Basketball, Football)
         "h2h_h1", "h2h_h2",
         "spreads_h1", "spreads_h2",
         "totals_h1", "totals_h2",
-        // Period markets (hockey)
+        "team_totals_h1", "team_totals_h2",
+        "alternate_spreads_h1", "alternate_spreads_h2",
+        "alternate_totals_h1", "alternate_totals_h2",
+        
+        // Period markets (Hockey: NHL)
         "h2h_p1", "h2h_p2", "h2h_p3",
         "spreads_p1", "spreads_p2", "spreads_p3",
-        "totals_p1", "totals_p2", "totals_p3"
-        // NOTE: h2h_3_way removed - only for soccer (Win/Draw/Loss)
-        // NHL/NBA use regular h2h since games can't end in ties
+        "totals_p1", "totals_p2", "totals_p3",
+        
+        // ===== SOCCER-SPECIFIC MARKETS =====
+        "h2h_3_way",     // Win/Draw/Loss (3-way moneyline)
+        "draw_no_bet",   // Draw No Bet
+        "btts",          // Both Teams to Score
+        
+        // Soccer half-time markets
+        "h2h_h1_3_way",  // 1st Half 3-Way
+        "totals_h1",     // 1st Half Total (already included above)
+        "spreads_h1"     // 1st Half Spread (already included above)
       ],
     [isPlayerPropsMode]
   );
