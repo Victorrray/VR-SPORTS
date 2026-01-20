@@ -2192,7 +2192,16 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         // Merge into single response
         response = { data: [...straightData, ...propsData] };
       } else {
+        console.log(`🔍 useOddsData: Fetching from endpoint: ${endpoint}`);
         response = await apiClient.get(endpoint);
+        console.log(`🔍 useOddsData: Response received:`, {
+          status: response.status,
+          dataType: typeof response.data,
+          isArray: Array.isArray(response.data),
+          length: Array.isArray(response.data) ? response.data.length : 'N/A',
+          hasError: !!response.data?.error,
+          error: response.data?.error
+        });
       }
       
 
@@ -2829,6 +2838,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         }
         return filtered;
       };
+      
+      // Debug: Log raw response structure
+      console.log(`🔍 Raw API Response:`, {
+        hasData: !!response.data,
+        isArray: Array.isArray(response.data),
+        dataLength: Array.isArray(response.data) ? response.data.length : 'N/A',
+        dataType: typeof response.data,
+        keys: response.data ? Object.keys(response.data) : [],
+        status: response.status,
+        statusText: response.statusText
+      });
       
       if (response.data && Array.isArray(response.data)) {
         // Debug: Log sports in API response
