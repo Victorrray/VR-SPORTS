@@ -153,15 +153,34 @@ router.post('/webhook',
               const userId = users[0].id;
               const currentPlan = users[0].plan;
               
-              console.log(`📊 Subscription status update for user ${userId}: ${subscription.status}`);
+              console.log(`📊 Subscription status update for user ${userId}: ${subscription.status}, cancel_at_period_end: ${subscription.cancel_at_period_end}`);
               
-              // If subscription is canceled, unpaid, or deleted - remove plan access immediately
-              if (subscription.status === 'canceled' || subscription.status === 'unpaid' || event.type === 'customer.subscription.deleted') {
+              // If subscription is set to cancel at period end, DON'T remove access yet
+              // User keeps access until the subscription actually ends
+              if (subscription.cancel_at_period_end && subscription.status === 'active') {
+                console.log(`⏳ Subscription scheduled to cancel at period end for user ${userId} - keeping access`);
+                const { error } = await supabase
+                  .from('users')
+                  .update({ 
+                    cancel_at_period_end: true,
+                    subscription_end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+                    subscription_status: 'active_until_period_end',
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', userId);
+                  
+                if (error) {
+                  console.error('❌ Failed to update cancel_at_period_end in Supabase:', error);
+                }
+              }
+              // Only remove plan access when subscription is ACTUALLY deleted or truly canceled (not just scheduled)
+              else if (event.type === 'customer.subscription.deleted' || subscription.status === 'canceled' || subscription.status === 'unpaid') {
                 const { error } = await supabase
                   .from('users')
                   .update({ 
                     plan: null,
                     subscription_end_date: null,
+                    cancel_at_period_end: false,
                     subscription_status: subscription.status,
                     updated_at: new Date().toISOString()
                   })
