@@ -747,6 +747,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // - Only fetch selected period markets (not all variants)
     // - Cache for 24 hours
     if (quarterMarkets.length > 0) {
+      console.log(`📅 PERIOD MARKETS: Fetching ${quarterMarkets.length} period markets:`, quarterMarkets);
       
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
@@ -773,10 +774,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             try {
               const eventId = game.id;
               const cacheKey = `period_markets_${sport}_${eventId}`;
+              console.log(`📅 Fetching period markets for game ${game.away_team} @ ${game.home_team} (${eventId})`);
               
-              // Check cache first
-              const cached = await getCachedResponse(cacheKey, PERIOD_MARKET_CACHE_HOURS * 60 * 60 * 1000);
+              // Check cache first (getCachedResponse is synchronous)
+              const cached = getCachedResponse(cacheKey);
               if (cached) {
+                console.log(`📅 Using cached period markets for ${eventId}`);
                 // Merge cached data
                 if (cached.bookmakers) {
                   cached.bookmakers.forEach(cBookmaker => {
@@ -796,13 +799,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               
               // Fetch from API
               const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${quarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}`;
+              console.log(`📅 Period markets API call: ${url.replace(API_KEY, 'HIDDEN')}`);
               
               const response = await axios.get(url);
               const eventData = response.data || {};
+              console.log(`📅 Period markets response for ${eventId}: ${eventData.bookmakers?.length || 0} bookmakers`);
               
-              // Cache the result
-              if (eventData.bookmakers) {
-                await setCachedResponse(cacheKey, eventData, PERIOD_MARKET_CACHE_HOURS * 60 * 60 * 1000);
+              // Cache the result (setCachedResponse is synchronous)
+              if (eventData.bookmakers && eventData.bookmakers.length > 0) {
+                setCachedResponse(cacheKey, eventData);
+                console.log(`📅 Cached period markets for ${eventId}`);
               }
               
               // Merge period market data with existing game
@@ -820,7 +826,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 });
               }
             } catch (gameErr) {
-              // Silently skip period market errors
+              console.error(`❌ Period markets error for ${game.id}:`, gameErr.message);
             }
           }
         } catch (sportErr) {
