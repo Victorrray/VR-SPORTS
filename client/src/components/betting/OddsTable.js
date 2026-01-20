@@ -232,18 +232,18 @@ function median(nums) {
 }
 
 // Book weighting for more accurate fair line calculation
-// Sharp books and low-vig books get higher weights
+// Sharp books get highest weights, DFS apps get 0 (they follow the market, not set it)
 const BOOK_WEIGHTS = {
   // Tier 1: Sharp books (highest weight)
   'pinnacle': 3.0,
   'circa': 2.5,
   'circasports': 2.5,
-  
-  // Tier 2: Low-vig books
   'novig': 2.5,
-  'lowvig': 2.0,
   'prophet_exchange': 2.5,
-  'rebet': 1.25,
+  
+  // Tier 2: Low-vig / secondary sharp books
+  'lowvig': 2.0,
+  'rebet': 1.5,
   
   // Tier 3: Major sportsbooks
   'draftkings': 1.5,
@@ -252,14 +252,26 @@ const BOOK_WEIGHTS = {
   'caesars': 1.5,
   'pointsbet': 1.5,
   'betrivers': 1.5,
+  'thescore': 1.5,
+  'wynnbet': 1.5,
   
-  // Tier 4: DFS apps (standard weight)
-  'prizepicks': 1.0,
-  'underdog': 1.0,
-  'pick6': 1.0,
-  'prophetx': 1.0,
+  // Tier 4: Secondary sportsbooks
+  'bet365': 1.25,
+  'fliff': 1.25,
   
-  // Tier 5: Other books (lower weight)
+  // Tier 5: DFS apps (0 weight - they follow the market, don't set it)
+  'prizepicks': 0.0,
+  'underdog': 0.0,
+  'pick6': 0.0,
+  'draftkings_pick6': 0.0,
+  'prophetx': 0.0,
+  'dabble': 0.0,
+  'dabble_au': 0.0,
+  'betr': 0.0,
+  'betr_us_dfs': 0.0,
+  'sleeper': 0.0,
+  
+  // Default for unlisted books
   'default': 1.0
 };
 
