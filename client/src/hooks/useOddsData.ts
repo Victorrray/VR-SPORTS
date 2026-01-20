@@ -2015,7 +2015,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         sportsList = 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
       }
       params.append('sports', sportsList);
-      console.log(`🏟️ useOddsData requesting: sport="${sport}", sportsList="${sportsList}"`);
       
       // Map market types to API format
       // For special markets (periods, alternates), request those specific markets from the API
@@ -2133,9 +2132,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         // Merge into single response
         response = { data: [...straightData, ...propsData] };
       } else {
-        console.log(`🔍 useOddsData: Fetching from endpoint: ${endpoint}`);
         response = await apiClient.get(endpoint);
-        console.log(`🔍 useOddsData: Response received:`, {
+        if (DEBUG_LOGGING) console.log(`🔍 useOddsData: Response received:`, {
           status: response.status,
           dataType: typeof response.data,
           isArray: Array.isArray(response.data),
@@ -2774,47 +2772,23 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           return gameDate > now; // Keep only future games
         });
         
-        if (filtered.length < picks.length) {
-          console.log(`⏰ filterExpiredBets: Removed ${picks.length - filtered.length} expired picks, ${filtered.length} remaining`);
+        if (DEBUG_LOGGING && filtered.length < picks.length) {
+          console.log(`⏰ filterExpiredBets: Removed ${picks.length - filtered.length} expired picks`);
         }
         return filtered;
       };
       
-      // Debug: Log raw response structure
-      console.log(`🔍 Raw API Response:`, {
-        hasData: !!response.data,
-        isArray: Array.isArray(response.data),
-        dataLength: Array.isArray(response.data) ? response.data.length : 'N/A',
-        dataType: typeof response.data,
-        keys: response.data ? Object.keys(response.data) : [],
-        status: response.status,
-        statusText: response.statusText
-      });
-      
       if (response.data && Array.isArray(response.data)) {
-        // Debug: Log sports in API response
-        const apiSports = new Set(response.data.map((g: any) => g.sport_key));
-        console.log(`🏟️ API Response: ${response.data.length} games, sports:`, Array.from(apiSports));
-        
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
-        console.log(`🔄 After transform: ${transformedPicks.length} picks`);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
-        console.log(`🔄 After minDataPoints: ${transformedPicks.length} picks`);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
-        console.log(`🔄 After filterDabble: ${transformedPicks.length} picks`);
         transformedPicks = filterPlayerPropsForStraightBets(transformedPicks);
-        console.log(`🔄 After filterPlayerProps: ${transformedPicks.length} picks`);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
-        console.log(`🔄 After filterUnibet: ${transformedPicks.length} picks`);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
-        console.log(`🔄 After filterLowROI: ${transformedPicks.length} picks`);
         transformedPicks = filterForMiddles(transformedPicks);
-        console.log(`🔄 After filterMiddles: ${transformedPicks.length} picks`);
         transformedPicks = filterForExchanges(transformedPicks);
-        console.log(`🔄 After filterExchanges: ${transformedPicks.length} picks`);
         transformedPicks = filterExpiredBets(transformedPicks);
-        console.log(`🔄 After filterExpired: ${transformedPicks.length} picks`);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
