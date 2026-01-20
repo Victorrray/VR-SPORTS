@@ -2363,6 +2363,14 @@ export default function OddsTable({
           // Debug: Log grouping for spreads/totals
           if (isSpreadMarket || isTotalMarket) {
             console.log(`🎯 STRICT LINE GROUPING: ${groupKey} - Found ${allBooksForOutcome.length} books with exact line ${basePoint}`);
+            // EXTRA DEBUG: Log each book's point to verify filtering
+            allBooksForOutcome.forEach(o => {
+              const bookPoint = o.point != null ? Number(o.point) : null;
+              const diff = bookPoint !== null && basePoint !== null ? Math.abs(bookPoint - basePoint) : 'N/A';
+              if (diff !== 'N/A' && diff > 0.01) {
+                console.error(`🚨 LINE MISMATCH: ${o.bookmaker?.key} has point ${bookPoint} but basePoint is ${basePoint} (diff: ${diff})`);
+              }
+            });
           }
           
           // Debug logging for quarter markets
@@ -2695,15 +2703,24 @@ export default function OddsTable({
     
     // Fallback to weighted consensus method for regular markets using all books
     // CRITICAL: For spreads/totals, only compare books with the SAME line
+    // Over 6.5 is a DIFFERENT bet than Over 6 - they should NOT be mixed for EV calculation
     const isSpreadOrTotal = row.mkt?.key && (row.mkt.key.includes('spread') || row.mkt.key.includes('total'));
     const targetPoint = row.out?.point;
     
     let booksForEV = allBooks;
     if (isSpreadOrTotal && targetPoint !== undefined && targetPoint !== null) {
       // Filter to only books with matching spread/total line
+      // Use 0.1 tolerance to handle floating point but exclude different lines (6 vs 6.5 = 0.5 diff)
+      const lineTolerance = 0.1;
       booksForEV = allBooks.filter(b => {
         const bookPoint = b.point ?? b.line;
-        return bookPoint === targetPoint || Math.abs(Number(bookPoint) - Number(targetPoint)) < 0.01;
+        if (bookPoint === undefined || bookPoint === null) return false;
+        const diff = Math.abs(Number(bookPoint) - Number(targetPoint));
+        const matches = diff < lineTolerance;
+        if (!matches) {
+          console.log(`🚫 EV FILTER: Excluding ${b.bookmaker?.key || b.book} with point ${bookPoint} (target: ${targetPoint}, diff: ${diff})`);
+        }
+        return matches;
       });
       
       console.log(`🎯 SPREAD/TOTAL EV FILTER: Target point ${targetPoint}, filtered ${allBooks.length} -> ${booksForEV.length} books with same line`);
@@ -4775,22 +4792,31 @@ export default function OddsTable({
                               const isRowTotalMarket = row.mkt?.key?.includes('total');
                               const rowOutcomeName = row.out?.name;
                               const rowPoint = row.out?.point;
-                              const miniTableStrictTolerance = 0.001;
+                              // Use 0.1 tolerance to handle floating point but still exclude different lines (6 vs 6.5)
+                              const miniTableStrictTolerance = 0.1;
                               
                               const dedupedBooks = (row.allBooks || []).filter(book => {
                                 const rawKey = book?.bookmaker?.key || book?.book || '';
                                 const key = normalizeBookKey(rawKey);
                                 if (!key || seenMiniBooks.has(key)) return false;
                                 
-                                // For spreads, only include books with matching outcome name
-                                if (isRowSpreadMarket && book.name !== rowOutcomeName) {
-                                  return false;
+                                // For spreads, only include books with matching outcome name AND point
+                                if (isRowSpreadMarket) {
+                                  if (book.name !== rowOutcomeName) return false;
+                                  if (rowPoint !== undefined) {
+                                    const bookPoint = book.point ?? book.line;
+                                    if (bookPoint === undefined || Math.abs(Number(bookPoint) - Number(rowPoint)) >= miniTableStrictTolerance) {
+                                      return false;
+                                    }
+                                  }
                                 }
                                 
-                                // For totals, include both Over and Under, but ONLY for the same line
+                                // For totals, ONLY include books with the EXACT same line
+                                // Over 6.5 is a DIFFERENT bet than Over 6 - they should NOT be mixed
                                 if (isRowTotalMarket && rowPoint !== undefined) {
                                   const bookPoint = book.point ?? book.line;
                                   if (bookPoint === undefined || Math.abs(Number(bookPoint) - Number(rowPoint)) >= miniTableStrictTolerance) {
+                                    console.log(`🚫 MINI-TABLE FILTER: Excluding ${key} with point ${bookPoint} (row point: ${rowPoint}, diff: ${Math.abs(Number(bookPoint) - Number(rowPoint))})`);
                                     return false;
                                   }
                                 }
