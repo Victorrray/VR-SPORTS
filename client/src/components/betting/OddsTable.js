@@ -330,17 +330,17 @@ function formatMarket(key="") {
   if (k === "h2h_p2") return "2nd Period Moneyline";
   if (k === "h2h_p3") return "3rd Period Moneyline";
   
-  // 3-way markets
-  if (k === "h2h_3_way") return "3-Way Moneyline";
-  if (k === "h2h_3_way_q1") return "1st Quarter 3-Way";
-  if (k === "h2h_3_way_q2") return "2nd Quarter 3-Way";
-  if (k === "h2h_3_way_q3") return "3rd Quarter 3-Way";
-  if (k === "h2h_3_way_q4") return "4th Quarter 3-Way";
-  if (k === "h2h_3_way_h1") return "1st Half 3-Way";
-  if (k === "h2h_3_way_h2") return "2nd Half 3-Way";
-  if (k === "h2h_3_way_p1") return "1st Period 3-Way";
-  if (k === "h2h_3_way_p2") return "2nd Period 3-Way";
-  if (k === "h2h_3_way_p3") return "3rd Period 3-Way";
+  // 3-way markets - display as "Moneyline" (cleaner UI)
+  if (k === "h2h_3_way") return "Moneyline";
+  if (k === "h2h_3_way_q1") return "1st Quarter Moneyline";
+  if (k === "h2h_3_way_q2") return "2nd Quarter Moneyline";
+  if (k === "h2h_3_way_q3") return "3rd Quarter Moneyline";
+  if (k === "h2h_3_way_q4") return "4th Quarter Moneyline";
+  if (k === "h2h_3_way_h1") return "1st Half Moneyline";
+  if (k === "h2h_3_way_h2") return "2nd Half Moneyline";
+  if (k === "h2h_3_way_p1") return "1st Period Moneyline";
+  if (k === "h2h_3_way_p2") return "2nd Period Moneyline";
+  if (k === "h2h_3_way_p3") return "3rd Period Moneyline";
   
   // Spread markets with periods
   if (k === "spreads_q1") return "1st Quarter Spread";
