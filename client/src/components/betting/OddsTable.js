@@ -419,7 +419,9 @@ const TEAM_LOCATIONS = {
 };
 
 function shortTeam(name="", sportKey="") {
-  const n = String(name).trim(); if (!n) return "";
+  // First, strip "(3-Way)" suffix from team names (comes from h2h_3_way market data)
+  let n = String(name).trim().replace(/\s*\(3-Way\)\s*$/i, '');
+  if (!n) return "";
   const mapped = TEAM_NICKNAMES[sportKey]?.[n]; if (mapped) return mapped;
   const paren = n.lastIndexOf(')'); if (paren !== -1 && paren + 1 < n.length) {
     const after = n.slice(paren + 1).trim(); if (after) return after;
@@ -3750,9 +3752,9 @@ export default function OddsTable({
                         >
                           {mode === "props" 
                             ? (row.out?.name || '')
-                            : (row.mkt?.key || '') === 'h2h'
+                            : (row.mkt?.key || '').includes('h2h')
                               ? shortTeam(row.out?.name, row.game?.sport_key)
-                              : (row.out?.name || '')}
+                              : (row.out?.name || '').replace(/\s*\(3-Way\)\s*$/i, '')}
                           {/* Add line inline with team name */}
                           {mode === "props" 
                             ? (() => {
