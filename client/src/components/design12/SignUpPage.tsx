@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap, CheckCircle2, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/SimpleAuth';
 
@@ -14,6 +14,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   
   const { signInWithGoogle, signUp } = useAuth();
 
@@ -25,6 +26,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
     try {
       await signUp(email, password);
       console.log('Sign up submitted:', { name, email });
+      setSignupSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up');
     } finally {
@@ -134,6 +136,44 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/10"></div>
               
               <div className="relative space-y-6">
+                {/* Success State - Check Your Email */}
+                {signupSuccess ? (
+                  <div className="text-center py-8 space-y-6">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 animate-[scaleIn_0.3s_ease-out]">
+                      <Mail className="w-10 h-10 text-white" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <h3 className="text-white text-2xl md:text-3xl font-bold">
+                        Check Your Email
+                      </h3>
+                      <p className="text-white/70 font-semibold text-lg">
+                        We've sent a confirmation link to
+                      </p>
+                      <p className="text-purple-400 font-bold text-lg break-all">
+                        {email}
+                      </p>
+                    </div>
+                    
+                    <div className="bg-slate-950/50 border border-white/10 rounded-xl p-4 space-y-2">
+                      <p className="text-white/60 text-sm font-semibold">
+                        Click the link in your email to activate your account.
+                      </p>
+                      <p className="text-white/40 text-xs">
+                        Didn't receive it? Check your spam folder.
+                      </p>
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={onLogin}
+                      className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30"
+                    >
+                      Go to Login
+                    </button>
+                  </div>
+                ) : (
+                  <>
                 {/* Mobile Logo */}
               
 
@@ -258,6 +298,8 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                     </button>
                   </div>
                 </form>
+                </>
+                )}
               </div>
             </div>
           </div>
