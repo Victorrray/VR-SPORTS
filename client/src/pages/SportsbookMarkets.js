@@ -567,6 +567,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return getAutoSelectedMarkets(sports);
   };
 
+  // Debug: Log what markets are being requested
+  console.log('🏈 PERIOD MARKETS DEBUG: marketsForMode includes period markets:', 
+    marketsForMode.filter(m => m.includes('_q') || m.includes('_h') || m.includes('_p')));
+  
   const { 
     games: marketGames = [], 
     books: marketBooks = [], 
