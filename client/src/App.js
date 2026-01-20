@@ -54,6 +54,17 @@ function AppRoutes() {
   const [mobileSearchCallback, setMobileSearchCallback] = useState(null);
   const [debugPanelOpen, setDebugPanelOpen] = useState(false);
 
+  // Handle Supabase auth redirects with hash params (email confirmation, password recovery)
+  // Supabase may redirect to root URL with hash params like #access_token=...&type=signup
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && (hash.includes('access_token') || hash.includes('error_description') || hash.includes('type='))) {
+      // Redirect to auth callback page to handle the auth flow properly
+      console.log('🔐 Detected auth hash params, redirecting to /auth/callback');
+      window.location.href = `/auth/callback${hash}`;
+    }
+  }, []);
+
   // Clear mobile search callback when navigating away from sportsbooks
   useEffect(() => {
     if (!location.pathname.startsWith('/sportsbooks')) {
