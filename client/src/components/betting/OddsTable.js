@@ -2215,6 +2215,18 @@ export default function OddsTable({
 
     const gameRows = [];
     gamesToProcess?.forEach((game) => {
+      // Debug: Log all markets available in this game's bookmakers
+      const allMarketsInGame = new Set();
+      game.bookmakers?.forEach(bk => {
+        bk.markets?.forEach(m => allMarketsInGame.add(m.key));
+      });
+      const periodMarketsFound = [...allMarketsInGame].filter(k => 
+        k.includes('_q') || k.includes('_h') || k.includes('_p') || k.includes('_1st')
+      );
+      if (periodMarketsFound.length > 0) {
+        console.log(`🏈 PERIOD MARKETS FOUND in ${game.home_team} vs ${game.away_team}:`, periodMarketsFound);
+      }
+      
       // Base markets + all period markets that might be in the game data
       const baseKeys = [
         "h2h", "spreads", "totals",
