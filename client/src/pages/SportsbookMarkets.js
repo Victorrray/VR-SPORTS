@@ -271,11 +271,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const [refreshCooldown, setRefreshCooldown] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   
-  // Auto-refresh toggle state (default: disabled)
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(() => {
-    const saved = localStorage.getItem('autoRefreshEnabled');
-    return saved !== null ? saved === 'true' : false; // Default to disabled
-  });
+  // Auto-refresh toggle state (default: ALWAYS disabled - ignore localStorage)
+  // This prevents unexpected refreshes that can clear data
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false);
   
   // Toggle auto-refresh and save to localStorage
   const toggleAutoRefresh = () => {
