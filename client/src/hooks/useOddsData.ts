@@ -2050,15 +2050,16 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           case 'alternate_totals_corners': return 'alternate_totals_corners';
           case 'alternate_totals_cards': return 'alternate_totals_cards';
           
-          // All markets - request ALL available markets for the sport
-          // NOTE: TheOddsAPI only officially supports: h2h, spreads, totals, outrights
-          // Quarter/half/period markets are NOT supported and will return no data
+          // All markets - request available markets for the sport
+          // NOTE: Main /odds endpoint only supports h2h, spreads, totals
+          // Quarter/half/period markets are supported via /events/{eventId}/odds endpoint
+          // The backend handles this separation - we send all desired markets and backend routes appropriately
           case 'all':
           default: {
-            // Base markets for all sports - ONLY officially supported markets
+            // Base markets for all sports (main /odds endpoint)
             const baseMarkets = ['h2h', 'spreads', 'totals'];
             
-            // Soccer-specific markets that ARE supported
+            // Soccer-specific markets
             const soccerMarkets = ['h2h_3_way', 'draw_no_bet', 'btts'];
             
             // Check if any soccer sports are included
