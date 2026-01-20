@@ -593,41 +593,40 @@ const refreshMarkets = useMemo(() => throttle(() => {
   }
 }, 5000), [fetchMarkets, isLoading, enabled]);
 
-// Set up auto-refresh and initial fetch
+// Initial fetch when params change (this is intentional - user changed filters)
 useEffect(() => {
   if (!enabled) {
     setIsLoading(false);
-    return () => {
-      if (stableFetch.current?.cancel) {
-        stableFetch.current.cancel();
-      }
-    };
+    return;
   }
 
-  // Initial fetch
+  // Initial fetch when params change
   fetchMarkets();
   
-  // Set up refresh interval only if autoRefresh is enabled
-  let refreshInterval;
-  if (autoRefresh) {
-    // Start the refresh interval
-    refreshInterval = setInterval(refreshMarkets, 30000); // Refresh every 30 seconds
-    console.log('🔄 Auto-refresh enabled (30s interval)');
-    
-    // Clean up
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-      activeRequest.current = null;
-    };
-  } else {
-    console.log('⏸️ Auto-refresh disabled');
-    return () => {
-      activeRequest.current = null;
-    };
+  return () => {
+    activeRequest.current = null;
+  };
+}, [enabled, fetchMarkets, paramsKey]);
+
+// Separate effect for auto-refresh interval ONLY
+useEffect(() => {
+  if (!enabled || !autoRefresh) {
+    console.log('⏸️ Auto-refresh disabled or hook disabled');
+    return;
   }
-}, [enabled, autoRefresh, fetchMarkets, refreshMarkets, paramsKey]);
+
+  // Set up refresh interval only if autoRefresh is enabled
+  console.log('🔄 Auto-refresh enabled (30s interval)');
+  const refreshInterval = setInterval(refreshMarkets, 30000); // Refresh every 30 seconds
+  
+  // Clean up
+  return () => {
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      console.log('🔄 Auto-refresh interval cleared');
+    }
+  };
+}, [enabled, autoRefresh, refreshMarkets]);
 
 useEffect(() => {
   if (games) {
