@@ -2302,37 +2302,39 @@ export default function OddsTable({
         Object.entries(grouped).forEach(([groupKey, outcomes]) => {
           if (!outcomes.length) return;
 
-          // For spreads/totals, group by point value first, then select best odds within each line
+          // For spreads/totals, ONLY show if ALL books have the SAME line
+          // This ensures accurate EV calculation and fair comparison
           let filteredOutcome;
           if (isSpreadMarket || isTotalMarket) {
             // Group outcomes by their point value
             const outcomesByPoint = {};
             outcomes.forEach(outcome => {
-              const pt = outcome?.point != null ? Number(outcome.point).toFixed(2) : 'NA';
+              const pt = outcome?.point != null ? Number(outcome.point).toFixed(1) : 'NA';
               if (!outcomesByPoint[pt]) outcomesByPoint[pt] = [];
               outcomesByPoint[pt].push(outcome);
             });
             
-            // Find the line with the most books (most common line)
-            let bestLine = null;
-            let maxBooks = 0;
-            Object.entries(outcomesByPoint).forEach(([line, lineOutcomes]) => {
-              if (lineOutcomes.length > maxBooks) {
-                maxBooks = lineOutcomes.length;
-                bestLine = line;
-              }
-            });
+            // Get all unique lines
+            const uniqueLines = Object.keys(outcomesByPoint);
             
-            // Select best odds from the most common line
-            const outcomesForBestLine = outcomesByPoint[bestLine] || outcomes;
-            filteredOutcome = outcomesForBestLine.reduce((best, current) => {
+            // CRITICAL: Skip this outcome if books have different lines
+            // Different lines = different bets, can't compare accurately
+            if (uniqueLines.length > 1) {
+              console.log(`⚠️ SKIPPING ${groupKey}: Books have different lines (${uniqueLines.join(', ')}) - cannot compare accurately`);
+              return; // Skip this outcome entirely
+            }
+            
+            // All books have the same line - proceed with best odds selection
+            const singleLine = uniqueLines[0];
+            const outcomesForLine = outcomesByPoint[singleLine] || outcomes;
+            filteredOutcome = outcomesForLine.reduce((best, current) => {
               if (!best) return current;
               const bestOdds = Number(best.price ?? best.odds ?? 0);
               const currentOdds = Number(current.price ?? current.odds ?? 0);
               const bestDecimal = americanToDecimal(bestOdds) || -Infinity;
               const currentDecimal = americanToDecimal(currentOdds) || -Infinity;
               return currentDecimal > bestDecimal ? current : best;
-            }, outcomesForBestLine[0]);
+            }, outcomesForLine[0]);
           } else {
             // For non-spread markets, just pick best odds
             filteredOutcome = outcomes.reduce((best, current) => {

@@ -790,10 +790,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const now = new Date();
     
     // First, filter by sport (selected sports)
+    // IMPORTANT: If 'all' is selected, don't filter by sport - show all games
     let sportFilteredGames = marketGames;
-    if (filters.sports && filters.sports.length > 0) {
+    if (filters.sports && filters.sports.length > 0 && !filters.sports.includes('all')) {
       sportFilteredGames = marketGames.filter(game => filters.sports.includes(game.sport_key));
     }
+    // If 'all' is selected, show all games (no sport filtering)
     
     // ALWAYS filter out games that have already started (past/completed games)
     // This prevents stale cached data from showing old games
