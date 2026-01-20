@@ -819,6 +819,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               
               // Merge period market data with existing game
               if (eventData.bookmakers) {
+                let mergedCount = 0;
                 eventData.bookmakers.forEach(pBookmaker => {
                   const existingBookmaker = game.bookmakers.find(b => b.key === pBookmaker.key);
                   if (existingBookmaker && pBookmaker.markets) {
@@ -826,10 +827,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                     pBookmaker.markets.forEach(pMarket => {
                       if (!existingMarketKeys.includes(pMarket.key)) {
                         existingBookmaker.markets.push(pMarket);
+                        mergedCount++;
                       }
                     });
+                  } else if (pBookmaker.markets && pBookmaker.markets.length > 0) {
+                    // Bookmaker not in base game - add it with period markets only
+                    game.bookmakers.push(pBookmaker);
+                    mergedCount += pBookmaker.markets.length;
                   }
                 });
+                console.log(`📅 Merged ${mergedCount} period markets for ${game.away_team} @ ${game.home_team}`);
               }
             } catch (gameErr) {
               console.error(`❌ Period markets error for ${game.id}:`, gameErr.message);
