@@ -2936,9 +2936,9 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       <div className="space-y-3">
                         {/* Table Header */}
                         <div className={`grid grid-cols-3 gap-3 px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs`}>Book</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Over' : pick.team1.split(' ').pop()}</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Under' : pick.team2.split(' ').pop()}</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-white'} font-bold text-xs`}>Book</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-white'} font-bold text-xs text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Over' : pick.team1.split(' ').pop()}</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-white'} font-bold text-xs text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Under' : pick.team2.split(' ').pop()}</div>
                         </div>
 
                         {/* Table Rows */}
