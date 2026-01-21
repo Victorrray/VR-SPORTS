@@ -2064,20 +2064,37 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           // The backend handles this separation - we send all desired markets and backend routes appropriately
           case 'all':
           default: {
-            // Base markets for all sports (main /odds endpoint)
-            const baseMarkets = ['h2h', 'spreads', 'totals'];
+            // Send ALL markets including period markets - backend handles routing to correct endpoints
+            const allMarkets = [
+              // Core markets
+              'h2h', 'spreads', 'totals',
+              // Alternate markets
+              'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals',
+              // Quarter markets (Basketball, Football)
+              'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+              'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+              'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+              // Half markets (Basketball, Football)
+              'h2h_h1', 'h2h_h2',
+              'spreads_h1', 'spreads_h2',
+              'totals_h1', 'totals_h2',
+              // Period markets (Hockey)
+              'h2h_p1', 'h2h_p2', 'h2h_p3',
+              'spreads_p1', 'spreads_p2', 'spreads_p3',
+              'totals_p1', 'totals_p2', 'totals_p3'
+            ];
             
             // Soccer-specific markets
-            const soccerMarkets = ['h2h_3_way', 'draw_no_bet', 'btts'];
+            const soccerMarkets = ['h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'];
             
             // Check if any soccer sports are included
             const hasSoccer = sportKey.includes('soccer_');
             
             if (hasSoccer) {
-              return [...baseMarkets, ...soccerMarkets].join(',');
+              return [...allMarkets, ...soccerMarkets].join(',');
             }
             
-            return baseMarkets.join(',');
+            return allMarkets.join(',');
           }
         }
       };
