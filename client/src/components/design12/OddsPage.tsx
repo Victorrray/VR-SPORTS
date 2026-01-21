@@ -2937,8 +2937,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         {/* Table Header */}
                         <div className={`grid grid-cols-3 gap-3 px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs`}>Book</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp ? 'Over' : pick.team1.split(' ').pop()}</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp ? 'Under' : pick.team2.split(' ').pop()}</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Over' : pick.team1.split(' ').pop()}</div>
+                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Under' : pick.team2.split(' ').pop()}</div>
                         </div>
 
                         {/* Table Rows */}
@@ -3024,8 +3024,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         {/* Header Row */}
                         <div className={`grid grid-cols-3 gap-6 px-6 py-3 ${isLight ? 'border-gray-200' : 'border-white/10'} border-b`}>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm`}>Book</div>
-                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp ? 'Over' : (pick.team1 || 'Side 1')}</div>
-                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp ? 'Under' : (pick.team2 || 'Side 2')}</div>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Over' : (pick.team1 || 'Side 1')}</div>
+                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp || pick.marketKey === 'totals' || pick.marketKey?.startsWith('totals_') || pick.marketKey?.includes('alternate_totals') ? 'Under' : (pick.team2 || 'Side 2')}</div>
                         </div>
 
                         {/* Data Rows */}
