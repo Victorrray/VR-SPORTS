@@ -357,21 +357,11 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     ? (filters.sports.length > 0 ? expandSports(filters.sports) : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
     : expandSports(filters.sports);
     
-  // Log the sports being used for the current mode
-  console.log(`🎯 Sports for ${isPlayerPropsMode ? 'Player Props' : 'Straight Bets'} mode:`, sportsForMode);
   
   const hasPlatinum = me?.plan === 'platinum' || me?.unlimited === true;
   const hasGoldOrBetter = me?.plan === 'gold' || me?.plan === 'platinum';
   const isOverQuota = !hasGoldOrBetter && me?.calls_made >= (me?.limit || 250);
   
-  // Debug logging for arbitrage access
-  console.log('🔍 Arbitrage Debug:', {
-    isArbitrageMode,
-    hasPlatinum,
-    userPlan: me?.plan,
-    userId: user?.id,
-    me: me
-  });
 
   // Market categories for organization
   const MARKET_CATEGORIES = {
@@ -745,9 +735,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     return getAutoSelectedMarkets(sports);
   };
 
-  // Debug: Log what markets are being requested
-  console.log('🏈 PERIOD MARKETS DEBUG: marketsForMode includes period markets:', 
-    marketsForMode.filter(m => m.includes('_q') || m.includes('_h') || m.includes('_p')));
   
   const { 
     games: marketGames = [], 
@@ -863,7 +850,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     const handleStorageChange = () => {
       const newSelectedBooks = getUserSelectedSportsbooks();
       updateFilter("sportsbooks", newSelectedBooks);
-      updateFilter("sportsbooks", newSelectedBooks);
     };
 
     // Listen for storage changes (when user updates selections in MySportsbooks)
@@ -910,8 +896,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   useEffect(() => {
     const initialMarkets = getAutoSelectedMarkets(filters.sports);
     updateFilter("markets", initialMarkets);
-    updateFilter("markets", initialMarkets);
-    console.log('🎯 Initial auto-selected markets:', initialMarkets);
+    console.log('🎯 Initial auto-selected markets:', initialMarkets.length);
   }, []); // Run only once on mount
 
   // Migration function to fix old invalid market names
@@ -976,26 +961,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   // Removed auto-selection logic - users should be able to select individual player prop markets
 
-  // Debug logging after marketGames is available
-  console.log('🎯 Markets hook params:', {
-    sportsForMode,
-    sports: filters.sports,
-    isPlayerPropsMode,
-    date: filters.date,
-    marketsForMode,
-    marketGamesCount: marketGames?.length || 0,
-    sportsbooks: filters.sportsbooks
-  });
-  
-  // Debug: Log games by sport
-  if (marketGames?.length > 0) {
-    const gamesBySport = marketGames.reduce((acc, game) => {
-      const sport = game.sport_key || 'unknown';
-      acc[sport] = (acc[sport] || 0) + 1;
-      return acc;
-    }, {});
-    console.log('📊 Games by sport:', gamesBySport);
-  }
 
   // Update bookList when marketBooks changes
   useEffect(() => {
@@ -1084,84 +1049,47 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     }
   }, [marketsLoading, filteredGames.length]);
 
-  // Auto-select all relevant markets when sports change (draft state)
-  // Track if user has explicitly selected markets in the modal
-  const [userHasSelectedMarkets, setUserHasSelectedMarkets] = useState(false);
-  // Track if user has explicitly selected markets in the APPLIED state (for API calls)
-  const [userHasAppliedMarketSelection, setUserHasAppliedMarketSelection] = useState(false);
+  // Single consolidated effect for auto-selecting markets when sports change
+  // This replaces multiple competing effects that were causing conflicts
+  const prevSportsRef = React.useRef(filters.sports);
   
   useEffect(() => {
-    if (filters.sports && filters.sports.length > 0) {
-      // Only auto-select if user hasn't explicitly selected markets yet
-      if (!userHasSelectedMarkets) {
-        const autoSelectedMarkets = getAutoSelectedMarkets(filters.sports);
-        updateFilter("markets", autoSelectedMarkets);
-        console.log('🎯 Auto-selected draft markets for sports:', filters.sports, '→', autoSelectedMarkets);
-      } else {
-        // User has made a selection - respect it (even if it's empty = "all markets")
-        console.log('🎯 User has selected markets - keeping selection:', filters.markets);
-      }
+    // Only run when sports actually change (not on every render)
+    const sportsChanged = JSON.stringify(prevSportsRef.current) !== JSON.stringify(filters.sports);
+    if (!sportsChanged) return;
+    
+    prevSportsRef.current = filters.sports;
+    
+    if (!filters.sports || filters.sports.length === 0) return;
+    
+    // Auto-select markets based on selected sports
+    const autoSelectedMarkets = getAutoSelectedMarkets(filters.sports);
+    if (autoSelectedMarkets.length > 0) {
+      updateFilter("markets", autoSelectedMarkets);
     }
-  }, [filters.sports, userHasSelectedMarkets]);
+  }, [filters.sports]);
 
-  // Auto-update draft player prop markets when draft sports change
+  // Auto-update player prop markets when sport changes (only in player props mode)
   useEffect(() => {
-    if (showPlayerProps && filters.sports && filters.sports.length > 0) {
-      const sportBasedMarkets = getPlayerPropMarketsBySport(filters.sports);
-      const availableMarketKeys = sportBasedMarkets
-        .filter(market => !market.isHeader)
-        .map(market => market.key);
-      
-      // Check if current draft selection contains markets that don't exist for the draft sport
-      const hasInvalidMarkets = (filters.playerPropMarkets || []).some(market => 
-        !availableMarketKeys.includes(market)
-      );
-      
-      // If we have invalid markets in draft selection, update to appropriate markets for new sport
-      if (hasInvalidMarkets) {
-        // Get first 3 valid markets for the new sport
-        const newMarkets = availableMarketKeys.slice(0, 3);
-        
-        console.log('🎯 Updating draft player prop markets for sport change:', {
-          draftSports: filters.sports,
-          oldDraftMarkets: filters.playerPropMarkets,
-          newMarkets: newMarkets,
-          availableMarkets: availableMarketKeys
-        });
-        
-        updateFilter("playerPropMarkets", newMarkets);
-      }
+    if (!showPlayerProps || !filters.sports || filters.sports.length === 0) return;
+    
+    const sportBasedMarkets = getPlayerPropMarketsBySport(filters.sports);
+    const availableMarketKeys = sportBasedMarkets
+      .filter(market => !market.isHeader)
+      .map(market => market.key);
+    
+    // Check if current selection has invalid markets for the selected sport
+    const currentMarkets = filters.playerPropMarkets || [];
+    const hasInvalidMarkets = currentMarkets.some(market => 
+      !availableMarketKeys.includes(market)
+    );
+    
+    // Update only if we have invalid markets
+    if (hasInvalidMarkets && availableMarketKeys.length > 0) {
+      const newMarkets = availableMarketKeys.slice(0, 3);
+      updateFilter("playerPropMarkets", newMarkets);
     }
   }, [filters.sports, showPlayerProps]);
-
-
-  // Auto-select all relevant markets when applied sports change
-  // BUT: Don't override user's explicit market selection
-  useEffect(() => {
-    if (filters.sports && filters.sports.length > 0) {
-      // If user has explicitly selected markets, don't auto-select
-      if (userHasAppliedMarketSelection) {
-        console.log('🎯 User has applied market selection - NOT auto-selecting markets');
-        return;
-      }
-      
-      // Get all relevant markets for the selected sports
-      const autoSelectedMarkets = getAutoSelectedMarkets(filters.sports);
-      
-      // If we already have some markets selected, merge them with the auto-selected ones
-      // to ensure we don't lose any markets when adding new sports
-      if (filters.markets && filters.markets.length > 0) {
-        // Create a Set to avoid duplicates
-        const combinedMarkets = new Set([...filters.markets, ...autoSelectedMarkets]);
-        updateFilter("markets", Array.from(combinedMarkets));
-        console.log('🎯 Combined markets for sports:', filters.sports, '→', Array.from(combinedMarkets));
-      } else {
-        // If no markets are selected yet, use the auto-selected ones
-        updateFilter("markets", autoSelectedMarkets);
-        console.log('🎯 Auto-selected markets for sports:', filters.sports, '→', autoSelectedMarkets);
-      }
-    }
-  }, [filters.sports, userHasAppliedMarketSelection]);
 
   // Enhanced player props loading state - show loading until props are populated
   useEffect(() => {
@@ -1261,19 +1189,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     
     // Removed auto-include logic - users should be able to select individual DFS apps
     
-    // Debug logging for filtering issues
-    console.log('🎯 Bookmaker Filtering Debug:', {
-      mode: isPlayerPropsMode ? 'Player Props' : 'Straight Bets',
-      sportsbooks: filters.sportsbooks,
-      playerPropSportsbooks: filters.playerPropSportsbooks,
-      currentSelectedBooks: currentSelectedBooks,
-      selectedBooksLength: currentSelectedBooks?.length || 0,
-      marketBooks: marketBooks?.map(b => b.key) || [],
-      effectiveSelectedBooks: result.length ? result : 'ALL BOOKS (empty filter)',
-      effectiveLength: result.length,
-      isShowingAllBooks: result.length === 0
-    });
-    
     return result;
   }, [filters.sportsbooks, filters.playerPropSportsbooks, marketBooks, isPlayerPropsMode]);
 
@@ -1282,36 +1197,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setShowMobileSearch(false);
   };
 
-  // Fetch sports list for filters - Include ALL available sports
+  // Fetch sports list for filters
   useEffect(() => {
     const fetchSports = async () => {
       try {
-        console.log('🏈 Fetching sports list from API...');
         const response = await secureFetch(withApiBase('/api/sports'), { credentials: 'include' });
-        
         if (response.ok) {
           const sports = await response.json();
-          console.log('✅ Sports API response:', { 
-            totalSports: sports.length, 
-            sports: sports.map(s => ({ key: s.key, title: s.title }))
-          });
-          
-          // Use ALL sports from the API, not just major US sports
-          // This allows users to select "all sports" and see all available sports
           setSportList(sports.length > 0 ? sports : AVAILABLE_SPORTS);
         } else {
-          console.error('❌ Sports API error:', { 
-            status: response.status, 
-            statusText: response.statusText,
-            url: response.url
-          });
-          console.warn('⚠️ Using fallback sports list');
           setSportList(AVAILABLE_SPORTS);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch sports list:', error);
-        console.warn('⚠️ Using fallback sports list');
-        // Fallback to available sports
         setSportList(AVAILABLE_SPORTS);
       }
     };
@@ -1322,32 +1219,13 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // When modal opens, filters are already available via context
 
   const handleApplyFilters = () => {
-    // Show loading immediately when filters are applied
     setFiltersLoading(true);
-    
-    console.log('🏈 Applying filters:', {
-      sports: filters.sports,
-      date: filters.date,
-      sportsbooks: filters.sportsbooks,
-      playerPropSportsbooks: filters.playerPropSportsbooks,
-      markets: filters.markets,
-      playerPropMarkets: filters.playerPropMarkets,
-      dataPoints: filters.dataPoints,
-      playerPropsMode: showPlayerProps
-    });
-    
-    // Apply filters via context (handles state update and localStorage persistence)
     contextApplyFilters();
-    
-    // Close modal immediately so user sees the new data loading
     setMobileFiltersOpen(false);
-
-    // Force OddsTable to re-render with new filters
     setTableNonce(prev => prev + 1);
 
     // Trigger data refresh after filters are applied
     setTimeout(() => {
-      console.log('🔄 Triggering refresh after filter application');
       if (refreshMarkets) {
         refreshMarkets();
       }

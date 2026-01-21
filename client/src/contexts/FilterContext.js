@@ -73,7 +73,7 @@ export function FilterProvider({ children }) {
   // Reset all filters to defaults
   const resetFilters = useCallback(() => {
     const defaults = {
-      sports: ['americanfootball_nfl', 'americanfootball_ncaaf'],
+      sports: ['americanfootball_nfl', 'basketball_nba', 'icehockey_nhl'],
       date: '',
       markets: ['h2h', 'spreads', 'totals'],
       sportsbooks: [],
