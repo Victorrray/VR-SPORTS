@@ -126,7 +126,7 @@ export function AccountPage({
       {onNavigateToSettings && (
         <button
           onClick={onNavigateToSettings}
-          className={`absolute top-0 right-0 p-2.5 ${isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl ${isLight ? 'hover:from-purple-200 hover:to-indigo-200' : 'hover:from-purple-500/30 hover:to-indigo-500/30'} transition-all z-10`}
+          className={`absolute top-0 right-0 p-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl ${isLight ? 'hover:bg-purple-200' : 'hover:bg-purple-500/40'} transition-all z-10`}
         >
           <Settings className="w-5 h-5" />
         </button>
@@ -155,7 +155,7 @@ export function AccountPage({
         </div>
 
         <div className="flex items-center gap-6 mb-6">
-          <div className={`w-20 h-20 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/30 to-indigo-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+          <div className={`w-20 h-20 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
             <User className={`w-10 h-10 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
           </div>
           <div className="flex-1">
@@ -349,7 +349,7 @@ export function AccountPage({
                 </p>
                 <button 
                   onClick={onNavigateToChangePlan}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold text-sm"
+                  className="w-full px-4 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-400 transition-all font-bold text-sm"
                 >
                   Upgrade Now
                 </button>

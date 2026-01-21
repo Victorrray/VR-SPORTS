@@ -116,7 +116,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
         <div className="mb-2">
           <span className={`px-2.5 py-0.5 ${
             isHero || isDark
-              ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300' 
+              ? 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
           } backdrop-blur-xl border rounded-full font-bold text-xs`}>
             {bet.sport}
@@ -318,7 +318,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 <div className="flex justify-end">
                   <button
                     onClick={handleAddToPicks}
-                    className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
+                    className="p-1.5 bg-purple-500 rounded-xl hover:bg-purple-400 transition-all flex items-center justify-center"
                   >
                     <Plus className="w-4 h-4 text-white" />
                   </button>

@@ -10,7 +10,7 @@ export function CTA() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-white mb-4 md:mb-6 font-bold" style={{fontSize: 'clamp(2rem, 6vw, 3.5rem)'}}>
             Ready to start{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-purple-400 bg-clip-text text-transparent">
               winning?
             </span>
           </h2>
@@ -20,7 +20,7 @@ export function CTA() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
               onClick={() => navigate('/signup')}
-              className="w-full sm:w-auto px-8 py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all text-center font-semibold"
+              className="w-full sm:w-auto px-8 py-3 md:py-4 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all text-center font-semibold"
             >
               Get started free
             </button>

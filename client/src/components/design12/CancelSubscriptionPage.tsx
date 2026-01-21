@@ -268,7 +268,7 @@ export function CancelSubscriptionPage({ onBack, onNavigateToChangePlan }: Cance
           </div>
 
           {/* Platinum Plan */}
-          <div className={`p-6 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/50'} backdrop-blur-2xl border rounded-2xl`}>
+          <div className={`p-6 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br bg-purple-500/20 border-purple-400/50'} backdrop-blur-2xl border rounded-2xl`}>
             <div className="flex items-center gap-3 mb-4">
               <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-purple-100' : 'bg-purple-500/20'} flex items-center justify-center`}>
                 <Crown className={`w-6 h-6 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
@@ -302,7 +302,7 @@ export function CancelSubscriptionPage({ onBack, onNavigateToChangePlan }: Cance
             </ul>
             <button
               onClick={onNavigateToChangePlan}
-              className={`w-full px-4 py-3 ${isLight ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'} rounded-xl font-bold transition-all`}
+              className={`w-full px-4 py-3 ${isLight ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-500 text-white hover:bg-purple-600'} rounded-xl font-bold transition-all`}
             >
               Upgrade to Platinum
             </button>

@@ -79,8 +79,8 @@ export function MobileBottomBar() {
                 {active && (
                   <div className={`absolute bottom-0 left-0 right-0 h-1 ${
                     isLight
-                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500'
-                      : 'bg-gradient-to-r from-purple-400 to-indigo-400'
+                      ? 'bg-purple-500'
+                      : 'bg-purple-400'
                   }`} />
                 )}
               </Link>

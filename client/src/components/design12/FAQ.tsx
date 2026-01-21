@@ -50,7 +50,7 @@ export function FAQ() {
           
           <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">
             Frequently Asked{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-purple-400 bg-clip-text text-transparent">
               Questions
             </span>
           </h2>
@@ -83,7 +83,7 @@ export function FAQ() {
                     {faq.question}
                   </span>
                   
-                  <div className={`flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                  <div className={`flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-500 flex items-center justify-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
                     {isOpen ? (
                       <Minus className="w-5 h-5 text-white" />
                     ) : (

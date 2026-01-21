@@ -160,7 +160,7 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
             className={`relative ${
               plan.current
                 ? isLight
-                  ? 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-300'
+                  ? 'bg-purple-50 border-purple-300'
                   : 'bg-gradient-to-br from-purple-500/20 via-indigo-500/20 to-purple-500/10 border-purple-400/50'
                 : isLight
                 ? lightModeColors.statsCard
@@ -235,9 +235,9 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
                     : 'bg-white/10 border-white/20 text-white/50 cursor-not-allowed'
                   : plan.current
                   ? isLight
-                    ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border-purple-300 hover:from-purple-200 hover:to-indigo-200'
-                    : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border-purple-400/30 hover:from-purple-500/40 hover:to-indigo-500/40'
-                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-purple-400/30 hover:from-purple-400 hover:to-indigo-400'
+                    ? 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200'
+                    : 'bg-gradient-to-r bg-purple-500/30 text-white border-purple-400/30 hover:bg-purple-500/50'
+                  : 'bg-purple-500 text-white border-purple-400/30 hover:bg-purple-400'
               } border`}
             >
               {plan.buttonText}

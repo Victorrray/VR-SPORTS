@@ -45,7 +45,7 @@ export function Pricing({ onGetStarted }: PricingProps = {}) {
         <div className="text-center mb-12 md:mb-16">
           <h2 className="text-white mb-4 font-bold" style={{fontSize: 'clamp(2rem, 6vw, 3.5rem)'}}>
             Simple,{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-purple-400 bg-clip-text text-transparent">
               transparent pricing
             </span>
           </h2>
@@ -58,14 +58,14 @@ export function Pricing({ onGetStarted }: PricingProps = {}) {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border ${
+              className={`relative bg-gradient-to-br bg-purple-500/20 backdrop-blur-xl border ${
                 plan.popular ? 'border-purple-400/50' : 'border-purple-400/30'
               } rounded-2xl p-6 md:p-8 shadow-xl ${
                 plan.popular ? 'shadow-purple-500/20' : 'shadow-purple-500/10'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full text-xs font-bold shadow-lg shadow-purple-500/50 flex items-center gap-1.5">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-purple-500 text-white rounded-full text-xs font-bold shadow-lg shadow-purple-500/50 flex items-center gap-1.5">
                   <Crown className="w-3.5 h-3.5" />
                   Most Popular
                 </div>
@@ -102,7 +102,7 @@ export function Pricing({ onGetStarted }: PricingProps = {}) {
 
               <button 
                 onClick={onGetStarted}
-                className="w-full py-3 md:py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center"
+                className="w-full py-3 md:py-4 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center"
               >
                 Get Started
               </button>

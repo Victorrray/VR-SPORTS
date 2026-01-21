@@ -26,11 +26,11 @@ export function Terms({ onBack, onLoginClick, onDashboardClick, onSignUpClick, o
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <div className="text-center mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6">
               <FileText className="w-4 h-4 text-purple-400" />
               <span className="text-purple-400 text-sm font-medium">Terms of Service</span>
             </div>
-            <h1 className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
+            <h1 className="bg-purple-400 bg-clip-text text-transparent mb-4">
               Terms of Service
             </h1>
             <p className="text-white/60 leading-relaxed">

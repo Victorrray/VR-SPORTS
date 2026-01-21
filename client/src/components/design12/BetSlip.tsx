@@ -147,7 +147,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* Bet Details Card */}
-            <div className={`${isLight ? 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200' : 'bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border-purple-400/20'} border rounded-xl p-4 space-y-3`}>
+            <div className={`${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/10 border-purple-400/20'} border rounded-xl p-4 space-y-3`}>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base mb-1`}>
@@ -242,8 +242,8 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                     className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 0.25
                         ? isLight
-                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 border-purple-400/50 text-white'
+                          ? 'bg-purple-100 border-purple-300 text-purple-700'
+                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
@@ -256,8 +256,8 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                     className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 0.5
                         ? isLight
-                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 border-purple-400/50 text-white'
+                          ? 'bg-purple-100 border-purple-300 text-purple-700'
+                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
@@ -270,8 +270,8 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                     className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 0.75
                         ? isLight
-                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 border-purple-400/50 text-white'
+                          ? 'bg-purple-100 border-purple-300 text-purple-700'
+                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
@@ -284,8 +284,8 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                     className={`py-2 px-3 rounded-xl font-bold text-xs transition-all border ${
                       kellyFraction === 1
                         ? isLight
-                          ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 border-purple-400/50 text-white'
+                          ? 'bg-purple-100 border-purple-300 text-purple-700'
+                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
@@ -365,7 +365,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                   ? isLight
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-white/5 text-white/30 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white'
+                  : 'bg-purple-500 hover:bg-purple-400 text-white'
               }`}
             >
               {isSubmitting ? (

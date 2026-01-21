@@ -32,7 +32,7 @@ export function Features() {
         >
           <h2 className="text-white mb-4 font-bold" style={{fontSize: 'clamp(2rem, 6vw, 3.5rem)'}}>
             Everything you need to{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-purple-400 bg-clip-text text-transparent">
               win
             </span>
           </h2>
@@ -45,13 +45,13 @@ export function Features() {
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 transition-all"
+              className="bg-gradient-to-br bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 transition-all"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center mb-4 md:mb-6">
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-purple-500 rounded-xl flex items-center justify-center mb-4 md:mb-6">
                 <feature.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
               </div>
               <h3 className="text-white mb-2 md:mb-3 font-bold text-lg md:text-xl">

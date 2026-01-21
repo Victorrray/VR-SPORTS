@@ -75,7 +75,7 @@ export function BetCard({ bet, variant = 'default', showActions = true }: BetCar
         <div className="mb-2">
           <span className={`px-2 py-0.5 ${
             isHero || isDark
-              ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300' 
+              ? 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
           } backdrop-blur-xl border rounded-lg font-bold text-xs`}>
             {bet.sport}
@@ -168,7 +168,7 @@ export function BetCard({ bet, variant = 'default', showActions = true }: BetCar
               className={`px-3 py-2 ${
                 isAdded 
                   ? 'bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 border-emerald-400/30' 
-                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30'
+                  : 'bg-purple-500 hover:bg-purple-400 border-purple-400/30'
               } text-white rounded-lg transition-all font-bold text-xs border text-center flex items-center justify-center gap-1.5`}
             >
               {isAdded ? (
@@ -292,7 +292,7 @@ export function BetCard({ bet, variant = 'default', showActions = true }: BetCar
                 <div className="flex justify-end">
                   <button
                     onClick={handleAddToPicks}
-                    className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg hover:from-purple-400 hover:to-indigo-400 transition-all"
+                    className="p-1.5 bg-purple-500 rounded-lg hover:bg-purple-400 transition-all"
                   >
                     <Plus className="w-4 h-4 text-white" />
                   </button>

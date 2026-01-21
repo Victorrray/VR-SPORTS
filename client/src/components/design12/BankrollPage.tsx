@@ -135,7 +135,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowAddFunds(!showAddFunds)}
-            className={`px-4 py-2.5 ${isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border-purple-300 hover:from-purple-200 hover:to-indigo-200' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-white hover:from-purple-500/30 hover:to-indigo-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm flex items-center gap-2 whitespace-nowrap`}
+            className={`px-4 py-2.5 ${isLight ? 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-white hover:bg-purple-500/40'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm flex items-center gap-2 whitespace-nowrap`}
           >
             <Plus className="w-4 h-4" />
             <span className="hidden md:inline">Add/Withdraw</span>
@@ -149,7 +149,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className={`p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
           <div className="flex items-center gap-3 mb-3">
-            <div className={`p-2 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-xl border`}>
+            <div className={`p-2 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-xl border`}>
               <Wallet className={`w-4 h-4 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
             </div>
             <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-xs uppercase tracking-wide`}>
@@ -348,7 +348,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
                   onClick={() => setStrategy('kelly')}
                   className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                     strategy === 'kelly'
-                      ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
+                      ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r bg-purple-500/30 text-white border border-purple-400/30'
                       : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                   }`}
                 >
@@ -358,7 +358,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
                   onClick={() => setStrategy('flat')}
                   className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                     strategy === 'flat'
-                      ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
+                      ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r bg-purple-500/30 text-white border border-purple-400/30'
                       : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                   }`}
                 >
@@ -368,7 +368,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
                   onClick={() => setStrategy('percentage')}
                   className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${
                     strategy === 'percentage'
-                      ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white border border-purple-400/30'
+                      ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r bg-purple-500/30 text-white border border-purple-400/30'
                       : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                   }`}
                 >
@@ -431,7 +431,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
             )}
 
             {/* Recommended Bet Display */}
-            <div className={`p-4 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border-purple-400/20'} border rounded-xl`}>
+            <div className={`p-4 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/10 border-purple-400/20'} border rounded-xl`}>
               <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold mb-1`}>
                 Your Next Bet Should Be
               </div>
@@ -456,7 +456,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
           {savedPicks.length === 0 ? (
             /* Empty State */
             <div className="flex flex-col items-center justify-center py-12 px-4">
-              <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
+              <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
                 <Activity className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
               </div>
               <h4 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg mb-2`}>No Activity Yet</h4>
@@ -553,7 +553,7 @@ export function BankrollPage({ savedPicks = [] }: BankrollPageProps) {
           </ul>
         </div>
         
-        <div className={`p-4 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border-purple-400/20'} border rounded-xl`}>
+        <div className={`p-4 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/10 border-purple-400/20'} border rounded-xl`}>
           <div className={`${isLight ? 'text-purple-700' : 'text-purple-400'} font-bold text-sm mb-2 flex items-center gap-2`}>
             <Target className="w-4 h-4" />
             Strategy Recommendations

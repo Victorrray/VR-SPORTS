@@ -93,7 +93,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
               </button>
 
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/50">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500 flex items-center justify-center shadow-lg shadow-purple-500/50">
                   <span className="text-white font-bold text-xl">OS</span>
                 </div>
                 <div>
@@ -104,7 +104,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
 
               <h2 className="text-white text-4xl md:text-5xl font-bold leading-tight">
                 Start Winning{' '}
-                <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                <span className="bg-purple-400 bg-clip-text text-transparent">
                   Today
                 </span>
               </h2>
@@ -133,7 +133,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
             </button>
 
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/80 to-purple-900/30 backdrop-blur-xl border border-white/10 p-8 md:p-10 shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-indigo-500/10"></div>
+              <div className="absolute inset-0 bg-purple-500/10"></div>
               
               <div className="relative space-y-6">
                 {/* Success State - Check Your Email */}
@@ -167,7 +167,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                     <button
                       type="button"
                       onClick={onLogin}
-                      className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30"
+                      className="w-full bg-purple-500 text-white py-4 rounded-xl hover:bg-purple-400 transition-all font-bold shadow-lg shadow-purple-500/30"
                     >
                       Go to Login
                     </button>
@@ -241,7 +241,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-4 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold shadow-lg shadow-purple-500/30 text-center"
+                    className="w-full bg-purple-500 text-white py-4 rounded-xl hover:bg-purple-400 transition-all font-bold shadow-lg shadow-purple-500/30 text-center"
                   >
                     Create your account
                   </button>

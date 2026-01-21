@@ -173,8 +173,8 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
                 }}
                 className={`md:hidden flex items-center gap-2 px-3 py-3 rounded-xl font-bold transition-all shrink-0 ${
                   isLight 
-                    ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600' 
-                    : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
+                    ? 'bg-purple-500 text-white hover:bg-purple-600' 
+                    : 'bg-purple-500 text-white hover:bg-purple-600'
                 }`}
               >
                 <Calculator className="w-5 h-5" />
@@ -228,7 +228,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
                 {sports.map(sport => (
                   <button
                     key={sport}
-                    className={`px-3 py-1.5 ${selectedSports.includes(sport) ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-transparent' : isLight ? 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200' : 'bg-white/10 text-white/80 border-white/20 hover:bg-white/15'} border rounded-full transition-all font-bold`}
+                    className={`px-3 py-1.5 ${selectedSports.includes(sport) ? 'bg-purple-500 text-white border-transparent' : isLight ? 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200' : 'bg-white/10 text-white/80 border-white/20 hover:bg-white/15'} border rounded-full transition-all font-bold`}
                     onClick={() => toggleFilter(sport, selectedSports, setSelectedSports)}
                   >
                     {sport}
@@ -243,7 +243,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
                 {sportsbooks.map(book => (
                   <button
                     key={book}
-                    className={`px-3 py-1.5 ${selectedSportsbooks.includes(book) ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-transparent' : isLight ? 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200' : 'bg-white/10 text-white/80 border-white/20 hover:bg-white/15'} border rounded-full transition-all font-bold`}
+                    className={`px-3 py-1.5 ${selectedSportsbooks.includes(book) ? 'bg-purple-500 text-white border-transparent' : isLight ? 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200' : 'bg-white/10 text-white/80 border-white/20 hover:bg-white/15'} border rounded-full transition-all font-bold`}
                     onClick={() => toggleFilter(book, selectedSportsbooks, setSelectedSportsbooks)}
                   >
                     {book}
@@ -260,7 +260,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
         {allPicks.length === 0 ? (
           /* Empty State */
           <div className={`col-span-full flex flex-col items-center justify-center py-16 px-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
-            <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
+            <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
               <Target className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
             </div>
             <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl mb-2`}>No Picks Yet</h3>
@@ -277,7 +277,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
             >
               {/* Sport Badge & Status */}
               <div className="mb-3 flex items-center justify-between">
-                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl font-bold text-xs`}>
+                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl font-bold text-xs`}>
                   {pick.sport}
                 </span>
                 {/* Status Badge */}

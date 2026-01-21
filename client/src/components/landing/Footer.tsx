@@ -15,10 +15,10 @@ export function Footer({ onRoadmapClick, onPrivacyClick, onTermsClick, onDisclai
           {/* Brand */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center">
                 <span className="text-white font-bold">OS</span>
               </div>
-              <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent font-bold">
+              <span className="bg-purple-400 bg-clip-text text-transparent font-bold">
                 OddSightSeer
               </span>
             </div>

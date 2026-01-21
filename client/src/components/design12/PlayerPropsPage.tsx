@@ -831,7 +831,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       onChange={(e) => hasPlatinum && setAutoRefresh(e.target.checked)}
                       disabled={!hasPlatinum}
                     />
-                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-indigo-500 ${!hasPlatinum ? 'cursor-not-allowed' : ''}`}></div>
+                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:bg-purple-500 ${!hasPlatinum ? 'cursor-not-allowed' : ''}`}></div>
                   </label>
                 </div>
               </div>
@@ -892,7 +892,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedDate === date.id
-                            ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -943,7 +943,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedDate === date.id
-                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -994,7 +994,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                             onClick={() => toggleSportsbookFilter(book.id)}
                             className={`w-full text-left px-4 py-3 font-bold transition-all ${
                               selectedSportsbooks.includes(book.id)
-                                ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                                ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                                 : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                             }`}
                           >
@@ -1051,7 +1051,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                               onClick={() => toggleSportsbookFilter(book.id)}
                               className={`w-full text-left px-6 py-4 font-bold transition-all ${
                                 selectedSportsbooks.includes(book.id)
-                                  ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                                  ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                                   : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                               }`}
                             >
@@ -1093,7 +1093,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedSports.includes(sport.id)
-                            ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1144,7 +1144,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedSports.includes(sport.id)
-                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -1184,7 +1184,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedMarket === market.id
-                            ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1235,7 +1235,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedMarket === market.id
-                              ? isLight ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -1257,8 +1257,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                   }}
                   className={`w-full px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
                     isLight 
-                      ? 'bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-300 text-purple-700 hover:from-purple-200 hover:to-indigo-200' 
-                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 border-purple-400/30 text-white'
+                      ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' 
+                      : 'bg-purple-500 hover:bg-purple-400 border-purple-400/30 text-white'
                   }`}
                 >
                   Apply Filters
@@ -1343,7 +1343,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     <div className="lg:col-span-3 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {/* Sport Badge */}
-                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                           {pick.sport}
                         </span>
                       </div>
@@ -1399,7 +1399,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                     {/* Card Header */}
                     <div className={`p-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
                       <div className="mb-2">
-                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                           {pick.sport}
                         </span>
                       </div>
@@ -1567,7 +1567,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                                     description: `${pick.pick} at ${book.name} has been added to your picks`
                                   });
                                 }}
-                                className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
+                                className="p-1.5 bg-purple-500 rounded-xl hover:bg-purple-400 transition-all flex items-center justify-center"
                               >
                                 <Plus className="w-4 h-4 text-white" />
                               </button>
@@ -1688,7 +1688,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                                           analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
                                         });
                                       }}
-                                      className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
+                                      className="p-1.5 bg-purple-500 rounded-xl hover:bg-purple-400 transition-all flex items-center justify-center"
                                     >
                                       <Plus className="w-4 h-4 text-white" />
                                     </button>

@@ -157,7 +157,7 @@ const BillingSuccess = () => {
         <div className="action-buttons space-y-3">
           <Link
             to="/dashboard"
-            className="primary-button w-full inline-flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="primary-button w-full inline-flex items-center justify-center px-6 py-4 bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Start Using {isGold ? 'Gold' : 'Premium'} Features
             <ArrowRight size={18} className="ml-2" />

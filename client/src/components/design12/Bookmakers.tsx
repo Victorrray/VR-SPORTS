@@ -15,7 +15,7 @@ export function Bookmakers() {
       title: 'Top Tier Sportsbooks',
       count: 9,
       books: ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'BetOnline', 'Bovada', 'MyBookie', 'Fliff',],
-      gradient: 'from-purple-500 to-indigo-500',
+      gradient: 'bg-purple-500',
     },
     {
       icon: Gamepad2,
@@ -44,14 +44,14 @@ export function Bookmakers() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 md:mb-16 max-w-4xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 rounded-full mb-6">
             <Building2 className="w-4 h-4 text-white" />
             <span className="text-white font-bold">Complete Coverage</span>
           </div>
           
           <h2 className="text-white text-3xl md:text-5xl mb-6 font-bold">
             Compare Odds Across{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-purple-400 bg-clip-text text-transparent">
               40+ Bookmakers
             </span>
           </h2>

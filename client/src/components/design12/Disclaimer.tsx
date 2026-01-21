@@ -26,11 +26,11 @@ export function Disclaimer({ onBack, onLoginClick, onDashboardClick, onSignUpCli
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <div className="text-center mb-12 md:mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6">
               <AlertTriangle className="w-4 h-4 text-purple-400" />
               <span className="text-purple-400 text-sm font-medium">Important Disclaimer</span>
             </div>
-            <h1 className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
+            <h1 className="bg-purple-400 bg-clip-text text-transparent mb-4">
               Betting Disclaimer
             </h1>
             <p className="text-white/60 leading-relaxed">
@@ -40,7 +40,7 @@ export function Disclaimer({ onBack, onLoginClick, onDashboardClick, onSignUpCli
 
           {/* Content */}
           <div className="space-y-8">
-            <section className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/30 rounded-2xl p-6 md:p-8">
+            <section className="bg-purple-500/10 border border-purple-500/30 rounded-2xl p-6 md:p-8">
               <div className="flex items-start gap-4">
                 <AlertTriangle className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
                 <div>

@@ -34,7 +34,7 @@ export function FreeBetSection() {
         >
           <h2 className="text-white mb-3 font-bold text-3xl">
             Today's{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-purple-400 bg-clip-text text-transparent">
               Featured Pick
             </span>
           </h2>
@@ -64,7 +64,7 @@ export function FreeBetSection() {
         >
           <a 
             href="#pricing"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-sm mb-3"
+            className="inline-block px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-sm mb-3"
           >
             Get Premium Access
           </a>

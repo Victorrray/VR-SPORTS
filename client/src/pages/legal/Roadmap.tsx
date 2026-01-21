@@ -64,11 +64,11 @@ export function Roadmap() {
       case 'completed':
         return 'from-green-500 to-emerald-500';
       case 'in-progress':
-        return 'from-purple-500 to-indigo-500';
+        return 'bg-purple-500';
       case 'planned':
         return 'from-slate-500 to-slate-600';
       default:
-        return 'from-purple-500 to-indigo-500';
+        return 'bg-purple-500';
     }
   };
 
@@ -99,11 +99,11 @@ export function Roadmap() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-6">
             <Rocket className="w-4 h-4 text-purple-400" />
             <span className="text-purple-400 text-sm font-medium">Product Roadmap</span>
           </div>
-          <h1 className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
+          <h1 className="bg-purple-400 bg-clip-text text-transparent mb-4">
             Building the Future of Sports Betting
           </h1>
           <p className="text-white/60 max-w-2xl mx-auto leading-relaxed">
@@ -139,7 +139,7 @@ export function Roadmap() {
           {/* In Progress */}
           <div>
             <div className="flex items-center gap-3 mb-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl text-white font-medium shadow-lg">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 rounded-xl text-white font-medium shadow-lg">
                 <Zap className="w-5 h-5" />
                 <span>In Progress</span>
               </div>
@@ -151,7 +151,7 @@ export function Roadmap() {
                   .flatMap(item => item.features)
                   .map((feature, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <div className="w-2 h-2 rounded-full bg-white" />
                       </div>
                       <span className="text-white/80">{feature}</span>
@@ -187,12 +187,12 @@ export function Roadmap() {
 
         {/* CTA Section */}
         <div className="max-w-3xl mx-auto text-center mt-16 md:mt-20">
-          <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-2xl p-8 md:p-12">
+          <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-8 md:p-12">
             <h2 className="text-white mb-4">Have a Feature Request?</h2>
             <p className="text-white/60 mb-6 leading-relaxed">
               We're always listening to our community. Share your ideas and help shape the future of OddSightSeer.
             </p>
-            <button className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center">
+            <button className="px-8 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center">
               Submit Feedback
             </button>
           </div>

@@ -52,7 +52,7 @@ function QuotaModal({ open, detail, onClose }) {
             Continue Browsing
           </button>
           <button 
-            className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold transition-all duration-200 flex items-center justify-center gap-2" 
+            className="flex-1 px-4 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-all duration-200 flex items-center justify-center gap-2" 
             onClick={() => (window.location.href = "/pricing")}
           >
             <TrendingUp size={16} />

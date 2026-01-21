@@ -77,13 +77,13 @@ export const themeConfig = {
   "solid-gradient": {
     name: "Solid Gradient",
     background: "bg-gray-900",
-    card: "bg-gradient-to-br from-purple-600 to-indigo-700 shadow-2xl",
-    cardHover: "hover:from-purple-500 hover:to-indigo-600",
+    card: "bg-purple-600 shadow-2xl",
+    cardHover: "hover:bg-purple-600",
     badge:
       "bg-white/20 border border-white/30 text-white shadow-lg",
     evBadge: "bg-emerald-500 text-white shadow-lg",
     button:
-      "bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 shadow-lg",
+      "bg-purple-500 hover:bg-purple-400 shadow-lg",
     text: "text-white",
     textMuted: "text-white/80",
     input:
@@ -112,7 +112,7 @@ export const lightModeColors = {
   evBadge:
     "bg-emerald-100 text-emerald-700 border border-emerald-200",
   button:
-    "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md",
+    "bg-purple-600 hover:bg-purple-700 text-white shadow-md",
   buttonSecondary:
     "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300",
   input:
@@ -121,9 +121,9 @@ export const lightModeColors = {
   statsIcon: "bg-purple-100 border border-purple-200",
   statsIconColor: "text-purple-600",
   statsBadge: "bg-purple-100 text-purple-700",
-  logoGradient: "from-purple-600 to-indigo-600",
+  logoGradient: "bg-purple-600",
   navActive:
-    "bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-300 text-purple-900 shadow-md",
+    "bg-purple-100 border border-purple-300 text-purple-900 shadow-md",
   navInactive:
     "text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-transparent hover:border-gray-200",
   signOutButton:

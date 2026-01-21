@@ -19,10 +19,10 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignU
           <div className="flex items-center gap-3">
             <div className="relative group">
               {/* Glow effect */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 blur-xl opacity-40 group-hover:opacity-60 transition-opacity" />
+              <div className="absolute inset-0 rounded-2xl bg-purple-500 blur-xl opacity-40 group-hover:opacity-60 transition-opacity" />
               
               {/* Logo container */}
-              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 flex items-center justify-center transform transition-transform group-hover:scale-105">
+              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-purple-500 flex items-center justify-center transform transition-transform group-hover:scale-105">
                 <span className="text-white font-bold text-lg md:text-xl">OS</span>
                 {/* Shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl" />
@@ -30,7 +30,7 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignU
             </div>
             
             <div className="flex flex-col">
-              <span className="bg-gradient-to-r from-purple-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent font-bold text-lg md:text-xl tracking-tight">
+              <span className="bg-purple-400 bg-clip-text text-transparent font-bold text-lg md:text-xl tracking-tight">
                 OddSightSeer
               </span>
               <span className="text-xs text-white/40 font-bold tracking-wide">
@@ -74,7 +74,7 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignU
             </button>
             <button 
               onClick={onSignUpClick}
-              className="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-600 hover:to-indigo-600 transition-all font-semibold"
+              className="px-6 py-2.5 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all font-semibold"
             >
               Sign up
             </button>
@@ -123,7 +123,7 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignU
                 </button>
                 <button 
                   onClick={onSignUpClick}
-                  className="w-full px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all font-bold border border-purple-400/30"
+                  className="w-full px-6 py-2.5 bg-purple-500 text-white rounded-xl hover:bg-purple-400 transition-all font-bold border border-purple-400/30"
                 >
                   Sign up
                 </button>

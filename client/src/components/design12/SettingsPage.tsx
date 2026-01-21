@@ -318,7 +318,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
                       });
                     }
                   }}
-                  className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white rounded-xl font-bold transition-all"
+                  className="flex-1 py-3 bg-purple-500 hover:bg-purple-400 text-white rounded-xl font-bold transition-all"
                 >
                   Save
                 </button>
