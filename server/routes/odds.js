@@ -973,8 +973,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         console.log(`🎯 PLAYER PROPS: Events by sport:`, eventsBySport);
       }
       
-      // OPTIMIZATION: Fetch player props for all events in larger parallel batches
-      const MAX_CONCURRENT = 15; // Increased from 10 to 15
+      // OPTIMIZATION: Fetch player props with rate limiting to avoid 429 errors
+      const MAX_CONCURRENT = 5; // Reduced from 15 to 5 to avoid rate limiting
+      const DELAY_BETWEEN_BATCHES_MS = 1000; // 1 second delay between batches
       const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
       
       // Explicitly include DFS apps and sharp books for player props (including soccer)
@@ -1049,6 +1050,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         );
         
         await Promise.all(batchPromises);
+        
+        // Add delay between batches to avoid rate limiting (429 errors)
+        if (i + MAX_CONCURRENT < allEvents.length) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES_MS));
+        }
       }
       
       console.log(`🎯 PLAYER PROPS COMPLETE: Added ${playerPropsCount} events with player props`);
