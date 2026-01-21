@@ -534,9 +534,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const getAutoSelectedMarkets = (selectedSports) => {
     const relevantMarkets = getRelevantMarkets(selectedSports);
     // Filter out header items and only return actual market keys
-    // Include core, alternates, and team markets (period markets not supported by API)
+    // Include core, alternates, team, AND period markets
     return relevantMarkets
-      .filter(market => !market.isHeader && (market.category === 'core' || market.category === 'alternates' || market.category === 'team'))
+      .filter(market => !market.isHeader && (market.category === 'core' || market.category === 'alternates' || market.category === 'team' || market.category === 'periods'))
       .map(market => market.key);
   };
 
