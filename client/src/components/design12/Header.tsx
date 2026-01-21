@@ -30,7 +30,7 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
             </div>
             
             <div className="flex flex-col">
-              <span className="text-purple-400 font-bold text-lg md:text-xl tracking-tight">
+              <span className="text-white font-bold text-lg md:text-xl tracking-tight">
                 OddSightSeer
               </span>
               <span className="text-xs text-white/40 font-bold tracking-wide">

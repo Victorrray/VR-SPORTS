@@ -18,7 +18,7 @@ export function Footer({ onRoadmapClick, onPrivacyClick, onTermsClick, onDisclai
               <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center">
                 <span className="text-white font-bold">OS</span>
               </div>
-              <span className="text-purple-400 font-bold">
+              <span className="text-white font-bold">
                 OddSightSeer
               </span>
             </div>

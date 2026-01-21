@@ -512,39 +512,6 @@ export function CalculatorPage() {
         </div>
       </div>
 
-      {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className={`p-4 ${isLight ? 'bg-blue-50 border-blue-200' : 'bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-400/20'} border rounded-xl`}>
-          <div className={`${isLight ? 'text-blue-700' : 'text-blue-400'} font-bold text-sm mb-1`}>
-            💡 Tip
-          </div>
-          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold`}>
-            {mode === 'single' && 'Positive odds (+) show profit on $100 bet. Negative odds (-) show stake needed to profit $100.'}
-            {mode === 'parlay' && 'Parlays multiply odds but require all legs to win. Higher risk, higher reward.'}
-            {mode === 'arbitrage' && 'Arbitrage opportunities guarantee profit by betting all outcomes across different books.'}
-          </div>
-        </div>
-        
-        <div className={`p-4 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border-purple-400/20'} border rounded-xl`}>
-          <div className={`${isLight ? 'text-purple-700' : 'text-purple-400'} font-bold text-sm mb-1`}>
-            📊 Strategy
-          </div>
-          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold`}>
-            {mode === 'single' && 'Look for bets with positive expected value (EV) based on your win probability estimate.'}
-            {mode === 'parlay' && 'Parlays are fun but have lower EV. Use sparingly and with high-confidence picks.'}
-            {mode === 'arbitrage' && 'Requires accounts at multiple sportsbooks. Act quickly as odds change rapidly.'}
-          </div>
-        </div>
-        
-        <div className={`p-4 ${isLight ? 'bg-amber-50 border-amber-200' : 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-400/20'} border rounded-xl`}>
-          <div className={`${isLight ? 'text-amber-700' : 'text-amber-400'} font-bold text-sm mb-1`}>
-            ⚠️ Warning
-          </div>
-          <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-xs font-bold`}>
-            Always bet responsibly. Never wager more than you can afford to lose.
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
