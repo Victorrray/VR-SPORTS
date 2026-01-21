@@ -794,6 +794,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     //   });
     // }
     
+
     // Step 2: Fetch quarter/half/period markets if requested
     // NOTE: Period markets require /events/{eventId}/odds endpoint (one call per game)
     // OPTIMIZATION: Only fetch for games starting within 24 hours to reduce API costs
@@ -818,17 +819,18 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const allSportGames = allGames.filter(g => g.sport_key === sport);
           console.log(`🏈 PERIOD MARKETS: ${sport} has ${allSportGames.length} total games`);
           
+          // Expanded to 7 days (168 hours) to catch NFL games scheduled for the weekend
+          const PERIOD_MARKET_WINDOW_HOURS = 168; // 7 days
           const sportGames = allSportGames
             .filter(g => {
               const gameTime = new Date(g.commence_time).getTime();
               const hoursUntilGame = (gameTime - now) / (1000 * 60 * 60);
-              // Expanded to 48 hours to catch more games
-              return hoursUntilGame > 0 && hoursUntilGame <= 48;
+              return hoursUntilGame > 0 && hoursUntilGame <= PERIOD_MARKET_WINDOW_HOURS;
             })
             .slice(0, MAX_GAMES_FOR_PERIOD_MARKETS);
           
           if (sportGames.length === 0) {
-            console.log(`🏈 PERIOD MARKETS: No games within 48h for ${sport}, skipping period market fetch`);
+            console.log(`🏈 PERIOD MARKETS: No games within ${PERIOD_MARKET_WINDOW_HOURS}h for ${sport}, skipping period market fetch`);
             continue;
           }
           
