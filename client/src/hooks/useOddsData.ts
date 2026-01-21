@@ -1708,8 +1708,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         const periodLabel = getPeriodLabel(marketKey);
         
-        lineGroups.forEach((books, point) => {
-          if (books.length < 2) return;
+        // LIMIT: Only show top 3 alternate lines per market (closest to main line)
+        // Convert to array, sort by number of books (more books = more relevant), take top 3
+        const sortedLines = Array.from(lineGroups.entries())
+          .filter(([_, books]) => books.length >= 4) // Require minimum 4 books
+          .sort((a, b) => b[1].length - a[1].length) // Sort by book count (most first)
+          .slice(0, 3); // Only keep top 3 lines
+        
+        sortedLines.forEach(([point, books]) => {
           
           const bestBook = books.reduce((best, book) => {
             const bestOdds = parseInt(best.odds, 10);
@@ -1729,19 +1735,16 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             pickDescription = `${teamName} Over ${point}${periodLabel ? ` ${periodLabel}` : ''}`;
           }
           
-          const hasEnoughData = books.length >= 4;
-          let ev = '--';
-          
-          if (hasEnoughData) {
-            const oddsValues = books.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
-            const bookKeys = books.map(b => b.key || b.name || '');
-            const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-            // Use weighted average based on book sharpness
-            const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
-            const bestProb = toProb(parseInt(bestBook.odds, 10));
-            const evValue = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
-          }
+          // Already filtered for 4+ books above
+          const hasEnoughData = true;
+          const oddsValues = books.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
+          const bookKeys = books.map(b => b.key || b.name || '');
+          const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
+          // Use weighted average based on book sharpness
+          const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
+          const bestProb = toProb(parseInt(bestBook.odds, 10));
+          const evValue = ((avgProb - bestProb) / bestProb) * 100;
+          const ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
           
           allPicks.push({
             id: `${game.id || gameIdx + 1}-${marketKey}-${point}`,
@@ -2426,7 +2429,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }
           
           const books = pick.allBooks || pick.books || [];
-          if (books.length < 2) {
+          // Require minimum 4 books for meaningful comparison
+          if (books.length < 4) {
             debugStats.noBooks++;
             return;
           }
