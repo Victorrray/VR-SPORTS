@@ -2952,9 +2952,11 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           >
                             <div className="flex flex-col">
                               <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
-                              {(pick.line !== null && pick.line !== undefined && !pick.isPlayerProp) && (
+                              {!pick.isPlayerProp && (pick.line !== null && pick.line !== undefined ? (
                                 <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.line}</span>
-                              )}
+                              ) : pick.pick?.match(/[+-]?\d+\.?\d*/)?.[0] && (
+                                <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.pick.match(/[+-]?\d+\.?\d*/)?.[0]}</span>
+                              ))}
                             </div>
                             <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.overOdds || book.odds)}</div>
                             <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.underOdds || book.team2Odds)}</div>
@@ -3039,9 +3041,11 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           >
                             <div>
                               <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                              {(pick.line !== null && pick.line !== undefined && !pick.isPlayerProp) && (
+                              {!pick.isPlayerProp && (pick.line !== null && pick.line !== undefined ? (
                                 <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.line}</div>
-                              )}
+                              ) : pick.pick?.match(/[+-]?\d+\.?\d*/)?.[0] && (
+                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.pick.match(/[+-]?\d+\.?\d*/)?.[0]}</div>
+                              ))}
                             </div>
                             <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{formatOdds(book.overOdds || book.odds)}</div>
                             <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{(book.underOdds || book.team2Odds) && (book.underOdds || book.team2Odds) !== '--' ? formatOdds(book.underOdds || book.team2Odds) : '--'}</div>
