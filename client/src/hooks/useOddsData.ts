@@ -2820,9 +2820,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
       // Filter out player props for straight bets mode
       // This is a safeguard in case the server returns player props data
+      // Player props should ONLY appear when betType === 'props'
       const filterPlayerPropsForStraightBets = (picks: OddsPick[]) => {
-        if (betType !== 'straight') return picks;
-        return picks.filter(pick => !pick.isPlayerProp);
+        if (betType === 'props') return picks; // Keep player props only for props view
+        return picks.filter(pick => !pick.isPlayerProp); // Filter out player props for all other views
       };
 
       // Filter out stale/expired bets (those with game times in the past)
