@@ -214,13 +214,28 @@ async function fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsM
   });
   
   const allEventsArrays = await Promise.all(eventsPromises);
-  const allEvents = allEventsArrays.flat();
+  let allEvents = allEventsArrays.flat();
   
-  console.log(`🎯 PLAYER PROPS FETCH: Found ${allEvents.length} total events across ${sportsArray.length} sports`);
+  // Filter out soccer events (no player props for soccer)
+  // and limit to major US sports for faster loading
+  const PLAYER_PROPS_SPORTS = ['americanfootball_nfl', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl'];
+  allEvents = allEvents.filter(e => PLAYER_PROPS_SPORTS.includes(e.sport_key));
   
-  // Rate limiting config - keep low to avoid 429 errors from TheOddsAPI
-  const MAX_CONCURRENT = 3;
-  const DELAY_BETWEEN_BATCHES_MS = 1500; // Longer delay to avoid rate limits
+  // Limit total events to prevent timeout - prioritize by sport
+  const MAX_EVENTS_FOR_PROPS = 30;
+  if (allEvents.length > MAX_EVENTS_FOR_PROPS) {
+    // Prioritize NFL, then NBA, then NHL, then NCAAB
+    const sportPriority = { 'americanfootball_nfl': 1, 'basketball_nba': 2, 'icehockey_nhl': 3, 'basketball_ncaab': 4 };
+    allEvents.sort((a, b) => (sportPriority[a.sport_key] || 99) - (sportPriority[b.sport_key] || 99));
+    allEvents = allEvents.slice(0, MAX_EVENTS_FOR_PROPS);
+    console.log(`🎯 PLAYER PROPS: Limited to ${MAX_EVENTS_FOR_PROPS} events (prioritized by sport)`);
+  }
+  
+  console.log(`🎯 PLAYER PROPS FETCH: Processing ${allEvents.length} events across ${sportsArray.length} sports`);
+  
+  // Rate limiting config - balance speed vs rate limits
+  const MAX_CONCURRENT = 5;
+  const DELAY_BETWEEN_BATCHES_MS = 800;
   const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
   
   // DFS apps and sharp books
