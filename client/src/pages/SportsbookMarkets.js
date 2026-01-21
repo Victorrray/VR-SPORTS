@@ -393,7 +393,21 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
       // Team-Specific
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
-      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
+      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' },
+      // Quarter Markets
+      { key: 'h2h_q1', title: '1Q Moneyline', description: 'First quarter winner', category: 'periods' },
+      { key: 'h2h_q2', title: '2Q Moneyline', description: 'Second quarter winner', category: 'periods' },
+      { key: 'spreads_q1', title: '1Q Spread', description: 'First quarter spread', category: 'periods' },
+      { key: 'spreads_q2', title: '2Q Spread', description: 'Second quarter spread', category: 'periods' },
+      { key: 'totals_q1', title: '1Q Total', description: 'First quarter total', category: 'periods' },
+      { key: 'totals_q2', title: '2Q Total', description: 'Second quarter total', category: 'periods' },
+      // Half Markets
+      { key: 'h2h_h1', title: '1H Moneyline', description: 'First half winner', category: 'periods' },
+      { key: 'h2h_h2', title: '2H Moneyline', description: 'Second half winner', category: 'periods' },
+      { key: 'spreads_h1', title: '1H Spread', description: 'First half spread', category: 'periods' },
+      { key: 'spreads_h2', title: '2H Spread', description: 'Second half spread', category: 'periods' },
+      { key: 'totals_h1', title: '1H Total', description: 'First half total', category: 'periods' },
+      { key: 'totals_h2', title: '2H Total', description: 'Second half total', category: 'periods' }
     ],
     basketball: [
       // Core Markets
@@ -405,7 +419,27 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available totals', category: 'alternates' },
       // Team-Specific
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
-      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' }
+      { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' },
+      // Quarter Markets
+      { key: 'h2h_q1', title: '1Q Moneyline', description: 'First quarter winner', category: 'periods' },
+      { key: 'h2h_q2', title: '2Q Moneyline', description: 'Second quarter winner', category: 'periods' },
+      { key: 'h2h_q3', title: '3Q Moneyline', description: 'Third quarter winner', category: 'periods' },
+      { key: 'h2h_q4', title: '4Q Moneyline', description: 'Fourth quarter winner', category: 'periods' },
+      { key: 'spreads_q1', title: '1Q Spread', description: 'First quarter spread', category: 'periods' },
+      { key: 'spreads_q2', title: '2Q Spread', description: 'Second quarter spread', category: 'periods' },
+      { key: 'spreads_q3', title: '3Q Spread', description: 'Third quarter spread', category: 'periods' },
+      { key: 'spreads_q4', title: '4Q Spread', description: 'Fourth quarter spread', category: 'periods' },
+      { key: 'totals_q1', title: '1Q Total', description: 'First quarter total', category: 'periods' },
+      { key: 'totals_q2', title: '2Q Total', description: 'Second quarter total', category: 'periods' },
+      { key: 'totals_q3', title: '3Q Total', description: 'Third quarter total', category: 'periods' },
+      { key: 'totals_q4', title: '4Q Total', description: 'Fourth quarter total', category: 'periods' },
+      // Half Markets
+      { key: 'h2h_h1', title: '1H Moneyline', description: 'First half winner', category: 'periods' },
+      { key: 'h2h_h2', title: '2H Moneyline', description: 'Second half winner', category: 'periods' },
+      { key: 'spreads_h1', title: '1H Spread', description: 'First half spread', category: 'periods' },
+      { key: 'spreads_h2', title: '2H Spread', description: 'Second half spread', category: 'periods' },
+      { key: 'totals_h1', title: '1H Total', description: 'First half total', category: 'periods' },
+      { key: 'totals_h2', title: '2H Total', description: 'Second half total', category: 'periods' }
     ],
     baseball: [
       // Core Markets
@@ -427,7 +461,17 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_spreads', title: 'Alt Puck Lines', description: 'All available puck lines', category: 'alternates' },
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available goal totals', category: 'alternates' },
       // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' }
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' },
+      // Period Markets (NHL has 3 periods)
+      { key: 'h2h_p1', title: '1P Moneyline', description: 'First period winner', category: 'periods' },
+      { key: 'h2h_p2', title: '2P Moneyline', description: 'Second period winner', category: 'periods' },
+      { key: 'h2h_p3', title: '3P Moneyline', description: 'Third period winner', category: 'periods' },
+      { key: 'spreads_p1', title: '1P Spread', description: 'First period spread', category: 'periods' },
+      { key: 'spreads_p2', title: '2P Spread', description: 'Second period spread', category: 'periods' },
+      { key: 'spreads_p3', title: '3P Spread', description: 'Third period spread', category: 'periods' },
+      { key: 'totals_p1', title: '1P Total', description: 'First period total', category: 'periods' },
+      { key: 'totals_p2', title: '2P Total', description: 'Second period total', category: 'periods' },
+      { key: 'totals_p3', title: '3P Total', description: 'Third period total', category: 'periods' }
     ],
     soccer: [
       // Core Markets
