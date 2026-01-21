@@ -727,6 +727,9 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   };
 
   
+  // DEBUG: Log markets being sent to API
+  console.log('🎯 marketsForMode count:', marketsForMode.length, 'markets:', marketsForMode.slice(0, 5).join(', '), '...');
+  
   const { 
     games: marketGames = [], 
     books: marketBooks = [], 
