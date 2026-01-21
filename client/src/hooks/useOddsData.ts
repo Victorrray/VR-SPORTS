@@ -2543,7 +2543,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 // Use a high confidence indicator since exchange refuses to offer this side
                 const impliedEdge = 15; // High confidence signal
                 
-                const line = pick.line || exchangeLine;
+                // CRITICAL: Extract numeric line only - avoid duplicating "Over" or "Under" in description
+                let numericLine = pick.line || exchangeLine;
+                
+                // If line is not a number, try to extract it from the pick description
+                if (numericLine === undefined || numericLine === null || isNaN(Number(numericLine))) {
+                  // Try to extract number from pick description like "Over 3.5" -> 3.5
+                  const pickDesc = pick.pick || '';
+                  const lineMatch = pickDesc.match(/[\d.]+/);
+                  if (lineMatch) {
+                    numericLine = parseFloat(lineMatch[0]);
+                  }
+                }
+                
                 let newPickDescription: string;
                 
                 // Check if this is truly a player prop (must have BOTH isPlayerProp flag AND playerName)
@@ -2552,10 +2564,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 if (isTruePlayerProp) {
                   // Player prop: "Player Name Over 6.5 Market"
                   const marketName = (pick as any).marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || '';
-                  newPickDescription = `${pick.playerName} ${missingSide} ${line} ${marketName}`.trim();
+                  newPickDescription = `${pick.playerName} ${missingSide} ${numericLine} ${marketName}`.trim();
                 } else {
                   // Game market (totals): "Over 6.5" or spreads: "Team +3.5"
-                  newPickDescription = `${missingSide} ${line}`;
+                  newPickDescription = `${missingSide} ${numericLine}`;
                 }
                 
                 
@@ -2665,7 +2677,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             debugStats.passed++;
             
             // Update pick description to reflect correct side
-            const line = pick.line || exchangeLine;
+            // CRITICAL: Extract numeric line only - avoid duplicating "Over" or "Under" in description
+            let numericLine = pick.line || exchangeLine;
+            
+            // If line is not a number, try to extract it from the pick description
+            if (numericLine === undefined || numericLine === null || isNaN(Number(numericLine))) {
+              // Try to extract number from pick description like "Over 3.5" -> 3.5
+              const pickDesc = pick.pick || '';
+              const lineMatch = pickDesc.match(/[\d.]+/);
+              if (lineMatch) {
+                numericLine = parseFloat(lineMatch[0]);
+              }
+            }
+            
             let newPickDescription: string;
             
             // Check if this is truly a player prop (must have BOTH isPlayerProp flag AND playerName)
@@ -2674,10 +2698,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             if (isTruePlayerProp) {
               // Player prop: "Player Name Over 6.5 Market"
               const marketName = (pick as any).marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || '';
-              newPickDescription = `${pick.playerName} ${pickSide} ${line} ${marketName}`.trim();
+              newPickDescription = `${pick.playerName} ${pickSide} ${numericLine} ${marketName}`.trim();
             } else {
               // Game market (totals): "Over 6.5" or spreads: "Team +3.5"
-              newPickDescription = `${pickSide} ${line}`;
+              newPickDescription = `${pickSide} ${numericLine}`;
             }
             
             filtered.push({
@@ -2836,6 +2860,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         });
       };
       
+      // Filter out picks with unrealistic EV (bad data)
+      // EV over 100% is almost certainly stale/bad data
+      const filterUnrealisticEV = (picks: OddsPick[]) => {
+        return picks.filter(pick => {
+          const evStr = pick.ev || '0%';
+          const evNum = parseFloat(evStr.replace('%', ''));
+          if (isNaN(evNum)) return true; // Keep if can't parse
+          return evNum <= 100; // Filter out anything over 100% EV
+        });
+      };
+      
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
@@ -2848,6 +2883,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForExchanges(transformedPicks);
         transformedPicks = filterExpiredBets(transformedPicks);
         transformedPicks = filterEmptyBooks(transformedPicks);
+        transformedPicks = filterUnrealisticEV(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
@@ -2865,6 +2901,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForExchanges(transformedPicks);
         transformedPicks = filterExpiredBets(transformedPicks);
         transformedPicks = filterEmptyBooks(transformedPicks);
+        transformedPicks = filterUnrealisticEV(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
