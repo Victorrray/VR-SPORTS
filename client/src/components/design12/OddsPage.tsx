@@ -2952,7 +2952,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           >
                             <div className="flex flex-col">
                               <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
-                              {(pick.marketKey === 'totals' || pick.marketKey === 'spreads' || pick.marketKey?.includes('alternate_') || pick.marketKey?.startsWith('totals_') || pick.marketKey?.startsWith('spreads_')) && (pick.line !== null && pick.line !== undefined) && (
+                              {(pick.line !== null && pick.line !== undefined && !pick.isPlayerProp) && (
                                 <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.line}</span>
                               )}
                             </div>
@@ -3039,7 +3039,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           >
                             <div>
                               <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                              {(pick.marketKey === 'totals' || pick.marketKey === 'spreads' || pick.marketKey?.includes('alternate_') || pick.marketKey?.startsWith('totals_') || pick.marketKey?.startsWith('spreads_')) && (pick.line !== null && pick.line !== undefined) && (
+                              {(pick.line !== null && pick.line !== undefined && !pick.isPlayerProp) && (
                                 <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.line}</div>
                               )}
                             </div>
