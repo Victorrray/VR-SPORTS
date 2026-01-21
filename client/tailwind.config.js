@@ -21,6 +21,20 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        // Custom purple color #6c00ff
+        purple: {
+          50: '#f5f0ff',
+          100: '#ede0ff',
+          200: '#dcc6ff',
+          300: '#c49dff',
+          400: '#a864ff',
+          500: '#6c00ff',  // Main purple
+          600: '#5c00db',
+          700: '#4d00b8',
+          800: '#400096',
+          900: '#33007a',
+          950: '#1a003d',
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
