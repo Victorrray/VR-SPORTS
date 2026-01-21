@@ -526,14 +526,18 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   
   // Filter books for mini table based on bet type
   // For exchanges: only show filtered sportsbook + exchange comparison book
-  // For spreads: only show books with the same line as the pick
+  // For spreads/totals: only show books with the same line as the pick
   const getMinitableBooks = (allBooks: any[], pickData: any) => {
     let booksToFilter = allBooks;
     
-    // For spreads, filter to only show books with the SAME line as the pick
-    // This prevents showing +1.5 when the pick is -1.5
+    // For spreads AND totals, filter to only show books with the SAME line as the pick
+    // This prevents showing alternate lines (e.g., Over 44.5 when pick is Over 43.5)
     const marketKey = pickData.marketKey || '';
-    if (marketKey === 'spreads' || marketKey.startsWith('spreads_')) {
+    const isSpreadOrTotal = marketKey === 'spreads' || marketKey.startsWith('spreads_') ||
+                            marketKey === 'totals' || marketKey.startsWith('totals_') ||
+                            marketKey.includes('alternate_');
+    
+    if (isSpreadOrTotal) {
       const pickLine = pickData.line;
       if (pickLine !== null && pickLine !== undefined) {
         booksToFilter = allBooks.filter(book => {
@@ -543,6 +547,15 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
         });
       }
     }
+    
+    // Deduplicate by book name - keep only one entry per sportsbook
+    const seenBooks = new Set<string>();
+    booksToFilter = booksToFilter.filter(book => {
+      const bookName = (book.name || '').toLowerCase();
+      if (seenBooks.has(bookName)) return false;
+      seenBooks.add(bookName);
+      return true;
+    });
     
     if (selectedBetType === 'exchanges') {
       // For exchanges, only show:
