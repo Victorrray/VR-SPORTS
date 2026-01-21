@@ -2847,20 +2847,37 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       
       // Filter out picks with insufficient comparison books (empty mini-table)
       // Use the user's minDataPoints setting (default 4) to filter
+      // CRITICAL: For spreads/totals, only count books that match the pick's line
       const filterEmptyBooks = (picks: OddsPick[]) => {
         const requiredBooks = Math.max(minDataPoints || 4, 2); // At least 2, respect user setting
         return picks.filter(pick => {
           const books = pick.books || pick.allBooks || [];
+          const pickLine = pick.line;
+          const marketKey = pick.marketKey || '';
+          
+          // For spreads/totals, only count books with matching line (same logic as mini-table)
+          const isSpreadOrTotal = marketKey === 'spreads' || marketKey.startsWith('spreads_') ||
+                                  marketKey === 'totals' || marketKey.startsWith('totals_') ||
+                                  marketKey.includes('alternate_');
+          
+          let booksToCount = books;
+          if (isSpreadOrTotal && pickLine !== null && pickLine !== undefined) {
+            booksToCount = books.filter((b: any) => {
+              if (b.line === null || b.line === undefined) return false;
+              return Math.abs(Number(b.line) - Number(pickLine)) < 0.5; // Same tolerance as mini-table
+            });
+          }
+          
           // For exchanges mode, we need non-exchange books for comparison
           if (betType === 'exchanges') {
             const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
-            const nonExchangeBooks = books.filter((b: any) => {
+            const nonExchangeBooks = booksToCount.filter((b: any) => {
               const bookName = (b.name || '').toLowerCase();
               return !EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
             });
             return nonExchangeBooks.length >= requiredBooks;
           }
-          return books.length >= requiredBooks;
+          return booksToCount.length >= requiredBooks;
         });
       };
       
