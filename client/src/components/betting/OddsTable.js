@@ -313,7 +313,9 @@ function formatLine(line, marketKey, mode="game") {
   if (line == null || line === "") return "";
   const n = Number(line); if (isNaN(n)) return line;
   if (mode === "props") return n;
-  if (String(marketKey).toLowerCase() === "totals") return n;
+  // For totals markets, just return the number (no +/- prefix)
+  const mktLower = String(marketKey).toLowerCase();
+  if (mktLower === "totals" || mktLower.includes("total")) return n;
   return n > 0 ? `+${n}` : `${n}`;
 }
 function formatMarket(key="") {
@@ -3803,10 +3805,11 @@ export default function OddsTable({
                             : (() => {
                                 // For game mode, show line for non-h2h markets
                                 const mktKey = row.mkt?.key || '';
-                                const point = row.out?.point;
+                                // CRITICAL FIX: Use allBooks[0].point as fallback since row.out.point may be missing
+                                const point = row.out?.point ?? row.allBooks?.[0]?.point ?? row.line;
                                 // Debug: Log the point value for totals
                                 if (mktKey.includes('total')) {
-                                  console.log(`🎯 TOTALS LINE DEBUG: mktKey=${mktKey}, point=${point}, type=${typeof point}, allBooks[0].point=${row.allBooks?.[0]?.point}`);
+                                  console.log(`🎯 TOTALS LINE DEBUG: mktKey=${mktKey}, row.out.point=${row.out?.point}, allBooks[0].point=${row.allBooks?.[0]?.point}, finalPoint=${point}`);
                                 }
                                 if (mktKey === 'h2h' || point == null) return '';
                                 return ` ${formatLine(point, mktKey, 'game')}`;
