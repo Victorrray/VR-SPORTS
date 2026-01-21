@@ -2539,10 +2539,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 // Use a high confidence indicator since exchange refuses to offer this side
                 const impliedEdge = 15; // High confidence signal
                 
-                const marketName = pick.marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || pick.pick?.split(' ').slice(-1)[0] || '';
-                const playerName = pick.playerName || pick.pick?.split(' ')[0] || '';
                 const line = pick.line || exchangeLine;
-                const newPickDescription = `${playerName} ${missingSide} ${line} ${marketName}`;
+                let newPickDescription: string;
+                
+                if (pick.isPlayerProp && pick.playerName) {
+                  // Player prop: "Player Name Over 6.5 Market"
+                  const marketName = (pick as any).marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || '';
+                  newPickDescription = `${pick.playerName} ${missingSide} ${line} ${marketName}`.trim();
+                } else {
+                  // Game market (totals): "Over 6.5" or spreads: "Team +3.5"
+                  newPickDescription = `${missingSide} ${line}`;
+                }
                 
                 
                 debugStats.passed++;
@@ -2651,11 +2658,17 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             debugStats.passed++;
             
             // Update pick description to reflect correct side
-            // Use the original marketKey/marketName to preserve combo market names like "Rebounds + Assists"
-            const marketName = pick.marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || pick.pick?.split(' ').slice(-1)[0] || '';
-            const playerName = pick.playerName || pick.pick?.split(' ')[0] || '';
             const line = pick.line || exchangeLine;
-            const newPickDescription = `${playerName} ${pickSide} ${line} ${marketName}`;
+            let newPickDescription: string;
+            
+            if (pick.isPlayerProp && pick.playerName) {
+              // Player prop: "Player Name Over 6.5 Market"
+              const marketName = (pick as any).marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || '';
+              newPickDescription = `${pick.playerName} ${pickSide} ${line} ${marketName}`.trim();
+            } else {
+              // Game market (totals): "Over 6.5" or spreads: "Team +3.5"
+              newPickDescription = `${pickSide} ${line}`;
+            }
             
             filtered.push({
               ...pick,
