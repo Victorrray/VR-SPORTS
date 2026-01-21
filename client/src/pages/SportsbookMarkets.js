@@ -290,21 +290,43 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const isArbitrageMode = showArbitrage;
   const isMiddlesMode = showMiddles;
   
-  // Markets to send to API - uses user's filter selection
-  // For player props: use player prop market keys
-  // For straight bets: use filters.markets (which includes period markets when "all" is selected)
+  // Markets to send to API - ALWAYS include period markets for straight bets
+  // The backend will filter to only supported markets per sport
   const marketsForMode = useMemo(() => {
     if (isPlayerPropsMode) {
       return PLAYER_PROP_MARKET_KEYS;
     }
-    // Use the user's selected markets from filters
-    // This includes period markets when they're selected
-    if (filters.markets && filters.markets.length > 0) {
-      return filters.markets;
-    }
-    // Fallback to core markets if nothing selected
-    return ["h2h", "spreads", "totals"];
-  }, [isPlayerPropsMode, filters.markets]);
+    // ALWAYS send all markets including period markets
+    // The backend filters to only supported markets per sport
+    // This ensures period markets are always requested when available
+    const allMarkets = [
+      // Core markets
+      "h2h", "spreads", "totals",
+      // Alternate markets
+      "alternate_spreads", "alternate_totals", "team_totals", "alternate_team_totals",
+      // Soccer-specific markets
+      "h2h_3_way", "draw_no_bet", "btts", "double_chance",
+      // Quarter markets (Basketball, Football)
+      "h2h_q1", "h2h_q2", "h2h_q3", "h2h_q4",
+      "spreads_q1", "spreads_q2", "spreads_q3", "spreads_q4",
+      "totals_q1", "totals_q2", "totals_q3", "totals_q4",
+      "team_totals_q1", "team_totals_q2", "team_totals_q3", "team_totals_q4",
+      // Half markets (Basketball, Football)
+      "h2h_h1", "h2h_h2",
+      "spreads_h1", "spreads_h2",
+      "totals_h1", "totals_h2",
+      "team_totals_h1", "team_totals_h2",
+      // Period markets (Hockey)
+      "h2h_p1", "h2h_p2", "h2h_p3",
+      "spreads_p1", "spreads_p2", "spreads_p3",
+      "totals_p1", "totals_p2", "totals_p3",
+      // Innings markets (Baseball)
+      "h2h_1st_1_innings", "h2h_1st_3_innings", "h2h_1st_5_innings",
+      "spreads_1st_1_innings", "spreads_1st_3_innings", "spreads_1st_5_innings",
+      "totals_1st_1_innings", "totals_1st_3_innings", "totals_1st_5_innings"
+    ];
+    return allMarkets;
+  }, [isPlayerPropsMode]);
   const regionsForMode = useMemo(() => isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"], [isPlayerPropsMode]);
   
   // Helper function to expand 'all' to actual sports list
