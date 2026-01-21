@@ -191,6 +191,8 @@ const SPORT_MARKET_SUPPORT = {
  * Used for both initial fetch and background refresh
  */
 async function fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsMarketMap, oddsFormat, req) {
+  console.log(`🎯 PLAYER PROPS FETCH START: ${sportsArray.length} sports, ${playerPropMarkets.length} markets requested`);
+  
   const userProfile = req.__userProfile || { plan: 'free' };
   const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
   const bookmakerList = allowedBookmakers.join(',');
@@ -203,8 +205,10 @@ async function fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsM
       const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
       const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
       const events = eventsResponse.data || [];
+      console.log(`🎯 EVENTS: ${sport} has ${events.length} events`);
       return events.map(e => ({ ...e, sport_key: sport }));
     } catch (err) {
+      console.log(`❌ EVENTS ERROR: ${sport}: ${err.message}`);
       return [];
     }
   });
