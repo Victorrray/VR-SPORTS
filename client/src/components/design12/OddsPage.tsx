@@ -2952,7 +2952,9 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           >
                             <div className="flex flex-col">
                               <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
-                              {book.line && <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{book.line}</span>}
+                              {(pick.marketKey === 'totals' || pick.marketKey === 'spreads' || pick.marketKey?.includes('alternate_') || pick.marketKey?.startsWith('totals_') || pick.marketKey?.startsWith('spreads_')) && pick.line && (
+                                <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.line}</span>
+                              )}
                             </div>
                             <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.overOdds || book.odds)}</div>
                             <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.underOdds || book.team2Odds)}</div>
@@ -3037,7 +3039,9 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           >
                             <div>
                               <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
-                              {book.line && <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{book.line}</div>}
+                              {(pick.marketKey === 'totals' || pick.marketKey === 'spreads' || pick.marketKey?.includes('alternate_') || pick.marketKey?.startsWith('totals_') || pick.marketKey?.startsWith('spreads_')) && pick.line && (
+                                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{pick.line}</div>
+                              )}
                             </div>
                             <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{formatOdds(book.overOdds || book.odds)}</div>
                             <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{(book.underOdds || book.team2Odds) && (book.underOdds || book.team2Odds) !== '--' ? formatOdds(book.underOdds || book.team2Odds) : '--'}</div>
