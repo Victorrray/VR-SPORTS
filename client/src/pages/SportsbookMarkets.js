@@ -1898,8 +1898,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                     selected={filters.markets || []}
                     onChange={(newMarkets) => {
                       updateFilter("markets", newMarkets);
-                      setUserHasSelectedMarkets(true); // Mark that user has made a selection
-                      console.log('🎯 User selected markets:', newMarkets.length > 0 ? newMarkets : 'ALL MARKETS (empty array)');
                     }}
                     placeholderText="Select markets..."
                     allLabel="All Markets"
