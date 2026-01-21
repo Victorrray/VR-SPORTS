@@ -467,11 +467,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     console.log(`📊 MARKETS DEBUG: Alternate markets for per-event (${alternateMarkets.length}):`, alternateMarkets);
     console.log(`📊 MARKETS DEBUG: Period markets for per-event (${quarterMarkets.length}):`, quarterMarkets);
     
-    // Step 1: Fetch base odds (only include player props if betType=props)
-    if (baseMarkets.length > 0 || (isPlayerPropsRequest && playerPropMarkets.length > 0)) {
-      const marketsToFetch = isPlayerPropsRequest 
-        ? [...new Set([...baseMarkets, ...playerPropMarkets])]
-        : baseMarkets;
+    // Step 1: Fetch base odds (NEVER include player props here - they must be fetched via per-event endpoint in Step 3)
+    // The main /sports/{sport}/odds endpoint only supports h2h, spreads, totals - NOT player props
+    if (baseMarkets.length > 0) {
+      // Only use base markets (h2h, spreads, totals) - player props are fetched separately in Step 3
+      const marketsToFetch = baseMarkets;
       const supabase = req.app.locals.supabase;
       const oddsCacheService = req.app.locals.oddsCacheService;
       
@@ -487,20 +487,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           // IMPORTANT: Filter markets to only those supported by this specific sport
           // This prevents 422 errors from sending wrong markets to sports that don't support them
           const sportSupportedMarkets = getSupportedMarketsForSport(sport);
-          const isPlayerPropMarket = (m) => m.startsWith('player_') || m.startsWith('batter_') || m.startsWith('pitcher_');
           
-          // Get sport-specific player prop markets (to avoid sending basketball props to NHL, etc.)
-          const sportSpecificPlayerProps = playerPropsMarketMap[sport] || 
-            (sport.startsWith('soccer_') ? defaultSoccerPlayerProps : []);
-          
-          const marketsForThisSport = marketsToFetch.filter(m => {
-            if (isPlayerPropMarket(m)) {
-              // Only include player props that are supported by THIS sport
-              return sportSpecificPlayerProps.includes(m);
-            }
-            // For non-player-prop markets, use the regular sport support check
-            return sportSupportedMarkets.includes(m);
-          });
+          // For Step 1, we only have base markets (h2h, spreads, totals) - no player props
+          const marketsForThisSport = marketsToFetch.filter(m => sportSupportedMarkets.includes(m));
           
           if (marketsForThisSport.length === 0) {
             console.log(`⚠️ No supported markets for ${sport}, skipping`);
