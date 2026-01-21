@@ -995,8 +995,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               // IMPORTANT: Filter player prop markets to only those supported by THIS sport
               // This prevents 422 errors from sending basketball markets to NHL, baseball markets to NBA, etc.
               const sportKey = event.sport_key;
-              const sportSpecificMarkets = playerPropsMarketMap[sportKey] || 
-                (sportKey?.startsWith('soccer_') ? defaultSoccerPlayerProps : []);
+              
+              // Skip soccer player props entirely - very low coverage (1-2 books), wastes API calls
+              if (sportKey?.startsWith('soccer_')) {
+                return;
+              }
+              
+              const sportSpecificMarkets = playerPropsMarketMap[sportKey] || [];
               
               // Only fetch markets that are both requested AND supported by this sport
               const marketsForThisEvent = playerPropMarkets.filter(m => sportSpecificMarkets.includes(m));
