@@ -14,7 +14,20 @@ export function FilterProvider({ children }) {
       // Game mode filters
       sports: ['americanfootball_nfl', 'basketball_nba', 'icehockey_nhl'],
       date: '',
-      markets: ['h2h', 'spreads', 'totals'],
+      markets: [
+        // Core markets
+        'h2h', 'spreads', 'totals',
+        // Alternate markets
+        'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals',
+        // Quarter markets (Basketball, Football)
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        // Half markets
+        'h2h_h1', 'h2h_h2', 'spreads_h1', 'spreads_h2', 'totals_h1', 'totals_h2',
+        // Period markets (Hockey)
+        'h2h_p1', 'h2h_p2', 'h2h_p3', 'spreads_p1', 'spreads_p2', 'spreads_p3', 'totals_p1', 'totals_p2', 'totals_p3'
+      ],
       sportsbooks: [],
       dataPoints: 10,
       
@@ -75,7 +88,15 @@ export function FilterProvider({ children }) {
     const defaults = {
       sports: ['americanfootball_nfl', 'basketball_nba', 'icehockey_nhl'],
       date: '',
-      markets: ['h2h', 'spreads', 'totals'],
+      markets: [
+        'h2h', 'spreads', 'totals',
+        'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals',
+        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
+        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
+        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
+        'h2h_h1', 'h2h_h2', 'spreads_h1', 'spreads_h2', 'totals_h1', 'totals_h2',
+        'h2h_p1', 'h2h_p2', 'h2h_p3', 'spreads_p1', 'spreads_p2', 'spreads_p3', 'totals_p1', 'totals_p2', 'totals_p3'
+      ],
       sportsbooks: [],
       dataPoints: 10,
       playerPropMarkets: ['player_pass_yds', 'player_rush_yds', 'player_receptions'],
