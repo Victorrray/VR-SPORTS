@@ -447,11 +447,25 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       if (/_1st_\d+_innings/.test(market)) return true;
       return false;
     };
-    const baseMarkets = filteredRegularMarkets.filter(m => !isPeriodMarket(m));
+    
+    // CRITICAL: The main /v4/sports/{sport}/odds endpoint ONLY supports h2h, spreads, totals
+    // All other markets (alternate_*, team_totals, period markets) require per-event endpoint
+    const MAIN_ENDPOINT_MARKETS = ['h2h', 'spreads', 'totals'];
+    const isAlternateMarket = (market) => {
+      return market.startsWith('alternate_') || market === 'team_totals' || market === 'alternate_team_totals';
+    };
+    
+    // Split markets into: main endpoint markets, alternate markets (per-event), period markets (per-event)
+    const mainEndpointMarkets = filteredRegularMarkets.filter(m => MAIN_ENDPOINT_MARKETS.includes(m));
+    const alternateMarkets = filteredRegularMarkets.filter(m => isAlternateMarket(m) && !isPeriodMarket(m));
     const quarterMarkets = filteredRegularMarkets.filter(m => isPeriodMarket(m));
     
-    console.log(`📊 MARKETS DEBUG: Base markets (${baseMarkets.length}):`, baseMarkets);
-    console.log(`📊 MARKETS DEBUG: Period markets (${quarterMarkets.length}):`, quarterMarkets);
+    // baseMarkets is now only the 3 featured markets for the main endpoint
+    const baseMarkets = mainEndpointMarkets;
+    
+    console.log(`📊 MARKETS DEBUG: Main endpoint markets (${baseMarkets.length}):`, baseMarkets);
+    console.log(`📊 MARKETS DEBUG: Alternate markets for per-event (${alternateMarkets.length}):`, alternateMarkets);
+    console.log(`📊 MARKETS DEBUG: Period markets for per-event (${quarterMarkets.length}):`, quarterMarkets);
     
     // Step 1: Fetch base odds (only include player props if betType=props)
     if (baseMarkets.length > 0 || (isPlayerPropsRequest && playerPropMarkets.length > 0)) {
@@ -799,11 +813,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // }
     
 
-    // Step 2: Fetch quarter/half/period markets if requested
-    // NOTE: Period markets require /events/{eventId}/odds endpoint (one call per game)
-    // OPTIMIZATION: Only fetch for games starting within 24 hours to reduce API costs
-    console.log(`🏈 PERIOD MARKETS CHECK: quarterMarkets.length = ${quarterMarkets.length}, markets = [${quarterMarkets.slice(0, 5).join(', ')}${quarterMarkets.length > 5 ? '...' : ''}]`);
-    if (quarterMarkets.length > 0) {
+    // Step 2: Fetch alternate and period markets via per-event endpoint
+    // NOTE: These markets require /events/{eventId}/odds endpoint (one call per game)
+    // Combine alternate markets + period markets for a single per-event call
+    const perEventMarkets = [...alternateMarkets, ...quarterMarkets];
+    console.log(`🏈 PER-EVENT MARKETS CHECK: ${perEventMarkets.length} markets = [${perEventMarkets.slice(0, 5).join(', ')}${perEventMarkets.length > 5 ? '...' : ''}]`);
+    if (perEventMarkets.length > 0) {
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
       
@@ -838,12 +853,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             continue;
           }
           
-          console.log(`🏈 PERIOD MARKETS: Fetching for ${sportGames.length} games in ${sport}`);
-          // Fetch period markets for each game individually
+          console.log(`🏈 PER-EVENT MARKETS: Fetching for ${sportGames.length} games in ${sport} (${perEventMarkets.length} markets)`);
+          // Fetch alternate + period markets for each game individually
           for (const game of sportGames) {
             try {
               const eventId = game.id;
-              const cacheKey = `period_markets_${sport}_${eventId}`;
+              const cacheKey = `per_event_markets_${sport}_${eventId}`;
               
               // Check cache first (getCachedResponse is synchronous)
               const cached = getCachedResponse(cacheKey);
@@ -865,8 +880,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 continue;
               }
               
-              // Fetch from API
-              const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${quarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}`;
+              // Fetch from API - use perEventMarkets (alternate + period markets)
+              const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${perEventMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}`;
               
               const response = await axios.get(url);
               const eventData = response.data || {};
@@ -896,7 +911,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                   }
                 });
                 if (mergedCount > 0) {
-                  console.log(`🏈 PERIOD MARKETS: Merged ${mergedCount} period markets for game ${game.home_team} vs ${game.away_team}`);
+                  console.log(`🏈 PER-EVENT MARKETS: Merged ${mergedCount} markets for game ${game.home_team} vs ${game.away_team}`);
                 }
               }
             } catch (gameErr) {
