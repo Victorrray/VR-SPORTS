@@ -883,8 +883,17 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               // Fetch from API - use perEventMarkets (alternate + period markets)
               const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${perEventMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}`;
               
+              console.log(`🏈 PER-EVENT API CALL: ${game.home_team} vs ${game.away_team} - requesting ${perEventMarkets.length} markets`);
+              
               const response = await axios.get(url);
               const eventData = response.data || {};
+              
+              // Log what we got back
+              const returnedMarkets = new Set();
+              (eventData.bookmakers || []).forEach(bm => {
+                (bm.markets || []).forEach(m => returnedMarkets.add(m.key));
+              });
+              console.log(`🏈 PER-EVENT API RESPONSE: ${game.home_team} vs ${game.away_team} - got ${eventData.bookmakers?.length || 0} bookmakers, markets: [${[...returnedMarkets].join(', ')}]`);
               
               // Cache the result with longer TTL for period markets
               if (eventData.bookmakers && eventData.bookmakers.length > 0) {
