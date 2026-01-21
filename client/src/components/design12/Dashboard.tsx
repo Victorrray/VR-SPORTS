@@ -509,28 +509,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          {/* Mobile Header */}
-          <header className={`lg:hidden px-4 py-4 border-b ${isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-slate-950/30'} backdrop-blur-2xl`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl ${isLight ? 'bg-purple-500' : 'bg-purple-500'} flex items-center justify-center`}>
-                  <span className="text-white font-bold">
-                    OS
-                  </span>
-                </div>
-                <span className={`${isLight ? 'text-purple-600' : 'text-purple-400'} font-bold`}>
-                  OddSightSeer
-                </span>
-              </div>
-              <button
-                onClick={onSignOut}
-                className={`flex items-center gap-2 px-3 py-2 ${isLight ? 'bg-red-50 border-red-300 text-red-600' : 'bg-red-500/10 border-red-400/30 text-red-400'} backdrop-blur-xl border rounded-xl font-bold text-sm`}
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </header>
-
           <div className="px-3 lg:px-8 py-4 lg:py-8 space-y-6 lg:space-y-8 pb-24 lg:pb-8">
             {/* Conditional Content Rendering */}
             {currentView === "dashboard" && (
