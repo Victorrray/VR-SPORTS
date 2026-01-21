@@ -2000,7 +2000,6 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // Map frontend sport IDs to TheOddsAPI sport keys
       const sportKeyMap: { [key: string]: string } = {
         'nfl': 'americanfootball_nfl',
-        'ncaa-football': 'americanfootball_ncaaf',
         'nba': 'basketball_nba',
         'ncaa-basketball': 'basketball_ncaab',
         'nhl': 'icehockey_nhl',
@@ -2021,8 +2020,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           sportsList = sportKeyMap[sport] || sport;
         }
       } else {
-        // Default to all sports
-        sportsList = 'americanfootball_nfl,americanfootball_ncaaf,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
+        // Default to all sports (NCAA Football removed - offseason)
+        sportsList = 'americanfootball_nfl,basketball_nba,basketball_ncaab,baseball_mlb,icehockey_nhl,soccer_epl,soccer_spain_la_liga,soccer_germany_bundesliga,soccer_usa_mls,soccer_mexico_ligamx';
       }
       params.append('sports', sportsList);
       

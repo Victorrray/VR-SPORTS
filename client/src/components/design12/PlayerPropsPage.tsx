@@ -289,7 +289,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
 
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
-    { id: 'ncaa-football', name: 'NCAA Football', count: 45, active: false },
     { id: 'nfl', name: 'NFL', count: 12, active: false },
     { id: 'nba', name: 'NBA', count: 18, active: false },
     { id: 'nhl', name: 'NHL', count: 24, active: false },
@@ -511,7 +510,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
         'nba': ['basketball_nba', 'nba', 'NBA'],
         'nhl': ['icehockey_nhl', 'nhl', 'NHL'],
         'mlb': ['baseball_mlb', 'mlb', 'MLB'],
-        'ncaa-football': ['americanfootball_ncaaf', 'americanfootball_ncaa', 'ncaa_football', 'NCAA Football'],
         'ncaa-basketball': ['basketball_ncaab', 'basketball_ncaa', 'ncaa_basketball', 'NCAA Basketball'],
         'soccer': ['soccer_', 'soccer', 'Soccer']  // Match API keys (soccer_epl) or display label (Soccer)
       };

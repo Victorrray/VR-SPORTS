@@ -409,7 +409,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
 
   const sports = [
     { id: 'all', name: 'All Sports', count: 124, active: true },
-    { id: 'ncaa-football', name: 'NCAA Football', count: 45, active: false },
     { id: 'nfl', name: 'NFL', count: 12, active: false },
     { id: 'nba', name: 'NBA', count: 18, active: false },
     { id: 'nhl', name: 'NHL', count: 24, active: false },
@@ -701,7 +700,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
         'nba': ['NBA'],
         'nhl': ['NHL'],
         'mlb': ['MLB'],
-        'ncaa-football': ['NCAA Football'],
         'ncaa-basketball': ['NCAA Basketball'],
         'soccer': ['Soccer']  // Soccer label
       };

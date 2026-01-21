@@ -254,7 +254,6 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // Major US Sports only (for now)
   const AVAILABLE_SPORTS = [
     { key: 'americanfootball_nfl', title: 'NFL' },
-    { key: 'americanfootball_ncaaf', title: 'NCAA' },
     { key: 'basketball_nba', title: 'NBA' },
     { key: 'basketball_ncaab', title: 'NCAA Basketball' },
     { key: 'icehockey_nhl', title: 'NHL' }
@@ -345,7 +344,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const sportsForMode = isPlayerPropsMode 
     ? (filters.sports.length > 0 ? expandSports(filters.sports) : ["americanfootball_nfl"]) 
     : isArbitrageMode
-    ? (filters.sports.length > 0 ? expandSports(filters.sports) : ["americanfootball_nfl", "americanfootball_ncaaf", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
+    ? (filters.sports.length > 0 ? expandSports(filters.sports) : ["americanfootball_nfl", "basketball_nba", "basketball_ncaab", "icehockey_nhl"])
     : expandSports(filters.sports);
     
   
@@ -1257,12 +1256,12 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
 
   const resetAllFilters = () => {
     // Reset both draft and applied states
-    // Include both NFL and NCAAF as default sports
-    const defaultSports = ["americanfootball_nfl", "americanfootball_ncaaf"];
+    // Default to NFL only (NCAA Football is in offseason)
+    const defaultSports = ["americanfootball_nfl"];
     const defaultMarkets = getAutoSelectedMarkets(defaultSports); // Auto-select markets for default sport
-    // Include a mix of NFL, NCAA football, and NCAA basketball relevant markets
+    // Include a mix of NFL and NCAA basketball relevant markets
     const defaultPlayerProps = [
-      // Football markets (NFL and NCAAF)
+      // Football markets (NFL)
       "player_pass_yds", "player_rush_yds", "player_receptions", "player_anytime_td",
       // Basketball markets (NBA and NCAAB)
       "player_points", "player_rebounds", "player_assists"
@@ -1371,8 +1370,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         sportCategories.set('basketball', ['basketball']);
         console.log(`🏀 Adding basketball player prop categories for sport: ${sport}`);
       }
-      // Handle football sports (both NFL and NCAA)
-      else if (sport === 'americanfootball_nfl' || sport === 'americanfootball_ncaaf' || sport.includes('football')) {
+      // Handle football sports (NFL only - NCAA Football is in offseason)
+      else if (sport === 'americanfootball_nfl' || sport.includes('football')) {
         sportCategories.set('football', ['passing', 'rushing', 'receiving', 'touchdowns', 'combination', 'defense', 'kicking']);
         console.log(`🏈 Adding football player prop categories for sport: ${sport}`);
       } 
@@ -2090,7 +2089,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         />
       ) : (marketsError && marketsError.includes('Authentication required')) ? null : isArbitrageMode && hasPlatinum ? (
         <ArbitrageDetector 
-          sport={filters.sports.length > 0 ? filters.sports : ['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
+          sport={filters.sports.length > 0 ? filters.sports : ['americanfootball_nfl', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
           games={filteredGames}
           bookFilter={effectiveSelectedBooks}
           compact={false}
@@ -2130,7 +2129,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
         </div>
       ) : isMiddlesMode && hasPlatinum ? (
         <MiddlesDetector 
-          sport={['americanfootball_nfl', 'americanfootball_ncaaf', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
+          sport={['americanfootball_nfl', 'basketball_nba', 'basketball_ncaab', 'icehockey_nhl']}
           games={[]}
           bookFilter={effectiveSelectedBooks}
           compact={false}
