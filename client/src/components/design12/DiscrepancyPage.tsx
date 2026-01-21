@@ -578,7 +578,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
 
                     {/* Match Info */}
                     <div className="col-span-3">
-                      <div className={`inline-block px-2.5 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'} rounded-full font-bold text-xs mb-2`}>
+                      <div className={`inline-block px-2.5 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-white'} rounded-full font-bold text-xs mb-2`}>
                         {pick.sport}
                       </div>
                       <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
@@ -655,7 +655,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                     {/* Header Row */}
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className={`inline-block px-2.5 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'} rounded-full font-bold text-xs mb-2`}>
+                        <div className={`inline-block px-2.5 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-white'} rounded-full font-bold text-xs mb-2`}>
                           {pick.sport}
                         </div>
                         <div className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
