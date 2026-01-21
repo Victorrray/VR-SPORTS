@@ -2542,7 +2542,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
                 const line = pick.line || exchangeLine;
                 let newPickDescription: string;
                 
-                if (pick.isPlayerProp && pick.playerName) {
+                // Check if this is truly a player prop (must have BOTH isPlayerProp flag AND playerName)
+                const isTruePlayerProp = pick.isPlayerProp === true && pick.playerName && typeof pick.playerName === 'string' && pick.playerName.length > 0;
+                
+                if (isTruePlayerProp) {
                   // Player prop: "Player Name Over 6.5 Market"
                   const marketName = (pick as any).marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || '';
                   newPickDescription = `${pick.playerName} ${missingSide} ${line} ${marketName}`.trim();
@@ -2661,7 +2664,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             const line = pick.line || exchangeLine;
             let newPickDescription: string;
             
-            if (pick.isPlayerProp && pick.playerName) {
+            // Check if this is truly a player prop (must have BOTH isPlayerProp flag AND playerName)
+            const isTruePlayerProp = pick.isPlayerProp === true && pick.playerName && typeof pick.playerName === 'string' && pick.playerName.length > 0;
+            
+            if (isTruePlayerProp) {
               // Player prop: "Player Name Over 6.5 Market"
               const marketName = (pick as any).marketName || (pick.marketKey ? formatMarketName(pick.marketKey) : '') || '';
               newPickDescription = `${pick.playerName} ${pickSide} ${line} ${marketName}`.trim();
