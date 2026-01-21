@@ -3800,7 +3800,17 @@ export default function OddsTable({
                                 console.log(`🎯 DISPLAY DEBUG for ${row.playerName}: point=${displayPoint}, type=${typeof displayPoint}`);
                                 return displayPoint ? ` ${displayPoint}` : '';
                               })()
-                            : ((row.mkt?.key || '') !== 'h2h' && row.out?.point ? ` ${formatLine(row.out.point, row.mkt.key, 'game')}` : '')}
+                            : (() => {
+                                // For game mode, show line for non-h2h markets
+                                const mktKey = row.mkt?.key || '';
+                                const point = row.out?.point;
+                                // Debug: Log the point value for totals
+                                if (mktKey.includes('total')) {
+                                  console.log(`🎯 TOTALS LINE DEBUG: mktKey=${mktKey}, point=${point}, type=${typeof point}, allBooks[0].point=${row.allBooks?.[0]?.point}`);
+                                }
+                                if (mktKey === 'h2h' || point == null) return '';
+                                return ` ${formatLine(point, mktKey, 'game')}`;
+                              })()}
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9 }}>
