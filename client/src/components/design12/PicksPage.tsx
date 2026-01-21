@@ -277,7 +277,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
             >
               {/* Sport Badge & Status */}
               <div className="mb-3 flex items-center justify-between">
-                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl font-bold text-xs`}>
+                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-white'} backdrop-blur-xl border rounded-xl font-bold text-xs`}>
                   {pick.sport}
                 </span>
                 {/* Status Badge */}
@@ -327,9 +327,6 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
 
               {/* Pick Display */}
               <div className={`text-center p-3 mb-3 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl border rounded-xl`}>
-                <div className={`${isLight ? 'text-purple-600' : 'text-purple-300'} font-bold uppercase tracking-wide mb-1 text-xs`}>
-                  Pick
-                </div>
                 <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
                   {pick.pick}
                 </div>
