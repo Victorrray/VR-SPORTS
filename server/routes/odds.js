@@ -472,8 +472,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           
           // IMPORTANT: Filter markets to only those supported by this specific sport
           // This prevents 422 errors from sending soccer markets (btts, draw_no_bet) to non-soccer sports
+          // BUT: Player prop markets should NOT be filtered by SPORT_MARKET_SUPPORT - they have their own support
           const sportSupportedMarkets = getSupportedMarketsForSport(sport);
-          const marketsForThisSport = marketsToFetch.filter(m => sportSupportedMarkets.includes(m));
+          const isPlayerPropMarket = (m) => m.startsWith('player_') || m.startsWith('batter_') || m.startsWith('pitcher_');
+          const marketsForThisSport = marketsToFetch.filter(m => 
+            isPlayerPropMarket(m) || sportSupportedMarkets.includes(m)
+          );
           
           if (marketsForThisSport.length === 0) {
             console.log(`⚠️ No supported markets for ${sport}, skipping`);
