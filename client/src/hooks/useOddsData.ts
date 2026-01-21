@@ -2845,12 +2845,22 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         return filtered;
       };
       
-      // Filter out picks with no comparison books (empty mini-table)
-      // A pick needs at least 2 books to be useful for comparison
+      // Filter out picks with insufficient comparison books (empty mini-table)
+      // Use the user's minDataPoints setting (default 4) to filter
       const filterEmptyBooks = (picks: OddsPick[]) => {
+        const requiredBooks = Math.max(minDataPoints || 4, 2); // At least 2, respect user setting
         return picks.filter(pick => {
           const books = pick.books || pick.allBooks || [];
-          return books.length >= 2; // Need at least 2 books for comparison
+          // For exchanges mode, we need non-exchange books for comparison
+          if (betType === 'exchanges') {
+            const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
+            const nonExchangeBooks = books.filter((b: any) => {
+              const bookName = (b.name || '').toLowerCase();
+              return !EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
+            });
+            return nonExchangeBooks.length >= requiredBooks;
+          }
+          return books.length >= requiredBooks;
         });
       };
       
