@@ -1063,6 +1063,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
       // Generate cache key for this player props request
       const ppCacheKey = getPlayerPropsCacheKey(sportsArray, playerPropMarkets);
+      console.log(`🎯 PLAYER PROPS: Cache key = ${ppCacheKey.substring(0, 80)}...`);
       const cachedProps = getCachedPlayerPropsResults(ppCacheKey);
       
       if (cachedProps) {
@@ -1081,16 +1082,19 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             .finally(() => setPlayerPropsRefreshing(ppCacheKey, false));
         }
       } else {
-        // No cache - fetch fresh data
-        console.log(`🎯 PLAYER PROPS: No cache, fetching fresh data for ${sportsArray.length} sports`);
+        // No cache - fetch fresh data (this will be slow on first request)
+        console.log(`🎯 PLAYER PROPS CACHE MISS: Fetching fresh data for ${sportsArray.length} sports, ${playerPropMarkets.length} markets`);
+        const startTime = Date.now();
         const freshProps = await fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsMarketMap, oddsFormat, req);
+        const duration = Date.now() - startTime;
         
         if (freshProps.length > 0) {
           allGames.push(...freshProps);
           setCachedPlayerPropsResults(ppCacheKey, freshProps);
+          console.log(`🎯 PLAYER PROPS COMPLETE: Added ${freshProps.length} events with player props in ${duration}ms (cached for next request)`);
+        } else {
+          console.log(`🎯 PLAYER PROPS COMPLETE: No props found after ${duration}ms`);
         }
-        
-        console.log(`🎯 PLAYER PROPS COMPLETE: Added ${freshProps.length} events with player props`);
       }
     }
     
