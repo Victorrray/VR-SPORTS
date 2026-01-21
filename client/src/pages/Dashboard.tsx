@@ -87,7 +87,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   useEffect(() => {
     try {
       localStorage.setItem('my_picks_v1', JSON.stringify(savedPicks));
-      console.log('✅ Picks saved to localStorage:', savedPicks.length);
     } catch (error) {
       console.error('Error saving picks to localStorage:', error);
     }
@@ -104,19 +103,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const userStats = useUserStats(savedPicks);
 
   const addPickToMyPicks = (pick: any) => {
-    console.log('📌 Adding pick to My Picks:', pick);
     setSavedPicks((prev) => {
       const updated = [...prev, pick];
-      console.log('📌 Updated savedPicks:', updated);
       return updated;
     });
   };
 
   const removePickFromMyPicks = (pickId: number | string) => {
-    console.log('🗑️ Removing pick from My Picks:', pickId);
     setSavedPicks((prev) => {
       const updated = prev.filter(pick => pick.id !== pickId);
-      console.log('🗑️ Updated savedPicks after removal:', updated);
       return updated;
     });
   };

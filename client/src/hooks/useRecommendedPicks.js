@@ -364,9 +364,6 @@ function calculateEV(odds, bookmakers, marketKey = null, outcomeName = null, poi
     
     // Only show positive EV and cap at reasonable values
     // Anything over 20% EV is likely a data error
-    if (ev > 0 && ev < 50) {
-      console.log(`    [EV Debug] Odds: ${odds}, Comparable: ${comparableOdds.length} books, Fair: ${(avgProb*100).toFixed(1)}%, Implied: ${(impliedProb*100).toFixed(1)}%, EV: ${ev.toFixed(2)}%`);
-    }
     
     // Cap EV at 50% - anything higher is almost certainly bad data
     return Math.min(50, Math.max(0, ev));
