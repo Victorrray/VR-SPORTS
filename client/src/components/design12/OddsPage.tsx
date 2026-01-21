@@ -988,7 +988,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           setSelectedMarket('all');
           setSelectedDate('all_upcoming');
         }}
-        className={`px-6 py-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-white hover:from-purple-500/30 hover:to-indigo-500/30'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+        className={`px-6 py-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' : 'bg-purple-500 border-purple-500 text-white hover:bg-purple-600'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
       >
         Clear All Filters
       </button>
@@ -2102,7 +2102,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         {/* Match Info */}
                         <div className="col-span-3 flex flex-col justify-center">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                               {pick.sport}
                             </span>
                             {/* Show prop badge for player props */}
@@ -2251,7 +2251,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         {/* Match Info */}
                         <div className="col-span-3 flex flex-col justify-center">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                               {pick.sport}
                             </span>
                           </div>
@@ -2461,7 +2461,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                     <div className="lg:col-span-3 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {/* Sport Badge */}
-                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                           {pick.sport}
                         </span>
                       </div>
@@ -2527,7 +2527,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                     {/* Card Header */}
                     <div className={`p-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
                       <div className="mb-2">
-                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                           {pick.sport}
                         </span>
                       </div>
@@ -2721,7 +2721,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       ) : (
                         <>
                           {/* Standard Pick Display - Rounded */}
-                          <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-2xl`}>
+                          <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-purple-500 border-purple-500'} backdrop-blur-xl border rounded-2xl`}>
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
                               {cleanPickDisplay(pick.pick)}
                             </div>
