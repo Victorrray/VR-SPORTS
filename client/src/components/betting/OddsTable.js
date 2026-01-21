@@ -2453,7 +2453,8 @@ export default function OddsTable({
               book: o.book,
               bookmaker: o.bookmaker,
               market: o.market,
-              point: o.point
+              point: o.point,
+              name: o.name // Include outcome name for mini-table filtering (Over/Under, team name)
             };
             
             // Check if this bookmaker is in the filter (case-insensitive)
@@ -4869,8 +4870,9 @@ export default function OddsTable({
                               const isRowTotalMarket = row.mkt?.key?.includes('total');
                               const rowOutcomeName = row.out?.name;
                               const rowPoint = row.out?.point;
-                              // Use 0.1 tolerance to handle floating point but still exclude different lines (6 vs 6.5)
-                              const miniTableStrictTolerance = 0.1;
+                              // STRICT: Use 0.001 tolerance - only allow virtually identical lines
+                              // This ensures 6.5 and 6 are NEVER mixed (diff of 0.5 >> 0.001)
+                              const miniTableStrictTolerance = 0.001;
                               
                               const dedupedBooks = (row.allBooks || []).filter(book => {
                                 const rawKey = book?.bookmaker?.key || book?.book || '';
