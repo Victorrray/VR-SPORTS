@@ -524,6 +524,21 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   // Exchange books for comparison
   const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
   
+  // Helper to clean up pick display - fix "Over Over" and "Under Over" bugs
+  const cleanPickDisplay = (pickText: string): string => {
+    if (!pickText) return pickText;
+    // Fix "Over Over X" -> "Over X"
+    // Fix "Under Over X" -> "Under X"
+    // Fix "Over Under X" -> "Over X"
+    // Fix "Under Under X" -> "Under X"
+    return pickText
+      .replace(/Over\s+Over\s+/gi, 'Over ')
+      .replace(/Under\s+Over\s+/gi, 'Under ')
+      .replace(/Over\s+Under\s+/gi, 'Over ')
+      .replace(/Under\s+Under\s+/gi, 'Under ')
+      .trim();
+  };
+  
   // Filter books for mini table based on bet type
   // For exchanges: only show filtered sportsbook + exchange comparison book
   // For spreads/totals: only show books with the same line as the pick
@@ -2128,7 +2143,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                             </div>
                           )}
                           <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
-                            {pick.pick}
+                            {cleanPickDisplay(pick.pick)}
                           </div>
                           {pick.line && (
                             <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>
@@ -2488,7 +2503,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
 
                     {/* Team/Line - Recommended pick (spread, total, moneyline, etc.) */}
                     <div className="lg:col-span-3 min-w-0">
-                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{pick.pick?.replace(/\s*\(3-Way\)\s*/gi, '')}</div>
+                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm lg:text-base truncate`}>{cleanPickDisplay(pick.pick?.replace(/\s*\(3-Way\)\s*/gi, '') || '')}</div>
                     </div>
 
                     {/* Book - Best sportsbook for this pick */}
@@ -2708,7 +2723,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           {/* Standard Pick Display - Rounded */}
                           <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-2xl`}>
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
-                              {pick.pick}
+                              {cleanPickDisplay(pick.pick)}
                             </div>
                           </div>
 
