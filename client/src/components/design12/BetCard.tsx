@@ -116,7 +116,7 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
         <div className="mb-2">
           <span className={`px-2.5 py-0.5 ${
             isHero || isDark
-              ? 'bg-purple-500/20 border-purple-400/30 text-purple-300' 
+              ? 'bg-purple-500/20 border-purple-400/30 text-white' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
           } backdrop-blur-xl border rounded-full font-bold text-xs`}>
             {bet.sport}
@@ -154,11 +154,6 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             ? 'bg-purple-500/20 border-purple-400/30' 
             : 'bg-purple-50 border-purple-200'
         } backdrop-blur-xl border rounded-xl`}>
-          <div className={`${
-            isHero || isDark ? 'text-purple-300' : 'text-purple-600'
-          } font-bold uppercase tracking-wide mb-1 text-xs`}>
-            Pick
-          </div>
           <div className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-sm`}>
             {bet.pick && bet.pick !== 'Yes' ? bet.pick : `${bet.teams}`}
           </div>
@@ -278,16 +273,16 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 ? 'bg-purple-500/20 border-purple-400/30' 
                 : 'bg-purple-100 border-purple-200'
             } border rounded-lg`}>
-              <div className={`${isHero || isDark ? 'text-purple-300' : 'text-purple-700'} font-bold text-xs`}>
+              <div className={`${isHero || isDark ? 'text-white' : 'text-purple-700'} font-bold text-xs`}>
                 Book
               </div>
-              <div className={`${isHero || isDark ? 'text-purple-300' : 'text-purple-700'} font-bold text-xs text-center`}>
+              <div className={`${isHero || isDark ? 'text-white' : 'text-purple-700'} font-bold text-xs text-center`}>
                 {team1.split(' ').pop()}
               </div>
-              <div className={`${isHero || isDark ? 'text-purple-300' : 'text-purple-700'} font-bold text-xs text-center`}>
+              <div className={`${isHero || isDark ? 'text-white' : 'text-purple-700'} font-bold text-xs text-center`}>
                 {team2.split(' ').pop()}
               </div>
-              <div className={`${isHero || isDark ? 'text-purple-300' : 'text-purple-700'} font-bold text-xs text-right`}>
+              <div className={`${isHero || isDark ? 'text-white' : 'text-purple-700'} font-bold text-xs text-right`}>
                 Pick
               </div>
             </div>
