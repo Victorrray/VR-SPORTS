@@ -216,6 +216,16 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       const marketsParam = Array.isArray(markets) ? markets.join(',') : markets;
       console.log('🔍 useMarkets: Processed marketsParam:', marketsParam);
       
+      // CRITICAL DEBUG: Log period markets being requested
+      const periodMarkets = (Array.isArray(markets) ? markets : markets.split(',')).filter(m => 
+        m.includes('_q') || m.includes('_h') || m.includes('_p') || m.includes('_1st')
+      );
+      if (periodMarkets.length > 0) {
+        console.log('🏈 PERIOD MARKETS REQUESTED:', periodMarkets);
+      } else {
+        console.log('⚠️ NO PERIOD MARKETS in request - only base markets');
+      }
+      
       // Detect if this is a player props request
       const playerPropMarketPrefixes = ['player_', 'batter_', 'pitcher_'];
       const marketsArray = Array.isArray(markets) ? markets : markets.split(',');
