@@ -1,16 +1,17 @@
 // src/hooks/useMarkets.js
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { debounce, APICache, throttle } from '../utils/performance';
+import { debounce, throttle } from '../utils/performance';
+import { APICache, CACHE_TTL } from '../utils/cache';
 import { useMemoizedCallback } from './useMemoizedCallback';
 import { withApiBase } from '../config/api';
 import { useQuotaHandler } from './useQuotaHandler';
 import { secureFetch } from '../utils/security';
+import logger, { CATEGORIES } from '../utils/logger';
 
 // Global event emitter for API usage updates
 export const apiUsageEvents = new EventTarget();
 
 const SCOREBOARD_CACHE = new Map();
-const SCOREBOARD_CACHE_TTL = 15 * 60 * 1000; // 15 minutes - longer cache for logos
 
 const normalizeTeamKey = (name = '') => {
   return String(name)
@@ -23,11 +24,9 @@ async function getScoreboardLogosForSport(sportKey) {
   if (!sportKey) return new Map();
   const cached = SCOREBOARD_CACHE.get(sportKey);
   const now = Date.now();
-  if (cached && now - cached.timestamp < SCOREBOARD_CACHE_TTL) {
-    console.log(`📦 Logo cache HIT for ${sportKey}`);
+  if (cached && now - cached.timestamp < CACHE_TTL.LOGOS) {
     return cached.map;
   }
-  console.log(`🔄 Logo cache MISS for ${sportKey}, fetching...`);
 
   try {
     const response = await secureFetch(
@@ -54,10 +53,9 @@ async function getScoreboardLogosForSport(sportKey) {
     }
 
     SCOREBOARD_CACHE.set(sportKey, { timestamp: now, map: teamLogoMap });
-    console.log(`✅ Cached ${teamLogoMap.size} team logos for ${sportKey}`);
     return teamLogoMap;
   } catch (error) {
-    console.warn('useMarkets: Unable to fetch scoreboard logos for', sportKey, error.message || error);
+    logger.warn(CATEGORIES.API, 'Unable to fetch scoreboard logos for', sportKey);
     SCOREBOARD_CACHE.set(sportKey, { timestamp: now, map: new Map() });
     return new Map();
   }
@@ -74,7 +72,6 @@ async function enrichGamesWithScoreboardData(games = []) {
     )
   );
   
-  console.log(`🎯 Enriching ${games.length} games for ${uniqueSports.length} sports:`, uniqueSports);
 
   const logoMapsEntries = await Promise.all(
     uniqueSports.map(async (sportKey) => {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { secureFetch } from '../utils/security';
 import { withApiBase } from '../config/api';
+import logger, { CATEGORIES } from '../utils/logger';
 
 /**
  * Hook to fetch recommended picks for the dashboard
@@ -47,7 +48,7 @@ export function useRecommendedPicks(options = {}) {
       });
 
       const url = withApiBase(`/api/odds?${params.toString()}`);
-      console.log('📊 Fetching recommended picks from:', url);
+      logger.debug(CATEGORIES.PICKS, 'Fetching recommended picks');
 
       const response = await secureFetch(url, {
         method: 'GET',
@@ -64,12 +65,7 @@ export function useRecommendedPicks(options = {}) {
       const data = await response.json();
       let games = Array.isArray(data) ? data : [];
 
-      console.log(`📥 API returned ${games.length} games`);
-      if (games.length > 0) {
-        console.log(`  First game: ${games[0].away_team} @ ${games[0].home_team}`);
-        console.log(`  Commence: ${games[0].commence_time}`);
-        console.log(`  Bookmakers: ${games[0].bookmakers?.length || 0}`);
-      }
+      logger.debug(CATEGORIES.PICKS, `API returned ${games.length} games`);
 
       // Filter out games that have already started or are in the past
       const now = new Date();
@@ -79,13 +75,10 @@ export function useRecommendedPicks(options = {}) {
         const gameTime = new Date(game.commence_time);
         // Exclude any game that has already started (commence_time must be in the future)
         const isUpcoming = gameTime > now;
-        if (!isUpcoming) {
-          console.log(`  ⏭️ Filtering out past game: ${game.away_team} @ ${game.home_team} (${game.commence_time})`);
-        }
         return isUpcoming;
       });
 
-      console.log(`📅 Filtered ${beforeFilter} games down to ${games.length} upcoming games`);
+      logger.debug(CATEGORIES.PICKS, `Filtered to ${games.length} upcoming games`);
 
       // Transform games into picks with EV calculation
       const recommendedPicks = games
@@ -102,7 +95,6 @@ export function useRecommendedPicks(options = {}) {
           // Use ALL bookmakers for better EV calculation (don't filter)
           const filteredBookmakers = game.bookmakers;
           
-          console.log(`  🎮 Game: ${game.away_team} @ ${game.home_team} - ${filteredBookmakers.length} bookmakers`);
           
           if (filteredBookmakers.length === 0) return picks;
           
@@ -148,10 +140,6 @@ export function useRecommendedPicks(options = {}) {
             // Calculate real EV based on actual odds
             const ev = calculateEV(odds, game.bookmakers, market.key, outcome.name, outcome.point);
 
-            // Log for debugging
-            if (ev > 0) {
-              console.log(`  📈 Found +EV: ${game.away_team} @ ${game.home_team} - ${outcome.name} ${market.key} @ ${bookmaker.title}: EV=${ev.toFixed(2)}%`);
-            }
 
             // Only include straight line bets (h2h, spreads, totals)
             // Skip alternate markets, player props, and other market types
@@ -210,16 +198,10 @@ export function useRecommendedPicks(options = {}) {
         })
         .slice(0, limit);
 
-      console.log(`✅ Found ${recommendedPicks.length} recommended picks`);
-      if (recommendedPicks.length > 0) {
-        console.log('  Top picks:');
-        recommendedPicks.slice(0, 3).forEach((pick, idx) => {
-          console.log(`    ${idx + 1}. ${pick.teams} - ${pick.pick} @ ${pick.sportsbook} (${pick.ev})`);
-        });
-      }
+      logger.debug(CATEGORIES.PICKS, `Found ${recommendedPicks.length} recommended picks`);
       setPicks(recommendedPicks);
     } catch (err) {
-      console.error('Error fetching recommended picks:', err);
+      logger.error(CATEGORIES.PICKS, 'Error fetching recommended picks:', err);
       setError(err.message);
       setPicks([]);
     } finally {

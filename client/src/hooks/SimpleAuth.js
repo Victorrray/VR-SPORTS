@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, clearTokenCache } from '../lib/supabase';
+import logger, { CATEGORIES } from '../utils/logger';
 
 const AuthContext = createContext(null);
 
@@ -24,62 +25,47 @@ export function AuthProvider({ children }) {
       if (error) {
         // Profile doesn't exist yet - this is normal for new users
         if (error.code === 'PGRST116') {
-          console.log('ℹ️ Profile does not exist yet (new user):', userId);
+          logger.debug(CATEGORIES.AUTH, 'Profile does not exist yet (new user):', userId);
           setProfile(null);
           return;
         }
-        console.warn('⚠️ Error fetching profile:', error.message, error.code);
+        logger.warn(CATEGORIES.AUTH, 'Error fetching profile:', error.message, error.code);
         setProfile(null);
         return;
       }
       
       if (data) {
-        console.log('✅ Profile fetched:', { id: data.id, username: data.username });
+        logger.debug(CATEGORIES.AUTH, 'Profile fetched:', { id: data.id, username: data.username });
         setProfile(data);
       }
     } catch (err) {
-      console.error('❌ Error fetching profile:', err);
+      logger.error(CATEGORIES.AUTH, 'Error fetching profile:', err);
       setProfile(null);
     }
   };
 
   useEffect(() => {
     if (!supabase) {
-      console.warn('⚠️ Supabase not configured, running in demo mode');
+      logger.warn(CATEGORIES.AUTH, 'Supabase not configured, running in demo mode');
       setAuthLoading(false);
       return;
     }
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('🔐 Initial session check:', {
+      logger.debug(CATEGORIES.AUTH, 'Initial session check:', {
         hasSession: !!session,
         hasToken: !!session?.access_token,
-        userId: session?.user?.id,
-        expiresAt: session?.expires_at,
-        sessionKeys: session ? Object.keys(session) : []
+        userId: session?.user?.id
       });
-      
-      // Log what's in localStorage
-      try {
-        const stored = localStorage.getItem('sb-oddsightseer-auth');
-        console.log('📦 localStorage sb-oddsightseer-auth:', stored ? 'EXISTS' : 'MISSING');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          console.log('📦 Stored session keys:', Object.keys(parsed));
-          console.log('📦 Stored session.session keys:', parsed.session ? Object.keys(parsed.session) : 'NO SESSION');
-        }
-      } catch (e) {
-        console.warn('⚠️ Could not check localStorage:', e.message);
-      }
       
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        console.log('👤 Initial session found, fetching profile for user:', session.user.id);
+        logger.debug(CATEGORIES.AUTH, 'Initial session found, fetching profile');
         fetchProfile(session.user.id);
       } else {
-        console.log('⚠️ No initial session found');
+        logger.debug(CATEGORIES.AUTH, 'No initial session found');
         setProfile(null);
       }
       setAuthLoading(false);
@@ -90,44 +76,23 @@ export function AuthProvider({ children }) {
       // Skip if session ID hasn't changed (prevents refresh on tab switch)
       const currentSessionId = session?.user?.id;
       if (currentSessionId === lastSessionId && _event === 'SIGNED_IN') {
-        console.log('🔐 Auth state SKIPPED (same session on tab switch):', _event);
-        return;
+        return; // Skip duplicate SIGNED_IN events on tab switch
       }
       
-      console.log('🔐 Auth state changed:', _event, {
-        hasSession: !!session,
-        hasToken: !!session?.access_token,
-        userId: session?.user?.id
-      });
+      logger.debug(CATEGORIES.AUTH, 'Auth state changed:', _event);
       
-      // Log what's being stored
-      if (session?.access_token) {
-        console.log('✅ Session has access token, should be persisted to localStorage');
-        // Verify it's actually being persisted
-        setTimeout(() => {
-          const stored = localStorage.getItem('sb-oddsightseer-auth');
-          console.log('📦 After auth change, localStorage sb-oddsightseer-auth exists:', !!stored);
-          if (stored) {
-            try {
-              const parsed = JSON.parse(stored);
-              console.log('📦 Stored session has token:', !!parsed?.session?.access_token);
-            } catch (e) {
-              console.warn('📦 Could not parse stored session');
-            }
-          }
-        }, 100);
-      } else {
-        console.warn('⚠️ Session has NO access token');
+      if (!session?.access_token) {
+        logger.warn(CATEGORIES.AUTH, 'Session has no access token');
       }
       
       setLastSessionId(currentSessionId);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        console.log('👤 User logged in, fetching profile for user:', session.user.id);
+        logger.debug(CATEGORIES.AUTH, 'User logged in, fetching profile');
         fetchProfile(session.user.id);
       } else {
-        console.log('👤 User logged out, clearing profile');
+        logger.debug(CATEGORIES.AUTH, 'User logged out');
         setProfile(null);
       }
       setAuthLoading(false);
@@ -147,13 +112,13 @@ export function AuthProvider({ children }) {
       const fiveMinutesMs = 5 * 60 * 1000;
 
       if (timeUntilExpiry < fiveMinutesMs && timeUntilExpiry > 0) {
-        console.log('🔄 Token expiring soon, refreshing...');
+        logger.debug(CATEGORIES.AUTH, 'Token expiring soon, refreshing...');
         supabase.auth.refreshSession().then(({ data, error }) => {
           if (error) {
-            console.warn('⚠️ Token refresh failed:', error.message);
+            logger.warn(CATEGORIES.AUTH, 'Token refresh failed:', error.message);
           } else {
-            console.log('✅ Token refreshed successfully');
-            clearTokenCache(); // Clear cache to force new token retrieval
+            logger.debug(CATEGORIES.AUTH, 'Token refreshed successfully');
+            clearTokenCache();
           }
         });
       }
@@ -168,37 +133,35 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     if (!supabase) throw new Error('Supabase not configured');
-    console.log('🔐 Signing in user...');
+    logger.debug(CATEGORIES.AUTH, 'Signing in user...');
     
-    // Clear ONLY plan-related cache (NOT user preferences like bankroll/sportsbooks)
+    // Clear plan-related cache
     try {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
       localStorage.removeItem('plan');
-      console.log('✅ Cleared plan cache before sign in (preserved bankroll & sportsbooks)');
     } catch (e) {
-      console.warn('⚠️ Could not clear cache:', e);
+      logger.warn(CATEGORIES.AUTH, 'Could not clear cache:', e);
     }
     
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     
-    console.log('✅ Sign in successful, plan cache cleared');
+    logger.debug(CATEGORIES.AUTH, 'Sign in successful');
     return data;
   };
 
   const signUp = async (email, password, metadata = {}) => {
     if (!supabase) throw new Error('Supabase not configured');
-    console.log('📝 Signing up user...');
+    logger.debug(CATEGORIES.AUTH, 'Signing up user...');
     
-    // Clear ONLY plan-related cache (NOT user preferences like bankroll/sportsbooks)
+    // Clear plan-related cache
     try {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
       localStorage.removeItem('plan');
-      console.log('✅ Cleared plan cache before sign up (preserved bankroll & sportsbooks)');
     } catch (e) {
-      console.warn('⚠️ Could not clear cache:', e);
+      logger.warn(CATEGORIES.AUTH, 'Could not clear cache:', e);
     }
     
     const { data, error } = await supabase.auth.signUp({
@@ -208,19 +171,17 @@ export function AuthProvider({ children }) {
     });
     if (error) throw error;
     
-    console.log('✅ Sign up successful, plan cache cleared');
+    logger.debug(CATEGORIES.AUTH, 'Sign up successful');
     return data;
   };
 
   const signOut = async () => {
     if (!supabase) throw new Error('Supabase not configured');
-    console.log('🔐 Signing out user...');
+    logger.debug(CATEGORIES.AUTH, 'Signing out user...');
     
-    // Clear token cache first
     clearTokenCache();
-    console.log('✅ Token cache cleared');
     
-    // Clear plan cache on sign out (preserve user preferences like bankroll/sportsbooks)
+    // Clear plan cache on sign out
     try {
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
@@ -228,32 +189,30 @@ export function AuthProvider({ children }) {
       sessionStorage.removeItem('userPlan');
       sessionStorage.removeItem('me');
       sessionStorage.removeItem('plan');
-      console.log('✅ Plan cache cleared on sign out (preserved bankroll & sportsbooks)');
     } catch (e) {
-      console.warn('⚠️ Could not clear cache on sign out:', e);
+      logger.warn(CATEGORIES.AUTH, 'Could not clear cache on sign out:', e);
     }
     
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     setUser(null);
     setSession(null);
-    console.log('✅ Sign out completed');
+    logger.debug(CATEGORIES.AUTH, 'Sign out completed');
   };
 
   const setUsername = async (username) => {
     if (!user) {
-      console.error('❌ setUsername: No user signed in');
+      logger.error(CATEGORIES.AUTH, 'setUsername: No user signed in');
       return { error: { message: 'Not signed in' } };
     }
     if (!supabase) {
-      console.error('❌ setUsername: Supabase not configured');
+      logger.error(CATEGORIES.AUTH, 'setUsername: Supabase not configured');
       return { error: { message: 'Database not available' } };
     }
     
-    console.log('🔄 setUsername: Attempting to set username:', username, 'for user:', user.id);
+    logger.debug(CATEGORIES.AUTH, 'Setting username:', username);
     
     try {
-      // First, check if profile exists
       const { data: existingProfile, error: checkError } = await supabase
         .from('profiles')
         .select('id')
@@ -261,26 +220,24 @@ export function AuthProvider({ children }) {
         .single();
       
       if (checkError && checkError.code === 'PGRST116') {
-        // Profile doesn't exist, create it
-        console.log('📝 Profile does not exist, creating...');
+        logger.debug(CATEGORIES.AUTH, 'Profile does not exist, creating...');
         const { error: insertError } = await supabase
           .from('profiles')
           .insert({ id: user.id, username: username.trim() });
         
         if (insertError) {
-          console.error('❌ Failed to create profile:', insertError);
+          logger.error(CATEGORIES.AUTH, 'Failed to create profile:', insertError);
           return { error: { message: insertError.message || 'Failed to create profile' } };
         }
       } else {
-        // Profile exists, update it
-        console.log('✏️ Profile exists, updating username...');
+        logger.debug(CATEGORIES.AUTH, 'Profile exists, updating username...');
         const { error: updateError } = await supabase
           .from('profiles')
           .update({ username: username.trim(), updated_at: new Date().toISOString() })
           .eq('id', user.id);
         
         if (updateError) {
-          console.error('❌ Failed to update username:', updateError);
+          logger.error(CATEGORIES.AUTH, 'Failed to update username:', updateError);
           if (updateError.code === '23505') {
             return { error: { message: 'This username is already in use' } };
           }
@@ -288,13 +245,12 @@ export function AuthProvider({ children }) {
         }
       }
       
-      // Refresh profile after successful update
-      console.log('✅ Username set successfully, refreshing profile...');
+      logger.debug(CATEGORIES.AUTH, 'Username set successfully');
       await fetchProfile(user.id);
       
       return { success: true };
     } catch (err) {
-      console.error('❌ setUsername unexpected error:', err);
+      logger.error(CATEGORIES.AUTH, 'setUsername unexpected error:', err);
       return { error: { message: `An unexpected error occurred: ${err.message}` } };
     }
   };

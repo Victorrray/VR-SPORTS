@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { diagnoseAuthIssues } from "../utils/authDiagnostics";
 
 const isProd = process.env.NODE_ENV === 'production';
-if (!isProd) console.log('🔧 Initializing Supabase client...');
 
 // Support BOTH Vite and CRA env conventions.
 const viteEnv = typeof import.meta !== "undefined" ? import.meta.env : {};
@@ -13,20 +12,6 @@ const getSupabaseConfig = () => {
   // First try environment variables
   const envUrl = process.env.REACT_APP_SUPABASE_URL || viteEnv?.VITE_SUPABASE_URL;
   const envAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || viteEnv?.VITE_SUPABASE_ANON_KEY;
-
-  // Log what we found
-  if (!isProd) {
-    console.log('🔍 Supabase Config Check:', {
-      'REACT_APP_SUPABASE_URL': !!process.env.REACT_APP_SUPABASE_URL,
-      'VITE_SUPABASE_URL': !!viteEnv?.VITE_SUPABASE_URL,
-      'REACT_APP_SUPABASE_ANON_KEY': !!process.env.REACT_APP_SUPABASE_ANON_KEY,
-      'VITE_SUPABASE_ANON_KEY': !!viteEnv?.VITE_SUPABASE_ANON_KEY,
-    });
-    console.log('📋 Raw env values:', {
-      'process.env.REACT_APP_SUPABASE_URL': process.env.REACT_APP_SUPABASE_URL?.substring(0, 40),
-      'process.env.REACT_APP_SUPABASE_ANON_KEY': process.env.REACT_APP_SUPABASE_ANON_KEY?.substring(0, 20),
-    });
-  }
 
   return {
     url: envUrl,
@@ -41,16 +26,8 @@ const isConfigValid = SUPABASE_URL && SUPABASE_ANON_KEY &&
                      SUPABASE_URL.startsWith('http') &&
                      SUPABASE_ANON_KEY.startsWith('ey');
 
-if (!isConfigValid) {
-  console.error('❌ Invalid Supabase configuration:', {
-    hasUrl: !!SUPABASE_URL,
-    hasAnonKey: !!SUPABASE_ANON_KEY,
-    urlStartsWithHttp: SUPABASE_URL?.startsWith('http'),
-    keyStartsWithEy: SUPABASE_ANON_KEY?.startsWith('ey'),
-    actualUrl: SUPABASE_URL ? SUPABASE_URL.substring(0, 30) + '...' : 'undefined',
-    actualKeyPrefix: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 10) + '...' : 'undefined'
-  });
-  console.warn('⚠️ Running in demo mode with no database connectivity');
+if (!isConfigValid && !isProd) {
+  console.warn('Supabase not configured - running in demo mode');
 }
 
 // Run diagnostics if in development
@@ -78,12 +55,9 @@ if (isConfigValid && typeof window !== 'undefined') {
         },
       },
     });
-    if (!isProd) console.log('✅ Supabase client initialized');
   } catch (error) {
-    console.error('❌ Failed to initialize Supabase:', error);
+    console.error('Failed to initialize Supabase:', error);
   }
-} else if (typeof window !== 'undefined') {
-  console.error('❌ Supabase configuration invalid - auth will not work');
 }
 
 // Export the client (may be null if not configured - that's OK for demo mode)
@@ -98,65 +72,37 @@ export const isSupabaseEnabled = isConfigValid && supabaseClient !== null;
 // Export a lightweight accessor for the current access token
 export async function getAccessToken() {
   try {
-    if (!supabaseClient) {
-      console.warn('⚠️ getAccessToken: Supabase client not initialized');
-      return null;
-    }
+    if (!supabaseClient) return null;
     
-    // Try to get session from Supabase
     const { data, error } = await supabaseClient.auth.getSession();
-    
-    if (error) {
-      console.warn('⚠️ getAccessToken: Error getting session:', error.message);
-    }
-    
     const token = data?.session?.access_token;
+    if (token) return token;
     
-    if (token) {
-      console.log('✅ getAccessToken: Got token from Supabase session');
-      return token;
-    }
-    
-    // Fallback 1: check localStorage
+    // Fallback: check localStorage
     try {
       const storedSession = localStorage.getItem('sb-oddsightseer-auth');
       if (storedSession) {
         const parsed = JSON.parse(storedSession);
-        // Try top-level first, then nested
         const storedToken = parsed?.access_token || parsed?.session?.access_token;
-        if (storedToken) {
-          console.log('✅ getAccessToken: Got token from localStorage (sb-oddsightseer-auth)');
-          return storedToken;
-        }
+        if (storedToken) return storedToken;
       }
-    } catch (e) {
-      console.warn('⚠️ getAccessToken: Could not parse sb-oddsightseer-auth');
-    }
+    } catch (_) {}
     
-    // Fallback 2: check for alternate storage keys
-    try {
-      const altKeys = ['sb-session', 'supabase.auth.token', 'sb-auth-session'];
-      for (const key of altKeys) {
+    // Fallback: check alternate storage keys
+    const altKeys = ['sb-session', 'supabase.auth.token', 'sb-auth-session'];
+    for (const key of altKeys) {
+      try {
         const stored = localStorage.getItem(key);
         if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            const altToken = parsed?.session?.access_token || parsed?.access_token;
-            if (altToken) {
-              console.log(`✅ getAccessToken: Got token from localStorage (${key})`);
-              return altToken;
-            }
-          } catch (_) {}
+          const parsed = JSON.parse(stored);
+          const altToken = parsed?.session?.access_token || parsed?.access_token;
+          if (altToken) return altToken;
         }
-      }
-    } catch (e) {
-      console.warn('⚠️ getAccessToken: Could not check alternate storage keys');
+      } catch (_) {}
     }
     
-    console.warn('⚠️ getAccessToken: No token available in any storage location');
     return null;
   } catch (e) {
-    console.error('❌ getAccessToken error:', e.message);
     return null;
   }
 }
@@ -171,21 +117,17 @@ export function getAccessTokenSync() {
     // Check in-memory cache first (valid for 1 minute)
     const now = Date.now();
     if (cachedToken && cachedTokenExpiry > now) {
-      console.log('✅ getAccessTokenSync: Got token from memory cache');
       return cachedToken;
     }
     
-    // Check primary storage key - Supabase stores the token at top level, not nested
+    // Check primary storage key
     const storedSession = localStorage.getItem('sb-oddsightseer-auth');
     if (storedSession) {
       const parsed = JSON.parse(storedSession);
-      // Try multiple paths: top-level access_token, nested session.access_token
       const token = parsed?.access_token || parsed?.session?.access_token;
       if (token) {
-        console.log('✅ getAccessTokenSync: Got token from localStorage (sb-oddsightseer-auth)');
-        // Cache the token
         cachedToken = token;
-        cachedTokenExpiry = now + 60000; // Cache for 1 minute
+        cachedTokenExpiry = now + 60000;
         return token;
       }
     }
@@ -193,37 +135,28 @@ export function getAccessTokenSync() {
     // Check alternate keys
     const altKeys = ['sb-session', 'supabase.auth.token', 'sb-auth-session'];
     for (const key of altKeys) {
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        try {
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
           const parsed = JSON.parse(stored);
           const token = parsed?.access_token || parsed?.session?.access_token;
           if (token) {
-            console.log(`✅ getAccessTokenSync: Got token from localStorage (${key})`);
-            // Cache the token
             cachedToken = token;
-            cachedTokenExpiry = now + 60000; // Cache for 1 minute
+            cachedTokenExpiry = now + 60000;
             return token;
           }
-        } catch (_) {}
-      }
+        }
+      } catch (_) {}
     }
     
-    // Last resort: try to get from Supabase client's internal session (synchronously if available)
-    if (supabaseClient && supabaseClient.auth.session) {
-      const token = supabaseClient.auth.session?.access_token;
-      if (token) {
-        console.log('✅ getAccessTokenSync: Got token from Supabase client internal session');
-        // Cache the token
-        cachedToken = token;
-        cachedTokenExpiry = now + 60000; // Cache for 1 minute
-        return token;
-      }
+    // Last resort: Supabase client's internal session
+    if (supabaseClient?.auth?.session?.access_token) {
+      const token = supabaseClient.auth.session.access_token;
+      cachedToken = token;
+      cachedTokenExpiry = now + 60000;
+      return token;
     }
-  } catch (e) {
-    console.warn('⚠️ getAccessTokenSync error:', e.message);
-  }
-  console.warn('⚠️ getAccessTokenSync: No token found in any location');
+  } catch (_) {}
   return null;
 }
 
@@ -237,4 +170,3 @@ export function clearTokenCache() {
 export const OAUTH_REDIRECT_TO =
   (typeof window !== "undefined" && `${window.location.origin}/`) || undefined;
 
-if (!isProd) console.log(supabase ? '✅ Supabase client created' : '❌ Supabase client creation failed');
