@@ -2935,11 +2935,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       {/* Books Table */}
                       <div className="space-y-3">
                         {/* Table Header */}
-                        <div className={`grid grid-cols-4 gap-3 px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
+                        <div className={`grid grid-cols-3 gap-3 px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-2xl`}>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs`}>Book</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp ? 'Over' : pick.team1.split(' ').pop()}</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>{pick.isPlayerProp ? 'Under' : pick.team2.split(' ').pop()}</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-right`}>Pick</div>
                         </div>
 
                         {/* Table Rows */}
@@ -2949,36 +2948,14 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           return displayBooks.map((book, idx) => (
                           <div 
                             key={idx}
-                            className={`grid grid-cols-4 gap-3 px-4 py-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-2xl items-center`}
+                            className={`grid grid-cols-3 gap-3 px-4 py-3 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-2xl items-center`}
                           >
-                            <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
+                            <div className="flex flex-col">
+                              <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</span>
+                              {book.line && <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>{book.line}</span>}
+                            </div>
                             <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.overOdds || book.odds)}</div>
                             <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-600' : 'text-white/60')} font-bold text-sm text-center`}>{formatOdds(book.underOdds || book.team2Odds)}</div>
-                            <div className="flex justify-end">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onAddPick({
-                                    id: Date.now(),
-                                    teams: pick.game,
-                                    time: 'Sun, Nov 10 7:00 PM PST',
-                                    pick: pick.pick,
-                                    odds: book.odds,
-                                    sportsbook: book.name,
-                                    ev: book.ev,
-                                    sport: pick.sport,
-                                    confidence: 'High',
-                                    analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
-                                  });
-                                  toast.success('Added to My Picks', {
-                                    description: `${pick.pick} at ${book.name} has been added to your picks`
-                                  });
-                                }}
-                                className="p-1.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
-                              >
-                                <Plus className="w-4 h-4 text-white" />
-                              </button>
-                            </div>
                           </div>
                         ));
                         })()}
@@ -3043,11 +3020,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       {/* Books Table - Matching Player Props Style */}
                       <div className="space-y-2">
                         {/* Header Row */}
-                        <div className={`grid grid-cols-4 gap-6 px-6 py-3 ${isLight ? 'border-gray-200' : 'border-white/10'} border-b`}>
+                        <div className={`grid grid-cols-3 gap-6 px-6 py-3 ${isLight ? 'border-gray-200' : 'border-white/10'} border-b`}>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm`}>Book</div>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp ? 'Over' : (pick.team1 || 'Side 1')}</div>
                           <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-center`}>{pick.isPlayerProp ? 'Under' : (pick.team2 || 'Side 2')}</div>
-                          <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} font-bold text-sm text-right`}>Pick</div>
                         </div>
 
                         {/* Data Rows */}
@@ -3057,7 +3033,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           return displayBooks.map((book, idx) => (
                           <div 
                             key={idx}
-                            className={`grid grid-cols-4 gap-6 px-6 py-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} items-center transition-all ${idx !== 0 ? (isLight ? 'border-t border-gray-100' : 'border-t border-white/5') : ''}`}
+                            className={`grid grid-cols-3 gap-6 px-6 py-4 ${isLight ? 'hover:bg-gray-50' : 'hover:bg-white/5'} items-center transition-all ${idx !== 0 ? (isLight ? 'border-t border-gray-100' : 'border-t border-white/5') : ''}`}
                           >
                             <div>
                               <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>{book.name}</div>
@@ -3065,36 +3041,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                             </div>
                             <div className={`${pick.pickSide === 'Over' || !pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{formatOdds(book.overOdds || book.odds)}</div>
                             <div className={`${pick.pickSide === 'Under' && pick.isPlayerProp ? (isLight ? 'text-emerald-600' : 'text-emerald-400') : (isLight ? 'text-gray-500' : 'text-white/50')} font-bold text-base text-center`}>{(book.underOdds || book.team2Odds) && (book.underOdds || book.team2Odds) !== '--' ? formatOdds(book.underOdds || book.team2Odds) : '--'}</div>
-                            <div className="flex justify-end">
-                              {isPickAdded(pick, book.name) ? (
-                                <button
-                                  className="p-2.5 bg-gradient-to-r from-emerald-500 to-green-500 rounded-xl cursor-default"
-                                  disabled
-                                >
-                                  <Check className="w-4 h-4 text-white" />
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onAddPick({
-                                      teams: pick.game,
-                                      time: 'Sun, Nov 10 7:00 PM PST',
-                                      pick: pick.pick,
-                                      odds: book.odds,
-                                      sportsbook: book.name,
-                                      ev: book.ev,
-                                      sport: pick.sport,
-                                      confidence: 'High',
-                                      analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
-                                    });
-                                  }}
-                                  className="p-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl hover:from-purple-400 hover:to-indigo-400 transition-all flex items-center justify-center"
-                                >
-                                  <Plus className="w-4 h-4 text-white" />
-                                </button>
-                              )}
-                            </div>
                           </div>
                         ));
                         })()}
