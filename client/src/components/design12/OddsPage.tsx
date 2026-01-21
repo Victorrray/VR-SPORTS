@@ -2721,7 +2721,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       ) : (
                         <>
                           {/* Standard Pick Display - Rounded */}
-                          <div className={`text-center p-3 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500 border-purple-500'} backdrop-blur-xl border rounded-2xl`}>
+                          <div className={`text-center p-3 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl border rounded-2xl`}>
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
                               {cleanPickDisplay(pick.pick)}
                             </div>
