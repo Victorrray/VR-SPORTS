@@ -142,7 +142,6 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
   // Debounced fetch function with enhanced error handling and retry logic
   const fetchMarkets = useMemoizedCallback(debounce(async (isRetry = false) => {
     if (!enabled) {
-      console.log('🔍 useMarkets: Skipping fetch - hook disabled');
       setIsLoading(false);
       return;
     }
@@ -151,25 +150,21 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     const withinCooldown = now - lastFetchTime.current < COOLDOWN_MS;
 
     if (!isRetry && activeRequest.current) {
-      console.log('🔍 useMarkets: Request already in flight');
       return activeRequest.current;
     }
 
     // Skip if we recently fetched (unless it's a retry)
     if (!isRetry && withinCooldown) {
       if (activeRequest.current) {
-        console.log('🔍 useMarkets: Waiting on in-flight request');
         return activeRequest.current;
       }
-      console.log('🔍 useMarkets: Skipping fetch - within cooldown window');
       setIsLoading(false);
       return;
     }
     
-    console.log('🔍 useMarkets: fetchMarkets called with:', { sports, regions, markets });
+    logger.debug(CATEGORIES.MARKETS, 'fetchMarkets called with:', { sports: sports.length, markets: markets.length });
     
     if (!sports?.length || !regions?.length || !markets?.length) {
-      console.log('🔍 useMarkets: Skipping fetch - missing required params');
       setError('Please select sports, regions, and markets to view odds');
       setIsLoading(false);
       return;
@@ -181,7 +176,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     
     // Always use cached data if available for faster sports switching
     if (cachedData && cachedData.length > 0) {
-      console.log('🔍 useMarkets: Using cached data, length:', cachedData.length);
+      logger.debug(CATEGORIES.CACHE, 'Using cached data:', cachedData.length);
       setGames(cachedData);
       setIsLoading(false);
       return;
@@ -189,13 +184,11 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     
     // If cached data is empty, clear it and fetch fresh data
     if (cachedData && cachedData.length === 0) {
-      console.log('🔍 useMarkets: Clearing empty cache and fetching fresh data');
       APICache.delete(cacheKey);
     }
     
     // Only show loading if we don't have cached data AND we're not within cooldown
     if (!cachedData && !withinCooldown) {
-      console.log('🔍 useMarkets: Setting loading to true');
       setIsLoading(true);
     }
     setError(null);
@@ -207,20 +200,15 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
     lastFetchTime.current = now;
 
     try {
-      console.log(`🔍 useMarkets: Starting ${isRetry ? `retry ${retryCount.current}/` : ''}fetch with params:`, { sports, regions, markets });
-      
       // Process markets parameter properly
       const marketsParam = Array.isArray(markets) ? markets.join(',') : markets;
-      console.log('🔍 useMarkets: Processed marketsParam:', marketsParam);
       
-      // CRITICAL DEBUG: Log period markets being requested
+      // Log period markets being requested (important for debugging)
       const periodMarkets = (Array.isArray(markets) ? markets : markets.split(',')).filter(m => 
         m.includes('_q') || m.includes('_h') || m.includes('_p') || m.includes('_1st')
       );
       if (periodMarkets.length > 0) {
-        console.log('🏈 PERIOD MARKETS REQUESTED:', periodMarkets);
-      } else {
-        console.log('⚠️ NO PERIOD MARKETS in request - only base markets');
+        logger.info(CATEGORIES.MARKETS, 'Period markets requested:', periodMarkets.length);
       }
       
       // Detect if this is a player props request
@@ -229,12 +217,6 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       const isPlayerPropsRequest = marketsArray.some(m => 
         playerPropMarketPrefixes.some(prefix => m.startsWith(prefix))
       );
-      
-      if (isPlayerPropsRequest) {
-        console.log('🏈 useMarkets: Detected PLAYER PROPS request');
-      } else {
-        console.log('🎮 useMarkets: Detected STRAIGHT BETS request (game odds)');
-      }
       
       const params = new URLSearchParams({
         sports: sports.join(','),
@@ -248,21 +230,17 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       // Add betType parameter to distinguish between straight bets and player props
       if (isPlayerPropsRequest) {
         params.append('betType', 'props');
-        console.log('🏈 useMarkets: Added betType=props to request');
       } else {
         params.append('betType', 'straight');
-        console.log('🎮 useMarkets: Added betType=straight to request');
       }
 
       // Add date parameter if provided
       if (date && date.trim()) {
         params.append('date', date);
-        console.log('🔍 useMarkets: Adding date filter:', date);
       }
 
       // Build path with centralized API base handling
       const fullUrl = withApiBase(`/api/odds?${params.toString()}`);
-      console.log('🔍 useMarkets: Final API URL:', fullUrl);
       
       // Enhanced fetch with better error handling and timeout
       // Player props requests need longer timeout since they fetch data for each event
@@ -273,7 +251,6 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       let response;
       let data;
       try {
-        console.log('🔍 useMarkets: Making request to:', fullUrl);
         response = await secureFetch(fullUrl, {
           signal: controller.signal,
           credentials: 'include',
@@ -286,19 +263,11 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         });
         
         clearTimeout(timeoutId);
-        
-      console.log('🔍 useMarkets: Response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url,
-        type: response.type,
-        redirected: response.redirected
-      });
 
         // Handle quota exceeded before other errors
         const quotaResult = await handleApiResponse(response);
         if (quotaResult.quotaExceeded) {
-          console.log('🔍 useMarkets: Quota exceeded, stopping further requests');
+          logger.warn(CATEGORIES.API, 'Quota exceeded');
           setError('Quota exceeded - upgrade to continue');
           setGames([]);
           return;
@@ -307,7 +276,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         if (!response.ok) {
           // Handle 402 Payment Required
           if (response.status === 402) {
-            console.warn('🔐 useMarkets: Payment required - user needs subscription');
+            logger.warn(CATEGORIES.API, 'Payment required');
             setError('Subscription required for API access');
             setGames([]);
             return;
@@ -315,27 +284,25 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
           
           // Handle 401 Unauthorized
           if (response.status === 401) {
-            console.warn('🔐 useMarkets: Authentication required');
+            logger.warn(CATEGORIES.API, 'Authentication required');
             setError('Authentication required - please log in');
             setGames([]);
             return;
           }
           
-          // Clone response before reading to avoid "body stream already read" error
           const responseClone = response.clone();
           const errorText = await responseClone.text();
-          console.error('🔴 useMarkets: API error response:', errorText);
+          logger.error(CATEGORIES.API, 'API error:', response.status);
           throw new Error(`API request failed with status ${response.status}: ${errorText.substring(0, 200)}`);
         }
         
         // Check if response is valid JSON
         const contentType = response.headers.get('content-type');
-        console.log('🔍 useMarkets: Response content-type:', contentType);
         
         if (!contentType || !contentType.includes('application/json')) {
           const text = await response.text();
-          console.error('🔴 useMarkets: Expected JSON but got:', text.substring(0, 500));
-          throw new Error(`Server returned ${contentType || 'unknown content type'} instead of JSON. This usually means the API endpoint is not configured correctly.`);
+          logger.error(CATEGORIES.API, 'Expected JSON but got:', contentType);
+          throw new Error(`Server returned ${contentType || 'unknown content type'} instead of JSON.`);
         }
         
         data = await response.json();
@@ -353,15 +320,8 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         if (error.response) {
           try {
             const errorBody = await error.response.text();
-            console.error('🔴 useMarkets: API error response:', errorBody);
             error.message = errorBody || error.message;
-            
-            console.error('🔍 API Error:', {
-              status: error.response.status,
-              statusText: error.response.statusText,
-              url: error.response.url,
-              error: errorBody
-            });
+            logger.error(CATEGORIES.API, 'API Error:', error.response.status);
             
             // Handle errors with retry logic
             if ((error.response.status >= 500 || error.response.status === 0) && retryCount.current < MAX_RETRIES) {
@@ -369,32 +329,24 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
               const retryAfter = error.response.headers.get('Retry-After') || RETRY_DELAY;
               const delay = typeof retryAfter === 'string' ? parseInt(retryAfter, 10) * 1000 : RETRY_DELAY;
               
-              console.log(`🔄 useMarkets: Retrying (${retryCount.current}/${MAX_RETRIES}) in ${delay/1000} seconds...`);
-              
-              // Clear the current request
+              logger.debug(CATEGORIES.API, `Retrying (${retryCount.current}/${MAX_RETRIES})`);
               activeRequest.current = null;
+              setError(`Temporarily unavailable. Retrying... (${retryCount.current}/${MAX_RETRIES})`);
               
-              // Show user feedback about the retry
-              setError(`Temporarily unavailable. Retrying in ${delay/1000} seconds... (${retryCount.current}/${MAX_RETRIES})`);
-              
-              // Schedule a retry with exponential backoff
               return new Promise(resolve => {
                 setTimeout(() => {
                   fetchMarkets(true).then(resolve);
-                }, delay * Math.pow(2, retryCount.current - 1)); // Exponential backoff
+                }, delay * Math.pow(2, retryCount.current - 1));
               });
             }
           } catch (e) {
-            console.error('🔴 useMarkets: Failed to read error response');
+            logger.error(CATEGORIES.API, 'Failed to read error response');
           }
         }
         
-        // Reset retry counter on non-retryable errors or max retries reached
         retryCount.current = 0;
         
-        // Provide more user-friendly error messages
         let userFriendlyError = 'Failed to load data. Please try again later.';
-        
         if (error.response) {
           if (error.response.status === 401 || error.response.status === 403) {
             userFriendlyError = 'Authentication required. Please log in again.';
@@ -403,46 +355,15 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
           } else if (error.response.status >= 500) {
             userFriendlyError = 'Server error. Our team has been notified.';
           }
-          
-          // In development, log the full error but still show something to the user
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('🔍 useMarkets: Request failed with status', error.response.status, error.message);
-          }
         }
         
         setError(userFriendlyError);
         setGames([]);
-        
-        // Re-throw the error to be caught by the error boundary
         throw error;
       }
       
-      console.log('🔍 useMarkets: Response data:', data);
-      
-      // Check for Dabble specifically
-      if (Array.isArray(data)) {
-        const allBookmakers = new Set();
-        let dabbleCount = 0;
-        data.forEach(game => {
-          if (game.bookmakers) {
-            game.bookmakers.forEach(book => {
-              allBookmakers.add(book.key);
-              if (book.key === 'dabble_au') {
-                dabbleCount++;
-                console.log(`🎰 DABBLE FOUND in game ${game.home_team} vs ${game.away_team}:`, {
-                  markets: book.markets?.length || 0,
-                  marketKeys: book.markets?.map(m => m.key) || []
-                });
-              }
-            });
-          }
-        });
-        console.log('🔍 All bookmakers in response:', Array.from(allBookmakers));
-        console.log(`🎰 Dabble found in ${dabbleCount} games`);
-      }
-      
       if (!data || !Array.isArray(data)) {
-        console.error('🔴 useMarkets: Invalid response format - expected array, got:', data);
+        logger.error(CATEGORIES.API, 'Invalid response format - expected array');
         setError('Invalid response format from server');
         setGames([]);
         return;
@@ -478,25 +399,20 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         away_logo: game.away_logo || ''
       }));
       
-      console.log('🔍 useMarkets: Normalized data:', normalizedData);
-      
       let preparedData = normalizedData;
       try {
         preparedData = await enrichGamesWithScoreboardData(normalizedData);
       } catch (logoErr) {
-        console.warn('useMarkets: Failed to enrich games with logos', logoErr);
+        logger.warn(CATEGORIES.API, 'Failed to enrich games with logos');
       }
       
       // Update state with normalized data - only if data actually changed
       setGames(prevGames => {
-        // If we have the same number of games and same first game ID, skip update
         if (prevGames.length === preparedData.length && prevGames.length > 0 && preparedData.length > 0) {
           if (prevGames[0].id === preparedData[0].id) {
-            console.log('🔍 useMarkets: Games data unchanged, skipping state update');
             return prevGames;
           }
         }
-        console.log('🔍 useMarkets: Games data changed, updating state');
         return preparedData;
       });
       
@@ -522,7 +438,7 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       // Filter books for free users - only allow DraftKings, FanDuel, and Caesars
       // This will be handled by the component using useMe hook
       
-      console.log('🔍 useMarkets: Extracted bookmakers:', uniqueBooks);
+      logger.debug(CATEGORIES.MARKETS, 'Extracted bookmakers:', uniqueBooks.length);
       setBooks(uniqueBooks);
       setLastUpdate(new Date());
       
@@ -531,12 +447,9 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       
       // If we got empty results, retry sooner instead of applying full cooldown
       if (preparedData.length === 0) {
-        console.log('⚠️ useMarkets: Got empty results, will retry sooner');
         retryCount.current += 1;
         if (retryCount.current < MAX_RETRIES) {
-          // Schedule a retry in 3 seconds instead of waiting for cooldown
           setTimeout(() => {
-            console.log(`🔄 useMarkets: Retrying after empty result (${retryCount.current}/${MAX_RETRIES})`);
             fetchMarkets(true);
           }, EMPTY_RESULT_RETRY_DELAY);
         }
@@ -547,14 +460,13 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       }
       
     } catch (err) {
-      console.error('🔍 useMarkets: Fetch error:', err);
-      console.error('🔍 useMarkets: Error stack:', err.stack);
+      logger.error(CATEGORIES.API, 'Fetch error:', err.message);
       lastFetchTime.current = previousFetchTs;
       
       // Handle network errors with retry logic
       if (err.name === 'TypeError' && err.message.includes('Failed to fetch') && retryCount.current < MAX_RETRIES) {
         retryCount.current += 1;
-        console.log(`🔄 useMarkets: Network error - Retrying (${retryCount.current}/${MAX_RETRIES}) in ${RETRY_DELAY/1000} seconds...`);
+        logger.debug(CATEGORIES.API, `Network error - Retrying (${retryCount.current}/${MAX_RETRIES})...`);
         
         // Clear the current request
         activeRequest.current = null;
@@ -576,7 +488,6 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
       
       // For development, provide fallback data instead of infinite loading
       if (process.env.NODE_ENV === 'development') {
-        console.warn('🔍 useMarkets: Using fallback data in development mode');
         return;
       }
       
@@ -586,7 +497,6 @@ export const useMarkets = (sports = [], regions = [], markets = [], options = {}
         throw new Error(`API request failed: ${err.message}`);
       }
     } finally {
-      console.log('🔍 useMarkets: Setting loading to false');
       setIsLoading(false);
       activeRequest.current = null;
     }
@@ -618,19 +528,14 @@ useEffect(() => {
 // Separate effect for auto-refresh interval ONLY
 useEffect(() => {
   if (!enabled || !autoRefresh) {
-    console.log('⏸️ Auto-refresh disabled or hook disabled');
     return;
   }
 
-  // Set up refresh interval only if autoRefresh is enabled
-  console.log('🔄 Auto-refresh enabled (30s interval)');
-  const refreshInterval = setInterval(refreshMarkets, 30000); // Refresh every 30 seconds
+  const refreshInterval = setInterval(refreshMarkets, 30000);
   
-  // Clean up
   return () => {
     if (refreshInterval) {
       clearInterval(refreshInterval);
-      console.log('🔄 Auto-refresh interval cleared');
     }
   };
 }, [enabled, autoRefresh, refreshMarkets]);
