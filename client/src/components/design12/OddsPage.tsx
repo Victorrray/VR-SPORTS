@@ -2102,7 +2102,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         {/* Match Info */}
                         <div className="col-span-3 flex flex-col justify-center">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                               {pick.sport}
                             </span>
                             {/* Show prop badge for player props */}
@@ -2251,7 +2251,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         {/* Match Info */}
                         <div className="col-span-3 flex flex-col justify-center">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                            <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                               {pick.sport}
                             </span>
                           </div>
@@ -2461,7 +2461,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                     <div className="lg:col-span-3 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {/* Sport Badge */}
-                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                        <span className={`px-2.5 py-1 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                           {pick.sport}
                         </span>
                       </div>
@@ -2527,7 +2527,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                     {/* Card Header */}
                     <div className={`p-3 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
                       <div className="mb-2">
-                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500 border-purple-500 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
+                        <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-white'} backdrop-blur-xl border rounded-full font-bold text-xs`}>
                           {pick.sport}
                         </span>
                       </div>
