@@ -2491,20 +2491,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               return;
             }
             
-            // Filter otherBooks by sportsbook filter if set (needed for both one-sided and normal processing)
-            const filteredOtherBooks = sportsbooks && sportsbooks.length > 0
-              ? otherBooks.filter((b: any) => {
-                  const bookKey = (b.key || b.name || '').toLowerCase();
-                  const bookName = (b.name || '').toLowerCase();
-                  return sportsbooks.some(sb => {
-                    const sbLower = sb.toLowerCase();
-                    return bookKey.includes(sbLower) || bookName.includes(sbLower) || sbLower.includes(bookKey) || sbLower.includes(bookName);
-                  });
-                })
-              : otherBooks;
+            // For exchanges mode, we want to find the BEST odds across ALL non-exchange books
+            // NOT just the user's filtered sportsbooks - we're comparing against exchange lines
+            // The sportsbook filter should only affect which picks to SHOW, not which odds to compare
+            const filteredOtherBooks = otherBooks; // Use ALL non-exchange books for comparison
             
-            // If no filtered books match, skip this pick
-            if (sportsbooks && sportsbooks.length > 0 && filteredOtherBooks.length === 0) {
+            // If no other books available, skip this pick
+            if (filteredOtherBooks.length === 0) {
               debugStats.noOther++;
               return;
             }
