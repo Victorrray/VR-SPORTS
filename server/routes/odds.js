@@ -149,21 +149,22 @@ const SPORT_MARKET_SUPPORT = {
     'team_totals_p1', 'team_totals_p2', 'team_totals_p3',
     'alternate_team_totals_p1', 'alternate_team_totals_p2', 'alternate_team_totals_p3'
   ],
-  // Soccer leagues - only h2h, spreads, totals supported (NO alternate markets)
-  // TheOddsAPI returns 422 error if alternate_spreads, alternate_totals, team_totals are requested for soccer
-  'soccer_epl': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_usa_mls': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_spain_la_liga': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_germany_bundesliga': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_italy_serie_a': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_france_ligue_one': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_fifa_world_cup': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_uefa_europa_league': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_mexico_ligamx': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_netherlands_eredivisie': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_portugal_primeira_liga': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
-  'soccer_spl': ['h2h', 'spreads', 'totals', 'h2h_3_way', 'draw_no_bet', 'btts', 'double_chance'],
+  // Soccer leagues - only basic markets supported
+  // TheOddsAPI returns 422 error for btts, draw_no_bet, double_chance on most soccer leagues
+  // Only h2h, spreads, totals are reliably supported
+  'soccer_epl': ['h2h', 'spreads', 'totals'],
+  'soccer_uefa_champs_league': ['h2h', 'spreads', 'totals'],
+  'soccer_usa_mls': ['h2h', 'spreads', 'totals'],
+  'soccer_spain_la_liga': ['h2h', 'spreads', 'totals'],
+  'soccer_germany_bundesliga': ['h2h', 'spreads', 'totals'],
+  'soccer_italy_serie_a': ['h2h', 'spreads', 'totals'],
+  'soccer_france_ligue_one': ['h2h', 'spreads', 'totals'],
+  'soccer_fifa_world_cup': ['h2h', 'spreads', 'totals'],
+  'soccer_uefa_europa_league': ['h2h', 'spreads', 'totals'],
+  'soccer_mexico_ligamx': ['h2h', 'spreads', 'totals'],
+  'soccer_netherlands_eredivisie': ['h2h', 'spreads', 'totals'],
+  'soccer_portugal_primeira_liga': ['h2h', 'spreads', 'totals'],
+  'soccer_spl': ['h2h', 'spreads', 'totals'],
   'mma_mixed_martial_arts': ['h2h', 'spreads', 'totals', 'h2h_lay'],
   'boxing_boxing': ['h2h', 'spreads', 'totals', 'h2h_lay'],
   'golf_pga': ['outrights', 'outrights_lay'],
