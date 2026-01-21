@@ -2827,6 +2827,15 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         return filtered;
       };
       
+      // Filter out picks with no comparison books (empty mini-table)
+      // A pick needs at least 2 books to be useful for comparison
+      const filterEmptyBooks = (picks: OddsPick[]) => {
+        return picks.filter(pick => {
+          const books = pick.books || pick.allBooks || [];
+          return books.length >= 2; // Need at least 2 books for comparison
+        });
+      };
+      
       if (response.data && Array.isArray(response.data)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         transformedPicks = filterUnderForDFS(transformedPicks);
@@ -2838,6 +2847,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForMiddles(transformedPicks);
         transformedPicks = filterForExchanges(transformedPicks);
         transformedPicks = filterExpiredBets(transformedPicks);
+        transformedPicks = filterEmptyBooks(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
@@ -2854,6 +2864,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterForMiddles(transformedPicks);
         transformedPicks = filterForExchanges(transformedPicks);
         transformedPicks = filterExpiredBets(transformedPicks);
+        transformedPicks = filterEmptyBooks(transformedPicks);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
