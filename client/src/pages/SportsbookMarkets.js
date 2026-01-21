@@ -1,7 +1,7 @@
 // src/pages/SportsbookMarkets.js
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, BarChart4, Star, Activity, RefreshCw, Search, Check } from 'lucide-react';
+import { Target, Zap, Users, Trophy, ChevronDown, ChevronUp, TrendingUp, Shield, BarChart3, BarChart4, Star, Activity, RefreshCw, Search, Check, Clock } from 'lucide-react';
 import SEOHelmet from '../components/seo/SEOHelmet';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup } from '../utils/seo';
 import { optimizedStorage } from "../utils/storageOptimizer";
@@ -378,6 +378,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     core: { title: 'Core Markets', icon: Target, description: 'Essential betting markets' },
     alternates: { title: 'Alternate Lines', icon: BarChart3, description: 'Additional line options' },
     team: { title: 'Team-Specific', icon: Users, description: 'Individual team markets' },
+    periods: { title: 'Game Periods', icon: Clock, description: 'Quarter, half, and period markets' },
     special: { title: 'Special Markets', icon: Star, description: 'Unique betting options' }
   };
 
@@ -644,7 +645,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     });
 
     // Add category headers and markets in logical order
-    const categoryOrder = ['core', 'alternates', 'team', 'special'];
+    const categoryOrder = ['core', 'alternates', 'team', 'periods', 'special'];
     
     categoryOrder.forEach(categoryKey => {
       if (categorizedMarkets[categoryKey] && categorizedMarkets[categoryKey].length > 0) {

@@ -775,6 +775,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     // Step 2: Fetch quarter/half/period markets if requested
     // NOTE: Period markets require /events/{eventId}/odds endpoint (one call per game)
     // OPTIMIZATION: Only fetch for games starting within 24 hours to reduce API costs
+    console.log(`🏈 PERIOD MARKETS CHECK: quarterMarkets.length = ${quarterMarkets.length}, markets = [${quarterMarkets.slice(0, 5).join(', ')}${quarterMarkets.length > 5 ? '...' : ''}]`);
     if (quarterMarkets.length > 0) {
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
@@ -803,9 +804,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             .slice(0, MAX_GAMES_FOR_PERIOD_MARKETS);
           
           if (sportGames.length === 0) {
+            console.log(`🏈 PERIOD MARKETS: No games within 24h for ${sport}, skipping period market fetch`);
             continue;
           }
           
+          console.log(`🏈 PERIOD MARKETS: Fetching for ${sportGames.length} games in ${sport}`);
           // Fetch period markets for each game individually
           for (const game of sportGames) {
             try {
@@ -862,9 +865,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                     mergedCount += pBookmaker.markets.length;
                   }
                 });
+                if (mergedCount > 0) {
+                  console.log(`🏈 PERIOD MARKETS: Merged ${mergedCount} period markets for game ${game.home_team} vs ${game.away_team}`);
+                }
               }
             } catch (gameErr) {
-              // Silently skip individual game errors
+              console.log(`🏈 PERIOD MARKETS ERROR for game ${game?.id}: ${gameErr.message}`);
             }
           }
         } catch (sportErr) {
