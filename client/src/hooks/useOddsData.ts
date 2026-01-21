@@ -2429,8 +2429,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }
           
           const books = pick.allBooks || pick.books || [];
-          // Require minimum 4 books for meaningful comparison
-          if (books.length < 4) {
+          // Require minimum books for meaningful comparison (use user's minDataPoints setting, default 4)
+          const requiredBooks = Math.max(minDataPoints || 4, 4);
+          if (books.length < requiredBooks) {
             debugStats.noBooks++;
             return;
           }
