@@ -926,7 +926,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                       checked={autoRefresh}
                       onChange={(e) => setAutoRefresh(e.target.checked)}
                     />
-                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:bg-purple-500`}></div>
+                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500`}></div>
                   </label>
                 </div>
               </div>
@@ -985,7 +985,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
                           selectedBook === book.id
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1037,7 +1037,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
                             selectedBook === book.id
-                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -1078,7 +1078,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
                           selectedSport === sport.id
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1130,7 +1130,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
                             selectedSport === sport.id
-                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -1171,7 +1171,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
                           selectedPropType === prop.id
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1223,7 +1223,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
                             selectedPropType === prop.id
-                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -1267,7 +1267,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all flex items-center justify-between ${
                           selectedDate === date.id
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1319,7 +1319,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all flex items-center justify-between ${
                             selectedDate === date.id
-                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >

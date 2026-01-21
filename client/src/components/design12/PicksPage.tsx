@@ -260,7 +260,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
         {allPicks.length === 0 ? (
           /* Empty State */
           <div className={`col-span-full flex flex-col items-center justify-center py-16 px-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
-            <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
+            <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
               <Target className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
             </div>
             <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl mb-2`}>No Picks Yet</h3>
@@ -277,7 +277,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
             >
               {/* Sport Badge & Status */}
               <div className="mb-3 flex items-center justify-between">
-                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl font-bold text-xs`}>
+                <span className={`px-2 py-0.5 ${isLight ? 'bg-purple-100 border-purple-200 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl font-bold text-xs`}>
                   {pick.sport}
                 </span>
                 {/* Status Badge */}
@@ -326,7 +326,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
               </div>
 
               {/* Pick Display */}
-              <div className={`text-center p-3 mb-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30'} backdrop-blur-xl border rounded-xl`}>
+              <div className={`text-center p-3 mb-3 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl border rounded-xl`}>
                 <div className={`${isLight ? 'text-purple-600' : 'text-purple-300'} font-bold uppercase tracking-wide mb-1 text-xs`}>
                   Pick
                 </div>

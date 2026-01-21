@@ -45,7 +45,7 @@ export function Features() {
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              className="bg-gradient-to-br bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 transition-all"
+              className="bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 transition-all"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

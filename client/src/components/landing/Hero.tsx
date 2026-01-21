@@ -44,7 +44,7 @@ export function Hero({ onGetStarted }: HeroProps = {}) {
             {/* Large Headline */}
             <h1 className="text-white mb-6 md:mb-8 leading-[1.1] font-bold" style={{fontSize: 'clamp(2.5rem, 8vw, 5rem)'}}>
               Bet smarter,<br />
-              <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="bg-purple-400 bg-clip-text text-transparent">
                 Win more.
               </span>
             </h1>

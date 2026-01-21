@@ -16,7 +16,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDMpIi8+PC9nPjwvc3ZnPg==')] opacity-40"></div>
 
@@ -35,7 +35,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
             <span className="font-semibold">Back to login</span>
           </button>
 
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/80 to-purple-900/30 backdrop-blur-xl border border-white/10 p-8 md:p-10">
+          <div className="relative overflow-hidden rounded-3xl bg-slate-900/90 backdrop-blur-xl border border-white/10 p-8 md:p-10">
             <div className="absolute inset-0 bg-purple-500/10"></div>
             
             <div className="relative space-y-6">
@@ -51,7 +51,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                 <>
                   {/* Header */}
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br bg-purple-500/20 border border-purple-400/30 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center mx-auto mb-4">
                       <Mail className="w-8 h-8 text-purple-400" />
                     </div>
                     <h3 className="text-white text-3xl font-bold mb-2">

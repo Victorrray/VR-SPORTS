@@ -161,7 +161,7 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
               plan.current
                 ? isLight
                   ? 'bg-purple-50 border-purple-300'
-                  : 'bg-gradient-to-br from-purple-500/20 via-indigo-500/20 to-purple-500/10 border-purple-400/50'
+                  : 'bg-purple-500/20 border-purple-400/50'
                 : isLight
                 ? lightModeColors.statsCard
                 : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'
@@ -236,7 +236,7 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
                   : plan.current
                   ? isLight
                     ? 'bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200'
-                    : 'bg-gradient-to-r bg-purple-500/30 text-white border-purple-400/30 hover:bg-purple-500/50'
+                    : 'bg-purple-500/30 text-white border-purple-400/30 hover:bg-purple-500/50'
                   : 'bg-purple-500 text-white border-purple-400/30 hover:bg-purple-400'
               } border`}
             >

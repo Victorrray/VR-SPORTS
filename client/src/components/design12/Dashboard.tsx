@@ -555,7 +555,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-sm md:text-base`}>
                       Top Picks
                     </h2>
-                    <span className={`px-2 md:px-2.5 lg:px-3 py-0.5 md:py-1 ${isLight ? lightModeColors.statsBadge : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-[10px] md:text-xs`}>
+                    <span className={`px-2 md:px-2.5 lg:px-3 py-0.5 md:py-1 ${isLight ? lightModeColors.statsBadge : 'bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-full font-bold text-[10px] md:text-xs`}>
                       {bets.length} Available
                     </span>
                   </div>

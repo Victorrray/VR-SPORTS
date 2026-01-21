@@ -94,7 +94,7 @@ export const themeConfig = {
 // Light mode color overrides
 export const lightModeColors = {
   background:
-    "bg-gradient-to-br from-gray-50 via-purple-50/30 to-indigo-50/30",
+    "bg-gray-50",
   sidebarBg: "bg-white/80 backdrop-blur-2xl border-gray-200",
   headerBg: "bg-white/80 backdrop-blur-2xl border-gray-200",
   card: "bg-white border border-gray-200 shadow-lg",

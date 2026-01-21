@@ -167,17 +167,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             {/* Logo */}
             <div className={`p-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'} relative overflow-hidden`}>
               {/* Background decoration */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${isLight ? 'bg-purple-50/50' : 'bg-purple-500/5'} opacity-50`} />
+              <div className={`absolute inset-0 ${isLight ? 'bg-purple-50/50' : 'bg-purple-500/5'} opacity-50`} />
               
               <div className="relative flex flex-col gap-4">
                 {/* Logo */}
                 <div className="flex items-center gap-3">
                   <div className="relative group">
                     {/* Glow effect */}
-                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${isLight ? 'bg-purple-400' : 'bg-purple-500'} blur-xl opacity-40 group-hover:opacity-60 transition-opacity`} />
+                    <div className={`absolute inset-0 rounded-2xl ${isLight ? 'bg-purple-400' : 'bg-purple-500'} blur-xl opacity-40 group-hover:opacity-60 transition-opacity`} />
                     
                     {/* Logo container */}
-                    <div className={`relative w-12 h-12 rounded-2xl bg-gradient-to-br ${isLight ? lightModeColors.logoGradient : 'bg-purple-500'} flex items-center justify-center transform transition-transform group-hover:scale-105`}>
+                    <div className={`relative w-12 h-12 rounded-2xl ${isLight ? lightModeColors.logoGradient : 'bg-purple-500'} flex items-center justify-center transform transition-transform group-hover:scale-105`}>
                       <span className="text-white font-bold text-lg">
                         OS
                       </span>
@@ -187,7 +187,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   </div>
                   
                   <div className="flex flex-col">
-                    <span className={`bg-gradient-to-r ${isLight ? lightModeColors.logoGradient : 'bg-purple-400'} bg-clip-text text-transparent font-bold text-lg tracking-tight`}>
+                    <span className={`${isLight ? lightModeColors.logoGradient : 'text-purple-400'} bg-clip-text text-transparent font-bold text-lg tracking-tight`}>
                       OddSightSeer
                     </span>
                     <span className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/40'} font-bold tracking-wide`}>
@@ -202,10 +202,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             <div className={`p-6 border-b ${isLight ? 'border-gray-200' : 'border-white/10'}`}>
               <button
                 onClick={() => setCurrentView("account")}
-                className={`w-full p-4 ${isLight ? 'bg-purple-50 border-purple-200 hover:border-purple-300' : 'bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-transparent border-white/10 hover:border-purple-400/30'} border backdrop-blur-xl rounded-2xl transition-all`}
+                className={`w-full p-4 ${isLight ? 'bg-purple-50 border-purple-200 hover:border-purple-300' : 'bg-purple-500/10 border-white/10 hover:border-purple-400/30'} border backdrop-blur-xl rounded-2xl transition-all`}
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-gradient-to-br bg-purple-100 border-purple-300' : 'bg-gradient-to-br bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-purple-100 border-purple-300' : 'bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
                     <User className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
                   </div>
                   <div className="flex-1 text-left">
@@ -233,7 +233,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("dashboard")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "dashboard"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -244,7 +244,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("odds")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "odds"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -255,7 +255,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("picks")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "picks"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -267,7 +267,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("calculator")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "calculator"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -279,7 +279,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("bankroll")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "bankroll"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -291,7 +291,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("account")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "account"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -306,7 +306,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onClick={() => setCurrentView("settings")}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
                   currentView === "settings"
-                    ? isLight ? lightModeColors.navActive : "bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-transparent backdrop-blur-xl border border-purple-400/30 text-white"
+                    ? isLight ? lightModeColors.navActive : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 text-white"
                     : isLight ? lightModeColors.navInactive : "text-white/60 hover:text-white hover:bg-white/5 hover:backdrop-blur-xl border border-transparent hover:border-white/10"
                 }`}
               >
@@ -331,12 +331,12 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           <header className={`lg:hidden px-4 py-4 border-b ${isLight ? 'border-gray-200 bg-white/80' : 'border-white/10 bg-slate-950/30'} backdrop-blur-2xl`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${isLight ? lightModeColors.logoGradient : 'bg-purple-500'} flex items-center justify-center`}>
+                <div className={`w-10 h-10 rounded-xl ${isLight ? lightModeColors.logoGradient : 'bg-purple-500'} flex items-center justify-center`}>
                   <span className="text-white font-bold">
                     OS
                   </span>
                 </div>
-                <span className={`bg-gradient-to-r ${isLight ? lightModeColors.logoGradient : 'bg-purple-400'} bg-clip-text text-transparent font-bold`}>
+                <span className={`${isLight ? lightModeColors.logoGradient : 'text-purple-400'} bg-clip-text text-transparent font-bold`}>
                   OddSightSeer
                 </span>
               </div>
@@ -372,7 +372,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                         className={`p-4 md:p-5 ${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent backdrop-blur-2xl border-white/10'} border rounded-xl md:rounded-2xl`}
                       >
                         <div className="flex items-center gap-3 mb-2">
-                          <div className={`p-2 ${isLight ? lightModeColors.statsIcon : 'bg-gradient-to-br bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-xl border`}>
+                          <div className={`p-2 ${isLight ? lightModeColors.statsIcon : 'bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-xl border`}>
                             <stat.icon className={`w-4 h-4 ${isLight ? lightModeColors.statsIconColor : 'text-purple-300'}`} />
                           </div>
                           <span className={`${isLight ? lightModeColors.textLight : 'text-white/50'} font-bold text-xs md:text-sm uppercase tracking-wide`}>
@@ -404,7 +404,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold`}>
                       Top Picks
                     </h2>
-                    <span className={`px-2.5 md:px-3 py-1 ${isLight ? lightModeColors.statsBadge : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
+                    <span className={`px-2.5 md:px-3 py-1 ${isLight ? lightModeColors.statsBadge : 'bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-lg font-bold text-xs`}>
                       {picksLoading ? 'Loading...' : `${bets.length} Available`}
                     </span>
                   </div>
@@ -464,7 +464,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               onClick={() => setCurrentView("dashboard")}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
                 currentView === "dashboard"
-                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-gradient-to-r bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
+                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
                   : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >
@@ -481,7 +481,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               onClick={() => setCurrentView("odds")}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
                 currentView === "odds"
-                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-gradient-to-r bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
+                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
                   : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >
@@ -498,7 +498,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               onClick={() => setCurrentView("picks")}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
                 currentView === "picks"
-                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-gradient-to-r bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
+                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
                   : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >
@@ -515,7 +515,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               onClick={() => setCurrentView("account")}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-full transition-all ${
                 currentView === "account"
-                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-gradient-to-r bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
+                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/30 backdrop-blur-xl border border-purple-400/40"
                   : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
               }`}
             >

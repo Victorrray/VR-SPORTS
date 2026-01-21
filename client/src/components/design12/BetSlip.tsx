@@ -197,7 +197,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
             </div>
 
             {/* Recommended Bet Amount - Kelly Criterion */}
-            <div className={`${isLight ? 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200' : 'bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-400/20'} border rounded-xl p-4 space-y-4`}>
+            <div className={`${isLight ? 'bg-purple-50 border-indigo-200' : 'bg-purple-500/10 border-indigo-400/20'} border rounded-xl p-4 space-y-4`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <TrendingUp className={`w-4 h-4 ${isLight ? 'text-indigo-600' : 'text-indigo-400'}`} />
@@ -243,7 +243,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                       kellyFraction === 0.25
                         ? isLight
                           ? 'bg-purple-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
+                          : 'bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
@@ -257,7 +257,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                       kellyFraction === 0.5
                         ? isLight
                           ? 'bg-purple-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
+                          : 'bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
@@ -271,7 +271,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                       kellyFraction === 0.75
                         ? isLight
                           ? 'bg-purple-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
+                          : 'bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
@@ -285,7 +285,7 @@ export function BetSlip({ isOpen, onClose, onConfirm, betData }: BetSlipProps) {
                       kellyFraction === 1
                         ? isLight
                           ? 'bg-purple-100 border-purple-300 text-purple-700'
-                          : 'bg-gradient-to-r bg-purple-500/30 border-purple-400/50 text-white'
+                          : 'bg-purple-500/30 border-purple-400/50 text-white'
                         : isLight
                         ? 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'

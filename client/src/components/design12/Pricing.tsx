@@ -64,7 +64,7 @@ export function Pricing() {
           {plans.map((plan, index) => (
             <motion.div
               key={index}
-              className={`relative bg-gradient-to-br bg-purple-500/20 backdrop-blur-xl border ${
+              className={`relative bg-purple-500/20 backdrop-blur-xl border ${
                 plan.popular ? 'border-purple-400/50' : 'border-purple-400/30'
               } rounded-2xl p-6 md:p-8 shadow-xl ${
                 plan.popular ? 'shadow-purple-500/20' : 'shadow-purple-500/10'

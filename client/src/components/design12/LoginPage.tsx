@@ -144,7 +144,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
               <span className="font-semibold">Back to home</span>
             </button>
 
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/80 to-purple-900/30 backdrop-blur-xl border border-white/10 p-8 md:p-10 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900/90 backdrop-blur-xl border border-white/10 p-8 md:p-10 shadow-2xl">
               <div className="absolute inset-0 bg-purple-500/10"></div>
               
               <div className="relative space-y-4 md:space-y-6">

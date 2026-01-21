@@ -126,7 +126,7 @@ export function AccountPage({
       {onNavigateToSettings && (
         <button
           onClick={onNavigateToSettings}
-          className={`absolute top-0 right-0 p-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl ${isLight ? 'hover:bg-purple-200' : 'hover:bg-purple-500/40'} transition-all z-10`}
+          className={`absolute top-0 right-0 p-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl ${isLight ? 'hover:bg-purple-200' : 'hover:bg-purple-500/40'} transition-all z-10`}
         >
           <Settings className="w-5 h-5" />
         </button>
@@ -155,7 +155,7 @@ export function AccountPage({
         </div>
 
         <div className="flex items-center gap-6 mb-6">
-          <div className={`w-20 h-20 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
+          <div className={`w-20 h-20 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
             <User className={`w-10 h-10 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
           </div>
           <div className="flex-1">
@@ -249,7 +249,7 @@ export function AccountPage({
         <div className="space-y-4">
           {/* Current Plan */}
           {isPlatinum ? (
-            <div className={`p-6 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-gradient-to-br from-purple-500/10 via-indigo-500/10 to-transparent border-purple-400/30'} backdrop-blur-xl rounded-xl border shadow-lg`}>
+            <div className={`p-6 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/10 border-purple-400/30'} backdrop-blur-xl rounded-xl border shadow-lg`}>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/30'} border flex items-center justify-center backdrop-blur-xl`}>

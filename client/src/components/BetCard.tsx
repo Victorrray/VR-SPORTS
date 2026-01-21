@@ -75,7 +75,7 @@ export function BetCard({ bet, variant = 'default', showActions = true }: BetCar
         <div className="mb-2">
           <span className={`px-2 py-0.5 ${
             isHero || isDark
-              ? 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-purple-300' 
+              ? 'bg-purple-500/20 border-purple-400/30 text-purple-300' 
               : 'bg-purple-100 border-purple-200 text-purple-700'
           } backdrop-blur-xl border rounded-lg font-bold text-xs`}>
             {bet.sport}
@@ -110,8 +110,8 @@ export function BetCard({ bet, variant = 'default', showActions = true }: BetCar
         {/* Pick Display */}
         <div className={`text-center p-3 ${
           isHero || isDark
-            ? 'bg-gradient-to-r from-purple-500/15 via-indigo-500/15 to-purple-500/15 border-purple-400/30' 
-            : 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200'
+            ? 'bg-purple-500/20 border-purple-400/30' 
+            : 'bg-purple-50 border-purple-200'
         } backdrop-blur-xl border rounded-lg`}>
           <div className={`${
             isHero || isDark ? 'text-purple-300' : 'text-purple-600'

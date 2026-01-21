@@ -998,9 +998,9 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   // Paywall Component for Free Users
   const PaywallOverlay = () => (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
-      <div className={`max-w-lg w-full text-center ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-slate-900/90 to-purple-900/30 border-white/10'} border rounded-3xl p-8 md:p-12 backdrop-blur-xl shadow-2xl`}>
+      <div className={`max-w-lg w-full text-center ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900/90 border-white/10'} border rounded-3xl p-8 md:p-12 backdrop-blur-xl shadow-2xl`}>
         {/* Lock Icon */}
-        <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-gradient-to-br bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center`}>
+        <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center`}>
           <Lock className={`w-10 h-10 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
         </div>
         
@@ -1545,7 +1545,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       onChange={(e) => hasPlatinum && setAutoRefresh(e.target.checked)}
                       disabled={!hasPlatinum}
                     />
-                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:bg-purple-500`}></div>
+                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500`}></div>
                   </label>
                 </div>
               </div>
@@ -1608,7 +1608,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedDate === date.id
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1659,7 +1659,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedDate === date.id
-                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -1718,7 +1718,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                             onClick={() => toggleSportsbookFilter(book.id)}
                             className={`w-full text-left px-4 py-3 font-bold transition-all ${
                               selectedSportsbooks.includes(book.id)
-                                ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                                ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                                 : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                             }`}
                           >
@@ -1783,7 +1783,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                               onClick={() => toggleSportsbookFilter(book.id)}
                               className={`w-full text-left px-6 py-4 font-bold transition-all ${
                                 selectedSportsbooks.includes(book.id)
-                                  ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                                  ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                                   : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                               }`}
                             >
@@ -1826,7 +1826,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedSports.includes(sport.id)
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1878,7 +1878,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedSports.includes(sport.id)
-                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -1918,7 +1918,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         }}
                         className={`w-full text-left px-4 py-3 font-bold transition-all ${
                           selectedMarket === market.id
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                             : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                         }`}
                       >
@@ -1969,7 +1969,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           }}
                           className={`w-full text-left px-6 py-4 font-bold transition-all ${
                             selectedMarket === market.id
-                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r bg-purple-500/30 text-white'
+                              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
                               : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
                           }`}
                         >
@@ -2721,7 +2721,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       ) : (
                         <>
                           {/* Standard Pick Display - Rounded */}
-                          <div className={`text-center p-3 ${isLight ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-50 border-purple-200' : 'bg-purple-500 border-purple-500'} backdrop-blur-xl border rounded-2xl`}>
+                          <div className={`text-center p-3 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500 border-purple-500'} backdrop-blur-xl border rounded-2xl`}>
                             <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
                               {cleanPickDisplay(pick.pick)}
                             </div>

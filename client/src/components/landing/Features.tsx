@@ -38,7 +38,7 @@ export function Features() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-gradient-to-br bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 transition-all"
+              className="bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 transition-all"
             >
               <div className="w-12 h-12 md:w-14 md:h-14 bg-purple-500 rounded-xl flex items-center justify-center mb-4 md:mb-6">
                 <feature.icon className="w-6 h-6 md:w-7 md:h-7 text-white" />

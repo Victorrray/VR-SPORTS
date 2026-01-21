@@ -198,7 +198,7 @@ export function CalculatorPage() {
           onClick={() => setMode('single')}
           className={`px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
             mode === 'single'
-              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r bg-purple-500/30 text-white border border-purple-400/30'
+              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-purple-500/30 text-white border border-purple-400/30'
               : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
           }`}
         >
@@ -211,7 +211,7 @@ export function CalculatorPage() {
           onClick={() => setMode('parlay')}
           className={`px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
             mode === 'parlay'
-              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r bg-purple-500/30 text-white border border-purple-400/30'
+              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-purple-500/30 text-white border border-purple-400/30'
               : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
           }`}
         >
@@ -224,7 +224,7 @@ export function CalculatorPage() {
           onClick={() => setMode('arbitrage')}
           className={`px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
             mode === 'arbitrage'
-              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gradient-to-r bg-purple-500/30 text-white border border-purple-400/30'
+              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-purple-500/30 text-white border border-purple-400/30'
               : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
           }`}
         >
@@ -324,7 +324,7 @@ export function CalculatorPage() {
                     addParlayLeg();
                     toast.success('Leg added to parlay');
                   }}
-                  className={`w-full px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' : 'bg-gradient-to-r bg-purple-500/20 border-purple-400/30 text-white hover:bg-purple-500/40'} border rounded-xl font-bold transition-all text-sm flex items-center justify-center gap-2`}
+                  className={`w-full px-4 py-3 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700 hover:bg-purple-200' : 'bg-purple-500/20 border-purple-400/30 text-white hover:bg-purple-500/40'} border rounded-xl font-bold transition-all text-sm flex items-center justify-center gap-2`}
                 >
                   <Plus className="w-4 h-4" />
                   Add Leg

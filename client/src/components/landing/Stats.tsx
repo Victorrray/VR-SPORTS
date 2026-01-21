@@ -14,7 +14,7 @@ export function Stats() {
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="bg-gradient-to-br bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 text-center w-full"
+              className="bg-purple-500/20 backdrop-blur-xl border border-purple-400/30 rounded-2xl p-6 md:p-8 text-center w-full"
             >
               <stat.icon className="w-8 h-8 md:w-10 md:h-10 text-purple-400 mx-auto mb-3 md:mb-4" />
               <div className="text-white mb-1 md:mb-2 font-bold" style={{fontSize: 'clamp(1.5rem, 4vw, 2.5rem)'}}>

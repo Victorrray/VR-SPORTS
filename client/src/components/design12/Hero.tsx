@@ -106,7 +106,7 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
               <div className="w-full max-w-[500px]">
                 {/* Featured Pick Badge */}
                 <div className="flex justify-center mb-4">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r bg-purple-500/20 border border-purple-400/30 backdrop-blur-xl rounded-full">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-400/30 backdrop-blur-xl rounded-full">
                     <Sparkles className="w-4 h-4 text-purple-300" />
                     <span className="text-white font-bold text-sm">Featured Pick</span>
                   </div>
