@@ -964,6 +964,15 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const allEventsArrays = await Promise.all(eventsPromises);
       const allEvents = allEventsArrays.flat();
       
+      console.log(`🎯 PLAYER PROPS: Found ${allEvents.length} total events across all sports`);
+      if (allEvents.length > 0) {
+        const eventsBySport = {};
+        allEvents.forEach(e => {
+          eventsBySport[e.sport_key] = (eventsBySport[e.sport_key] || 0) + 1;
+        });
+        console.log(`🎯 PLAYER PROPS: Events by sport:`, eventsBySport);
+      }
+      
       // OPTIMIZATION: Fetch player props for all events in larger parallel batches
       const MAX_CONCURRENT = 15; // Increased from 10 to 15
       const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
@@ -993,21 +1002,29 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               
               if (marketsForThisEvent.length === 0) {
                 // No supported player prop markets for this sport, skip
+                console.log(`🎯 SKIP: No supported markets for ${sportKey} event ${event.id}`);
                 return;
               }
+              
+              console.log(`🎯 FETCHING: ${sportKey} event ${event.id} with ${marketsForThisEvent.length} markets`);
               
               // Include bookmakers parameter to explicitly request DFS apps for all sports including soccer
               const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${marketsForThisEvent.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${allPlayerPropsBookmakers}&includeBetLimits=true`;
               
               const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 15000 }); // Reduced timeout
               
+              const bookmakerCount = playerPropsResponse.data?.bookmakers?.length || 0;
+              console.log(`🎯 RESPONSE: ${sportKey} event ${event.id} - ${bookmakerCount} bookmakers`);
+              
               if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
-                // Log DFS apps found for soccer events
-                if (event.sport_key?.startsWith('soccer_')) {
-                  const dfsFound = playerPropsResponse.data.bookmakers.filter(bk => 
-                    dfsBookmakersForProps.some(dfs => bk.key?.toLowerCase().includes(dfs))
-                  );
-                  // DFS apps found for soccer
+                // Log bookmakers found
+                const bookmakerKeys = playerPropsResponse.data.bookmakers.map(bk => bk.key);
+                console.log(`🎯 BOOKMAKERS: ${bookmakerKeys.join(', ')}`);
+                
+                // Check for PrizePicks specifically
+                const hasPrizePicks = bookmakerKeys.some(k => k?.toLowerCase().includes('prizepicks'));
+                if (hasPrizePicks) {
+                  console.log(`✅ PRIZEPICKS FOUND for ${sportKey} event ${event.id}`);
                 }
                 
                 const eventWithProps = {
@@ -1026,13 +1043,15 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                 }
               }
             } catch (eventErr) {
-              // Silently skip failed events
+              console.log(`❌ PLAYER PROPS ERROR: ${event.sport_key} event ${event.id}: ${eventErr.message}`);
             }
           })()
         );
         
         await Promise.all(batchPromises);
       }
+      
+      console.log(`🎯 PLAYER PROPS COMPLETE: Added ${playerPropsCount} events with player props`);
     }
     
     // Filter bookmakers' markets to only include requested markets (if not fetching all)
