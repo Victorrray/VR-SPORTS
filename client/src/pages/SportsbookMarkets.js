@@ -862,10 +862,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   }, []);
 
   // Initialize markets for default sports on component mount
+  // IMPORTANT: Always update to include period markets, even if user has old localStorage data
   useEffect(() => {
     const initialMarkets = getAutoSelectedMarkets(filters.sports);
-    updateFilter("markets", initialMarkets);
-    console.log('🎯 Initial auto-selected markets:', initialMarkets.length);
+    // Check if current markets are missing period markets
+    const hasPeriodMarkets = (filters.markets || []).some(m => 
+      m.includes('_q') || m.includes('_h') || m.includes('_p') || m.includes('_1st')
+    );
+    // Force update if no period markets or if we have more markets available
+    if (!hasPeriodMarkets || initialMarkets.length > (filters.markets || []).length) {
+      updateFilter("markets", initialMarkets);
+      console.log('🎯 Updated markets to include period markets:', initialMarkets.length);
+    }
   }, []); // Run only once on mount
 
   // Migration function to fix old invalid market names
