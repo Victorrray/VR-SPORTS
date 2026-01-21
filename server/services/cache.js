@@ -44,44 +44,42 @@ function getCacheKey(endpoint, params) {
 function getCachedResponse(cacheKey) {
   const cached = apiCache.get(cacheKey);
   if (!cached) {
-    console.log(` Cache MISS for ${cacheKey}`);
     return null;
   }
   
-  // Determine cache duration based on market type
-  const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
-  const isPlayerProp = PLAYER_PROP_MARKETS.some(market => cacheKey.includes(market));
-  
-  let cacheDuration = CACHE_DURATION_MS; // Default 5 minutes
-  let cacheType = 'regular';
-  
-  if (isPlayerProp) {
-    cacheDuration = PLAYER_PROPS_CACHE_DURATION_MS; // 30 seconds for player props
-    cacheType = 'player prop';
-  } else if (isAlternateMarket) {
-    cacheDuration = ALTERNATE_MARKETS_CACHE_DURATION_MS; // 30 minutes for alternates
-    cacheType = 'alternate market';
+  // Use custom TTL if set, otherwise determine based on market type
+  let cacheDuration;
+  if (cached.customTtl) {
+    cacheDuration = cached.customTtl;
+  } else {
+    const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
+    const isPlayerProp = PLAYER_PROP_MARKETS.some(market => cacheKey.includes(market));
+    
+    if (isPlayerProp) {
+      cacheDuration = PLAYER_PROPS_CACHE_DURATION_MS;
+    } else if (isAlternateMarket) {
+      cacheDuration = ALTERNATE_MARKETS_CACHE_DURATION_MS;
+    } else {
+      cacheDuration = CACHE_DURATION_MS;
+    }
   }
   
   if (Date.now() - cached.timestamp < cacheDuration) {
-    console.log(` Cache HIT for ${cacheKey} (${cacheType})`);
     return cached.data;
   }
   
-  console.log(` Cache EXPIRED for ${cacheKey} (${cacheType})`);
-  apiCache.delete(cacheKey); // Remove expired cache
+  apiCache.delete(cacheKey);
   return null;
 }
 
 /**
- * Set cached response with timestamp
+ * Set cached response with timestamp and optional custom TTL
+ * @param {string} cacheKey - Cache key
+ * @param {any} data - Data to cache
+ * @param {number} customTtl - Optional custom TTL in milliseconds
  */
-function setCachedResponse(cacheKey, data) {
-  // Check if this is an alternate market for logging purposes
-  const isAlternateMarket = ALTERNATE_MARKETS.some(market => cacheKey.includes(market));
-  
-  apiCache.set(cacheKey, { data, timestamp: Date.now() });
-  console.log(`💾 Cached response for ${cacheKey}${isAlternateMarket ? ' (alternate market with extended TTL)' : ''}`);
+function setCachedResponse(cacheKey, data, customTtl = null) {
+  apiCache.set(cacheKey, { data, timestamp: Date.now(), customTtl });
 }
 
 /**

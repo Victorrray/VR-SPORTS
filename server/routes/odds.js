@@ -774,13 +774,8 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     
     // Step 2: Fetch quarter/half/period markets if requested
     // NOTE: Period markets require /events/{eventId}/odds endpoint (one call per game)
-    // This is much more expensive, so we're strategic:
-    // - Only fetch for top 5 games per sport
-    // - Only fetch selected period markets (not all variants)
-    // - Cache for 24 hours
+    // OPTIMIZATION: Only fetch for games starting within 24 hours to reduce API costs
     if (quarterMarkets.length > 0) {
-      console.log(`📅 PERIOD MARKETS: Fetching ${quarterMarkets.length} period markets:`, quarterMarkets);
-      
       const userProfile = req.__userProfile || { plan: 'free' };
       const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
       
@@ -788,14 +783,24 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
       const bookmakerList = gameOddsBookmakers.join(',');
       
-      // Fetch period markets for all games (not just top 5) to ensure they show up
-      const MAX_GAMES_FOR_PERIOD_MARKETS = 50; // Increased from 5 to show more period markets
-      const PERIOD_MARKET_CACHE_HOURS = 1; // Reduced cache time for fresher data
+      // OPTIMIZATION: Only fetch period markets for games starting within 24 hours
+      const MAX_GAMES_FOR_PERIOD_MARKETS = 10; // Limit to 10 games per sport to reduce API calls
+      const PERIOD_MARKET_CACHE_MS = 6 * 60 * 60 * 1000; // 6 hour cache for period markets
+      const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
       
       for (const sport of sportsArray) {
         try {
-          // Get top games for this sport (first 5)
-          const sportGames = allGames.filter(g => g.sport_key === sport).slice(0, MAX_GAMES_FOR_PERIOD_MARKETS);
+          // OPTIMIZATION: Only fetch period markets for games starting within 24 hours
+          const now = Date.now();
+          const sportGames = allGames
+            .filter(g => {
+              if (g.sport_key !== sport) return false;
+              const gameTime = new Date(g.commence_time).getTime();
+              const hoursUntilGame = (gameTime - now) / (1000 * 60 * 60);
+              // Only fetch for games starting within 24 hours
+              return hoursUntilGame > 0 && hoursUntilGame <= 24;
+            })
+            .slice(0, MAX_GAMES_FOR_PERIOD_MARKETS);
           
           if (sportGames.length === 0) {
             continue;
@@ -806,12 +811,10 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             try {
               const eventId = game.id;
               const cacheKey = `period_markets_${sport}_${eventId}`;
-              console.log(`📅 Fetching period markets for game ${game.away_team} @ ${game.home_team} (${eventId})`);
               
               // Check cache first (getCachedResponse is synchronous)
               const cached = getCachedResponse(cacheKey);
               if (cached) {
-                console.log(`📅 Using cached period markets for ${eventId}`);
                 // Merge cached data
                 if (cached.bookmakers) {
                   cached.bookmakers.forEach(cBookmaker => {
@@ -831,16 +834,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
               
               // Fetch from API
               const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events/${eventId}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${quarterMarkets.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}`;
-              console.log(`📅 Period markets API call: ${url.replace(API_KEY, 'HIDDEN')}`);
               
               const response = await axios.get(url);
               const eventData = response.data || {};
-              console.log(`📅 Period markets response for ${eventId}: ${eventData.bookmakers?.length || 0} bookmakers`);
               
-              // Cache the result (setCachedResponse is synchronous)
+              // Cache the result with longer TTL for period markets
               if (eventData.bookmakers && eventData.bookmakers.length > 0) {
-                setCachedResponse(cacheKey, eventData);
-                console.log(`📅 Cached period markets for ${eventId}`);
+                setCachedResponse(cacheKey, eventData, PERIOD_MARKET_CACHE_MS);
               }
               
               // Merge period market data with existing game
@@ -862,10 +862,9 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
                     mergedCount += pBookmaker.markets.length;
                   }
                 });
-                console.log(`📅 Merged ${mergedCount} period markets for ${game.away_team} @ ${game.home_team}`);
               }
             } catch (gameErr) {
-              console.error(`❌ Period markets error for ${game.id}:`, gameErr.message);
+              // Silently skip individual game errors
             }
           }
         } catch (sportErr) {
