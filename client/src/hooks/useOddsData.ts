@@ -2848,9 +2848,16 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // Filter out picks with insufficient comparison books (empty mini-table)
       // Use the user's minDataPoints setting (default 4) to filter
       // CRITICAL: For spreads/totals, only count books that match the pick's line
+      // EXCEPTION: Player props use minDataPoints of 1 since DFS apps often have limited coverage
       const filterEmptyBooks = (picks: OddsPick[]) => {
-        const requiredBooks = Math.max(minDataPoints || 4, 2); // At least 2, respect user setting
         return picks.filter(pick => {
+          // Player props have different requirements - just need 1 book minimum
+          if (pick.isPlayerProp) {
+            const books = pick.books || pick.allBooks || [];
+            return books.length >= 1;
+          }
+          
+          const requiredBooks = Math.max(minDataPoints || 4, 2); // At least 2, respect user setting
           const books = pick.books || pick.allBooks || [];
           const pickLine = pick.line;
           const marketKey = pick.marketKey || '';

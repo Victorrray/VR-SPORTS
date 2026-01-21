@@ -218,9 +218,9 @@ async function fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsM
   
   console.log(`🎯 PLAYER PROPS FETCH: Found ${allEvents.length} total events across ${sportsArray.length} sports`);
   
-  // Rate limiting config
-  const MAX_CONCURRENT = 15;
-  const DELAY_BETWEEN_BATCHES_MS = 500; // Reduced delay since we have caching now
+  // Rate limiting config - keep low to avoid 429 errors from TheOddsAPI
+  const MAX_CONCURRENT = 3;
+  const DELAY_BETWEEN_BATCHES_MS = 1500; // Longer delay to avoid rate limits
   const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
   
   // DFS apps and sharp books
