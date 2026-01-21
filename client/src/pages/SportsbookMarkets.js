@@ -394,20 +394,62 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       // Team-Specific
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
       { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' },
-      // Quarter Markets
+      // Quarter Markets - Moneyline
       { key: 'h2h_q1', title: '1Q Moneyline', description: 'First quarter winner', category: 'periods' },
       { key: 'h2h_q2', title: '2Q Moneyline', description: 'Second quarter winner', category: 'periods' },
+      { key: 'h2h_q3', title: '3Q Moneyline', description: 'Third quarter winner', category: 'periods' },
+      { key: 'h2h_q4', title: '4Q Moneyline', description: 'Fourth quarter winner', category: 'periods' },
+      // Quarter Markets - Spreads
       { key: 'spreads_q1', title: '1Q Spread', description: 'First quarter spread', category: 'periods' },
       { key: 'spreads_q2', title: '2Q Spread', description: 'Second quarter spread', category: 'periods' },
+      { key: 'spreads_q3', title: '3Q Spread', description: 'Third quarter spread', category: 'periods' },
+      { key: 'spreads_q4', title: '4Q Spread', description: 'Fourth quarter spread', category: 'periods' },
+      // Quarter Markets - Totals
       { key: 'totals_q1', title: '1Q Total', description: 'First quarter total', category: 'periods' },
       { key: 'totals_q2', title: '2Q Total', description: 'Second quarter total', category: 'periods' },
-      // Half Markets
+      { key: 'totals_q3', title: '3Q Total', description: 'Third quarter total', category: 'periods' },
+      { key: 'totals_q4', title: '4Q Total', description: 'Fourth quarter total', category: 'periods' },
+      // Quarter Markets - Alternate Spreads
+      { key: 'alternate_spreads_q1', title: 'Alt 1Q Spread', description: 'Alternate first quarter spreads', category: 'periods' },
+      { key: 'alternate_spreads_q2', title: 'Alt 2Q Spread', description: 'Alternate second quarter spreads', category: 'periods' },
+      { key: 'alternate_spreads_q3', title: 'Alt 3Q Spread', description: 'Alternate third quarter spreads', category: 'periods' },
+      { key: 'alternate_spreads_q4', title: 'Alt 4Q Spread', description: 'Alternate fourth quarter spreads', category: 'periods' },
+      // Quarter Markets - Alternate Totals
+      { key: 'alternate_totals_q1', title: 'Alt 1Q Total', description: 'Alternate first quarter totals', category: 'periods' },
+      { key: 'alternate_totals_q2', title: 'Alt 2Q Total', description: 'Alternate second quarter totals', category: 'periods' },
+      { key: 'alternate_totals_q3', title: 'Alt 3Q Total', description: 'Alternate third quarter totals', category: 'periods' },
+      { key: 'alternate_totals_q4', title: 'Alt 4Q Total', description: 'Alternate fourth quarter totals', category: 'periods' },
+      // Quarter Markets - Team Totals
+      { key: 'team_totals_q1', title: '1Q Team Total', description: 'First quarter team totals', category: 'periods' },
+      { key: 'team_totals_q2', title: '2Q Team Total', description: 'Second quarter team totals', category: 'periods' },
+      { key: 'team_totals_q3', title: '3Q Team Total', description: 'Third quarter team totals', category: 'periods' },
+      { key: 'team_totals_q4', title: '4Q Team Total', description: 'Fourth quarter team totals', category: 'periods' },
+      // Quarter Markets - Alternate Team Totals
+      { key: 'alternate_team_totals_q1', title: 'Alt 1Q Team Total', description: 'Alternate first quarter team totals', category: 'periods' },
+      { key: 'alternate_team_totals_q2', title: 'Alt 2Q Team Total', description: 'Alternate second quarter team totals', category: 'periods' },
+      { key: 'alternate_team_totals_q3', title: 'Alt 3Q Team Total', description: 'Alternate third quarter team totals', category: 'periods' },
+      { key: 'alternate_team_totals_q4', title: 'Alt 4Q Team Total', description: 'Alternate fourth quarter team totals', category: 'periods' },
+      // Half Markets - Moneyline
       { key: 'h2h_h1', title: '1H Moneyline', description: 'First half winner', category: 'periods' },
       { key: 'h2h_h2', title: '2H Moneyline', description: 'Second half winner', category: 'periods' },
+      // Half Markets - Spreads
       { key: 'spreads_h1', title: '1H Spread', description: 'First half spread', category: 'periods' },
       { key: 'spreads_h2', title: '2H Spread', description: 'Second half spread', category: 'periods' },
+      // Half Markets - Totals
       { key: 'totals_h1', title: '1H Total', description: 'First half total', category: 'periods' },
-      { key: 'totals_h2', title: '2H Total', description: 'Second half total', category: 'periods' }
+      { key: 'totals_h2', title: '2H Total', description: 'Second half total', category: 'periods' },
+      // Half Markets - Alternate Spreads
+      { key: 'alternate_spreads_h1', title: 'Alt 1H Spread', description: 'Alternate first half spreads', category: 'periods' },
+      { key: 'alternate_spreads_h2', title: 'Alt 2H Spread', description: 'Alternate second half spreads', category: 'periods' },
+      // Half Markets - Alternate Totals
+      { key: 'alternate_totals_h1', title: 'Alt 1H Total', description: 'Alternate first half totals', category: 'periods' },
+      { key: 'alternate_totals_h2', title: 'Alt 2H Total', description: 'Alternate second half totals', category: 'periods' },
+      // Half Markets - Team Totals
+      { key: 'team_totals_h1', title: '1H Team Total', description: 'First half team totals', category: 'periods' },
+      { key: 'team_totals_h2', title: '2H Team Total', description: 'Second half team totals', category: 'periods' },
+      // Half Markets - Alternate Team Totals
+      { key: 'alternate_team_totals_h1', title: 'Alt 1H Team Total', description: 'Alternate first half team totals', category: 'periods' },
+      { key: 'alternate_team_totals_h2', title: 'Alt 2H Team Total', description: 'Alternate second half team totals', category: 'periods' }
     ],
     basketball: [
       // Core Markets
@@ -420,26 +462,62 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       // Team-Specific
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific over/under', category: 'team' },
       { key: 'alternate_team_totals', title: 'Alt Team Totals', description: 'All team total options', category: 'team' },
-      // Quarter Markets
+      // Quarter Markets - Moneyline
       { key: 'h2h_q1', title: '1Q Moneyline', description: 'First quarter winner', category: 'periods' },
       { key: 'h2h_q2', title: '2Q Moneyline', description: 'Second quarter winner', category: 'periods' },
       { key: 'h2h_q3', title: '3Q Moneyline', description: 'Third quarter winner', category: 'periods' },
       { key: 'h2h_q4', title: '4Q Moneyline', description: 'Fourth quarter winner', category: 'periods' },
+      // Quarter Markets - Spreads
       { key: 'spreads_q1', title: '1Q Spread', description: 'First quarter spread', category: 'periods' },
       { key: 'spreads_q2', title: '2Q Spread', description: 'Second quarter spread', category: 'periods' },
       { key: 'spreads_q3', title: '3Q Spread', description: 'Third quarter spread', category: 'periods' },
       { key: 'spreads_q4', title: '4Q Spread', description: 'Fourth quarter spread', category: 'periods' },
+      // Quarter Markets - Totals
       { key: 'totals_q1', title: '1Q Total', description: 'First quarter total', category: 'periods' },
       { key: 'totals_q2', title: '2Q Total', description: 'Second quarter total', category: 'periods' },
       { key: 'totals_q3', title: '3Q Total', description: 'Third quarter total', category: 'periods' },
       { key: 'totals_q4', title: '4Q Total', description: 'Fourth quarter total', category: 'periods' },
-      // Half Markets
+      // Quarter Markets - Alternate Spreads
+      { key: 'alternate_spreads_q1', title: 'Alt 1Q Spread', description: 'Alternate first quarter spreads', category: 'periods' },
+      { key: 'alternate_spreads_q2', title: 'Alt 2Q Spread', description: 'Alternate second quarter spreads', category: 'periods' },
+      { key: 'alternate_spreads_q3', title: 'Alt 3Q Spread', description: 'Alternate third quarter spreads', category: 'periods' },
+      { key: 'alternate_spreads_q4', title: 'Alt 4Q Spread', description: 'Alternate fourth quarter spreads', category: 'periods' },
+      // Quarter Markets - Alternate Totals
+      { key: 'alternate_totals_q1', title: 'Alt 1Q Total', description: 'Alternate first quarter totals', category: 'periods' },
+      { key: 'alternate_totals_q2', title: 'Alt 2Q Total', description: 'Alternate second quarter totals', category: 'periods' },
+      { key: 'alternate_totals_q3', title: 'Alt 3Q Total', description: 'Alternate third quarter totals', category: 'periods' },
+      { key: 'alternate_totals_q4', title: 'Alt 4Q Total', description: 'Alternate fourth quarter totals', category: 'periods' },
+      // Quarter Markets - Team Totals
+      { key: 'team_totals_q1', title: '1Q Team Total', description: 'First quarter team totals', category: 'periods' },
+      { key: 'team_totals_q2', title: '2Q Team Total', description: 'Second quarter team totals', category: 'periods' },
+      { key: 'team_totals_q3', title: '3Q Team Total', description: 'Third quarter team totals', category: 'periods' },
+      { key: 'team_totals_q4', title: '4Q Team Total', description: 'Fourth quarter team totals', category: 'periods' },
+      // Quarter Markets - Alternate Team Totals
+      { key: 'alternate_team_totals_q1', title: 'Alt 1Q Team Total', description: 'Alternate first quarter team totals', category: 'periods' },
+      { key: 'alternate_team_totals_q2', title: 'Alt 2Q Team Total', description: 'Alternate second quarter team totals', category: 'periods' },
+      { key: 'alternate_team_totals_q3', title: 'Alt 3Q Team Total', description: 'Alternate third quarter team totals', category: 'periods' },
+      { key: 'alternate_team_totals_q4', title: 'Alt 4Q Team Total', description: 'Alternate fourth quarter team totals', category: 'periods' },
+      // Half Markets - Moneyline
       { key: 'h2h_h1', title: '1H Moneyline', description: 'First half winner', category: 'periods' },
       { key: 'h2h_h2', title: '2H Moneyline', description: 'Second half winner', category: 'periods' },
+      // Half Markets - Spreads
       { key: 'spreads_h1', title: '1H Spread', description: 'First half spread', category: 'periods' },
       { key: 'spreads_h2', title: '2H Spread', description: 'Second half spread', category: 'periods' },
+      // Half Markets - Totals
       { key: 'totals_h1', title: '1H Total', description: 'First half total', category: 'periods' },
-      { key: 'totals_h2', title: '2H Total', description: 'Second half total', category: 'periods' }
+      { key: 'totals_h2', title: '2H Total', description: 'Second half total', category: 'periods' },
+      // Half Markets - Alternate Spreads
+      { key: 'alternate_spreads_h1', title: 'Alt 1H Spread', description: 'Alternate first half spreads', category: 'periods' },
+      { key: 'alternate_spreads_h2', title: 'Alt 2H Spread', description: 'Alternate second half spreads', category: 'periods' },
+      // Half Markets - Alternate Totals
+      { key: 'alternate_totals_h1', title: 'Alt 1H Total', description: 'Alternate first half totals', category: 'periods' },
+      { key: 'alternate_totals_h2', title: 'Alt 2H Total', description: 'Alternate second half totals', category: 'periods' },
+      // Half Markets - Team Totals
+      { key: 'team_totals_h1', title: '1H Team Total', description: 'First half team totals', category: 'periods' },
+      { key: 'team_totals_h2', title: '2H Team Total', description: 'Second half team totals', category: 'periods' },
+      // Half Markets - Alternate Team Totals
+      { key: 'alternate_team_totals_h1', title: 'Alt 1H Team Total', description: 'Alternate first half team totals', category: 'periods' },
+      { key: 'alternate_team_totals_h2', title: 'Alt 2H Team Total', description: 'Alternate second half team totals', category: 'periods' }
     ],
     baseball: [
       // Core Markets
@@ -450,7 +528,37 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_spreads', title: 'Alt Run Lines', description: 'All available run lines', category: 'alternates' },
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available run totals', category: 'alternates' },
       // Team-Specific
-      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific run totals', category: 'team' }
+      { key: 'team_totals', title: 'Team Totals', description: 'Team-specific run totals', category: 'team' },
+      // Innings Markets - Moneyline
+      { key: 'h2h_1st_1_innings', title: '1st Inning ML', description: 'First inning moneyline', category: 'periods' },
+      { key: 'h2h_1st_3_innings', title: '1st 3 Innings ML', description: 'First 3 innings moneyline', category: 'periods' },
+      { key: 'h2h_1st_5_innings', title: '1st 5 Innings ML', description: 'First 5 innings moneyline', category: 'periods' },
+      { key: 'h2h_1st_7_innings', title: '1st 7 Innings ML', description: 'First 7 innings moneyline', category: 'periods' },
+      // Innings Markets - 3-Way Moneyline
+      { key: 'h2h_3_way_1st_1_innings', title: '1st Inning 3-Way', description: 'First inning 3-way moneyline', category: 'periods' },
+      { key: 'h2h_3_way_1st_3_innings', title: '1st 3 Innings 3-Way', description: 'First 3 innings 3-way moneyline', category: 'periods' },
+      { key: 'h2h_3_way_1st_5_innings', title: '1st 5 Innings 3-Way', description: 'First 5 innings 3-way moneyline', category: 'periods' },
+      { key: 'h2h_3_way_1st_7_innings', title: '1st 7 Innings 3-Way', description: 'First 7 innings 3-way moneyline', category: 'periods' },
+      // Innings Markets - Spreads
+      { key: 'spreads_1st_1_innings', title: '1st Inning Spread', description: 'First inning spread', category: 'periods' },
+      { key: 'spreads_1st_3_innings', title: '1st 3 Innings Spread', description: 'First 3 innings spread', category: 'periods' },
+      { key: 'spreads_1st_5_innings', title: '1st 5 Innings Spread', description: 'First 5 innings spread', category: 'periods' },
+      { key: 'spreads_1st_7_innings', title: '1st 7 Innings Spread', description: 'First 7 innings spread', category: 'periods' },
+      // Innings Markets - Alternate Spreads
+      { key: 'alternate_spreads_1st_1_innings', title: 'Alt 1st Inning Spread', description: 'Alternate first inning spreads', category: 'periods' },
+      { key: 'alternate_spreads_1st_3_innings', title: 'Alt 1st 3 Innings Spread', description: 'Alternate first 3 innings spreads', category: 'periods' },
+      { key: 'alternate_spreads_1st_5_innings', title: 'Alt 1st 5 Innings Spread', description: 'Alternate first 5 innings spreads', category: 'periods' },
+      { key: 'alternate_spreads_1st_7_innings', title: 'Alt 1st 7 Innings Spread', description: 'Alternate first 7 innings spreads', category: 'periods' },
+      // Innings Markets - Totals
+      { key: 'totals_1st_1_innings', title: '1st Inning Total', description: 'First inning total', category: 'periods' },
+      { key: 'totals_1st_3_innings', title: '1st 3 Innings Total', description: 'First 3 innings total', category: 'periods' },
+      { key: 'totals_1st_5_innings', title: '1st 5 Innings Total', description: 'First 5 innings total', category: 'periods' },
+      { key: 'totals_1st_7_innings', title: '1st 7 Innings Total', description: 'First 7 innings total', category: 'periods' },
+      // Innings Markets - Alternate Totals
+      { key: 'alternate_totals_1st_1_innings', title: 'Alt 1st Inning Total', description: 'Alternate first inning totals', category: 'periods' },
+      { key: 'alternate_totals_1st_3_innings', title: 'Alt 1st 3 Innings Total', description: 'Alternate first 3 innings totals', category: 'periods' },
+      { key: 'alternate_totals_1st_5_innings', title: 'Alt 1st 5 Innings Total', description: 'Alternate first 5 innings totals', category: 'periods' },
+      { key: 'alternate_totals_1st_7_innings', title: 'Alt 1st 7 Innings Total', description: 'Alternate first 7 innings totals', category: 'periods' }
     ],
     hockey: [
       // Core Markets
@@ -462,16 +570,38 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'alternate_totals', title: 'Alt Totals', description: 'All available goal totals', category: 'alternates' },
       // Team-Specific
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' },
-      // Period Markets (NHL has 3 periods)
+      // Period Markets - Moneyline
       { key: 'h2h_p1', title: '1P Moneyline', description: 'First period winner', category: 'periods' },
       { key: 'h2h_p2', title: '2P Moneyline', description: 'Second period winner', category: 'periods' },
       { key: 'h2h_p3', title: '3P Moneyline', description: 'Third period winner', category: 'periods' },
+      // Period Markets - 3-Way Moneyline
+      { key: 'h2h_3_way_p1', title: '1P 3-Way', description: 'First period 3-way result', category: 'periods' },
+      { key: 'h2h_3_way_p2', title: '2P 3-Way', description: 'Second period 3-way result', category: 'periods' },
+      { key: 'h2h_3_way_p3', title: '3P 3-Way', description: 'Third period 3-way result', category: 'periods' },
+      // Period Markets - Spreads
       { key: 'spreads_p1', title: '1P Spread', description: 'First period spread', category: 'periods' },
       { key: 'spreads_p2', title: '2P Spread', description: 'Second period spread', category: 'periods' },
       { key: 'spreads_p3', title: '3P Spread', description: 'Third period spread', category: 'periods' },
+      // Period Markets - Alternate Spreads
+      { key: 'alternate_spreads_p1', title: 'Alt 1P Spread', description: 'Alternate first period spreads', category: 'periods' },
+      { key: 'alternate_spreads_p2', title: 'Alt 2P Spread', description: 'Alternate second period spreads', category: 'periods' },
+      { key: 'alternate_spreads_p3', title: 'Alt 3P Spread', description: 'Alternate third period spreads', category: 'periods' },
+      // Period Markets - Totals
       { key: 'totals_p1', title: '1P Total', description: 'First period total', category: 'periods' },
       { key: 'totals_p2', title: '2P Total', description: 'Second period total', category: 'periods' },
-      { key: 'totals_p3', title: '3P Total', description: 'Third period total', category: 'periods' }
+      { key: 'totals_p3', title: '3P Total', description: 'Third period total', category: 'periods' },
+      // Period Markets - Alternate Totals
+      { key: 'alternate_totals_p1', title: 'Alt 1P Total', description: 'Alternate first period totals', category: 'periods' },
+      { key: 'alternate_totals_p2', title: 'Alt 2P Total', description: 'Alternate second period totals', category: 'periods' },
+      { key: 'alternate_totals_p3', title: 'Alt 3P Total', description: 'Alternate third period totals', category: 'periods' },
+      // Period Markets - Team Totals
+      { key: 'team_totals_p1', title: '1P Team Total', description: 'First period team totals', category: 'periods' },
+      { key: 'team_totals_p2', title: '2P Team Total', description: 'Second period team totals', category: 'periods' },
+      { key: 'team_totals_p3', title: '3P Team Total', description: 'Third period team totals', category: 'periods' },
+      // Period Markets - Alternate Team Totals
+      { key: 'alternate_team_totals_p1', title: 'Alt 1P Team Total', description: 'Alternate first period team totals', category: 'periods' },
+      { key: 'alternate_team_totals_p2', title: 'Alt 2P Team Total', description: 'Alternate second period team totals', category: 'periods' },
+      { key: 'alternate_team_totals_p3', title: 'Alt 3P Team Total', description: 'Alternate third period team totals', category: 'periods' }
     ],
     soccer: [
       // Core Markets
@@ -484,7 +614,10 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       { key: 'team_totals', title: 'Team Totals', description: 'Team-specific goal totals', category: 'team' },
       // Special Markets
       { key: 'draw_no_bet', title: 'Draw No Bet', description: 'Win/Loss excluding draws', category: 'special' },
-      { key: 'btts', title: 'Both Teams to Score', description: 'Yes/No both teams score', category: 'special' }
+      { key: 'btts', title: 'Both Teams to Score', description: 'Yes/No both teams score', category: 'special' },
+      // Half Markets - 3-Way
+      { key: 'h2h_3_way_h1', title: '1H 3-Way', description: 'First half 3-way result', category: 'periods' },
+      { key: 'h2h_3_way_h2', title: '2H 3-Way', description: 'Second half 3-way result', category: 'periods' }
     ],
     default: [
       { key: 'h2h', title: 'Moneyline', description: 'Win/Loss bets', category: 'core' },
