@@ -1073,6 +1073,11 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       if (cachedProps) {
         // We have cached data - return it immediately
         console.log(`📦 PLAYER PROPS CACHE HIT: Returning ${cachedProps.data.length} cached props (age: ${cachedProps.age}s, stale: ${cachedProps.isStale})`);
+        // Log first prop to verify structure
+        if (cachedProps.data.length > 0) {
+          const firstProp = cachedProps.data[0];
+          console.log(`📦 FIRST CACHED PROP: ${firstProp.home_team} vs ${firstProp.away_team}, bookmakers: ${firstProp.bookmakers?.length || 0}`);
+        }
         allGames.push(...cachedProps.data);
         
         // If data is stale, trigger background refresh (but don't wait for it)
