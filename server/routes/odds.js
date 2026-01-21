@@ -485,13 +485,22 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const bookmakerList = gameOddsBookmakers.join(',');
           
           // IMPORTANT: Filter markets to only those supported by this specific sport
-          // This prevents 422 errors from sending soccer markets (btts, draw_no_bet) to non-soccer sports
-          // BUT: Player prop markets should NOT be filtered by SPORT_MARKET_SUPPORT - they have their own support
+          // This prevents 422 errors from sending wrong markets to sports that don't support them
           const sportSupportedMarkets = getSupportedMarketsForSport(sport);
           const isPlayerPropMarket = (m) => m.startsWith('player_') || m.startsWith('batter_') || m.startsWith('pitcher_');
-          const marketsForThisSport = marketsToFetch.filter(m => 
-            isPlayerPropMarket(m) || sportSupportedMarkets.includes(m)
-          );
+          
+          // Get sport-specific player prop markets (to avoid sending basketball props to NHL, etc.)
+          const sportSpecificPlayerProps = playerPropsMarketMap[sport] || 
+            (sport.startsWith('soccer_') ? defaultSoccerPlayerProps : []);
+          
+          const marketsForThisSport = marketsToFetch.filter(m => {
+            if (isPlayerPropMarket(m)) {
+              // Only include player props that are supported by THIS sport
+              return sportSpecificPlayerProps.includes(m);
+            }
+            // For non-player-prop markets, use the regular sport support check
+            return sportSupportedMarkets.includes(m);
+          });
           
           if (marketsForThisSport.length === 0) {
             console.log(`⚠️ No supported markets for ${sport}, skipping`);
@@ -981,8 +990,22 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
         const batchPromises = batch.map(event => 
           (async () => {
             try {
+              // IMPORTANT: Filter player prop markets to only those supported by THIS sport
+              // This prevents 422 errors from sending basketball markets to NHL, baseball markets to NBA, etc.
+              const sportKey = event.sport_key;
+              const sportSpecificMarkets = playerPropsMarketMap[sportKey] || 
+                (sportKey?.startsWith('soccer_') ? defaultSoccerPlayerProps : []);
+              
+              // Only fetch markets that are both requested AND supported by this sport
+              const marketsForThisEvent = playerPropMarkets.filter(m => sportSpecificMarkets.includes(m));
+              
+              if (marketsForThisEvent.length === 0) {
+                // No supported player prop markets for this sport, skip
+                return;
+              }
+              
               // Include bookmakers parameter to explicitly request DFS apps for all sports including soccer
-              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${playerPropMarkets.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${allPlayerPropsBookmakers}&includeBetLimits=true`;
+              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${marketsForThisEvent.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${allPlayerPropsBookmakers}&includeBetLimits=true`;
               
               const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 15000 }); // Reduced timeout
               
