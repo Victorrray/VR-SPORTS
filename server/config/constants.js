@@ -5,7 +5,8 @@
 
 // Cache durations - balanced for freshness vs API cost/memory
 const CACHE_DURATION_MS = 3 * 60 * 1000; // 3 minutes for regular markets
-const PLAYER_PROPS_CACHE_DURATION_MS = 2 * 60 * 1000; // 2 minutes for player props (was 30s - too aggressive)
+const PLAYER_PROPS_CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes for player props - return cached fast, refresh in background
+const PLAYER_PROPS_STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes - after this, trigger background refresh
 const ALTERNATE_MARKETS_CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes for alternate markets (change less frequently)
 const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -183,6 +184,7 @@ module.exports = {
   PLAYER_PROPS_REQUEST_TIMEOUT,
   PLAYER_PROPS_MAX_CACHE_ENTRIES,
   PLAYER_PROPS_TIMEZONE,
+  PLAYER_PROPS_STALE_THRESHOLD_MS,
   
   // Stripe configuration
   STRIPE_PRICE_GOLD,

@@ -8,7 +8,12 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 const { requireUser, checkPlanAccess, enforceUsage } = require('../middleware/auth');
-const { getCacheKey, getCachedResponse, setCachedResponse, clearCachedResponse, getOddsInFlight, setOddsInFlight, deleteOddsInFlight } = require('../services/cache');
+const { 
+  getCacheKey, getCachedResponse, setCachedResponse, clearCachedResponse, 
+  getOddsInFlight, setOddsInFlight, deleteOddsInFlight,
+  getCachedPlayerPropsResults, setCachedPlayerPropsResults, 
+  isPlayerPropsRefreshing, setPlayerPropsRefreshing, getPlayerPropsCacheKey
+} = require('../services/cache');
 const {
   getBookmakersForPlan,
   transformCachedOddsToApiFormat,
@@ -182,10 +187,128 @@ const SPORT_MARKET_SUPPORT = {
 };
 
 /**
+ * Helper function to fetch player props data
+ * Used for both initial fetch and background refresh
+ */
+async function fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsMarketMap, oddsFormat, req) {
+  const userProfile = req.__userProfile || { plan: 'free' };
+  const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
+  const bookmakerList = allowedBookmakers.join(',');
+  
+  const playerPropsResults = [];
+  
+  // Fetch all sports' events in parallel first
+  const eventsPromises = sportsArray.map(async (sport) => {
+    try {
+      const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
+      const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
+      const events = eventsResponse.data || [];
+      return events.map(e => ({ ...e, sport_key: sport }));
+    } catch (err) {
+      return [];
+    }
+  });
+  
+  const allEventsArrays = await Promise.all(eventsPromises);
+  const allEvents = allEventsArrays.flat();
+  
+  console.log(`🎯 PLAYER PROPS FETCH: Found ${allEvents.length} total events across ${sportsArray.length} sports`);
+  
+  // Rate limiting config
+  const MAX_CONCURRENT = 5;
+  const DELAY_BETWEEN_BATCHES_MS = 1000;
+  const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
+  
+  // DFS apps and sharp books
+  const dfsBookmakersForProps = [
+    'prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs',
+    'pinnacle', 'prophet_exchange', 'rebet', 'betopenly'
+  ];
+  const allPlayerPropsBookmakers = [...new Set([...bookmakerList.split(','), ...dfsBookmakersForProps])].join(',');
+  
+  for (let i = 0; i < allEvents.length; i += MAX_CONCURRENT) {
+    const batch = allEvents.slice(i, i + MAX_CONCURRENT);
+    const batchPromises = batch.map(event => 
+      (async () => {
+        try {
+          const sportKey = event.sport_key;
+          
+          // Skip soccer player props
+          if (sportKey?.startsWith('soccer_')) {
+            return null;
+          }
+          
+          const sportSpecificMarkets = playerPropsMarketMap[sportKey] || [];
+          const marketsForThisEvent = playerPropMarkets.filter(m => sportSpecificMarkets.includes(m));
+          
+          if (marketsForThisEvent.length === 0) {
+            return null;
+          }
+          
+          const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${marketsForThisEvent.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${allPlayerPropsBookmakers}&includeBetLimits=true`;
+          
+          const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 15000 });
+          
+          if (playerPropsResponse.data?.bookmakers?.length > 0) {
+            const eventWithProps = {
+              ...playerPropsResponse.data,
+              bookmakers: playerPropsResponse.data.bookmakers
+                .filter(bk => bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key)))
+                .map(bk => ({
+                  ...bk,
+                  title: bk.title || bk.key?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'
+                }))
+            };
+            
+            if (eventWithProps.bookmakers.length > 0) {
+              return eventWithProps;
+            }
+          }
+          return null;
+        } catch (eventErr) {
+          console.log(`❌ PLAYER PROPS ERROR: ${event.sport_key} event ${event.id}: ${eventErr.message}`);
+          return null;
+        }
+      })()
+    );
+    
+    const batchResults = await Promise.all(batchPromises);
+    playerPropsResults.push(...batchResults.filter(r => r !== null));
+    
+    // Delay between batches to avoid rate limiting
+    if (i + MAX_CONCURRENT < allEvents.length) {
+      await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES_MS));
+    }
+  }
+  
+  return playerPropsResults;
+}
+
+/**
+ * Background refresh for player props (fire and forget)
+ */
+async function fetchPlayerPropsInBackground(cacheKey, sportsArray, playerPropMarkets, playerPropsMarketMap, oddsFormat, req) {
+  console.log(`🔄 BACKGROUND REFRESH: Starting for ${sportsArray.length} sports`);
+  const startTime = Date.now();
+  
+  try {
+    const freshProps = await fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsMarketMap, oddsFormat, req);
+    
+    if (freshProps.length > 0) {
+      setCachedPlayerPropsResults(cacheKey, freshProps);
+      console.log(`🔄 BACKGROUND REFRESH COMPLETE: Updated cache with ${freshProps.length} props in ${Date.now() - startTime}ms`);
+    } else {
+      console.log(`🔄 BACKGROUND REFRESH: No props found, keeping existing cache`);
+    }
+  } catch (err) {
+    console.log(`❌ BACKGROUND REFRESH ERROR: ${err.message}`);
+  }
+}
+
+/**
  * GET /api/odds
  * Main odds endpoint - returns game odds with optional player props
  */
-
 
 router.get('/', requireUser, checkPlanAccess, async (req, res) => {
   try {
@@ -933,136 +1056,42 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     
     // Step 3: Fetch player props if requested
     // NOTE: Player props must be fetched using /events/{eventId}/odds endpoint, one event at a time
+    // OPTIMIZATION: Use stale-while-revalidate caching - return cached data immediately, refresh in background
     
     console.log(`🎯 PLAYER PROPS CHECK: playerPropMarkets.length=${playerPropMarkets.length}, ENABLE_PLAYER_PROPS_V2=${ENABLE_PLAYER_PROPS_V2}, isPlayerPropsRequest=${isPlayerPropsRequest}`);
     
     if (playerPropMarkets.length > 0 && ENABLE_PLAYER_PROPS_V2) {
-      console.log(`🎯 PLAYER PROPS: Starting Step 3 - fetching player props for ${sportsArray.length} sports`);
+      // Generate cache key for this player props request
+      const ppCacheKey = getPlayerPropsCacheKey(sportsArray, playerPropMarkets);
+      const cachedProps = getCachedPlayerPropsResults(ppCacheKey);
       
-      const userProfile = req.__userProfile || { plan: 'free' };
-      const allowedBookmakers = getBookmakersForPlan(userProfile.plan);
-      
-      // Use ALL allowed bookmakers for player props (both traditional sportsbooks and DFS apps)
-      // TheOddsAPI will return player props data for whichever bookmakers have it available
-      const playerPropsBookmakers = allowedBookmakers;
-      const bookmakerList = playerPropsBookmakers.join(',');
-      
-      let playerPropsCount = 0;
-      
-      // OPTIMIZATION: Fetch all sports' events in parallel first
-      const eventsPromises = sportsArray.map(async (sport) => {
-        try {
-          const eventsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/events?apiKey=${API_KEY}`;
-          const eventsResponse = await axios.get(eventsUrl, { timeout: 30000 });
-          const events = eventsResponse.data || [];
-          return events.map(e => ({ ...e, sport_key: sport }));
-        } catch (err) {
-          return [];
-        }
-      });
-      
-      const allEventsArrays = await Promise.all(eventsPromises);
-      const allEvents = allEventsArrays.flat();
-      
-      console.log(`🎯 PLAYER PROPS: Found ${allEvents.length} total events across all sports`);
-      if (allEvents.length > 0) {
-        const eventsBySport = {};
-        allEvents.forEach(e => {
-          eventsBySport[e.sport_key] = (eventsBySport[e.sport_key] || 0) + 1;
-        });
-        console.log(`🎯 PLAYER PROPS: Events by sport:`, eventsBySport);
-      }
-      
-      // OPTIMIZATION: Fetch player props with rate limiting to avoid 429 errors
-      const MAX_CONCURRENT = 5; // Reduced from 15 to 5 to avoid rate limiting
-      const DELAY_BETWEEN_BATCHES_MS = 1000; // 1 second delay between batches
-      const playerPropsRegions = 'us,us2,us_dfs,us_ex,au';
-      
-      // Explicitly include DFS apps and sharp books for player props (including soccer)
-      const dfsBookmakersForProps = [
-        // DFS Apps (weight 0) - use correct API keys
-        'prizepicks', 'underdog', 'pick6', 'dabble_au', 'betr_us_dfs',
-        // Sharp/Exchange books (same weighting as DFS apps)
-        'pinnacle', 'prophet_exchange', 'rebet', 'betopenly'
-      ];
-      const allPlayerPropsBookmakers = [...new Set([...bookmakerList.split(','), ...dfsBookmakersForProps])].join(',');
-      
-      for (let i = 0; i < allEvents.length; i += MAX_CONCURRENT) {
-        const batch = allEvents.slice(i, i + MAX_CONCURRENT);
-        const batchPromises = batch.map(event => 
-          (async () => {
-            try {
-              // IMPORTANT: Filter player prop markets to only those supported by THIS sport
-              // This prevents 422 errors from sending basketball markets to NHL, baseball markets to NBA, etc.
-              const sportKey = event.sport_key;
-              
-              // Skip soccer player props entirely - very low coverage (1-2 books), wastes API calls
-              if (sportKey?.startsWith('soccer_')) {
-                return;
-              }
-              
-              const sportSpecificMarkets = playerPropsMarketMap[sportKey] || [];
-              
-              // Only fetch markets that are both requested AND supported by this sport
-              const marketsForThisEvent = playerPropMarkets.filter(m => sportSpecificMarkets.includes(m));
-              
-              if (marketsForThisEvent.length === 0) {
-                // No supported player prop markets for this sport, skip
-                console.log(`🎯 SKIP: No supported markets for ${sportKey} event ${event.id}`);
-                return;
-              }
-              
-              console.log(`🎯 FETCHING: ${sportKey} event ${event.id} with ${marketsForThisEvent.length} markets`);
-              
-              // Include bookmakers parameter to explicitly request DFS apps for all sports including soccer
-              const playerPropsUrl = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(event.sport_key)}/events/${event.id}/odds?apiKey=${API_KEY}&regions=${playerPropsRegions}&markets=${marketsForThisEvent.join(',')}&oddsFormat=${oddsFormat}&bookmakers=${allPlayerPropsBookmakers}&includeBetLimits=true`;
-              
-              const playerPropsResponse = await axios.get(playerPropsUrl, { timeout: 15000 }); // Reduced timeout
-              
-              const bookmakerCount = playerPropsResponse.data?.bookmakers?.length || 0;
-              console.log(`🎯 RESPONSE: ${sportKey} event ${event.id} - ${bookmakerCount} bookmakers`);
-              
-              if (playerPropsResponse.data && playerPropsResponse.data.bookmakers && playerPropsResponse.data.bookmakers.length > 0) {
-                // Log bookmakers found
-                const bookmakerKeys = playerPropsResponse.data.bookmakers.map(bk => bk.key);
-                console.log(`🎯 BOOKMAKERS: ${bookmakerKeys.join(', ')}`);
-                
-                // Check for PrizePicks specifically
-                const hasPrizePicks = bookmakerKeys.some(k => k?.toLowerCase().includes('prizepicks'));
-                if (hasPrizePicks) {
-                  console.log(`✅ PRIZEPICKS FOUND for ${sportKey} event ${event.id}`);
-                }
-                
-                const eventWithProps = {
-                  ...playerPropsResponse.data,
-                  bookmakers: playerPropsResponse.data.bookmakers
-                    .filter(bk => bk.markets && bk.markets.some(m => playerPropMarkets.includes(m.key)))
-                    .map(bk => ({
-                      ...bk,
-                      title: bk.title || bk.key?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'
-                    }))
-                };
-                
-                if (eventWithProps.bookmakers.length > 0) {
-                  allGames.push(eventWithProps);
-                  playerPropsCount++;
-                }
-              }
-            } catch (eventErr) {
-              console.log(`❌ PLAYER PROPS ERROR: ${event.sport_key} event ${event.id}: ${eventErr.message}`);
-            }
-          })()
-        );
+      if (cachedProps) {
+        // We have cached data - return it immediately
+        console.log(`📦 PLAYER PROPS CACHE HIT: Returning ${cachedProps.data.length} cached props (age: ${cachedProps.age}s, stale: ${cachedProps.isStale})`);
+        allGames.push(...cachedProps.data);
         
-        await Promise.all(batchPromises);
-        
-        // Add delay between batches to avoid rate limiting (429 errors)
-        if (i + MAX_CONCURRENT < allEvents.length) {
-          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES_MS));
+        // If data is stale, trigger background refresh (but don't wait for it)
+        if (cachedProps.isStale && !isPlayerPropsRefreshing(ppCacheKey)) {
+          console.log(`🔄 PLAYER PROPS: Triggering background refresh for stale cache`);
+          setPlayerPropsRefreshing(ppCacheKey, true);
+          
+          // Fire and forget - refresh in background
+          fetchPlayerPropsInBackground(ppCacheKey, sportsArray, playerPropMarkets, playerPropsMarketMap, oddsFormat, req)
+            .catch(err => console.log(`❌ Background refresh error: ${err.message}`))
+            .finally(() => setPlayerPropsRefreshing(ppCacheKey, false));
         }
+      } else {
+        // No cache - fetch fresh data
+        console.log(`🎯 PLAYER PROPS: No cache, fetching fresh data for ${sportsArray.length} sports`);
+        const freshProps = await fetchPlayerPropsData(sportsArray, playerPropMarkets, playerPropsMarketMap, oddsFormat, req);
+        
+        if (freshProps.length > 0) {
+          allGames.push(...freshProps);
+          setCachedPlayerPropsResults(ppCacheKey, freshProps);
+        }
+        
+        console.log(`🎯 PLAYER PROPS COMPLETE: Added ${freshProps.length} events with player props`);
       }
-      
-      console.log(`🎯 PLAYER PROPS COMPLETE: Added ${playerPropsCount} events with player props`);
     }
     
     // Filter bookmakers' markets to only include requested markets (if not fetching all)

@@ -6,6 +6,7 @@
 const {
   CACHE_DURATION_MS,
   PLAYER_PROPS_CACHE_DURATION_MS,
+  PLAYER_PROPS_STALE_THRESHOLD_MS,
   ALTERNATE_MARKETS_CACHE_DURATION_MS,
   ALTERNATE_MARKETS,
   PLAYER_PROP_MARKETS,
@@ -18,6 +19,10 @@ const planCache = new Map();
 const playerPropsCache = new Map();
 const playerPropsInFlight = new Map();
 const oddsInFlight = new Map(); // Prevent thundering herd for odds API calls
+
+// Dedicated player props results cache (keyed by sports+markets combination)
+const playerPropsResultsCache = new Map();
+const playerPropsBackgroundRefresh = new Set(); // Track which keys are being refreshed
 
 // Player props metrics
 const playerPropsMetrics = {
@@ -234,6 +239,71 @@ function deleteOddsInFlight(key) {
   oddsInFlight.delete(key);
 }
 
+/**
+ * Get cached player props results
+ * Returns { data, isStale, isFresh } or null if not cached
+ */
+function getCachedPlayerPropsResults(cacheKey) {
+  const cached = playerPropsResultsCache.get(cacheKey);
+  if (!cached) {
+    return null;
+  }
+  
+  const age = Date.now() - cached.timestamp;
+  const isExpired = age > PLAYER_PROPS_CACHE_DURATION_MS;
+  const isStale = age > PLAYER_PROPS_STALE_THRESHOLD_MS;
+  
+  if (isExpired) {
+    playerPropsResultsCache.delete(cacheKey);
+    return null;
+  }
+  
+  return {
+    data: cached.data,
+    isStale,
+    isFresh: !isStale,
+    age: Math.round(age / 1000) // age in seconds
+  };
+}
+
+/**
+ * Set cached player props results
+ */
+function setCachedPlayerPropsResults(cacheKey, data) {
+  playerPropsResultsCache.set(cacheKey, {
+    data,
+    timestamp: Date.now()
+  });
+  console.log(`📦 PLAYER PROPS CACHE: Stored ${data.length} props for key: ${cacheKey.substring(0, 50)}...`);
+}
+
+/**
+ * Check if background refresh is in progress for a key
+ */
+function isPlayerPropsRefreshing(cacheKey) {
+  return playerPropsBackgroundRefresh.has(cacheKey);
+}
+
+/**
+ * Mark player props as refreshing (to prevent duplicate refreshes)
+ */
+function setPlayerPropsRefreshing(cacheKey, isRefreshing) {
+  if (isRefreshing) {
+    playerPropsBackgroundRefresh.add(cacheKey);
+  } else {
+    playerPropsBackgroundRefresh.delete(cacheKey);
+  }
+}
+
+/**
+ * Generate cache key for player props based on sports and markets
+ */
+function getPlayerPropsCacheKey(sports, markets) {
+  const sortedSports = [...sports].sort().join(',');
+  const sortedMarkets = [...markets].sort().join(',');
+  return `pp_${sortedSports}_${sortedMarkets}`;
+}
+
 module.exports = {
   // Cache key generation
   getCacheKey,
@@ -267,4 +337,11 @@ module.exports = {
   
   // Utilities
   clearAllCaches,
+  
+  // Player props results caching (stale-while-revalidate)
+  getCachedPlayerPropsResults,
+  setCachedPlayerPropsResults,
+  isPlayerPropsRefreshing,
+  setPlayerPropsRefreshing,
+  getPlayerPropsCacheKey,
 };
