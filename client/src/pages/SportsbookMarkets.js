@@ -865,14 +865,16 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   // IMPORTANT: Always update to include period markets, even if user has old localStorage data
   useEffect(() => {
     const initialMarkets = getAutoSelectedMarkets(filters.sports);
-    // Check if current markets are missing period markets
-    const hasPeriodMarkets = (filters.markets || []).some(m => 
-      m.includes('_q') || m.includes('_h') || m.includes('_p') || m.includes('_1st')
-    );
-    // Force update if no period markets or if we have more markets available
-    if (!hasPeriodMarkets || initialMarkets.length > (filters.markets || []).length) {
+    console.log('🎯 Mount effect - initialMarkets:', initialMarkets.length, 'current filters.markets:', (filters.markets || []).length);
+    console.log('🎯 Period markets in initialMarkets:', initialMarkets.filter(m => 
+      m.includes('_q') || m.includes('_h1') || m.includes('_h2') || m.includes('_p1') || m.includes('_p2') || m.includes('_p3') || m.includes('_1st')
+    ).length);
+    
+    // ALWAYS update markets on mount to ensure period markets are included
+    // This fixes the issue where old localStorage data doesn't have period markets
+    if (initialMarkets.length > 0) {
       updateFilter("markets", initialMarkets);
-      console.log('🎯 Updated markets to include period markets:', initialMarkets.length);
+      console.log('🎯 Updated markets to include all markets:', initialMarkets.length);
     }
   }, []); // Run only once on mount
 
