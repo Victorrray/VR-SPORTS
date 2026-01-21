@@ -434,9 +434,20 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
     console.log(`📊 MARKETS DEBUG: Filtered markets:`, filteredRegularMarkets);
     
     // Separate quarter/half/period markets from base markets
-    const quarterMarketPatterns = ['_q', '_h', '_p', '_1st_', '_3_', '_5_'];
-    const baseMarkets = filteredRegularMarkets.filter(m => !quarterMarketPatterns.some(pattern => m.includes(pattern)));
-    const quarterMarkets = filteredRegularMarkets.filter(m => quarterMarketPatterns.some(pattern => m.includes(pattern)));
+    // IMPORTANT: Use regex patterns to avoid false positives like h2h_3_way matching _3_
+    const isPeriodMarket = (market) => {
+      // Quarter markets: _q1, _q2, _q3, _q4
+      if (/_q[1-4]/.test(market)) return true;
+      // Half markets: _h1, _h2
+      if (/_h[12]$/.test(market)) return true;
+      // Period markets (hockey): _p1, _p2, _p3
+      if (/_p[1-3]$/.test(market)) return true;
+      // Innings markets: _1st_1_innings, _1st_3_innings, etc.
+      if (/_1st_\d+_innings/.test(market)) return true;
+      return false;
+    };
+    const baseMarkets = filteredRegularMarkets.filter(m => !isPeriodMarket(m));
+    const quarterMarkets = filteredRegularMarkets.filter(m => isPeriodMarket(m));
     
     console.log(`📊 MARKETS DEBUG: Base markets (${baseMarkets.length}):`, baseMarkets);
     console.log(`📊 MARKETS DEBUG: Period markets (${quarterMarkets.length}):`, quarterMarkets);
@@ -457,6 +468,16 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           // For game odds, filter out DFS apps (they only have player props)
           const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
           const bookmakerList = gameOddsBookmakers.join(',');
+          
+          // IMPORTANT: Filter markets to only those supported by this specific sport
+          // This prevents 422 errors from sending soccer markets (btts, draw_no_bet) to non-soccer sports
+          const sportSupportedMarkets = getSupportedMarketsForSport(sport);
+          const marketsForThisSport = marketsToFetch.filter(m => sportSupportedMarkets.includes(m));
+          
+          if (marketsForThisSport.length === 0) {
+            console.log(`⚠️ No supported markets for ${sport}, skipping`);
+            continue;
+          }
           
           // Check Supabase cache first (but skip if player props are requested - they need fresh data)
           let supabaseCachedData = null;
@@ -499,12 +520,12 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             console.log(`⚠️ ${sport}: All ${validCachedData.length} cached games are past, fetching fresh data`);
           }
           
-          // Make API call
-          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsToFetch.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
+          // Make API call - use marketsForThisSport to only request supported markets
+          const url = `https://api.the-odds-api.com/v4/sports/${encodeURIComponent(sport)}/odds?apiKey=${API_KEY}&regions=${regions}&markets=${marketsForThisSport.join(',')}&bookmakers=${bookmakerList}&oddsFormat=${oddsFormat}&includeBetLimits=true&includeLinks=true&includeSids=true`;
           
           // Split markets for optimized caching
-          const regularMarketsData = marketsToFetch.filter(market => !ALTERNATE_MARKETS.includes(market));
-          const alternateMarketsData = marketsToFetch.filter(market => ALTERNATE_MARKETS.includes(market));
+          const regularMarketsData = marketsForThisSport.filter(market => !ALTERNATE_MARKETS.includes(market));
+          const alternateMarketsData = marketsForThisSport.filter(market => ALTERNATE_MARKETS.includes(market));
           
           const needsRegularMarkets = regularMarketsData.length > 0;
           const needsAlternateMarkets = alternateMarketsData.length > 0;
@@ -521,7 +542,7 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
             (!needsRegularMarkets || cachedRegularData) && 
             (!needsAlternateMarkets || cachedAlternateData);
           
-          const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsToFetch });
+          const cacheKey = getCacheKey('odds', { sport, regions, markets: marketsForThisSport });
           const cachedData = getCachedResponse(cacheKey);
           
           let responseData;
