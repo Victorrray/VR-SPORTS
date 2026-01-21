@@ -289,53 +289,22 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const isPlayerPropsMode = showPlayerProps;
   const isArbitrageMode = showArbitrage;
   const isMiddlesMode = showMiddles;
-  // Full list of TheOddsAPI supported markets for straight bets
-  // Reference: https://the-odds-api.com/sports-odds-data/betting-markets.html
-  const marketsForMode = useMemo(() => isPlayerPropsMode 
-    ? PLAYER_PROP_MARKET_KEYS // Use all available player prop markets
-    : [
-        // ===== FEATURED MARKETS (main /odds endpoint) =====
-        "h2h",           // Moneyline (head-to-head)
-        "spreads",       // Point spreads / handicaps
-        "totals",        // Over/Under totals
-        "outrights",     // Futures (championship winners, etc.)
-        
-        // ===== ADDITIONAL MARKETS (via /events/{eventId}/odds) =====
-        // Team totals
-        "team_totals",
-        
-        // Alternate lines
-        "alternate_spreads",
-        "alternate_totals",
-        "alternate_team_totals",
-        
-        // ===== GAME PERIOD MARKETS =====
-        // Quarter markets (Basketball: NBA, NCAAB, WNBA | Football: NFL, NCAAF)
-        "h2h_q1", "h2h_q2", "h2h_q3", "h2h_q4",
-        "spreads_q1", "spreads_q2", "spreads_q3", "spreads_q4",
-        "totals_q1", "totals_q2", "totals_q3", "totals_q4",
-        "team_totals_q1", "team_totals_q2", "team_totals_q3", "team_totals_q4",
-        "alternate_spreads_q1", "alternate_spreads_q2", "alternate_spreads_q3", "alternate_spreads_q4",
-        "alternate_totals_q1", "alternate_totals_q2", "alternate_totals_q3", "alternate_totals_q4",
-        
-        // Half markets (Basketball, Football)
-        "h2h_h1", "h2h_h2",
-        "spreads_h1", "spreads_h2",
-        "totals_h1", "totals_h2",
-        "team_totals_h1", "team_totals_h2",
-        "alternate_spreads_h1", "alternate_spreads_h2",
-        "alternate_totals_h1", "alternate_totals_h2",
-        
-        // Period markets (Hockey: NHL)
-        "h2h_p1", "h2h_p2", "h2h_p3",
-        "spreads_p1", "spreads_p2", "spreads_p3",
-        "totals_p1", "totals_p2", "totals_p3"
-        
-        // NOTE: 3-way markets (h2h_3_way) removed - only for soccer, not NBA/NHL
-        // Soccer-specific markets (draw_no_bet, btts) should be requested separately for soccer sports
-      ],
-    [isPlayerPropsMode]
-  );
+  
+  // Markets to send to API - uses user's filter selection
+  // For player props: use player prop market keys
+  // For straight bets: use filters.markets (which includes period markets when "all" is selected)
+  const marketsForMode = useMemo(() => {
+    if (isPlayerPropsMode) {
+      return PLAYER_PROP_MARKET_KEYS;
+    }
+    // Use the user's selected markets from filters
+    // This includes period markets when they're selected
+    if (filters.markets && filters.markets.length > 0) {
+      return filters.markets;
+    }
+    // Fallback to core markets if nothing selected
+    return ["h2h", "spreads", "totals"];
+  }, [isPlayerPropsMode, filters.markets]);
   const regionsForMode = useMemo(() => isPlayerPropsMode ? ["us", "us_dfs"] : ["us", "us2", "us_exchanges"], [isPlayerPropsMode]);
   
   // Helper function to expand 'all' to actual sports list
