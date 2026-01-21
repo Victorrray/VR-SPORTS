@@ -28,6 +28,7 @@ interface AccountPageProps {
   onNavigateToCancelSubscription?: () => void;
   onNavigateToDeleteAccount?: () => void;
   onNavigateToChangePlan?: () => void;
+  onSignOut?: () => void;
 }
 
 export function AccountPage({
@@ -35,6 +36,7 @@ export function AccountPage({
   onNavigateToCancelSubscription,
   onNavigateToDeleteAccount,
   onNavigateToChangePlan,
+  onSignOut,
 }: AccountPageProps) {
   const { colorMode } = useTheme();
   // Dark mode only - no light mode support
@@ -426,6 +428,21 @@ export function AccountPage({
                 <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
                   {passwordResetLoading ? 'Please wait...' : 'Send password reset email'}
                 </div>
+              </div>
+            </div>
+            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+          </button>
+
+          {/* Sign Out Button */}
+          <button 
+            onClick={onSignOut}
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+          >
+            <div className="flex items-center gap-3">
+              <LogOut className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Sign Out</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Log out of your account</div>
               </div>
             </div>
             <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>

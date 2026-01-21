@@ -578,6 +578,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 onNavigateToCancelSubscription={() => setCurrentView("cancelSubscription")}
                 onNavigateToDeleteAccount={() => setCurrentView("deleteAccount")}
                 onNavigateToChangePlan={() => setCurrentView("changePlan")}
+                onSignOut={onSignOut}
               />
             )}
             {currentView === "settings" && <SettingsPage onNavigateToChangePlan={() => setCurrentView("changePlan")} onNavigateToCancelSubscription={() => setCurrentView("cancelSubscription")} />}
