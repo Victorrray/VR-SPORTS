@@ -2966,7 +2966,18 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }
         }
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
-        console.log(`📊 AFTER TRANSFORM: ${transformedPicks.length} picks, playerProps=${transformedPicks.filter(p => p.isPlayerProp).length}`);
+        console.log(`📊 AFTER TRANSFORM: ${transformedPicks.length} picks, playerProps=${transformedPicks.filter(p => p.isPlayerProp).length}, betType=${betType}`);
+        
+        // Debug: Check if picks have team2Odds for arbitrage
+        if (betType === 'arbitrage' && transformedPicks.length > 0) {
+          const firstPick = transformedPicks[0];
+          const books = firstPick.allBooks || firstPick.books || [];
+          const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
+          console.log(`🎯 ARBITRAGE DEBUG: First pick has ${books.length} books, ${booksWithTeam2.length} with team2Odds`);
+          if (books.length > 0) {
+            console.log(`🎯 First book sample:`, { name: books[0].name, odds: books[0].odds, team2Odds: books[0].team2Odds });
+          }
+        }
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
