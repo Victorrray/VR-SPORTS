@@ -36,28 +36,28 @@ const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 // Bookmaker lists
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr",
-  // Sharp books and exchanges (high priority)
-  "pinnacle", "prophet_exchange", "rebet",
+  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr", "pick6", "betr_us_dfs",
+  // Sharp books and exchanges (high priority) - us_ex region
+  "pinnacle", "prophet_exchange", "rebet", "kalshi", "polymarket", "novig", "prophetx",
   // US region books
   "draftkings", "fanduel", "betmgm", "caesars", "williamhill_us", "pointsbet", "bovada", 
-  "mybookie", "betonline", "unibet", "betrivers", "novig", "fliff",
+  "mybookie", "betonline", "unibet", "betrivers", "fliff",
   "hardrock", "hardrockbet", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
   "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
   // Other exchange books
-  "betopenly", "prophetx"
+  "betopenly"
 ];
 
 // Trial user bookmaker restrictions
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr",
-  // Sharp books and exchanges (high priority)
-  "pinnacle", "prophet_exchange", "rebet",
+  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr", "pick6", "betr_us_dfs",
+  // Sharp books and exchanges (high priority) - us_ex region
+  "pinnacle", "prophet_exchange", "rebet", "kalshi", "polymarket", "novig", "prophetx",
   // Major sportsbooks
   "draftkings", "fanduel", "caesars", "williamhill_us", "betmgm", "pointsbet", "betrivers", 
-  "unibet", "bovada", "betonline", "fliff", "hardrock", "hardrockbet", "novig", "wynnbet",
-  "espnbet", "fanatics", "betopenly", "prophetx"
+  "unibet", "bovada", "betonline", "fliff", "hardrock", "hardrockbet", "wynnbet",
+  "espnbet", "fanatics", "betopenly"
 ];
 
 // Market configurations

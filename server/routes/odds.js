@@ -331,7 +331,7 @@ async function fetchPlayerPropsInBackground(cacheKey, sportsArray, playerPropMar
 
 router.get('/', requireUser, checkPlanAccess, async (req, res) => {
   try {
-    const { sports, regions = "us,us2", markets = "h2h,spreads,totals", oddsFormat = "american", date, betType } = req.query;
+    const { sports, regions = "us,us2,us_ex", markets = "h2h,spreads,totals", oddsFormat = "american", date, betType } = req.query;
     
     if (!sports) return res.status(400).json({ error: "Missing sports parameter" });
     if (!API_KEY) {
