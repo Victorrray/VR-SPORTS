@@ -626,6 +626,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           const gameOddsBookmakers = allowedBookmakers.filter(book => !dfsApps.includes(book));
           const bookmakerList = gameOddsBookmakers.join(',');
           
+          // Debug: Log exchange books in request
+          const exchangeBooks = ['kalshi', 'polymarket', 'novig', 'prophetx', 'rebet', 'betopenly'];
+          const exchangesInRequest = gameOddsBookmakers.filter(b => exchangeBooks.includes(b));
+          if (exchangesInRequest.length > 0) {
+            console.log(`🔄 EXCHANGES in request for ${sport}: ${exchangesInRequest.join(', ')}`);
+          }
+          
           // IMPORTANT: Filter markets to only those supported by this specific sport
           // This prevents 422 errors from sending wrong markets to sports that don't support them
           const sportSupportedMarkets = getSupportedMarketsForSport(sport);
