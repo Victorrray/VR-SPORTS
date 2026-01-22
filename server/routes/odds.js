@@ -1116,6 +1116,13 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
           allGames.push(...freshProps);
           setCachedPlayerPropsResults(ppCacheKey, freshProps);
           console.log(`🎯 PLAYER PROPS COMPLETE: Added ${freshProps.length} events with player props in ${duration}ms (cached for next request)`);
+          // Log first prop structure for debugging
+          if (freshProps[0]) {
+            const fp = freshProps[0];
+            const firstBm = fp.bookmakers?.[0];
+            const firstMarket = firstBm?.markets?.[0];
+            console.log(`🎯 FIRST PROP STRUCTURE: ${fp.home_team} vs ${fp.away_team}, sport=${fp.sport_key}, bookmakers=${fp.bookmakers?.length}, firstMarket=${firstMarket?.key}, outcomes=${firstMarket?.outcomes?.length}`);
+          }
         } else {
           console.log(`🎯 PLAYER PROPS COMPLETE: No props found after ${duration}ms`);
         }
