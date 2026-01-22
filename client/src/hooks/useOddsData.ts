@@ -355,6 +355,13 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       bm.markets?.some((m: any) => isPlayerPropMarket(m.key))
     );
     
+    // Debug logging for player props detection
+    if (gameIdx < 3) {
+      const allMarketKeys = bookmakers.flatMap((bm: any) => bm.markets?.map((m: any) => m.key) || []);
+      const playerPropMarkets = allMarketKeys.filter((k: string) => isPlayerPropMarket(k));
+      console.log(`🎯 Game ${gameIdx}: ${gameMatchup} - hasPlayerProps=${hasPlayerProps}, playerPropMarkets=${playerPropMarkets.length}`, playerPropMarkets.slice(0, 5));
+    }
+    
     if (hasPlayerProps) {
       // PLAYER PROPS MODE: Create one pick per player per market (combining all lines)
       const playerPropsMap = new Map<string, any>(); // key: "playerName-marketKey" (no line in key)
