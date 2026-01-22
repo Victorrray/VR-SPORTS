@@ -5,6 +5,7 @@ import { getAccessTokenSync } from '../lib/supabase';
 export const apiClient = axios.create({
   baseURL: API_BASE_URL || undefined,
   withCredentials: true,
+  timeout: 60000, // 60 second timeout for player props requests
 });
 
 // Add request interceptor to include auth token
