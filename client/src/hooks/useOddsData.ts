@@ -257,9 +257,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
   // Books to exclude from alternate markets (their alternate lines are often stale/unavailable)
   const EXCLUDE_FROM_ALTERNATES = ['dabble', 'dabble_au'];
   
-  // Stale thresholds - DFS apps change lines much faster (reduced for fresher data)
-  const STALE_THRESHOLD_DFS_MS = 3 * 60 * 1000;  // 3 minutes for DFS apps (was 5)
-  const STALE_THRESHOLD_STANDARD_MS = 15 * 60 * 1000;  // 15 minutes for standard books (was 30)
+  // Stale thresholds - DFS apps change lines faster but we need to be lenient for cached data
+  const STALE_THRESHOLD_DFS_MS = 10 * 60 * 1000;  // 10 minutes for DFS apps (increased from 3)
+  const STALE_THRESHOLD_STANDARD_MS = 30 * 60 * 1000;  // 30 minutes for standard books (increased from 15)
   
   // Helper to check if a book is a DFS app
   const isDFSBook = (bookKey: string): boolean => {
