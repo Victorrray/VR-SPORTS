@@ -1167,6 +1167,14 @@ router.get('/', requireUser, checkPlanAccess, async (req, res) => {
       console.log(`⚠️ Missing sports: [${missingSports.join(', ')}]`);
     }
     
+    // Log response size for debugging
+    const responseSize = JSON.stringify(allGames).length;
+    console.log(`📤 RESPONSE: Sending ${allGames.length} games (${Math.round(responseSize / 1024)}KB)`);
+    
+    // Log player props count in response
+    const propsGames = allGames.filter(g => g.bookmakers?.some(bm => bm.markets?.some(m => m.key?.startsWith('player_'))));
+    console.log(`🎯 PLAYER PROPS IN RESPONSE: ${propsGames.length} games have player_ markets`);
+    
     res.json(allGames);
   } catch (err) {
     console.error('Odds error:', err);
