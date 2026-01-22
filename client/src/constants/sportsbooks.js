@@ -28,10 +28,12 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'pinnacle', name: 'Pinnacle', popular: true, tier: 2 },
   { key: 'novig', name: 'NoVig', popular: true, tier: 2 },
   
-  // ===== EXCHANGE =====
-  { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true, tier: 3 },
-  { key: 'rebet', name: 'ReBet', popular: true, isExchange: true, tier: 3 },
-  { key: 'betopenly', name: 'BetOpenly', popular: true, isExchange: true, tier: 3 },
+  // ===== EXCHANGES (all tier 2 for equal weighting) =====
+  { key: 'kalshi', name: 'Kalshi', popular: true, isExchange: true, tier: 2 },
+  { key: 'polymarket', name: 'Polymarket', popular: true, isExchange: true, tier: 2 },
+  { key: 'prophetx', name: 'ProphetX', popular: true, isExchange: true, tier: 2 },
+  { key: 'rebet', name: 'ReBet', popular: true, isExchange: true, tier: 2 },
+  { key: 'betopenly', name: 'BetOpenly', popular: true, isExchange: true, tier: 2 },
   
   // ===== REGIONAL/SPECIALTY =====
   { key: 'fliff', name: 'Fliff', popular: false, tier: 3 },
@@ -104,6 +106,17 @@ export const getTraditionalSportsbooks = () => {
 export const isDFSApp = (key) => {
   const book = getSportsbookByKey(key);
   return book?.isDFS || false;
+};
+
+// Helper function to get exchange books only
+export const getExchangeBooks = () => {
+  return AVAILABLE_SPORTSBOOKS.filter(book => book.isExchange);
+};
+
+// Helper function to check if a sportsbook is an exchange
+export const isExchangeBook = (key) => {
+  const book = getSportsbookByKey(key);
+  return book?.isExchange || false;
 };
 
 // Helper function to get non-offshore books only
