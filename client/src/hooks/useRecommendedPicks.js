@@ -152,9 +152,9 @@ export function useRecommendedPicks(options = {}) {
             const ev = calculateEV(odds, game.bookmakers, market.key, outcome.name, outcome.point);
 
 
-            // Only include straight line bets (h2h, spreads, totals)
+            // Only include straight line bets (h2h, spreads, totals, team_totals)
             // Skip alternate markets, player props, and other market types
-            const isStraitBet = ['h2h', 'spreads', 'totals'].includes(market.key);
+            const isStraitBet = ['h2h', 'spreads', 'totals', 'team_totals'].includes(market.key);
             
             if (ev >= minEV && isStraitBet) {
               // Format pick description based on market type
@@ -168,6 +168,12 @@ export function useRecommendedPicks(options = {}) {
               } else if (market.key === 'totals') {
                 const point = outcome.point;
                 pickDescription = `Game Total ${outcome.name} ${point}`;
+              } else if (market.key === 'team_totals') {
+                // Team totals - outcome.name is the team name (e.g., "Florida Panthers")
+                // outcome.description is "Over" or "Under"
+                const point = outcome.point;
+                const overUnder = outcome.description || 'Over';
+                pickDescription = `${outcome.name} ${overUnder} ${point}`;
               }
 
               const gameStartTime = new Date(game.commence_time);
