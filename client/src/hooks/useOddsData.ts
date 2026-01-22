@@ -2908,6 +2908,20 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       
       if (response.data && Array.isArray(response.data)) {
         console.log(`📊 RAW RESPONSE: ${response.data.length} games, betType=${betType}`);
+        // Debug: Check first few games for player prop markets
+        if (betType === 'props' && response.data.length > 0) {
+          const gamesWithPlayerProps = response.data.filter((g: any) => 
+            g.bookmakers?.some((bm: any) => 
+              bm.markets?.some((m: any) => m.key?.startsWith('player_'))
+            )
+          );
+          console.log(`🎯 PLAYER PROPS DEBUG: ${gamesWithPlayerProps.length}/${response.data.length} games have player_ markets`);
+          if (gamesWithPlayerProps.length > 0) {
+            const firstGame = gamesWithPlayerProps[0];
+            const allMarkets = firstGame.bookmakers?.flatMap((bm: any) => bm.markets?.map((m: any) => m.key) || []) || [];
+            console.log(`🎯 FIRST GAME WITH PROPS: ${firstGame.home_team} vs ${firstGame.away_team}, markets:`, allMarkets.slice(0, 10));
+          }
+        }
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
         console.log(`📊 AFTER TRANSFORM: ${transformedPicks.length} picks, playerProps=${transformedPicks.filter(p => p.isPlayerProp).length}`);
         transformedPicks = filterUnderForDFS(transformedPicks);
