@@ -2674,7 +2674,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             const bestEdge = Math.max(overEdge, underEdge);
             
             
-            if (bestEdge < 1) {
+            if (bestEdge < 0.5) {
               debugStats.lowEdge++;
               return;
             }
@@ -2793,7 +2793,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             const otherProb = toProb(bestOtherOdds);
             const edge = ((exchangeProb - otherProb) / otherProb) * 100;
             
-            if (edge < 1) {
+            if (edge < 0.5) {
               debugStats.lowEdge++;
               return;
             }
