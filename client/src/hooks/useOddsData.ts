@@ -2907,18 +2907,25 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
       
       if (response.data && Array.isArray(response.data)) {
+        console.log(`📊 RAW RESPONSE: ${response.data.length} games, betType=${betType}`);
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
+        console.log(`📊 AFTER TRANSFORM: ${transformedPicks.length} picks, playerProps=${transformedPicks.filter(p => p.isPlayerProp).length}`);
         transformedPicks = filterUnderForDFS(transformedPicks);
         transformedPicks = filterByMinDataPoints(transformedPicks);
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
+        const beforePropsFilter = transformedPicks.length;
         transformedPicks = filterPlayerPropsForStraightBets(transformedPicks);
+        console.log(`📊 AFTER PROPS FILTER: ${transformedPicks.length} picks (was ${beforePropsFilter}), betType=${betType}`);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
         transformedPicks = filterForExchanges(transformedPicks);
         transformedPicks = filterExpiredBets(transformedPicks);
+        const beforeEmptyFilter = transformedPicks.length;
         transformedPicks = filterEmptyBooks(transformedPicks);
+        console.log(`📊 AFTER EMPTY BOOKS FILTER: ${transformedPicks.length} picks (was ${beforeEmptyFilter})`);
         transformedPicks = filterUnrealisticEV(transformedPicks);
+        console.log(`📊 FINAL: ${transformedPicks.length} picks`);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
