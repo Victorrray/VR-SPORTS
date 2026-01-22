@@ -167,7 +167,7 @@ export function useRecommendedPicks(options = {}) {
                 pickDescription = `${outcome.name} ${pointStr}`;
               } else if (market.key === 'totals') {
                 const point = outcome.point;
-                pickDescription = `${outcome.name} ${point}`;
+                pickDescription = `Game Total ${outcome.name} ${point}`;
               }
 
               const gameStartTime = new Date(game.commence_time);
