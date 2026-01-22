@@ -275,9 +275,12 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
     });
   }, [apiPicks, selectedDate]);
 
-  // Use date-filtered picks
-  const topPicks = dateFilteredPicks;
+  // Use date-filtered picks - ONLY show player props (filter out straight bets)
+  const topPicks = dateFilteredPicks.filter(pick => pick.isPlayerProp === true);
   const isLoading = apiLoading;
+  
+  // Debug: Log player props count
+  console.log(`🎯 PlayerPropsPage: ${dateFilteredPicks.length} total picks, ${topPicks.length} player props`);
   
   
   // Reset to page 1 when filters change
