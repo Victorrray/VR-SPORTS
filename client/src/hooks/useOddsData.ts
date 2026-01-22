@@ -2449,16 +2449,26 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }
           
           // Find exchange book odds (these are the "sharp" reference lines)
-          const exchangeBooks = books.filter((b: any) => {
+          // Check both book key AND name since API returns different formats
+          const isExchangeBook = (b: any) => {
+            const bookKey = (b.key || '').toLowerCase();
             const bookName = (b.name || '').toLowerCase();
-            return EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
-          });
+            return EXCHANGE_BOOKS.some(ex => bookKey.includes(ex) || bookName.includes(ex));
+          };
+          
+          const exchangeBooks = books.filter(isExchangeBook);
           
           // Find non-exchange books
-          const otherBooks = books.filter((b: any) => {
-            const bookName = (b.name || '').toLowerCase();
-            return !EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
-          });
+          const otherBooks = books.filter((b: any) => !isExchangeBook(b));
+          
+          // Debug: Log first pick's books to see what we're getting
+          if (debugStats.total === 1) {
+            console.log(`🔄 EXCHANGES DEBUG: First pick has ${books.length} books, ${exchangeBooks.length} exchanges, ${otherBooks.length} other`);
+            console.log(`🔄 Book keys:`, books.slice(0, 5).map((b: any) => b.key || b.name));
+            if (exchangeBooks.length > 0) {
+              console.log(`🔄 Exchange books found:`, exchangeBooks.map((b: any) => b.key || b.name));
+            }
+          }
           
           if (exchangeBooks.length === 0) {
             debugStats.noExchange++;
@@ -2810,6 +2820,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         
         // Sort by edge (highest first)
         filtered.sort((a: any, b: any) => (b.edgeVsExchange || 0) - (a.edgeVsExchange || 0));
+        
+        // Debug: Log filter stats
+        console.log(`🔄 EXCHANGES FILTER STATS:`, debugStats);
+        console.log(`🔄 EXCHANGES RESULT: ${filtered.length} picks passed filter`);
         
         return filtered;
       };
