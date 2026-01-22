@@ -2253,11 +2253,19 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // Filter out arbitrage opportunities with less than 1% ROI
       const filterLowROIArbitrage = (picks: OddsPick[]) => {
         if (betType !== 'arbitrage') return picks;
+        
+        console.log(`🎯 ARBITRAGE FILTER: Starting with ${picks.length} picks`);
+        let debugStats = { total: 0, noTeam2Odds: 0, lowROI: 0, passed: 0 };
+        
         const filtered = picks.filter(pick => {
+          debugStats.total++;
           const books = pick.allBooks || pick.books || [];
           const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
           const booksWithTeam2 = books.filter((b: OddsBook) => b.team2Odds && b.team2Odds !== '--');
-          if (booksWithTeam2.length === 0) return false;
+          if (booksWithTeam2.length === 0) {
+            debugStats.noTeam2Odds++;
+            return false;
+          }
           
           const bestOppBook = booksWithTeam2.reduce((best: OddsBook, b: OddsBook) => {
             const bestOdds = parseInt(best.team2Odds, 10);
@@ -2275,8 +2283,18 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           const totalImplied = impliedProb1 + impliedProb2;
           const roi = totalImplied < 1 ? (1 - totalImplied) * 100 : 0;
           
-          return roi >= 1; // Only keep picks with 1% or higher ROI
+          if (roi >= 1) {
+            debugStats.passed++;
+            return true;
+          } else {
+            debugStats.lowROI++;
+            return false;
+          }
         });
+        
+        console.log(`🎯 ARBITRAGE FILTER STATS:`, debugStats);
+        console.log(`🎯 ARBITRAGE RESULT: ${filtered.length} picks passed filter`);
+        
         return filtered;
       };
 
@@ -2288,6 +2306,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       // and UNDER at a higher line from DIFFERENT books, creating a "middle" gap
       const filterForMiddles = (picks: OddsPick[]) => {
         if (betType !== 'middles') return picks;
+        
+        console.log(`🎯 MIDDLES FILTER: Starting with ${picks.length} picks`);
         
         // Group picks by game and market type
         const gameMarketGroups = new Map<string, any[]>();
@@ -2411,6 +2431,9 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         
         // Sort by gap (highest first)
         filtered.sort((a, b) => (b.middleGap || 0) - (a.middleGap || 0));
+        
+        console.log(`🎯 MIDDLES FILTER: Found ${gameMarketGroups.size} game/market groups, ${filtered.length} middle opportunities`);
+        
         return filtered;
       };
 
