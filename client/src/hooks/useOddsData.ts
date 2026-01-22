@@ -75,9 +75,13 @@ export interface UseOddsDataResult {
 const BOOK_WEIGHTS: { [key: string]: number } = {
   // Exchanges (highest weight - no vig, true market prices)
   'kalshi': 3.0,
+  'polymarket': 3.0,
   'novig': 3.0,
   'prophetx': 3.0,
   'prophet': 3.0,
+  'prophet_exchange': 3.0,
+  'rebet': 3.0,
+  'betopenly': 3.0,
   'betfair': 3.0,
   'betfair_ex_us': 3.0,
   'matchbook': 3.0,
@@ -2410,8 +2414,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         return filtered;
       };
 
-      // Exchange books to use as sharp reference lines (Novig and ProphetX only)
-      const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
+      // Exchange books to use as sharp reference lines
+      const EXCHANGE_BOOKS = ['kalshi', 'polymarket', 'novig', 'prophet', 'prophetx', 'prophet_exchange', 'rebet', 'betopenly'];
       
       // Filter for exchanges - find bets where exchange books have worse odds than other sportsbooks
       // This works for both straight bets AND player props
