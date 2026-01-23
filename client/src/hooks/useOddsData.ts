@@ -1751,11 +1751,39 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           // Extract point from groupKey or from first book
           const point = books[0]?.point || (isTeamTotals ? parseFloat(groupKey.split('|')[0]) : parseFloat(groupKey));
           
+          // Find the overall best book
           const bestBook = books.reduce((best, book) => {
             const bestOdds = parseInt(best.odds, 10);
             const bookOdds = parseInt(book.odds, 10);
             return bookOdds > bestOdds ? book : best;
           }, books[0]);
+          
+          // Check if user has a sportsbook filter applied
+          const userHasFilter = selectedSportsbooks && selectedSportsbooks.length > 0;
+          const filteredBooks = books.filter(b => isBookIncluded(b.key, b.name));
+          const hasFilteredBooks = filteredBooks.length > 0;
+          
+          // If user filtered for specific books, only show picks where filtered book has BEST odds
+          if (userHasFilter) {
+            if (!hasFilteredBooks) {
+              return; // Skip - filtered book doesn't have this market
+            }
+            
+            // Check if the filtered book has the best odds
+            const bestFilteredBook = filteredBooks.reduce((best, book) => {
+              const bestOdds = parseInt(best.odds, 10);
+              const bookOdds = parseInt(book.odds, 10);
+              return bookOdds > bestOdds ? book : best;
+            }, filteredBooks[0]);
+            
+            const filteredBestOdds = parseInt(bestFilteredBook.odds, 10);
+            const overallBestOdds = parseInt(bestBook.odds, 10);
+            
+            // Skip if another book has better odds than the filtered book
+            if (overallBestOdds > filteredBestOdds) {
+              return; // Don't show - another book has better odds
+            }
+          }
           
           let pickDescription = '';
           const pointStr = point > 0 ? `+${point}` : `${point}`;
