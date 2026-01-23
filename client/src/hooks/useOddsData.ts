@@ -982,9 +982,20 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (!market || !market.outcomes || market.outcomes.length === 0) return;
           
           // Match outcomes to correct teams (API may return in any order)
-          // team1 = away_team, team2 = home_team
-          let awayOutcome = market.outcomes.find((o: any) => o.name === team1);
-          let homeOutcome = market.outcomes.find((o: any) => o.name === team2);
+          // For totals: awayOutcome = Over, homeOutcome = Under
+          // For h2h/spreads: team1 = away_team, team2 = home_team
+          let awayOutcome: any;
+          let homeOutcome: any;
+          
+          if (marketKey === 'totals') {
+            // For totals, explicitly find Over and Under outcomes
+            awayOutcome = market.outcomes.find((o: any) => o.name === 'Over');
+            homeOutcome = market.outcomes.find((o: any) => o.name === 'Under');
+          } else {
+            // For h2h and spreads, match by team name
+            awayOutcome = market.outcomes.find((o: any) => o.name === team1);
+            homeOutcome = market.outcomes.find((o: any) => o.name === team2);
+          }
           
           // Fallback to index-based if names don't match exactly
           if (!awayOutcome || !homeOutcome) {
