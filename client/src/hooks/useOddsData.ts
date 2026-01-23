@@ -1685,7 +1685,10 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
       
       // Process alternate period markets (like alternate markets but with period labels)
       [...alternatePeriodMarkets, ...alternateMarkets].forEach(marketKey => {
-        const lineGroups = new Map<number, any[]>();
+        // For team_totals, we need to group by BOTH point AND team/outcome name
+        // Otherwise we mix different teams' odds together
+        const isTeamTotals = marketKey.includes('team_totals');
+        const lineGroups = new Map<string, any[]>(); // Use string key for composite grouping
         
         bookmakers.forEach((bm: any) => {
           const bookKey = bm.key || '';
@@ -1710,19 +1713,26 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const point = outcome.point;
             if (point === undefined) return;
             
-            if (!lineGroups.has(point)) {
-              lineGroups.set(point, []);
+            // For team_totals, create a composite key with team/outcome name
+            // This ensures we compare odds for the SAME bet (e.g., "Chicago Blackhawks Over 2.5")
+            const groupKey = isTeamTotals 
+              ? `${point}|${outcome.name}|${outcome.description || ''}`
+              : String(point);
+            
+            if (!lineGroups.has(groupKey)) {
+              lineGroups.set(groupKey, []);
             }
             
             const odds = outcome.price !== undefined ? outcome.price : outcome.odds;
             const normalizedOdds = normalizeAmericanOdds(odds);
             if (normalizedOdds && odds !== undefined && odds !== null) {
-              lineGroups.get(point)!.push({
+              lineGroups.get(groupKey)!.push({
                 name: bookName,
                 key: bookKey,
                 odds: normalizedOdds,
                 team: outcome.name,
-                description: outcome.description
+                description: outcome.description,
+                point: point // Store point for later use
               });
             }
           });
@@ -1735,9 +1745,11 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         const sortedLines = Array.from(lineGroups.entries())
           .filter(([_, books]) => books.length >= 4) // Require minimum 4 books
           .sort((a, b) => b[1].length - a[1].length) // Sort by book count (most first)
-          .slice(0, 3); // Only keep top 3 lines
+          .slice(0, isTeamTotals ? 6 : 3); // Allow more team totals picks (2 teams x 3 lines)
         
-        sortedLines.forEach(([point, books]) => {
+        sortedLines.forEach(([groupKey, books]) => {
+          // Extract point from groupKey or from first book
+          const point = books[0]?.point || (isTeamTotals ? parseFloat(groupKey.split('|')[0]) : parseFloat(groupKey));
           
           const bestBook = books.reduce((best, book) => {
             const bestOdds = parseInt(best.odds, 10);
