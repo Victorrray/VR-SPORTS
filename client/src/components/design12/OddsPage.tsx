@@ -608,7 +608,31 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
       return filteredBooks;
     }
     
-    // For other bet types, return filtered books (already filtered by line for spreads)
+    // For other bet types, sort filtered sportsbooks to the top
+    if (selectedSportsbooks.length > 0) {
+      // Sort so filtered sportsbooks appear first
+      booksToFilter.sort((a, b) => {
+        const aKey = (a.key || a.name || '').toLowerCase();
+        const aName = (a.name || '').toLowerCase();
+        const bKey = (b.key || b.name || '').toLowerCase();
+        const bName = (b.name || '').toLowerCase();
+        
+        const aIsFiltered = selectedSportsbooks.some(sb => {
+          const sbLower = sb.toLowerCase();
+          return aKey.includes(sbLower) || aName.includes(sbLower) || sbLower.includes(aKey) || sbLower.includes(aName);
+        });
+        const bIsFiltered = selectedSportsbooks.some(sb => {
+          const sbLower = sb.toLowerCase();
+          return bKey.includes(sbLower) || bName.includes(sbLower) || sbLower.includes(bKey) || sbLower.includes(bName);
+        });
+        
+        // Filtered books come first
+        if (aIsFiltered && !bIsFiltered) return -1;
+        if (!aIsFiltered && bIsFiltered) return 1;
+        return 0;
+      });
+    }
+    
     return booksToFilter;
   };
 
