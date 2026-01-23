@@ -156,6 +156,12 @@ export function useRecommendedPicks(options = {}) {
             // Skip alternate markets, player props, and other market types
             const isStraitBet = ['h2h', 'spreads', 'totals', 'team_totals'].includes(market.key);
             
+            // CRITICAL: Explicitly skip player props - they should NEVER appear in straight bets
+            const isPlayerProp = market.key?.startsWith('player_') || 
+                                 market.key?.startsWith('batter_') || 
+                                 market.key?.startsWith('pitcher_');
+            if (isPlayerProp) return; // Skip player props entirely
+            
             if (ev >= minEV && isStraitBet) {
               // Format pick description based on market type
               let pickDescription = outcome.name;
@@ -169,11 +175,22 @@ export function useRecommendedPicks(options = {}) {
                 const point = outcome.point;
                 pickDescription = `Game Total ${outcome.name} ${point}`;
               } else if (market.key === 'team_totals') {
-                // Team totals - outcome.name is the team name (e.g., "Florida Panthers")
+                // Team totals - outcome.name is the team name (e.g., "Tampa Bay Lightning")
                 // outcome.description is "Over" or "Under"
+                // Format: "Tampa Bay Lightning Over 3.5"
                 const point = outcome.point;
-                const overUnder = outcome.description || 'Over';
-                pickDescription = `${outcome.name} ${overUnder} ${point}`;
+                const overUnder = outcome.description || outcome.name; // description has Over/Under
+                // If outcome.name is "Over" or "Under", we need to get team from elsewhere
+                const isOverUnder = outcome.name === 'Over' || outcome.name === 'Under';
+                if (isOverUnder) {
+                  // outcome.name is Over/Under, need to find team name from game context
+                  // For team totals, the team is usually in outcome.description or we derive from game
+                  const teamName = outcome.description || game.home_team || 'Team';
+                  pickDescription = `${teamName} ${outcome.name} ${point}`;
+                } else {
+                  // outcome.name is the team name, outcome.description is Over/Under
+                  pickDescription = `${outcome.name} ${overUnder} ${point}`;
+                }
               }
 
               const gameStartTime = new Date(game.commence_time);

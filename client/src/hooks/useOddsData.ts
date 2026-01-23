@@ -1742,8 +1742,22 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           } else if (marketKey.includes('alternate_totals')) {
             pickDescription = `Alt Over ${point}${periodLabel ? ` ${periodLabel}` : ''}`;
           } else if (marketKey.includes('team_totals')) {
-            const teamName = books[0]?.team || team1;
-            pickDescription = `${teamName} Over ${point}${periodLabel ? ` ${periodLabel}` : ''}`;
+            // For team_totals, outcome.name could be "Over"/"Under" or the team name
+            // outcome.description typically has the team name when outcome.name is Over/Under
+            const firstBook = books[0];
+            const isOverUnder = firstBook?.team === 'Over' || firstBook?.team === 'Under';
+            let teamName: string;
+            let overUnder: string;
+            if (isOverUnder) {
+              // outcome.name is Over/Under, description has team name
+              teamName = firstBook?.description || team1;
+              overUnder = firstBook?.team || 'Over';
+            } else {
+              // outcome.name is team name, description has Over/Under
+              teamName = firstBook?.team || team1;
+              overUnder = firstBook?.description || 'Over';
+            }
+            pickDescription = `${teamName} ${overUnder} ${point}${periodLabel ? ` ${periodLabel}` : ''}`;
           }
           
           // Already filtered for 4+ books above
