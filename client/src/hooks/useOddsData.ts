@@ -2532,11 +2532,26 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }
           
           const books = pick.allBooks || pick.books || [];
-          // Require minimum books for meaningful comparison (use user's minDataPoints setting, default 4)
-          const requiredBooks = Math.max(minDataPoints || 4, 4);
+          // For exchanges, we need fewer books since exchange coverage is limited
+          // Require at least 2 books (1 exchange + 1 other) for meaningful comparison
+          const requiredBooks = 2;
           if (books.length < requiredBooks) {
             debugStats.noBooks++;
             return;
+          }
+          
+          // Filter out NHL player props unders for points > 1.5 (these are unreliable)
+          const sportKey = (pick as any).sportKey || (pick as any).sport_key || '';
+          const isNHLGame = sportKey.includes('icehockey') || sportKey.includes('nhl');
+          const isPropBet = pick.isPlayerProp || pick.playerName;
+          const propMarketKey = (pick as any).marketKey || '';
+          const isPointsMarket = propMarketKey.includes('player_points') || propMarketKey.includes('player_goals');
+          const pickDesc = (pick.pick || '').toLowerCase();
+          const isUnderBet = pickDesc.includes('under');
+          const propLine = pick.line || 0;
+          
+          if (isNHLGame && isPropBet && isPointsMarket && isUnderBet && propLine > 1.5) {
+            return; // Skip NHL points/goals unders > 1.5
           }
           
           // Find exchange book odds (these are the "sharp" reference lines)
