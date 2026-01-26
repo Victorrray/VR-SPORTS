@@ -208,7 +208,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
   const { user } = useAuth();
   const { me, loading: meLoading } = useMe();
   const { bets, isOpen, addBet, removeBet, updateBet, clearAllBets, openBetSlip, closeBetSlip, placeBets } = useBetSlip();
-  const { filters, updateFilter, updateFilters, openFilterModal, applyFilters: contextApplyFilters, closeFilterModal, resetFilters: contextResetFilters } = useFilters();
+  const { filters, updateFilter, updateFilters, openFilterModal, applyFilters: contextApplyFilters, closeFilterModal, resetFilters: contextResetFilters, switchBetType } = useFilters();
   
   // Get user's saved sportsbook selections by mode
   const getUserSelectedSportsbooks = (mode = 'game') => {
@@ -818,25 +818,35 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       setShowPlayerProps(false);
       setShowArbitrage(true);
       setShowMiddles(false);
+      switchBetType('arbitrage'); // Load arbitrage-specific filters
       // Note: Non-platinum users will see the upgrade message instead of being redirected
     } else if (mode === 'props' && currentMode !== 'props') {
       console.log('🎯 Initializing player props mode from URL parameter');
       setShowPlayerProps(true);
       setShowArbitrage(false);
       setShowMiddles(false);
+      switchBetType('props'); // Load props-specific filters
     } else if (mode === 'middles' && currentMode !== 'middles') {
       console.log('🎪 Initializing middles mode from URL parameter');
       setShowPlayerProps(false);
       setShowArbitrage(false);
       setShowMiddles(true);
+      switchBetType('middles'); // Load middles-specific filters
       // Note: Non-platinum users will see the upgrade message instead of being redirected
+    } else if (mode === 'exchanges' && currentMode !== 'exchanges') {
+      console.log('💱 Initializing exchanges mode from URL parameter');
+      setShowPlayerProps(false);
+      setShowArbitrage(false);
+      setShowMiddles(false);
+      switchBetType('exchanges'); // Load exchanges-specific filters
     } else if (!mode && currentMode !== 'game') {
       console.log('🎮 Initializing game mode (no mode parameter)');
       setShowPlayerProps(false);
       setShowArbitrage(false);
       setShowMiddles(false);
+      switchBetType('straight'); // Load straight bets filters
     }
-  }, [location.search, meLoading]); // Only depend on URL and loading state, not mode states
+  }, [location.search, meLoading, switchBetType]); // Only depend on URL and loading state, not mode states
 
   // Listen for changes to user's sportsbook selections
   useEffect(() => {
@@ -1612,6 +1622,18 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     setShowPlayerProps(sectionId === 'props');
     setShowArbitrage(sectionId === 'arbitrage');
     setShowMiddles(sectionId === 'middles');
+    
+    // Switch to the bet type's unique filter settings
+    // This loads the saved filters for this specific tool
+    const betTypeMap = {
+      'props': 'props',
+      'arbitrage': 'arbitrage',
+      'middles': 'middles',
+      'game': 'straight',
+      'exchanges': 'exchanges'
+    };
+    const newBetType = betTypeMap[sectionId] || 'straight';
+    switchBetType(newBetType);
     
     // Force a re-render by updating the table nonce
     setTableNonce(prev => prev + 1);
