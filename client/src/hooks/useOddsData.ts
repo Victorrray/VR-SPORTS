@@ -2603,10 +2603,26 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               return;
             }
             
-            // For exchanges mode, we want to find the BEST odds across ALL non-exchange books
-            // NOT just the user's filtered sportsbooks - we're comparing against exchange lines
-            // The sportsbook filter should only affect which picks to SHOW, not which odds to compare
-            const filteredOtherBooks = otherBooks; // Use ALL non-exchange books for comparison
+            // For exchanges mode with sportsbook filter:
+            // - Find best odds from ALL books for comparison
+            // - But only SHOW picks where the filtered book has the best edge
+            // This allows users to filter for specific books (like Underdog) and see where they beat exchanges
+            const allOtherBooks = otherBooks; // Use ALL non-exchange books for comparison
+            
+            // Check if user has a sportsbook filter active
+            const hasSpFilter = sportsbooks && sportsbooks.length > 0;
+            const isBookInFilter = (b: any) => {
+              if (!hasSpFilter) return true;
+              const bookKey = (b.key || b.name || '').toLowerCase();
+              const bookName = (b.name || '').toLowerCase();
+              return sportsbooks.some(sb => {
+                const sbLower = sb.toLowerCase();
+                return bookKey.includes(sbLower) || bookName.includes(sbLower) || sbLower.includes(bookKey) || sbLower.includes(bookName);
+              });
+            };
+            
+            // For finding best odds, use all books
+            const filteredOtherBooks = allOtherBooks
             
             // If no other books available, skip this pick
             if (filteredOtherBooks.length === 0) {
@@ -2645,6 +2661,12 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               });
               
               if (bestMissingSideBook) {
+                // CRITICAL: If user has sportsbook filter, only show picks where the best book matches the filter
+                if (hasSpFilter && !isBookInFilter(bestMissingSideBook)) {
+                  debugStats.noBetter++; // Best book isn't in user's filter
+                  return;
+                }
+                
                 // Calculate implied edge - exchange won't offer this side, so it's likely +EV
                 // Use a high confidence indicator since exchange refuses to offer this side
                 const impliedEdge = 15; // High confidence signal
@@ -2777,6 +2799,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             
             if (!bestBook) {
               debugStats.noBetter++;
+              return;
+            }
+            
+            // CRITICAL: If user has sportsbook filter, only show picks where the best book matches the filter
+            // This allows filtering for specific books like Underdog to see where they beat exchanges
+            if (hasSpFilter && !isBookInFilter(bestBook)) {
+              debugStats.noBetter++; // Best book isn't in user's filter
               return;
             }
             
