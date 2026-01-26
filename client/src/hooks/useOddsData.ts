@@ -3033,10 +3033,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           
           // For exchanges mode, we need non-exchange books for comparison
           if (betType === 'exchanges') {
-            const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
+            const EXCHANGE_BOOKS_LIST = ['kalshi', 'polymarket', 'novig', 'prophet', 'prophetx', 'prophet_exchange', 'rebet', 'betopenly'];
             const nonExchangeBooks = booksToCount.filter((b: any) => {
               const bookName = (b.name || '').toLowerCase();
-              return !EXCHANGE_BOOKS.some(ex => bookName.includes(ex));
+              return !EXCHANGE_BOOKS_LIST.some(ex => bookName.includes(ex));
             });
             return nonExchangeBooks.length >= requiredBooks;
           }
