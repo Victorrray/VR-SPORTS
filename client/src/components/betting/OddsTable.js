@@ -4510,9 +4510,25 @@ export default function OddsTable({
                               }
                               if (isTotals) {
                                 const name = top ? 'Over' : 'Under';
+                                const rowOutcomeName = row.out?.name; // The selected side (Over or Under)
+                                
+                                // CRITICAL FIX: If this book's stored odds match the row's selected side,
+                                // use the stored odds for that column and look up the opposite side
+                                const bookHasSelectedSide = ob.name === rowOutcomeName || 
+                                  (ob.price !== undefined && ob.price !== null && ob.price !== '');
+                                
+                                // If we're looking for the same side as the row's selection AND the book has odds,
+                                // use the book's stored odds directly
+                                if (name === rowOutcomeName && bookHasSelectedSide) {
+                                  const result = ob.price ?? ob.odds ?? '';
+                                  console.log('Totals result (direct):', { name, rowOutcomeName, result });
+                                  return result;
+                                }
+                                
+                                // Otherwise, look up from outcomes array
                                 const f = outs.find(x => x && x.name === name && String(x.point ?? '') === oPointStr);
                                 const result = f ? (f.price ?? f.odds) : '';
-                                console.log('Totals result:', { name, point: oPointStr, found: f, result });
+                                console.log('Totals result (lookup):', { name, point: oPointStr, found: f, result });
                                 return result;
                               }
                               // Spreads handling is now done in the main grab function
