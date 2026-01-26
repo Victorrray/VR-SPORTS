@@ -2181,7 +2181,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       params.append('markets', marketsList);
       
       // Add other parameters the backend expects
-      params.append('regions', 'us');
+      // Include us_ex for exchanges (Kalshi, Polymarket, Novig, etc.) and us_dfs for DFS apps
+      params.append('regions', 'us,us2,us_ex,us_dfs');
       params.append('oddsFormat', 'american');
       
       // Optional: date, betType, sportsbooks (if backend supports them)
@@ -2919,6 +2920,14 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             
             debugStats.passed++;
             
+            // Include ALL exchange books in the mini-table, not just the best one
+            const allExchangeBooksForDisplay = exchangeBooks.map((b: any) => ({
+              ...b,
+              isBest: b.name === bestExchangeBook.name,
+              ev: '0%',
+              isExchange: true
+            }));
+            
             filtered.push({
               ...pick,
               bestOdds: bestOtherBook.odds,
@@ -2929,7 +2938,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               edgeVsExchange: edge,
               books: [
                 { ...bestOtherBook, isBest: true, ev: `${edge.toFixed(1)}%` },
-                { ...bestExchangeBook, isBest: false, ev: '0%', isExchange: true },
+                ...allExchangeBooksForDisplay,
                 ...otherBooks.filter((b: any) => b.name !== bestOtherBook.name).slice(0, 3)
               ],
               allBooks: books
