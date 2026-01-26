@@ -2965,9 +2965,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
 
       // Filter out player props for straight bets mode
       // This is a safeguard in case the server returns player props data
-      // Player props should ONLY appear when betType === 'props'
+      // Player props should ONLY appear when betType === 'props' or 'exchanges'
+      // Exchanges mode can work with both regular bets AND player props
       const filterPlayerPropsForStraightBets = (picks: OddsPick[]) => {
-        if (betType === 'props') return picks; // Keep player props only for props view
+        if (betType === 'props' || betType === 'exchanges') return picks; // Keep player props for props and exchanges views
         return picks.filter(pick => !pick.isPlayerProp); // Filter out player props for all other views
       };
 
