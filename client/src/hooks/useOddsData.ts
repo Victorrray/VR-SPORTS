@@ -2319,14 +2319,32 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
 
       // Filter out arbitrage opportunities with less than 1% ROI
+      // IMPORTANT: Only allow arbitrage on full-game markets (h2h, spreads, totals)
+      // Period markets (1H, 1Q, etc.) cannot be arbitraged against full-game markets
       const filterLowROIArbitrage = (picks: OddsPick[]) => {
         if (betType !== 'arbitrage') return picks;
         
         console.log(`🎯 ARBITRAGE FILTER: Starting with ${picks.length} picks`);
-        let debugStats = { total: 0, noTeam2Odds: 0, lowROI: 0, passed: 0 };
+        let debugStats = { total: 0, noTeam2Odds: 0, lowROI: 0, passed: 0, periodMarket: 0 };
         
         const filtered = picks.filter(pick => {
           debugStats.total++;
+          
+          // CRITICAL: Only allow full-game markets for arbitrage
+          // Period markets (h2h_h1, h2h_q1, spreads_h1, etc.) cannot be arbitraged
+          // because they're different markets than full-game
+          const marketKey = (pick as any).marketKey || '';
+          const isPeriodMarket = marketKey.includes('_h1') || marketKey.includes('_h2') || 
+                                 marketKey.includes('_q1') || marketKey.includes('_q2') || 
+                                 marketKey.includes('_q3') || marketKey.includes('_q4') ||
+                                 marketKey.includes('_p1') || marketKey.includes('_p2') || 
+                                 marketKey.includes('_p3');
+          
+          if (isPeriodMarket) {
+            debugStats.periodMarket++;
+            return false; // Skip period markets for arbitrage
+          }
+          
           const books = pick.allBooks || pick.books || [];
           const side1Odds = parseInt(String(pick.bestOdds).replace('+', ''), 10);
           const booksWithTeam2 = books.filter((b: OddsBook) => b.team2Odds && b.team2Odds !== '--');
