@@ -6,8 +6,8 @@
 export const SITE_CONFIG = {
   name: 'OddSightSeer',
   domain: 'https://oddsightseer.com',
-  description: 'Find +EV bets, compare sportsbook odds, and track line movement across 15+ major bookmakers.',
-  keywords: 'sports betting odds, odds comparison tool, best sportsbook odds, +EV betting, positive expected value bets, arbitrage betting, line movement tracker, player props comparison, NFL odds, NBA odds, MLB odds, NHL odds, DraftKings odds, FanDuel odds, BetMGM odds, line shopping tool, betting edge finder, sports betting analytics, real-time odds, PrizePicks comparison, Underdog Fantasy odds',
+  description: 'Free odds comparison tool to find the best NFL, NBA & MLB lines. Compare DraftKings vs FanDuel odds, find +EV player props, and shop lines across 15+ sportsbooks.',
+  keywords: 'DraftKings vs FanDuel odds, best NFL betting odds today, NBA player props comparison, free odds comparison tool, PrizePicks vs Underdog lines, best sportsbook for NFL, line shopping tool free, positive EV bets finder, NFL spreads comparison, NBA totals best odds, MLB moneyline comparison, same game parlay odds, live betting odds comparison, best odds for Super Bowl, March Madness betting odds',
   twitterHandle: '@OddSightSeer',
   ogImage: 'https://oddsightseer.com/og-image.png',
   ogImageAlt: 'OddSightSeer - Real-time sports betting odds comparison across 15+ sportsbooks',
@@ -226,42 +226,44 @@ export const generateSitemapEntry = (path, priority = 0.8, changefreq = 'weekly'
 
 /**
  * SEO-friendly page titles (50-60 chars optimal)
+ * Targeting long-tail keywords with search intent
  */
 export const PAGE_TITLES = {
-  home: 'OddSightSeer — Find +EV Bets & Compare Sportsbook Odds',
-  sportsbooks: 'Best Odds Comparison — Compare 15+ Sportsbooks Real-Time',
-  dashboard: 'Betting Dashboard — Track Performance & Find +EV Opportunities',
-  scores: 'Live Sports Scores — Real-Time Updates with Betting Context',
-  picks: 'My Picks — Betting History & Performance Analytics',
-  dfs: 'DFS Odds Comparison — Daily Fantasy Sports Lines & Props',
-  account: 'Account Settings — Manage Your Profile & Preferences',
-  pricing: 'Pricing Plans — Choose Your OddSightSeer Tier',
+  home: 'Free Odds Comparison Tool — DraftKings vs FanDuel & More',
+  sportsbooks: 'Compare NFL, NBA & MLB Odds — Best Lines Across 15+ Books',
+  dashboard: 'Betting Tracker — ROI Analytics & +EV Bet Finder',
+  scores: 'Live NFL, NBA, MLB Scores — Real-Time with Betting Odds',
+  picks: 'Bet Tracker — Track Your Picks & Analyze Performance',
+  dfs: 'PrizePicks vs Underdog — Compare DFS Player Props Lines',
+  account: 'Account Settings — OddSightSeer',
+  pricing: 'Pricing — Free Odds Comparison & Premium Features',
   terms: 'Terms of Service — OddSightSeer',
   privacy: 'Privacy Policy — OddSightSeer',
-  login: 'Login — Access Your OddSightSeer Account',
-  signup: 'Sign Up Free — Start Finding +EV Bets Today',
-  roadmap: 'Product Roadmap — OddSightSeer Future Features',
-  disclaimer: 'Disclaimer — OddSightSeer Sports Betting Platform'
+  login: 'Login — OddSightSeer Odds Comparison',
+  signup: 'Sign Up Free — Compare Odds & Find +EV Bets',
+  roadmap: 'Product Roadmap — OddSightSeer',
+  disclaimer: 'Disclaimer — OddSightSeer'
 };
 
 /**
- * SEO-friendly page descriptions (160-320 chars optimal)
+ * SEO-friendly page descriptions (150-160 chars optimal for SERP display)
+ * Focus on long-tail keywords and clear value proposition
  */
 export const PAGE_DESCRIPTIONS = {
-  home: 'Find +EV bets with real-time odds comparison across 15+ major sportsbooks. Spot arbitrage opportunities, track line movement, and maximize your betting edge with advanced analytics.',
-  sportsbooks: 'Compare moneylines, spreads, totals, and props across DraftKings, FanDuel, BetMGM, Caesars, PointsBet, and more. Find the best odds instantly with real-time line tracking.',
-  dashboard: 'Track your betting performance with detailed analytics, ROI tracking, and personalized high-edge bet recommendations. Monitor your bankroll and improve your betting strategy.',
-  scores: 'Live sports scores for NFL, NBA, MLB, NHL, and more with real-time updates, betting context, and odds integration for informed betting decisions.',
-  picks: 'Review your complete betting history, track performance metrics, analyze your picks with advanced analytics, and identify patterns to improve your ROI.',
-  dfs: 'Compare daily fantasy sports odds across PrizePicks, Underdog Fantasy, and DraftKings Pick6. Find the best player prop lines for maximum value.',
-  account: 'Manage your OddSightSeer account, update preferences, configure sportsbook selections, and customize your betting experience.',
-  pricing: 'Choose the right OddSightSeer plan for your betting needs. Free tier with basic odds comparison or Platinum for unlimited access to all features.',
-  terms: 'Read the complete terms of service for OddSightSeer sports betting odds comparison platform. Understand your rights and responsibilities.',
-  privacy: 'Learn how OddSightSeer protects your privacy, handles your data, and complies with data protection regulations.',
-  login: 'Log in to your OddSightSeer account to access real-time odds comparison, betting analytics, and personalized recommendations.',
-  signup: 'Create a free OddSightSeer account to start comparing odds, finding +EV bets, and tracking your betting performance with advanced analytics.',
-  roadmap: 'Explore OddSightSeer\'s product roadmap and upcoming features. See what\'s coming next to improve your sports betting experience.',
-  disclaimer: 'Important disclaimer and legal information for OddSightSeer users. Please read before using our sports betting odds comparison platform.'
+  home: 'Free tool to compare DraftKings, FanDuel, BetMGM & 12+ sportsbook odds. Find the best NFL, NBA, MLB lines and +EV player props in seconds.',
+  sportsbooks: 'Compare NFL spreads, NBA totals, MLB moneylines across DraftKings vs FanDuel vs BetMGM. See which book has the best odds for every game today.',
+  dashboard: 'Track your betting ROI, see your win rate by sport, and get personalized +EV bet recommendations based on your betting history.',
+  scores: 'Live NFL, NBA, MLB, NHL scores with real-time odds. See how lines move during games and find live betting value.',
+  picks: 'Track all your bets in one place. See your ROI by sport, book, and bet type. Identify what\'s working and improve your strategy.',
+  dfs: 'Compare PrizePicks vs Underdog Fantasy vs DraftKings Pick6 player prop lines. Find the best odds for points, rebounds, yards & more.',
+  account: 'Manage your OddSightSeer account settings, connected sportsbooks, and notification preferences.',
+  pricing: 'Free odds comparison for casual bettors. Upgrade to Platinum for unlimited access, arbitrage alerts, and advanced analytics.',
+  terms: 'Terms of Service for OddSightSeer sports betting odds comparison platform.',
+  privacy: 'Privacy Policy — How OddSightSeer protects your data and respects your privacy.',
+  login: 'Log in to OddSightSeer to access your betting dashboard, saved picks, and personalized odds comparison.',
+  signup: 'Create a free account to compare odds across 15+ sportsbooks, track your bets, and find +EV opportunities.',
+  roadmap: 'See what features are coming next to OddSightSeer — arbitrage scanner, more sportsbooks, and advanced analytics.',
+  disclaimer: 'Important legal disclaimer for OddSightSeer users regarding sports betting odds comparison.'
 };
 
 /**
