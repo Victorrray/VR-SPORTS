@@ -18,11 +18,28 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
-);
+const rootElement = document.getElementById("root");
+
+// Check if the page was pre-rendered by react-snap
+// If so, hydrate instead of render for better SEO
+if (rootElement.hasChildNodes()) {
+  // Page was pre-rendered, hydrate it
+  ReactDOM.hydrateRoot(
+    rootElement,
+    <React.StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+} else {
+  // Normal client-side render
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+}

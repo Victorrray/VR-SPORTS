@@ -4,16 +4,22 @@
 User-agent: *
 Allow: /
 
-# Disallow private/auth pages
+# Disallow private/auth pages (require login)
 Disallow: /auth/
 Disallow: /billing/success
 Disallow: /billing/cancel
 Disallow: /api/
 Disallow: /*.json$
 Disallow: /static/
+Disallow: /dashboard
+Disallow: /account
+Disallow: /picks
+Disallow: /usage-plan
+Disallow: /subscribe
+Disallow: /my-sportsbooks
 
 # Crawl delay to be respectful
 Crawl-delay: 1
 
-# Sitemap location
-Sitemap: https://oddsightseer.com/sitemap.xml
+# Sitemap location (must match canonical URL with www)
+Sitemap: https://www.oddsightseer.com/sitemap.xml

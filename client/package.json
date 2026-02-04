@@ -63,8 +63,32 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "CI=false npm install --legacy-peer-deps && npm i baseline-browser-mapping@latest -D && react-scripts build",
+    "postbuild": "react-snap",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "reactSnap": {
+    "source": "build",
+    "minifyHtml": {
+      "collapseWhitespace": false,
+      "removeComments": false
+    },
+    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"],
+    "include": [
+      "/",
+      "/sportsbooks",
+      "/scores",
+      "/dfs",
+      "/pricing",
+      "/login",
+      "/signup",
+      "/terms",
+      "/privacy",
+      "/disclaimer",
+      "/roadmap"
+    ],
+    "skipThirdPartyRequests": true,
+    "cacheAjaxRequests": true
   },
   "eslintConfig": {
     "extends": [
@@ -85,6 +109,7 @@
     ]
   },
   "devDependencies": {
+    "react-snap": "^1.23.0",
     "@types/node": "^24.10.0",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.0",
