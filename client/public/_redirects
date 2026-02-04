@@ -1,1 +1,8 @@
+# Force www (canonical domain) - fixes "Page with redirect" issues
+https://oddsightseer.com/*  https://www.oddsightseer.com/:splat  301!
+
+# Remove trailing slashes (except root) - prevents duplicate content
+https://www.oddsightseer.com/*/  https://www.oddsightseer.com/:splat  301!
+
+# SPA fallback - must be last
 /*    /index.html   200
