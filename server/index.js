@@ -43,6 +43,19 @@ const app = express();
 // Initialize Sentry error tracking
 initSentry(app);
 
+// ============================================================================
+// WWW CANONICALIZATION - Redirect non-www to www for SEO
+// This fixes "Page with redirect" issues in Google Search Console
+// ============================================================================
+app.use((req, res, next) => {
+  const host = req.get('host');
+  // Only redirect in production and if host is non-www oddsightseer.com
+  if (process.env.NODE_ENV === 'production' && host === 'oddsightseer.com') {
+    return res.redirect(301, `https://www.oddsightseer.com${req.originalUrl}`);
+  }
+  next();
+});
+
 // Store services in app.locals for route access
 app.locals.stripe = stripe;
 app.locals.supabase = supabase;

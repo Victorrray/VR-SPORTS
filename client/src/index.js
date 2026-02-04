@@ -7,6 +7,15 @@ import "./utils/storageInit";
 import App from "./App";
 import "./index.css";
 
+// ============================================================================
+// WWW CANONICALIZATION - Redirect non-www to www for SEO
+// This fixes "Page with redirect" issues in Google Search Console
+// Must run BEFORE React renders to ensure Google sees the redirect
+// ============================================================================
+if (typeof window !== 'undefined' && window.location.hostname === 'oddsightseer.com') {
+  window.location.replace(`https://www.oddsightseer.com${window.location.pathname}${window.location.search}${window.location.hash}`);
+}
+
 // CRITICAL: Prevent tab refresh BEFORE anything else loads
 preventTabRefresh();
 initReloadDiagnostics();
