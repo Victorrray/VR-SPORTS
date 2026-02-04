@@ -4122,7 +4122,6 @@ export default function OddsTable({
                                 </div>
                               </>
                             )}
-                            <div className="mini-header-pick">Pick</div>
                           </div>
 
                           {/* Book rows */}
@@ -4765,70 +4764,6 @@ export default function OddsTable({
                                       </>
                                     )
                                   )}
-                                  <div className="mini-pick-col">
-                                    {(() => {
-                                      // Debug logging for links and source IDs
-                                      if (i === 0) {
-                                        console.log(`🔗 LINK & SID DEBUG for ${ob.bookmaker?.key}:`, {
-                                          bookmaker_link: ob.bookmaker_link,
-                                          market_link: ob.market_link,
-                                          betslip_link: ob.betslip_link,
-                                          event_sid: ob.event_sid,
-                                          market_sid: ob.market_sid,
-                                          outcome_sid: ob.outcome_sid,
-                                          fullObject: ob
-                                        });
-                                      }
-                                      
-                                      if (ob.bookmaker_link || ob.market_link || ob.event_sid) {
-                                        const hasDeepLinking = supportsDeepLinking(ob.bookmaker?.key);
-                                        const title = hasDeepLinking 
-                                          ? "Bet Now (Smart Link)" 
-                                          : "Bet Now at Sportsbook";
-                                        
-                                        return (
-                                          <a 
-                                            href={ob.market_link || ob.bookmaker_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="bet-now-btn"
-                                            onClick={async (e) => {
-                                              e.stopPropagation();
-                                              // Try to get enhanced deep link
-                                              if (hasDeepLinking) {
-                                                e.preventDefault();
-                                                const bestLink = await getBestLink(ob);
-                                                if (bestLink) {
-                                                  window.open(bestLink, '_blank', 'noopener,noreferrer');
-                                                } else {
-                                                  window.open(ob.market_link || ob.bookmaker_link, '_blank', 'noopener,noreferrer');
-                                                }
-                                              }
-                                            }}
-                                            title={title}
-                                          >
-                                            {hasDeepLinking ? '🚀' : '🎯'}
-                                          </a>
-                                        );
-                                      }
-                                      return (
-                                        <button 
-                                          className="add-pick-btn"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (onAddBet) {
-                                              addToBetSlip(row, ob, e.target);
-                                            } else {
-                                              addToPicks(row, ob, true, e.target);
-                                            }
-                                          }}
-                                          title={onAddBet ? "Add to Bet Slip" : "Add to My Picks"}
-                                        >
-                                          +
-                                        </button>
-                                      );
-                                    })()}
-                                  </div>
                                 </div>
                                 ))}
                                 

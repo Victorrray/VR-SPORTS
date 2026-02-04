@@ -1523,18 +1523,17 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       {/* Books Table */}
                       <div className="space-y-2">
                         {/* Table Header */}
-                        <div className={`grid grid-cols-4 gap-2 px-3 py-2 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-xl`}>
+                        <div className={`grid grid-cols-3 gap-2 px-3 py-2 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} border rounded-xl`}>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs`}>Book</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>Over</div>
                           <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-center`}>Under</div>
-                          <div className={`${isLight ? 'text-purple-700' : 'text-purple-300'} font-bold text-xs text-right`}>Pick</div>
                         </div>
 
                         {/* Table Rows */}
                         {(expandedSportsbooks.includes(pick.id) ? ((pick as any).allBooks || pick.books) : ((pick as any).allBooks || pick.books).slice(0, 5)).map((book: any, idx: number) => (
                           <div 
                             key={idx}
-                            className={`grid grid-cols-4 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl items-center`}
+                            className={`grid grid-cols-3 gap-2 px-3 py-2.5 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl items-center`}
                           >
                             <div className="flex flex-col">
                               <span className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>
@@ -1548,31 +1547,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                             </div>
                             <div className={`${isLight ? 'text-emerald-600' : 'text-emerald-400'} font-bold text-sm text-center`}>{book.odds}</div>
                             <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm text-center`}>{book.team2Odds}</div>
-                            <div className="flex justify-end">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onAddPick({
-                                    id: Date.now(),
-                                    teams: pick.game,
-                                    time: 'Sun, Nov 10 7:00 PM PST',
-                                    pick: pick.pick,
-                                    odds: book.odds,
-                                    sportsbook: book.name,
-                                    ev: book.ev,
-                                    sport: pick.sport,
-                                    confidence: 'High',
-                                    analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
-                                  });
-                                  toast.success('Added to My Picks', {
-                                    description: `${pick.pick} at ${book.name} has been added to your picks`
-                                  });
-                                }}
-                                className="p-1.5 bg-purple-500 rounded-xl hover:bg-purple-400 transition-all flex items-center justify-center"
-                              >
-                                <Plus className="w-4 h-4 text-white" />
-                              </button>
-                            </div>
                           </div>
                         ))}
                       </div>
@@ -1638,7 +1612,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                               <th className={`text-left py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>Book</th>
                               <th className={`text-center py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>Over</th>
                               <th className={`text-center py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>Under</th>
-                              <th className={`text-right py-2 px-3 ${isLight ? 'text-gray-500' : 'text-white/60'} font-bold text-xs`}>Pick</th>
                             </tr>
                           </thead>
                           <tbody className={`divide-y ${isLight ? 'divide-gray-200' : 'divide-white/10'}`}>
@@ -1664,36 +1637,6 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                                 </td>
                                 <td className="py-2 px-3 text-center">
                                   <span className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-bold text-sm`}>{book.team2Odds}</span>
-                                </td>
-                                <td className="py-2 px-3 text-right">
-                                  {isPickAdded(pick, book.name) ? (
-                                    <button
-                                      className="p-1.5 bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg cursor-default"
-                                      disabled
-                                    >
-                                      <Check className="w-4 h-4 text-white" />
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onAddPick({
-                                          teams: pick.game,
-                                          time: 'Sun, Nov 10 7:00 PM PST',
-                                          pick: pick.pick,
-                                          odds: book.odds,
-                                          sportsbook: book.name,
-                                          ev: book.ev,
-                                          sport: pick.sport,
-                                          confidence: 'High',
-                                          analysis: `${pick.pick} - ${book.name} at ${book.odds} with ${book.ev} expected value`
-                                        });
-                                      }}
-                                      className="p-1.5 bg-purple-500 rounded-xl hover:bg-purple-400 transition-all flex items-center justify-center"
-                                    >
-                                      <Plus className="w-4 h-4 text-white" />
-                                    </button>
-                                  )}
                                 </td>
                               </tr>
                             ))}
