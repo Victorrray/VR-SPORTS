@@ -21,5 +21,5 @@ Disallow: /my-sportsbooks
 # Crawl delay to be respectful
 Crawl-delay: 1
 
-# Sitemap location (must match canonical URL with www)
-Sitemap: https://www.oddsightseer.com/sitemap.xml
+# Sitemap location (must match canonical URL - non-www is primary on Render)
+Sitemap: https://oddsightseer.com/sitemap.xml
