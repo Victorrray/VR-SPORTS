@@ -192,7 +192,10 @@ export function Roadmap() {
             <p className="text-white/60 mb-6 leading-relaxed">
               We're always listening to our community. Share your ideas and help shape the future of OddSightSeer.
             </p>
-            <button className="px-8 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center">
+            <button 
+              onClick={() => window.location.href = 'mailto:support@oddsightseer.com?subject=Feature%20Feedback'}
+              className="px-8 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all font-semibold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 text-center"
+            >
               Submit Feedback
             </button>
           </div>
