@@ -18,30 +18,18 @@ const roadmapData: RoadmapItem[] = [
     status: 'completed',
     quarter: 'Q4 2024',
     features: [
-      'Historical performance tracking',
       'Mobile-responsive design',
-      'Dark/Light mode support'
-    ]
-  },
-  {
-    title: 'Advanced Analytics',
-    description: 'Enhanced data visualization and predictive modeling',
-    status: 'in-progress',
-    quarter: 'Q1 2025',
-    features: [
-      'Verison 1.02.0',
+      'Version 1.2',
       'Complete Redesign of UI'
     ]
   },
   {
-    title: 'Social Features',
-    description: 'Community engagement and collaborative betting',
-    status: 'planned',
-    quarter: 'Q2 2025',
+    title: 'Version 1.3',
+    description: 'Stability improvements and bug fixes',
+    status: 'in-progress',
+    quarter: 'Q1 2025',
     features: [
-      'Leaderboards and competitions',
-      'Share picks with friends',
-      'Live chat during games'
+      'Bug Fixes'
     ]
   }
 ];
@@ -174,28 +162,6 @@ export function Roadmap() {
             </div>
           </div>
 
-          {/* Coming Soon */}
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-500 to-slate-600 rounded-xl text-white font-medium shadow-lg">
-                <Clock className="w-5 h-5" />
-                <span>Coming Soon</span>
-              </div>
-            </div>
-            <div className="bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-6 md:p-8">
-              <ul className="space-y-3">
-                {roadmapData
-                  .filter(item => item.status === 'planned')
-                  .flatMap(item => item.features)
-                  .map((feature, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <Clock className="w-5 h-5 text-slate-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-white/80">{feature}</span>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          </div>
         </div>
 
         {/* CTA Section */}
