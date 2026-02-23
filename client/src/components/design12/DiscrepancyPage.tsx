@@ -6,6 +6,15 @@ import { useOddsData } from '../../hooks/useOddsData';
 import { ChevronDown, ChevronRight, ChevronLeft, Filter, RefreshCw, ArrowUp, ArrowDown, Check, Clock, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Get today's date in YYYY-MM-DD format
+function getTodayDateString() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // Types for discrepancy data
 interface BookLine {
   bookmaker: string;
@@ -120,7 +129,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
   const [selectedBook, setSelectedBook] = useState('prizepicks');
   const [selectedSport, setSelectedSport] = useState('basketball_nba');
   const [selectedPropType, setSelectedPropType] = useState('all');
-  const [selectedDate, setSelectedDate] = useState('all_upcoming');
+  const [selectedDate, setSelectedDate] = useState(getTodayDateString());
   const [minDiscrepancy, setMinDiscrepancy] = useState(1);
   const [autoRefresh, setAutoRefresh] = useState(false);
   
