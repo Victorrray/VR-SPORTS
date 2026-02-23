@@ -476,22 +476,6 @@ export function AccountPage({
           </a>
 
           <a 
-            href="https://discord.gg/oddsightseer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
-          >
-            <div className="flex items-center gap-3">
-              <MessageCircle className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Join Discord</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Get help from the community</div>
-              </div>
-            </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
-          </a>
-
-          <a 
             href="/roadmap"
             className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
           >
