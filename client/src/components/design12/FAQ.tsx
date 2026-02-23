@@ -114,7 +114,10 @@ export function FAQ() {
         {/* Bottom CTA */}
         <div className="mt-12 text-center">
           <p className="text-white/60 mb-4 font-semibold">Still have questions?</p>
-          <button className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 hover:border-white/20 rounded-full transition-all font-bold text-white">
+          <button 
+            onClick={() => window.location.href = 'mailto:support@oddsightseer.com'}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 hover:border-white/20 rounded-full transition-all font-bold text-white"
+          >
             <HelpCircle className="w-5 h-5" />
             <span>Contact Support</span>
           </button>

@@ -29,7 +29,7 @@ export function Footer({ onRoadmapClick, onPrivacyClick, onTermsClick, onDisclai
               <a href="#" className="w-9 h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center transition-all">
                 <Twitter className="w-4 h-4 text-white/60" />
               </a>
-              <a href="#" className="w-9 h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center transition-all">
+              <a href="mailto:support@oddsightseer.com" className="w-9 h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center transition-all">
                 <MessageCircle className="w-4 h-4 text-white/60" />
               </a>
             </div>
