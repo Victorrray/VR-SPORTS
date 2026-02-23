@@ -14,6 +14,9 @@ import {
   Download,
   Eye,
   EyeOff,
+  Headphones,
+  MessageCircle,
+  FileText,
 } from "lucide-react";
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
@@ -449,6 +452,61 @@ export function AccountPage({
           </button>
         </div>
       </div>
+
+      {/* Support Section */}
+      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-[16px] p-6`}>
+        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
+          <Headphones className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+          Support
+        </h2>
+
+        <div className="space-y-4">
+          <a 
+            href="mailto:support@oddsightseer.com"
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+          >
+            <div className="flex items-center gap-3">
+              <Mail className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Contact Support</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>support@oddsightseer.com</div>
+              </div>
+            </div>
+            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+          </a>
+
+          <a 
+            href="https://discord.gg/oddsightseer"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+          >
+            <div className="flex items-center gap-3">
+              <MessageCircle className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Join Discord</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Get help from the community</div>
+              </div>
+            </div>
+            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+          </a>
+
+          <a 
+            href="/roadmap"
+            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+          >
+            <div className="flex items-center gap-3">
+              <FileText className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <div>
+                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Feature Roadmap</div>
+                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>See what's coming next</div>
+              </div>
+            </div>
+            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+          </a>
+        </div>
+      </div>
+
       {/* Danger Zone */}
       <div className={`${isLight ? 'bg-red-50 border-red-200' : 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent border-red-400/30'} backdrop-blur-2xl border rounded-2xl p-6`}>
         <h2 className={`${isLight ? 'text-red-600' : 'text-red-400'} font-bold mb-4`}>
