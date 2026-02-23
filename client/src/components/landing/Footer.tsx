@@ -88,7 +88,7 @@ export function Footer({ onRoadmapClick, onPrivacyClick, onTermsClick, onDisclai
 
         <div className="pt-8 border-t border-white/10 text-center md:text-left">
           <p className="text-white/40 text-sm font-medium">
-            © 2025 OddSightSeer. All rights reserved.
+            © 2026 OddSightSeer. All rights reserved.
           </p>
         </div>
       </div>
