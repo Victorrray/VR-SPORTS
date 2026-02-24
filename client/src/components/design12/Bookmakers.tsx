@@ -42,9 +42,9 @@ export function Bookmakers() {
     {
       icon: Globe,
       title: 'UK Bookmakers',
-      count: 10,
+      count: 12,
       gradient: 'from-blue-500 to-indigo-500',
-      books: ['Betfair', 'Bet Victor', 'Betway', 'Ladbrokes', 'Paddy Power', 'Sky Bet', 'William Hill', '888sport', 'Coral', 'Virgin Bet'],
+      books: ['Betfair', 'Bet Victor', 'Betway', 'Ladbrokes', 'Paddy Power', 'Sky Bet', 'William Hill', '888sport', 'Coral', 'Virgin Bet', 'Matchbook', 'BoyleSports'],
     },
   ];
 
@@ -159,17 +159,6 @@ export function Bookmakers() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* "And many more" text */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="text-center text-white/40 text-sm mt-6 font-medium"
-        >
-          Plus Matchbook, BoyleSports, and many more...
-        </motion.p>
       </div>
     </section>
   );
