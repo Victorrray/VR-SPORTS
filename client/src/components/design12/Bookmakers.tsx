@@ -1,7 +1,10 @@
-import { Building2, Gamepad2, TrendingUp, Repeat, Globe } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Building2, Gamepad2, TrendingUp, Repeat, Globe, ChevronDown, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 export function Bookmakers() {
+  const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
+
   // Featured books shown as pills (top 8 most popular)
   const featuredBooks = [
     'DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'ESPN BET', 'PrizePicks', 'Pinnacle', 'Bovada'
@@ -92,6 +95,7 @@ export function Bookmakers() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 max-w-5xl mx-auto">
           {categories.map((category, idx) => {
             const Icon = category.icon;
+            const isExpanded = expandedCategory === idx;
             return (
               <motion.div
                 key={idx}
@@ -99,7 +103,8 @@ export function Bookmakers() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className={`group relative bg-gradient-to-br ${category.gradient} rounded-2xl p-4 md:p-5 transition-all duration-300 hover:scale-105 cursor-default`}
+                onClick={() => setExpandedCategory(isExpanded ? null : idx)}
+                className={`group relative bg-gradient-to-br ${category.gradient} rounded-2xl p-4 md:p-5 transition-all duration-300 hover:scale-105 cursor-pointer`}
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="p-2.5 rounded-xl bg-white/20 border border-white/30 mb-3">
@@ -108,14 +113,52 @@ export function Bookmakers() {
                   <h3 className="text-white text-sm md:text-base font-bold mb-1">
                     {category.title}
                   </h3>
-                  <p className="text-white/80 text-xs md:text-sm font-semibold">
+                  <p className="text-white/80 text-xs md:text-sm font-semibold flex items-center gap-1">
                     {category.count} books
+                    <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                   </p>
                 </div>
               </motion.div>
             );
           })}
         </div>
+
+        {/* Expanded Books Panel */}
+        <AnimatePresence>
+          {expandedCategory !== null && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="max-w-5xl mx-auto mt-4 overflow-hidden"
+            >
+              <div className={`bg-gradient-to-br ${categories[expandedCategory].gradient} rounded-2xl p-5 md:p-6`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-white font-bold text-lg">
+                    {categories[expandedCategory].title}
+                  </h4>
+                  <button
+                    onClick={() => setExpandedCategory(null)}
+                    className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                  {categories[expandedCategory].books.map((book) => (
+                    <div
+                      key={book}
+                      className="bg-white/20 border border-white/30 rounded-xl px-3 py-2 text-center text-white text-sm hover:bg-white/30 transition-all font-semibold"
+                    >
+                      {book}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* "And many more" text */}
         <motion.p
@@ -125,7 +168,7 @@ export function Bookmakers() {
           transition={{ duration: 0.5, delay: 0.5 }}
           className="text-center text-white/40 text-sm mt-6 font-medium"
         >
-          Plus Matchbook, BoyleSports, Smarkets, and many more...
+          Plus Matchbook, BoyleSports, and many more...
         </motion.p>
       </div>
     </section>
