@@ -9,7 +9,8 @@ import "./SectionMenu.css";
 export default function SectionMenu({ 
   currentSection = "game", 
   onSectionChange,
-  hasPlatinum = false
+  hasPlatinum = false,
+  hasGoldOrBetter = false
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -19,7 +20,8 @@ export default function SectionMenu({
       name: "Straight Bets", 
       description: "Compare odds across all major sportsbooks",
       icon: BarChart3,
-      emoji: "📊"
+      emoji: "📊",
+      free: true
     },
     { 
       id: "props", 
@@ -27,7 +29,7 @@ export default function SectionMenu({
       description: "Explore player props across every book you follow",
       icon: Target,
       emoji: "🎯",
-      requiresPlatinum: false
+      requiresGold: true
     },
     { 
       id: "arbitrage", 
@@ -35,8 +37,7 @@ export default function SectionMenu({
       description: "Find profitable arbitrage opportunities",
       icon: Zap,
       emoji: "⚡",
-      requiresPlatinum: true,
-      disabled: false
+      requiresPlatinum: true
     },
     { 
       id: "middles", 
@@ -44,8 +45,7 @@ export default function SectionMenu({
       description: "Find middle betting opportunities between different lines",
       icon: Activity,
       emoji: "🎪",
-      requiresPlatinum: true,
-      disabled: false
+      requiresPlatinum: true
     }
   ];
 
@@ -81,7 +81,8 @@ export default function SectionMenu({
           {sections.map(section => {
             const isActive = section.id === currentSection;
             const isPlatinumRequired = section.requiresPlatinum && !hasPlatinum;
-            const isDisabled = section.disabled || isPlatinumRequired;
+            const isGoldRequired = section.requiresGold && !hasGoldOrBetter;
+            const isDisabled = section.disabled || isPlatinumRequired || isGoldRequired;
             
             return (
               <button
@@ -90,7 +91,7 @@ export default function SectionMenu({
                 onClick={() => !isDisabled && handleSectionChange(section.id)}
                 aria-current={isActive}
                 disabled={isDisabled}
-                title={isPlatinumRequired ? 'Requires Platinum Plan' : ''}
+                title={isPlatinumRequired ? 'Requires Platinum Plan' : isGoldRequired ? 'Requires Gold Plan' : ''}
                 style={{
                   opacity: isDisabled ? 0.5 : 1,
                   cursor: isDisabled ? 'not-allowed' : 'pointer'

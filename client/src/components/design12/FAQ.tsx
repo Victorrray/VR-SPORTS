@@ -7,6 +7,10 @@ export function FAQ() {
 
   const faqs = [
     {
+      question: 'Does OddSightSeer offer a free odds viewer?',
+      answer: 'Yes! OddSightSeer offers a free odds viewer that gives you access to our Straight Bets tool. Compare real-time odds across multiple sportsbooks at no cost. Upgrade to Gold or Platinum for access to +EV finder, player props, arbitrage opportunities, and more advanced features.',
+    },
+    {
       question: 'Is OddSightSeer a sportsbook?',
       answer: 'No, OddSightSeer is not a sportsbook. We are strictly a sports data and analytics platform. We do not facilitate betting or hold user funds. We provide real-time odds data, +EV analysis, and betting tools to help you make informed decisions on the sportsbooks of your choice.',
     },

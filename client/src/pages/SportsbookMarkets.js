@@ -1594,9 +1594,15 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
     // Check if user has access to premium features (arbitrage/middles require platinum)
     if ((sectionId === 'arbitrage' || sectionId === 'middles') && !hasPlatinum) {
       console.warn(`⚠️ User tried to access ${sectionId} but doesn't have platinum plan. Plan: ${me?.plan}`);
-      // Show alert to user
       alert(`${sectionId === 'arbitrage' ? 'Arbitrage' : 'Middles'} detection requires a Platinum plan. Please upgrade to access this feature.`);
-      return; // Don't change section if user doesn't have access
+      return;
+    }
+    
+    // Check if user has access to Gold features (player props require gold or better)
+    if (sectionId === 'props' && !hasGoldOrBetter) {
+      console.warn(`⚠️ User tried to access player props but doesn't have gold plan. Plan: ${me?.plan}`);
+      alert('Player Props requires a Gold or Platinum plan. Please upgrade to access this feature.');
+      return;
     }
     
     // Update URL to persist mode selection FIRST
@@ -2373,7 +2379,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
       <SectionMenu 
         currentSection={getCurrentSectionId()} 
         onSectionChange={handleSectionChange} 
-        hasPlatinum={hasPlatinum} 
+        hasPlatinum={hasPlatinum}
+        hasGoldOrBetter={hasGoldOrBetter}
       />
       
       <MobileFiltersSheet open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title={isPlayerPropsMode ? "NFL Player Props" : "Filters"}>
