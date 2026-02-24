@@ -23,7 +23,7 @@ export function HowItWorks() {
       number: 3,
       icon: Sparkles,
       title: 'Start Finding +EV Bets',
-      description: 'Our algorithm instantly identifies profitable opportunities with positive expected value. Get alerts in real-time.',
+      description: 'Our algorithm instantly identifies profitable opportunities with positive expected value.',
       gradient: 'from-indigo-500 to-indigo-600',
       iconGradient: 'from-violet-400 to-violet-600',
     },
