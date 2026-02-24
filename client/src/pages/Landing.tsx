@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/SimpleAuth';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { Hero } from '../components/design12/Hero';
 import { Stats } from '../components/design12/Stats';
-import { Features } from '../components/design12/Features';
+// import { Features } from '../components/design12/Features';
 import { Header } from '../components/design12/Header';
 import { Bookmakers } from '../components/design12/Bookmakers';
 import { HowItWorks } from '../components/design12/HowItWorks';
@@ -60,7 +60,7 @@ export default function Landing() {
         <Hero onGetStartedClick={handleSignUpClick} />
         <Stats />
         <Bookmakers />
-        <Features />
+        {/* <Features /> */}
         <HowItWorks />
         <Pricing />
         <FAQ />
