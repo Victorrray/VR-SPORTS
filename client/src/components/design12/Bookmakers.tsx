@@ -5,31 +5,38 @@ export function Bookmakers() {
   const categories = [
     {
       icon: TrendingUp,
-      title: 'Popular Books',
-      count: 8,
-      books: ['Pinnacle', 'ESPN BET', 'Fanatics', 'Hard Rock', 'PointsBet', 'BetRivers', 'WynnBET', 'Unibet'],
+      title: 'US Sportsbooks',
+      count: 14,
+      books: ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'ESPN BET', 'Fanatics', 'Hard Rock', 'PointsBet', 'BetRivers', 'WynnBET', 'Unibet', 'Bally Bet', 'betPARX', 'theScore Bet'],
       gradient: 'from-cyan-500 to-blue-500',
     },
     {
       icon: Building2,
-      title: 'Top Tier Sportsbooks',
-      count: 9,
-      books: ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'BetOnline', 'Bovada', 'MyBookie', 'Fliff',],
+      title: 'Sharp & Offshore Books',
+      count: 8,
+      books: ['Pinnacle', 'LowVig', 'Bovada', 'BetOnline', 'MyBookie', 'BetUS', 'BetAnything', 'Fliff'],
       gradient: 'bg-purple-500',
     },
     {
       icon: Gamepad2,
       title: 'DFS & Pick\'em Apps',
-      count: 4,
-      books: ['PrizePicks', 'Underdog', 'DK Pick6', 'Dabble'],
+      count: 5,
+      books: ['PrizePicks', 'Underdog', 'DK Pick6', 'Dabble', 'Betr'],
       gradient: 'from-emerald-500 to-teal-500',
     },
     {
       icon: Repeat,
-      title: 'Betting Exchanges',
-      count: 4,
-      books: ['ProphetX', 'ReBet', 'BetOpenly','NoVig'],
+      title: 'Exchanges',
+      count: 8,
+      books: ['ProphetX', 'ReBet', 'BetOpenly', 'NoVig', 'Kalshi', 'Polymarket', 'Betfair Exchange', 'Smarkets'],
       gradient: 'from-violet-500 to-purple-500',
+    },
+    {
+      icon: Building2,
+      title: 'UK Bookmakers',
+      count: 10,
+      books: ['Betfair', 'Bet Victor', 'Betway', 'Ladbrokes', 'Paddy Power', 'Sky Bet', 'William Hill', '888sport', 'Coral', 'Virgin Bet'],
+      gradient: 'from-blue-500 to-indigo-500',
     },
   ];
 
@@ -52,7 +59,7 @@ export function Bookmakers() {
           <h2 className="text-white text-3xl md:text-5xl mb-6 font-bold">
             Compare Odds Across{' '}
             <span className="bg-purple-400 bg-clip-text text-transparent">
-              40+ Bookmakers
+              45+ Bookmakers
             </span>
           </h2>
           
