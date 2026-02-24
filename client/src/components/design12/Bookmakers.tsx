@@ -66,7 +66,7 @@ export function Bookmakers() {
           
           <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">
             Compare Odds Across{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="text-purple-400">
               45+ Bookmakers
             </span>
           </h2>
