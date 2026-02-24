@@ -39,10 +39,35 @@ export const AVAILABLE_SPORTSBOOKS = [
   { key: 'fliff', name: 'Fliff', popular: false, tier: 3 },
   { key: 'circasports', name: 'Circa Sports', popular: false, tier: 3 },
   
-  // ===== OFFSHORE (Optional - can remove if not wanted) =====
+  // ===== ADDITIONAL US BOOKS =====
+  { key: 'betus', name: 'BetUS', popular: false, tier: 3 },
+  { key: 'ballybet', name: 'Bally Bet', popular: false, tier: 3 },
+  { key: 'betanything', name: 'BetAnything', popular: false, tier: 3 },
+  { key: 'betparx', name: 'betPARX', popular: false, tier: 3 },
+  { key: 'thescorebet', name: 'theScore Bet', popular: false, tier: 3 },
+  { key: 'lowvig', name: 'LowVig', popular: false, tier: 3 },
+  
+  // ===== OFFSHORE =====
   { key: 'bovada', name: 'Bovada', popular: false, tier: 3, offshore: true },
   { key: 'betonline', name: 'BetOnline', popular: false, tier: 3, offshore: true },
   { key: 'mybookieag', name: 'MyBookie', popular: false, tier: 3, offshore: true },
+  
+  // ===== UK BOOKMAKERS =====
+  { key: '888sport', name: '888sport', popular: false, tier: 3, region: 'uk' },
+  { key: 'betfair_ex_uk', name: 'Betfair Exchange', popular: false, tier: 3, region: 'uk', isExchange: true },
+  { key: 'betfair', name: 'Betfair Sportsbook', popular: false, tier: 3, region: 'uk' },
+  { key: 'betvictor', name: 'Bet Victor', popular: false, tier: 3, region: 'uk' },
+  { key: 'betway', name: 'Betway', popular: false, tier: 3, region: 'uk' },
+  { key: 'ladbrokes_uk', name: 'Ladbrokes', popular: false, tier: 3, region: 'uk' },
+  { key: 'paddypower', name: 'Paddy Power', popular: false, tier: 3, region: 'uk' },
+  { key: 'skybet', name: 'Sky Bet', popular: false, tier: 3, region: 'uk' },
+  { key: 'williamhill_uk', name: 'William Hill', popular: false, tier: 3, region: 'uk' },
+  { key: 'coral', name: 'Coral', popular: false, tier: 3, region: 'uk' },
+  { key: 'unibet_uk', name: 'Unibet UK', popular: false, tier: 3, region: 'uk' },
+  { key: 'smarkets', name: 'Smarkets', popular: false, tier: 3, region: 'uk', isExchange: true },
+  { key: 'matchbook', name: 'Matchbook', popular: false, tier: 3, region: 'uk', isExchange: true },
+  { key: 'virginbet', name: 'Virgin Bet', popular: false, tier: 3, region: 'uk' },
+  { key: 'boylesports', name: 'BoyleSports', popular: false, tier: 3, region: 'uk' },
 ];
 
 // Helper function to get sportsbook by key
