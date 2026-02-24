@@ -41,7 +41,7 @@ export function Footer({ onRoadmapClick, onPrivacyClick, onTermsClick, onDisclai
             <div>
               <h3 className="text-white font-bold mb-4">Product</h3>
               <ul className="space-y-2">
-                <li><a href="#features" className="text-white/60 hover:text-white transition-colors text-sm font-medium">Features</a></li>
+                <li><a href="#how-it-works" className="text-white/60 hover:text-white transition-colors text-sm font-medium">How It Works</a></li>
                 <li><a href="#pricing" className="text-white/60 hover:text-white transition-colors text-sm font-medium">Pricing</a></li>
                 
                 <li>

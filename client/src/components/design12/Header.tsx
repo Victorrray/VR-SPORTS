@@ -41,9 +41,6 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-white/70 hover:text-white transition-colors font-medium">
-              Features
-            </a>
             <button 
               onClick={onDashboardClick}
               className="text-white/70 hover:text-white transition-colors font-medium"
@@ -93,9 +90,6 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
         {mobileMenuOpen && (
           <div className="md:hidden">
             <nav className="flex flex-col gap-3 px-6 py-6 bg-gradient-to-br from-slate-900/95 via-slate-900/98 to-slate-950/95 backdrop-blur-2xl border-t border-white/10 rounded-b-2xl">
-              <a href="#features" className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
-                Features
-              </a>
               <button 
                 onClick={onDashboardClick}
                 className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold text-left"

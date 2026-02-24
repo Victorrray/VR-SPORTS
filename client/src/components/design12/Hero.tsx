@@ -83,7 +83,7 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
                 Get started
               </button>
               
-              <a href="#features" className="text-white/70 hover:text-white text-sm flex items-center gap-2 transition-colors group font-semibold">
+              <a href="#how-it-works" className="text-white/70 hover:text-white text-sm flex items-center gap-2 transition-colors group font-semibold">
                 See how it works
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
