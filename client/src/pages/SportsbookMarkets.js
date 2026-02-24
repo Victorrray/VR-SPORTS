@@ -2627,8 +2627,42 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
             </>
           ) : (
             <>
+              {/* Free User Upgrade Notice */}
+              {!hasGoldOrBetter && (
+                <div style={{ 
+                  padding: '16px', 
+                  marginBottom: '20px', 
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(124, 58, 237, 0.1))', 
+                  border: '1px solid rgba(139, 92, 246, 0.3)', 
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#a78bfa', fontWeight: 600, marginBottom: '8px', fontSize: '14px' }}>
+                    🔒 Filters require Gold or Platinum
+                  </p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '12px' }}>
+                    Upgrade to filter by sports, sportsbooks, and markets
+                  </p>
+                  <button 
+                    onClick={() => window.location.href = '/#pricing'}
+                    style={{ 
+                      padding: '8px 16px', 
+                      background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', 
+                      color: '#fff', 
+                      border: 'none', 
+                      borderRadius: '8px', 
+                      fontWeight: 600, 
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    View Plans
+                  </button>
+                </div>
+              )}
+
               {/* Auto-Refresh Toggle */}
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 20, opacity: hasGoldOrBetter ? 1 : 0.4, pointerEvents: hasGoldOrBetter ? 'auto' : 'none' }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: hasPlatinum ? 'pointer' : 'not-allowed', padding: '8px 0', opacity: hasPlatinum ? 1 : 0.5 }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>
                     <RefreshCw size={16} style={{ opacity: autoRefreshEnabled ? 1 : 0.5 }} />
@@ -2650,7 +2684,8 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                 </label>
               </div>
 
-              {/* Straight Bets Filters */}
+              {/* Straight Bets Filters - Disabled for free users */}
+              <div style={{ opacity: hasGoldOrBetter ? 1 : 0.4, pointerEvents: hasGoldOrBetter ? 'auto' : 'none' }}>
               {/* Data Points Slider */}
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, fontWeight: 600, color: 'var(--text-primary)' }}>
@@ -2726,6 +2761,7 @@ const SportsbookMarkets = ({ onRegisterMobileSearch }) => {
                   allLabel="All Markets"
                   enableCategories={true}
                 />
+              </div>
               </div>
             </>
           )}
