@@ -1,42 +1,47 @@
-import { Building2, Gamepad2, TrendingUp, Repeat } from 'lucide-react';
+import { Building2, Gamepad2, TrendingUp, Repeat, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function Bookmakers() {
+  // Featured books shown as pills (top 8 most popular)
+  const featuredBooks = [
+    'DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'ESPN BET', 'PrizePicks', 'Pinnacle', 'Bovada'
+  ];
+
   const categories = [
     {
       icon: TrendingUp,
       title: 'US Sportsbooks',
       count: 14,
-      books: ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'ESPN BET', 'Fanatics', 'Hard Rock', 'PointsBet', 'BetRivers', 'WynnBET', 'Unibet', 'Bally Bet', 'betPARX', 'theScore Bet'],
       gradient: 'from-cyan-500 to-blue-500',
-    },
-    {
-      icon: Building2,
-      title: 'Sharp & Offshore Books',
-      count: 8,
-      books: ['Pinnacle', 'LowVig', 'Bovada', 'BetOnline', 'MyBookie', 'BetUS', 'BetAnything', 'Fliff'],
-      gradient: 'bg-purple-500',
+      books: ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'ESPN BET', 'Fanatics', 'Hard Rock', 'PointsBet', 'BetRivers', 'WynnBET', 'Unibet', 'Bally Bet', 'betPARX', 'theScore Bet'],
     },
     {
       icon: Gamepad2,
-      title: 'DFS & Pick\'em Apps',
+      title: 'DFS & Pick\'em',
       count: 5,
-      books: ['PrizePicks', 'Underdog', 'DK Pick6', 'Dabble', 'Betr'],
       gradient: 'from-emerald-500 to-teal-500',
+      books: ['PrizePicks', 'Underdog', 'DK Pick6', 'Dabble', 'Betr'],
+    },
+    {
+      icon: Building2,
+      title: 'Sharp & Offshore',
+      count: 8,
+      gradient: 'from-purple-500 to-violet-500',
+      books: ['Pinnacle', 'LowVig', 'Bovada', 'BetOnline', 'MyBookie', 'BetUS', 'BetAnything', 'Fliff'],
     },
     {
       icon: Repeat,
       title: 'Exchanges',
       count: 8,
-      books: ['ProphetX', 'ReBet', 'BetOpenly', 'NoVig', 'Kalshi', 'Polymarket', 'Betfair Exchange', 'Smarkets'],
       gradient: 'from-violet-500 to-purple-500',
+      books: ['ProphetX', 'ReBet', 'BetOpenly', 'NoVig', 'Kalshi', 'Polymarket', 'Betfair Exchange', 'Smarkets'],
     },
     {
-      icon: Building2,
+      icon: Globe,
       title: 'UK Bookmakers',
       count: 10,
-      books: ['Betfair', 'Bet Victor', 'Betway', 'Ladbrokes', 'Paddy Power', 'Sky Bet', 'William Hill', '888sport', 'Coral', 'Virgin Bet'],
       gradient: 'from-blue-500 to-indigo-500',
+      books: ['Betfair', 'Bet Victor', 'Betway', 'Ladbrokes', 'Paddy Power', 'Sky Bet', 'William Hill', '888sport', 'Coral', 'Virgin Bet'],
     },
   ];
 
@@ -49,79 +54,79 @@ export function Bookmakers() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12 md:mb-16 max-w-4xl mx-auto"
+          className="text-center mb-10 md:mb-14 max-w-4xl mx-auto"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 rounded-full mb-6">
             <Building2 className="w-4 h-4 text-white" />
             <span className="text-white font-bold">Complete Coverage</span>
           </div>
           
-          <h2 className="text-white text-3xl md:text-5xl mb-6 font-bold">
+          <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">
             Compare Odds Across{' '}
-            <span className="bg-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               45+ Bookmakers
             </span>
           </h2>
           
-          <p className="text-white/60 text-lg font-semibold">
+          <p className="text-white/60 text-lg font-semibold mb-8">
             The most comprehensive sportsbook coverage in the industry
           </p>
+
+          {/* Featured Books Pills */}
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+            {featuredBooks.map((book) => (
+              <motion.span
+                key={book}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white text-sm font-semibold hover:bg-white/20 transition-all cursor-default"
+              >
+                {book}
+              </motion.span>
+            ))}
+          </div>
         </motion.div>
 
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 max-w-7xl mx-auto">
+        {/* Category Cards - Compact Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 max-w-5xl mx-auto">
           {categories.map((category, idx) => {
             const Icon = category.icon;
             return (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className={`group relative bg-gradient-to-br ${category.gradient} rounded-2xl md:rounded-3xl p-6 md:p-8 transition-all duration-300`}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                className={`group relative bg-gradient-to-br ${category.gradient} rounded-2xl p-4 md:p-5 transition-all duration-300 hover:scale-105 cursor-default`}
               >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-white/20 border border-white/30">
-                      <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-white text-lg md:text-xl font-bold">
-                        {category.title}
-                      </h3>
-                      <p className="text-white/80 text-sm font-semibold">
-                        {category.count} bookmakers
-                      </p>
-                    </div>
+                <div className="flex flex-col items-center text-center">
+                  <div className="p-2.5 rounded-xl bg-white/20 border border-white/30 mb-3">
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
+                  <h3 className="text-white text-sm md:text-base font-bold mb-1">
+                    {category.title}
+                  </h3>
+                  <p className="text-white/80 text-xs md:text-sm font-semibold">
+                    {category.count} books
+                  </p>
                 </div>
-
-                {/* Books Grid */}
-                <div className="grid grid-cols-2 gap-2 md:gap-3">
-                  {category.books.map((book) => (
-                    <div
-                      key={book}
-                      className="bg-white/20 border border-white/30 rounded-xl px-3 py-2.5 md:py-3 text-center text-white text-sm md:text-base hover:bg-white/30 transition-all font-bold"
-                    >
-                      {book}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Plus More indicator if needed */}
-                {category.books.length > 8 && (
-                  <div className="mt-3 text-center">
-                    <span className="inline-flex items-center gap-1 text-xs md:text-sm font-bold text-white">
-                      + more bookmakers
-                    </span>
-                  </div>
-                )}
               </motion.div>
             );
           })}
         </div>
+
+        {/* "And many more" text */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="text-center text-white/40 text-sm mt-6 font-medium"
+        >
+          Plus Matchbook, BoyleSports, Smarkets, and many more...
+        </motion.p>
       </div>
     </section>
   );
