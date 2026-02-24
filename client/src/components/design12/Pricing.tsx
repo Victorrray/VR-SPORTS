@@ -9,10 +9,13 @@ export function Pricing() {
       period: '/month',
       description: 'Essential tools for serious bettors',
       features: [
-        'Real-time odds from 40+ sportsbooks',
-        'EV tool access',
-        'Player Props tool access',
-        'Performance tracking'
+        'Real-time odds from 45+ sportsbooks',
+        '+EV bet finder',
+        'Player Props tool',
+        'Line shopping across all books',
+        'DFS app integration (PrizePicks, Underdog)',
+        'Personalized dashboard',
+        'Email support'
       ]
     },
     {
@@ -21,14 +24,13 @@ export function Pricing() {
       period: '/month',
       description: 'Advanced analytics for professionals',
       features: [
-        'Real-time odds from 40+ sportsbooks',
-        'EV tool access',
-        'Player Props tool access',
-        'Arbitrage tool access',
-        'Middles tool access',
-        'Auto refresh',
-        'Live betting',
-        'performance tracking'
+        'Everything in Gold, plus:',
+        'Arbitrage opportunity scanner',
+        'Middles betting tool',
+        'Auto-refresh odds (real-time)',
+        'Live betting markets',
+        'Priority support',
+        'Early access to new features'
       ],
       popular: true
     }
