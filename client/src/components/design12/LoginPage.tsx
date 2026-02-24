@@ -152,7 +152,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                 
 
                 {/* Header */}
-                <div className="text-center lg:text-left">
+                <div className="text-center">
                   <h3 className="text-white text-2xl md:text-4xl font-bold mb-2">
                     {isLogin ? 'Welcome back' : 'Create account'}
                   </h3>
