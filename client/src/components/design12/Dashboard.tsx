@@ -315,7 +315,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               <div className="space-y-1">
                 <button
                   onClick={() => setCurrentView("dashboard")}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     currentView === "dashboard"
                       ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
                       : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
@@ -337,7 +337,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     setSelectedBetType('straight');
                     setCurrentView("odds");
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     !hasPaidPlan
                       ? isLight ? 'text-gray-300' : 'text-white/20'
                       : currentView === "odds" && selectedBetType === 'straight'
@@ -355,7 +355,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     setSelectedBetType('props');
                     setCurrentView("odds");
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     !hasPaidPlan
                       ? isLight ? 'text-gray-300' : 'text-white/20'
                       : currentView === "odds" && selectedBetType === 'props'
@@ -373,7 +373,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     setSelectedBetType('discrepancy');
                     setCurrentView("odds");
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     !hasPaidPlan
                       ? isLight ? 'text-gray-300' : 'text-white/20'
                       : currentView === "odds" && selectedBetType === 'discrepancy'
@@ -391,7 +391,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     setSelectedBetType('exchanges');
                     setCurrentView("odds");
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     !hasPaidPlan
                       ? isLight ? 'text-gray-300' : 'text-white/20'
                       : currentView === "odds" && selectedBetType === 'exchanges'
@@ -409,7 +409,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     setSelectedBetType('arbitrage');
                     setCurrentView("odds");
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     !hasPaidPlan
                       ? isLight ? 'text-gray-300' : 'text-white/20'
                       : currentView === "odds" && selectedBetType === 'arbitrage'
@@ -427,7 +427,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     setSelectedBetType('middles');
                     setCurrentView("odds");
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     !hasPaidPlan
                       ? isLight ? 'text-gray-300' : 'text-white/20'
                       : currentView === "odds" && selectedBetType === 'middles'
@@ -448,7 +448,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 </div>
                 <button
                   onClick={() => setCurrentView("calculator")}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                     currentView === "calculator"
                       ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
                       : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
@@ -464,7 +464,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             <div className={`px-3 py-4 border-t ${isLight ? 'border-gray-100' : 'border-white/5'} space-y-1`}>
               <button
                 onClick={() => setCurrentView("account")}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                   currentView === "account"
                     ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
                     : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
@@ -475,7 +475,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </button>
               <button
                 onClick={() => setCurrentView("settings")}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                   currentView === "settings"
                     ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
                     : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
@@ -486,7 +486,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </button>
               <button
                 onClick={onSignOut}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
                   isLight ? 'text-red-600 hover:bg-red-50' : 'text-red-400 hover:bg-red-500/10'
                 }`}
               >
