@@ -335,6 +335,31 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                           <p className="text-white/40 text-xs font-medium">Must be at least 8 characters</p>
                         </div>
 
+                        {/* Terms Checkbox */}
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                          <div className="relative mt-0.5">
+                            <input
+                              type="checkbox"
+                              checked={agreedToTerms}
+                              onChange={(e) => setAgreedToTerms(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-5 h-5 rounded-md border-2 border-white/20 bg-slate-950/50 peer-checked:bg-gradient-to-br peer-checked:from-purple-500 peer-checked:to-violet-600 peer-checked:border-transparent transition-all flex items-center justify-center group-hover:border-purple-400/50">
+                              {agreedToTerms && (
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-white/50 text-xs font-medium leading-relaxed">
+                            I agree to the{' '}
+                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Terms of Service</a>
+                            {' '}and{' '}
+                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Privacy Policy</a>
+                          </span>
+                        </label>
+
                         {/* Submit Button */}
                         <motion.button
                           type="submit"
@@ -373,31 +398,6 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                           </svg>
                           {isLoading ? 'Signing up...' : 'Continue with Google'}
                         </motion.button>
-
-                        {/* Terms Checkbox */}
-                        <label className="flex items-start gap-3 cursor-pointer group">
-                          <div className="relative mt-0.5">
-                            <input
-                              type="checkbox"
-                              checked={agreedToTerms}
-                              onChange={(e) => setAgreedToTerms(e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-5 h-5 rounded-md border-2 border-white/20 bg-slate-950/50 peer-checked:bg-gradient-to-br peer-checked:from-purple-500 peer-checked:to-violet-600 peer-checked:border-transparent transition-all flex items-center justify-center group-hover:border-purple-400/50">
-                              {agreedToTerms && (
-                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </div>
-                          </div>
-                          <span className="text-white/50 text-xs font-medium leading-relaxed">
-                            I agree to the{' '}
-                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Terms of Service</a>
-                            {' '}and{' '}
-                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Privacy Policy</a>
-                          </span>
-                        </label>
 
                         {/* Login Link */}
                         <div className="text-center pt-2">
