@@ -287,9 +287,9 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgc3Ryb2tlPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDMpIi8+PC9nPjwvc3ZnPg==')] opacity-40"></div>
       )}
 
-      <div className="relative flex">
+      <div className="relative flex min-h-screen">
         {/* Sidebar */}
-        <aside className={`hidden lg:flex lg:flex-col w-64 h-screen ${isLight ? 'bg-white border-gray-200' : 'bg-slate-950/80 border-white/5'} border-r`}>
+        <aside className={`hidden lg:flex lg:flex-col w-64 sticky top-0 h-screen ${isLight ? 'bg-white border-gray-200' : 'bg-slate-950/80 border-white/5'} border-r`}>
           <div className="flex-1 flex flex-col">
             {/* Logo/Brand */}
             <div className={`px-5 py-6 border-b ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
