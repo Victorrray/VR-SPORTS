@@ -23,17 +23,32 @@ export function useFeaturedPick() {
         setLoading(true);
         setError(null);
 
-        // Check cache first
+        // Clear old cache entries (keep only today's)
         const today = new Date().toISOString().split('T')[0];
         const cacheKey = `featured-bet-${today}`;
+        
+        // Remove any old featured-bet cache entries
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('featured-bet-') && key !== cacheKey) {
+            localStorage.removeItem(key);
+          }
+        });
+
         const cached = localStorage.getItem(cacheKey);
 
         if (cached) {
           try {
             const cachedBet = JSON.parse(cached);
-            setBet(cachedBet);
-            setLoading(false);
-            return;
+            // Verify the cached bet's game time is still in the future
+            const gameDate = new Date(cachedBet.gameTime);
+            if (gameDate > new Date()) {
+              setBet(cachedBet);
+              setLoading(false);
+              return;
+            } else {
+              // Game has passed, clear cache and fetch new
+              localStorage.removeItem(cacheKey);
+            }
           } catch (e) {
             console.warn('Failed to parse cached bet');
             localStorage.removeItem(cacheKey);

@@ -41,9 +41,9 @@ router.get('/', async (req, res) => {
     const bet = {
       id: game.id,
       sport: 'NBA',
-      teams: `${game.home_team} @ ${game.away_team}`,
+      teams: `${game.away_team} @ ${game.home_team}`,
       gameTime: game.commence_time,
-      pick: `${game.home_team} -3.5`,
+      pick: `${game.home_team} ML`,
       odds: homeOdds,
       sportsbook: game.bookmakers?.[0]?.title || 'DraftKings',
       ev: '+2.5%'
