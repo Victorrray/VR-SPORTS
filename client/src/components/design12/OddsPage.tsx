@@ -1344,7 +1344,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date */}
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-              className={`flex items-center gap-2 h-10 px-4 rounded-lg transition-all font-semibold whitespace-nowrap text-sm ${
+              className={`flex items-center gap-2 h-10 px-4 rounded-full transition-all font-semibold whitespace-nowrap text-sm ${
                 isLight 
                   ? 'bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100' 
                   : 'bg-purple-500/15 border border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
@@ -1377,7 +1377,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 }
               }}
               disabled={isLoading}
-              className={`flex items-center gap-2 h-10 px-4 rounded-lg transition-all font-semibold whitespace-nowrap text-sm ${
+              className={`flex items-center gap-2 h-10 px-4 rounded-full transition-all font-semibold whitespace-nowrap text-sm ${
                 isLoading
                   ? isLight ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white/5 text-white/30 cursor-not-allowed'
                   : isLight ? 'bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100' : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
@@ -1392,7 +1392,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <button 
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
-                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
                   currentPage === 1
                     ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
                     : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
@@ -1401,7 +1401,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <ChevronRight className="w-4 h-4 rotate-180" />
               </button>
               
-              <div className={`flex items-center h-10 px-3 rounded-lg ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/5 text-white/60'}`}>
+              <div className={`flex items-center h-10 px-3 rounded-full ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/5 text-white/60'}`}>
                 <span className="font-semibold text-sm whitespace-nowrap">
                   {currentPage}/{totalPages}
                 </span>
@@ -1410,7 +1410,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <button 
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
-                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
                   currentPage === totalPages
                     ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
                     : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
@@ -1427,7 +1427,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           <button 
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
-            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
+            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
               currentPage === 1
                 ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
@@ -1436,7 +1436,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             <ChevronRight className="w-4 h-4 rotate-180" />
           </button>
           
-          <div className={`flex items-center h-10 px-3 rounded-lg ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/5 text-white/60'}`}>
+          <div className={`flex items-center h-10 px-3 rounded-full ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/5 text-white/60'}`}>
             <span className="font-semibold text-sm whitespace-nowrap">
               {currentPage}/{totalPages}
             </span>
@@ -1445,7 +1445,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           <button 
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
-            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
+            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
               currentPage === totalPages
                 ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
