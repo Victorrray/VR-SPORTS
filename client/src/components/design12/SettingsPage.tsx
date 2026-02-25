@@ -1,8 +1,9 @@
-import { Settings, Bell, Shield, Globe, Smartphone, Mail, Lock, Eye, Database, Download, Trash2, ToggleLeft, CreditCard, Crown, Calendar, DollarSign, Check, X, AlertTriangle, FileText } from 'lucide-react';
+import { Settings, Shield, Globe, Trash2, DollarSign, Check, X, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTheme, lightModeColors, OddsFormat } from '../../contexts/ThemeContext';
 import { useBankroll } from '../../contexts/BankrollContext';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 interface SettingsPageProps {
   onNavigateToChangePlan?: () => void;
@@ -13,10 +14,6 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
   const { colorMode, oddsFormat, setOddsFormat } = useTheme();
   const { currentBankroll, startingBankroll, setStartingBankroll, setCurrentBankroll, resetBankroll } = useBankroll();
   const isLight = colorMode === 'light';
-  const [notifications, setNotifications] = useState(true);
-  const [emailAlerts, setEmailAlerts] = useState(true);
-  const [twoFactor, setTwoFactor] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(false);
   
   // Modal states
   const [showBankrollModal, setShowBankrollModal] = useState(false);
@@ -26,23 +23,41 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="space-y-2">
-        <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl md:text-3xl font-bold`}>Settings</h1>
-        <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold`}>Customize your OddSightSeer experience</p>
-      </div>
+      <motion.div 
+        className="space-y-2"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h1 className="text-white text-2xl md:text-3xl font-extrabold tracking-tight">
+          App{' '}
+          <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+            Settings
+          </span>
+        </h1>
+        <p className="text-white/50 font-medium">Customize your OddSightSeer experience</p>
+      </motion.div>
 
       {/* Display & Preferences */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
-        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
-          <Globe className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+      <motion.div 
+        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-600 rounded-l-2xl" />
+        
+        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+            <Globe className="w-4 h-4 text-white" />
+          </div>
           Display & Preferences
         </h2>
 
         <div className="space-y-4">
-          <div className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
+          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-3 mb-4">
-              <DollarSign className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Default Odds Format</div>
+              <DollarSign className="w-5 h-5 text-purple-400" />
+              <div className="text-white font-semibold">Default Odds Format</div>
             </div>
             
             <div className="grid grid-cols-3 gap-2">
@@ -51,19 +66,15 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
                 onClick={() => setOddsFormat('american')}
                 className={`p-3 rounded-xl border transition-all ${
                   oddsFormat === 'american'
-                    ? isLight
-                      ? 'bg-purple-100 border-purple-400 text-purple-700'
-                      : 'bg-purple-500/20 border-purple-400/50 text-purple-300'
-                    : isLight
-                      ? 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                    ? 'bg-purple-500/20 border-purple-400/50 text-purple-300'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   {oddsFormat === 'american' && <Check className="w-3.5 h-3.5" />}
-                  <span className="font-bold text-sm">American</span>
+                  <span className="font-semibold text-sm">American</span>
                 </div>
-                <div className={`text-xs ${oddsFormat === 'american' ? '' : isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                <div className={`text-xs ${oddsFormat === 'american' ? '' : 'text-white/50'}`}>
                   -110, +150
                 </div>
               </button>
@@ -73,19 +84,15 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
                 onClick={() => setOddsFormat('decimal')}
                 className={`p-3 rounded-xl border transition-all ${
                   oddsFormat === 'decimal'
-                    ? isLight
-                      ? 'bg-purple-100 border-purple-400 text-purple-700'
-                      : 'bg-purple-500/20 border-purple-400/50 text-purple-300'
-                    : isLight
-                      ? 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                    ? 'bg-purple-500/20 border-purple-400/50 text-purple-300'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   {oddsFormat === 'decimal' && <Check className="w-3.5 h-3.5" />}
-                  <span className="font-bold text-sm">Decimal</span>
+                  <span className="font-semibold text-sm">Decimal</span>
                 </div>
-                <div className={`text-xs ${oddsFormat === 'decimal' ? '' : isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                <div className={`text-xs ${oddsFormat === 'decimal' ? '' : 'text-white/50'}`}>
                   1.91, 2.50
                 </div>
               </button>
@@ -95,44 +102,42 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
                 onClick={() => setOddsFormat('fractional')}
                 className={`p-3 rounded-xl border transition-all ${
                   oddsFormat === 'fractional'
-                    ? isLight
-                      ? 'bg-purple-100 border-purple-400 text-purple-700'
-                      : 'bg-purple-500/20 border-purple-400/50 text-purple-300'
-                    : isLight
-                      ? 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                    ? 'bg-purple-500/20 border-purple-400/50 text-purple-300'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-1">
                   {oddsFormat === 'fractional' && <Check className="w-3.5 h-3.5" />}
-                  <span className="font-bold text-sm">Fractional</span>
+                  <span className="font-semibold text-sm">Fractional</span>
                 </div>
-                <div className={`text-xs ${oddsFormat === 'fractional' ? '' : isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                <div className={`text-xs ${oddsFormat === 'fractional' ? '' : 'text-white/50'}`}>
                   10/11, 3/2
                 </div>
               </button>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Bankroll Settings - Hidden for now */}
-      {/* Security Section */}
-
-      {/* Data & Performance */}
+      </motion.div>
 
       {/* Advanced Settings */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
-        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
-          <Settings className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+      <motion.div 
+        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-600 rounded-l-2xl" />
+        
+        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+            <Settings className="w-4 h-4 text-white" />
+          </div>
           Advanced
         </h2>
 
         <div className="space-y-3">
-
           <button 
             onClick={() => {
-              // Keys to PRESERVE (user settings)
               const preserveKeys = [
                 'vr_bankroll_current',
                 'vr_bankroll_starting', 
@@ -145,47 +150,52 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
                 'userBankroll',
               ];
               
-              // Save preserved values
               const preserved: Record<string, string | null> = {};
               preserveKeys.forEach(key => {
                 preserved[key] = localStorage.getItem(key);
               });
               
-              // Clear all localStorage
               localStorage.clear();
               
-              // Restore preserved values
               Object.entries(preserved).forEach(([key, value]) => {
                 if (value !== null) {
                   localStorage.setItem(key, value);
                 }
               });
               
-              // Clear sessionStorage (temporary data only)
               sessionStorage.clear();
               
               toast.success('Cache Cleared', {
                 description: 'Temporary data cleared. Your settings have been preserved.'
               });
             }}
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left"
           >
             <div className="flex items-center gap-3">
-              <Trash2 className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <Trash2 className="w-5 h-5 text-blue-400" />
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Clear Cache</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Remove temporary data (preserves your settings)</div>
+                <div className="text-white font-semibold">Clear Cache</div>
+                <div className="text-white/50 text-sm">Remove temporary data (preserves your settings)</div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Legal Links */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
-        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
-          <Shield className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+      <motion.div 
+        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-500 to-orange-600 rounded-l-2xl" />
+        
+        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <Shield className="w-4 h-4 text-white" />
+          </div>
           Legal
         </h2>
 
@@ -194,51 +204,51 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
             href="/privacy"
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
           >
             <div className="flex items-center gap-3">
-              <FileText className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <FileText className="w-5 h-5 text-amber-400" />
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Privacy Policy</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>How we handle your data</div>
+                <div className="text-white font-semibold">Privacy Policy</div>
+                <div className="text-white/50 text-sm">How we handle your data</div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </a>
 
           <a 
             href="/terms"
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
           >
             <div className="flex items-center gap-3">
-              <FileText className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <FileText className="w-5 h-5 text-amber-400" />
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Terms of Service</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Rules and guidelines</div>
+                <div className="text-white font-semibold">Terms of Service</div>
+                <div className="text-white/50 text-sm">Rules and guidelines</div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </a>
 
           <a 
             href="/disclaimer"
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
           >
             <div className="flex items-center gap-3">
-              <AlertTriangle className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <AlertTriangle className="w-5 h-5 text-amber-400" />
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Disclaimer</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Important legal notices</div>
+                <div className="text-white font-semibold">Disclaimer</div>
+                <div className="text-white/50 text-sm">Important legal notices</div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </a>
         </div>
-      </div>
+      </motion.div>
 
       {/* Starting Bankroll Modal */}
       {showBankrollModal && (
