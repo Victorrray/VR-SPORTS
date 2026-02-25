@@ -12,8 +12,6 @@ export function Pricing() {
         'Real-time odds from 45+ sportsbooks',
         '+EV bet finder',
         'Player Props tool',
-        'Line shopping across all books',
-        'DFS app integration (PrizePicks, Underdog)',
         'Personalized dashboard',
         'Email support'
       ]
