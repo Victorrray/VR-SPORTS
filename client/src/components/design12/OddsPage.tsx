@@ -1475,24 +1475,32 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} lg:border-r max-lg:border-t lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} lg:w-80 max-lg:w-full`}
+            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-gradient-to-b from-white to-slate-50' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-purple-500/20'} lg:rounded-none max-lg:rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} lg:w-80 max-lg:w-full shadow-2xl`}
             style={{
               zIndex: 9999,
               top: '-64px',
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-6 lg:pt-6 pb-4 space-y-4 lg:border-b border-b-0 -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-2xl`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white/95 backdrop-blur-xl' : 'bg-slate-900/95 backdrop-blur-xl'} z-10 px-6 pt-6 lg:pt-6 pb-4 space-y-4 lg:border-b border-b-0 ${isLight ? 'border-gray-200' : 'border-white/10'} -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-3xl`}>
               {/* Drag Handle - Mobile Only */}
               <div className="flex lg:hidden justify-center pt-3 pb-2 -mt-6">
-                <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-gradient-to-r from-purple-500/50 to-violet-500/50'}`}></div>
               </div>
               {/* Header */}
               <div className="flex items-center justify-between">
-                <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl`}>Filters</h3>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
+                    <Filter className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                  </div>
+                  <div>
+                    <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Filters</h3>
+                    <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Customize your view</p>
+                  </div>
+                </div>
                 <button
                   onClick={closeFilterMenu}
-                  className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                  className={`w-10 h-10 flex items-center justify-center ${isLight ? 'hover:bg-gray-100 text-gray-500' : 'hover:bg-white/10 text-white/60'} rounded-xl transition-all`}
                 >
                   <ChevronRight className="w-5 h-5 lg:block hidden" />
                   <span className="lg:hidden text-lg">✕</span>
@@ -1503,13 +1511,9 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <div className="flex lg:hidden gap-2">
                 <button
                   onClick={applyFilters}
-                  className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
-                    isLight 
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600' 
-                      : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600'
-                  }`}
+                  className="flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all text-center bg-gradient-to-r from-purple-500 to-violet-500 text-white hover:from-purple-600 hover:to-violet-600 shadow-lg shadow-purple-500/25"
                 >
-                  Apply
+                  Apply Filters
                 </button>
                 <button
                   onClick={() => {
@@ -1531,10 +1535,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       description: 'All filters have been cleared'
                     });
                   }}
-                  className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
+                  className={`px-4 py-3 rounded-xl font-bold text-sm transition-all text-center ${
                     isLight 
-                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
+                      : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
                   }`}
                 >
                   Reset
@@ -1543,21 +1547,23 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             </div>
 
             {/* Content - scrollable on both mobile and desktop */}
-            <div className="overflow-y-auto flex-1 p-6 pt-2 lg:pt-12 space-y-3 lg:space-y-5 scrollbar-hide">
+            <div className="overflow-y-auto flex-1 p-6 pt-2 lg:pt-8 space-y-4 lg:space-y-5 scrollbar-hide">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div className={!hasPlatinum ? 'opacity-50' : ''}>
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 flex items-center gap-2`}>
+                <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 flex items-center gap-2`}>
                   Auto Refresh
-                  {!hasPlatinum && <span className="text-purple-400 text-[10px] ml-1">(Platinum)</span>}
+                  {!hasPlatinum && <span className="text-purple-400 text-[10px] ml-1 normal-case">(Platinum)</span>}
                 </label>
-                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
+                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-100' : 'bg-gradient-to-r from-purple-500/10 to-violet-500/10 border border-purple-500/20'} rounded-2xl`}>
                   <div className="flex items-center gap-3 flex-1">
-                    <RefreshCw className={`w-5 h-5 ${autoRefresh && hasPlatinum ? (isLight ? 'text-purple-600' : 'text-purple-400') : (isLight ? 'text-gray-400' : 'text-white/40')}`} />
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${autoRefresh && hasPlatinum ? (isLight ? 'bg-purple-100' : 'bg-purple-500/20') : (isLight ? 'bg-gray-100' : 'bg-white/5')}`}>
+                      <RefreshCw className={`w-4 h-4 ${autoRefresh && hasPlatinum ? (isLight ? 'text-purple-600' : 'text-purple-400') : (isLight ? 'text-gray-400' : 'text-white/40')}`} />
+                    </div>
                     <div>
-                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>Auto Refresh Odds</div>
-                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs font-bold`}>
-                        {!hasPlatinum ? 'Upgrade to Platinum for auto refresh' : autoRefresh ? 'Updates every 30 seconds in background' : 'Disabled - manual refresh only'}
+                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-semibold text-sm`}>Auto Refresh Odds</div>
+                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>
+                        {!hasPlatinum ? 'Upgrade to Platinum' : autoRefresh ? 'Every 30 seconds' : 'Manual refresh only'}
                       </div>
                     </div>
                   </div>
@@ -1569,7 +1575,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       onChange={(e) => hasPlatinum && setAutoRefresh(e.target.checked)}
                       disabled={!hasPlatinum}
                     />
-                    <div className={`w-11 h-6 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500`}></div>
+                    <div className={`w-12 h-7 ${isLight ? 'bg-gray-200' : 'bg-white/10'} peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-md peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-violet-500`}></div>
                   </label>
                 </div>
               </div>
@@ -1577,12 +1583,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               {/* Minimum Data Points Slider - Hidden for arbitrage, middles, and exchanges */}
               {selectedBetType !== 'arbitrage' && selectedBetType !== 'middles' && selectedBetType !== 'exchanges' && (
                 <div>
-                  <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                  <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 block`}>
                     Minimum Data Points
                   </label>
-                  <div className={`p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl`}>
+                  <div className={`p-4 ${isLight ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100' : 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20'} rounded-2xl`}>
                     <div className="flex items-center gap-3">
-                      <span className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-xs font-bold`}>1</span>
+                      <span className={`${isLight ? 'text-gray-400' : 'text-white/30'} text-xs font-medium`}>1</span>
                       <input
                         type="range"
                         min="1"
@@ -1590,12 +1596,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         step="1"
                         value={minDataPoints}
                         onChange={(e) => setMinDataPoints(parseInt(e.target.value))}
-                        className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-purple-500`}
+                        className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-blue-500`}
                         style={{
-                          background: `linear-gradient(to right, ${isLight ? '#9333ea' : '#a855f7'} 0%, ${isLight ? '#9333ea' : '#a855f7'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
+                          background: `linear-gradient(to right, ${isLight ? '#3b82f6' : '#60a5fa'} 0%, ${isLight ? '#3b82f6' : '#60a5fa'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
                         }}
                       />
-                      <div className={`${isLight ? 'text-purple-600 bg-purple-100' : 'text-purple-300 bg-purple-500/20'} px-2 py-1 rounded-full font-bold text-sm min-w-[40px] text-center`}>
+                      <div className={`${isLight ? 'text-blue-600 bg-blue-100' : 'text-blue-300 bg-blue-500/20'} px-3 py-1.5 rounded-full font-bold text-sm min-w-[48px] text-center`}>
                         {minDataPoints === 15 ? 'MAX' : minDataPoints}
                       </div>
                     </div>
@@ -1605,13 +1611,13 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
 
               {/* Date Filter */}
               <div className="relative">
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 block`}>
                   Date
                 </label>
                 <button
                   onClick={() => setDateExpanded(!dateExpanded)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                    isLight ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-semibold text-sm transition-all ${
+                    isLight ? 'bg-white border border-gray-200 text-gray-900 hover:border-purple-300 hover:bg-purple-50/50' : 'bg-white/5 border border-white/10 text-white hover:border-purple-500/30 hover:bg-purple-500/10'
                   }`}
                 >
                   <span>
@@ -1622,7 +1628,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 
                 {/* Desktop Inline Dropdown */}
                 {dateExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200 shadow-lg' : 'bg-slate-800/95 backdrop-blur-xl border-white/10'} border rounded-2xl overflow-hidden`}>
                     {dateOptions.map((date) => (
                       <button
                         key={date.id}
@@ -1630,10 +1636,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           setSelectedDate(date.id);
                           setDateExpanded(false);
                         }}
-                        className={`w-full text-left px-4 py-3 font-bold transition-all ${
+                        className={`w-full text-left px-4 py-3 font-medium transition-all ${
                           selectedDate === date.id
                             ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
-                            : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                            : isLight ? 'text-gray-700 hover:bg-gray-50' : 'text-white/70 hover:bg-white/5'
                         }`}
                       >
                         {date.name}
@@ -1698,13 +1704,13 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
 
               {/* Sportsbooks Filter */}
               <div className="relative">
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 block`}>
+                <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 block`}>
                   Sportsbooks
                 </label>
                 <button
                   onClick={() => setSportsbooksExpanded(!sportsbooksExpanded)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-all ${
-                    isLight ? 'bg-white border border-gray-300 text-gray-900 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-semibold text-sm transition-all ${
+                    isLight ? 'bg-white border border-gray-200 text-gray-900 hover:border-emerald-300 hover:bg-emerald-50/50' : 'bg-white/5 border border-white/10 text-white hover:border-emerald-500/30 hover:bg-emerald-500/10'
                   }`}
                 >
                   <span>
@@ -1720,7 +1726,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 
                 {/* Desktop Inline Dropdown */}
                 {sportsbooksExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl overflow-hidden`}>
+                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200 shadow-lg' : 'bg-slate-800/95 backdrop-blur-xl border-white/10'} border rounded-2xl overflow-hidden`}>
                     {sportsbooksByTier
                       .filter(tierGroup => {
                         // Hide DFS & Pick'em category for straight bets, arbitrage, and middles modes
@@ -1732,7 +1738,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       .map((tierGroup, tierIndex) => (
                       <div key={tierIndex}>
                         {/* Tier Header */}
-                        <div className={`px-4 py-2 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/50'} text-xs font-bold uppercase tracking-wider`}>
+                        <div className={`px-4 py-2 ${isLight ? 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700' : 'bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-400'} text-[10px] font-bold uppercase tracking-wider`}>
                           {tierGroup.tier}
                         </div>
                         {/* Sportsbooks in this tier */}
@@ -1740,10 +1746,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           <button
                             key={book.id}
                             onClick={() => toggleSportsbookFilter(book.id)}
-                            className={`w-full text-left px-4 py-3 font-bold transition-all ${
+                            className={`w-full text-left px-4 py-3 font-medium transition-all ${
                               selectedSportsbooks.includes(book.id)
-                                ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
-                                : isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                                ? isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-300'
+                                : isLight ? 'text-gray-700 hover:bg-gray-50' : 'text-white/70 hover:bg-white/5'
                             }`}
                           >
                             {book.name}
