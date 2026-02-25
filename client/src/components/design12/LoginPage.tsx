@@ -235,10 +235,10 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
               )}
 
               {/* Tab Toggle */}
-              <div className="flex mb-6 p-1 bg-white/5 rounded-xl border border-white/10">
+              <div className="flex mb-6 p-1 bg-white/5 rounded-full border border-white/10">
                 <button
                   onClick={() => setIsLogin(true)}
-                  className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                  className={`flex-1 py-2.5 rounded-full font-semibold text-sm transition-all ${
                     isLogin ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/70'
                   }`}
                 >
@@ -246,7 +246,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
                 </button>
                 <button
                   onClick={onSignUp}
-                  className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition-all ${
+                  className={`flex-1 py-2.5 rounded-full font-semibold text-sm transition-all ${
                     !isLogin ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/70'
                   }`}
                 >

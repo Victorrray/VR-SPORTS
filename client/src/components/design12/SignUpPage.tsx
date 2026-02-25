@@ -183,29 +183,22 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
           {/* Right Side - Sign Up Form */}
           <motion.div 
             className="w-full max-w-md mx-auto lg:mx-0"
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
             {/* Mobile Back Button */}
             <button 
               onClick={onBack}
-              className="lg:hidden flex items-center gap-2 text-white/60 hover:text-white transition-colors group mb-6"
+              className="lg:hidden flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-6"
             >
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-5 h-5" />
               <span className="font-semibold">Back to home</span>
             </button>
 
-            {/* Form Card */}
-            <div className="relative">
-              {/* Glow Effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-violet-500/20 rounded-[2rem] blur-xl" />
-              
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-8 shadow-2xl">
-                {/* Gradient overlay */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500" />
-                
-                <div className="relative space-y-6">
+            {/* Simple Form Card */}
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 md:p-8">
+              <div className="space-y-6">
                   {/* Success State - Check Your Email */}
                   {signupSuccess ? (
                     <motion.div 
@@ -257,86 +250,92 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                   ) : (
                     <>
                       {/* Header */}
-                      <div className="text-center space-y-2">
-                        <motion.h3 
-                          className="text-white text-3xl font-extrabold"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                        >
+                      <div className="text-center mb-6">
+                        <h3 className="text-white text-2xl font-bold mb-2">
                           Create your account
-                        </motion.h3>
-                        <p className="text-white/50 font-medium">
+                        </h3>
+                        <p className="text-white/50 text-sm">
                           Start finding +EV bets in minutes
                         </p>
                       </div>
 
                       {/* Error Message */}
                       {error && (
-                        <motion.div 
-                          className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm text-center font-semibold flex items-center justify-center gap-2"
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                        >
-                          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
+                        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center font-medium">
                           {error}
-                        </motion.div>
+                        </div>
                       )}
 
+                      {/* Tab Toggle */}
+                      <div className="flex mb-6 p-1 bg-white/5 rounded-full border border-white/10">
+                        <button
+                          type="button"
+                          onClick={onLogin}
+                          className="flex-1 py-2.5 rounded-full font-semibold text-sm transition-all text-white/50 hover:text-white/70"
+                        >
+                          Sign In
+                        </button>
+                        <button
+                          type="button"
+                          className="flex-1 py-2.5 rounded-full font-semibold text-sm transition-all bg-purple-600 text-white"
+                        >
+                          Sign Up
+                        </button>
+                      </div>
+
                       {/* Form */}
-                      <form onSubmit={handleSubmit} className="space-y-5">
+                      <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Name */}
-                        <div className="space-y-2">
-                          <label className="text-white/80 font-semibold text-sm">First Name</label>
+                        <div>
+                          <label className="text-white/70 font-medium text-sm mb-1.5 block">First Name</label>
                           <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="John"
-                            className="w-full px-4 py-4 bg-slate-950/50 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 transition-all"
                             required
                           />
                         </div>
 
                         {/* Email */}
-                        <div className="space-y-2">
-                          <label className="text-white/80 font-semibold text-sm">Email address</label>
+                        <div>
+                          <label className="text-white/70 font-medium text-sm mb-1.5 block">Email</label>
                           <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="your@email.com"
-                            className="w-full px-4 py-4 bg-slate-950/50 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 transition-all"
                             required
                           />
                         </div>
 
                         {/* Password */}
-                        <div className="space-y-2">
-                          <label className="text-white/80 font-semibold text-sm">Password</label>
+                        <div>
+                          <label className="text-white/70 font-medium text-sm mb-1.5 block">Password</label>
                           <div className="relative">
                             <input
                               type={showPassword ? 'text' : 'password'}
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
                               placeholder="••••••••"
-                              className="w-full px-4 py-4 bg-slate-950/50 border border-white/10 rounded-2xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all font-medium pr-12"
+                              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 transition-all pr-12"
                               required
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
                             >
                               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                           </div>
-                          <p className="text-white/40 text-xs font-medium">Must be at least 8 characters</p>
+                          <p className="text-white/40 text-xs mt-1.5">Must be at least 8 characters</p>
                         </div>
 
                         {/* Terms Checkbox */}
-                        <label className="flex items-start gap-3 cursor-pointer group">
+                        <label className="flex items-start gap-3 cursor-pointer">
                           <div className="relative mt-0.5">
                             <input
                               type="checkbox"
@@ -344,51 +343,44 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                               onChange={(e) => setAgreedToTerms(e.target.checked)}
                               className="sr-only peer"
                             />
-                            <div className="w-5 h-5 rounded-md border-2 border-white/20 bg-slate-950/50 peer-checked:bg-gradient-to-br peer-checked:from-purple-500 peer-checked:to-violet-600 peer-checked:border-transparent transition-all flex items-center justify-center group-hover:border-purple-400/50">
+                            <div className="w-4 h-4 rounded border border-white/20 bg-white/5 peer-checked:bg-purple-600 peer-checked:border-transparent transition-all flex items-center justify-center">
                               {agreedToTerms && (
-                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
                               )}
                             </div>
                           </div>
-                          <span className="text-white/50 text-xs font-medium leading-relaxed">
+                          <span className="text-white/50 text-xs leading-relaxed">
                             I agree to the{' '}
-                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Terms of Service</a>
-                            {' '}and{' '}
-                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Privacy Policy</a>
+                            <a href="/terms" className="text-purple-400 hover:text-purple-300">Terms</a>
+                            {' & '}
+                            <a href="/privacy" className="text-purple-400 hover:text-purple-300">Privacy Policy</a>
                           </span>
                         </label>
 
                         {/* Submit Button */}
-                        <motion.button
+                        <button
                           type="submit"
                           disabled={isLoading || !agreedToTerms}
-                          className={`w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white py-4 rounded-2xl transition-all font-bold text-center shadow-xl shadow-purple-500/25 flex items-center justify-center gap-2 group ${!agreedToTerms ? 'opacity-50 cursor-not-allowed' : 'hover:from-purple-500 hover:to-violet-500'} disabled:opacity-50 disabled:cursor-not-allowed`}
-                          whileHover={agreedToTerms ? { scale: 1.01 } : {}}
-                          whileTap={agreedToTerms ? { scale: 0.99 } : {}}
+                          className="w-full bg-purple-600 hover:bg-purple-500 text-white py-3.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
                         >
-                          {isLoading ? 'Creating account...' : agreedToTerms ? 'Create your account' : 'Agree to terms to continue'}
-                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </motion.button>
+                          {isLoading ? 'Creating account...' : 'Create Account'}
+                        </button>
 
                         {/* Divider */}
-                        <div className="relative flex items-center justify-center gap-4">
-                          <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/20"></div>
-                          <span className="text-white/40 font-medium text-xs tracking-wider uppercase">
-                            or continue with
-                          </span>
-                          <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/20"></div>
+                        <div className="flex items-center gap-3 py-2">
+                          <div className="flex-1 h-px bg-white/10"></div>
+                          <span className="text-white/40 text-xs">or</span>
+                          <div className="flex-1 h-px bg-white/10"></div>
                         </div>
 
                         {/* Google Sign Up */}
-                        <motion.button
+                        <button
                           type="button"
                           onClick={handleGoogleSignIn}
                           disabled={isLoading}
-                          className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white hover:bg-white/10 hover:border-white/20 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.99 }}
+                          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -397,23 +389,22 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                           </svg>
                           {isLoading ? 'Signing up...' : 'Continue with Google'}
-                        </motion.button>
+                        </button>
 
                         {/* Login Link */}
-                        <div className="text-center pt-2">
-                          <span className="text-white/50 font-medium text-sm">Already have an account? </span>
+                        <p className="text-center text-white/40 text-xs pt-2">
+                          Already have an account?{' '}
                           <button
                             type="button"
                             onClick={onLogin}
-                            className="text-purple-400 hover:text-purple-300 font-bold text-sm transition-colors"
+                            className="text-purple-400 hover:text-purple-300 font-medium"
                           >
                             Sign in
                           </button>
-                        </div>
+                        </p>
                       </form>
                     </>
                   )}
-                </div>
               </div>
             </div>
           </motion.div>
