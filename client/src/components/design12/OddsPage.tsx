@@ -1344,8 +1344,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date */}
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
-                isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+              className={`flex items-center gap-2 h-10 px-4 rounded-lg transition-all font-semibold whitespace-nowrap text-sm ${
+                isLight 
+                  ? 'bg-purple-50 border border-purple-200 text-purple-700 hover:bg-purple-100' 
+                  : 'bg-purple-500/15 border border-purple-500/30 text-purple-300 hover:bg-purple-500/25'
               }`}
             >
               <Filter className="w-4 h-4" />
@@ -1375,10 +1377,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 }
               }}
               disabled={isLoading}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
+              className={`flex items-center gap-2 h-10 px-4 rounded-lg transition-all font-semibold whitespace-nowrap text-sm ${
                 isLoading
-                  ? isLight ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/40 cursor-not-allowed'
-                  : isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                  ? isLight ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white/5 text-white/30 cursor-not-allowed'
+                  : isLight ? 'bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100' : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -1386,70 +1388,70 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             </button>
 
             {/* Pagination Controls - Mobile only */}
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex md:hidden items-center gap-1.5">
               <button 
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
-                className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
                   currentPage === 1
-                    ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                    : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
+                    : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
                 }`}
               >
-                <ChevronRight className="w-5 h-5 rotate-180" />
+                <ChevronRight className="w-4 h-4 rotate-180" />
               </button>
               
-              <div className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-white border-gray-300' : 'bg-white/5 border-white/10'} backdrop-blur-2xl border rounded-xl`}>
-                <span className={`${isLight ? 'text-gray-700' : 'text-white'} font-bold text-sm whitespace-nowrap`}>
-                  {currentPage} / {totalPages}
+              <div className={`flex items-center h-10 px-3 rounded-lg ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/5 text-white/60'}`}>
+                <span className="font-semibold text-sm whitespace-nowrap">
+                  {currentPage}/{totalPages}
                 </span>
               </div>
 
               <button 
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
-                className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
                   currentPage === totalPages
-                    ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                    : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
+                    : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
                 }`}
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Pagination Controls - Desktop only */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1.5">
           <button 
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
-            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
               currentPage === 1
-                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
+                : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
             }`}
           >
-            <ChevronRight className="w-5 h-5 rotate-180" />
+            <ChevronRight className="w-4 h-4 rotate-180" />
           </button>
           
-          <div className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-white border-gray-300' : 'bg-white/5 border-white/10'} backdrop-blur-2xl border rounded-xl`}>
-            <span className={`${isLight ? 'text-gray-700' : 'text-white'} font-bold text-sm whitespace-nowrap`}>
-              {currentPage} / {totalPages}
+          <div className={`flex items-center h-10 px-3 rounded-lg ${isLight ? 'bg-slate-100 text-slate-600' : 'bg-white/5 text-white/60'}`}>
+            <span className="font-semibold text-sm whitespace-nowrap">
+              {currentPage}/{totalPages}
             </span>
           </div>
 
           <button 
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
-            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+            className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all ${
               currentPage === totalPages
-                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                ? isLight ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-white/5 text-white/20 cursor-not-allowed'
+                : isLight ? 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100' : 'bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25'
             }`}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
