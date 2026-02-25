@@ -17,9 +17,9 @@ export function Footer({ onRoadmapClick, onPrivacyClick, onTermsClick, onDisclai
       </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10 py-16 md:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-8 mb-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-8 mb-12">
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2">
             <motion.div 
               className="flex items-center gap-3 mb-5"
               initial={{ opacity: 0, y: 10 }}
