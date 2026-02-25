@@ -16,6 +16,7 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   
   const { signInWithGoogle, signUp } = useAuth();
 
@@ -337,12 +338,12 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                         {/* Submit Button */}
                         <motion.button
                           type="submit"
-                          disabled={isLoading}
-                          className="w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white py-4 rounded-2xl hover:from-purple-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold text-center shadow-xl shadow-purple-500/25 flex items-center justify-center gap-2 group"
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.99 }}
+                          disabled={isLoading || !agreedToTerms}
+                          className={`w-full bg-gradient-to-r from-purple-600 to-violet-600 text-white py-4 rounded-2xl transition-all font-bold text-center shadow-xl shadow-purple-500/25 flex items-center justify-center gap-2 group ${!agreedToTerms ? 'opacity-50 cursor-not-allowed' : 'hover:from-purple-500 hover:to-violet-500'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                          whileHover={agreedToTerms ? { scale: 1.01 } : {}}
+                          whileTap={agreedToTerms ? { scale: 0.99 } : {}}
                         >
-                          {isLoading ? 'Creating account...' : 'Create your account'}
+                          {isLoading ? 'Creating account...' : agreedToTerms ? 'Create your account' : 'Agree to terms to continue'}
                           <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </motion.button>
 
@@ -373,13 +374,30 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
                           {isLoading ? 'Signing up...' : 'Continue with Google'}
                         </motion.button>
 
-                        {/* Terms */}
-                        <p className="text-center text-white/40 text-xs font-medium">
-                          By continuing, you agree to our{' '}
-                          <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors">Terms of Service</a>
-                          {' '}and{' '}
-                          <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors">Privacy Policy</a>
-                        </p>
+                        {/* Terms Checkbox */}
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                          <div className="relative mt-0.5">
+                            <input
+                              type="checkbox"
+                              checked={agreedToTerms}
+                              onChange={(e) => setAgreedToTerms(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-5 h-5 rounded-md border-2 border-white/20 bg-slate-950/50 peer-checked:bg-gradient-to-br peer-checked:from-purple-500 peer-checked:to-violet-600 peer-checked:border-transparent transition-all flex items-center justify-center group-hover:border-purple-400/50">
+                              {agreedToTerms && (
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-white/50 text-xs font-medium leading-relaxed">
+                            I agree to the{' '}
+                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Terms of Service</a>
+                            {' '}and{' '}
+                            <a href="#" className="text-purple-400 hover:text-purple-300 transition-colors" onClick={(e) => e.stopPropagation()}>Privacy Policy</a>
+                          </span>
+                        </label>
 
                         {/* Login Link */}
                         <div className="text-center pt-2">
