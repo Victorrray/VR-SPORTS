@@ -6,7 +6,6 @@ import {
   CreditCard,
   Settings,
   Shield,
-  Bell,
   LogOut,
   Lock,
   Star,
@@ -15,8 +14,8 @@ import {
   Eye,
   EyeOff,
   Headphones,
-  MessageCircle,
   FileText,
+  ChevronRight,
 } from "lucide-react";
 import { useState } from 'react';
 import { useTheme, lightModeColors } from '../../contexts/ThemeContext';
@@ -25,6 +24,7 @@ import { useMe } from '../../hooks/useMe';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
 import { apiClient } from '../../utils/apiClient';
+import { motion } from 'framer-motion';
 
 interface AccountPageProps {
   onNavigateToSettings?: () => void;
@@ -129,67 +129,77 @@ export function AccountPage({
     <div className="space-y-6 relative">
       {/* Settings Icon - Top Right */}
       {onNavigateToSettings && (
-        <button
+        <motion.button
           onClick={onNavigateToSettings}
-          className={`absolute top-0 right-0 p-2.5 ${isLight ? 'bg-purple-100 border-purple-300 text-purple-700' : 'bg-purple-500/20 border-purple-400/30 text-purple-300'} backdrop-blur-xl border rounded-xl ${isLight ? 'hover:bg-purple-200' : 'hover:bg-purple-500/40'} transition-all z-10`}
+          className="absolute top-0 right-0 p-2.5 bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/30 text-purple-300 backdrop-blur-xl border rounded-xl hover:bg-purple-500/30 transition-all z-10"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <Settings className="w-5 h-5" />
-        </button>
+        </motion.button>
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <motion.div 
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <div>
-          <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-2xl md:text-3xl font-bold`}>
-            Account Settings
+          <h1 className="text-white text-2xl md:text-3xl font-extrabold tracking-tight">
+            Account{' '}
+            <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+              Settings
+            </span>
           </h1>
-          <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold`}>
+          <p className="text-white/50 font-medium">
             Manage your profile and subscription
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Profile Section */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
+      <motion.div 
+        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        {/* Accent bar */}
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-600 rounded-l-2xl" />
+        
         <div className="flex items-center justify-between mb-6">
-          <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2`}>
-            <User className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+          <h2 className="text-white font-bold flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+              <User className="w-4 h-4 text-white" />
+            </div>
             Profile Information
           </h2>
-          
         </div>
 
         <div className="flex items-center gap-6 mb-6">
-          <div className={`w-20 h-20 rounded-2xl ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/30 border-purple-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
-            <User className={`w-10 h-10 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/30 to-violet-500/30 border border-purple-400/30 flex items-center justify-center">
+            <User className="w-10 h-10 text-purple-300" />
           </div>
           <div className="flex-1">
-            <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} text-xl font-bold mb-1`}>
+            <h3 className="text-white text-xl font-bold mb-2">
               {profile?.username || user?.email?.split('@')[0] || 'User'}
             </h3>
             <div className="flex items-center gap-2">
-              <div className={`px-3 py-1 ${
+              <div className={`px-3 py-1.5 ${
                 isPlatinum 
-                  ? (isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30')
+                  ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30'
                   : isGold
-                    ? (isLight ? 'bg-yellow-100 border-yellow-200' : 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/30')
-                    : (isLight ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 border-gray-400/30')
-              } border rounded-full backdrop-blur-xl`}>
+                    ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/30'
+                    : 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 border-gray-400/30'
+              } border rounded-full`}>
                 <div className="flex items-center gap-1.5">
                   <PlanIcon className={`w-4 h-4 ${
-                    isPlatinum 
-                      ? (isLight ? 'text-amber-600' : 'text-amber-400')
-                      : isGold
-                        ? (isLight ? 'text-yellow-600' : 'text-yellow-400')
-                        : (isLight ? 'text-gray-600' : 'text-gray-400')
+                    isPlatinum ? 'text-amber-400' : isGold ? 'text-yellow-400' : 'text-gray-400'
                   }`} />
                   <span className={`${
-                    isPlatinum 
-                      ? (isLight ? 'text-amber-700' : 'text-amber-400')
-                      : isGold
-                        ? (isLight ? 'text-yellow-700' : 'text-yellow-400')
-                        : (isLight ? 'text-gray-700' : 'text-gray-400')
-                  } font-bold text-sm`}>
+                    isPlatinum ? 'text-amber-400' : isGold ? 'text-yellow-400' : 'text-gray-400'
+                  } font-semibold text-sm`}>
                     {meLoading ? 'Loading...' : planDisplayName}
                   </span>
                 </div>
@@ -199,55 +209,52 @@ export function AccountPage({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
+          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-3 mb-2">
-              <Mail className={`w-4 h-4 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold uppercase tracking-wide`}>
-                Email
-              </span>
+              <Mail className="w-4 h-4 text-purple-400" />
+              <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Email</span>
             </div>
             <div className="flex items-center justify-between">
-              <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+              <p className="text-white font-medium">
                 {showEmail ? (user?.email || 'Not available') : maskEmail(user?.email || '')}
               </p>
               <button
                 onClick={() => setShowEmail(!showEmail)}
-                className={`p-1.5 rounded-lg transition-colors ${
-                  isLight 
-                    ? 'hover:bg-gray-200 text-gray-500' 
-                    : 'hover:bg-white/10 text-white/50'
-                }`}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 transition-colors"
                 title={showEmail ? 'Hide email' : 'Show email'}
               >
-                {showEmail ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showEmail ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <div className={`p-4 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10'} backdrop-blur-xl rounded-xl border`}>
+          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-3 mb-2">
-              <Calendar className={`w-4 h-4 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-              <span className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold uppercase tracking-wide`}>
-                Member Since
-              </span>
+              <Calendar className="w-4 h-4 text-purple-400" />
+              <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Member Since</span>
             </div>
-            <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+            <p className="text-white font-medium">
               {me?.created_at 
                 ? new Date(me.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
                 : 'Not available'}
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Billing & Subscription Section */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6 shadow-xl`}>
-        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
-          <CreditCard className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+      <motion.div 
+        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-500 to-emerald-600 rounded-l-2xl" />
+        
+        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+            <CreditCard className="w-4 h-4 text-white" />
+          </div>
           Billing & Subscription
         </h2>
 
@@ -402,113 +409,141 @@ export function AccountPage({
             </button>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Settings Section */}
-      
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-[16px] p-6`}>
-        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
-          <Shield className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+      {/* Security Section */}
+      <motion.div 
+        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-600 rounded-l-2xl" />
+        
+        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+            <Shield className="w-4 h-4 text-white" />
+          </div>
           Security & Privacy
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <button 
             onClick={handlePasswordReset}
             disabled={passwordResetLoading}
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left disabled:opacity-50`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left disabled:opacity-50"
           >
             <div className="flex items-center gap-3">
               {passwordResetLoading ? (
-                <Loader2 className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'} animate-spin`} />
+                <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
               ) : (
-                <Lock className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                <Lock className="w-5 h-5 text-blue-400" />
               )}
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>
+                <div className="text-white font-semibold">
                   {passwordResetLoading ? 'Sending...' : 'Change Password'}
                 </div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                <div className="text-white/50 text-sm">
                   {passwordResetLoading ? 'Please wait...' : 'Send password reset email'}
                 </div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </button>
 
-          {/* Sign Out Button */}
           <button 
             onClick={onSignOut}
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left"
           >
             <div className="flex items-center gap-3">
-              <LogOut className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <LogOut className="w-5 h-5 text-blue-400" />
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Sign Out</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Log out of your account</div>
+                <div className="text-white font-semibold">Sign Out</div>
+                <div className="text-white/50 text-sm">Log out of your account</div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Support Section */}
-      <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-[16px] p-6`}>
-        <h2 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold flex items-center gap-2 mb-6`}>
-          <Headphones className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+      <motion.div 
+        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-500 to-orange-600 rounded-l-2xl" />
+        
+        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <Headphones className="w-4 h-4 text-white" />
+          </div>
           Support
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <a 
             href="mailto:support@oddsightseer.com"
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
           >
             <div className="flex items-center gap-3">
-              <Mail className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <Mail className="w-5 h-5 text-amber-400" />
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Contact Support</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>support@oddsightseer.com</div>
+                <div className="text-white font-semibold">Contact Support</div>
+                <div className="text-white/50 text-sm">support@oddsightseer.com</div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </a>
 
           <a 
             href="/roadmap"
-            className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left`}
+            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
           >
             <div className="flex items-center gap-3">
-              <FileText className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <FileText className="w-5 h-5 text-amber-400" />
               <div>
-                <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Feature Roadmap</div>
-                <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>See what's coming next</div>
+                <div className="text-white font-semibold">Feature Roadmap</div>
+                <div className="text-white/50 text-sm">See what's coming next</div>
               </div>
             </div>
-            <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+            <ChevronRight className="w-5 h-5 text-white/40" />
           </a>
         </div>
-      </div>
+      </motion.div>
 
       {/* Danger Zone */}
-      <div className={`${isLight ? 'bg-red-50 border-red-200' : 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent border-red-400/30'} backdrop-blur-2xl border rounded-2xl p-6`}>
-        <h2 className={`${isLight ? 'text-red-600' : 'text-red-400'} font-bold mb-4`}>
+      <motion.div 
+        className="relative bg-gradient-to-br from-red-500/10 to-red-500/5 backdrop-blur-xl border border-red-500/20 rounded-2xl p-6 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-red-500 to-rose-600 rounded-l-2xl" />
+        
+        <h2 className="text-red-400 font-bold flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center">
+            <Shield className="w-4 h-4 text-white" />
+          </div>
           Danger Zone
         </h2>
         <div className="space-y-3">
           <button 
             onClick={onNavigateToCancelSubscription}
-            className={`w-full px-4 py-3 ${isLight ? 'bg-red-100 border-red-300 text-red-600 hover:bg-red-200' : 'bg-red-500/10 border-red-400/30 text-red-400 hover:bg-red-500/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
+            className="w-full px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl transition-all font-semibold text-sm"
+          >
             Cancel Subscription
           </button>
           <button 
             onClick={onNavigateToDeleteAccount}
-            className={`w-full px-4 py-3 ${isLight ? 'bg-red-100 border-red-300 text-red-600 hover:bg-red-200' : 'bg-red-500/10 border-red-400/30 text-red-400 hover:bg-red-500/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}>
+            className="w-full px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl transition-all font-semibold text-sm"
+          >
             Delete Account
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
