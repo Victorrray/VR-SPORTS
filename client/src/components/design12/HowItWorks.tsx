@@ -1,7 +1,11 @@
 import { UserPlus, Settings, Sparkles, ChevronRight, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function HowItWorks() {
+interface HowItWorksProps {
+  onSignIn?: () => void;
+}
+
+export function HowItWorks({ onSignIn }: HowItWorksProps = {}) {
   const steps = [
     {
       number: 1,
@@ -151,6 +155,14 @@ export function HowItWorks() {
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </motion.button>
+            
+            <motion.button
+              onClick={onSignIn}
+              className="text-white/60 hover:text-white font-semibold text-sm transition-colors"
+              whileHover={{ scale: 1.02 }}
+            >
+              Already have an account? <span className="text-purple-400 hover:text-purple-300">Sign In</span>
             </motion.button>
           </motion.div>
         </div>
