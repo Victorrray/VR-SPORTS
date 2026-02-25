@@ -289,7 +289,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
       <div className="relative flex min-h-screen">
         {/* Sidebar */}
-        <aside className={`hidden lg:flex lg:flex-col w-64 sticky top-0 h-screen ${isLight ? 'bg-white border-gray-200' : 'bg-slate-950/80 border-white/5'} border-r`}>
+        <aside className={`hidden lg:flex lg:flex-col w-64 fixed top-0 left-0 h-screen z-40 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-950/80 border-white/5'} border-r`}>
           <div className="flex-1 flex flex-col">
             {/* Logo/Brand */}
             <div className={`px-5 py-6 border-b ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
@@ -496,7 +496,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto lg:ml-64">
           <div className="px-3 lg:px-8 py-4 lg:py-8 space-y-6 lg:space-y-8 pb-24 lg:pb-8">
             {/* Conditional Content Rendering */}
             {currentView === "dashboard" && (
