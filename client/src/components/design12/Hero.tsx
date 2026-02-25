@@ -106,13 +106,13 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             {/* Large Headline with Gradient */}
             <h1 className="mb-6 leading-[1.05] font-extrabold tracking-tight">
               <span className="text-white block" style={{fontSize: 'clamp(2.5rem, 7vw, 4.5rem)'}}>
-                🔥 Stop Leaving
+                Bet smarter,
               </span>
               <span 
                 className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent block"
                 style={{fontSize: 'clamp(2.5rem, 7vw, 4.5rem)'}}
               >
-                Money on the Table
+                Win more.
               </span>
             </h1>
             

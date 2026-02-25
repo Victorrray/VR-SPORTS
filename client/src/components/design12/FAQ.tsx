@@ -1,6 +1,6 @@
-import { Plus, Minus, HelpCircle } from 'lucide-react';
+import { Plus, Minus, HelpCircle, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -16,11 +16,11 @@ export function FAQ() {
     },
     {
       question: 'How does OddSightSeer find +EV bets?',
-      answer: 'Our proprietary algorithm scans odds across 40+ sportsbooks in real-time, calculates true probability, and identifies bets where the implied odds are in your favor.',
+      answer: 'Our proprietary algorithm scans odds across 45+ sportsbooks in real-time, calculates true probability, and identifies bets where the implied odds are in your favor.',
     },
     {
       question: 'What\'s the difference between Gold and Platinum?',
-      answer: 'Gold ($10/mo) includes access to all 40+ sportsbooks, +EV finder, and player props tool. Platinum ($25/mo) adds arbitrage opportunities, middles tool, and live betting markets.',
+      answer: 'Gold ($10/mo) includes access to all 45+ sportsbooks, +EV finder, and player props tool. Platinum ($25/mo) adds arbitrage opportunities, middles tool, and live betting markets.',
     },
     {
       question: 'Can I cancel my subscription anytime?',
@@ -37,29 +37,39 @@ export function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-16 md:py-24">
-      <div className="container mx-auto px-4 md:px-6">
+    <section id="faq" className="relative py-20 md:py-28 overflow-hidden bg-slate-950">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Header */}
         <motion.div 
-          className="text-center mb-12 md:mb-16 max-w-3xl mx-auto"
+          className="text-center mb-14 md:mb-20 max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full mb-6">
-            <HelpCircle className="w-4 h-4 text-white" />
-            <span className="text-white font-bold">FAQ</span>
-          </div>
+          <motion.div 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-violet-500/20 border border-purple-400/30 rounded-full mb-6"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+          >
+            <HelpCircle className="w-4 h-4 text-purple-400" />
+            <span className="text-purple-300 text-sm font-semibold">FAQ</span>
+          </motion.div>
           
-          <h2 className="text-white text-3xl md:text-5xl mb-4 font-bold">
+          <h2 className="text-white text-3xl md:text-5xl lg:text-6xl mb-6 font-extrabold tracking-tight">
             Frequently Asked{' '}
-            <span className="bg-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
               Questions
             </span>
           </h2>
           
-          <p className="text-white/60 text-lg font-semibold">
+          <p className="text-white/60 text-lg md:text-xl font-medium">
             Everything you need to know about OddSightSeer
           </p>
         </motion.div>
@@ -72,7 +82,9 @@ export function FAQ() {
             return (
               <motion.div
                 key={index}
-                className="group bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden hover:border-white/20 transition-all duration-300"
+                className={`group bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-300 ${
+                  isOpen ? 'border-purple-400/50 shadow-lg shadow-purple-500/10' : 'border-white/10 hover:border-white/20'
+                }`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -83,49 +95,69 @@ export function FAQ() {
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="w-full px-6 md:px-8 py-5 md:py-6 flex items-center justify-between gap-4 text-left hover:bg-white/5 transition-colors"
                 >
-                  <span className="text-white text-lg md:text-xl font-bold pr-4">
+                  <span className="text-white text-base md:text-lg font-bold pr-4">
                     {faq.question}
                   </span>
                   
-                  <div className={`flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-500 flex items-center justify-center transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                  <motion.div 
+                    className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                      isOpen ? 'bg-gradient-to-br from-purple-500 to-violet-600' : 'bg-white/10'
+                    }`}
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     {isOpen ? (
                       <Minus className="w-5 h-5 text-white" />
                     ) : (
-                      <Plus className="w-5 h-5 text-white" />
+                      <Plus className="w-5 h-5 text-white/70" />
                     )}
-                  </div>
+                  </motion.div>
                 </button>
 
                 {/* Answer */}
-                <div
-                  className={`overflow-hidden transition-all duration-300 ${
-                    isOpen ? 'max-h-96' : 'max-h-0'
-                  }`}
-                >
-                  <div className="px-6 md:px-8 pb-5 md:pb-6 pt-2">
-                    <div className="border-t border-white/10 pt-4">
-                      <p className="text-white/70 leading-relaxed font-semibold">
-                        {faq.answer}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-6 md:px-8 pb-6">
+                        <div className="border-t border-white/10 pt-4">
+                          <p className="text-white/70 leading-relaxed font-medium">
+                            {faq.answer}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             );
           })}
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-12 text-center">
-          <p className="text-white/60 mb-4 font-semibold">Still have questions?</p>
-          <button 
+        <motion.div 
+          className="mt-14 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+        >
+          <p className="text-white/50 mb-5 font-medium">Still have questions?</p>
+          <motion.button 
             onClick={() => window.location.href = 'mailto:support@oddsightseer.com'}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 hover:border-white/20 rounded-full transition-all font-bold text-white"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-br from-white/10 to-white/5 hover:from-white/15 hover:to-white/10 backdrop-blur-sm border border-white/20 hover:border-purple-400/50 rounded-2xl transition-all font-bold text-white shadow-xl"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <HelpCircle className="w-5 h-5" />
+            <MessageCircle className="w-5 h-5 text-purple-400" />
             <span>Contact Support</span>
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </div>
     </section>
   );
