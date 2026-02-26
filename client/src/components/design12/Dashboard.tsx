@@ -591,22 +591,22 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe px-4 pb-4">
-        <div className={`${isLight ? 'bg-white/80 border-gray-200' : 'bg-slate-950/60 border-white/10'} backdrop-blur-xl border rounded-full px-2 py-2.5`}>
-          <div className="flex items-center justify-around gap-1">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe px-3 pb-3">
+        <div className={`${isLight ? 'bg-white/90 border-gray-200/50 shadow-lg' : 'bg-gradient-to-r from-slate-900/95 via-slate-900/95 to-slate-900/95 border-white/5 shadow-2xl shadow-purple-500/10'} backdrop-blur-2xl border rounded-2xl px-2 py-2`}>
+          <div className="flex items-center justify-around">
             <button
               onClick={() => setCurrentView("dashboard")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
                 currentView === "dashboard"
-                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
+                  ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
+                  : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
               }`}
             >
               <Home
-                className={`w-5 h-5 ${currentView === "dashboard" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
+                className={`w-5 h-5 ${currentView === "dashboard" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
               />
               <span
-                className={`text-[10px] font-bold ${currentView === "dashboard" ? isLight ? "text-purple-900" : "text-white" : ""}`}
+                className={`text-[10px] font-semibold ${currentView === "dashboard" ? isLight ? "text-purple-700" : "text-white" : ""}`}
               >
                 Home
               </span>
@@ -614,53 +614,53 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             {/* Odds button - grayed out for free users, redirects to subscription */}
             <button
               onClick={() => hasPaidPlan ? setCurrentView("odds") : setCurrentView("changePlan")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
                 !hasPaidPlan
-                  ? isLight ? "text-gray-400 opacity-50" : "text-white/30 opacity-50"
+                  ? isLight ? "text-gray-300" : "text-white/20"
                   : currentView === "odds"
-                    ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
-                    : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
+                    ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
+                    : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
               }`}
             >
               <Zap
-                className={`w-5 h-5 ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
+                className={`w-5 h-5 ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
               />
               <span
-                className={`text-[10px] font-bold ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-900" : "text-white" : ""}`}
+                className={`text-[10px] font-semibold ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-700" : "text-white" : ""}`}
               >
                 Odds
               </span>
             </button>
             <button
               onClick={() => setCurrentView("calculator")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
                 currentView === "calculator"
-                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
+                  ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
+                  : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
               }`}
             >
               <Calculator
-                className={`w-5 h-5 ${currentView === "calculator" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
+                className={`w-5 h-5 ${currentView === "calculator" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
               />
               <span
-                className={`text-[10px] font-bold ${currentView === "calculator" ? isLight ? "text-purple-900" : "text-white" : ""}`}
+                className={`text-[10px] font-semibold ${currentView === "calculator" ? isLight ? "text-purple-700" : "text-white" : ""}`}
               >
                 Calc
               </span>
             </button>
             <button
               onClick={() => setCurrentView("account")}
-              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-full ${
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
                 currentView === "account"
-                  ? isLight ? "bg-purple-100 border border-purple-300" : "bg-purple-500/20 backdrop-blur-xl border border-purple-400/30"
-                  : isLight ? "text-gray-600 hover:bg-gray-100" : "text-white/60 hover:bg-white/10"
+                  ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
+                  : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
               }`}
             >
               <User
-                className={`w-5 h-5 ${currentView === "account" ? isLight ? "text-purple-600" : "text-purple-300" : ""}`}
+                className={`w-5 h-5 ${currentView === "account" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
               />
               <span
-                className={`text-[10px] font-bold ${currentView === "account" ? isLight ? "text-purple-900" : "text-white" : ""}`}
+                className={`text-[10px] font-semibold ${currentView === "account" ? isLight ? "text-purple-700" : "text-white" : ""}`}
               >
                 Account
               </span>
