@@ -294,7 +294,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             {/* Logo/Brand - Compact */}
             <div className="px-4 py-5">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center">
                   <span className="text-white font-bold text-xs">OS</span>
                 </div>
                 <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>OddSightSeer</span>
