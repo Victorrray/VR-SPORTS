@@ -1344,7 +1344,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date */}
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-              className={`flex items-center gap-2 h-10 px-4 border rounded-lg transition-colors text-sm ${
+              className={`flex items-center gap-2 h-10 px-5 border rounded-full transition-colors text-sm ${
                 isLight 
                   ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' 
                   : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
@@ -1377,7 +1377,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 }
               }}
               disabled={isLoading}
-              className={`flex items-center gap-2 h-10 px-4 border rounded-lg transition-colors text-sm ${
+              className={`flex items-center gap-2 h-10 px-5 border rounded-full transition-colors text-sm ${
                 isLoading
                   ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                   : isLight ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
@@ -1392,7 +1392,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <button 
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
-                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
                   currentPage === 1
                     ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                     : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -1401,7 +1401,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <ChevronRight className="w-4 h-4 rotate-180" />
               </button>
               
-              <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+              <div className={`flex items-center h-9 px-3 border rounded-full ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
                 <span className="text-sm whitespace-nowrap">
                   {currentPage}/{totalPages}
                 </span>
@@ -1410,7 +1410,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <button 
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
-                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
                   currentPage === totalPages
                     ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                     : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -1436,7 +1436,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             <ChevronRight className="w-4 h-4 rotate-180" />
           </button>
           
-          <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+          <div className={`flex items-center h-9 px-3 border rounded-full ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
             <span className="text-sm whitespace-nowrap">
               {currentPage}/{totalPages}
             </span>
@@ -1462,7 +1462,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           {/* Backdrop - Desktop only (to the right of panel) */}
           <div 
             className={`hidden lg:block fixed right-0 bottom-0 bg-black/40 z-[9998] transition-all ${isFilterClosing ? 'opacity-0 duration-150' : 'opacity-100 duration-500 delay-100'}`}
-            style={{ left: '320px', top: '-24px' }}
+            style={{ left: '320px', top: '0' }}
             onClick={closeFilterMenu}
           />
           
@@ -1478,7 +1478,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl`}
             style={{
               zIndex: 9999,
-              top: '-64px',
+              top: '0',
             }}
           >
             {/* Sticky Header */}
@@ -1503,7 +1503,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <div className="flex lg:hidden gap-2">
                 <button
                   onClick={applyFilters}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm transition-colors text-center bg-purple-600 text-white hover:bg-purple-500"
+                  className="flex-1 px-4 py-2.5 rounded-full text-sm transition-colors text-center bg-purple-600 text-white hover:bg-purple-500"
                 >
                   Apply Filters
                 </button>
@@ -1527,7 +1527,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       description: 'All filters have been cleared'
                     });
                   }}
-                  className={`px-4 py-2.5 rounded-lg text-sm transition-colors text-center ${
+                  className={`px-4 py-2.5 rounded-full text-sm transition-colors text-center ${
                     isLight 
                       ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
                       : 'bg-white/5 text-white/60 hover:bg-white/10'
@@ -1606,7 +1606,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 </label>
                 <button
                   onClick={() => setDateExpanded(!dateExpanded)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-sm transition-colors ${
                     isLight ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white/80 hover:bg-white/10'
                   }`}
                 >
@@ -1618,7 +1618,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 
                 {/* Desktop Inline Dropdown */}
                 {dateExpanded && (
-                  <div className={`hidden lg:block mt-1.5 ${isLight ? 'bg-white border-gray-200 shadow-lg' : 'bg-slate-900 border-white/10'} border rounded-lg overflow-hidden`}>
+                  <div className={`hidden lg:block mt-1.5 ${isLight ? 'bg-white border-gray-200 shadow-lg' : 'bg-slate-900 border-white/10'} border rounded-2xl overflow-hidden`}>
                     {dateOptions.map((date) => (
                       <button
                         key={date.id}
@@ -1699,7 +1699,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 </label>
                 <button
                   onClick={() => setSportsbooksExpanded(!sportsbooksExpanded)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-semibold text-sm transition-all ${
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full font-semibold text-sm transition-all ${
                     isLight ? 'bg-white border border-gray-200 text-gray-900 hover:border-purple-300 hover:bg-purple-50/50' : 'bg-white/5 border border-white/10 text-white hover:border-purple-500/30 hover:bg-purple-500/10'
                   }`}
                 >
