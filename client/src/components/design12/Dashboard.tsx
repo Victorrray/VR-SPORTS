@@ -294,10 +294,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             {/* Logo/Brand - Compact */}
             <div className="px-4 py-5">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
                   <span className="text-white font-bold text-xs">OS</span>
                 </div>
                 <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>OddSightSeer</span>
+              </div>
+              {/* Plan Badge */}
+              <div className={`flex items-center gap-2 px-3 py-1.5 mt-3 rounded-full ${isLight ? 'bg-gray-50' : 'bg-white/5'}`}>
+                <PlanIcon className={`w-3.5 h-3.5 ${planConfig.color}`} />
+                <span className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-white/70'}`}>{planConfig.label} Plan</span>
               </div>
             </div>
 
@@ -458,12 +463,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
             {/* User & Settings - Bottom */}
             <div className={`px-3 py-3 border-t ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
-              {/* Plan Badge */}
-              <div className={`flex items-center gap-2 px-3 py-2 mb-2 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-white/5'}`}>
-                <PlanIcon className={`w-4 h-4 ${planConfig.color}`} />
-                <span className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-white/70'}`}>{planConfig.label} Plan</span>
-              </div>
-              
               <div className="space-y-0.5">
                 <button
                   onClick={() => setCurrentView("account")}
