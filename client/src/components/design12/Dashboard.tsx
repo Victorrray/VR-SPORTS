@@ -504,53 +504,66 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             {currentView === "dashboard" && (
               <>
                 {/* Header Section */}
-                <div className="space-y-4 lg:space-y-6">
-                  <div>
-                    <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2`}>
-                      Welcome back, {profile?.username || user?.email?.split('@')[0] || 'User'}!
-                    </h1>
-                    <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold text-sm md:text-base`}>
-                      Here are your recommended picks for today
-                    </p>
+                <div className="space-y-6">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
+                        <span className="text-2xl">👋</span>
+                      </div>
+                      <div>
+                        <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-xl md:text-2xl lg:text-3xl font-bold`}>
+                          Welcome back, {profile?.username || user?.email?.split('@')[0] || 'User'}!
+                        </h1>
+                        <p className={`${isLight ? lightModeColors.textMuted : 'text-white/50'} text-sm md:text-base`}>
+                          Here are your recommended picks for today
+                        </p>
+                      </div>
+                    </div>
                   </div>
-
                 </div>
 
                 {/* Bets Section */}
-                <div className="space-y-3 lg:space-y-4">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className={`w-4 h-4 md:w-5 md:h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-                    <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-sm md:text-base`}>
-                      Top Picks
-                    </h2>
-                    <span className={`px-2 md:px-2.5 lg:px-3 py-0.5 md:py-1 ${isLight ? lightModeColors.statsBadge : 'bg-purple-500/20 border-purple-400/30 text-white'} backdrop-blur-xl border rounded-full font-bold text-[10px] md:text-xs`}>
-                      {bets.length} Available
-                    </span>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20'}`}>
+                        <TrendingUp className={`w-4 h-4 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                      </div>
+                      <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-base md:text-lg`}>
+                        Top Picks
+                      </h2>
+                      <span className={`px-3 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-white border border-purple-500/30'} rounded-full font-semibold text-xs`}>
+                        {bets.length} Available
+                      </span>
+                    </div>
                   </div>
 
                   {/* Bet Cards Grid - Real data from API */}
                   {picksLoading ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                       {[1, 2, 3, 4].map((i) => (
                         <div
                           key={i}
-                          className={`p-4 rounded-lg ${isLight ? 'bg-gray-100' : 'bg-white/5'} animate-pulse`}
-                          style={{ height: '300px' }}
+                          className={`rounded-2xl ${isLight ? 'bg-gray-100' : 'bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10'} animate-pulse`}
+                          style={{ height: '280px' }}
                         />
                       ))}
                     </div>
                   ) : bets.length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4 items-start">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
                       {bets.map((bet) => (
                         <BetCard key={bet.id} bet={bet} onAddPick={openBetSlip} />
                       ))}
                     </div>
                   ) : (
-                    <div className={`p-6 rounded-xl text-center ${isLight ? 'bg-gray-100' : 'bg-white/5'}`}>
-                      <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold`}>
-                        No high-value picks available at the moment
+                    <div className={`p-8 rounded-2xl text-center ${isLight ? 'bg-gray-50 border border-gray-200' : 'bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10'}`}>
+                      <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
+                        <TrendingUp className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                      </div>
+                      <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg mb-2`}>
+                        No picks available right now
                       </p>
-                      <p className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-sm mt-2`}>
+                      <p className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm max-w-sm mx-auto`}>
                         Check back soon for recommended picks with positive expected value
                       </p>
                     </div>
