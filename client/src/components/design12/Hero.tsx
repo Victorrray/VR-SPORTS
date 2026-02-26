@@ -1,4 +1,4 @@
-import { ChevronRight, TrendingUp, Zap, Shield, BarChart3 } from 'lucide-react';
+import { ChevronRight, Shield, Clock, Building2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface HeroProps {
@@ -6,12 +6,6 @@ interface HeroProps {
 }
 
 export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
-  const stats = [
-    { label: 'Sportsbooks', value: '45+', icon: BarChart3 },
-    { label: 'Avg Edge', value: '+4.8%', icon: TrendingUp },
-    { label: 'Real-time', value: '24/7', icon: Zap },
-  ];
-
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-slate-950">
       {/* Simplified Background */}
@@ -28,12 +22,6 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8">
-              <Zap className="w-4 h-4 text-purple-400" />
-              <span className="text-white/70 text-sm font-medium">Free Odds Viewer Available</span>
-            </div>
-
             {/* Headline */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
               Bet smarter,{' '}
@@ -64,39 +52,20 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/40 mb-16">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/40">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-purple-400" />
                 <span>No credit card required</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-purple-400" />
+                <Clock className="w-4 h-4 text-purple-400" />
                 <span>Real-time data</span>
               </div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-purple-400" />
+                <Building2 className="w-4 h-4 text-purple-400" />
                 <span>45+ sportsbooks</span>
               </div>
             </div>
-
-            {/* Stats Cards */}
-            <motion.div 
-              className="grid grid-cols-3 gap-4 max-w-lg mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {stats.map((stat) => (
-                <div 
-                  key={stat.label}
-                  className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:p-6"
-                >
-                  <stat.icon className="w-5 h-5 text-purple-400 mb-2 mx-auto" />
-                  <div className="text-white text-xl md:text-2xl font-bold">{stat.value}</div>
-                  <div className="text-white/40 text-xs md:text-sm">{stat.label}</div>
-                </div>
-              ))}
-            </motion.div>
           </motion.div>
         </div>
       </div>

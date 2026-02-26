@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Zap, Lock, TrendingUp, ArrowRight, BarChart3 } from 'lucide-react';
+import { Sparkles, Lock, TrendingUp, ArrowRight, Building2, Clock } from 'lucide-react';
 
 interface FreeOddsPreviewProps {
   onGetStartedClick: () => void;
@@ -196,7 +196,7 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-purple-500/20">
-                    <Zap className="w-5 h-5 text-purple-400" />
+                    <Sparkles className="w-5 h-5 text-purple-400" />
                   </div>
                   <div>
                     <p className="text-white font-semibold">Unlock Full Access</p>
@@ -225,8 +225,8 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
         >
           {[
             { icon: TrendingUp, text: '+EV Bets Highlighted' },
-            { icon: Zap, text: 'Real-time Updates' },
-            { icon: BarChart3, text: '45+ Sportsbooks' },
+            { icon: Clock, text: 'Real-time Updates' },
+            { icon: Building2, text: '45+ Sportsbooks' },
           ].map((feature, index) => (
             <div
               key={index}

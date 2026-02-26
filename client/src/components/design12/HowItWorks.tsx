@@ -1,4 +1,4 @@
-import { UserPlus, Settings, Zap, ChevronRight } from 'lucide-react';
+import { UserPlus, CreditCard, Target, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface HowItWorksProps {
@@ -15,13 +15,13 @@ export function HowItWorks({ onSignIn }: HowItWorksProps = {}) {
     },
     {
       number: '02',
-      icon: Settings,
+      icon: CreditCard,
       title: 'Choose Your Plan',
       description: 'Select Gold ($10/mo) or Platinum ($25/mo) for full access.',
     },
     {
       number: '03',
-      icon: Zap,
+      icon: Target,
       title: 'Find +EV Bets',
       description: 'Our algorithm identifies profitable opportunities instantly.',
     },
