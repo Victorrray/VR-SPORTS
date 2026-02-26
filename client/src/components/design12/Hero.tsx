@@ -23,8 +23,12 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             className="text-center max-w-3xl mx-auto"
           >
             {/* Free Viewer Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-6">
-              <span className="text-white/70 text-sm font-medium">Free Odds Viewer Available</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-violet-500/20 border border-purple-400/30 rounded-full mb-6 shadow-lg shadow-purple-500/10">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+              </span>
+              <span className="text-white text-sm font-semibold">Free Odds Viewer Available</span>
             </div>
 
             {/* Headline */}
