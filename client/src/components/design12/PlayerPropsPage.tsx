@@ -748,24 +748,32 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} lg:border-r max-lg:border-t lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} lg:w-80 max-lg:w-full`}
+            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-gradient-to-b from-white to-slate-50' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-purple-500/20'} lg:rounded-none max-lg:rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} lg:w-80 max-lg:w-full shadow-2xl`}
             style={{
               zIndex: 9999,
               top: '-64px',
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-900 border-purple-400/50'} z-10 px-6 pt-6 lg:pt-6 pb-4 space-y-4 lg:border-b border-b-0 -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-2xl`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white/95 backdrop-blur-xl' : 'bg-slate-900/95 backdrop-blur-xl'} z-10 px-6 pt-6 lg:pt-6 pb-4 space-y-4 lg:border-b border-b-0 ${isLight ? 'border-gray-200' : 'border-white/10'} -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-3xl`}>
               {/* Drag Handle - Mobile Only */}
               <div className="flex lg:hidden justify-center pt-3 pb-2 -mt-6">
-                <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
+                <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-gradient-to-r from-purple-500/50 to-violet-500/50'}`}></div>
               </div>
               {/* Header */}
               <div className="flex items-center justify-between">
-                <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-xl`}>Filters</h3>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
+                    <Filter className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                  </div>
+                  <div>
+                    <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Filters</h3>
+                    <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Customize your view</p>
+                  </div>
+                </div>
                 <button
                   onClick={closeFilterMenu}
-                  className={`p-2 ${isLight ? 'hover:bg-gray-100 text-gray-600' : 'hover:bg-white/10 text-white/60'} rounded-lg transition-all`}
+                  className={`w-10 h-10 flex items-center justify-center ${isLight ? 'hover:bg-gray-100 text-gray-500' : 'hover:bg-white/10 text-white/60'} rounded-xl transition-all`}
                 >
                   <ChevronRight className="w-5 h-5 lg:block hidden" />
                   <span className="lg:hidden text-lg">✕</span>
@@ -776,13 +784,9 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
               <div className="flex lg:hidden gap-2">
                 <button
                   onClick={closeFilterMenu}
-                  className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
-                    isLight 
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600' 
-                      : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:from-emerald-600 hover:to-green-600'
-                  }`}
+                  className="flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all text-center bg-gradient-to-r from-purple-500 to-violet-500 text-white hover:from-purple-600 hover:to-violet-600 shadow-lg shadow-purple-500/25"
                 >
-                  Apply
+                  Apply Filters
                 </button>
                 <button
                   onClick={() => {
@@ -795,10 +799,10 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       description: 'All filters have been cleared'
                     });
                   }}
-                  className={`flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all text-center ${
+                  className={`px-4 py-3 rounded-xl font-bold text-sm transition-all text-center ${
                     isLight 
-                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
+                      : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
                   }`}
                 >
                   Reset
