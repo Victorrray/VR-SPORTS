@@ -183,23 +183,30 @@ export function CalculatorPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-2xl md:text-3xl mb-2`}>
-          Betting Calculator
-        </h2>
-        <p className={`${isLight ? lightModeColors.textMuted : 'text-white/60'} font-bold`}>
-          Calculate payouts, parlays, and arbitrage opportunities
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
+              <Calculator className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+            </div>
+            <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-2xl md:text-3xl`}>
+              Betting Calculator
+            </h2>
+          </div>
+          <p className={`${isLight ? lightModeColors.textMuted : 'text-white/50'} text-sm`}>
+            Calculate payouts, parlays, and arbitrage opportunities
+          </p>
+        </div>
       </div>
 
       {/* Mode Selector */}
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         <button
           onClick={() => setMode('single')}
-          className={`px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
+          className={`px-5 py-2.5 rounded-full font-semibold text-sm whitespace-nowrap transition-all ${
             mode === 'single'
-              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-purple-500/30 text-white border border-purple-400/30'
-              : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-white border border-purple-500/30'
+              : isLight ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -209,10 +216,10 @@ export function CalculatorPage() {
         </button>
         <button
           onClick={() => setMode('parlay')}
-          className={`px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
+          className={`px-5 py-2.5 rounded-full font-semibold text-sm whitespace-nowrap transition-all ${
             mode === 'parlay'
-              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-purple-500/30 text-white border border-purple-400/30'
-              : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-white border border-purple-500/30'
+              : isLight ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -222,10 +229,10 @@ export function CalculatorPage() {
         </button>
         <button
           onClick={() => setMode('arbitrage')}
-          className={`px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
+          className={`px-5 py-2.5 rounded-full font-semibold text-sm whitespace-nowrap transition-all ${
             mode === 'arbitrage'
-              ? isLight ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-purple-500/30 text-white border border-purple-400/30'
-              : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+              ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-white border border-purple-500/30'
+              : isLight ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70'
           }`}
         >
           <div className="flex items-center gap-2">
@@ -238,12 +245,17 @@ export function CalculatorPage() {
       {/* Calculator Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input Section */}
-        <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
-          <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg mb-4`}>
-            {mode === 'single' && 'Single Bet Calculator'}
-            {mode === 'parlay' && 'Parlay Calculator'}
-            {mode === 'arbitrage' && 'Arbitrage Calculator'}
-          </h3>
+        <div className={`${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-gradient-to-br from-white/[0.08] to-white/[0.02] border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
+          <div className="flex items-center gap-3 mb-5">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isLight ? 'bg-blue-100' : 'bg-blue-500/20'}`}>
+              <DollarSign className={`w-4 h-4 ${isLight ? 'text-blue-600' : 'text-blue-400'}`} />
+            </div>
+            <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg`}>
+              {mode === 'single' && 'Single Bet Calculator'}
+              {mode === 'parlay' && 'Parlay Calculator'}
+              {mode === 'arbitrage' && 'Arbitrage Calculator'}
+            </h3>
+          </div>
 
           {/* Single Bet Mode */}
           {mode === 'single' && (
@@ -377,10 +389,15 @@ export function CalculatorPage() {
         </div>
 
         {/* Results Section */}
-        <div className={`${isLight ? lightModeColors.statsCard : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
-          <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg mb-4`}>
-            Results
-          </h3>
+        <div className={`${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-gradient-to-br from-white/[0.08] to-white/[0.02] border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
+          <div className="flex items-center gap-3 mb-5">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isLight ? 'bg-emerald-100' : 'bg-emerald-500/20'}`}>
+              <TrendingUp className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+            </div>
+            <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg`}>
+              Results
+            </h3>
+          </div>
 
           {/* Single Bet Results */}
           {mode === 'single' && (
