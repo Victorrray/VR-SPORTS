@@ -47,6 +47,7 @@ import { CancelSubscriptionPage } from "./CancelSubscriptionPage";
 import { DeleteAccountPage } from "./DeleteAccountPage";
 import { ChangePlanPage } from "./ChangePlanPage";
 import { BetCard, BetData } from "./BetCard";
+import LiveGamesTicker from "./LiveGamesTicker";
 import { Toaster } from "./ui/sonner";
 import { BetSlip } from "./BetSlip";
 import { toast } from "sonner";
@@ -524,6 +525,9 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     </div>
                   </div>
                 </div>
+
+                {/* Live Games Ticker */}
+                <LiveGamesTicker isLight={isLight} />
 
                 {/* Bets Section */}
                 <div className="space-y-4">
