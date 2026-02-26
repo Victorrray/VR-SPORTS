@@ -510,8 +510,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
-                        <span className="text-2xl">👋</span>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-white/5'}`}>
+                        <span className="text-xl">👋</span>
                       </div>
                       <div>
                         <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-xl md:text-2xl lg:text-3xl font-bold`}>
@@ -529,13 +529,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20'}`}>
-                        <TrendingUp className={`w-4 h-4 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-                      </div>
                       <h2 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-base md:text-lg`}>
                         Top Picks
                       </h2>
-                      <span className={`px-3 py-1 ${isLight ? 'bg-purple-100 text-purple-700' : 'bg-gradient-to-r from-purple-500/20 to-violet-500/20 text-white border border-purple-500/30'} rounded-full font-semibold text-xs`}>
+                      <span className={`px-2.5 py-1 ${isLight ? 'bg-gray-100 text-gray-600' : 'bg-white/5 text-white/60'} rounded-lg font-medium text-xs`}>
                         {bets.length} Available
                       </span>
                     </div>
@@ -560,8 +557,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                     </div>
                   ) : (
                     <div className={`p-8 rounded-2xl text-center ${isLight ? 'bg-gray-50 border border-gray-200' : 'bg-gradient-to-br from-white/[0.06] to-white/[0.02] border border-white/10'}`}>
-                      <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
-                        <TrendingUp className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                      <div className={`w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center ${isLight ? 'bg-gray-100' : 'bg-white/5'}`}>
+                        <TrendingUp className={`w-7 h-7 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
                       </div>
                       <p className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg mb-2`}>
                         No picks available right now
