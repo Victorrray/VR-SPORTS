@@ -839,7 +839,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
         <>
           {/* Desktop Backdrop */}
           <div 
-            className={`hidden lg:block fixed right-0 bg-black/30 z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
+            className={`hidden lg:block fixed right-0 bg-black/40 z-[9998] transition-all ${isFilterClosing ? 'opacity-0 duration-150' : 'opacity-100 duration-500 delay-100'}`}
             style={{ top: '-100px', bottom: 0, left: '320px' }}
             onClick={closeFilterMenu}
           />
