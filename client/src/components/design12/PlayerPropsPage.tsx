@@ -807,7 +807,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             </div>
 
             {/* Content - scrollable on both mobile and desktop */}
-            <div className="overflow-y-auto flex-1 p-6 pt-2 lg:pt-12 space-y-3 lg:space-y-5 scrollbar-hide">
+            <div className="overflow-y-auto flex-1 p-6 pt-6 lg:pt-12 space-y-4 lg:space-y-5 scrollbar-hide">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div>
