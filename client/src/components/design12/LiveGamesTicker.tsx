@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Circle, Loader2 } from 'lucide-react';
+import { Circle, Loader2 } from 'lucide-react';
 
 interface Team {
   id: string;
@@ -199,7 +199,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setSelectedSport('all')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
               selectedSport === 'all'
                 ? 'bg-purple-600 text-white'
                 : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
@@ -211,7 +211,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
             <button
               key={sport.key}
               onClick={() => setSelectedSport(sport.key)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                 selectedSport === sport.key
                   ? 'bg-purple-600 text-white'
                   : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
@@ -223,32 +223,13 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         </div>
       </div>
 
-      {/* Games Ticker */}
+      {/* Games Ticker - Swipeable */}
       <div className="relative">
-        {/* Scroll Buttons */}
-        <button
-          onClick={() => scroll('left')}
-          className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full ${
-            isLight ? 'bg-white shadow-md text-gray-600 hover:bg-gray-50' : 'bg-slate-900 text-white/60 hover:bg-slate-800'
-          } transition-colors`}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        
-        <button
-          onClick={() => scroll('right')}
-          className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full ${
-            isLight ? 'bg-white shadow-md text-gray-600 hover:bg-gray-50' : 'bg-slate-900 text-white/60 hover:bg-slate-800'
-          } transition-colors`}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-
         {/* Scrollable Games */}
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto scrollbar-hide px-10 py-3"
-          style={{ scrollSnapType: 'x mandatory' }}
+          className="flex gap-3 overflow-x-auto scrollbar-hide px-4 py-3 touch-pan-x"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {games.length === 0 ? (
             <div className={`flex-shrink-0 w-full text-center py-4 ${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>
