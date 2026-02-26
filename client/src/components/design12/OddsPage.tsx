@@ -1548,7 +1548,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                   Auto Refresh
                   {!hasPlatinum && <span className="text-purple-400 text-[10px] ml-1 normal-case">(Platinum)</span>}
                 </label>
-                <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border border-gray-100' : 'bg-white/5 border border-white/5'} rounded-lg`}>
+                <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border border-gray-100' : 'bg-white/5 border border-white/5'} rounded-xl`}>
                   <div className="flex items-center gap-2.5 flex-1">
                     <RefreshCw className={`w-4 h-4 ${autoRefresh && hasPlatinum ? (isLight ? 'text-purple-600' : 'text-purple-400') : (isLight ? 'text-gray-400' : 'text-white/40')}`} />
                     <div>
@@ -1577,7 +1577,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                   <label className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-[10px] uppercase tracking-wider mb-2 block`}>
                     Min Data Points
                   </label>
-                  <div className={`p-3 ${isLight ? 'bg-gray-50 border border-gray-100' : 'bg-white/5 border border-white/5'} rounded-lg`}>
+                  <div className={`p-3 ${isLight ? 'bg-gray-50 border border-gray-100' : 'bg-white/5 border border-white/5'} rounded-xl`}>
                     <div className="flex items-center gap-2.5">
                       <span className={`${isLight ? 'text-gray-400' : 'text-white/30'} text-xs`}>1</span>
                       <input
@@ -1607,7 +1607,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 </label>
                 <button
                   onClick={() => setDateExpanded(!dateExpanded)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-sm transition-colors ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm transition-colors ${
                     isLight ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white/80 hover:bg-white/10'
                   }`}
                 >
@@ -1700,7 +1700,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 </label>
                 <button
                   onClick={() => setSportsbooksExpanded(!sportsbooksExpanded)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full font-semibold text-sm transition-all ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
                     isLight ? 'bg-white border border-gray-200 text-gray-900 hover:border-purple-300 hover:bg-purple-50/50' : 'bg-white/5 border border-white/10 text-white hover:border-purple-500/30 hover:bg-purple-500/10'
                   }`}
                 >
