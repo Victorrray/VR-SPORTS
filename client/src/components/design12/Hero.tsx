@@ -22,6 +22,11 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             transition={{ duration: 0.5 }}
             className="text-center max-w-3xl mx-auto"
           >
+            {/* Free Viewer Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-6">
+              <span className="text-white/70 text-sm font-medium">Free Odds Viewer Available</span>
+            </div>
+
             {/* Headline */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
               Bet smarter,{' '}
