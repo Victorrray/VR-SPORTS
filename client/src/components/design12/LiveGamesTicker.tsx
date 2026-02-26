@@ -245,7 +245,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
               return (
                 <div
                   key={game.id}
-                  className={`flex-shrink-0 w-[200px] p-3 rounded-xl ${
+                  className={`flex-shrink-0 w-[180px] md:w-[200px] p-3 md:p-3 rounded-xl min-h-[100px] md:min-h-[90px] ${
                     isLive 
                       ? isLight ? 'bg-emerald-50 border border-emerald-200' : 'bg-emerald-500/10 border border-emerald-500/20'
                       : isLight ? 'bg-white border border-gray-200' : 'bg-white/5 border border-white/10'
