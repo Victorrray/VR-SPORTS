@@ -1401,7 +1401,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <ChevronRight className="w-4 h-4 rotate-180" />
               </button>
               
-              <div className={`flex items-center h-9 px-3 border rounded-full ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+              <div className={`flex items-center justify-center w-auto h-9 px-3 border rounded-xl ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
                 <span className="text-sm whitespace-nowrap">
                   {currentPage}/{totalPages}
                 </span>
@@ -1436,7 +1436,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             <ChevronRight className="w-4 h-4 rotate-180" />
           </button>
           
-          <div className={`flex items-center h-9 px-3 border rounded-full ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+          <div className={`flex items-center justify-center w-auto h-9 px-3 border rounded-xl ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
             <span className="text-sm whitespace-nowrap">
               {currentPage}/{totalPages}
             </span>
