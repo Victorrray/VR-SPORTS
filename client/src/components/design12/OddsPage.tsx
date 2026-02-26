@@ -1427,7 +1427,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           <button 
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
-            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-xl transition-colors ${
               currentPage === 1
                 ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -1445,7 +1445,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           <button 
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
-            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-xl transition-colors ${
               currentPage === totalPages
                 ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
