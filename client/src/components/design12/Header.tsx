@@ -17,8 +17,11 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
     <header className="absolute top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20 md:h-24">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
+          {/* Logo - Home Button */}
+          <button 
+            onClick={() => navigate('/')}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
             <div className="relative group">
               {/* Glow effect */}
               <div className="absolute inset-0 rounded-2xl bg-purple-500 blur-xl opacity-40 group-hover:opacity-60 transition-opacity" />
@@ -31,7 +34,7 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
               </div>
             </div>
             
-            <div className="flex flex-col">
+            <div className="flex flex-col text-left">
               <span className="text-white font-bold text-lg md:text-xl tracking-tight">
                 OddSightSeer
               </span>
@@ -39,7 +42,7 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
                 PREMIUM ANALYTICS
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
