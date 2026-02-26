@@ -633,8 +633,8 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 - Default filters: All Sports, All Markets, Straight Bets, Today */}
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
-                isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+              className={`flex items-center gap-2 h-10 px-4 border rounded-lg transition-colors text-sm ${
+                isLight ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
               <Filter className="w-4 h-4" />
@@ -650,10 +650,10 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                 });
               }}
               disabled={isLoading}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
+              className={`flex items-center gap-2 h-10 px-4 border rounded-lg transition-colors text-sm ${
                 isLoading
-                  ? isLight ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/40 cursor-not-allowed'
-                  : isLight ? 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                  ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                  : isLight ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -661,70 +661,70 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             </button>
 
             {/* Pagination Controls - Mobile only */}
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex md:hidden items-center gap-1.5">
               <button 
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
-                className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
                   currentPage === 1
-                    ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                    : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                    : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <ChevronRight className="w-5 h-5 rotate-180" />
+                <ChevronRight className="w-4 h-4 rotate-180" />
               </button>
               
-              <div className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-white border-gray-300' : 'bg-white/5 border-white/10'} backdrop-blur-2xl border rounded-xl`}>
-                <span className={`${isLight ? 'text-gray-700' : 'text-white'} font-bold text-sm whitespace-nowrap`}>
-                  {currentPage} / {totalPages}
+              <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+                <span className="text-sm whitespace-nowrap">
+                  {currentPage}/{totalPages}
                 </span>
               </div>
 
               <button 
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
-                className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
                   currentPage === totalPages
-                    ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                    : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                    : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Pagination Controls - Desktop only */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1.5">
           <button 
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
-            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
               currentPage === 1
-                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <ChevronRight className="w-5 h-5 rotate-180" />
+            <ChevronRight className="w-4 h-4 rotate-180" />
           </button>
           
-          <div className={`flex items-center gap-2 h-[44px] px-4 ${isLight ? 'bg-white border-gray-300' : 'bg-white/5 border-white/10'} backdrop-blur-2xl border rounded-xl`}>
-            <span className={`${isLight ? 'text-gray-700' : 'text-white'} font-bold text-sm whitespace-nowrap`}>
-              {currentPage} / {totalPages}
+          <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+            <span className="text-sm whitespace-nowrap">
+              {currentPage}/{totalPages}
             </span>
           </div>
 
           <button 
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
-            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
               currentPage === totalPages
-                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -735,7 +735,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           {/* Backdrop - Desktop only (to the right of panel) */}
           <div 
             className={`hidden lg:block fixed right-0 bottom-0 bg-black/40 z-[9998] transition-all ${isFilterClosing ? 'opacity-0 duration-150' : 'opacity-100 duration-500 delay-100'}`}
-            style={{ left: '320px', top: '-24px' }}
+            style={{ left: '288px', top: '-24px' }}
             onClick={closeFilterMenu}
           />
           
@@ -748,35 +748,27 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-gradient-to-b from-white to-slate-50' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-purple-500/20'} lg:rounded-none max-lg:rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-80 max-lg:w-full shadow-2xl`}
+            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl`}
             style={{
               zIndex: 9999,
               top: '-64px',
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white/95 backdrop-blur-xl' : 'bg-slate-900/95 backdrop-blur-xl'} z-10 px-6 pt-6 lg:pt-6 pb-4 space-y-4 lg:border-b border-b-0 ${isLight ? 'border-gray-200' : 'border-white/10'} -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-3xl`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white' : 'bg-slate-950'} z-10 px-5 pt-5 lg:pt-5 pb-3 space-y-3 lg:border-b border-b-0 ${isLight ? 'border-gray-100' : 'border-white/5'} -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-2xl`}>
               {/* Drag Handle - Mobile Only */}
-              <div className="flex lg:hidden justify-center pt-3 pb-2 -mt-6">
-                <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-gradient-to-r from-purple-500/50 to-violet-500/50'}`}></div>
+              <div className="flex lg:hidden justify-center pt-2 pb-1 -mt-5">
+                <div className={`w-10 h-1 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
               </div>
               {/* Header */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
-                    <Filter className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-                  </div>
-                  <div>
-                    <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Filters</h3>
-                    <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Customize your view</p>
-                  </div>
-                </div>
+                <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>Filters</h3>
                 <button
                   onClick={closeFilterMenu}
-                  className={`w-10 h-10 flex items-center justify-center ${isLight ? 'hover:bg-gray-100 text-gray-500' : 'hover:bg-white/10 text-white/60'} rounded-xl transition-all`}
+                  className={`w-8 h-8 flex items-center justify-center ${isLight ? 'hover:bg-gray-100 text-gray-400' : 'hover:bg-white/10 text-white/50'} rounded-lg transition-colors`}
                 >
-                  <ChevronRight className="w-5 h-5 lg:block hidden" />
-                  <span className="lg:hidden text-lg">✕</span>
+                  <ChevronRight className="w-4 h-4 lg:block hidden" />
+                  <span className="lg:hidden text-sm">✕</span>
                 </button>
               </div>
               
@@ -784,7 +776,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
               <div className="flex lg:hidden gap-2">
                 <button
                   onClick={closeFilterMenu}
-                  className="flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all text-center bg-gradient-to-r from-purple-500 to-violet-500 text-white hover:from-purple-600 hover:to-violet-600 shadow-lg shadow-purple-500/25"
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm transition-colors text-center bg-purple-600 text-white hover:bg-purple-500"
                 >
                   Apply Filters
                 </button>
@@ -799,10 +791,10 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
                       description: 'All filters have been cleared'
                     });
                   }}
-                  className={`px-4 py-3 rounded-xl font-bold text-sm transition-all text-center ${
+                  className={`px-4 py-2.5 rounded-lg text-sm transition-colors text-center ${
                     isLight 
                       ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
-                      : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
+                      : 'bg-white/5 text-white/60 hover:bg-white/10'
                   }`}
                 >
                   Reset
@@ -811,15 +803,15 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
             </div>
 
             {/* Content - scrollable on both mobile and desktop */}
-            <div className="overflow-y-auto flex-1 p-6 pt-6 lg:pt-12 space-y-4 lg:space-y-5 scrollbar-hide">
+            <div className="overflow-y-auto flex-1 p-5 pt-4 lg:pt-6 space-y-4 scrollbar-hide">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div>
-                <label className={`${isLight ? 'text-gray-700' : 'text-white/80'} font-bold text-xs uppercase tracking-wide mb-2 flex items-center gap-2`}>
+                <label className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-[10px] uppercase tracking-wider mb-2 flex items-center gap-2`}>
                   Auto Refresh
                 </label>
-                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-white border border-gray-300' : 'bg-white/5 border border-white/10'} backdrop-blur-xl rounded-xl ${!hasPlatinum ? 'opacity-60' : ''}`}>
-                  <div className="flex items-center gap-3 flex-1">
+                <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border border-gray-100' : 'bg-white/5 border border-white/5'} rounded-lg ${!hasPlatinum ? 'opacity-50' : ''}`}>
+                  <div className="flex items-center gap-2.5 flex-1">
                     <RefreshCw className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
                     <div>
                       <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-sm`}>Auto Refresh Odds</div>
