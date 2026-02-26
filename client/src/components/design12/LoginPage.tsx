@@ -147,7 +147,7 @@ export function LoginPage({ onBack, onSignUp, onForgotPassword, onLogin, isLoadi
             {/* Headline */}
             <div className="space-y-6">
               <h2 className="text-white text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-                Find Your{' '}
+                Find Your<br />
                 <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
                   Winning Edge
                 </span>
