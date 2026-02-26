@@ -1586,7 +1586,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                   <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 block`}>
                     Minimum Data Points
                   </label>
-                  <div className={`p-4 ${isLight ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100' : 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20'} rounded-2xl`}>
+                  <div className={`p-4 ${isLight ? 'bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-100' : 'bg-gradient-to-r from-purple-500/10 to-violet-500/10 border border-purple-500/20'} rounded-2xl`}>
                     <div className="flex items-center gap-3">
                       <span className={`${isLight ? 'text-gray-400' : 'text-white/30'} text-xs font-medium`}>1</span>
                       <input
@@ -1596,12 +1596,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         step="1"
                         value={minDataPoints}
                         onChange={(e) => setMinDataPoints(parseInt(e.target.value))}
-                        className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-blue-500`}
+                        className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-purple-500`}
                         style={{
-                          background: `linear-gradient(to right, ${isLight ? '#3b82f6' : '#60a5fa'} 0%, ${isLight ? '#3b82f6' : '#60a5fa'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
+                          background: `linear-gradient(to right, ${isLight ? '#a855f7' : '#a855f7'} 0%, ${isLight ? '#a855f7' : '#a855f7'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
                         }}
                       />
-                      <div className={`${isLight ? 'text-blue-600 bg-blue-100' : 'text-blue-300 bg-blue-500/20'} px-3 py-1.5 rounded-full font-bold text-sm min-w-[48px] text-center`}>
+                      <div className={`${isLight ? 'text-purple-600 bg-purple-100' : 'text-purple-300 bg-purple-500/20'} px-3 py-1.5 rounded-full font-bold text-sm min-w-[48px] text-center`}>
                         {minDataPoints === 15 ? 'MAX' : minDataPoints}
                       </div>
                     </div>
@@ -1710,7 +1710,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 <button
                   onClick={() => setSportsbooksExpanded(!sportsbooksExpanded)}
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-semibold text-sm transition-all ${
-                    isLight ? 'bg-white border border-gray-200 text-gray-900 hover:border-emerald-300 hover:bg-emerald-50/50' : 'bg-white/5 border border-white/10 text-white hover:border-emerald-500/30 hover:bg-emerald-500/10'
+                    isLight ? 'bg-white border border-gray-200 text-gray-900 hover:border-purple-300 hover:bg-purple-50/50' : 'bg-white/5 border border-white/10 text-white hover:border-purple-500/30 hover:bg-purple-500/10'
                   }`}
                 >
                   <span>
@@ -1738,7 +1738,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       .map((tierGroup, tierIndex) => (
                       <div key={tierIndex}>
                         {/* Tier Header */}
-                        <div className={`px-4 py-2 ${isLight ? 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700' : 'bg-gradient-to-r from-emerald-500/10 to-green-500/10 text-emerald-400'} text-[10px] font-bold uppercase tracking-wider`}>
+                        <div className={`px-4 py-2 ${isLight ? 'bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700' : 'bg-gradient-to-r from-purple-500/10 to-violet-500/10 text-purple-400'} text-[10px] font-bold uppercase tracking-wider`}>
                           {tierGroup.tier}
                         </div>
                         {/* Sportsbooks in this tier */}
@@ -1748,7 +1748,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                             onClick={() => toggleSportsbookFilter(book.id)}
                             className={`w-full text-left px-4 py-3 font-medium transition-all ${
                               selectedSportsbooks.includes(book.id)
-                                ? isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-300'
+                                ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/20 text-purple-300'
                                 : isLight ? 'text-gray-700 hover:bg-gray-50' : 'text-white/70 hover:bg-white/5'
                             }`}
                           >
