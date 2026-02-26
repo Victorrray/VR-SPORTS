@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { Header } from '../components/design12/Header';
 import { Footer } from '../components/design12/Footer';
-import { Check, ChevronRight, Zap } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, SITE_CONFIG } from '../utils/seo';
 import { useAuth } from '../hooks/SimpleAuth';
@@ -95,59 +95,88 @@ export default function PricingPage() {
             </div>
           </motion.div>
 
-          {/* Plans */}
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {plans.map((plan, index) => (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border rounded-2xl p-6 md:p-8 ${
-                  plan.popular ? 'border-purple-500/50' : 'border-white/10'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-600 rounded-full">
-                      <Zap className="w-3 h-3 text-white" />
-                      <span className="text-white text-xs font-bold">Most Popular</span>
-                    </div>
+          {/* Plans - Clean Minimal Design */}
+          <div className="max-w-3xl mx-auto">
+            {/* Plan Toggle Header */}
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex p-1 bg-white/5 rounded-full border border-white/10">
+                {plans.map((plan) => (
+                  <div
+                    key={plan.name}
+                    className={`px-6 py-2 rounded-full text-sm font-semibold transition-all cursor-default ${
+                      plan.popular 
+                        ? 'bg-purple-600 text-white' 
+                        : 'text-white/50'
+                    }`}
+                  >
+                    {plan.name}
                   </div>
-                )}
+                ))}
+              </div>
+            </div>
 
-                <div className="mb-6">
-                  <h3 className="text-white text-xl font-bold mb-2">{plan.name}</h3>
-                  <p className="text-white/50 text-sm">{plan.description}</p>
-                </div>
-
-                <div className="mb-6">
-                  <span className="text-4xl md:text-5xl font-bold text-white">{plan.price}</span>
-                  <span className="text-white/50">{plan.period}</span>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-white/70 text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={handleSignUpClick}
-                  className={`group w-full py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                    plan.popular
-                      ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                      : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
-                  }`}
+            {/* Plans Side by Side */}
+            <div className="grid md:grid-cols-2 gap-8">
+              {plans.map((plan, index) => (
+                <motion.div
+                  key={plan.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="text-center"
                 >
-                  Get Started
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </motion.div>
-            ))}
+                  {/* Plan Name & Badge */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <h3 className="text-white text-2xl font-bold">{plan.name}</h3>
+                      {plan.popular && (
+                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full">
+                          Popular
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-white/40 text-sm">{plan.description}</p>
+                  </div>
+
+                  {/* Price */}
+                  <div className="mb-8">
+                    <span className="text-5xl md:text-6xl font-bold text-white">{plan.price}</span>
+                    <span className="text-white/40 text-lg">{plan.period}</span>
+                  </div>
+
+                  {/* CTA Button */}
+                  <button
+                    onClick={handleSignUpClick}
+                    className={`group w-full py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 mb-8 ${
+                      plan.popular
+                        ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
+                    }`}
+                  >
+                    Get Started
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+
+                  {/* Features List */}
+                  <ul className="space-y-3 text-left">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center gap-3">
+                        <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                        <span className="text-white/60 text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-white/10 my-12" />
+
+            {/* Bottom comparison note */}
+            <p className="text-center text-white/30 text-sm">
+              Both plans include a 7-day free trial. Cancel anytime.
+            </p>
           </div>
 
           {/* FAQ Link */}
