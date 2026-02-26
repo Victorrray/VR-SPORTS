@@ -288,37 +288,29 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       )}
 
       <div className="relative flex min-h-screen">
-        {/* Sidebar */}
-        <aside className={`hidden lg:flex lg:flex-col w-64 fixed top-0 left-0 h-screen z-40 ${isLight ? 'bg-white border-gray-200' : 'bg-slate-950/80 border-white/5'} border-r`}>
+        {/* Sidebar - Minimal Clean Design */}
+        <aside className={`hidden lg:flex lg:flex-col w-56 fixed top-0 left-0 h-screen z-40 ${isLight ? 'bg-white' : 'bg-slate-950'} border-r ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
           <div className="flex-1 flex flex-col">
-            {/* Logo/Brand */}
-            <div className={`px-5 py-6 border-b ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
-              <div className="flex items-center gap-3">
-                <img 
-                  src="/favicon.png" 
-                  alt="OddSightSeer" 
-                  className="w-10 h-10 rounded-xl"
-                />
-                <div>
-                  <span className={`font-bold text-lg ${isLight ? 'text-gray-900' : 'text-white'}`}>OddSightSeer</span>
-                  <div className={`flex items-center gap-1.5 ${planConfig.color}`}>
-                    <PlanIcon className="w-3 h-3" />
-                    <span className="text-xs font-semibold">{planConfig.label}</span>
-                  </div>
+            {/* Logo/Brand - Compact */}
+            <div className="px-4 py-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">OS</span>
                 </div>
+                <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>OddSightSeer</span>
               </div>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-6">
+            {/* Navigation - Clean */}
+            <nav className="flex-1 px-3 py-2 overflow-y-auto">
               {/* Main */}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <button
                   onClick={() => setCurrentView("dashboard")}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
                     currentView === "dashboard"
-                      ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                      : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
+                      ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                      : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <Home className="w-4 h-4" />
@@ -327,178 +319,190 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </div>
 
               {/* Odds Tools */}
-              <div className="space-y-1">
-                <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-gray-400' : 'text-white/30'}`}>
-                  Odds Tools
+              <div className="mt-6">
+                <div className={`px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider ${isLight ? 'text-gray-400' : 'text-white/30'}`}>
+                  Tools
                 </div>
-                <button
-                  onClick={() => {
-                    if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
-                    setSelectedBetType('straight');
-                    setCurrentView("odds");
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    !hasPaidPlan
-                      ? isLight ? 'text-gray-300' : 'text-white/20'
-                      : currentView === "odds" && selectedBetType === 'straight'
-                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                        : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <Zap className="w-4 h-4" />
-                  Straight Bets
-                  {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
-                    setSelectedBetType('props');
-                    setCurrentView("odds");
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    !hasPaidPlan
-                      ? isLight ? 'text-gray-300' : 'text-white/20'
-                      : currentView === "odds" && selectedBetType === 'props'
-                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                        : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <Target className="w-4 h-4" />
-                  Player Props
-                  {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
-                    setSelectedBetType('discrepancy');
-                    setCurrentView("odds");
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    !hasPaidPlan
-                      ? isLight ? 'text-gray-300' : 'text-white/20'
-                      : currentView === "odds" && selectedBetType === 'discrepancy'
-                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                        : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <BarChart2 className="w-4 h-4" />
-                  Discrepancy
-                  {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
-                    setSelectedBetType('exchanges');
-                    setCurrentView("odds");
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    !hasPaidPlan
-                      ? isLight ? 'text-gray-300' : 'text-white/20'
-                      : currentView === "odds" && selectedBetType === 'exchanges'
-                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                        : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  Exchanges
-                  {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
-                    setSelectedBetType('arbitrage');
-                    setCurrentView("odds");
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    !hasPaidPlan
-                      ? isLight ? 'text-gray-300' : 'text-white/20'
-                      : currentView === "odds" && selectedBetType === 'arbitrage'
-                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                        : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Arbitrage
-                  {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
-                    setSelectedBetType('middles');
-                    setCurrentView("odds");
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    !hasPaidPlan
-                      ? isLight ? 'text-gray-300' : 'text-white/20'
-                      : currentView === "odds" && selectedBetType === 'middles'
-                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                        : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <Target className="w-4 h-4" />
-                  Middles
-                  {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
-                </button>
+                <div className="space-y-0.5">
+                  <button
+                    onClick={() => {
+                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      setSelectedBetType('straight');
+                      setCurrentView("odds");
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      !hasPaidPlan
+                        ? isLight ? 'text-gray-300' : 'text-white/20'
+                        : currentView === "odds" && selectedBetType === 'straight'
+                          ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                          : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Zap className="w-4 h-4" />
+                    Straight Bets
+                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      setSelectedBetType('props');
+                      setCurrentView("odds");
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      !hasPaidPlan
+                        ? isLight ? 'text-gray-300' : 'text-white/20'
+                        : currentView === "odds" && selectedBetType === 'props'
+                          ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                          : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Target className="w-4 h-4" />
+                    Player Props
+                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      setSelectedBetType('discrepancy');
+                      setCurrentView("odds");
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      !hasPaidPlan
+                        ? isLight ? 'text-gray-300' : 'text-white/20'
+                        : currentView === "odds" && selectedBetType === 'discrepancy'
+                          ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                          : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <BarChart2 className="w-4 h-4" />
+                    Discrepancy
+                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      setSelectedBetType('exchanges');
+                      setCurrentView("odds");
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      !hasPaidPlan
+                        ? isLight ? 'text-gray-300' : 'text-white/20'
+                        : currentView === "odds" && selectedBetType === 'exchanges'
+                          ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                          : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    Exchanges
+                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      setSelectedBetType('arbitrage');
+                      setCurrentView("odds");
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      !hasPaidPlan
+                        ? isLight ? 'text-gray-300' : 'text-white/20'
+                        : currentView === "odds" && selectedBetType === 'arbitrage'
+                          ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                          : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Arbitrage
+                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      setSelectedBetType('middles');
+                      setCurrentView("odds");
+                    }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      !hasPaidPlan
+                        ? isLight ? 'text-gray-300' : 'text-white/20'
+                        : currentView === "odds" && selectedBetType === 'middles'
+                          ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                          : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Target className="w-4 h-4" />
+                    Middles
+                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                  </button>
+                </div>
               </div>
 
               {/* Utilities */}
-              <div className="space-y-1">
-                <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${isLight ? 'text-gray-400' : 'text-white/30'}`}>
+              <div className="mt-6">
+                <div className={`px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider ${isLight ? 'text-gray-400' : 'text-white/30'}`}>
                   Utilities
                 </div>
-                <button
-                  onClick={() => setCurrentView("calculator")}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                    currentView === "calculator"
-                      ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                      : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <Calculator className="w-4 h-4" />
-                  Calculator
-                </button>
+                <div className="space-y-0.5">
+                  <button
+                    onClick={() => setCurrentView("calculator")}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      currentView === "calculator"
+                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                        : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <Calculator className="w-4 h-4" />
+                    Calculator
+                  </button>
+                </div>
               </div>
             </nav>
 
-            {/* User & Settings */}
-            <div className={`px-3 py-4 border-t ${isLight ? 'border-gray-100' : 'border-white/5'} space-y-1`}>
-              <button
-                onClick={() => setCurrentView("account")}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                  currentView === "account"
-                    ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                    : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <User className="w-4 h-4" />
-                <span className="flex-1 text-left truncate">{profile?.username || user?.email?.split('@')[0] || 'Account'}</span>
-              </button>
-              <button
-                onClick={() => setCurrentView("settings")}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                  currentView === "settings"
-                    ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-purple-500/15 text-purple-300'
-                    : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5 hover:text-white'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                Settings
-              </button>
-              <button
-                onClick={onSignOut}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-full font-medium text-sm transition-all ${
-                  isLight ? 'text-red-600 hover:bg-red-50' : 'text-red-400 hover:bg-red-500/10'
-                }`}
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </button>
+            {/* User & Settings - Bottom */}
+            <div className={`px-3 py-3 border-t ${isLight ? 'border-gray-100' : 'border-white/5'}`}>
+              {/* Plan Badge */}
+              <div className={`flex items-center gap-2 px-3 py-2 mb-2 rounded-lg ${isLight ? 'bg-gray-50' : 'bg-white/5'}`}>
+                <PlanIcon className={`w-4 h-4 ${planConfig.color}`} />
+                <span className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-white/70'}`}>{planConfig.label} Plan</span>
+              </div>
+              
+              <div className="space-y-0.5">
+                <button
+                  onClick={() => setCurrentView("account")}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    currentView === "account"
+                      ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                      : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  Account
+                </button>
+                <button
+                  onClick={() => setCurrentView("settings")}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    currentView === "settings"
+                      ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                      : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </button>
+                <button
+                  onClick={onSignOut}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    isLight ? 'text-gray-500 hover:text-red-600 hover:bg-red-50' : 'text-white/50 hover:text-red-400 hover:bg-red-500/10'
+                  }`}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto lg:ml-64">
+        <main className="flex-1 overflow-y-auto lg:ml-56">
           <div className="px-3 lg:px-8 py-4 lg:py-8 space-y-6 lg:space-y-8 pb-24 lg:pb-8">
             {/* Conditional Content Rendering */}
             {currentView === "dashboard" && (
