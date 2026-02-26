@@ -748,7 +748,7 @@ export function PlayerPropsPage({ onAddPick, savedPicks = [] }: { onAddPick: (pi
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-gradient-to-b from-white to-slate-50' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-purple-500/20'} lg:rounded-none max-lg:rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-300' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300'} lg:w-80 max-lg:w-full shadow-2xl`}
+            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-gradient-to-b from-white to-slate-50' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-purple-500/20'} lg:rounded-none max-lg:rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-80 max-lg:w-full shadow-2xl`}
             style={{
               zIndex: 9999,
               top: '-64px',
