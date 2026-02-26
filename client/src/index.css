@@ -67,8 +67,13 @@
   @apply border-border;
 }
 
-body {
+html, body {
   @apply bg-background text-foreground;
+  overscroll-behavior: none;
+}
+
+html {
+  background-color: #0f0a1a;
 }
 
 /* Custom range slider thumb styles */
