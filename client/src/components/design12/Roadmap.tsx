@@ -165,8 +165,7 @@ export function Roadmap() {
                 className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 hover:border-green-500/30 transition-all"
                 whileHover={{ y: -2 }}
               >
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-500 to-emerald-500 rounded-l-3xl" />
-                <ul className="space-y-4 pl-4">
+                                <ul className="space-y-4 pl-4">
                   {roadmapData
                     .filter(item => item.status === 'completed')
                     .flatMap(item => item.features)
@@ -207,8 +206,7 @@ export function Roadmap() {
                 className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8 hover:border-purple-500/30 transition-all"
                 whileHover={{ y: -2 }}
               >
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-600 rounded-l-3xl" />
-                
+                                
                 {/* Animated pulse indicator */}
                 <div className="absolute top-6 right-6">
                   <span className="relative flex h-3 w-3">
@@ -229,8 +227,7 @@ export function Roadmap() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 + index * 0.1 }}
                       >
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                          <Zap className="w-4 h-4 text-white" />
+                        <div className="w-6 h-6 rounded-full border-2 border-purple-500/50 flex items-center justify-center">
                         </div>
                         <span className="text-white font-medium">{feature}</span>
                       </motion.li>
@@ -257,8 +254,7 @@ export function Roadmap() {
               <motion.div 
                 className="relative bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl border border-white/10 border-dashed rounded-3xl p-6 md:p-8"
               >
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-slate-500 to-slate-600 rounded-l-3xl opacity-50" />
-                <div className="text-center py-4">
+                                <div className="text-center py-4">
                   <Lightbulb className="w-10 h-10 text-white/30 mx-auto mb-3" />
                   <p className="text-white/40 font-medium">More exciting features coming soon...</p>
                 </div>
