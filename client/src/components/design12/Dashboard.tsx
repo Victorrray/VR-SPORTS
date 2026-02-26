@@ -603,80 +603,45 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         </main>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe px-3 pb-3">
-        <div className={`${isLight ? 'bg-white/90 border-gray-200/50 shadow-lg' : 'bg-gradient-to-r from-slate-900/95 via-slate-900/95 to-slate-900/95 border-white/5 shadow-2xl shadow-purple-500/10'} backdrop-blur-2xl border rounded-2xl px-2 py-2`}>
-          <div className="flex items-center justify-around">
+      {/* Mobile Bottom Navigation - Minimal Dock */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe">
+        <div className={`${isLight ? 'bg-white/80 border-t border-gray-200/50' : 'bg-slate-950/90 border-t border-white/5'} backdrop-blur-xl px-6 py-3`}>
+          <div className="flex items-center justify-around max-w-md mx-auto">
             <button
               onClick={() => setCurrentView("dashboard")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
-                currentView === "dashboard"
-                  ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
-                  : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
-              }`}
+              className="flex flex-col items-center gap-1.5 py-1 transition-all relative"
             >
-              <Home
-                className={`w-5 h-5 ${currentView === "dashboard" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-semibold ${currentView === "dashboard" ? isLight ? "text-purple-700" : "text-white" : ""}`}
-              >
-                Home
-              </span>
+              <Home className={`w-6 h-6 transition-colors ${currentView === "dashboard" ? isLight ? "text-purple-600" : "text-white" : isLight ? "text-gray-400" : "text-white/40"}`} />
+              {currentView === "dashboard" && (
+                <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isLight ? 'bg-purple-600' : 'bg-purple-400'}`} />
+              )}
             </button>
-            {/* Odds button - grayed out for free users, redirects to subscription */}
             <button
               onClick={() => hasPaidPlan ? setCurrentView("odds") : setCurrentView("changePlan")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
-                !hasPaidPlan
-                  ? isLight ? "text-gray-300" : "text-white/20"
-                  : currentView === "odds"
-                    ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
-                    : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
-              }`}
+              className="flex flex-col items-center gap-1.5 py-1 transition-all relative"
             >
-              <Zap
-                className={`w-5 h-5 ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-semibold ${!hasPaidPlan ? "" : currentView === "odds" ? isLight ? "text-purple-700" : "text-white" : ""}`}
-              >
-                Odds
-              </span>
+              <Zap className={`w-6 h-6 transition-colors ${!hasPaidPlan ? isLight ? "text-gray-300" : "text-white/20" : currentView === "odds" ? isLight ? "text-purple-600" : "text-white" : isLight ? "text-gray-400" : "text-white/40"}`} />
+              {currentView === "odds" && hasPaidPlan && (
+                <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isLight ? 'bg-purple-600' : 'bg-purple-400'}`} />
+              )}
             </button>
             <button
               onClick={() => setCurrentView("calculator")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
-                currentView === "calculator"
-                  ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
-                  : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
-              }`}
+              className="flex flex-col items-center gap-1.5 py-1 transition-all relative"
             >
-              <Calculator
-                className={`w-5 h-5 ${currentView === "calculator" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-semibold ${currentView === "calculator" ? isLight ? "text-purple-700" : "text-white" : ""}`}
-              >
-                Calc
-              </span>
+              <Calculator className={`w-6 h-6 transition-colors ${currentView === "calculator" ? isLight ? "text-purple-600" : "text-white" : isLight ? "text-gray-400" : "text-white/40"}`} />
+              {currentView === "calculator" && (
+                <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isLight ? 'bg-purple-600' : 'bg-purple-400'}`} />
+              )}
             </button>
             <button
               onClick={() => setCurrentView("account")}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
-                currentView === "account"
-                  ? isLight ? "bg-purple-100" : "bg-gradient-to-br from-purple-500/20 to-violet-500/20"
-                  : isLight ? "text-gray-500 hover:bg-gray-100" : "text-white/40 hover:text-white/60"
-              }`}
+              className="flex flex-col items-center gap-1.5 py-1 transition-all relative"
             >
-              <User
-                className={`w-5 h-5 ${currentView === "account" ? isLight ? "text-purple-600" : "text-purple-400" : ""}`}
-              />
-              <span
-                className={`text-[10px] font-semibold ${currentView === "account" ? isLight ? "text-purple-700" : "text-white" : ""}`}
-              >
-                Account
-              </span>
+              <User className={`w-6 h-6 transition-colors ${currentView === "account" ? isLight ? "text-purple-600" : "text-white" : isLight ? "text-gray-400" : "text-white/40"}`} />
+              {currentView === "account" && (
+                <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isLight ? 'bg-purple-600' : 'bg-purple-400'}`} />
+              )}
             </button>
           </div>
         </div>
