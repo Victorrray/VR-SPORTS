@@ -247,7 +247,7 @@ export function CalculatorPage() {
         {/* Input Section */}
         <div className={`${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-gradient-to-br from-white/[0.08] to-white/[0.02] border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
           <div className="flex items-center gap-3 mb-5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isLight ? 'bg-blue-100' : 'bg-blue-500/20'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isLight ? 'bg-blue-100' : 'bg-blue-500/20'}`}>
               <DollarSign className={`w-4 h-4 ${isLight ? 'text-blue-600' : 'text-blue-400'}`} />
             </div>
             <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg`}>
@@ -391,7 +391,7 @@ export function CalculatorPage() {
         {/* Results Section */}
         <div className={`${isLight ? 'bg-white border-gray-200 shadow-sm' : 'bg-gradient-to-br from-white/[0.08] to-white/[0.02] border-white/10'} backdrop-blur-2xl border rounded-2xl p-6`}>
           <div className="flex items-center gap-3 mb-5">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isLight ? 'bg-emerald-100' : 'bg-emerald-500/20'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isLight ? 'bg-emerald-100' : 'bg-emerald-500/20'}`}>
               <TrendingUp className={`w-4 h-4 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
             </div>
             <h3 className={`${isLight ? lightModeColors.text : 'text-white'} font-bold text-lg`}>
