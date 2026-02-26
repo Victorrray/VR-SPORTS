@@ -196,10 +196,10 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
             <input 
               type="text"
               placeholder="Search teams, games, or leagues..."
-              className={`w-full pl-12 pr-4 py-3.5 ${isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-100' : 'bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/40 focus:bg-white/10'} backdrop-blur-2xl border rounded-xl focus:outline-none font-bold transition-all shadow-lg`}
+              className={`w-full pl-12 pr-4 py-2.5 ${isLight ? 'bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-purple-500' : 'bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-purple-400/40'} border rounded-lg focus:outline-none transition-colors text-sm`}
             />
           </div>
-          <button className={`flex items-center gap-2 px-4 py-3.5 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'} backdrop-blur-2xl border rounded-xl transition-all font-bold shadow-lg`} onClick={() => setShowFilters(!showFilters)}>
+          <button className={`flex items-center gap-2 px-4 py-2.5 ${isLight ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'} border rounded-lg transition-colors text-sm`} onClick={() => setShowFilters(!showFilters)}>
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">Filters</span>
           </button>
@@ -208,7 +208,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
 
       {/* Filter Panel */}
       {showFilters && (
-        <div className={`${isLight ? 'bg-white border-gray-300' : 'bg-white/5 border-white/10'} backdrop-blur-2xl border rounded-xl p-6 shadow-lg`}>
+        <div className={`${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg p-5`}>
           <div className="flex justify-between items-center mb-4">
             <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Filters</h3>
             <button 
@@ -259,7 +259,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {allPicks.length === 0 ? (
           /* Empty State */
-          <div className={`col-span-full flex flex-col items-center justify-center py-16 px-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-2xl`}>
+          <div className={`col-span-full flex flex-col items-center justify-center py-16 px-4 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-xl`}>
             <div className={`p-4 ${isLight ? 'bg-purple-100 border-purple-200' : 'bg-purple-500/20 border-purple-400/30'} backdrop-blur-xl rounded-full border mb-4`}>
               <Target className={`w-8 h-8 ${isLight ? 'text-purple-600' : 'text-purple-300'}`} />
             </div>
@@ -273,7 +273,7 @@ export function PicksPage({ savedPicks = [], onRemovePick, onUpdatePickStatus, o
           allPicks.map((pick, index) => (
             <div
               key={`pick-${index}-${pick.id}`}
-              className={`relative p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-gradient-to-br from-white/5 via-white/[0.02] to-transparent border-white/10'} backdrop-blur-2xl border rounded-xl hover:border-purple-400/40 transition-all group`}
+              className={`relative p-4 ${isLight ? 'bg-white border-gray-200' : 'bg-white/5 border-white/10'} border rounded-lg hover:border-purple-400/40 transition-colors group`}
             >
               {/* Sport Badge & Status */}
               <div className="mb-3 flex items-center justify-between">
