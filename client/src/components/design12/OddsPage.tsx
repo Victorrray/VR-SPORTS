@@ -1115,8 +1115,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             <span className="font-bold text-2xl md:text-3xl">
               {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
             </span>
-            <ChevronDown className={`w-6 h-6 transition-transform ${isBetTypeDropdownOpen ? 'rotate-180' : ''}`} />
-          </button>
+                      </button>
 
           {/* Dropdown Menu - Positioned relative to button */}
           {isBetTypeDropdownOpen && (
@@ -1193,8 +1192,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             <span className="font-bold text-2xl md:text-3xl">
               {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
             </span>
-            <ChevronDown className={`w-6 h-6 transition-transform ${isBetTypeDropdownOpen ? 'rotate-180' : ''}`} />
-          </button>
+                      </button>
 
           {/* Dropdown Menu - Positioned relative to button */}
           {isBetTypeDropdownOpen && (
@@ -1269,8 +1267,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           <span className="font-bold text-2xl md:text-3xl">
             {betTypes.find(b => b.id === selectedBetType)?.name || 'All Bets'}
           </span>
-          <ChevronDown className={`w-6 h-6 transition-transform ${isBetTypeDropdownOpen ? 'rotate-180' : ''}`} />
-        </button>
+                  </button>
 
         {/* Dropdown Menu - Positioned relative to button */}
         {isBetTypeDropdownOpen && (
