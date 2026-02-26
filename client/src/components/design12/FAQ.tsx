@@ -1,4 +1,4 @@
-import { Plus, Minus, HelpCircle, MessageCircle } from 'lucide-react';
+import { Plus, Minus, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,39 +37,20 @@ export function FAQ() {
   ];
 
   return (
-    <section id="faq" className="relative py-20 md:py-28 overflow-hidden bg-slate-950">
-      {/* Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+    <section id="faq" className="relative py-16 md:py-20 bg-slate-950">
+      <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
         <motion.div 
-          className="text-center mb-14 md:mb-20 max-w-3xl mx-auto"
+          className="text-center mb-12 max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
-          <motion.div 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-violet-500/20 border border-purple-400/30 rounded-full mb-6"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
-            <HelpCircle className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-300 text-sm font-semibold">FAQ</span>
-          </motion.div>
-          
-          <h2 className="text-white text-3xl md:text-5xl lg:text-6xl mb-6 font-extrabold tracking-tight">
-            Frequently Asked{' '}
-            <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
-              Questions
-            </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Frequently Asked Questions
           </h2>
-          
-          <p className="text-white/60 text-lg md:text-xl font-medium">
+          <p className="text-white/50 text-lg">
             Everything you need to know about OddSightSeer
           </p>
         </motion.div>
@@ -82,8 +63,8 @@ export function FAQ() {
             return (
               <motion.div
                 key={index}
-                className={`group bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-300 ${
-                  isOpen ? 'border-purple-400/50 shadow-lg shadow-purple-500/10' : 'border-white/10 hover:border-white/20'
+                className={`bg-white/5 border rounded-2xl overflow-hidden transition-all ${
+                  isOpen ? 'border-purple-500/30' : 'border-white/10'
                 }`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -141,22 +122,20 @@ export function FAQ() {
 
         {/* Bottom CTA */}
         <motion.div 
-          className="mt-14 text-center"
+          className="mt-12 text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
-          <p className="text-white/50 mb-5 font-medium">Still have questions?</p>
-          <motion.button 
+          <p className="text-white/40 mb-4 text-sm">Still have questions?</p>
+          <button 
             onClick={() => window.location.href = 'mailto:support@oddsightseer.com'}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-br from-white/10 to-white/5 hover:from-white/15 hover:to-white/10 backdrop-blur-sm border border-white/20 hover:border-purple-400/50 rounded-2xl transition-all font-bold text-white shadow-xl"
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all font-semibold text-white"
           >
-            <MessageCircle className="w-5 h-5 text-purple-400" />
+            <MessageCircle className="w-4 h-4 text-purple-400" />
             <span>Contact Support</span>
-          </motion.button>
+          </button>
         </motion.div>
       </div>
     </section>
