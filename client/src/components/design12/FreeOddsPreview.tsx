@@ -61,7 +61,7 @@ const sampleBets = [
 
 export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
   return (
-    <section className="relative py-20 md:py-28 bg-slate-950 overflow-hidden">
+    <section className="relative py-12 md:py-16 bg-slate-950 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-3xl" />
@@ -75,7 +75,7 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-6">
             <Eye className="w-4 h-4 text-purple-400" />
@@ -98,8 +98,8 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
           className="max-w-5xl mx-auto"
         >
           <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl overflow-hidden">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/10 bg-white/5">
+            {/* Table Header - Hidden on mobile */}
+            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/10 bg-white/5">
               <div className="col-span-4 text-white/50 text-xs font-semibold uppercase tracking-wider">Matchup</div>
               <div className="col-span-2 text-white/50 text-xs font-semibold uppercase tracking-wider">Market</div>
               <div className="col-span-2 text-white/50 text-xs font-semibold uppercase tracking-wider">Best Odds</div>
@@ -115,52 +115,87 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: 0.1 * index }}
-                className={`grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/5 last:border-b-0 transition-all ${
+                className={`px-4 md:px-6 py-3 md:py-4 border-b border-white/5 last:border-b-0 transition-all ${
                   bet.isLocked ? 'opacity-50' : 'hover:bg-white/5'
                 }`}
               >
-                <div className="col-span-4">
-                  <div className="flex items-center gap-3">
-                    {bet.isLocked && (
-                      <Lock className="w-4 h-4 text-white/30 flex-shrink-0" />
-                    )}
-                    <div>
-                      <div className={`font-semibold ${bet.isLocked ? 'text-white/30' : 'text-white'}`}>
-                        {bet.isLocked ? '••••••••••••' : bet.matchup}
+                {/* Mobile Layout */}
+                <div className="md:hidden">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {bet.isLocked && (
+                        <Lock className="w-4 h-4 text-white/30 flex-shrink-0" />
+                      )}
+                      <div className="min-w-0">
+                        <div className={`font-semibold text-sm truncate ${bet.isLocked ? 'text-white/30' : 'text-white'}`}>
+                          {bet.isLocked ? '••••••••••••' : bet.matchup}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                            bet.isLocked ? 'bg-white/5 text-white/30' : 'bg-purple-500/20 text-purple-300'
+                          }`}>
+                            {bet.isLocked ? '•••' : bet.market}
+                          </span>
+                          <span className={`text-xs ${bet.isLocked ? 'text-white/20' : 'text-white/50'}`}>
+                            {bet.isLocked ? '•••' : bet.pick}
+                          </span>
+                        </div>
                       </div>
-                      <div className={`text-sm ${bet.isLocked ? 'text-white/20' : 'text-white/50'}`}>
-                        {bet.isLocked ? '••••••••' : bet.pick}
-                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`font-bold text-sm ${bet.isLocked ? 'text-white/30' : 'text-white'}`}>
+                        {bet.isLocked ? '•••' : bet.bestOdds}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        bet.isLocked ? 'bg-white/5 text-white/30' : 'bg-emerald-500/20 text-emerald-400'
+                      }`}>
+                        {bet.isLocked ? '•••' : bet.edge}
+                      </span>
                     </div>
                   </div>
                 </div>
-                <div className="col-span-2 flex items-center">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    bet.isLocked 
-                      ? 'bg-white/5 text-white/30' 
-                      : 'bg-purple-500/20 text-purple-300'
-                  }`}>
-                    {bet.isLocked ? '•••••' : bet.market}
-                  </span>
-                </div>
-                <div className="col-span-2 flex items-center">
-                  <span className={`font-bold ${bet.isLocked ? 'text-white/30' : 'text-white'}`}>
-                    {bet.isLocked ? '•••' : bet.bestOdds}
-                  </span>
-                </div>
-                <div className="col-span-2 flex items-center">
-                  <span className={bet.isLocked ? 'text-white/30' : 'text-white/70'}>
-                    {bet.isLocked ? '••••••••' : bet.bestBook}
-                  </span>
-                </div>
-                <div className="col-span-2 flex items-center justify-end">
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${
-                    bet.isLocked 
-                      ? 'bg-white/5 text-white/30' 
-                      : 'bg-emerald-500/20 text-emerald-400'
-                  }`}>
-                    {bet.isLocked ? '•••' : bet.edge}
-                  </span>
+
+                {/* Desktop Layout */}
+                <div className="hidden md:grid grid-cols-12 gap-4">
+                  <div className="col-span-4">
+                    <div className="flex items-center gap-3">
+                      {bet.isLocked && (
+                        <Lock className="w-4 h-4 text-white/30 flex-shrink-0" />
+                      )}
+                      <div>
+                        <div className={`font-semibold ${bet.isLocked ? 'text-white/30' : 'text-white'}`}>
+                          {bet.isLocked ? '••••••••••••' : bet.matchup}
+                        </div>
+                        <div className={`text-sm ${bet.isLocked ? 'text-white/20' : 'text-white/50'}`}>
+                          {bet.isLocked ? '••••••••' : bet.pick}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      bet.isLocked ? 'bg-white/5 text-white/30' : 'bg-purple-500/20 text-purple-300'
+                    }`}>
+                      {bet.isLocked ? '•••••' : bet.market}
+                    </span>
+                  </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className={`font-bold ${bet.isLocked ? 'text-white/30' : 'text-white'}`}>
+                      {bet.isLocked ? '•••' : bet.bestOdds}
+                    </span>
+                  </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className={bet.isLocked ? 'text-white/30' : 'text-white/70'}>
+                      {bet.isLocked ? '••••••••' : bet.bestBook}
+                    </span>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-end">
+                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                      bet.isLocked ? 'bg-white/5 text-white/30' : 'bg-emerald-500/20 text-emerald-400'
+                    }`}>
+                      {bet.isLocked ? '•••' : bet.edge}
+                    </span>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -195,7 +230,7 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="flex flex-wrap items-center justify-center gap-3 mt-10"
+          className="flex flex-wrap items-center justify-center gap-3 mt-8"
         >
           {[
             { icon: TrendingUp, text: '+EV Bets Highlighted' },
