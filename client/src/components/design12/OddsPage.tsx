@@ -1344,10 +1344,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date */}
             <button 
               onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-2xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
+              className={`flex items-center gap-2 h-10 px-4 border rounded-lg transition-colors text-sm ${
                 isLight 
-                  ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' 
-                  : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                  ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' 
+                  : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
               <Filter className="w-4 h-4" />
@@ -1377,10 +1377,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 }
               }}
               disabled={isLoading}
-              className={`flex items-center gap-2 h-[44px] px-4 backdrop-blur-xl border rounded-xl transition-all font-bold whitespace-nowrap text-sm ${
+              className={`flex items-center gap-2 h-10 px-4 border rounded-lg transition-colors text-sm ${
                 isLoading
-                  ? isLight ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                  : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                  ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                  : isLight ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -1388,21 +1388,21 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             </button>
 
             {/* Pagination Controls - Mobile only */}
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex md:hidden items-center gap-1.5">
               <button 
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
-                className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
                   currentPage === 1
-                    ? isLight ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                    : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                    : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <ChevronRight className="w-5 h-5 rotate-180" />
+                <ChevronRight className="w-4 h-4 rotate-180" />
               </button>
               
-              <div className={`flex items-center h-[44px] px-4 backdrop-blur-2xl border rounded-xl ${isLight ? 'bg-white border-gray-300 text-gray-700' : 'bg-white/5 border-white/10 text-white/60'}`}>
-                <span className="font-bold text-sm whitespace-nowrap">
+              <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+                <span className="text-sm whitespace-nowrap">
                   {currentPage}/{totalPages}
                 </span>
               </div>
@@ -1410,34 +1410,34 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <button 
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
-                className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
                   currentPage === totalPages
-                    ? isLight ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                    : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                    ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                    : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Pagination Controls - Desktop only */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-1.5">
           <button 
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
-            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
               currentPage === 1
-                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <ChevronRight className="w-5 h-5 rotate-180" />
+            <ChevronRight className="w-4 h-4 rotate-180" />
           </button>
           
-          <div className={`flex items-center h-[44px] px-4 backdrop-blur-2xl border rounded-xl ${isLight ? 'bg-white border-gray-300 text-gray-700' : 'bg-white/5 border-white/10 text-white/60'}`}>
-            <span className="font-bold text-sm whitespace-nowrap">
+          <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+            <span className="text-sm whitespace-nowrap">
               {currentPage}/{totalPages}
             </span>
           </div>
@@ -1445,13 +1445,13 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           <button 
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
-            className={`flex items-center justify-center w-[44px] h-[44px] backdrop-blur-2xl border rounded-xl transition-all font-bold ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
               currentPage === totalPages
-                ? isLight ? 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/30 cursor-not-allowed'
-                : isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
+                : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -1475,35 +1475,27 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-gradient-to-b from-white to-slate-50' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-purple-500/20'} lg:rounded-none max-lg:rounded-t-3xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-80 max-lg:w-full shadow-2xl`}
+            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!left-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl`}
             style={{
               zIndex: 9999,
               top: '-64px',
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white/95 backdrop-blur-xl' : 'bg-slate-900/95 backdrop-blur-xl'} z-10 px-6 pt-6 lg:pt-6 pb-4 space-y-4 lg:border-b border-b-0 ${isLight ? 'border-gray-200' : 'border-white/10'} -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-3xl`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white' : 'bg-slate-950'} z-10 px-5 pt-5 lg:pt-5 pb-3 space-y-3 lg:border-b border-b-0 ${isLight ? 'border-gray-100' : 'border-white/5'} -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-2xl`}>
               {/* Drag Handle - Mobile Only */}
-              <div className="flex lg:hidden justify-center pt-3 pb-2 -mt-6">
-                <div className={`w-12 h-1.5 rounded-full ${isLight ? 'bg-gray-300' : 'bg-gradient-to-r from-purple-500/50 to-violet-500/50'}`}></div>
+              <div className="flex lg:hidden justify-center pt-2 pb-1 -mt-5">
+                <div className={`w-10 h-1 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
               </div>
               {/* Header */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isLight ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-500/20 to-violet-500/20 border border-purple-500/30'}`}>
-                    <Filter className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
-                  </div>
-                  <div>
-                    <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Filters</h3>
-                    <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Customize your view</p>
-                  </div>
-                </div>
+                <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>Filters</h3>
                 <button
                   onClick={closeFilterMenu}
-                  className={`w-10 h-10 flex items-center justify-center ${isLight ? 'hover:bg-gray-100 text-gray-500' : 'hover:bg-white/10 text-white/60'} rounded-xl transition-all`}
+                  className={`w-8 h-8 flex items-center justify-center ${isLight ? 'hover:bg-gray-100 text-gray-400' : 'hover:bg-white/10 text-white/50'} rounded-lg transition-colors`}
                 >
-                  <ChevronRight className="w-5 h-5 lg:block hidden" />
-                  <span className="lg:hidden text-lg">✕</span>
+                  <ChevronRight className="w-4 h-4 lg:block hidden" />
+                  <span className="lg:hidden text-sm">✕</span>
                 </button>
               </div>
               
@@ -1511,7 +1503,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               <div className="flex lg:hidden gap-2">
                 <button
                   onClick={applyFilters}
-                  className="flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all text-center bg-gradient-to-r from-purple-500 to-violet-500 text-white hover:from-purple-600 hover:to-violet-600 shadow-lg shadow-purple-500/25"
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm transition-colors text-center bg-purple-600 text-white hover:bg-purple-500"
                 >
                   Apply Filters
                 </button>
@@ -1535,10 +1527,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                       description: 'All filters have been cleared'
                     });
                   }}
-                  className={`px-4 py-3 rounded-xl font-bold text-sm transition-all text-center ${
+                  className={`px-4 py-2.5 rounded-lg text-sm transition-colors text-center ${
                     isLight 
                       ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
-                      : 'bg-white/5 text-white/60 hover:bg-white/10 border border-white/10'
+                      : 'bg-white/5 text-white/60 hover:bg-white/10'
                   }`}
                 >
                   Reset
@@ -1547,23 +1539,21 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             </div>
 
             {/* Content - scrollable on both mobile and desktop */}
-            <div className="overflow-y-auto flex-1 p-6 pt-6 lg:pt-12 space-y-4 lg:space-y-5 scrollbar-hide">
+            <div className="overflow-y-auto flex-1 p-5 pt-4 lg:pt-6 space-y-4 scrollbar-hide">
 
               {/* Auto Refresh Toggle - Platinum Only */}
               <div className={!hasPlatinum ? 'opacity-50' : ''}>
-                <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 flex items-center gap-2`}>
+                <label className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-[10px] uppercase tracking-wider mb-2 flex items-center gap-2`}>
                   Auto Refresh
                   {!hasPlatinum && <span className="text-purple-400 text-[10px] ml-1 normal-case">(Platinum)</span>}
                 </label>
-                <div className={`flex items-center justify-between p-4 ${isLight ? 'bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-100' : 'bg-gradient-to-r from-purple-500/10 to-violet-500/10 border border-purple-500/20'} rounded-2xl`}>
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${autoRefresh && hasPlatinum ? (isLight ? 'bg-purple-100' : 'bg-purple-500/20') : (isLight ? 'bg-gray-100' : 'bg-white/5')}`}>
-                      <RefreshCw className={`w-4 h-4 ${autoRefresh && hasPlatinum ? (isLight ? 'text-purple-600' : 'text-purple-400') : (isLight ? 'text-gray-400' : 'text-white/40')}`} />
-                    </div>
+                <div className={`flex items-center justify-between p-3 ${isLight ? 'bg-gray-50 border border-gray-100' : 'bg-white/5 border border-white/5'} rounded-lg`}>
+                  <div className="flex items-center gap-2.5 flex-1">
+                    <RefreshCw className={`w-4 h-4 ${autoRefresh && hasPlatinum ? (isLight ? 'text-purple-600' : 'text-purple-400') : (isLight ? 'text-gray-400' : 'text-white/40')}`} />
                     <div>
-                      <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-semibold text-sm`}>Auto Refresh Odds</div>
-                      <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-xs`}>
-                        {!hasPlatinum ? 'Upgrade to Platinum' : autoRefresh ? 'Every 30 seconds' : 'Manual refresh only'}
+                      <div className={`${isLight ? 'text-gray-700' : 'text-white/80'} text-sm`}>Auto Refresh</div>
+                      <div className={`${isLight ? 'text-gray-400' : 'text-white/40'} text-xs`}>
+                        {!hasPlatinum ? 'Platinum only' : autoRefresh ? 'Every 30s' : 'Off'}
                       </div>
                     </div>
                   </div>
@@ -1583,12 +1573,12 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
               {/* Minimum Data Points Slider - Hidden for arbitrage, middles, and exchanges */}
               {selectedBetType !== 'arbitrage' && selectedBetType !== 'middles' && selectedBetType !== 'exchanges' && (
                 <div>
-                  <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 block`}>
-                    Minimum Data Points
+                  <label className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-[10px] uppercase tracking-wider mb-2 block`}>
+                    Min Data Points
                   </label>
-                  <div className={`p-4 ${isLight ? 'bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-100' : 'bg-gradient-to-r from-purple-500/10 to-violet-500/10 border border-purple-500/20'} rounded-2xl`}>
-                    <div className="flex items-center gap-3">
-                      <span className={`${isLight ? 'text-gray-400' : 'text-white/30'} text-xs font-medium`}>1</span>
+                  <div className={`p-3 ${isLight ? 'bg-gray-50 border border-gray-100' : 'bg-white/5 border border-white/5'} rounded-lg`}>
+                    <div className="flex items-center gap-2.5">
+                      <span className={`${isLight ? 'text-gray-400' : 'text-white/30'} text-xs`}>1</span>
                       <input
                         type="range"
                         min="1"
@@ -1596,13 +1586,13 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                         step="1"
                         value={minDataPoints}
                         onChange={(e) => setMinDataPoints(parseInt(e.target.value))}
-                        className={`flex-1 h-2 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-purple-500`}
+                        className={`flex-1 h-1.5 rounded-full appearance-none cursor-pointer ${isLight ? 'bg-gray-200' : 'bg-white/10'} accent-purple-500`}
                         style={{
                           background: `linear-gradient(to right, ${isLight ? '#a855f7' : '#a855f7'} 0%, ${isLight ? '#a855f7' : '#a855f7'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} ${((minDataPoints - 1) / 14) * 100}%, ${isLight ? '#e5e7eb' : 'rgba(255,255,255,0.1)'} 100%)`
                         }}
                       />
-                      <div className={`${isLight ? 'text-purple-600 bg-purple-100' : 'text-purple-300 bg-purple-500/20'} px-3 py-1.5 rounded-full font-bold text-sm min-w-[48px] text-center`}>
-                        {minDataPoints === 15 ? 'MAX' : minDataPoints}
+                      <div className={`${isLight ? 'text-gray-700' : 'text-white/70'} text-sm min-w-[32px] text-center`}>
+                        {minDataPoints}
                       </div>
                     </div>
                   </div>
@@ -1611,13 +1601,13 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
 
               {/* Date Filter */}
               <div className="relative">
-                <label className={`${isLight ? 'text-gray-600' : 'text-white/60'} font-semibold text-[11px] uppercase tracking-wider mb-2 block`}>
+                <label className={`${isLight ? 'text-gray-500' : 'text-white/40'} text-[10px] uppercase tracking-wider mb-2 block`}>
                   Date
                 </label>
                 <button
                   onClick={() => setDateExpanded(!dateExpanded)}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl font-semibold text-sm transition-all ${
-                    isLight ? 'bg-white border border-gray-200 text-gray-900 hover:border-purple-300 hover:bg-purple-50/50' : 'bg-white/5 border border-white/10 text-white hover:border-purple-500/30 hover:bg-purple-500/10'
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                    isLight ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-white/5 border border-white/10 text-white/80 hover:bg-white/10'
                   }`}
                 >
                   <span>
@@ -1628,7 +1618,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                 
                 {/* Desktop Inline Dropdown */}
                 {dateExpanded && (
-                  <div className={`hidden lg:block mt-2 ${isLight ? 'bg-white border-gray-200 shadow-lg' : 'bg-slate-800/95 backdrop-blur-xl border-white/10'} border rounded-2xl overflow-hidden`}>
+                  <div className={`hidden lg:block mt-1.5 ${isLight ? 'bg-white border-gray-200 shadow-lg' : 'bg-slate-900 border-white/10'} border rounded-lg overflow-hidden`}>
                     {dateOptions.map((date) => (
                       <button
                         key={date.id}
@@ -1636,10 +1626,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                           setSelectedDate(date.id);
                           setDateExpanded(false);
                         }}
-                        className={`w-full text-left px-4 py-3 font-medium transition-all ${
+                        className={`w-full text-left px-3 py-2 text-sm transition-colors ${
                           selectedDate === date.id
-                            ? isLight ? 'bg-purple-100 text-purple-700' : 'bg-purple-500/30 text-white'
-                            : isLight ? 'text-gray-700 hover:bg-gray-50' : 'text-white/70 hover:bg-white/5'
+                            ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/10 text-white'
+                            : isLight ? 'text-gray-600 hover:bg-gray-50' : 'text-white/60 hover:bg-white/5'
                         }`}
                       >
                         {date.name}
