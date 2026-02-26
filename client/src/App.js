@@ -17,6 +17,7 @@ import DebugPanel from './components/debug/DebugPanel';
 // import NavbarRevamped from './components/layout/NavbarRevamped'; // OLD - Using new Header from landing page
 // import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
 import Landing from './pages/Landing';
+import PricingPage from './pages/PricingPage';
 import DashboardPage from './pages/DashboardPage';
 import DFSMarkets from './pages/DFSMarkets';
 import SportsbookMarkets from './pages/SportsbookMarkets';
@@ -149,7 +150,7 @@ function AppRoutes() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
-              {/* <Route path="/pricing" element={<Landing />} /> */}
+              <Route path="/pricing" element={<PricingPage />} />
               <Route path="/subscribe" element={<PrivateRoute><Subscribe /></PrivateRoute>} />
               {/* <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} /> */}
               {/* <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} /> */}

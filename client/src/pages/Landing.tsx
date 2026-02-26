@@ -2,13 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/SimpleAuth';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { Hero } from '../components/design12/Hero';
-import { Stats } from '../components/design12/Stats';
 import { FreeOddsPreview } from '../components/design12/FreeOddsPreview';
-// import { Features } from '../components/design12/Features';
 import { Header } from '../components/design12/Header';
-import { Bookmakers } from '../components/design12/Bookmakers';
 import { HowItWorks } from '../components/design12/HowItWorks';
-import { Pricing } from '../components/design12/Pricing';
 import { FAQ } from '../components/design12/FAQ';
 import { Footer } from '../components/design12/Footer';
 import { PAGE_TITLES, PAGE_DESCRIPTIONS, generateSchemaMarkup, SITE_CONFIG } from '../utils/seo';
@@ -59,12 +55,8 @@ export default function Landing() {
           onSignupClick={handleSignUpClick}
         />
         <Hero onGetStartedClick={handleSignUpClick} />
-        <Stats />
         <FreeOddsPreview onGetStartedClick={handleSignUpClick} />
-        <Bookmakers />
-        {/* <Features /> */}
         <HowItWorks />
-        <Pricing />
         <FAQ />
         <Footer 
           onRoadmapClick={handleRoadmapClick}

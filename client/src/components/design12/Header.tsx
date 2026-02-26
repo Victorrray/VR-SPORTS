@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 interface HeaderProps {
@@ -10,6 +11,7 @@ interface HeaderProps {
 
 export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignupClick }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <header className="absolute top-0 left-0 right-0 z-50">
@@ -47,9 +49,12 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
             >
               Dashboard
             </button>
-            <a href="#pricing" className="text-white/70 hover:text-white transition-colors font-medium">
+            <button 
+              onClick={() => navigate('/pricing')}
+              className="text-white/70 hover:text-white transition-colors font-medium"
+            >
               Pricing
-            </a>
+            </button>
             <a href="#faq" className="text-white/70 hover:text-white transition-colors font-medium">
               FAQ
             </a>
@@ -96,9 +101,12 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
               >
                 Dashboard
               </button>
-              <a href="#pricing" className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
+              <button 
+                onClick={() => { navigate('/pricing'); setMobileMenuOpen(false); }}
+                className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold text-left"
+              >
                 Pricing
-              </a>
+              </button>
               <a href="#faq" className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
                 FAQ
               </a>
