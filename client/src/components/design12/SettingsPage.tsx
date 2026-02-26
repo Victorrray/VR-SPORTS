@@ -28,45 +28,39 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-white text-2xl md:text-3xl font-extrabold tracking-tight">
-          App{' '}
-          <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
-            Settings
-          </span>
+        <h1 className="text-white text-xl md:text-2xl font-bold">
+          App Settings
         </h1>
         <p className="text-white/50 font-medium">Customize your OddSightSeer experience</p>
       </motion.div>
 
       {/* Display & Preferences */}
       <motion.div 
-        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-                
-        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-            <Globe className="w-4 h-4 text-white" />
-          </div>
+        <h2 className="text-white font-bold text-sm flex items-center gap-2 mb-5">
+          <Globe className="w-4 h-4 text-purple-400" />
           Display & Preferences
         </h2>
 
         <div className="space-y-4">
-          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-3 mb-4">
-              <DollarSign className="w-5 h-5 text-purple-400" />
-              <div className="text-white font-semibold">Default Odds Format</div>
+          <div className="p-3.5 bg-white/5 rounded-lg border border-white/10">
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="w-4 h-4 text-purple-400" />
+              <div className="text-white text-sm">Default Odds Format</div>
             </div>
             
             <div className="grid grid-cols-3 gap-2">
               {/* American */}
               <button
                 onClick={() => setOddsFormat('american')}
-                className={`p-3 rounded-xl border transition-all ${
+                className={`p-2.5 rounded-lg border transition-colors ${
                   oddsFormat === 'american'
-                    ? 'bg-purple-500/20 border-purple-400/50 text-purple-300'
-                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                    ? 'bg-purple-500/20 border-purple-400/30 text-purple-300'
+                    : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-1">
@@ -81,10 +75,10 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
               {/* Decimal */}
               <button
                 onClick={() => setOddsFormat('decimal')}
-                className={`p-3 rounded-xl border transition-all ${
+                className={`p-2.5 rounded-lg border transition-colors ${
                   oddsFormat === 'decimal'
-                    ? 'bg-purple-500/20 border-purple-400/50 text-purple-300'
-                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                    ? 'bg-purple-500/20 border-purple-400/30 text-purple-300'
+                    : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-1">
@@ -99,10 +93,10 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
               {/* Fractional */}
               <button
                 onClick={() => setOddsFormat('fractional')}
-                className={`p-3 rounded-xl border transition-all ${
+                className={`p-2.5 rounded-lg border transition-colors ${
                   oddsFormat === 'fractional'
-                    ? 'bg-purple-500/20 border-purple-400/50 text-purple-300'
-                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                    ? 'bg-purple-500/20 border-purple-400/30 text-purple-300'
+                    : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                 }`}
               >
                 <div className="flex items-center justify-center gap-1.5 mb-1">
@@ -120,16 +114,13 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
 
       {/* Advanced Settings */}
       <motion.div 
-        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-                
-        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-            <Settings className="w-4 h-4 text-white" />
-          </div>
+        <h2 className="text-white font-bold text-sm flex items-center gap-2 mb-5">
+          <Settings className="w-4 h-4 text-blue-400" />
           Advanced
         </h2>
 
@@ -167,32 +158,29 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
                 description: 'Temporary data cleared. Your settings have been preserved.'
               });
             }}
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors text-left"
           >
             <div className="flex items-center gap-3">
-              <Trash2 className="w-5 h-5 text-blue-400" />
+              <Trash2 className="w-4 h-4 text-blue-400" />
               <div>
-                <div className="text-white font-semibold">Clear Cache</div>
-                <div className="text-white/50 text-sm">Remove temporary data (preserves your settings)</div>
+                <div className="text-white text-sm">Clear Cache</div>
+                <div className="text-white/40 text-xs">Remove temporary data (preserves your settings)</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </button>
         </div>
       </motion.div>
 
       {/* Legal Links */}
       <motion.div 
-        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-                
-        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
+        <h2 className="text-white font-bold text-sm flex items-center gap-2 mb-5">
+          <Shield className="w-4 h-4 text-amber-400" />
           Legal
         </h2>
 
@@ -201,48 +189,48 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
             href="/privacy"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-amber-400" />
+              <FileText className="w-4 h-4 text-amber-400" />
               <div>
-                <div className="text-white font-semibold">Privacy Policy</div>
-                <div className="text-white/50 text-sm">How we handle your data</div>
+                <div className="text-white text-sm">Privacy Policy</div>
+                <div className="text-white/40 text-xs">How we handle your data</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </a>
 
           <a 
             href="/terms"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-amber-400" />
+              <FileText className="w-4 h-4 text-amber-400" />
               <div>
-                <div className="text-white font-semibold">Terms of Service</div>
-                <div className="text-white/50 text-sm">Rules and guidelines</div>
+                <div className="text-white text-sm">Terms of Service</div>
+                <div className="text-white/40 text-xs">Rules and guidelines</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </a>
 
           <a 
             href="/disclaimer"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-400" />
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
               <div>
-                <div className="text-white font-semibold">Disclaimer</div>
-                <div className="text-white/50 text-sm">Important legal notices</div>
+                <div className="text-white text-sm">Disclaimer</div>
+                <div className="text-white/40 text-xs">Important legal notices</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </a>
         </div>
       </motion.div>

@@ -131,9 +131,9 @@ export function AccountPage({
       {onNavigateToSettings && (
         <motion.button
           onClick={onNavigateToSettings}
-          className="absolute top-0 right-0 p-2.5 bg-gradient-to-br from-purple-500/20 to-violet-500/20 border-purple-400/30 text-purple-300 backdrop-blur-xl border rounded-xl hover:bg-purple-500/30 transition-all z-10"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="absolute top-0 right-0 p-2 bg-white/5 border-white/10 text-white/60 border rounded-lg hover:bg-white/10 hover:text-white transition-colors z-10"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <Settings className="w-5 h-5" />
         </motion.button>
@@ -146,11 +146,8 @@ export function AccountPage({
         animate={{ opacity: 1, y: 0 }}
       >
         <div>
-          <h1 className="text-white text-2xl md:text-3xl font-extrabold tracking-tight">
-            Account{' '}
-            <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
-              Settings
-            </span>
+          <h1 className="text-white text-xl md:text-2xl font-bold">
+            Account Settings
           </h1>
           <p className="text-white/50 font-medium">
             Manage your profile and subscription
@@ -160,27 +157,24 @@ export function AccountPage({
 
       {/* Profile Section */}
       <motion.div 
-        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-                
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white font-bold flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-              <User className="w-4 h-4 text-white" />
-            </div>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-white font-bold text-sm flex items-center gap-2">
+            <User className="w-4 h-4 text-purple-400" />
             Profile Information
           </h2>
         </div>
 
-        <div className="flex items-center gap-6 mb-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/30 to-violet-500/30 border border-purple-400/30 flex items-center justify-center">
-            <User className="w-10 h-10 text-purple-300" />
+        <div className="flex items-center gap-4 mb-5">
+          <div className="w-14 h-14 rounded-xl bg-purple-500/20 border border-purple-400/20 flex items-center justify-center">
+            <User className="w-7 h-7 text-purple-400" />
           </div>
           <div className="flex-1">
-            <h3 className="text-white text-xl font-bold mb-2">
+            <h3 className="text-white text-lg font-bold mb-1.5">
               {profile?.username || user?.email?.split('@')[0] || 'User'}
             </h3>
             <div className="flex items-center gap-2">
@@ -207,7 +201,7 @@ export function AccountPage({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+          <div className="p-3.5 bg-white/5 rounded-lg border border-white/10">
             <div className="flex items-center gap-3 mb-2">
               <Mail className="w-4 h-4 text-purple-400" />
               <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Email</span>
@@ -226,7 +220,7 @@ export function AccountPage({
             </div>
           </div>
 
-          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+          <div className="p-3.5 bg-white/5 rounded-lg border border-white/10">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-4 h-4 text-purple-400" />
               <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Member Since</span>
@@ -242,46 +236,43 @@ export function AccountPage({
 
       {/* Billing & Subscription Section */}
       <motion.div 
-        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-                
-        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-            <CreditCard className="w-4 h-4 text-white" />
-          </div>
+        <h2 className="text-white font-bold text-sm flex items-center gap-2 mb-5">
+          <CreditCard className="w-4 h-4 text-green-400" />
           Billing & Subscription
         </h2>
 
         <div className="space-y-4">
           {/* Current Plan */}
           {isPlatinum ? (
-            <div className={`p-6 ${isLight ? 'bg-purple-50 border-purple-200' : 'bg-purple-500/10 border-purple-400/30'} backdrop-blur-xl rounded-xl border shadow-lg`}>
+            <div className="p-5 bg-purple-500/10 border-purple-400/20 rounded-lg border">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-amber-100 border-amber-200' : 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
-                    <Crown className={`w-6 h-6 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 border-amber-400/20 border flex items-center justify-center">
+                    <Crown className="w-5 h-5 text-amber-400" />
                   </div>
                   <div>
-                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Platinum Plan</div>
-                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Premium features unlocked</div>
+                    <div className="text-white font-bold">Platinum Plan</div>
+                    <div className="text-white/50 text-sm">Premium features unlocked</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>$25</div>
-                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>per month</div>
+                  <div className="text-white font-bold text-xl">$25</div>
+                  <div className="text-white/50 text-sm">per month</div>
                 </div>
               </div>
               
               {me?.cancel_at_period_end ? (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-orange-600' : 'text-orange-400'} text-sm font-bold mb-4`}>
+                <div className="flex items-center gap-2 text-orange-400 text-sm mb-3">
                   <Calendar className="w-4 h-4" />
                   <span>Subscription Ending{me?.subscription_end_date ? ` · Access until ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
                 </div>
               ) : (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                <div className="flex items-center gap-2 text-green-400 text-sm mb-3">
                   <Calendar className="w-4 h-4" />
                   <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
                 </div>
@@ -290,37 +281,37 @@ export function AccountPage({
               <div className="flex gap-2">
                 <button 
                   onClick={onNavigateToChangePlan}
-                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+                  className="flex-1 px-4 py-2.5 bg-white/5 border-white/10 text-white hover:bg-white/10 border rounded-lg transition-colors text-sm"
                 >
                   {me?.cancel_at_period_end ? 'Resubscribe' : 'Change Plan'}
                 </button>
               </div>
             </div>
           ) : isGold ? (
-            <div className={`p-6 ${isLight ? 'bg-yellow-50 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/10 via-amber-500/10 to-transparent border-yellow-400/30'} backdrop-blur-xl rounded-xl border shadow-lg`}>
+            <div className="p-5 bg-yellow-500/10 border-yellow-400/20 rounded-lg border">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-yellow-100 border-yellow-200' : 'bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border-yellow-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
-                    <Star className={`w-6 h-6 ${isLight ? 'text-yellow-600' : 'text-yellow-400'}`} />
+                  <div className="w-10 h-10 rounded-lg bg-yellow-500/20 border-yellow-400/20 border flex items-center justify-center">
+                    <Star className="w-5 h-5 text-yellow-400" />
                   </div>
                   <div>
-                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Gold Plan</div>
-                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Enhanced features</div>
+                    <div className="text-white font-bold">Gold Plan</div>
+                    <div className="text-white/50 text-sm">Enhanced features</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>$10</div>
-                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>per month</div>
+                  <div className="text-white font-bold text-xl">$10</div>
+                  <div className="text-white/50 text-sm">per month</div>
                 </div>
               </div>
               
               {me?.cancel_at_period_end ? (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-orange-600' : 'text-orange-400'} text-sm font-bold mb-4`}>
+                <div className="flex items-center gap-2 text-orange-400 text-sm mb-3">
                   <Calendar className="w-4 h-4" />
                   <span>Subscription Ending{me?.subscription_end_date ? ` · Access until ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
                 </div>
               ) : (
-                <div className={`flex items-center gap-2 ${isLight ? 'text-green-600' : 'text-green-400'} text-sm font-bold mb-4`}>
+                <div className="flex items-center gap-2 text-green-400 text-sm mb-3">
                   <Calendar className="w-4 h-4" />
                   <span>Active Subscription{me?.subscription_end_date ? ` · Next payment ${new Date(me.subscription_end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}</span>
                 </div>
@@ -329,36 +320,36 @@ export function AccountPage({
               <div className="flex gap-2">
                 <button 
                   onClick={onNavigateToChangePlan}
-                  className={`flex-1 px-4 py-3 ${isLight ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'} backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
+                  className="flex-1 px-4 py-2.5 bg-white/5 border-white/10 text-white hover:bg-white/10 border rounded-lg transition-colors text-sm"
                 >
                   {me?.cancel_at_period_end ? 'Resubscribe' : 'Change Plan'}
                 </button>
               </div>
             </div>
           ) : (
-            <div className={`p-6 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-gray-500/10 via-slate-500/10 to-transparent border-gray-400/30'} backdrop-blur-xl rounded-xl border`}>
+            <div className="p-5 bg-white/5 border-white/10 rounded-lg border">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl ${isLight ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-br from-gray-500/20 to-slate-500/20 border-gray-400/30'} border flex items-center justify-center backdrop-blur-xl`}>
-                    <User className={`w-6 h-6 ${isLight ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <div className="w-10 h-10 rounded-lg bg-white/10 border-white/10 border flex items-center justify-center">
+                    <User className="w-5 h-5 text-gray-400" />
                   </div>
                   <div>
-                    <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-lg`}>Free Plan</div>
-                    <div className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm font-bold`}>Limited access</div>
+                    <div className="text-white font-bold">Free Plan</div>
+                    <div className="text-white/50 text-sm">Limited access</div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-2xl`}>Free</div>
-                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>Limited</div>
+                  <div className="text-white font-bold text-xl">Free</div>
+                  <div className="text-white/50 text-sm">Limited</div>
                 </div>
               </div>
-              <div className={`pt-4 border-t ${isLight ? 'border-gray-200' : 'border-gray-400/20'}`}>
-                <p className={`${isLight ? 'text-gray-600' : 'text-white/60'} text-sm mb-4`}>
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-white/50 text-sm mb-4">
                   Upgrade to unlock unlimited odds data, arbitrage detection, and more!
                 </p>
                 <button 
                   onClick={onNavigateToChangePlan}
-                  className="w-full px-4 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-400 transition-all font-bold text-sm"
+                  className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-colors text-sm"
                 >
                   Upgrade Now
                 </button>
@@ -371,18 +362,18 @@ export function AccountPage({
             <button 
               onClick={openCustomerPortal}
               disabled={portalLoading}
-              className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left disabled:opacity-50`}
+              className="w-full flex items-center justify-between p-3.5 bg-white/5 border-white/10 hover:bg-white/10 rounded-lg border transition-colors text-left disabled:opacity-50"
             >
               <div className="flex items-center gap-3">
-                <CreditCard className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                <CreditCard className="w-4 h-4 text-purple-400" />
                 <div>
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Payment Method</div>
-                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                  <div className="text-white text-sm">Payment Method</div>
+                  <div className="text-white/40 text-xs">
                     {portalLoading ? 'Loading...' : 'Manage your payment method'}
                   </div>
                 </div>
               </div>
-              <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+              <ChevronRight className="w-4 h-4 text-white/30" />
             </button>
           )}
 
@@ -391,18 +382,18 @@ export function AccountPage({
             <button 
               onClick={openCustomerPortal}
               disabled={portalLoading}
-              className={`w-full flex items-center justify-between p-4 ${isLight ? 'bg-gray-50 border-gray-200 hover:bg-gray-100' : 'bg-gradient-to-br from-white/5 to-transparent border-white/10 hover:bg-white/10'} backdrop-blur-xl rounded-xl border transition-all text-left disabled:opacity-50`}
+              className="w-full flex items-center justify-between p-3.5 bg-white/5 border-white/10 hover:bg-white/10 rounded-lg border transition-colors text-left disabled:opacity-50"
             >
               <div className="flex items-center gap-3">
-                <Download className={`w-5 h-5 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+                <Download className="w-4 h-4 text-purple-400" />
                 <div>
-                  <div className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold`}>Billing History</div>
-                  <div className={`${isLight ? 'text-gray-500' : 'text-white/50'} text-sm font-bold`}>
+                  <div className="text-white text-sm">Billing History</div>
+                  <div className="text-white/40 text-xs">
                     {portalLoading ? 'Loading...' : 'View and download past invoices'}
                   </div>
                 </div>
               </div>
-              <span className={`${isLight ? 'text-gray-400' : 'text-white/40'}`}>→</span>
+              <ChevronRight className="w-4 h-4 text-white/30" />
             </button>
           )}
         </div>
@@ -410,16 +401,13 @@ export function AccountPage({
 
       {/* Security Section */}
       <motion.div 
-        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-                
-        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
+        <h2 className="text-white font-bold text-sm flex items-center gap-2 mb-5">
+          <Shield className="w-4 h-4 text-blue-400" />
           Security & Privacy
         </h2>
 
@@ -427,112 +415,106 @@ export function AccountPage({
           <button 
             onClick={handlePasswordReset}
             disabled={passwordResetLoading}
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left disabled:opacity-50"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors text-left disabled:opacity-50"
           >
             <div className="flex items-center gap-3">
               {passwordResetLoading ? (
-                <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
+                <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
               ) : (
-                <Lock className="w-5 h-5 text-blue-400" />
+                <Lock className="w-4 h-4 text-blue-400" />
               )}
               <div>
-                <div className="text-white font-semibold">
+                <div className="text-white text-sm">
                   {passwordResetLoading ? 'Sending...' : 'Change Password'}
                 </div>
-                <div className="text-white/50 text-sm">
+                <div className="text-white/40 text-xs">
                   {passwordResetLoading ? 'Please wait...' : 'Send password reset email'}
                 </div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </button>
 
           <button 
             onClick={onSignOut}
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors text-left"
           >
             <div className="flex items-center gap-3">
-              <LogOut className="w-5 h-5 text-blue-400" />
+              <LogOut className="w-4 h-4 text-blue-400" />
               <div>
-                <div className="text-white font-semibold">Sign Out</div>
-                <div className="text-white/50 text-sm">Log out of your account</div>
+                <div className="text-white text-sm">Sign Out</div>
+                <div className="text-white/40 text-xs">Log out of your account</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </button>
         </div>
       </motion.div>
 
       {/* Support Section */}
       <motion.div 
-        className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
       >
-                
-        <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-            <Headphones className="w-4 h-4 text-white" />
-          </div>
+        <h2 className="text-white font-bold text-sm flex items-center gap-2 mb-5">
+          <Headphones className="w-4 h-4 text-amber-400" />
           Support
         </h2>
 
         <div className="space-y-3">
           <a 
             href="mailto:support@oddsightseer.com"
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-amber-400" />
+              <Mail className="w-4 h-4 text-amber-400" />
               <div>
-                <div className="text-white font-semibold">Contact Support</div>
-                <div className="text-white/50 text-sm">support@oddsightseer.com</div>
+                <div className="text-white text-sm">Contact Support</div>
+                <div className="text-white/40 text-xs">support@oddsightseer.com</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </a>
 
           <a 
             href="/roadmap"
-            className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <FileText className="w-5 h-5 text-amber-400" />
+              <FileText className="w-4 h-4 text-amber-400" />
               <div>
-                <div className="text-white font-semibold">Feature Roadmap</div>
-                <div className="text-white/50 text-sm">See what's coming next</div>
+                <div className="text-white text-sm">Feature Roadmap</div>
+                <div className="text-white/40 text-xs">See what's coming next</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-white/40" />
+            <ChevronRight className="w-4 h-4 text-white/30" />
           </a>
         </div>
       </motion.div>
 
       {/* Danger Zone */}
       <motion.div 
-        className="relative bg-gradient-to-br from-red-500/10 to-red-500/5 backdrop-blur-xl border border-red-500/20 rounded-2xl p-6 overflow-hidden"
+        className="relative bg-red-500/5 border border-red-500/20 rounded-xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
-                
-        <h2 className="text-red-400 font-bold flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
+        <h2 className="text-red-400 font-bold text-sm flex items-center gap-2 mb-4">
+          <Shield className="w-4 h-4 text-red-400" />
           Danger Zone
         </h2>
-        <div className="space-y-3">
+        <div className="space-y-2">
           <button 
             onClick={onNavigateToCancelSubscription}
-            className="w-full px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl transition-all font-semibold text-sm"
+            className="w-full px-4 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors text-sm"
           >
             Cancel Subscription
           </button>
           <button 
             onClick={onNavigateToDeleteAccount}
-            className="w-full px-4 py-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl transition-all font-semibold text-sm"
+            className="w-full px-4 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors text-sm"
           >
             Delete Account
           </button>
