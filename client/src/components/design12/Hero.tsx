@@ -68,69 +68,115 @@ export function Hero({ onGetStartedClick = () => {} }: HeroProps) {
             </div>
           </motion.div>
 
-          {/* Hero Image - App Screenshot Mockup */}
+          {/* Hero Image - OddsTable Mockup */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-12 md:mt-16 max-w-5xl mx-auto"
+            className="mt-12 md:mt-16 max-w-4xl mx-auto"
           >
             <div className="relative">
-              {/* Glow effect behind image */}
+              {/* Glow effect behind */}
               <div className="absolute inset-0 bg-gradient-to-t from-purple-600/20 to-transparent blur-2xl -z-10 scale-95" />
               
-              {/* Browser mockup frame */}
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-                {/* Browser header */}
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-white/5">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/60" />
+              {/* Table container */}
+              <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                {/* Table Header */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/10 bg-white/5">
+                  <div className="col-span-4 text-white/50 text-xs font-semibold uppercase tracking-wider">Matchup</div>
+                  <div className="col-span-2 text-white/50 text-xs font-semibold uppercase tracking-wider">Market</div>
+                  <div className="col-span-2 text-white/50 text-xs font-semibold uppercase tracking-wider">Best Odds</div>
+                  <div className="col-span-2 text-white/50 text-xs font-semibold uppercase tracking-wider">Book</div>
+                  <div className="col-span-2 text-white/50 text-xs font-semibold uppercase tracking-wider text-right">Edge</div>
+                </div>
+
+                {/* Visible Rows */}
+                <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/5">
+                  <div className="col-span-4">
+                    <div className="text-white font-semibold">Knicks vs 76ers</div>
+                    <div className="text-white/50 text-sm">Knicks -4.5</div>
                   </div>
-                  <div className="flex-1 mx-4">
-                    <div className="bg-white/10 rounded-lg px-4 py-1.5 text-white/40 text-sm text-center max-w-xs mx-auto">
-                      oddsightseer.com
-                    </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300">Spread</span>
+                  </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className="text-white font-bold">-105</span>
+                  </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className="text-white/70">FanDuel</span>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-end">
+                    <span className="px-3 py-1 rounded-full text-sm font-bold bg-emerald-500/20 text-emerald-400">+4.1%</span>
                   </div>
                 </div>
-                
-                {/* App content preview */}
-                <div className="p-4 md:p-6 bg-slate-900/50">
-                  {/* Mini toolbar */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/20" />
-                      <div className="h-3 w-24 bg-white/20 rounded" />
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="h-8 w-20 bg-white/10 rounded-lg" />
-                      <div className="h-8 w-20 bg-purple-500/30 rounded-lg" />
-                    </div>
+
+                <div className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/5">
+                  <div className="col-span-4">
+                    <div className="text-white font-semibold">Ravens vs Bengals</div>
+                    <div className="text-white/50 text-sm">Ravens ML</div>
                   </div>
-                  
-                  {/* Table preview */}
-                  <div className="space-y-2">
-                    {[1, 2, 3, 4].map((row) => (
-                      <div key={row} className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                        <div className="w-10 h-10 rounded-lg bg-white/10" />
-                        <div className="flex-1">
-                          <div className="h-3 w-32 bg-white/20 rounded mb-2" />
-                          <div className="h-2 w-20 bg-white/10 rounded" />
-                        </div>
-                        <div className="text-right">
-                          <div className="h-3 w-12 bg-white/20 rounded mb-2" />
-                          <div className="h-4 w-16 bg-emerald-500/30 rounded-full" />
-                        </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300">Moneyline</span>
+                  </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className="text-white font-bold">-135</span>
+                  </div>
+                  <div className="col-span-2 flex items-center">
+                    <span className="text-white/70">DraftKings</span>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-end">
+                    <span className="px-3 py-1 rounded-full text-sm font-bold bg-emerald-500/20 text-emerald-400">+3.5%</span>
+                  </div>
+                </div>
+
+                {/* Locked Rows */}
+                {[1, 2].map((row) => (
+                  <div key={row} className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/5 opacity-40">
+                    <div className="col-span-4 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      <div>
+                        <div className="text-white/30">••••••••••••</div>
+                        <div className="text-white/20 text-sm">••••••••</div>
                       </div>
-                    ))}
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-white/5 text-white/30">•••••</span>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <span className="text-white/30 font-bold">•••</span>
+                    </div>
+                    <div className="col-span-2 flex items-center">
+                      <span className="text-white/30">••••••••</span>
+                    </div>
+                    <div className="col-span-2 flex items-center justify-end">
+                      <span className="px-3 py-1 rounded-full text-sm font-bold bg-white/5 text-white/30">•••</span>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Unlock CTA */}
+                <div className="px-6 py-4 bg-gradient-to-r from-purple-500/10 to-violet-500/10 border-t border-purple-500/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-purple-500/20">
+                        <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-white font-semibold text-sm">Unlock Full Access</p>
+                        <p className="text-white/50 text-xs">Get real-time odds, all markets, and +EV alerts</p>
+                      </div>
+                    </div>
+                    <button className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2">
+                      Get Started Free
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-              </div>
-              
-              {/* Floating badge */}
-              <div className="absolute -top-3 -right-3 md:top-4 md:right-4 px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-lg">
-                Live Data
               </div>
             </div>
           </motion.div>
