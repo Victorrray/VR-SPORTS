@@ -9,52 +9,52 @@ interface FreeOddsPreviewProps {
 const sampleBets = [
   {
     id: 1,
-    matchup: 'Lakers vs Celtics',
+    matchup: 'Knicks vs 76ers',
     market: 'Spread',
-    pick: 'Lakers -3.5',
-    bestOdds: '-108',
+    pick: 'Knicks -4.5',
+    bestOdds: '-105',
     bestBook: 'FanDuel',
-    edge: '+3.2%',
+    edge: '+4.1%',
     isLocked: false,
   },
   {
     id: 2,
-    matchup: 'Chiefs vs Bills',
+    matchup: 'Ravens vs Bengals',
     market: 'Moneyline',
-    pick: 'Chiefs ML',
-    bestOdds: '-145',
+    pick: 'Ravens ML',
+    bestOdds: '-135',
     bestBook: 'DraftKings',
-    edge: '+2.8%',
+    edge: '+3.5%',
     isLocked: false,
   },
   {
     id: 3,
-    matchup: 'Yankees vs Red Sox',
+    matchup: 'Dodgers vs Padres',
     market: 'Total',
-    pick: 'Over 8.5',
-    bestOdds: '-105',
+    pick: 'Over 7.5',
+    bestOdds: '-108',
     bestBook: 'BetMGM',
-    edge: '+4.1%',
+    edge: '+2.9%',
     isLocked: true,
   },
   {
     id: 4,
-    matchup: 'Warriors vs Suns',
+    matchup: 'Celtics vs Heat',
     market: 'Spread',
-    pick: 'Suns +2.5',
+    pick: 'Heat +6.5',
     bestOdds: '-110',
     bestBook: 'Caesars',
-    edge: '+2.5%',
+    edge: '+3.2%',
     isLocked: true,
   },
   {
     id: 5,
-    matchup: 'Eagles vs Cowboys',
+    matchup: 'Chiefs vs Chargers',
     market: 'Moneyline',
-    pick: 'Eagles ML',
-    bestOdds: '+125',
+    pick: 'Chiefs ML',
+    bestOdds: '-155',
     bestBook: 'PointsBet',
-    edge: '+5.2%',
+    edge: '+2.7%',
     isLocked: true,
   },
 ];
@@ -135,7 +135,7 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
                   </div>
                 </div>
                 <div className="col-span-2 flex items-center">
-                  <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     bet.isLocked 
                       ? 'bg-white/5 text-white/30' 
                       : 'bg-purple-500/20 text-purple-300'
