@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Zap, Lock, TrendingUp, Eye, ArrowRight } from 'lucide-react';
+import { Zap, Lock, TrendingUp, ArrowRight, BarChart3 } from 'lucide-react';
 
 interface FreeOddsPreviewProps {
   onGetStartedClick: () => void;
@@ -61,12 +61,7 @@ const sampleBets = [
 
 export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
   return (
-    <section className="relative py-12 md:py-16 bg-slate-950 overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-violet-600/5 rounded-full blur-3xl" />
-      </div>
+    <section className="relative py-12 md:py-16 bg-slate-950">
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Section Header */}
@@ -77,15 +72,11 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-6">
-            <Eye className="w-4 h-4 text-purple-400" />
-            <span className="text-purple-300 text-sm font-medium">Free Preview</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-            See Our Odds Viewer in Action
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Free Odds Preview
           </h2>
           <p className="text-white/50 text-lg max-w-2xl mx-auto">
-            Get a taste of our powerful straight bets tool. Free users can view limited odds data - upgrade for full access.
+            Get a taste of our odds viewer. Upgrade for full access to all features.
           </p>
         </motion.div>
 
@@ -235,7 +226,7 @@ export function FreeOddsPreview({ onGetStartedClick }: FreeOddsPreviewProps) {
           {[
             { icon: TrendingUp, text: '+EV Bets Highlighted' },
             { icon: Zap, text: 'Real-time Updates' },
-            { icon: Eye, text: '45+ Sportsbooks' },
+            { icon: BarChart3, text: '45+ Sportsbooks' },
           ].map((feature, index) => (
             <div
               key={index}
