@@ -44,10 +44,9 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-purple-500 to-violet-600 rounded-l-2xl" />
-        
+                
         <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
             <Globe className="w-4 h-4 text-white" />
           </div>
           Display & Preferences
@@ -126,10 +125,9 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-600 rounded-l-2xl" />
-        
+                
         <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
             <Settings className="w-4 h-4 text-white" />
           </div>
           Advanced
@@ -190,10 +188,9 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-500 to-orange-600 rounded-l-2xl" />
-        
+                
         <h2 className="text-white font-bold flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
             <Shield className="w-4 h-4 text-white" />
           </div>
           Legal
