@@ -47,12 +47,29 @@ interface SportConfig {
 }
 
 const SPORTS: SportConfig[] = [
+  // Major US Sports
   { key: 'nfl', name: 'NFL', endpoint: 'football/nfl' },
   { key: 'nba', name: 'NBA', endpoint: 'basketball/nba' },
   { key: 'mlb', name: 'MLB', endpoint: 'baseball/mlb' },
   { key: 'nhl', name: 'NHL', endpoint: 'hockey/nhl' },
+  // College Sports
   { key: 'ncaaf', name: 'NCAAF', endpoint: 'football/college-football' },
   { key: 'ncaab', name: 'NCAAB', endpoint: 'basketball/mens-college-basketball' },
+  { key: 'wcbb', name: 'WCBB', endpoint: 'basketball/womens-college-basketball' },
+  { key: 'wnba', name: 'WNBA', endpoint: 'basketball/wnba' },
+  // Soccer
+  { key: 'mls', name: 'MLS', endpoint: 'soccer/usa.1' },
+  { key: 'epl', name: 'EPL', endpoint: 'soccer/eng.1' },
+  { key: 'laliga', name: 'La Liga', endpoint: 'soccer/esp.1' },
+  { key: 'seriea', name: 'Serie A', endpoint: 'soccer/ita.1' },
+  { key: 'bundesliga', name: 'Bundesliga', endpoint: 'soccer/ger.1' },
+  { key: 'ligue1', name: 'Ligue 1', endpoint: 'soccer/fra.1' },
+  { key: 'ucl', name: 'UCL', endpoint: 'soccer/uefa.champions' },
+  // Other
+  { key: 'pga', name: 'PGA', endpoint: 'golf/pga' },
+  { key: 'ufc', name: 'UFC', endpoint: 'mma/ufc' },
+  { key: 'f1', name: 'F1', endpoint: 'racing/f1' },
+  { key: 'tennis', name: 'Tennis', endpoint: 'tennis/atp' },
 ];
 
 interface LiveGamesTickerProps {
@@ -100,12 +117,20 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         })
       );
       
-      // Sort by status (live first, then upcoming, then completed)
+      // Sort by status (live first, then by start time, then completed last)
       allGames.sort((a, b) => {
         const stateOrder: Record<string, number> = { 'in': 0, 'pre': 1, 'post': 2 };
         const aState = a.status?.type?.state || 'pre';
         const bState = b.status?.type?.state || 'pre';
-        return (stateOrder[aState] ?? 1) - (stateOrder[bState] ?? 1);
+        
+        // First sort by state
+        const stateComparison = (stateOrder[aState] ?? 1) - (stateOrder[bState] ?? 1);
+        if (stateComparison !== 0) return stateComparison;
+        
+        // Within same state, sort by start time
+        const aTime = new Date(a.date).getTime();
+        const bTime = new Date(b.date).getTime();
+        return aTime - bTime;
       });
       
       setGames(allGames);
@@ -228,7 +253,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         {/* Scrollable Games */}
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto scrollbar-hide px-4 py-3 touch-pan-x"
+          className="flex gap-3 overflow-x-auto scrollbar-hide pl-4 pr-4 py-3 touch-pan-x"
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {games.length === 0 ? (
