@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/SimpleAuth';
 import { Helmet } from '@dr.pogodin/react-helmet';
 import { Hero } from '../components/design12/Hero';
 import { Stats } from '../components/design12/Stats';
+import { FreeOddsPreview } from '../components/design12/FreeOddsPreview';
 // import { Features } from '../components/design12/Features';
 import { Header } from '../components/design12/Header';
 import { Bookmakers } from '../components/design12/Bookmakers';
@@ -59,6 +60,7 @@ export default function Landing() {
         />
         <Hero onGetStartedClick={handleSignUpClick} />
         <Stats />
+        <FreeOddsPreview onGetStartedClick={handleSignUpClick} />
         <Bookmakers />
         {/* <Features /> */}
         <HowItWorks />
