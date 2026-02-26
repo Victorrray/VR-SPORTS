@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, EyeOff, Sparkles, TrendingUp, Zap, Mail, Shield, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Mail, Shield, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../hooks/SimpleAuth';
 import { motion } from 'framer-motion';
@@ -47,12 +47,6 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
       setIsLoading(false);
     }
   };
-
-  const stats = [
-    { icon: TrendingUp, value: '+4.8%', label: 'Avg Edge', color: 'from-green-500 to-emerald-600' },
-    { icon: Sparkles, value: '45+', label: 'Sportsbooks', color: 'from-purple-500 to-violet-600' },
-    { icon: Zap, value: '24/7', label: 'Live Updates', color: 'from-blue-500 to-cyan-600' },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-950 relative overflow-hidden">
@@ -143,29 +137,6 @@ export function SignUpPage({ onBack, onLogin }: SignUpPageProps) {
               <p className="text-white/60 text-lg font-medium max-w-md">
                 Join thousands of smart bettors using data-driven insights to find profitable opportunities across 45+ sportsbooks.
               </p>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="flex gap-4">
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    className="flex-1 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 hover:border-purple-400/30 transition-all"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1 }}
-                    whileHover={{ y: -3, scale: 1.02 }}
-                  >
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-3`}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-                    <p className="text-white font-bold text-xl">{stat.value}</p>
-                    <p className="text-white/50 text-sm font-medium">{stat.label}</p>
-                  </motion.div>
-                );
-              })}
             </div>
 
             {/* Trust Indicator */}
