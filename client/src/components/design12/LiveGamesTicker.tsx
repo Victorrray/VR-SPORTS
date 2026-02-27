@@ -266,7 +266,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide max-w-[60%] md:max-w-none">
           <button
             onClick={() => setSelectedSport('all')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors flex-shrink-0 ${
+            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex-shrink-0 ${
               selectedSport === 'all'
                 ? 'bg-purple-600 text-white'
                 : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
@@ -278,7 +278,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
             <button
               key={sport.key}
               onClick={() => setSelectedSport(sport.key)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors flex-shrink-0 ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex-shrink-0 ${
                 selectedSport === sport.key
                   ? 'bg-purple-600 text-white'
                   : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
