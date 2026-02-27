@@ -67,7 +67,7 @@ const ALL_SPORTS: SportConfig[] = [
   // Major US Sports
   { key: 'nfl', name: 'NFL', endpoint: 'football/nfl', season: [9, 2] }, // Sep-Feb
   { key: 'nba', name: 'NBA', endpoint: 'basketball/nba', season: [10, 6] }, // Oct-Jun
-  { key: 'mlb', name: 'MLB', endpoint: 'baseball/mlb', season: [3, 11] }, // Mar-Nov
+  { key: 'mlb', name: 'MLB', endpoint: 'baseball/mlb', season: [2, 11] }, // Feb-Nov (Spring Training starts Feb)
   { key: 'nhl', name: 'NHL', endpoint: 'hockey/nhl', season: [10, 6] }, // Oct-Jun
   // College Sports
   { key: 'ncaaf', name: 'NCAAF', endpoint: 'football/college-football', season: [8, 1] }, // Aug-Jan
@@ -244,7 +244,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide max-w-[60%] md:max-w-none">
           <button
             onClick={() => setSelectedSport('all')}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors flex-shrink-0 ${
               selectedSport === 'all'
                 ? 'bg-purple-600 text-white'
                 : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
@@ -256,7 +256,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
             <button
               key={sport.key}
               onClick={() => setSelectedSport(sport.key)}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors flex-shrink-0 ${
                 selectedSport === sport.key
                   ? 'bg-purple-600 text-white'
                   : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
