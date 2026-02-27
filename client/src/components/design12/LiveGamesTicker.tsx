@@ -276,6 +276,8 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
           className="flex gap-3 overflow-x-auto scrollbar-hide px-4 py-3 touch-pan-x first:ml-0"
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
+          {/* Left spacer for proper padding */}
+          <div className="flex-shrink-0 w-2 md:w-0" aria-hidden="true" />
           {games.length === 0 ? (
             <div className={`flex-shrink-0 w-full text-center py-4 ${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>
               No games scheduled today
