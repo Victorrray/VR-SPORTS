@@ -144,8 +144,8 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
 
   useEffect(() => {
     fetchGames();
-    // Refresh every 30 seconds for live updates
-    const interval = setInterval(fetchGames, 30000);
+    // Refresh every 10 seconds for live updates
+    const interval = setInterval(fetchGames, 10000);
     return () => clearInterval(interval);
   }, [selectedSport]);
 
@@ -220,11 +220,11 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
           </div>
         </div>
         
-        {/* Sport Filter */}
-        <div className="flex items-center gap-1">
+        {/* Sport Filter - Scrollable */}
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide max-w-[60%] md:max-w-none">
           <button
             onClick={() => setSelectedSport('all')}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
               selectedSport === 'all'
                 ? 'bg-purple-600 text-white'
                 : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
@@ -232,11 +232,11 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
           >
             All
           </button>
-          {SPORTS.slice(0, 4).map((sport) => (
+          {SPORTS.map((sport) => (
             <button
               key={sport.key}
               onClick={() => setSelectedSport(sport.key)}
-              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors flex-shrink-0 ${
                 selectedSport === sport.key
                   ? 'bg-purple-600 text-white'
                   : isLight ? 'text-gray-500 hover:bg-gray-100' : 'text-white/50 hover:bg-white/5'
