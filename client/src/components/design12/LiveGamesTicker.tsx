@@ -43,7 +43,7 @@ interface Game {
 interface SportConfig {
   key: string;
   name: string;
-  endpoint: string;
+  endpoint: string | string[]; // Can be single endpoint or array for umbrella sports
   // Season months: [startMonth, endMonth] (1-indexed, wraps around for winter sports)
   season?: [number, number];
 }
@@ -74,14 +74,16 @@ const ALL_SPORTS: SportConfig[] = [
   { key: 'ncaab', name: 'NCAAB', endpoint: 'basketball/mens-college-basketball', season: [11, 4] }, // Nov-Apr
   { key: 'wcbb', name: 'WCBB', endpoint: 'basketball/womens-college-basketball', season: [11, 4] }, // Nov-Apr
   { key: 'wnba', name: 'WNBA', endpoint: 'basketball/wnba', season: [5, 10] }, // May-Oct
-  // Soccer (European leagues: Aug-May)
-  { key: 'mls', name: 'MLS', endpoint: 'soccer/usa.1', season: [2, 12] }, // Feb-Dec
-  { key: 'epl', name: 'EPL', endpoint: 'soccer/eng.1', season: [8, 5] }, // Aug-May
-  { key: 'laliga', name: 'La Liga', endpoint: 'soccer/esp.1', season: [8, 5] },
-  { key: 'seriea', name: 'Serie A', endpoint: 'soccer/ita.1', season: [8, 5] },
-  { key: 'bundesliga', name: 'Bundesliga', endpoint: 'soccer/ger.1', season: [8, 5] },
-  { key: 'ligue1', name: 'Ligue 1', endpoint: 'soccer/fra.1', season: [8, 5] },
-  { key: 'ucl', name: 'UCL', endpoint: 'soccer/uefa.champions', season: [9, 6] }, // Sep-Jun
+  // Soccer - All leagues under one umbrella
+  { key: 'soccer', name: 'Soccer', endpoint: [
+    'soccer/usa.1',      // MLS
+    'soccer/eng.1',      // EPL
+    'soccer/esp.1',      // La Liga
+    'soccer/ita.1',      // Serie A
+    'soccer/ger.1',      // Bundesliga
+    'soccer/fra.1',      // Ligue 1
+    'soccer/uefa.champions', // UCL
+  ]}, // Year-round (different leagues have different seasons)
   // Other (year-round or specific seasons)
   { key: 'pga', name: 'PGA', endpoint: 'golf/pga' }, // Year-round
   { key: 'ufc', name: 'UFC', endpoint: 'mma/ufc' }, // Year-round
@@ -116,34 +118,39 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         : SPORTS.filter(s => s.key === selectedSport);
       
       await Promise.all(
-        sportsToFetch.map(async (sport) => {
-          try {
-            const response = await fetch(
-              `https://site.api.espn.com/apis/site/v2/sports/${sport.endpoint}/scoreboard`
-            );
-            if (response.ok) {
-              const data = await response.json();
-              if (data.events) {
-                // Filter out events without valid team data
-                const validEvents = data.events.filter((event: Game) => {
-                  const competitors = event.competitions?.[0]?.competitors;
-                  if (!competitors || competitors.length < 2) return false;
-                  // Check if both teams have valid abbreviations (not TBD)
-                  const hasValidTeams = competitors.every(
-                    (c: any) => c.team?.abbreviation && c.team.abbreviation !== 'TBD'
-                  );
-                  return hasValidTeams;
-                });
-                allGames.push(...validEvents.map((event: Game) => ({
-                  ...event,
-                  sportKey: sport.key,
-                  sportName: sport.name,
-                })));
+        sportsToFetch.flatMap((sport) => {
+          // Handle array endpoints (like Soccer with multiple leagues)
+          const endpoints = Array.isArray(sport.endpoint) ? sport.endpoint : [sport.endpoint];
+          
+          return endpoints.map(async (endpoint) => {
+            try {
+              const response = await fetch(
+                `https://site.api.espn.com/apis/site/v2/sports/${endpoint}/scoreboard`
+              );
+              if (response.ok) {
+                const data = await response.json();
+                if (data.events) {
+                  // Filter out events without valid team data
+                  const validEvents = data.events.filter((event: Game) => {
+                    const competitors = event.competitions?.[0]?.competitors;
+                    if (!competitors || competitors.length < 2) return false;
+                    // Check if both teams have valid abbreviations (not TBD)
+                    const hasValidTeams = competitors.every(
+                      (c: any) => c.team?.abbreviation && c.team.abbreviation !== 'TBD'
+                    );
+                    return hasValidTeams;
+                  });
+                  allGames.push(...validEvents.map((event: Game) => ({
+                    ...event,
+                    sportKey: sport.key,
+                    sportName: sport.name,
+                  })));
+                }
               }
+            } catch (err) {
+              console.warn(`Failed to fetch ${sport.name} games:`, err);
             }
-          } catch (err) {
-            console.warn(`Failed to fetch ${sport.name} games:`, err);
-          }
+          });
         })
       );
       
