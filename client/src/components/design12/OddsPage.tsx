@@ -1458,8 +1458,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
         <>
           {/* Backdrop - Desktop only (to the right of panel) */}
           <div 
-            className={`hidden lg:block fixed right-0 bottom-0 bg-black/40 z-[9998] transition-all ${isFilterClosing ? 'opacity-0 duration-150' : 'opacity-100 duration-500 delay-100'}`}
-            style={{ left: 'calc(224px + 288px)', top: '0' }}
+            className={`hidden lg:block fixed right-0 bottom-0 top-0 bg-black/40 z-20 transition-all ${isFilterClosing ? 'opacity-0 duration-150' : 'opacity-100 duration-500 delay-100'}`}
+            style={{ left: 'calc(224px + 288px)' }}
             onClick={closeFilterMenu}
           />
           
@@ -1472,10 +1472,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           
           {/* Side Panel - Desktop / Bottom Drawer - Mobile */}
           <div 
-            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl`}
+            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!top-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl max-lg:z-[9999] lg:z-30`}
             style={{
-              zIndex: 9999,
-              top: '0',
               left: '224px',
             }}
           >
