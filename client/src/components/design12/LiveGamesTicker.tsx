@@ -124,7 +124,17 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
             if (response.ok) {
               const data = await response.json();
               if (data.events) {
-                allGames.push(...data.events.map((event: Game) => ({
+                // Filter out events without valid team data
+                const validEvents = data.events.filter((event: Game) => {
+                  const competitors = event.competitions?.[0]?.competitors;
+                  if (!competitors || competitors.length < 2) return false;
+                  // Check if both teams have valid abbreviations (not TBD)
+                  const hasValidTeams = competitors.every(
+                    (c: any) => c.team?.abbreviation && c.team.abbreviation !== 'TBD'
+                  );
+                  return hasValidTeams;
+                });
+                allGames.push(...validEvents.map((event: Game) => ({
                   ...event,
                   sportKey: sport.key,
                   sportName: sport.name,
@@ -277,7 +287,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {/* Left spacer for proper padding */}
-          <div className="flex-shrink-0 w-2 md:w-0" aria-hidden="true" />
+          <div className="flex-shrink-0 w-4" aria-hidden="true" />
           {games.length === 0 ? (
             <div className={`flex-shrink-0 w-full text-center py-4 ${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>
               No games scheduled today
@@ -292,7 +302,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
               return (
                 <div
                   key={game.id}
-                  className={`flex-shrink-0 w-[180px] md:w-[200px] p-3 md:p-3 rounded-xl min-h-[100px] md:min-h-[90px] ${index === 0 ? 'ml-1' : ''} ${
+                  className={`flex-shrink-0 w-[180px] md:w-[200px] p-3 md:p-3 rounded-xl min-h-[100px] md:min-h-[90px] ${
                     isLive 
                       ? isLight ? 'bg-emerald-50 border border-emerald-200' : 'bg-emerald-500/10 border border-emerald-500/20'
                       : isLight ? 'bg-white border border-gray-200' : 'bg-white/5 border border-white/10'
