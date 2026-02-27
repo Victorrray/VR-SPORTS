@@ -44,33 +44,53 @@ interface SportConfig {
   key: string;
   name: string;
   endpoint: string;
+  // Season months: [startMonth, endMonth] (1-indexed, wraps around for winter sports)
+  season?: [number, number];
 }
 
-const SPORTS: SportConfig[] = [
+// Helper to check if a sport is in season
+const isInSeason = (sport: SportConfig): boolean => {
+  if (!sport.season) return true; // Year-round sports
+  const currentMonth = new Date().getMonth() + 1; // 1-indexed
+  const [start, end] = sport.season;
+  
+  if (start <= end) {
+    // Normal season (e.g., MLB: Apr-Oct)
+    return currentMonth >= start && currentMonth <= end;
+  } else {
+    // Wrapped season (e.g., NFL: Sep-Feb)
+    return currentMonth >= start || currentMonth <= end;
+  }
+};
+
+const ALL_SPORTS: SportConfig[] = [
   // Major US Sports
-  { key: 'nfl', name: 'NFL', endpoint: 'football/nfl' },
-  { key: 'nba', name: 'NBA', endpoint: 'basketball/nba' },
-  { key: 'mlb', name: 'MLB', endpoint: 'baseball/mlb' },
-  { key: 'nhl', name: 'NHL', endpoint: 'hockey/nhl' },
+  { key: 'nfl', name: 'NFL', endpoint: 'football/nfl', season: [9, 2] }, // Sep-Feb
+  { key: 'nba', name: 'NBA', endpoint: 'basketball/nba', season: [10, 6] }, // Oct-Jun
+  { key: 'mlb', name: 'MLB', endpoint: 'baseball/mlb', season: [3, 11] }, // Mar-Nov
+  { key: 'nhl', name: 'NHL', endpoint: 'hockey/nhl', season: [10, 6] }, // Oct-Jun
   // College Sports
-  { key: 'ncaaf', name: 'NCAAF', endpoint: 'football/college-football' },
-  { key: 'ncaab', name: 'NCAAB', endpoint: 'basketball/mens-college-basketball' },
-  { key: 'wcbb', name: 'WCBB', endpoint: 'basketball/womens-college-basketball' },
-  { key: 'wnba', name: 'WNBA', endpoint: 'basketball/wnba' },
-  // Soccer
-  { key: 'mls', name: 'MLS', endpoint: 'soccer/usa.1' },
-  { key: 'epl', name: 'EPL', endpoint: 'soccer/eng.1' },
-  { key: 'laliga', name: 'La Liga', endpoint: 'soccer/esp.1' },
-  { key: 'seriea', name: 'Serie A', endpoint: 'soccer/ita.1' },
-  { key: 'bundesliga', name: 'Bundesliga', endpoint: 'soccer/ger.1' },
-  { key: 'ligue1', name: 'Ligue 1', endpoint: 'soccer/fra.1' },
-  { key: 'ucl', name: 'UCL', endpoint: 'soccer/uefa.champions' },
-  // Other
-  { key: 'pga', name: 'PGA', endpoint: 'golf/pga' },
-  { key: 'ufc', name: 'UFC', endpoint: 'mma/ufc' },
-  { key: 'f1', name: 'F1', endpoint: 'racing/f1' },
-  { key: 'tennis', name: 'Tennis', endpoint: 'tennis/atp' },
+  { key: 'ncaaf', name: 'NCAAF', endpoint: 'football/college-football', season: [8, 1] }, // Aug-Jan
+  { key: 'ncaab', name: 'NCAAB', endpoint: 'basketball/mens-college-basketball', season: [11, 4] }, // Nov-Apr
+  { key: 'wcbb', name: 'WCBB', endpoint: 'basketball/womens-college-basketball', season: [11, 4] }, // Nov-Apr
+  { key: 'wnba', name: 'WNBA', endpoint: 'basketball/wnba', season: [5, 10] }, // May-Oct
+  // Soccer (European leagues: Aug-May)
+  { key: 'mls', name: 'MLS', endpoint: 'soccer/usa.1', season: [2, 12] }, // Feb-Dec
+  { key: 'epl', name: 'EPL', endpoint: 'soccer/eng.1', season: [8, 5] }, // Aug-May
+  { key: 'laliga', name: 'La Liga', endpoint: 'soccer/esp.1', season: [8, 5] },
+  { key: 'seriea', name: 'Serie A', endpoint: 'soccer/ita.1', season: [8, 5] },
+  { key: 'bundesliga', name: 'Bundesliga', endpoint: 'soccer/ger.1', season: [8, 5] },
+  { key: 'ligue1', name: 'Ligue 1', endpoint: 'soccer/fra.1', season: [8, 5] },
+  { key: 'ucl', name: 'UCL', endpoint: 'soccer/uefa.champions', season: [9, 6] }, // Sep-Jun
+  // Other (year-round or specific seasons)
+  { key: 'pga', name: 'PGA', endpoint: 'golf/pga' }, // Year-round
+  { key: 'ufc', name: 'UFC', endpoint: 'mma/ufc' }, // Year-round
+  { key: 'f1', name: 'F1', endpoint: 'racing/f1', season: [3, 12] }, // Mar-Dec
+  { key: 'tennis', name: 'Tennis', endpoint: 'tennis/atp' }, // Year-round
 ];
+
+// Filter to only show sports currently in season
+const SPORTS = ALL_SPORTS.filter(isInSeason);
 
 interface LiveGamesTickerProps {
   isLight?: boolean;
