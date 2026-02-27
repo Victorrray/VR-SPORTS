@@ -518,10 +518,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                         <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-xl md:text-2xl lg:text-3xl font-bold`}>
                           Welcome back, {profile?.username || user?.email?.split('@')[0] || 'User'}!
                         </h1>
-                        <p className={`${isLight ? lightModeColors.textMuted : 'text-white/50'} text-sm md:text-base`}>
-                          Here are your recommended picks for today
-                        </p>
-                      </div>
+                                              </div>
                     </div>
                   </div>
                 </div>
