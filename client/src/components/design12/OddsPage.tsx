@@ -1456,9 +1456,9 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
       {/* Filter Side Panel */}
       {isFilterMenuOpen && (
         <>
-          {/* Backdrop - Desktop only (to the right of panel) */}
+          {/* Backdrop - Desktop only (to the right of panel) - appears after animation */}
           <div 
-            className={`hidden lg:block fixed right-0 bottom-0 top-0 bg-black/40 z-20 transition-all ${isFilterClosing ? 'opacity-0 duration-150' : 'opacity-100 duration-500 delay-100'}`}
+            className={`hidden lg:block fixed right-0 bottom-0 top-0 bg-black/40 z-20 transition-opacity ${isFilterClosing ? 'opacity-0 duration-150' : 'opacity-100 duration-300 delay-300'}`}
             style={{ left: 'calc(224px + 288px)' }}
             onClick={closeFilterMenu}
           />
@@ -1478,7 +1478,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white' : 'bg-slate-950'} z-10 px-5 pt-5 lg:pt-0 pb-3 space-y-3 lg:border-b border-b-0 ${isLight ? 'border-gray-100' : 'border-white/5'} -mt-6 lg:mt-0 lg:rounded-none max-lg:rounded-t-2xl`}>
+            <div className={`sticky top-0 ${isLight ? 'bg-white' : 'bg-slate-950'} z-10 px-5 pt-4 lg:pt-4 pb-3 space-y-3 lg:border-b border-b-0 ${isLight ? 'border-gray-100' : 'border-white/5'} lg:mt-0 lg:rounded-none max-lg:rounded-t-2xl max-lg:-mt-6`}>
               {/* Drag Handle - Mobile Only */}
               <div className="flex lg:hidden justify-center pt-2 pb-1 -mt-5">
                 <div className={`w-10 h-1 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
