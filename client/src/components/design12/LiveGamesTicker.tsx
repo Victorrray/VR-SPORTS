@@ -155,6 +155,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
       );
       
       // Sort by status (live first, then by start time, then completed last)
+      // Use stable sort with game ID as tiebreaker to prevent jumping
       allGames.sort((a, b) => {
         const stateOrder: Record<string, number> = { 'in': 0, 'pre': 1, 'post': 2 };
         const aState = a.status?.type?.state || 'pre';
@@ -167,7 +168,11 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         // Within same state, sort by start time
         const aTime = new Date(a.date).getTime();
         const bTime = new Date(b.date).getTime();
-        return aTime - bTime;
+        const timeComparison = aTime - bTime;
+        if (timeComparison !== 0) return timeComparison;
+        
+        // Use game ID as final tiebreaker for stable sorting
+        return a.id.localeCompare(b.id);
       });
       
       setGames(allGames);
@@ -290,12 +295,10 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         {/* Scrollable Games */}
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto scrollbar-hide px-4 py-3 touch-pan-x first:ml-0"
+          className="flex gap-3 overflow-x-auto scrollbar-hide py-3 touch-pan-x ml-4 mr-4"
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
-          {/* Left spacer for proper padding */}
-          <div className="flex-shrink-0 w-4" aria-hidden="true" />
-          {games.length === 0 ? (
+                    {games.length === 0 ? (
             <div className={`flex-shrink-0 w-full text-center py-4 ${isLight ? 'text-gray-500' : 'text-white/50'} text-sm`}>
               No games scheduled today
             </div>
