@@ -144,8 +144,8 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
 
   useEffect(() => {
     fetchGames();
-    // Refresh every 10 seconds for live updates
-    const interval = setInterval(fetchGames, 10000);
+    // Refresh every 5 seconds for live updates
+    const interval = setInterval(fetchGames, 5000);
     return () => clearInterval(interval);
   }, [selectedSport]);
 
