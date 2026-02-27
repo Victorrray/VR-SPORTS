@@ -301,7 +301,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <span className={`font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>OddSightSeer</span>
               </div>
               {/* Plan Badge */}
-              <div className={`flex items-center gap-2 px-3 py-1.5 mt-3 rounded-full ${isLight ? 'bg-gray-50' : 'bg-white/5'}`}>
+              <div className={`flex items-center gap-2 px-3 py-1.5 mt-3`}>
                 <PlanIcon className={`w-3.5 h-3.5 ${planConfig.color}`} />
                 <span className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-white/70'}`}>{planConfig.label} Plan</span>
               </div>
