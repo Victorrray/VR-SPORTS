@@ -253,7 +253,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
         {/* Scrollable Games */}
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto scrollbar-hide pl-4 pr-4 py-3 touch-pan-x"
+          className="flex gap-3 overflow-x-auto scrollbar-hide px-4 py-3 touch-pan-x first:ml-0"
           style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           {games.length === 0 ? (
@@ -261,7 +261,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
               No games scheduled today
             </div>
           ) : (
-            games.map((game) => {
+            games.map((game, index) => {
               const homeTeam = game.competitions?.[0]?.competitors?.find(c => c.homeAway === 'home');
               const awayTeam = game.competitions?.[0]?.competitors?.find(c => c.homeAway === 'away');
               const isLive = game.status?.type?.state === 'in';
@@ -270,7 +270,7 @@ const LiveGamesTicker: React.FC<LiveGamesTickerProps> = ({ isLight = false }) =>
               return (
                 <div
                   key={game.id}
-                  className={`flex-shrink-0 w-[180px] md:w-[200px] p-3 md:p-3 rounded-xl min-h-[100px] md:min-h-[90px] ${
+                  className={`flex-shrink-0 w-[180px] md:w-[200px] p-3 md:p-3 rounded-xl min-h-[100px] md:min-h-[90px] ${index === 0 ? 'ml-1' : ''} ${
                     isLive 
                       ? isLight ? 'bg-emerald-50 border border-emerald-200' : 'bg-emerald-500/10 border border-emerald-500/20'
                       : isLight ? 'bg-white border border-gray-200' : 'bg-white/5 border border-white/10'
