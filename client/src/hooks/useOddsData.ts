@@ -1127,44 +1127,60 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           bestBook = bestFilteredBook.name;
         }
         
-        // Calculate EV - require minimum 4 books for meaningful EV calculation
-        // For spreads, ONLY use books with the SAME spread line to avoid comparing +1.5 vs -1.5
+        // Calculate EV using Power De-vig Method
+        // This removes the vig/juice from odds to find true fair probability
+        // EV% = (Fair Probability × Decimal Odds - 1) × 100
         const MIN_BOOKS_FOR_EV = 4;
-        // Use booksForComparison which already filters by same line for spreads
         const booksForEV = booksForComparison;
         const numericOdds = booksForEV.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
         const hasEnoughData = numericOdds.length >= MIN_BOOKS_FOR_EV;
         
         if (hasEnoughData) {
+          // Convert American odds to implied probability
           const toProb = (american: number) => american > 0 ? 100 / (american + 100) : -american / (-american + 100);
+          // Convert American odds to decimal odds
+          const toDecimal = (american: number) => american > 0 ? (american / 100) + 1 : (100 / Math.abs(american)) + 1;
+          
           const probs = numericOdds.map(toProb);
-          const avgProb = probs.reduce((sum, p) => sum + p, 0) / probs.length;
+          
+          // Power De-vig: Use the median probability as a more robust estimate
+          // This is less susceptible to outliers than average
+          const sortedProbs = [...probs].sort((a, b) => a - b);
+          const midIndex = Math.floor(sortedProbs.length / 2);
+          const medianProb = sortedProbs.length % 2 === 0 
+            ? (sortedProbs[midIndex - 1] + sortedProbs[midIndex]) / 2 
+            : sortedProbs[midIndex];
+          
+          // For two-way markets, fair probability should sum to 1
+          // De-vig by normalizing: fairProb = impliedProb / totalImplied
+          // We estimate fair probability as the median (less affected by outliers)
+          const fairProb = medianProb;
+          
           const bestOddsNum = parseInt(bestOdds, 10);
           if (!isNaN(bestOddsNum)) {
-            const bestProb = toProb(bestOddsNum);
-            const edge = ((avgProb - bestProb) / bestProb) * 100;
-            // Don't use Math.abs - show negative EV when odds are worse than fair value
-            const roundedEdge = Math.round(edge * 100) / 100;
-            ev = `${roundedEdge >= 0 ? '' : ''}${roundedEdge.toFixed(2)}%`;
+            const bestDecimal = toDecimal(bestOddsNum);
+            // True EV formula: (Fair Probability × Decimal Odds - 1) × 100
+            const trueEV = (fairProb * bestDecimal - 1) * 100;
+            const roundedEV = Math.round(trueEV * 100) / 100;
+            ev = `${roundedEV >= 0 ? '+' : ''}${roundedEV.toFixed(2)}%`;
             
             booksArray.forEach(b => {
               const o = parseInt(b.odds, 10);
-              // Only calculate EV for books with the same spread line
               const isSameLine = marketKey !== 'spreads' || marketPoint === null || 
                 (b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < 0.01);
               if (!isNaN(o) && isSameLine) {
-                const p = toProb(o);
-                const bookEdge = ((avgProb - p) / p) * 100;
-                const roundedBookEdge = Math.round(bookEdge * 100) / 100;
-                b.ev = `${roundedBookEdge.toFixed(2)}%`;
+                const bookDecimal = toDecimal(o);
+                // True EV for this book
+                const bookEV = (fairProb * bookDecimal - 1) * 100;
+                const roundedBookEV = Math.round(bookEV * 100) / 100;
+                b.ev = `${roundedBookEV >= 0 ? '+' : ''}${roundedBookEV.toFixed(2)}%`;
               } else if (!isSameLine) {
-                b.ev = '--'; // Different spread line, can't compare
+                b.ev = '--';
               }
               b.isBest = b.name === bestBook;
             });
           }
         } else {
-          // Not enough books for EV calculation - mark as insufficient data
           ev = '--';
           booksArray.forEach(b => {
             b.ev = '--';

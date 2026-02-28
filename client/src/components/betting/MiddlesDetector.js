@@ -177,11 +177,42 @@ const MiddlesDetector = ({
     return opportunities;
   };
 
+  // Sport-specific probability multipliers for middles
+  // Based on historical scoring patterns and variance
+  const getSportProbabilityMultiplier = (sportKey, marketKey) => {
+    // For totals: probability per point in the middle range
+    // For spreads: probability per point of margin difference
+    const multipliers = {
+      // NFL: Lower scoring, ~2.5% per point for totals, ~3% for spreads
+      'americanfootball_nfl': { totals: 2.5, spreads: 3.0 },
+      'americanfootball_ncaaf': { totals: 2.5, spreads: 3.0 },
+      // NBA: High scoring with more variance, ~1.5% per point
+      'basketball_nba': { totals: 1.5, spreads: 1.8 },
+      'basketball_ncaab': { totals: 1.8, spreads: 2.0 },
+      // MLB: Low scoring, ~4% per run
+      'baseball_mlb': { totals: 4.0, spreads: 4.5 },
+      // NHL: Low scoring, ~5% per goal
+      'icehockey_nhl': { totals: 5.0, spreads: 5.5 },
+      // Soccer: Very low scoring, ~8% per goal
+      'soccer': { totals: 8.0, spreads: 8.0 },
+    };
+    
+    // Find matching sport (handle variations like soccer_epl, etc.)
+    const sportBase = Object.keys(multipliers).find(key => 
+      sportKey?.toLowerCase().includes(key.replace('_', ''))
+    ) || 'americanfootball_nfl';
+    
+    return multipliers[sportBase]?.[marketKey] || 2.5;
+  };
+
   const calculateMiddleOpportunity = (line1, line2, gap, game, marketKey) => {
     try {
       let bets = [];
       let middleRange = '';
       let probability = 0;
+      
+      // Get sport-specific probability multiplier
+      const probMultiplier = getSportProbabilityMultiplier(game.sport_key, marketKey);
       
       if (marketKey === 'totals') {
         // For totals: bet Over on lower line, Under on higher line
@@ -190,8 +221,9 @@ const MiddlesDetector = ({
         
         middleRange = `${lowerLine.line + 0.5} - ${higherLine.line - 0.5}`;
         
-        // Estimate probability based on gap (rough approximation)
-        probability = Math.min(gap * 8, 45); // Cap at 45%
+        // Sport-specific probability calculation
+        // Probability = gap × sport multiplier, capped at 45%
+        probability = Math.min(gap * probMultiplier, 45);
         
         // Calculate optimal stakes
         const decimal1 = lowerLine.overOdds > 0 ? (lowerLine.overOdds / 100) + 1 : (100 / Math.abs(lowerLine.overOdds)) + 1;
@@ -244,7 +276,8 @@ const MiddlesDetector = ({
         const gap = Math.abs(line2.line - line1.line);
         middleRange = `${Math.min(line1.line, line2.line)} - ${Math.max(line1.line, line2.line)}`;
         
-        probability = Math.min(gap * 6, 40); // Slightly lower probability for spreads
+        // Sport-specific probability for spreads
+        probability = Math.min(gap * probMultiplier, 40);
         
         const decimal1 = line1.odds1 > 0 ? (line1.odds1 / 100) + 1 : (100 / Math.abs(line1.odds1)) + 1;
         const decimal2 = line2.odds2 > 0 ? (line2.odds2 / 100) + 1 : (100 / Math.abs(line2.odds2)) + 1;
