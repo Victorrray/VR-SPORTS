@@ -68,6 +68,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   // Get plan display info
   const userPlan = me?.plan || 'free';
   const hasPaidPlan = userPlan === 'gold' || userPlan === 'platinum' || me?.unlimited === true;
+  const hasPlatinumPlan = userPlan === 'platinum' || me?.unlimited === true;
   const getPlanConfig = () => {
     switch (userPlan) {
       case 'platinum':
@@ -368,12 +369,12 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   </button>
                   <button
                     onClick={() => {
-                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      if (!hasPlatinumPlan) { setCurrentView("changePlan"); return; }
                       setSelectedBetType('discrepancy');
                       setCurrentView("odds");
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      !hasPaidPlan
+                      !hasPlatinumPlan
                         ? isLight ? 'text-gray-300' : 'text-white/20'
                         : currentView === "odds" && selectedBetType === 'discrepancy'
                           ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
@@ -382,16 +383,16 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   >
                     <BarChart2 className="w-4 h-4" />
                     Discrepancy
-                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                    {!hasPlatinumPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
                   </button>
                   <button
                     onClick={() => {
-                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      if (!hasPlatinumPlan) { setCurrentView("changePlan"); return; }
                       setSelectedBetType('exchanges');
                       setCurrentView("odds");
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      !hasPaidPlan
+                      !hasPlatinumPlan
                         ? isLight ? 'text-gray-300' : 'text-white/20'
                         : currentView === "odds" && selectedBetType === 'exchanges'
                           ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
@@ -400,16 +401,16 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   >
                     <TrendingUp className="w-4 h-4" />
                     Exchanges
-                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                    {!hasPlatinumPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
                   </button>
                   <button
                     onClick={() => {
-                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      if (!hasPlatinumPlan) { setCurrentView("changePlan"); return; }
                       setSelectedBetType('arbitrage');
                       setCurrentView("odds");
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      !hasPaidPlan
+                      !hasPlatinumPlan
                         ? isLight ? 'text-gray-300' : 'text-white/20'
                         : currentView === "odds" && selectedBetType === 'arbitrage'
                           ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
@@ -418,16 +419,16 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   >
                     <Sparkles className="w-4 h-4" />
                     Arbitrage
-                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                    {!hasPlatinumPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
                   </button>
                   <button
                     onClick={() => {
-                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
+                      if (!hasPlatinumPlan) { setCurrentView("changePlan"); return; }
                       setSelectedBetType('middles');
                       setCurrentView("odds");
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      !hasPaidPlan
+                      !hasPlatinumPlan
                         ? isLight ? 'text-gray-300' : 'text-white/20'
                         : currentView === "odds" && selectedBetType === 'middles'
                           ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
@@ -436,7 +437,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   >
                     <Target className="w-4 h-4" />
                     Middles
-                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
+                    {!hasPlatinumPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
                   </button>
                 </div>
               </div>
