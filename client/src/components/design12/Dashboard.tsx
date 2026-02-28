@@ -333,21 +333,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="space-y-0.5">
                   <button
                     onClick={() => {
-                      if (!hasPaidPlan) { setCurrentView("changePlan"); return; }
                       setSelectedBetType('straight');
                       setCurrentView("odds");
                     }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      !hasPaidPlan
-                        ? isLight ? 'text-gray-300' : 'text-white/20'
-                        : currentView === "odds" && selectedBetType === 'straight'
-                          ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
-                          : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
+                      currentView === "odds" && selectedBetType === 'straight'
+                        ? isLight ? 'bg-purple-50 text-purple-700' : 'bg-white/5 text-white'
+                        : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
                     }`}
                   >
                     <Zap className="w-4 h-4" />
                     Straight Bets
-                    {!hasPaidPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
                   </button>
                   <button
                     onClick={() => {
