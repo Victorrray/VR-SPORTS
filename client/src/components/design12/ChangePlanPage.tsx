@@ -36,8 +36,6 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
         { text: 'Straight Bets with EV', included: true },
         { text: 'Player Props', included: true },
         { text: 'Advanced Filters', included: true },
-        { text: 'Bet Tracking', included: true },
-        { text: 'Email Support', included: true },
       ],
       lockedFeatures: [
         'Arbitrage Finder',
@@ -64,7 +62,6 @@ export function ChangePlanPage({ onBack }: ChangePlanPageProps) {
         { text: 'Middles Detector', included: true },
         { text: 'Discrepancy Tool', included: true },
         { text: 'Exchanges Access', included: true },
-        { text: 'Priority Support', included: true },
       ],
       lockedFeatures: [],
       buttonText: isPlatinum ? 'Current Plan' : 'Get Platinum',
