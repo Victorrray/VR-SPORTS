@@ -1092,11 +1092,8 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
     </div>
   );
 
-  // FREE USERS CANNOT ACCESS ANY BETTING TOOLS - require paid plan
-  // Show paywall for free users (after loading completes)
-  if (!meLoading && !hasPaidPlan) {
-    return <PaywallOverlay />;
-  }
+  // Free users can access Straight Bets but not filters
+  // Other bet types require paid plans (handled in Dashboard navigation)
 
   // Show PlayerPropsPage when props are selected
   if (selectedBetType === 'props') {
@@ -1339,17 +1336,20 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           </div> */}
           <div className="flex items-center justify-center gap-2 overflow-x-auto overflow-y-visible -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide w-full md:w-auto">
             {/* Filters Button - Opens side panel to filter odds by sport, market type, bet type, and date */}
-            <button 
-              onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-              className={`flex items-center gap-2 h-10 px-5 border rounded-full transition-colors text-sm ${
-                isLight 
-                  ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' 
-                  : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              <span>Filters</span>
-            </button>
+            {/* Only show filters for paid users */}
+            {hasPaidPlan && (
+              <button 
+                onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+                className={`flex items-center gap-2 h-10 px-5 border rounded-full transition-colors text-sm ${
+                  isLight 
+                    ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900' 
+                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filters</span>
+              </button>
+            )}
 
             {/* Manual Refresh Button */}
             <button 
