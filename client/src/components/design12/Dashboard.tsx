@@ -571,8 +571,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             )}
 
             {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} onUpdatePickStatus={updatePickStatus} onNavigateToCalculator={() => setCurrentView("calculator")} />}
-            {/* Only render OddsPage for paid users to avoid unnecessary API calls */}
-            {currentView === "odds" && hasPaidPlan && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} betType={selectedBetType} onBetTypeChange={setSelectedBetType} />}
+            {/* Render OddsPage - free users can access Straight Bets */}
+            {currentView === "odds" && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} betType={selectedBetType} onBetTypeChange={setSelectedBetType} />}
             {currentView === "account" && (
               <AccountPage
                 onNavigateToSettings={() => setCurrentView("settings")}
