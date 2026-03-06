@@ -73,40 +73,65 @@ export interface UseOddsDataResult {
 // Book weighting for EV calculations
 // Sharp books and exchanges get higher weights because their lines are more accurate
 const BOOK_WEIGHTS: { [key: string]: number } = {
-  // Exchanges (highest weight - no vig, true market prices)
-  'kalshi': 3.0,
-  'polymarket': 3.0,
+  // Pinnacle - global sharp reference, highest limits, accepts winners (own tier)
+  'pinnacle': 3.5,
+
+  // US exchanges - true market prices, no vig
   'novig': 3.0,
   'prophetx': 3.0,
   'prophet': 3.0,
   'prophet_exchange': 3.0,
-  'rebet': 3.0,
-  'betopenly': 3.0,
-  'betfair': 3.0,
-  'betfair_ex_us': 3.0,
-  'matchbook': 3.0,
-  
-  // Sharp books (high weight - accurate lines, low margins)
-  'pinnacle': 3.0,
-  'circa': 3.0,
+
+  // Smaller US exchanges + international exchange (less US sports liquidity)
+  'betopenly': 2.5,
+  'rebet': 2.5,
+  'betfair': 2.5,
+  'betfair_ex_us': 2.5,
+  'matchbook': 2.5,
+
+  // Sharp books - tight margins, respected lines
+  'circa': 2.5,
   'bookmaker': 2.5,
   'bookmaker_us': 2.5,
-  'bovada': 2.0,
-  'betonline': 2.0,
-  'betonlineag': 2.0,
-  
-  // Major US sportsbooks (moderate weight)
+  'lowvig': 2.5,     // mirrors Pinnacle lines with reduced vig
+  'lowvigag': 2.5,
+
+  // Kalshi - binary event contracts, good signal but not traditional lines
+  'kalshi': 2.0,
+
+  // Sharp international / respected US books
+  'superbook': 2.0,
+  'circasports': 2.0,
+
+  // Polymarket - crypto prediction market, thin US sports liquidity
+  'polymarket': 1.5,
+
+  // Bet365 - sharper than the US big 4 (especially soccer/international)
+  'bet365': 1.8,
+
+  // Major US sportsbooks - high volume, competitive but recreational-focused
   'fanduel': 1.5,
   'draftkings': 1.5,
-  'caesars': 1.5,
-  'betmgm': 1.5,
-  'bet365': 1.5,
   'williamhill': 1.5,
   'williamhill_us': 1.5,
+
+  // Promo-heavy recreational US books
+  'caesars': 1.2,
+  'betmgm': 1.2,
   'betrivers': 1.2,
   'unibet': 1.2,
   'unibet_us': 1.2,
-  
+  'espnbet': 1.2,
+  'fanatics': 1.2,
+  'hardrockbet': 1.2,
+  'wynnbet': 1.2,
+
+  // Soft offshore books - slow to move lines, limit winners
+  'bovada': 1.0,
+  'betonline': 1.0,
+  'betonlineag': 1.0,
+  'mybookie': 1.0,
+
   // Default weight for all other books
   'default': 1.0
 };
