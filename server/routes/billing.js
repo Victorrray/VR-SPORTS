@@ -121,11 +121,12 @@ router.post('/webhook',
           console.log(`🔍 About to update Supabase for user: ${userId} with plan: ${planToSet}`);
           const { error } = await supabase
             .from('users')
-            .update({ 
+            .update({
               plan: planToSet,
               subscription_end_date: subscriptionEndDate.toISOString(),
               grandfathered: false,  // Paying users are not grandfathered
               stripe_customer_id: subscription.customer,
+              stripe_subscription_id: subscription.id,
               updated_at: new Date().toISOString()
             })
             .eq('id', userId);
@@ -548,7 +549,7 @@ router.post('/customer-portal', requireUser, async (req, res) => {
     // Create a customer portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: user.stripe_customer_id,
-      return_url: `${FRONTEND_URL}/account`,
+      return_url: `${FRONTEND_URL}/dashboard?view=account`,
     });
 
     console.log(`✅ Created customer portal session for user: ${userId}`);

@@ -19,20 +19,12 @@ import DebugPanel from './components/debug/DebugPanel';
 import Landing from './pages/Landing';
 import PricingPage from './pages/PricingPage';
 import DashboardPage from './pages/DashboardPage';
-import DFSMarkets from './pages/DFSMarkets';
-import SportsbookMarkets from './pages/SportsbookMarkets';
-import { OddsPageWrapper as OddsPage } from './components/design12/OddsPageWrapper';
 import { LoginPageWrapper as Login } from './components/design12/LoginPageWrapper';
 import { SignUpPageWrapper as SignUp } from './components/design12/SignUpPageWrapper';
 import { ForgotPasswordPageWrapper as ForgotPassword } from './components/design12/ForgotPasswordPageWrapper';
-import { AccountPageWrapper as Account } from './components/design12/AccountPageWrapper';
-import UsagePlan from './pages/UsagePlan';
-import MySportsbooks from './pages/MySportsbooks';
 import AuthCallback from './pages/AuthCallback';
 import LoadingBar from "./components/common/LoadingBar";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import PlanGuard from "./components/guards/PlanGuard";
-import { PicksPage as MyPicks } from './components/design12/PicksPage';
 import { TermsWrapper as Terms } from './components/design12/TermsWrapper';
 import { PrivacyWrapper as Privacy } from './components/design12/PrivacyWrapper';
 import { RoadmapWrapper as Roadmap } from './components/design12/RoadmapWrapper';
@@ -52,7 +44,6 @@ function AppRoutes() {
   const location = useLocation();
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [quotaModal, setQuotaModal] = useState({ open: false, detail: null });
-  const [mobileSearchCallback, setMobileSearchCallback] = useState(null);
   const [debugPanelOpen, setDebugPanelOpen] = useState(false);
 
   // Handle Supabase auth redirects with hash params (email confirmation, password recovery)
@@ -65,13 +56,6 @@ function AppRoutes() {
       window.location.href = `/auth/callback${hash}`;
     }
   }, []);
-
-  // Clear mobile search callback when navigating away from sportsbooks
-  useEffect(() => {
-    if (!location.pathname.startsWith('/sportsbooks')) {
-      setMobileSearchCallback(null);
-    }
-  }, [location.pathname]);
 
   // Global quota exceeded event listener
   useEffect(() => {
@@ -131,20 +115,11 @@ function AppRoutes() {
       <div className="app">
         <div className="app-layout">
           <LoadingBar />
-          {/* OLD NAVBAR - Commented out, using new Header from landing page */}
-          {/* <NavbarRevamped onOpenMobileSearch={() => {
-            console.log('Navbar: onOpenMobileSearch called, callback exists:', !!mobileSearchCallback);
-            if (mobileSearchCallback) {
-              mobileSearchCallback();
-            }
-          }} /> */}
           <main className="main-content" id="main-content" tabIndex="-1">
             <AuthDebug />
             <Routes>
               <Route path="/" element={user ? <DashboardPage /> : <Landing />} />
               <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
-              {/* <Route path="/dfs" element={<PrivateRoute><PlanGuard><DFSMarkets /></PlanGuard></PrivateRoute>} /> */}
-              {/* /sportsbooks route removed - old page */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -152,11 +127,6 @@ function AppRoutes() {
               <Route path="/app" element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/subscribe" element={<PrivateRoute><Subscribe /></PrivateRoute>} />
-              {/* <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} /> */}
-              {/* <Route path="/usage-plan" element={<PrivateRoute><UsagePlan /></PrivateRoute>} /> */}
-              {/* <Route path="/my-sportsbooks" element={<PrivateRoute><MySportsbooks /></PrivateRoute>} /> */}
-              {/* /picks route hidden for free version */}
-              {/* <Route path="/picks" element={<PrivateRoute><MyPicks /></PrivateRoute>} /> */}
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/billing/success" element={<BillingSuccess />} />
               <Route path="/billing/cancel" element={<Navigate to="/dashboard?view=changePlan" replace />} />
@@ -166,9 +136,7 @@ function AppRoutes() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          {/* OLD FOOTER - Commented out, using new Footer from landing page */}
-          {/* {(['/', '/pricing', '/signup'].includes(location.pathname) && !user) && <Footer />} */}
-          
+
           {/* Username Setup Modal */}
           {showUsernameSetup && (
             <UsernameSetup 

@@ -60,10 +60,21 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-slate-950">
       <Helmet>
-        <title>Pricing - {PAGE_TITLES.home}</title>
-        <meta name="description" content="Simple, transparent pricing for OddSightSeer. Choose Gold ($10/mo) or Platinum ($25/mo) plans." />
+        <title>{PAGE_TITLES.pricing}</title>
+        <meta name="description" content={PAGE_DESCRIPTIONS.pricing} />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={`${SITE_CONFIG.domain}/pricing`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={PAGE_TITLES.pricing} />
+        <meta property="og:description" content={PAGE_DESCRIPTIONS.pricing} />
+        <meta property="og:image" content={SITE_CONFIG.ogImage} />
+        <meta property="og:url" content={`${SITE_CONFIG.domain}/pricing`} />
+        <meta property="og:site_name" content={SITE_CONFIG.name} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={PAGE_TITLES.pricing} />
+        <meta name="twitter:description" content={PAGE_DESCRIPTIONS.pricing} />
+        <meta name="twitter:image" content={SITE_CONFIG.ogImage} />
+        <meta name="twitter:site" content={SITE_CONFIG.twitterHandle} />
       </Helmet>
 
       <Header 

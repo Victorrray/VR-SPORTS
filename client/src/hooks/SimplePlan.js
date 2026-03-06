@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './SimpleAuth';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
@@ -11,7 +11,7 @@ export function usePlan() {
   const [plan, setPlan] = useState(null);
   const [planLoading, setPlanLoading] = useState(true);
 
-  const fetchPlan = async () => {
+  const fetchPlan = useCallback(async () => {
     if (!user) {
       if (DEBUG_PLAN) console.log('🔄 No user, skipping plan fetch');
       setPlan(null);
@@ -90,48 +90,29 @@ export function usePlan() {
       setPlan({ plan: 'free', remaining: 250, limit: 250 });
       setPlanLoading(false);
     }
-  };
+  }, [user?.id]);
 
   // Fetch plan when user logs in or user ID changes
   useEffect(() => {
     if (authLoading) return;
-    
-    // Reset plan when user changes (sign out/sign in)
+
     if (!user) {
       if (DEBUG_PLAN) console.log('🔄 User signed out - clearing plan');
       setPlan(null);
       setPlanLoading(false);
       return;
     }
-    
-    if (DEBUG_PLAN) console.log('🔄 User changed - fetching plan for:', user.id);
-    if (DEBUG_PLAN) console.log('🔄 Current plan state:', plan);
-    fetchPlan();
-  }, [user?.id, authLoading]);
 
-  // DISABLED: Refresh plan when page becomes visible (user returns to tab)
-  // This was causing unnecessary API calls and cascading re-renders when switching tabs
-  // Users can manually refresh if needed, or plan will refresh on next page navigation
-  // useEffect(() => {
-  //   if (!user) return;
-  //   const handleVisibilityChange = () => {
-  //     if (document.visibilityState === 'visible') {
-  //       if (DEBUG_PLAN) console.log('🔄 Page visible - refreshing plan');
-  //       fetchPlan();
-  //     }
-  //   };
-  //   document.addEventListener('visibilitychange', handleVisibilityChange);
-  //   return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  // }, [user?.id]);
+    if (DEBUG_PLAN) console.log('🔄 User changed - fetching plan for:', user.id);
+    fetchPlan();
+  }, [user?.id, authLoading, fetchPlan]);
 
   const refreshPlan = async () => {
-    if (!user) return null;
-    
+    if (!user) return;
+
     if (DEBUG_PLAN) console.log('🔄 Manual plan refresh triggered for user:', user.id);
-    
-    // Clear any cached data
+
     try {
-      // Clear localStorage cache
       localStorage.removeItem('userPlan');
       localStorage.removeItem('me');
       localStorage.removeItem('plan');
@@ -139,11 +120,8 @@ export function usePlan() {
     } catch (e) {
       console.warn('⚠️ Could not clear localStorage:', e);
     }
-    
-    // Force a fresh fetch by clearing any browser cache
+
     await fetchPlan();
-    if (DEBUG_PLAN) console.log('✅ Plan refresh complete, new plan:', plan);
-    return plan;
   };
 
   // Listen for plan update events from admin panel
@@ -155,28 +133,7 @@ export function usePlan() {
 
     window.addEventListener('planUpdated', handlePlanUpdate);
     return () => window.removeEventListener('planUpdated', handlePlanUpdate);
-  }, [user?.id]);
-
-  // DISABLED: Listen for visibility changes and clear cache when returning to tab
-  // This was causing unnecessary API calls and cascading re-renders when switching tabs
-  // Plan data doesn't change frequently enough to justify refreshing on every tab switch
-  // useEffect(() => {
-  //   const handleVisibilityChange = () => {
-  //     if (document.visibilityState === 'visible') {
-  //       if (DEBUG_PLAN) console.log('👁️ Page became visible - clearing cache and refreshing plan');
-  //       try {
-  //         localStorage.removeItem('userPlan');
-  //         localStorage.removeItem('me');
-  //         localStorage.removeItem('plan');
-  //       } catch (e) {
-  //         console.warn('⚠️ Could not clear cache:', e);
-  //       }
-  //       fetchPlan();
-  //     }
-  //   };
-  //   document.addEventListener('visibilitychange', handleVisibilityChange);
-  //   return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  // }, [user?.id]);
+  }, [fetchPlan]);
 
   // Auto-clear plan cache on page load/mount (preserve user preferences)
   useEffect(() => {

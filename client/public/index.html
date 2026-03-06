@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <!-- Favicon / App Icons -->
-    <!-- Favicons: prefer SVG/PNG to avoid 404 on missing .ico -->
     <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
@@ -23,11 +22,12 @@
     <link rel="alternate" hreflang="en-US" href="https://oddsightseer.com/" />
     <link rel="alternate" hreflang="x-default" href="https://oddsightseer.com/" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Odds Comparison — DraftKings vs FanDuel vs BetMGM" />
-    <meta property="og:description" content="Compare NFL, NBA, MLB odds across 15+ sportsbooks. Find the best lines for spreads, totals, and player props in seconds." />
+    <meta property="og:description" content="Compare NFL, NBA, MLB odds across 45+ sportsbooks. Find the best lines for spreads, totals, and player props in seconds." />
     <meta property="og:image" content="https://oddsightseer.com/og-image.png?v=2" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -39,19 +39,12 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Odds Comparison — DraftKings vs FanDuel vs BetMGM" />
-    <meta name="twitter:description" content="Compare NFL, NBA, MLB odds across 15+ sportsbooks. Find the best lines for spreads, totals, and player props." />
+    <meta name="twitter:description" content="Compare NFL, NBA, MLB odds across 45+ sportsbooks. Find the best lines for spreads, totals, and player props." />
     <meta name="twitter:image" content="https://oddsightseer.com/og-image.png?v=2" />
     <meta name="twitter:image:width" content="1200" />
     <meta name="twitter:image:height" content="630" />
     <meta name="twitter:site" content="@OddSightSeer" />
     <meta name="twitter:creator" content="@OddSightSeer" />
-
-    <!-- Additional SEO Meta Tags -->
-    <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
-    <meta name="distribution" content="global" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -60,8 +53,8 @@
       "@type": "Organization",
       "name": "OddSightSeer",
       "url": "https://oddsightseer.com",
-      "logo": "https://oddsightseer.com/logo.png",
-      "description": "Find +EV bets with real-time odds comparison across 15+ major sportsbooks.",
+      "logo": "https://oddsightseer.com/apple-touch-icon.png",
+      "description": "Find +EV bets with real-time odds comparison across 45+ major sportsbooks.",
       "sameAs": [
         "https://twitter.com/OddSightSeer",
         "https://www.facebook.com/OddSightSeer"
@@ -82,24 +75,25 @@
       "url": "https://oddsightseer.com",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Web Browser",
-      "description": "Real-time sports betting odds comparison and analysis platform. Compare lines across 15+ sportsbooks.",
+      "description": "Real-time sports betting odds comparison and analysis platform. Compare lines across 45+ sportsbooks.",
       "offers": {
-        "@type": "Offer",
-        "price": "0",
+        "@type": "AggregateOffer",
         "priceCurrency": "USD",
-        "description": "Free tier available with premium options"
+        "lowPrice": "10",
+        "highPrice": "25",
+        "offerCount": 2
       },
       "featureList": [
         "Real-time odds comparison",
-        "15+ sportsbooks",
+        "45+ sportsbooks",
         "Arbitrage detection",
         "Player props analysis",
-        "Line movement tracking"
+        "+EV bet finder"
       ]
     }
     </script>
 
-    <!-- Breadcrumb Schema for Navigation -->
+    <!-- Breadcrumb Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -114,12 +108,6 @@
         {
           "@type": "ListItem",
           "position": 2,
-          "name": "Odds Comparison",
-          "item": "https://oddsightseer.com/sportsbooks"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
           "name": "Pricing",
           "item": "https://oddsightseer.com/pricing"
         }
@@ -135,63 +123,63 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "What is OddSightSeer?",
+          "name": "Does OddSightSeer offer a free odds viewer?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "OddSightSeer is a sports betting odds comparison platform that helps you find the best lines across 15+ major sportsbooks including DraftKings, FanDuel, BetMGM, and Caesars."
+            "text": "Yes! OddSightSeer offers a free odds viewer that gives you access to our Straight Bets tool. Compare real-time odds across multiple sportsbooks at no cost. Upgrade to Gold or Platinum for access to +EV finder, player props, arbitrage opportunities, and more advanced features."
           }
         },
         {
           "@type": "Question",
-          "name": "How does odds comparison help me win more bets?",
+          "name": "Is OddSightSeer a sportsbook?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "By comparing odds across multiple sportsbooks, you can find the best available line for any bet. Getting better odds means higher payouts on wins and better long-term expected value (+EV)."
+            "text": "No, OddSightSeer is not a sportsbook. We are strictly a sports data and analytics platform. We do not facilitate betting or hold user funds. We provide real-time odds data, +EV analysis, and betting tools to help you make informed decisions on the sportsbooks of your choice."
           }
         },
         {
           "@type": "Question",
-          "name": "Is OddSightSeer free to use?",
+          "name": "How does OddSightSeer find +EV bets?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "OddSightSeer offers Gold and Platinum plans for odds comparison. Gold includes basic access, while Platinum unlocks player props, unlimited access, and advanced analytics."
+            "text": "Our proprietary algorithm scans odds across 45+ sportsbooks in real-time, calculates true probability, and identifies bets where the implied odds are in your favor."
           }
         },
         {
           "@type": "Question",
-          "name": "What sportsbooks does OddSightSeer compare?",
+          "name": "What's the difference between Gold and Platinum?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "We compare odds from 15+ major US sportsbooks including DraftKings, FanDuel, BetMGM, Caesars, PointsBet, BetRivers, and DFS apps like PrizePicks and Underdog Fantasy."
+            "text": "Gold ($10/mo) includes access to all 45+ sportsbooks, +EV finder, and player props tool. Platinum ($25/mo) adds arbitrage opportunities, middles tool, and live betting markets."
           }
         },
         {
           "@type": "Question",
-          "name": "What sports are covered?",
+          "name": "Can I cancel my subscription anytime?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "OddSightSeer covers all major US sports including NFL, NBA, MLB, NHL, college football (NCAAF), college basketball (NCAAB), and major soccer leagues."
+            "text": "Yes! Both plans are month-to-month with no long-term commitment. You can cancel anytime from your account settings."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What sports and markets are covered?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We cover all major sports including NFL, NBA, MLB, NHL, NCAA Basketball and football. Markets include moneylines, spreads, totals, player props, and live betting (Platinum plan)."
           }
         }
       ]
     }
     </script>
 
-    <!-- Google Analytics (gtag.js) -->
+    <!-- Google Analytics + Google Ads -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-R1H8X9E1PE"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-R1H8X9E1PE');
-    </script>
-
-    <!-- Google Ads (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17783188669"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
       gtag('config', 'AW-17783188669');
     </script>
 

@@ -33,26 +33,10 @@ export function useRecommendedPicks(options = {}) {
       setLoading(true);
       setError(null);
 
-      // Fetch odds data with high EV filter
-      // Only fetch today's and future games (filter out past games)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      // Include all markets including period markets - backend filters per sport
-      const allMarkets = [
-        'h2h', 'spreads', 'totals',
-        'alternate_spreads', 'alternate_totals', 'team_totals', 'alternate_team_totals',
-        'h2h_q1', 'h2h_q2', 'h2h_q3', 'h2h_q4',
-        'spreads_q1', 'spreads_q2', 'spreads_q3', 'spreads_q4',
-        'totals_q1', 'totals_q2', 'totals_q3', 'totals_q4',
-        'h2h_h1', 'h2h_h2', 'spreads_h1', 'spreads_h2', 'totals_h1', 'totals_h2',
-        'h2h_p1', 'h2h_p2', 'h2h_p3', 'spreads_p1', 'spreads_p2', 'spreads_p3', 'totals_p1', 'totals_p2', 'totals_p3'
-      ];
-      
       const params = new URLSearchParams({
         sports: 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl',
         regions: 'us',
-        markets: allMarkets.join(','),
+        markets: 'h2h,spreads,totals,team_totals',
         oddsFormat: 'american',
         dateFormat: 'iso',
         _t: Date.now(),
@@ -103,13 +87,9 @@ export function useRecommendedPicks(options = {}) {
           // and find the best odds for each
           const bestOddsMap = new Map(); // key: "marketKey|outcomeName|point" -> { odds, bookmaker, market, outcome }
           
-          // Use ALL bookmakers for better EV calculation (don't filter)
-          const filteredBookmakers = game.bookmakers;
-          
-          
-          if (filteredBookmakers.length === 0) return picks;
-          
-          filteredBookmakers.forEach((bookmaker) => {
+          if (game.bookmakers.length === 0) return picks;
+
+          game.bookmakers.forEach((bookmaker) => {
             if (!bookmaker.markets) return;
             
             bookmaker.markets.forEach((market) => {

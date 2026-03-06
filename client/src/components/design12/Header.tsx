@@ -98,23 +98,23 @@ export function Header({ onLoginClick, onDashboardClick, onRoadmapClick, onSignu
         {mobileMenuOpen && (
           <div className="md:hidden">
             <nav className="flex flex-col gap-3 px-6 py-6 bg-gradient-to-br from-slate-900/95 via-slate-900/98 to-slate-950/95 backdrop-blur-2xl border-t border-white/10 rounded-b-2xl">
-              <button 
-                onClick={onDashboardClick}
+              <button
+                onClick={() => { onDashboardClick(); setMobileMenuOpen(false); }}
                 className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold text-left"
               >
                 Dashboard
               </button>
-              <button 
+              <button
                 onClick={() => { navigate('/pricing'); setMobileMenuOpen(false); }}
                 className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold text-left"
               >
                 Pricing
               </button>
-              <a href="#faq" className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
+              <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold">
                 FAQ
               </a>
-              <button 
-                onClick={onRoadmapClick}
+              <button
+                onClick={() => { onRoadmapClick(); setMobileMenuOpen(false); }}
                 className="w-full px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 rounded-xl transition-all font-bold text-left"
               >
                 Roadmap

@@ -32,7 +32,7 @@ import {
   DollarSign,
   Sparkles,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTheme, lightModeColors, themeConfig } from "../../contexts/ThemeContext";
 import { useAuth } from "../../hooks/SimpleAuth";
@@ -69,7 +69,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const userPlan = me?.plan || 'free';
   const hasPaidPlan = userPlan === 'gold' || userPlan === 'platinum' || me?.unlimited === true;
   const hasPlatinumPlan = userPlan === 'platinum' || me?.unlimited === true;
-  const getPlanConfig = () => {
+  const planConfig = useMemo(() => {
     switch (userPlan) {
       case 'platinum':
         return { label: 'Platinum', icon: Crown, color: 'text-amber-400', bg: isLight ? 'bg-amber-100 border-amber-300' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-400/30' };
@@ -78,8 +78,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       default:
         return { label: 'Free', icon: Zap, color: 'text-gray-400', bg: isLight ? 'bg-gray-100 border-gray-300' : 'bg-gradient-to-r from-gray-500/20 to-gray-600/20 border-gray-400/30' };
     }
-  };
-  const planConfig = getPlanConfig();
+  }, [userPlan, isLight]);
   const PlanIcon = planConfig.icon;
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedSport, setSelectedSport] = useState("all");
@@ -93,7 +92,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [currentView, setCurrentView] = useState<
     "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll" | "cancelSubscription" | "deleteAccount" | "changePlan"
   >(initialView);
-  const [savedPicks, setSavedPicks] = useState<any[]>([]);
+  type SavedPick = BetData & { betAmount?: number; result?: string; status?: string };
+  const [savedPicks, setSavedPicks] = useState<SavedPick[]>(() => {
+    try {
+      const stored = localStorage.getItem('savedPicks');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [previousView, setPreviousView] = useState<string>("account");
   const [betSlipOpen, setBetSlipOpen] = useState(false);
   const [pendingBet, setPendingBet] = useState<any>(null);
@@ -108,6 +115,13 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
   // Use recommended picks from API, fallback to empty array if loading
   const bets: BetData[] = recommendedPicks.length > 0 ? recommendedPicks : [];
+
+  // Persist picks across refreshes
+  useEffect(() => {
+    try {
+      localStorage.setItem('savedPicks', JSON.stringify(savedPicks));
+    } catch {}
+  }, [savedPicks]);
 
   const openBetSlip = (betData: any) => {
     setPendingBet(betData);
@@ -230,7 +244,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     };
   };
 
-  const calculatedStats = calculateStats();
+  const calculatedStats = useMemo(() => calculateStats(), [savedPicks]);
 
   const stats = [
     {

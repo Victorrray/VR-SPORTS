@@ -17,9 +17,10 @@ Disallow: /picks
 Disallow: /usage-plan
 Disallow: /subscribe
 Disallow: /my-sportsbooks
+Disallow: /app
 
 # Crawl delay to be respectful
 Crawl-delay: 1
 
-# Sitemap location (must match canonical URL - non-www is primary on Render)
+# Sitemap location
 Sitemap: https://oddsightseer.com/sitemap.xml

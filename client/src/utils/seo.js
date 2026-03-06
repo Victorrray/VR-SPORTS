@@ -11,7 +11,7 @@ export const SITE_CONFIG = {
   twitterHandle: '@OddSightSeer',
   ogImage: 'https://oddsightseer.com/og-image.png',
   ogImageAlt: 'OddSightSeer - Real-time sports betting odds comparison across 15+ sportsbooks',
-  logo: 'https://oddsightseer.com/og-image.png'
+  logo: 'https://oddsightseer.com/apple-touch-icon.png'
 };
 
 /**
