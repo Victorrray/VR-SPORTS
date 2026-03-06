@@ -1207,18 +1207,20 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             const bestDecimal = toDecimal(bestOddsNum);
             // True EV formula: (Fair Probability × Decimal Odds - 1) × 100
             const trueEV = (fairProb * bestDecimal - 1) * 100;
-            const roundedEV = Math.round(trueEV * 100) / 100;
+            const clampedEV = Math.max(-20, Math.min(10, trueEV));
+            const roundedEV = Math.round(clampedEV * 100) / 100;
             ev = `${roundedEV >= 0 ? '+' : ''}${roundedEV.toFixed(2)}%`;
-            
+
             booksArray.forEach(b => {
               const o = parseInt(b.odds, 10);
-              const isSameLine = marketKey !== 'spreads' || marketPoint === null || 
+              const isSameLine = marketKey !== 'spreads' || marketPoint === null ||
                 (b.line !== null && b.line !== undefined && Math.abs(Number(b.line) - Number(marketPoint)) < 0.01);
               if (!isNaN(o) && isSameLine) {
                 const bookDecimal = toDecimal(o);
                 // True EV for this book
                 const bookEV = (fairProb * bookDecimal - 1) * 100;
-                const roundedBookEV = Math.round(bookEV * 100) / 100;
+                const clampedBookEV = Math.max(-20, Math.min(10, bookEV));
+                const roundedBookEV = Math.round(clampedBookEV * 100) / 100;
                 b.ev = `${roundedBookEV >= 0 ? '+' : ''}${roundedBookEV.toFixed(2)}%`;
               } else if (!isSameLine) {
                 b.ev = '--';

@@ -840,26 +840,20 @@ export function DiscrepancyPage() {
           />
           
           {/* Mobile Backdrop */}
-          <div 
-            className={`lg:hidden fixed right-0 left-0 bg-black/60 z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
-            style={{ top: '-100px', bottom: 0 }}
+          <div
+            className={`lg:hidden fixed inset-0 bg-black/60 z-[9998] transition-opacity duration-300 ${isFilterClosing ? 'opacity-0' : 'opacity-100'}`}
             onClick={closeFilterMenu}
           />
-          
-          {/* Side Panel */}
-          <div 
-            className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!top-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl max-lg:z-[9999] lg:z-30`}
+
+          {/* Side Panel - Full height on all screen sizes */}
+          <div
+            className={`!fixed !top-0 !bottom-0 max-lg:!left-0 max-lg:!right-0 ${isLight ? 'bg-white' : 'bg-slate-950'} border-r ${isLight ? 'border-gray-200' : 'border-white/10'} rounded-none flex flex-col ${isFilterClosing ? 'animate-out slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl z-[9999]`}
             style={{
               left: '224px',
-              top: 0,
             }}
           >
             {/* Sticky Header */}
-            <div className={`sticky top-0 ${isLight ? 'bg-white' : 'bg-slate-950'} z-10 px-5 pt-4 lg:pt-4 pb-3 space-y-3 lg:border-b border-b-0 ${isLight ? 'border-gray-100' : 'border-white/5'} lg:mt-0 lg:rounded-none max-lg:rounded-t-2xl max-lg:-mt-6`}>
-              {/* Drag Handle - Mobile Only */}
-              <div className="flex lg:hidden justify-center pt-2 pb-1 -mt-5">
-                <div className={`w-10 h-1 rounded-full ${isLight ? 'bg-gray-300' : 'bg-white/20'}`}></div>
-              </div>
+            <div className={`sticky top-0 ${isLight ? 'bg-white' : 'bg-slate-950'} z-10 px-5 pt-4 pb-3 space-y-3 border-b ${isLight ? 'border-gray-100' : 'border-white/5'} mt-0 rounded-none`}>
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h3 className={`${isLight ? 'text-gray-900' : 'text-white'} font-bold text-base`}>Filters</h3>
