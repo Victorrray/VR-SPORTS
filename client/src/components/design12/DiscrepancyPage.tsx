@@ -830,7 +830,7 @@ export function DiscrepancyPage() {
       </div>
 
       {/* Filter Side Panel */}
-      {isFilterMenuOpen && (
+      {isFilterMenuOpen && createPortal(
         <>
           {/* Desktop Backdrop - appears after animation */}
           <div 
@@ -1335,7 +1335,8 @@ export function DiscrepancyPage() {
 
               </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );

@@ -720,7 +720,7 @@ export function PlayerPropsPage() {
       </div>
 
       {/* Filter Side Panel */}
-      {isFilterMenuOpen && (
+      {isFilterMenuOpen && createPortal(
         <>
           {/* Backdrop - Desktop only (to the right of panel) - appears after animation */}
           <div 
@@ -1277,7 +1277,8 @@ export function PlayerPropsPage() {
             {/* End Scrollable Content */}
           </div>
           {/* End Side Panel */}
-        </>
+        </>,
+        document.body
       )}
 
       {/* Picks Count and Updated Time */}

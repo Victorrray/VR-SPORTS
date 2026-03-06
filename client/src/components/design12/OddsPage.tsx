@@ -1442,7 +1442,7 @@ export function OddsPage({ betType, onBetTypeChange }: OddsPageProps) {
       </div>
 
       {/* Filter Side Panel */}
-      {isFilterMenuOpen && (
+      {isFilterMenuOpen && createPortal(
         <>
           {/* Backdrop - Desktop only (to the right of panel) - appears after animation */}
           <div 
@@ -2034,7 +2034,8 @@ export function OddsPage({ betType, onBetTypeChange }: OddsPageProps) {
             {/* End Scrollable Content */}
           </div>
           {/* End Side Panel */}
-        </>
+        </>,
+        document.body
       )}
 
       {/* Last Updated Indicator */}
