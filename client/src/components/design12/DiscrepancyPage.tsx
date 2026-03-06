@@ -45,11 +45,6 @@ interface DiscrepancyPick {
   traditionalBookCount?: number; // Number of traditional sportsbooks used in average
 }
 
-// Props for the component
-interface DiscrepancyPageProps {
-  onAddPick?: (pick: any) => void;
-  savedPicks?: any[];
-}
 
 // DFS apps that support player props
 const DFS_SPORTSBOOKS = [
@@ -120,7 +115,7 @@ const PROP_TYPES = [
   { id: 'player_receptions', name: 'Receptions' },
 ];
 
-export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageProps) {
+export function DiscrepancyPage() {
   const { colorMode } = useTheme();
   const isLight = colorMode === 'light';
   const { data: userData } = useMe();
@@ -472,10 +467,10 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
 
             {/* Pagination Controls - Mobile only */}
             <div className="flex md:hidden items-center gap-1.5">
-              <button 
+              <button
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
-                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
                   currentPage === 1
                     ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                     : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -483,17 +478,17 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              
-              <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+
+              <div className={`flex items-center h-9 px-3 border rounded-xl ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
                 <span className="text-sm whitespace-nowrap">
                   {currentPage}/{totalPages}
                 </span>
               </div>
 
-              <button 
+              <button
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
-                className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+                className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
                   currentPage === totalPages
                     ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                     : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -507,10 +502,10 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
 
         {/* Desktop Pagination */}
         <div className="hidden md:flex items-center gap-1.5">
-          <button 
+          <button
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
-            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
               currentPage === 1
                 ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -518,17 +513,17 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          
-          <div className={`flex items-center h-9 px-3 border rounded-lg ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
+
+          <div className={`flex items-center h-9 px-3 border rounded-xl ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
             <span className="text-sm whitespace-nowrap">
               {currentPage}/{totalPages}
             </span>
           </div>
 
-          <button 
+          <button
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
-            className={`flex items-center justify-center w-9 h-9 border rounded-lg transition-colors ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
               currentPage === totalPages
                 ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -856,6 +851,7 @@ export function DiscrepancyPage({ onAddPick, savedPicks = [] }: DiscrepancyPageP
             className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!top-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl max-lg:z-[9999] lg:z-30`}
             style={{
               left: '224px',
+              top: 0,
             }}
           >
             {/* Sticky Header */}

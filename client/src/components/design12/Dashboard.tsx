@@ -1,38 +1,18 @@
 import {
   TrendingUp,
-  Clock,
-  Search,
-  ChevronDown,
-  Filter,
   BarChart2,
-  Plus,
   Zap,
-  RefreshCw,
-  Calendar,
-  Star,
-  ArrowUpRight,
-  ArrowDownRight,
   Target,
-  Flame,
-  Trophy,
-  TrendingDown,
-  Eye,
-  Bell,
-  ChevronRight,
-  ArrowUp,
-  ArrowDown,
-  Check,
   Crown,
   LogOut,
   User,
   Home,
   Settings,
   Calculator,
-  Wallet,
-  DollarSign,
   Sparkles,
+  ArrowLeftRight,
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTheme, lightModeColors, themeConfig } from "../../contexts/ThemeContext";
 import { useAuth } from "../../hooks/SimpleAuth";
@@ -41,16 +21,12 @@ import { OddsPage } from "./OddsPage";
 import { AccountPage } from "./AccountPage";
 import { SettingsPage } from "./SettingsPage";
 import { CalculatorPage } from "./CalculatorPage";
-import { BankrollPage } from "./BankrollPage";
-import { PicksPage } from "./PicksPage";
 import { CancelSubscriptionPage } from "./CancelSubscriptionPage";
 import { DeleteAccountPage } from "./DeleteAccountPage";
 import { ChangePlanPage } from "./ChangePlanPage";
 import { BetCard, BetData } from "./BetCard";
 import LiveGamesTicker from "./LiveGamesTicker";
 import { Toaster } from "./ui/sonner";
-import { BetSlip } from "./BetSlip";
-import { toast } from "sonner";
 import { useRecommendedPicks } from "../../hooks/useRecommendedPicks";
 
 interface DashboardProps {
@@ -85,197 +61,23 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   
   // Check URL params for initial view (e.g., /dashboard?view=changePlan)
   const urlView = searchParams.get('view');
-  const initialView = urlView && ['dashboard', 'picks', 'odds', 'account', 'settings', 'calculator', 'bankroll', 'cancelSubscription', 'deleteAccount', 'changePlan'].includes(urlView) 
-    ? urlView as "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll" | "cancelSubscription" | "deleteAccount" | "changePlan"
+  const initialView = urlView && ['dashboard', 'odds', 'account', 'settings', 'calculator', 'cancelSubscription', 'deleteAccount', 'changePlan'].includes(urlView)
+    ? urlView as "dashboard" | "odds" | "account" | "settings" | "calculator" | "cancelSubscription" | "deleteAccount" | "changePlan"
     : "dashboard";
-  
+
   const [currentView, setCurrentView] = useState<
-    "dashboard" | "picks" | "odds" | "account" | "settings" | "calculator" | "bankroll" | "cancelSubscription" | "deleteAccount" | "changePlan"
+    "dashboard" | "odds" | "account" | "settings" | "calculator" | "cancelSubscription" | "deleteAccount" | "changePlan"
   >(initialView);
-  type SavedPick = BetData & { betAmount?: number; result?: string; status?: string };
-  const [savedPicks, setSavedPicks] = useState<SavedPick[]>(() => {
-    try {
-      const stored = localStorage.getItem('savedPicks');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [previousView, setPreviousView] = useState<string>("account");
-  const [betSlipOpen, setBetSlipOpen] = useState(false);
-  const [pendingBet, setPendingBet] = useState<any>(null);
   const [selectedBetType, setSelectedBetType] = useState<string>('straight');
 
-  // Fetch recommended picks from API - limit to 4 for free users to minimize API costs
+  // Fetch recommended picks from API
   const { picks: recommendedPicks, loading: picksLoading } = useRecommendedPicks({
-    limit: 4, // Free users only get 4 picks
+    limit: 4,
     minEV: 5,
     enabled: true,
   });
 
-  // Use recommended picks from API, fallback to empty array if loading
   const bets: BetData[] = recommendedPicks.length > 0 ? recommendedPicks : [];
-
-  // Persist picks across refreshes
-  useEffect(() => {
-    try {
-      localStorage.setItem('savedPicks', JSON.stringify(savedPicks));
-    } catch {}
-  }, [savedPicks]);
-
-  const openBetSlip = (betData: any) => {
-    setPendingBet(betData);
-    setBetSlipOpen(true);
-  };
-
-  const closeBetSlip = () => {
-    setBetSlipOpen(false);
-    setPendingBet(null);
-  };
-
-  const confirmBetSlip = (betAmount: number) => {
-    if (pendingBet) {
-      const pickWithAmount = {
-        ...pendingBet,
-        betAmount: betAmount,
-        id: Date.now()
-      };
-      setSavedPicks((prev) => [...prev, pickWithAmount]);
-      toast.success('Added to My Picks', {
-        description: `${pendingBet.pick || 'Pick'} at ${pendingBet.sportsbook || 'Sportsbook'} has been added with $${betAmount.toFixed(2)} bet`
-      });
-    }
-    closeBetSlip();
-  };
-
-  const removePickFromMyPicks = (index: number) => {
-    setSavedPicks((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const updatePickStatus = (index: number, status: 'won' | 'lost' | 'pending') => {
-    setSavedPicks((prev) => prev.map((pick, i) => 
-      i === index ? { ...pick, status } : pick
-    ));
-  };
-
-  // Calculate stats from saved picks
-  const calculateStats = () => {
-    if (savedPicks.length === 0) {
-      return {
-        winRate: '---',
-        avgEdge: '---',
-        totalProfit: '---',
-        activeBets: '0',
-        winRateChange: '---',
-        avgEdgeChange: '---',
-        profitChange: '---',
-        betsChange: '---',
-      };
-    }
-
-    // Count wins, losses, and pending
-    const settledPicks = savedPicks.filter(p => p.result === 'win' || p.result === 'loss');
-    const wins = savedPicks.filter(p => p.result === 'win').length;
-    const activeBets = savedPicks.filter(p => !p.result || p.result === 'pending').length;
-    
-    // Calculate win rate (only from settled bets)
-    const winRate = settledPicks.length > 0 
-      ? ((wins / settledPicks.length) * 100).toFixed(1) + '%'
-      : activeBets > 0 ? 'Pending' : '---';
-    
-    // Calculate average EV/edge from all picks
-    const evValues = savedPicks
-      .map(p => {
-        const evStr = p.ev || p.edge || '0';
-        const match = evStr.match(/([+-]?\d+\.?\d*)/);
-        return match ? parseFloat(match[1]) : 0;
-      })
-      .filter(v => v !== 0);
-    
-    const avgEdge = evValues.length > 0 
-      ? '+' + (evValues.reduce((a, b) => a + b, 0) / evValues.length).toFixed(1) + '%'
-      : '---';
-    
-    // Calculate total profit/loss from settled bets
-    let totalProfit = 0;
-    savedPicks.forEach(pick => {
-      const betAmount = pick.betAmount || 0;
-      const oddsStr = String(pick.odds || '+100');
-      const oddsNum = parseInt(oddsStr.replace('+', ''), 10);
-      
-      if (pick.result === 'win') {
-        // Calculate winnings based on American odds
-        if (oddsNum > 0) {
-          totalProfit += betAmount * (oddsNum / 100);
-        } else {
-          totalProfit += betAmount * (100 / Math.abs(oddsNum));
-        }
-      } else if (pick.result === 'loss') {
-        totalProfit -= betAmount;
-      }
-    });
-    
-    const profitStr = totalProfit >= 0 
-      ? '+$' + totalProfit.toFixed(2)
-      : '-$' + Math.abs(totalProfit).toFixed(2);
-    
-    // Calculate potential profit from active bets
-    let potentialProfit = 0;
-    savedPicks.filter(p => !p.result || p.result === 'pending').forEach(pick => {
-      const betAmount = pick.betAmount || 0;
-      const oddsStr = String(pick.odds || '+100');
-      const oddsNum = parseInt(oddsStr.replace('+', ''), 10);
-      if (oddsNum > 0) {
-        potentialProfit += betAmount * (oddsNum / 100);
-      } else {
-        potentialProfit += betAmount * (100 / Math.abs(oddsNum));
-      }
-    });
-
-    return {
-      winRate,
-      avgEdge,
-      totalProfit: settledPicks.length > 0 ? profitStr : '---',
-      activeBets: activeBets.toString(),
-      winRateChange: settledPicks.length > 0 ? `${wins}W - ${settledPicks.length - wins}L` : '---',
-      avgEdgeChange: evValues.length > 0 ? `${evValues.length} picks` : '---',
-      profitChange: potentialProfit > 0 ? `+$${potentialProfit.toFixed(2)} potential` : '---',
-      betsChange: activeBets > 0 ? `$${savedPicks.filter(p => !p.result).reduce((sum, p) => sum + (p.betAmount || 0), 0).toFixed(2)} at risk` : '---',
-    };
-  };
-
-  const calculatedStats = useMemo(() => calculateStats(), [savedPicks]);
-
-  const stats = [
-    {
-      label: "Win Rate",
-      value: calculatedStats.winRate,
-      change: calculatedStats.winRateChange,
-      positive: true,
-      icon: Target,
-    },
-    {
-      label: "Average Edge",
-      value: calculatedStats.avgEdge,
-      change: calculatedStats.avgEdgeChange,
-      positive: true,
-      icon: TrendingUp,
-    },
-    {
-      label: "Total Profit",
-      value: calculatedStats.totalProfit,
-      change: calculatedStats.profitChange,
-      positive: calculatedStats.totalProfit.startsWith('+') || calculatedStats.totalProfit === '---',
-      icon: DollarSign,
-    },
-    {
-      label: "Active Bets",
-      value: calculatedStats.activeBets,
-      change: calculatedStats.betsChange,
-      positive: true,
-      icon: Sparkles,
-    },
-  ];
 
   return (
     <div
@@ -409,7 +211,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                           : isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' : 'text-white/50 hover:text-white hover:bg-white/5'
                     }`}
                   >
-                    <TrendingUp className="w-4 h-4" />
+                    <ArrowLeftRight className="w-4 h-4" />
                     Exchanges
                     {!hasPlatinumPlan && <Crown className="w-3 h-3 ml-auto text-amber-500" />}
                   </button>
@@ -529,7 +331,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                         <h1 className={`${isLight ? lightModeColors.text : 'text-white'} text-xl md:text-2xl lg:text-3xl font-bold`}>
                           Welcome back, {profile?.username || user?.email?.split('@')[0] || 'User'}!
                         </h1>
-                                              </div>
+                        <p className={`${isLight ? lightModeColors.textMuted : 'text-white/50'} text-sm font-medium mt-0.5`}>
+                          Here are today's top +EV picks
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -564,7 +369,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   ) : bets.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
                       {bets.map((bet) => (
-                        <BetCard key={bet.id} bet={bet} onAddPick={openBetSlip} />
+                        <BetCard key={bet.id} bet={bet} />
                       ))}
                     </div>
                   ) : (
@@ -584,9 +389,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </>
             )}
 
-            {currentView === "picks" && <PicksPage savedPicks={savedPicks} onRemovePick={removePickFromMyPicks} onUpdatePickStatus={updatePickStatus} onNavigateToCalculator={() => setCurrentView("calculator")} />}
             {/* Render OddsPage - free users can access Straight Bets */}
-            {currentView === "odds" && <OddsPage onAddPick={openBetSlip} savedPicks={savedPicks} betType={selectedBetType} onBetTypeChange={setSelectedBetType} />}
+            {currentView === "odds" && <OddsPage betType={selectedBetType} onBetTypeChange={setSelectedBetType} />}
             {currentView === "account" && (
               <AccountPage
                 onNavigateToSettings={() => setCurrentView("settings")}
@@ -598,7 +402,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             )}
             {currentView === "settings" && <SettingsPage onNavigateToChangePlan={() => setCurrentView("changePlan")} onNavigateToCancelSubscription={() => setCurrentView("cancelSubscription")} />}
             {currentView === "calculator" && <CalculatorPage />}
-            {currentView === "bankroll" && <BankrollPage savedPicks={savedPicks} />}
             {currentView === "cancelSubscription" && (
               <CancelSubscriptionPage onBack={() => setCurrentView("account")} />
             )}
@@ -629,11 +432,11 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               )}
             </button>
             <button
-              onClick={() => hasPaidPlan ? setCurrentView("odds") : setCurrentView("changePlan")}
+              onClick={() => setCurrentView("odds")}
               className="flex flex-col items-center gap-1.5 py-1 transition-all relative"
             >
-              <Zap className={`w-6 h-6 transition-colors ${!hasPaidPlan ? isLight ? "text-gray-300" : "text-white/20" : currentView === "odds" ? isLight ? "text-purple-600" : "text-white" : isLight ? "text-gray-400" : "text-white/40"}`} />
-              {currentView === "odds" && hasPaidPlan && (
+              <Zap className={`w-6 h-6 transition-colors ${currentView === "odds" ? isLight ? "text-purple-600" : "text-white" : isLight ? "text-gray-400" : "text-white/40"}`} />
+              {currentView === "odds" && (
                 <div className={`absolute -bottom-1 w-1 h-1 rounded-full ${isLight ? 'bg-purple-600' : 'bg-purple-400'}`} />
               )}
             </button>
@@ -659,13 +462,6 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         </div>
       </div>
 
-      {/* Bet Slip */}
-      <BetSlip
-        isOpen={betSlipOpen}
-        betData={pendingBet}
-        onClose={closeBetSlip}
-        onConfirm={confirmBetSlip}
-      />
     </div>
   );
 }

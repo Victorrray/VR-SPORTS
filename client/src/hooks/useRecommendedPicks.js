@@ -36,7 +36,7 @@ export function useRecommendedPicks(options = {}) {
       const params = new URLSearchParams({
         sports: 'americanfootball_nfl,basketball_nba,baseball_mlb,icehockey_nhl',
         regions: 'us',
-        markets: 'h2h,spreads,totals,team_totals',
+        markets: 'h2h,spreads,totals',
         oddsFormat: 'american',
         dateFormat: 'iso',
         _t: Date.now(),
@@ -77,7 +77,6 @@ export function useRecommendedPicks(options = {}) {
 
       // Transform games into picks with EV calculation
       const recommendedPicks = games
-        .slice(0, limit * 2) // Get more than needed to filter
         .flatMap((game) => {
           const picks = [];
           
@@ -191,10 +190,10 @@ export function useRecommendedPicks(options = {}) {
                 pick: pickDescription,
                 odds: odds,
                 sportsbook: normalizeBookName(bookmaker.title || bookmaker.key),
-                ev: `${ev.toFixed(2)}%`,
+                ev: `${ev >= 0 ? '+' : ''}${ev.toFixed(2)}%`,
                 sport: getSportLabel(game.sport_key),
                 status: status,
-                confidence: ev > 10 ? 'High' : ev > 7 ? 'Medium' : 'Low',
+                confidence: ev > 5 ? 'High' : ev > 2.5 ? 'Medium' : 'Low',
                 bookmakers: game.bookmakers,
                 marketKey: market.key,
                 point: outcome.point,
@@ -226,8 +225,8 @@ export function useRecommendedPicks(options = {}) {
   useEffect(() => {
     fetchRecommendedPicks();
     
-    // Refresh every 5 minutes
-    const interval = setInterval(fetchRecommendedPicks, 5 * 60 * 1000);
+    // Refresh every 10 minutes (server caches for 5 min, no point polling faster)
+    const interval = setInterval(fetchRecommendedPicks, 10 * 60 * 1000);
     return () => clearInterval(interval);
   }, [fetchRecommendedPicks]);
 
@@ -332,44 +331,20 @@ function calculateEV(odds, bookmakers, marketKey = null, outcomeName = null, poi
       }
     });
 
-    // Need at least 2 comparable odds to calculate meaningful EV
-    if (comparableOdds.length < 2) {
-      // Fallback: if we have the best odds and they're positive, give a small EV boost
-      if (odds > 100) return 0.5; // Slight positive for good underdogs
-      return 0;
-    }
+    // Need at least 4 comparable odds for a meaningful consensus
+    if (comparableOdds.length < 4) return 0;
 
-    // Calculate fair probability using power method (de-vig)
-    // Average the implied probabilities and normalize
-    const probs = comparableOdds.map(o => americanOddsToProb(o));
-    const avgProb = probs.reduce((a, b) => a + b, 0) / probs.length;
-    
-    // The fair probability should be close to the average
-    // EV = (Fair Probability / Implied Probability - 1) * 100
-    // Or equivalently: how much better are our odds vs the fair line
-    
-    // Find the best (lowest juice) odds among comparable books
-    const bestOdds = comparableOdds.reduce((best, current) => {
-      // For negative odds, less negative is better (-110 > -120)
-      // For positive odds, more positive is better (+150 > +130)
-      if (current > 0 && best > 0) return current > best ? current : best;
-      if (current < 0 && best < 0) return current > best ? current : best;
-      if (current > 0) return current; // Positive is always better than negative
-      return best;
-    }, comparableOdds[0]);
-    
-    const bestProb = americanOddsToProb(bestOdds);
-    
-    // EV calculation: compare our odds to the consensus fair line
-    // If our implied prob is LOWER than fair prob, we have +EV (getting better odds)
-    // EV% = (Fair Prob / Our Implied Prob - 1) * 100
+    // Trim outliers: drop the single best and worst before averaging
+    // This removes stale lines and data errors that inflate the consensus
+    const probs = comparableOdds.map(o => americanOddsToProb(o)).sort((a, b) => a - b);
+    const trimmed = probs.slice(1, probs.length - 1); // drop min and max
+    const avgProb = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+
+    // EV% = how much better our best odds are vs the trimmed consensus
     const ev = ((avgProb / impliedProb) - 1) * 100;
-    
-    // Only show positive EV and cap at reasonable values
-    // Anything over 20% EV is likely a data error
-    
-    // Cap EV at 50% - anything higher is almost certainly bad data
-    return Math.min(50, Math.max(0, ev));
+
+    // Real markets rarely exceed 8% EV; cap at 10% to filter data errors
+    return Math.min(10, Math.max(0, ev));
   } catch (err) {
     console.warn('Error calculating EV:', err);
     return 0;

@@ -1,4 +1,4 @@
-import { Clock, Check, Plus, ChevronDown } from 'lucide-react';
+import { Clock, ChevronDown } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -31,12 +31,9 @@ export interface BetData {
 interface BetCardProps {
   bet: BetData;
   variant?: 'default' | 'hero'; // 'hero' for landing page display
-  showActions?: boolean; // Control whether to show action buttons
-  onAddPick?: (bet: BetData) => void; // Callback to add pick to My Picks
 }
 
-export function BetCard({ bet, variant = 'default', showActions = true, onAddPick }: BetCardProps) {
-  const [isAdded, setIsAdded] = useState(false);
+export function BetCard({ bet, variant = 'default' }: BetCardProps) {
   const [isCompareExpanded, setIsCompareExpanded] = useState(false);
   const [showAllBooks, setShowAllBooks] = useState(false);
   
@@ -50,17 +47,36 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
   // Format odds based on user's selected format
   const formatOdds = (odds: string | number): string => convertOdds(odds, oddsFormat);
 
-  const handleAddToPicks = () => {
-    if (!isAdded && onAddPick) {
-      onAddPick(bet);
-      toast.success('Bet added to My Picks!');
-    }
-    setIsAdded(!isAdded);
-  };
-
   const handleToggleCompare = () => {
     setIsCompareExpanded(!isCompareExpanded);
   };
+
+  // Helpers for odds math
+  const toDecimal = (o: number) => o > 0 ? (o / 100) + 1 : (100 / Math.abs(o)) + 1;
+  const toAmerican = (d: number) => d >= 2 ? Math.round((d - 1) * 100) : Math.round(-100 / (d - 1));
+  const fmtAmerican = (n: number) => n >= 0 ? `+${n}` : String(n);
+
+  // Compute real average and de-vigged odds from bookmaker data
+  const computedOddsStats = useMemo(() => {
+    if (!bet.bookmakers || bet.bookmakers.length === 0) return { avg: null, deVig: null };
+    const pairs: { o1: number; o2: number }[] = [];
+    bet.bookmakers.forEach((bk) => {
+      const market = bk.markets?.[0];
+      if (market?.outcomes?.length >= 2) {
+        pairs.push({ o1: market.outcomes[0].price, o2: market.outcomes[1].price });
+      }
+    });
+    if (pairs.length === 0) return { avg: null, deVig: null };
+    const avgDecimal = pairs.reduce((s, p) => s + toDecimal(p.o1), 0) / pairs.length;
+    const avgAmerican = toAmerican(avgDecimal);
+    const deVigProb = pairs.reduce((s, p) => {
+      const p1 = 1 / toDecimal(p.o1);
+      const p2 = 1 / toDecimal(p.o2);
+      return s + p1 / (p1 + p2);
+    }, 0) / pairs.length;
+    const deVigAmerican = toAmerican(1 / deVigProb);
+    return { avg: fmtAmerican(avgAmerican), deVig: fmtAmerican(deVigAmerican) };
+  }, [bet.bookmakers]);
 
   // Extract real sportsbook odds from bookmakers data
   const sportsbookOdds = useMemo(() => {
@@ -134,15 +150,21 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               {bet.time}
             </div>
           </div>
-          <div className={`px-2.5 py-1 ${
-            isHero || isDark
-              ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30' 
-              : 'bg-emerald-100 border-emerald-300'
-          } backdrop-blur-xl rounded-full border`}>
-            <span className={`${isHero || isDark ? 'text-white' : 'text-emerald-700'} font-bold text-xs`}>
-              {bet.ev}
-            </span>
-          </div>
+          {(() => {
+            const evNum = parseFloat(bet.ev);
+            const isPositive = !isNaN(evNum) && evNum > 0;
+            return (
+              <div className={`px-2.5 py-1 ${
+                isPositive
+                  ? isHero || isDark ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30' : 'bg-emerald-100 border-emerald-300'
+                  : isHero || isDark ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-300'
+              } backdrop-blur-xl rounded-full border`}>
+                <span className={`${isPositive ? (isHero || isDark ? 'text-white' : 'text-emerald-700') : (isHero || isDark ? 'text-white/60' : 'text-gray-500')} font-bold text-xs`}>
+                  {bet.ev}
+                </span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -187,21 +209,17 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           </div>
         </div>
 
-        {/* Action Buttons */}
-        {showActions && (
-          <div className={`grid grid-cols-1 gap-2`}>
-            {!isHero && (
-              <button 
-                onClick={handleToggleCompare}
-                className={`px-3 py-2 rounded-xl ${
-                isHero || isDark
-                  ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20' 
-                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-              } backdrop-blur-xl border transition-all font-bold text-xs text-center`}>
-                Compare Odds
-              </button>
-            )}
-          </div>
+        {/* Compare Odds Toggle */}
+        {!isHero && (
+          <button
+            onClick={handleToggleCompare}
+            className={`w-full px-3 py-2 rounded-xl ${
+              isHero || isDark
+                ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'
+                : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+            } backdrop-blur-xl border transition-all font-bold text-xs text-center`}>
+            Compare Odds
+          </button>
         )}
       </div>
 
@@ -235,15 +253,15 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             {/* Average Odds */}
             <div className="flex flex-col items-center text-center">
               <div className={`${isHero || isDark ? 'text-white/60' : 'text-gray-600'} font-bold text-xs mb-2`}>
-                Average Odds
+                Market Avg
               </div>
               <div className={`px-3 py-2 ${
                 isHero || isDark
-                  ? 'bg-white/5 border-white/10' 
+                  ? 'bg-white/5 border-white/10'
                   : 'bg-gray-100 border-gray-200'
               } backdrop-blur-xl border rounded-xl`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
-                  {String(bet.odds).includes('+') ? `+${parseInt(String(bet.odds)) - 15}` : `${parseInt(String(bet.odds)) + 15}`}
+                  {computedOddsStats.avg ?? '--'}
                 </span>
               </div>
             </div>
@@ -251,15 +269,15 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
             {/* DeVig Odds */}
             <div className="flex flex-col items-center text-center">
               <div className={`${isHero || isDark ? 'text-white/60' : 'text-gray-600'} font-bold text-xs mb-2`}>
-                DeVig Odds
+                Fair Odds
               </div>
               <div className={`px-3 py-2 ${
                 isHero || isDark
-                  ? 'bg-white/5 border-white/10' 
+                  ? 'bg-white/5 border-white/10'
                   : 'bg-gray-100 border-gray-200'
               } backdrop-blur-xl border rounded-xl`}>
                 <span className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-base`}>
-                  {String(bet.odds).includes('+') ? `+${parseInt(String(bet.odds)) - 8}` : `${parseInt(String(bet.odds)) + 8}`}
+                  {computedOddsStats.deVig ?? '--'}
                 </span>
               </div>
             </div>
@@ -268,11 +286,11 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
           {/* Books Table */}
           <div className="space-y-2 md:space-y-3">
             {/* Table Header */}
-            <div className={`grid grid-cols-4 gap-2 px-3 py-2 ${
+            <div className={`grid grid-cols-3 gap-2 px-3 py-2 ${
               isHero || isDark
-                ? 'bg-purple-500/20 border-purple-400/30' 
+                ? 'bg-purple-500/20 border-purple-400/30'
                 : 'bg-purple-100 border-purple-200'
-            } border rounded-lg`}>
+            } border rounded-xl`}>
               <div className={`${isHero || isDark ? 'text-white' : 'text-purple-700'} font-bold text-xs`}>
                 Book
               </div>
@@ -282,20 +300,17 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               <div className={`${isHero || isDark ? 'text-white' : 'text-purple-700'} font-bold text-xs text-center`}>
                 {team2.split(' ').pop()}
               </div>
-              <div className={`${isHero || isDark ? 'text-white' : 'text-purple-700'} font-bold text-xs text-right`}>
-                Pick
-              </div>
             </div>
 
             {/* Table Rows */}
             {(showAllBooks ? sportsbookOdds : sportsbookOdds.slice(0, 5)).map((book, idx) => (
-              <div 
+              <div
                 key={idx}
-                className={`grid grid-cols-4 gap-2 px-3 py-2.5 md:py-3 ${
+                className={`grid grid-cols-3 gap-2 px-3 py-2.5 md:py-3 ${
                   isHero || isDark
-                    ? 'bg-white/5 border-white/10' 
+                    ? 'bg-white/5 border-white/10'
                     : 'bg-white border-gray-200'
-                } border rounded-lg items-center`}
+                } border rounded-xl items-center`}
               >
                 <div className={`${isHero || isDark ? 'text-white' : 'text-gray-900'} font-bold text-sm`}>
                   {book.name}
@@ -303,20 +318,12 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
                 <div className={`${
                   isHero || isDark ? 'text-emerald-400' : 'text-emerald-600'
                 } font-bold text-sm text-center`}>
-                  {book.odds}
+                  {formatOdds(book.odds)}
                 </div>
                 <div className={`${
                   isHero || isDark ? 'text-white/60' : 'text-gray-600'
                 } font-bold text-sm text-center`}>
-                  {book.team2Odds}
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleAddToPicks}
-                    className="p-1.5 bg-purple-500 rounded-xl hover:bg-purple-400 transition-all flex items-center justify-center"
-                  >
-                    <Plus className="w-4 h-4 text-white" />
-                  </button>
+                  {formatOdds(book.team2Odds)}
                 </div>
               </div>
             ))}
@@ -328,9 +335,9 @@ export function BetCard({ bet, variant = 'default', showActions = true, onAddPic
               onClick={() => setShowAllBooks(!showAllBooks)}
               className={`w-full flex items-center justify-center gap-2 px-4 py-2 mt-3 ${
                 isHero || isDark
-                  ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' 
+                  ? 'bg-white/5 border-white/10 text-white hover:bg-white/10'
                   : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              } backdrop-blur-xl border rounded-lg transition-all font-bold text-sm`}
+              } backdrop-blur-xl border rounded-xl transition-all font-bold text-sm`}
             >
               <ChevronDown className={`w-4 h-4 transition-transform ${showAllBooks ? 'rotate-180' : ''}`} />
               <span>{showAllBooks ? 'View Less' : 'View More'}</span>

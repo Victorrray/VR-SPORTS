@@ -28,15 +28,15 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-white text-xl md:text-2xl font-bold">
+        <h2 className="text-white text-2xl md:text-3xl font-bold">
           App Settings
-        </h1>
+        </h2>
         <p className="text-white/50 font-medium">Customize your OddSightSeer experience</p>
       </motion.div>
 
       {/* Display & Preferences */}
       <motion.div 
-        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -47,7 +47,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
         </h2>
 
         <div className="space-y-4">
-          <div className="p-3.5 bg-white/5 rounded-lg border border-white/10">
+          <div className="p-3.5 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-2 mb-3">
               <DollarSign className="w-4 h-4 text-purple-400" />
               <div className="text-white text-sm">Default Odds Format</div>
@@ -57,7 +57,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
               {/* American */}
               <button
                 onClick={() => setOddsFormat('american')}
-                className={`p-2.5 rounded-lg border transition-colors ${
+                className={`p-2.5 rounded-xl border transition-colors ${
                   oddsFormat === 'american'
                     ? 'bg-purple-500/20 border-purple-400/30 text-purple-300'
                     : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
@@ -75,7 +75,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
               {/* Decimal */}
               <button
                 onClick={() => setOddsFormat('decimal')}
-                className={`p-2.5 rounded-lg border transition-colors ${
+                className={`p-2.5 rounded-xl border transition-colors ${
                   oddsFormat === 'decimal'
                     ? 'bg-purple-500/20 border-purple-400/30 text-purple-300'
                     : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
@@ -93,7 +93,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
               {/* Fractional */}
               <button
                 onClick={() => setOddsFormat('fractional')}
-                className={`p-2.5 rounded-lg border transition-colors ${
+                className={`p-2.5 rounded-xl border transition-colors ${
                   oddsFormat === 'fractional'
                     ? 'bg-purple-500/20 border-purple-400/30 text-purple-300'
                     : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
@@ -114,7 +114,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
 
       {/* Advanced Settings */}
       <motion.div 
-        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
@@ -158,7 +158,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
                 description: 'Temporary data cleared. Your settings have been preserved.'
               });
             }}
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors text-left"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors text-left"
           >
             <div className="flex items-center gap-3">
               <Trash2 className="w-4 h-4 text-blue-400" />
@@ -174,7 +174,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
 
       {/* Legal Links */}
       <motion.div 
-        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -189,7 +189,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
             href="/privacy"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
               <FileText className="w-4 h-4 text-amber-400" />
@@ -205,7 +205,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
             href="/terms"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
               <FileText className="w-4 h-4 text-amber-400" />
@@ -221,7 +221,7 @@ export function SettingsPage({ onNavigateToChangePlan, onNavigateToCancelSubscri
             href="/disclaimer"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
               <AlertTriangle className="w-4 h-4 text-amber-400" />

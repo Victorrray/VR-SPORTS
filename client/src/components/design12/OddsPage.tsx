@@ -175,13 +175,11 @@ const calculateDevigOdds = (books: any[]): string => {
 };
 
 interface OddsPageProps {
-  onAddPick: (pick: any) => void;
-  savedPicks?: any[];
   betType?: string;
   onBetTypeChange?: (betType: string) => void;
 }
 
-export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange }: OddsPageProps) {
+export function OddsPage({ betType, onBetTypeChange }: OddsPageProps) {
   const { oddsFormat } = useTheme();
   // Dark mode only - no light mode support
   const isLight = false;
@@ -276,7 +274,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   const [marketClosing, setMarketClosing] = useState(false);
   const [sportsbooksExpanded, setSportsbooksExpanded] = useState(false);
   const [sportsbooksClosing, setSportsbooksClosing] = useState(false);
-  const [addedPicks, setAddedPicks] = useState<(string | number)[]>([]); // Track which picks have been added
   
   // Close handlers with animation for sub-filters
   const closeDateDrawer = () => {
@@ -639,15 +636,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
   const toggleSportsbookFilter = (bookId: string) => {
     setSelectedSportsbooks(prev =>
       prev.includes(bookId) ? prev.filter(id => id !== bookId) : [...prev, bookId]
-    );
-  };
-
-  // Check if a pick has been added
-  const isPickAdded = (pickData: any, bookName: string) => {
-    return savedPicks.some(savedPick => 
-      savedPick.pick === pickData.pick && 
-      savedPick.sportsbook === bookName &&
-      savedPick.teams === pickData.game
     );
   };
 
@@ -1167,7 +1155,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           />
         )}
 
-        <PlayerPropsPage onAddPick={onAddPick} savedPicks={savedPicks} />
+        <PlayerPropsPage />
       </div>
     );
   }
@@ -1244,7 +1232,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           />
         )}
 
-        <DiscrepancyPage onAddPick={onAddPick} savedPicks={savedPicks} />
+        <DiscrepancyPage />
       </div>
     );
   }
@@ -1421,10 +1409,10 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
 
         {/* Pagination Controls - Desktop only */}
         <div className="hidden md:flex items-center gap-1.5">
-          <button 
+          <button
             onClick={goToPreviousPage}
             disabled={currentPage === 1}
-            className={`flex items-center justify-center w-9 h-9 border rounded-xl transition-colors ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
               currentPage === 1
                 ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -1432,17 +1420,17 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
           >
             <ChevronRight className="w-4 h-4 rotate-180" />
           </button>
-          
+
           <div className={`flex items-center justify-center w-auto h-9 px-3 border rounded-xl ${isLight ? 'bg-white border-gray-200 text-gray-600' : 'bg-white/5 border-white/10 text-white/60'}`}>
             <span className="text-sm whitespace-nowrap">
               {currentPage}/{totalPages}
             </span>
           </div>
 
-          <button 
+          <button
             onClick={goToNextPage}
             disabled={currentPage === totalPages}
-            className={`flex items-center justify-center w-9 h-9 border rounded-xl transition-colors ${
+            className={`flex items-center justify-center w-9 h-9 border rounded-full transition-colors ${
               currentPage === totalPages
                 ? isLight ? 'bg-gray-50 border-gray-200 text-gray-300 cursor-not-allowed' : 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed'
                 : isLight ? 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'
@@ -1475,6 +1463,7 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
             className={`!fixed max-lg:!bottom-0 max-lg:!left-0 max-lg:!right-0 max-lg:!top-auto lg:!top-0 lg:!bottom-0 max-lg:max-h-[85vh] ${isLight ? 'bg-white' : 'bg-slate-950'} lg:border-r max-lg:border-t ${isLight ? 'border-gray-200' : 'border-white/10'} lg:rounded-none max-lg:rounded-t-2xl flex flex-col ${isFilterClosing ? 'animate-out max-lg:slide-out-to-bottom lg:slide-out-to-left duration-200 ease-out fill-mode-forwards' : 'animate-in max-lg:slide-in-from-bottom lg:slide-in-from-left duration-300 ease-out'} lg:w-72 max-lg:w-full shadow-xl max-lg:z-[9999] lg:z-30`}
             style={{
               left: '224px',
+              top: 0,
             }}
           >
             {/* Sticky Header */}
@@ -2188,31 +2177,6 @@ export function OddsPage({ onAddPick, savedPicks = [], betType, onBetTypeChange 
                               {formatOdds(pick.bestOdds)}
                             </div>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!addedPicks.includes(pick.id)) {
-                                onAddPick({
-                                  ...pick,
-                                  confidence: 'High'
-                                });
-                                setAddedPicks([...addedPicks, pick.id]);
-                                toast.success('Bet added to My Picks!');
-                              }
-                            }}
-                            disabled={addedPicks.includes(pick.id)}
-                            className={`px-4 py-2 ${
-                              addedPicks.includes(pick.id)
-                                ? 'bg-gradient-to-r from-emerald-500 to-green-500 border-emerald-400/30 cursor-not-allowed'
-                                : 'bg-purple-500 hover:bg-purple-400 border-purple-400/30'
-                            } text-white rounded-xl transition-all font-bold text-sm border`}
-                          >
-                            {addedPicks.includes(pick.id) ? (
-                              <Check className="w-4 h-4" />
-                            ) : (
-                              'Bet'
-                            )}
-                          </button>
                         </div>
                       </div>
                     </div>

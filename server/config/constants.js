@@ -4,10 +4,10 @@
  */
 
 // Cache durations - balanced for freshness vs API cost/memory
-const CACHE_DURATION_MS = 3 * 60 * 1000; // 3 minutes for regular markets
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes for regular markets
 const PLAYER_PROPS_CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes for player props - return cached fast, refresh in background
 const PLAYER_PROPS_STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes - after this, trigger background refresh
-const ALTERNATE_MARKETS_CACHE_DURATION_MS = 10 * 60 * 1000; // 10 minutes for alternate markets (change less frequently)
+const ALTERNATE_MARKETS_CACHE_DURATION_MS = 15 * 60 * 1000; // 15 minutes for alternate markets (change less frequently)
 const PLAN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 // API configuration
@@ -18,7 +18,7 @@ const ENABLE_PLAYER_PROPS_V2 = process.env.ENABLE_PLAYER_PROPS_V2 !== 'false'; /
 const REMOVE_API_LIMITS = process.env.REMOVE_API_LIMITS === 'true'; // Testing flag to remove all API limits
 
 // Player props configuration
-const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 30_000);
+const PLAYER_PROPS_CACHE_TTL_MS = Number(process.env.PLAYER_PROPS_CACHE_TTL_MS || 300_000); // 5 minutes default
 const PLAYER_PROPS_RETRY_ATTEMPTS = Number(process.env.PLAYER_PROPS_RETRY_ATTEMPTS || 2);
 const PLAYER_PROPS_MAX_MARKETS_PER_REQUEST = 50;
 const PLAYER_PROPS_MAX_BOOKS_PER_REQUEST = 25;
@@ -36,27 +36,24 @@ const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 // Bookmaker lists
 const FOCUSED_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr", "pick6", "betr_us_dfs",
+  "prizepicks", "underdog", "pick6", "betr_us_dfs",
   // Sharp books and exchanges (high priority) - us_ex region
-  "pinnacle", "prophet_exchange", "rebet", "kalshi", "polymarket", "novig", "prophetx",
-  // US region books
-  "draftkings", "fanduel", "betmgm", "caesars", "williamhill_us", "pointsbet", "bovada", 
-  "mybookie", "betonline", "unibet", "betrivers", "fliff",
-  "hardrock", "hardrockbet", "espnbet", "fanatics", "wynnbet", "superbook", "twinspires",
-  "betfred_us", "circasports", "lowvig", "barstool", "foxbet",
-  // Other exchange books
-  "betopenly"
+  "pinnacle", "prophet_exchange", "rebet", "kalshi", "novig", "prophetx", "betopenly",
+  // US region books (active as of 2025)
+  "draftkings", "fanduel", "betmgm", "caesars", "williamhill_us", "bovada",
+  "betonline", "unibet", "betrivers", "fliff",
+  "hardrockbet", "espnbet", "fanatics", "wynnbet", "superbook", "lowvig",
 ];
 
 // Trial user bookmaker restrictions
 const TRIAL_BOOKMAKERS = [
   // DFS apps for player props (prioritized for slice limit)
-  "prizepicks", "underdog", "draftkings_pick6", "dabble_au", "betr", "pick6", "betr_us_dfs",
+  "prizepicks", "underdog", "pick6", "betr_us_dfs",
   // Sharp books and exchanges (high priority) - us_ex region
-  "pinnacle", "prophet_exchange", "rebet", "kalshi", "polymarket", "novig", "prophetx",
+  "pinnacle", "prophet_exchange", "rebet", "kalshi", "novig", "prophetx",
   // Major sportsbooks
-  "draftkings", "fanduel", "caesars", "williamhill_us", "betmgm", "pointsbet", "betrivers", 
-  "unibet", "bovada", "betonline", "fliff", "hardrock", "hardrockbet", "wynnbet",
+  "draftkings", "fanduel", "caesars", "williamhill_us", "betmgm", "betrivers",
+  "unibet", "bovada", "betonline", "fliff", "hardrockbet", "wynnbet",
   "espnbet", "fanatics", "betopenly"
 ];
 

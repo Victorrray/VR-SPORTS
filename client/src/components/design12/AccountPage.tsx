@@ -131,7 +131,7 @@ export function AccountPage({
       {onNavigateToSettings && (
         <motion.button
           onClick={onNavigateToSettings}
-          className="absolute top-0 right-0 p-2 bg-white/5 border-white/10 text-white/60 border rounded-lg hover:bg-white/10 hover:text-white transition-colors z-10"
+          className="absolute top-0 right-0 p-2 bg-white/5 border-white/10 text-white/60 border rounded-xl hover:bg-white/10 hover:text-white transition-colors z-10"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -146,9 +146,9 @@ export function AccountPage({
         animate={{ opacity: 1, y: 0 }}
       >
         <div>
-          <h1 className="text-white text-xl md:text-2xl font-bold">
+          <h2 className="text-white text-2xl md:text-3xl font-bold">
             Account Settings
-          </h1>
+          </h2>
           <p className="text-white/50 font-medium">
             Manage your profile and subscription
           </p>
@@ -157,7 +157,7 @@ export function AccountPage({
 
       {/* Profile Section */}
       <motion.div 
-        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -201,7 +201,7 @@ export function AccountPage({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-3.5 bg-white/5 rounded-lg border border-white/10">
+          <div className="p-3.5 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-3 mb-2">
               <Mail className="w-4 h-4 text-purple-400" />
               <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Email</span>
@@ -212,7 +212,7 @@ export function AccountPage({
               </p>
               <button
                 onClick={() => setShowEmail(!showEmail)}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 transition-colors"
+                className="p-1.5 rounded-xl hover:bg-white/10 text-white/50 transition-colors"
                 title={showEmail ? 'Hide email' : 'Show email'}
               >
                 {showEmail ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -220,7 +220,7 @@ export function AccountPage({
             </div>
           </div>
 
-          <div className="p-3.5 bg-white/5 rounded-lg border border-white/10">
+          <div className="p-3.5 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-4 h-4 text-purple-400" />
               <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Member Since</span>
@@ -236,7 +236,7 @@ export function AccountPage({
 
       {/* Billing & Subscription Section */}
       <motion.div 
-        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
@@ -249,10 +249,10 @@ export function AccountPage({
         <div className="space-y-4">
           {/* Current Plan */}
           {isPlatinum ? (
-            <div className="p-5 bg-purple-500/10 border-purple-400/20 rounded-lg border">
+            <div className="p-5 bg-purple-500/10 border-purple-400/20 rounded-xl border">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 border-amber-400/20 border flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border-amber-400/20 border flex items-center justify-center">
                     <Crown className="w-5 h-5 text-amber-400" />
                   </div>
                   <div>
@@ -281,17 +281,17 @@ export function AccountPage({
               <div className="flex gap-2">
                 <button 
                   onClick={onNavigateToChangePlan}
-                  className="flex-1 px-4 py-2.5 bg-white/5 border-white/10 text-white hover:bg-white/10 border rounded-lg transition-colors text-sm"
+                  className="flex-1 px-4 py-2.5 bg-white/5 border-white/10 text-white hover:bg-white/10 border rounded-xl transition-colors text-sm"
                 >
                   {me?.cancel_at_period_end ? 'Resubscribe' : 'Change Plan'}
                 </button>
               </div>
             </div>
           ) : isGold ? (
-            <div className="p-5 bg-yellow-500/10 border-yellow-400/20 rounded-lg border">
+            <div className="p-5 bg-yellow-500/10 border-yellow-400/20 rounded-xl border">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-yellow-500/20 border-yellow-400/20 border flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-yellow-500/20 border-yellow-400/20 border flex items-center justify-center">
                     <Star className="w-5 h-5 text-yellow-400" />
                   </div>
                   <div>
@@ -320,17 +320,17 @@ export function AccountPage({
               <div className="flex gap-2">
                 <button 
                   onClick={onNavigateToChangePlan}
-                  className="flex-1 px-4 py-2.5 bg-white/5 border-white/10 text-white hover:bg-white/10 border rounded-lg transition-colors text-sm"
+                  className="flex-1 px-4 py-2.5 bg-white/5 border-white/10 text-white hover:bg-white/10 border rounded-xl transition-colors text-sm"
                 >
                   {me?.cancel_at_period_end ? 'Resubscribe' : 'Change Plan'}
                 </button>
               </div>
             </div>
           ) : (
-            <div className="p-5 bg-white/5 border-white/10 rounded-lg border">
+            <div className="p-5 bg-white/5 border-white/10 rounded-xl border">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/10 border-white/10 border flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/10 border-white/10 border flex items-center justify-center">
                     <User className="w-5 h-5 text-gray-400" />
                   </div>
                   <div>
@@ -349,7 +349,7 @@ export function AccountPage({
                 </p>
                 <button 
                   onClick={onNavigateToChangePlan}
-                  className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-colors text-sm"
+                  className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-500 transition-colors text-sm"
                 >
                   Upgrade Now
                 </button>
@@ -362,7 +362,7 @@ export function AccountPage({
             <button 
               onClick={openCustomerPortal}
               disabled={portalLoading}
-              className="w-full flex items-center justify-between p-3.5 bg-white/5 border-white/10 hover:bg-white/10 rounded-lg border transition-colors text-left disabled:opacity-50"
+              className="w-full flex items-center justify-between p-3.5 bg-white/5 border-white/10 hover:bg-white/10 rounded-xl border transition-colors text-left disabled:opacity-50"
             >
               <div className="flex items-center gap-3">
                 <CreditCard className="w-4 h-4 text-purple-400" />
@@ -382,7 +382,7 @@ export function AccountPage({
             <button 
               onClick={openCustomerPortal}
               disabled={portalLoading}
-              className="w-full flex items-center justify-between p-3.5 bg-white/5 border-white/10 hover:bg-white/10 rounded-lg border transition-colors text-left disabled:opacity-50"
+              className="w-full flex items-center justify-between p-3.5 bg-white/5 border-white/10 hover:bg-white/10 rounded-xl border transition-colors text-left disabled:opacity-50"
             >
               <div className="flex items-center gap-3">
                 <Download className="w-4 h-4 text-purple-400" />
@@ -401,7 +401,7 @@ export function AccountPage({
 
       {/* Security Section */}
       <motion.div 
-        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -415,7 +415,7 @@ export function AccountPage({
           <button 
             onClick={handlePasswordReset}
             disabled={passwordResetLoading}
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors text-left disabled:opacity-50"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors text-left disabled:opacity-50"
           >
             <div className="flex items-center gap-3">
               {passwordResetLoading ? (
@@ -437,7 +437,7 @@ export function AccountPage({
 
           <button 
             onClick={onSignOut}
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors text-left"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors text-left"
           >
             <div className="flex items-center gap-3">
               <LogOut className="w-4 h-4 text-blue-400" />
@@ -453,7 +453,7 @@ export function AccountPage({
 
       {/* Support Section */}
       <motion.div 
-        className="relative bg-white/5 border border-white/10 rounded-xl p-5 overflow-hidden"
+        className="relative bg-white/5 border border-white/10 rounded-2xl p-5 overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
@@ -466,7 +466,7 @@ export function AccountPage({
         <div className="space-y-3">
           <a 
             href="mailto:support@oddsightseer.com"
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
               <Mail className="w-4 h-4 text-amber-400" />
@@ -480,7 +480,7 @@ export function AccountPage({
 
           <a 
             href="/roadmap"
-            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
+            className="w-full flex items-center justify-between p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors"
           >
             <div className="flex items-center gap-3">
               <FileText className="w-4 h-4 text-amber-400" />
@@ -508,13 +508,13 @@ export function AccountPage({
         <div className="space-y-2">
           <button 
             onClick={onNavigateToCancelSubscription}
-            className="w-full px-4 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors text-sm"
+            className="w-full px-4 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-xl transition-colors text-sm"
           >
             Cancel Subscription
           </button>
           <button 
             onClick={onNavigateToDeleteAccount}
-            className="w-full px-4 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors text-sm"
+            className="w-full px-4 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-xl transition-colors text-sm"
           >
             Delete Account
           </button>

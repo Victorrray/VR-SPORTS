@@ -128,28 +128,49 @@ function getBookWeight(bookKey: string): number {
   return BOOK_WEIGHTS['default'];
 }
 
+// Convert American odds to implied probability
+function toAmericanProb(o: number): number {
+  return o > 0 ? 100 / (o + 100) : -o / (-o + 100);
+}
+
 // Calculate weighted average probability from odds array
 function calculateWeightedAvgProb(
-  oddsArray: number[], 
+  oddsArray: number[],
   bookKeys: string[],
   toProb: (american: number) => number
 ): number {
   if (oddsArray.length === 0) return 0.5;
-  
+
   let totalWeightedProb = 0;
   let totalWeight = 0;
-  
+
   for (let i = 0; i < oddsArray.length; i++) {
     const odds = oddsArray[i];
     const bookKey = bookKeys[i] || '';
     const weight = getBookWeight(bookKey);
     const prob = toProb(odds);
-    
+
     totalWeightedProb += prob * weight;
     totalWeight += weight;
   }
-  
+
   return totalWeight > 0 ? totalWeightedProb / totalWeight : 0.5;
+}
+
+// Calculate EV% string for a set of books vs the best odds available.
+// Returns "+2.50%" for positive EV, "-1.30%" for negative EV, "--" on bad input.
+function calcEVString(oddsValues: number[], bookKeys: string[], bestOddsStr: string): string {
+  if (oddsValues.length === 0) return '--';
+  const bestOddsNum = parseInt(bestOddsStr, 10);
+  if (isNaN(bestOddsNum)) return '--';
+  const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toAmericanProb);
+  const bestProb = toAmericanProb(bestOddsNum);
+  if (bestProb === 0) return '--';
+  const evValue = ((avgProb - bestProb) / bestProb) * 100;
+  // Clamp to realistic range — genuine +EV rarely exceeds 10%
+  const clamped = Math.max(-20, Math.min(10, evValue));
+  const rounded = Math.round(clamped * 100) / 100;
+  return `${rounded >= 0 ? '+' : ''}${rounded.toFixed(2)}%`;
 }
 
 // Map sport keys to readable league names
@@ -787,7 +808,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         let ev = '--';
         if (hasEnoughData && bestEV > 0) {
           // Cap EV at 50% - anything higher is almost certainly bad data or calculation error
-          const cappedEV = Math.min(50, Math.abs(bestEV));
+          const cappedEV = Math.min(10, Math.abs(bestEV));
           ev = `${Math.round(cappedEV * 100) / 100}%`;
         }
         
@@ -1345,14 +1366,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         if (hasEnoughData) {
           const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
           const bookKeys = booksArray.map(b => b.key || b.name || '');
-          const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-          // Use weighted average based on book sharpness
-          const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
-          const bestProb = toProb(parseInt(bestOdds, 10));
-          const evValue = ((avgProb - bestProb) / bestProb) * 100;
-          ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+          ev = calcEVString(oddsValues, bookKeys, bestOdds);
         }
-        
+
         // Create pick description
         let pickDescription = '';
         if (marketKey === 'h2h_3_way') {
@@ -1525,12 +1541,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             if (hasEnoughData) {
               const oddsValues = validBooks.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
               const bookKeys = validBooks.map(b => b.key || b.name || '');
-              const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-              // Use weighted average based on book sharpness
-              const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
-              const bestProb = toProb(parseInt(bestOdds, 10));
-              const evValue = ((avgProb - bestProb) / bestProb) * 100;
-              ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+              ev = calcEVString(oddsValues, bookKeys, bestOdds);
             }
             
             const periodLabel = getPeriodLabel(marketKey);
@@ -1662,14 +1673,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           if (hasEnoughData) {
             const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
             const bookKeys = booksArray.map(b => b.key || b.name || '');
-            const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-            // Use weighted average based on book sharpness
-            const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
-            const bestProb = toProb(parseInt(bestOdds, 10));
-            const evValue = ((avgProb - bestProb) / bestProb) * 100;
-            ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+            ev = calcEVString(oddsValues, bookKeys, bestOdds);
           }
-          
+
           const periodLabel = getPeriodLabel(marketKey);
           const pickDescription = `${team1} ML ${periodLabel}`;
           
@@ -1831,12 +1837,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
           const hasEnoughData = true;
           const oddsValues = books.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
           const bookKeys = books.map(b => b.key || b.name || '');
-          const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-          // Use weighted average based on book sharpness
-          const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
-          const bestProb = toProb(parseInt(bestBook.odds, 10));
-          const evValue = ((avgProb - bestProb) / bestProb) * 100;
-          const ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+          const ev = calcEVString(oddsValues, bookKeys, bestBook.odds);
           
           allPicks.push({
             id: `${game.id || gameIdx + 1}-${marketKey}-${point}`,
@@ -1961,14 +1962,9 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         if (hasEnoughData) {
           const oddsValues = booksArray.map(b => parseInt(b.odds, 10)).filter(o => !isNaN(o));
           const bookKeys = booksArray.map(b => b.key || b.name || '');
-          const toProb = (o: number) => o > 0 ? 100 / (o + 100) : -o / (-o + 100);
-          // Use weighted average based on book sharpness
-          const avgProb = calculateWeightedAvgProb(oddsValues, bookKeys, toProb);
-          const bestProb = toProb(parseInt(bestOdds, 10));
-          const evValue = ((avgProb - bestProb) / bestProb) * 100;
-          ev = `${Math.abs(Math.round(evValue * 100) / 100).toFixed(2)}%`;
+          ev = calcEVString(oddsValues, bookKeys, bestOdds);
         }
-        
+
         const periodLabel = getPeriodLabel(marketKey);
         const pickDescription = `${team1} (3-Way) ${periodLabel}`;
         
@@ -2001,20 +1997,18 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
   
   // Sort picks: bets with valid EV% at top (sorted by EV descending), bets without EV at bottom
   allPicks.sort((a, b) => {
-    const aHasEV = a.ev !== '--' && a.ev !== '0%' && a.hasEnoughData !== false;
-    const bHasEV = b.ev !== '--' && b.ev !== '0%' && b.hasEnoughData !== false;
+    const aEVNum = parseFloat((a.ev || '').replace('%', ''));
+    const bEVNum = parseFloat((b.ev || '').replace('%', ''));
+    const aHasEV = a.ev !== '--' && a.hasEnoughData !== false && !isNaN(aEVNum) && aEVNum > 0;
+    const bHasEV = b.ev !== '--' && b.hasEnoughData !== false && !isNaN(bEVNum) && bEVNum > 0;
     
     // Picks with EV come before picks without EV
     if (aHasEV && !bHasEV) return -1;
     if (!aHasEV && bHasEV) return 1;
     
-    // If both have EV, sort by EV percentage (highest first)
+    // If both have positive EV, sort by EV descending
     if (aHasEV && bHasEV) {
-      const aEV = parseFloat(a.ev.replace('%', ''));
-      const bEV = parseFloat(b.ev.replace('%', ''));
-      if (!isNaN(aEV) && !isNaN(bEV)) {
-        return bEV - aEV; // Higher EV first
-      }
+      return bEVNum - aEVNum;
     }
     
     // If neither has EV, sort by book count (more books = more data = higher priority)
@@ -2067,12 +2061,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       return;
     }
 
-    // Prevent fetches within cooldown window (prevents tab switch refreshes)
+    // Prevent auto-refresh fetches within cooldown window (prevents tab switch refreshes)
+    // Manual refetches and filter changes always bypass this cooldown
     const now = Date.now();
     const timeSinceLastFetch = now - lastFetchTimeRef.current;
-    if (timeSinceLastFetch < COOLDOWN_MS && lastFetchTimeRef.current > 0) {
-      console.log(`🔍 useOddsData: Skipping fetch - within ${COOLDOWN_MS/1000}s cooldown (${timeSinceLastFetch}ms since last fetch)`);
-      setLoading(false);
+    if (isAutoRefresh && timeSinceLastFetch < COOLDOWN_MS && lastFetchTimeRef.current > 0) {
+      if (DEBUG_LOGGING) console.log(`🔍 useOddsData: Skipping auto-refresh - within ${COOLDOWN_MS/1000}s cooldown (${timeSinceLastFetch}ms since last fetch)`);
+      setIsRefreshing(false);
       return;
     }
 
@@ -3196,9 +3191,11 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
     }
   }, [enabled, sport, date, marketType, betType, sportsbooks, limit, minDataPoints]);
 
-  // Initial fetch and when dependencies change
+  // Initial fetch and when dependencies (filters) change
   useEffect(() => {
     isInitialLoadRef.current = true;
+    setPicks([]); // Clear stale picks immediately so old filter data isn't shown during load
+    lastFetchTimeRef.current = 0; // Reset cooldown so filter changes are never blocked
     fetchOddsData(false);
   }, [fetchOddsData]);
 
@@ -3231,7 +3228,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
     picks,
     loading,
     error,
-    refetch: () => fetchOddsData(false),
+    refetch: () => {
+      lastFetchTimeRef.current = 0; // Bypass cooldown for manual refresh
+      fetchOddsData(false);
+    },
     lastUpdated,
     isRefreshing,
   };
