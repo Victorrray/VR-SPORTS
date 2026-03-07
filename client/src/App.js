@@ -1,5 +1,5 @@
 // file: src/App.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/SimpleAuth';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -10,30 +10,31 @@ import { FilterProvider } from './contexts/FilterContext';
 import { ToastProvider } from './components/common/Toast';
 import { HelmetProvider } from '@dr.pogodin/react-helmet';
 import { ThemeProvider } from './contexts/ThemeContext';
-import AuthDebug from './components/debug/AuthDebug';
 import { registerServiceWorker } from './utils/bundleOptimization';
 import { initBrowserCompat } from './utils/browserCompat';
-import DebugPanel from './components/debug/DebugPanel';
-// import NavbarRevamped from './components/layout/NavbarRevamped'; // OLD - Using new Header from landing page
-// import Footer from './components/layout/Footer'; // OLD - Using new Footer from landing page
-import Landing from './pages/Landing';
-import PricingPage from './pages/PricingPage';
-import DashboardPage from './pages/DashboardPage';
-import { LoginPageWrapper as Login } from './components/design12/LoginPageWrapper';
-import { SignUpPageWrapper as SignUp } from './components/design12/SignUpPageWrapper';
-import { ForgotPasswordPageWrapper as ForgotPassword } from './components/design12/ForgotPasswordPageWrapper';
-import AuthCallback from './pages/AuthCallback';
 import LoadingBar from "./components/common/LoadingBar";
 import PrivateRoute from "./components/auth/PrivateRoute";
-import { TermsWrapper as Terms } from './components/design12/TermsWrapper';
-import { PrivacyWrapper as Privacy } from './components/design12/PrivacyWrapper';
-import { RoadmapWrapper as Roadmap } from './components/design12/RoadmapWrapper';
-import { DisclaimerWrapper as Disclaimer } from './components/design12/DisclaimerWrapper';
-import BillingSuccess from './pages/BillingSuccess';
-import BillingCancel from './pages/BillingCancel';
-import Subscribe from './pages/Subscribe';
 import QuotaModal from './components/modals/QuotaModal';
-import UsernameSetup from './components/auth/UsernameSetup';
+
+// Lazy-load heavy routes to reduce initial bundle size
+const Landing = React.lazy(() => import('./pages/Landing'));
+const PricingPage = React.lazy(() => import('./pages/PricingPage'));
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
+const Login = React.lazy(() => import('./components/design12/LoginPageWrapper').then(m => ({ default: m.LoginPageWrapper })));
+const SignUp = React.lazy(() => import('./components/design12/SignUpPageWrapper').then(m => ({ default: m.SignUpPageWrapper })));
+const ForgotPassword = React.lazy(() => import('./components/design12/ForgotPasswordPageWrapper').then(m => ({ default: m.ForgotPasswordPageWrapper })));
+const AuthCallback = React.lazy(() => import('./pages/AuthCallback'));
+const Terms = React.lazy(() => import('./components/design12/TermsWrapper').then(m => ({ default: m.TermsWrapper })));
+const Privacy = React.lazy(() => import('./components/design12/PrivacyWrapper').then(m => ({ default: m.PrivacyWrapper })));
+const Roadmap = React.lazy(() => import('./components/design12/RoadmapWrapper').then(m => ({ default: m.RoadmapWrapper })));
+const Disclaimer = React.lazy(() => import('./components/design12/DisclaimerWrapper').then(m => ({ default: m.DisclaimerWrapper })));
+const BillingSuccess = React.lazy(() => import('./pages/BillingSuccess'));
+const Subscribe = React.lazy(() => import('./pages/Subscribe'));
+const WelcomePage = React.lazy(() => import('./pages/WelcomePage'));
+
+// Debug-only components — excluded from production bundle
+const DebugPanel = process.env.NODE_ENV === 'development' ? require('./components/debug/DebugPanel').default : null;
+const AuthDebug = process.env.NODE_ENV === 'development' ? require('./components/debug/AuthDebug').default : null;
 import "./App.css";
 import './styles/accessibility.css';
 import './styles/browserCompat.css';
@@ -42,7 +43,6 @@ import './styles/responsive-mobile.css';
 function AppRoutes() {
   const { user } = useAuth();
   const location = useLocation();
-  const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [quotaModal, setQuotaModal] = useState({ open: false, detail: null });
   const [debugPanelOpen, setDebugPanelOpen] = useState(false);
 
@@ -67,29 +67,17 @@ function AppRoutes() {
     return () => window.removeEventListener("plangate", handleQuotaExceeded);
   }, []);
 
-  // Debug panel keyboard shortcut
+  // Debug panel keyboard shortcut — development only
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
     const handleKeyPress = (e) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'D') {
         setDebugPanelOpen(prev => !prev);
       }
     };
-
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
-
-  // Get profile from context
-  const { profile } = useAuth();
-
-  useEffect(() => {
-    // Show username setup if user is logged in but has no username in profile
-    if (user && profile && !profile.username) {
-      setShowUsernameSetup(true);
-    } else {
-      setShowUsernameSetup(false);
-    }
-  }, [user, profile]);
 
   // Only redirect non-authenticated users from login-required pages to landing page
   const shouldRedirectToLanding = !user && (
@@ -116,7 +104,7 @@ function AppRoutes() {
         <div className="app-layout">
           <LoadingBar />
           <main className="main-content" id="main-content" tabIndex="-1">
-            <AuthDebug />
+            {process.env.NODE_ENV === 'development' && AuthDebug && <AuthDebug />}
             <Routes>
               <Route path="/" element={user ? <DashboardPage /> : <Landing />} />
               <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
@@ -126,6 +114,7 @@ function AppRoutes() {
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/app" element={user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/welcome" element={<PrivateRoute><WelcomePage /></PrivateRoute>} />
               <Route path="/subscribe" element={<PrivateRoute><Subscribe /></PrivateRoute>} />
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/billing/success" element={<BillingSuccess />} />
@@ -137,13 +126,6 @@ function AppRoutes() {
             </Routes>
           </main>
 
-          {/* Username Setup Modal */}
-          {showUsernameSetup && (
-            <UsernameSetup 
-              onComplete={() => setShowUsernameSetup(false)} 
-            />
-          )}
-          
           {/* Quota Exceeded Modal */}
           <QuotaModal 
             open={quotaModal.open} 

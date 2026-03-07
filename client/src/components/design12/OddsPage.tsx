@@ -120,6 +120,27 @@ const calculateAverageOdds = (books: any[]): string => {
   return avgOdds > 0 ? `+${avgOdds}` : String(avgOdds);
 };
 
+// EV badge styling: green for positive, red for negative, gray for unknown
+const getEvBadgeClass = (ev: string, isLight: boolean): { wrapper: string; text: string } => {
+  if (!ev || ev === '--') {
+    return {
+      wrapper: isLight ? 'bg-gray-100 border-gray-200' : 'bg-white/5 border-white/10',
+      text: isLight ? 'text-gray-400' : 'text-white/30',
+    };
+  }
+  if (ev.startsWith('+')) {
+    return {
+      wrapper: isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30',
+      text: isLight ? 'text-emerald-700' : 'text-emerald-400',
+    };
+  }
+  // Negative EV
+  return {
+    wrapper: isLight ? 'bg-red-50 border-red-200' : 'bg-red-500/10 border-red-400/20',
+    text: isLight ? 'text-red-500' : 'text-red-400',
+  };
+};
+
 // Helper function to calculate devig (no-vig/fair) odds
 // Uses the multiplicative method to remove vig
 const calculateDevigOdds = (books: any[]): string => {
@@ -505,17 +526,17 @@ export function OddsPage({ betType, onBetTypeChange }: OddsPageProps) {
     }
   ];
 
-  const toggleRow = (id: string | number) => {
-    setExpandedRows(prev => 
+  const toggleRow = useCallback((id: string | number) => {
+    setExpandedRows(prev =>
       prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
     );
-  };
+  }, []);
 
-  const toggleSportsbook = (id: string | number) => {
-    setExpandedSportsbooks(prev => 
+  const toggleSportsbook = useCallback((id: string | number) => {
+    setExpandedSportsbooks(prev =>
       prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
     );
-  };
+  }, []);
 
   // Exchange books for comparison
   const EXCHANGE_BOOKS = ['novig', 'prophet', 'prophetx', 'prophet_exchange'];
@@ -633,23 +654,23 @@ export function OddsPage({ betType, onBetTypeChange }: OddsPageProps) {
     return booksToFilter;
   };
 
-  const toggleSportsbookFilter = (bookId: string) => {
+  const toggleSportsbookFilter = useCallback((bookId: string) => {
     setSelectedSportsbooks(prev =>
       prev.includes(bookId) ? prev.filter(id => id !== bookId) : [...prev, bookId]
     );
-  };
+  }, []);
 
-  const goToNextPage = () => {
+  const goToNextPage = useCallback(() => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
-  };
+  }, [currentPage, totalPages]);
 
-  const goToPreviousPage = () => {
+  const goToPreviousPage = useCallback(() => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
-  };
+  }, [currentPage]);
 
   // Create a map of sportsbook IDs to names and API keys for matching
   const sportsbookMap: Record<string, string[]> = {};
@@ -2427,8 +2448,8 @@ export function OddsPage({ betType, onBetTypeChange }: OddsPageProps) {
                   <div className="hidden lg:grid lg:grid-cols-12 gap-4 lg:gap-6 items-center">
                     {/* EV Badge - Shows expected value percentage */}
                     <div className="lg:col-span-2">
-                      <div className={`inline-flex items-center gap-2 px-1.5 py-0.5 lg:px-2 lg:py-0.5 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400/30'} backdrop-blur-xl border rounded-full shadow-lg whitespace-nowrap text-[14px]`}>
-                        <span className={`${isLight ? 'text-emerald-700' : 'text-emerald-400'} font-bold text-xs lg:text-sm`}>{pick.ev}</span>
+                      <div className={`inline-flex items-center gap-2 px-1.5 py-0.5 lg:px-2 lg:py-0.5 ${getEvBadgeClass(pick.ev, isLight).wrapper} backdrop-blur-xl border rounded-full shadow-lg whitespace-nowrap text-[14px]`}>
+                        <span className={`${getEvBadgeClass(pick.ev, isLight).text} font-bold text-xs lg:text-sm`}>{pick.ev}</span>
                       </div>
                     </div>
 
@@ -2587,8 +2608,8 @@ export function OddsPage({ betType, onBetTypeChange }: OddsPageProps) {
                             );
                           })()
                         ) : (
-                          <div className={`px-2.5 py-1 ${isLight ? 'bg-emerald-100 border-emerald-300' : 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/30'} backdrop-blur-xl rounded-full border`}>
-                            <span className={`${isLight ? 'text-emerald-700' : 'text-white'} font-bold text-xs`}>
+                          <div className={`px-2.5 py-1 ${getEvBadgeClass(pick.ev, isLight).wrapper} backdrop-blur-xl rounded-full border`}>
+                            <span className={`${getEvBadgeClass(pick.ev, isLight).text} font-bold text-xs`}>
                               {pick.ev}
                             </span>
                           </div>

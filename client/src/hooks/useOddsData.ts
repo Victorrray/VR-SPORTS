@@ -376,8 +376,8 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
   
   // Log first game structure to debug (only in dev)
   if (DEBUG_LOGGING && games.length > 0) {
-    console.log('📋 First game structure:', games[0]);
-    console.log('📋 First game keys:', Object.keys(games[0]));
+    if (DEBUG_LOGGING) console.log('📋 First game structure:', games[0]);
+    if (DEBUG_LOGGING) console.log('📋 First game keys:', Object.keys(games[0]));
   }
   
   const allPicks: OddsPick[] = [];
@@ -390,14 +390,14 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     
     // Log first game's bookmakers (only in dev)
     if (DEBUG_LOGGING && gameIdx === 0) {
-      console.log(`📋 First game bookmakers:`, bookmakers);
-      console.log(`📋 First game bookmakers length:`, bookmakers.length);
+      if (DEBUG_LOGGING) console.log(`📋 First game bookmakers:`, bookmakers);
+      if (DEBUG_LOGGING) console.log(`📋 First game bookmakers length:`, bookmakers.length);
       const bookKeys = bookmakers.map((b: any) => b.key);
-      console.log(`📋 Bookmaker keys in response:`, bookKeys);
+      if (DEBUG_LOGGING) console.log(`📋 Bookmaker keys in response:`, bookKeys);
       // Check for DFS apps specifically
       const dfsApps = ['prizepicks', 'underdog', 'pick6', 'betr_us_dfs', 'dabble_au', 'sleeper'];
       const foundDFS = bookKeys.filter((key: string) => dfsApps.includes(key?.toLowerCase()));
-      console.log(`🎮 DFS Apps in response:`, foundDFS.length > 0 ? foundDFS : 'NONE - API not returning DFS apps');
+      if (DEBUG_LOGGING) console.log(`🎮 DFS Apps in response:`, foundDFS.length > 0 ? foundDFS : 'NONE - API not returning DFS apps');
     }
     
     // Check if this game has player prop markets
@@ -409,7 +409,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
     if (gameIdx < 3) {
       const allMarketKeys = bookmakers.flatMap((bm: any) => bm.markets?.map((m: any) => m.key) || []);
       const playerPropMarkets = allMarketKeys.filter((k: string) => isPlayerPropMarket(k));
-      console.log(`🎯 Game ${gameIdx}: ${gameMatchup} - hasPlayerProps=${hasPlayerProps}, playerPropMarkets=${playerPropMarkets.length}`, playerPropMarkets.slice(0, 5));
+      if (DEBUG_LOGGING) console.log(`🎯 Game ${gameIdx}: ${gameMatchup} - hasPlayerProps=${hasPlayerProps}, playerPropMarkets=${playerPropMarkets.length}`, playerPropMarkets.slice(0, 5));
     }
     
     if (hasPlayerProps) {
@@ -769,7 +769,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
         
         // Debug logging for EV comparison
         if (DEBUG_LOGGING) {
-          console.log(`📊 EV COMPARISON for ${propData.playerName} ${formatMarketName(propData.marketKey)}:`, {
+          if (DEBUG_LOGGING) console.log(`📊 EV COMPARISON for ${propData.playerName} ${formatMarketName(propData.marketKey)}:`, {
             overEV: overEV.toFixed(2) + '%',
             underEV: underEV.toFixed(2) + '%',
             hasEnoughOverData,
@@ -862,7 +862,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             team2Odds: b.underOdds || '--',
             overOdds: b.overOdds,
             underOdds: b.underOdds || '--',
-            ev: hasEnoughData ? '0%' : '--',
+            ev: '--',
             isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
             isAtConsensus: true,
             pickSide: pickSide // Track which side is the pick
@@ -898,7 +898,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
             team2Odds: secondaryOdds,
             overOdds: b.overOdds,
             underOdds: b.underOdds || '--',
-            ev: hasEnoughData ? '0%' : '--',
+            ev: '--',
             isBest: b.name === bestBookForCard.name && b.line === bestBookForCard.line,
             isAtConsensus: b.line === consensusLine
           };
@@ -1076,7 +1076,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               key: bookKey,
               odds: normalizedOdds,
               team2Odds: normalizedTeam2Odds || '--',
-              ev: '0%',
+              ev: '--',
               isBest: false,
               line: bookLine // Store line per book for middles detection
             };
@@ -1340,7 +1340,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               odds: normalizedOdds,
               team2Odds: normalizedTeam2Odds || '--',
               drawOdds: drawOutcome ? normalizeAmericanOdds(drawOutcome.price || drawOutcome.odds) : null,
-              ev: '0%',
+              ev: '--',
               isBest: false
             });
           }
@@ -1502,7 +1502,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
                   key: bookKey,
                   odds: '--',
                   team2Odds: '--',
-                  ev: '0%',
+                  ev: '--',
                   isBest: false,
                   line: line
                 };
@@ -1647,7 +1647,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
                 key: bookKey,
                 odds: normalizedOdds,
                 team2Odds: normalizedTeam2Odds || '--',
-                ev: '0%',
+                ev: '--',
                 isBest: false
               });
             }
@@ -1936,7 +1936,7 @@ function transformOddsApiToOddsPick(games: any[], selectedSportsbooks: string[] 
               odds: normalizedOdds,
               team2Odds: normalizedTeam2Odds || '--',
               drawOdds: drawOutcome ? normalizeAmericanOdds(drawOutcome.price || drawOutcome.odds) : null,
-              ev: '0%',
+              ev: '--',
               isBest: false
             });
           }
@@ -2362,7 +2362,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const filterLowROIArbitrage = (picks: OddsPick[]) => {
         if (betType !== 'arbitrage') return picks;
         
-        console.log(`🎯 ARBITRAGE FILTER: Starting with ${picks.length} picks`);
+        if (DEBUG_LOGGING) console.log(`🎯 ARBITRAGE FILTER: Starting with ${picks.length} picks`);
         let debugStats = { total: 0, noTeam2Odds: 0, lowROI: 0, passed: 0, periodMarket: 0 };
         
         const filtered = picks.filter(pick => {
@@ -2416,8 +2416,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           }
         });
         
-        console.log(`🎯 ARBITRAGE FILTER STATS:`, debugStats);
-        console.log(`🎯 ARBITRAGE RESULT: ${filtered.length} picks passed filter`);
+        if (DEBUG_LOGGING) console.log(`🎯 ARBITRAGE FILTER STATS:`, debugStats);
+        if (DEBUG_LOGGING) console.log(`🎯 ARBITRAGE RESULT: ${filtered.length} picks passed filter`);
         
         return filtered;
       };
@@ -2431,7 +2431,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       const filterForMiddles = (picks: OddsPick[]) => {
         if (betType !== 'middles') return picks;
         
-        console.log(`🎯 MIDDLES FILTER: Starting with ${picks.length} picks`);
+        if (DEBUG_LOGGING) console.log(`🎯 MIDDLES FILTER: Starting with ${picks.length} picks`);
         
         // Group picks by game and market type
         const gameMarketGroups = new Map<string, any[]>();
@@ -2556,7 +2556,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         // Sort by gap (highest first)
         filtered.sort((a, b) => (b.middleGap || 0) - (a.middleGap || 0));
         
-        console.log(`🎯 MIDDLES FILTER: Found ${gameMarketGroups.size} game/market groups, ${filtered.length} middle opportunities`);
+        if (DEBUG_LOGGING) console.log(`🎯 MIDDLES FILTER: Found ${gameMarketGroups.size} game/market groups, ${filtered.length} middle opportunities`);
         
         return filtered;
       };
@@ -2625,10 +2625,10 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
           
           // Debug: Log first pick's books to see what we're getting
           if (debugStats.total === 1) {
-            console.log(`🔄 EXCHANGES DEBUG: First pick has ${books.length} books, ${exchangeBooks.length} exchanges, ${otherBooks.length} other`);
-            console.log(`🔄 Book keys:`, books.slice(0, 5).map((b: any) => b.key || b.name));
+            if (DEBUG_LOGGING) console.log(`🔄 EXCHANGES DEBUG: First pick has ${books.length} books, ${exchangeBooks.length} exchanges, ${otherBooks.length} other`);
+            if (DEBUG_LOGGING) console.log(`🔄 Book keys:`, books.slice(0, 5).map((b: any) => b.key || b.name));
             if (exchangeBooks.length > 0) {
-              console.log(`🔄 Exchange books found:`, exchangeBooks.map((b: any) => b.key || b.name));
+              if (DEBUG_LOGGING) console.log(`🔄 Exchange books found:`, exchangeBooks.map((b: any) => b.key || b.name));
             }
           }
           
@@ -2923,7 +2923,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               edgeVsExchange: bestEdge,
               books: [
                 { ...bestBook, isBest: true, ev: `${bestEdge.toFixed(1)}%` },
-                { ...exchangeBook, odds: String(exchangeOddsForSide), isBest: false, ev: '0%', isExchange: true },
+                { ...exchangeBook, odds: String(exchangeOddsForSide), isBest: false, ev: '--', isExchange: true },
                 ...otherBooks.filter((b: any) => b.name !== bestBook.name).slice(0, 3)
               ],
               allBooks: books
@@ -2995,7 +2995,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
             const allExchangeBooksForDisplay = exchangeBooks.map((b: any) => ({
               ...b,
               isBest: b.name === bestExchangeBook.name,
-              ev: '0%',
+              ev: '--',
               isExchange: true
             }));
             
@@ -3021,8 +3021,8 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         filtered.sort((a: any, b: any) => (b.edgeVsExchange || 0) - (a.edgeVsExchange || 0));
         
         // Debug: Log filter stats
-        console.log(`🔄 EXCHANGES FILTER STATS:`, debugStats);
-        console.log(`🔄 EXCHANGES RESULT: ${filtered.length} picks passed filter`);
+        if (DEBUG_LOGGING) console.log(`🔄 EXCHANGES FILTER STATS:`, debugStats);
+        if (DEBUG_LOGGING) console.log(`🔄 EXCHANGES RESULT: ${filtered.length} picks passed filter`);
         
         return filtered;
       };
@@ -3067,7 +3067,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         });
         
         if (DEBUG_LOGGING && filtered.length < picks.length) {
-          console.log(`⏰ filterExpiredBets: Removed ${picks.length - filtered.length} expired picks`);
+          if (DEBUG_LOGGING) console.log(`⏰ filterExpiredBets: Removed ${picks.length - filtered.length} expired picks`);
         }
         return filtered;
       };
@@ -3127,7 +3127,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       };
       
       if (response.data && Array.isArray(response.data)) {
-        console.log(`📊 RAW RESPONSE: ${response.data.length} games, betType=${betType}`);
+        if (DEBUG_LOGGING) console.log(`📊 RAW RESPONSE: ${response.data.length} games, betType=${betType}`);
         // Debug: Check first few games for player prop markets
         if (betType === 'props' && response.data.length > 0) {
           const gamesWithPlayerProps = response.data.filter((g: any) => 
@@ -3135,24 +3135,24 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
               bm.markets?.some((m: any) => m.key?.startsWith('player_'))
             )
           );
-          console.log(`🎯 PLAYER PROPS DEBUG: ${gamesWithPlayerProps.length}/${response.data.length} games have player_ markets`);
+          if (DEBUG_LOGGING) console.log(`🎯 PLAYER PROPS DEBUG: ${gamesWithPlayerProps.length}/${response.data.length} games have player_ markets`);
           if (gamesWithPlayerProps.length > 0) {
             const firstGame = gamesWithPlayerProps[0];
             const allMarkets = firstGame.bookmakers?.flatMap((bm: any) => bm.markets?.map((m: any) => m.key) || []) || [];
-            console.log(`🎯 FIRST GAME WITH PROPS: ${firstGame.home_team} vs ${firstGame.away_team}, markets:`, allMarkets.slice(0, 10));
+            if (DEBUG_LOGGING) console.log(`🎯 FIRST GAME WITH PROPS: ${firstGame.home_team} vs ${firstGame.away_team}, markets:`, allMarkets.slice(0, 10));
           }
         }
         let transformedPicks = transformOddsApiToOddsPick(response.data, sportsbooks);
-        console.log(`📊 AFTER TRANSFORM: ${transformedPicks.length} picks, playerProps=${transformedPicks.filter(p => p.isPlayerProp).length}, betType=${betType}`);
+        if (DEBUG_LOGGING) console.log(`📊 AFTER TRANSFORM: ${transformedPicks.length} picks, playerProps=${transformedPicks.filter(p => p.isPlayerProp).length}, betType=${betType}`);
         
         // Debug: Check if picks have team2Odds for arbitrage
         if (betType === 'arbitrage' && transformedPicks.length > 0) {
           const firstPick = transformedPicks[0];
           const books = firstPick.allBooks || firstPick.books || [];
           const booksWithTeam2 = books.filter((b: any) => b.team2Odds && b.team2Odds !== '--');
-          console.log(`🎯 ARBITRAGE DEBUG: First pick has ${books.length} books, ${booksWithTeam2.length} with team2Odds`);
+          if (DEBUG_LOGGING) console.log(`🎯 ARBITRAGE DEBUG: First pick has ${books.length} books, ${booksWithTeam2.length} with team2Odds`);
           if (books.length > 0) {
-            console.log(`🎯 First book sample:`, { name: books[0].name, odds: books[0].odds, team2Odds: books[0].team2Odds });
+            if (DEBUG_LOGGING) console.log(`🎯 First book sample:`, { name: books[0].name, odds: books[0].odds, team2Odds: books[0].team2Odds });
           }
         }
         transformedPicks = filterUnderForDFS(transformedPicks);
@@ -3160,7 +3160,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterDabbleFromAlternates(transformedPicks);
         const beforePropsFilter = transformedPicks.length;
         transformedPicks = filterPlayerPropsForStraightBets(transformedPicks);
-        console.log(`📊 AFTER PROPS FILTER: ${transformedPicks.length} picks (was ${beforePropsFilter}), betType=${betType}`);
+        if (DEBUG_LOGGING) console.log(`📊 AFTER PROPS FILTER: ${transformedPicks.length} picks (was ${beforePropsFilter}), betType=${betType}`);
         transformedPicks = filterUnibetForArbitrage(transformedPicks);
         transformedPicks = filterLowROIArbitrage(transformedPicks);
         transformedPicks = filterForMiddles(transformedPicks);
@@ -3168,13 +3168,13 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         transformedPicks = filterExpiredBets(transformedPicks);
         const beforeEmptyFilter = transformedPicks.length;
         transformedPicks = filterEmptyBooks(transformedPicks);
-        console.log(`📊 AFTER EMPTY BOOKS FILTER: ${transformedPicks.length} picks (was ${beforeEmptyFilter})`);
+        if (DEBUG_LOGGING) console.log(`📊 AFTER EMPTY BOOKS FILTER: ${transformedPicks.length} picks (was ${beforeEmptyFilter})`);
         transformedPicks = filterUnrealisticEV(transformedPicks);
-        console.log(`📊 FINAL: ${transformedPicks.length} picks`);
+        if (DEBUG_LOGGING) console.log(`📊 FINAL: ${transformedPicks.length} picks`);
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
-          console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
+          if (DEBUG_LOGGING) console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
         }
       } else if (response.data && response.data.picks && Array.isArray(response.data.picks)) {
         let transformedPicks = transformOddsApiToOddsPick(response.data.picks, sportsbooks);
@@ -3192,7 +3192,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
         setPicks(transformedPicks);
         setLastUpdated(new Date());
         if (DEBUG_LOGGING) {
-          console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
+          if (DEBUG_LOGGING) console.log('✅ Odds data fetched:', transformedPicks.length, 'picks');
         }
       } else {
         console.warn('⚠️ Unexpected response format');
@@ -3209,7 +3209,7 @@ export function useOddsData(options: UseOddsDataOptions = {}): UseOddsDataResult
       if (!isAutoRefresh) {
         setPicks([]);
       } else {
-        console.log('⚠️ Auto-refresh failed, keeping existing data');
+        if (DEBUG_LOGGING) console.log('⚠️ Auto-refresh failed, keeping existing data');
       }
     } finally {
       setLoading(false);

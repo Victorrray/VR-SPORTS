@@ -7,7 +7,19 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const rateLimit = require('express-rate-limit');
 const { requireUser, checkPlanAccess, enforceUsage } = require('../middleware/auth');
+
+// Per-user rate limit on odds fetches — protects Odds API credits
+// Authenticated users: 30 requests per 10 minutes (well above normal UX needs)
+const oddsRateLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 30,
+  keyGenerator: (req) => req.user?.id || req.ip,
+  message: { error: 'Too many odds requests. Please wait before refreshing again.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 const { 
   getCacheKey, getCachedResponse, setCachedResponse, clearCachedResponse, 
   getOddsInFlight, setOddsInFlight, deleteOddsInFlight,
@@ -329,7 +341,7 @@ async function fetchPlayerPropsInBackground(cacheKey, sportsArray, playerPropMar
  * Main odds endpoint - returns game odds with optional player props
  */
 
-router.get('/', requireUser, checkPlanAccess, async (req, res) => {
+router.get('/', oddsRateLimiter, requireUser, checkPlanAccess, async (req, res) => {
   try {
     const { sports, regions = "us,us_ex", markets = "h2h,spreads,totals", oddsFormat = "american", date, betType } = req.query;
     
